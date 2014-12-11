@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -57,7 +58,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -233,13 +233,13 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 if (delim < 0) {
                     final int pos2 = parameterList.indexOf(';', pos + 1);
                     final String name = pos2 < 0 ? parameterList.substring(pos + 1).trim() : parameterList.substring(pos + 1, pos2).trim();
-                    parseParameter(name.toLowerCase(Locale.ENGLISH), "");
+                    parseParameter(asciiLowerCase(name), "");
                     pos = pos2;
                 } else {
                     final String name = parameterList.substring(pos + 1, delim).trim();
                     pos = parameterList.indexOf(';', pos + 1);
                     final String value = pos < 0 ? parameterList.substring(delim + 1) : parameterList.substring(delim + 1, pos);
-                    parseParameter(name.toLowerCase(Locale.ENGLISH), value);
+                    parseParameter(asciiLowerCase(name), value);
                 }
             }
         }
@@ -323,7 +323,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             LOG.warn("", MailExceptionCode.INVALID_PARAMETER.create(name));
             return;
         }
-        parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
+        parameters.put(asciiLowerCase(name), new Parameter(name, value));
     }
 
     /**
@@ -337,7 +337,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         if ((null == name) || containsSpecial(name)) {
             throw MailExceptionCode.INVALID_PARAMETER.create(name);
         }
-        parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
+        parameters.put(asciiLowerCase(name), new Parameter(name, value));
     }
 
     /**
@@ -352,7 +352,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             LOG.error("", me);
             return;
         }
-        final String key = name.toLowerCase(Locale.ENGLISH);
+        final String key = asciiLowerCase(name);
         final Parameter p = parameters.get(key);
         if (null == p) {
             parameters.put(key, new Parameter(name, value));
@@ -374,7 +374,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         if (null == name) {
             return null;
         }
-        final Parameter p = parameters.get(name.toLowerCase(Locale.ENGLISH));
+        final Parameter p = parameters.get(asciiLowerCase(name));
         if (null == p) {
             return null;
         }
@@ -391,7 +391,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         if (null == name) {
             return null;
         }
-        final Parameter p = parameters.remove(name.toLowerCase(Locale.ENGLISH));
+        final Parameter p = parameters.remove(asciiLowerCase(name));
         if (null == p) {
             return null;
         }
@@ -408,7 +408,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         if (null == name) {
             return false;
         }
-        final Parameter p = parameters.get(name.toLowerCase(Locale.ENGLISH));
+        final Parameter p = parameters.get(asciiLowerCase(name));
         if (null == p) {
             return false;
         }

@@ -1,6 +1,10 @@
+* 2014-12-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35808: Do ENVELOPE header decoding to not interpret "=? ?=" sequences as a whitespace
+
 * 2014-12-10 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 35313: Added option to override language for drive "settings" request 
+ - Fix for bug 35313: Added option to override language for drive "settings" request
 
 * 2014-12-10 - thorben.betten@open-xchange.com
 

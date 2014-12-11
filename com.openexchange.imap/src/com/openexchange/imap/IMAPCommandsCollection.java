@@ -3057,7 +3057,7 @@ public final class IMAPCommandsCollection {
             }
 
             private boolean isApplicationSmil(final BODYSTRUCTURE bodystructure) {
-                return bodystructure.isMulti() && "related".equals(toLowerCase(bodystructure.subtype)) && "application/smil".equals(toLowerCase(bodystructure.cParams.get("type")));
+                return bodystructure.isMulti() && "related".equals(toLowerCase(bodystructure.subtype)) && "application/smil".equals(toLowerCase(MimeMessageUtility.decodeEnvelopeHeader(bodystructure.cParams.get("type"))));
             }
 
         }));
