@@ -51,7 +51,7 @@ package com.openexchange.xing;
 
 import java.util.EnumMap;
 import org.json.JSONObject;
-import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.session.Session;
 

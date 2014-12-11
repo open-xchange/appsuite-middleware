@@ -69,7 +69,7 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.container.FileHolder;
-import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;

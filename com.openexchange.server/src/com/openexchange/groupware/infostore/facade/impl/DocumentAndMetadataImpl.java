@@ -52,7 +52,7 @@ package com.openexchange.groupware.infostore.facade.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import com.openexchange.ajax.container.IFileHolder.InputStreamClosure;
+import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;

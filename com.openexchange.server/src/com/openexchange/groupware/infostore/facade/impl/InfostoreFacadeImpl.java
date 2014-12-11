@@ -72,7 +72,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.ajax.container.IFileHolder.InputStreamClosure;
+import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;

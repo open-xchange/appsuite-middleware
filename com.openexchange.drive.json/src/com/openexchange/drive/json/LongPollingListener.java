@@ -50,8 +50,8 @@
 package com.openexchange.drive.json;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.exception.OXException;
 
 /**

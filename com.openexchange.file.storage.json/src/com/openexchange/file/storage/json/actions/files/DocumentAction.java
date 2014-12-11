@@ -58,7 +58,7 @@ import java.io.InputStream;
 import java.util.Date;
 import org.slf4j.Logger;
 import com.openexchange.ajax.container.FileHolder;
-import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
