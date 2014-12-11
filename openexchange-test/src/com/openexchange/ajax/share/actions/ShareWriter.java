@@ -114,7 +114,7 @@ public class ShareWriter {
     }
 
     public static void writeInternalRecipient(InternalRecipient recipient, JSONObject jRecipient) throws JSONException {
-        jRecipient.put("id", recipient.getEntity());
+        jRecipient.put("entity", recipient.getEntity());
     }
 
     public static JSONArray writeTargets(List<ShareTarget> targets) throws JSONException {
