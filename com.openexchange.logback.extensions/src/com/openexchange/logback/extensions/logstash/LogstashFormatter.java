@@ -68,7 +68,7 @@ public class LogstashFormatter implements LifeCycle {
 
     private boolean isStarted;
 
-    protected static final FastDateFormat LOGSTASH_TIMEFORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+    public static final FastDateFormat LOGSTASH_TIMEFORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
 
     /*
      * (non-Javadoc)

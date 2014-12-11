@@ -413,6 +413,11 @@ public class Strings {
 
     /**
      * Replaces control characters with space characters.
+     * <p>
+     * A subsequent range of control characters gets replaced with a whitespace; e.g.
+     * <pre>
+     * <code>"\r\n\t"</code> -&gt; <code>" "</code>
+     * </pre>
      *
      * @param str The string to sanitize
      * @return The sanitized string

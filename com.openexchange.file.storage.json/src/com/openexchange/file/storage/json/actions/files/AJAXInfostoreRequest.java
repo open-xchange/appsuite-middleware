@@ -447,7 +447,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (parameter == null) {
             return FileStorageFileAccess.CURRENT_VERSION;
         }
-        return parameter;
+        return "null".equalsIgnoreCase(parameter) ? FileStorageFileAccess.CURRENT_VERSION : parameter;
     }
 
     @Override
