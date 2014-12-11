@@ -1297,7 +1297,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Update OLD parent in cache, cause this can only be done here
          */
-        ConditionTreeMapManagement.dropFor(ctx.getContextId());
         if (FolderCacheManager.isEnabled()) {
             Connection wc = writeCon;
             final boolean create = (wc == null);

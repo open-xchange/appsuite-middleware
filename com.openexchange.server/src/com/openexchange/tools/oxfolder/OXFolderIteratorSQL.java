@@ -680,7 +680,7 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath system's private folder.
      */
     private static SearchIterator<FolderObject> getVisiblePrivateFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
@@ -875,7 +875,7 @@ public final class OXFolderIteratorSQL {
      */
     private static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final FolderObject parentFolder, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         final boolean shared = parentFolder.isShared(userId);
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
@@ -981,7 +981,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If an error occurs
      */
     public static boolean isVisibleFolder(final int folderId, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 return treeMap.isVisibleFolder(userId, memberInGroups, accessibleModules, folderId);
@@ -1065,7 +1065,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If an error occurs
      */
     public static TIntList getVisibleSubfolders(final int parent, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = Collections.<Condition> singletonList(new ConditionTreeMap.ParentCondition(parent));
@@ -1164,7 +1164,7 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances of user-visible shared folders.
      */
     public static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
@@ -1844,7 +1844,7 @@ public final class OXFolderIteratorSQL {
      * type and a certain parent folder.
      */
     private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
@@ -1952,6 +1952,14 @@ public final class OXFolderIteratorSQL {
         } catch (final OXException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw e;
+        }
+    }
+
+    private static boolean isNullOrAutocommit(Connection con) {
+        try {
+            return con == null || con.getAutoCommit();
+        } catch (SQLException e) {
+            return false;
         }
     }
 

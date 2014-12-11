@@ -120,7 +120,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.TrackableCallable;
 import com.openexchange.threadpool.behavior.AbortBehavior;
-import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -679,8 +678,6 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                     folderMapManagement.dropFor(folderId, realTreeId, userId, contextId);
                 }
             }
-
-            ConditionTreeMapManagement.dropFor(contextId);
         }
     }
 
