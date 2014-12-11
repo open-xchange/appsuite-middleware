@@ -466,7 +466,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 {
                     final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
                     final ParameterList cParams = bodystructure.cParams;
-                    content = readContent(bytes, null == cParams ? null : cParams.get("charset"), bodystructure.encoding);
+                    content = readContent(bytes, null == cParams ? null : MimeMessageUtility.decodeEnvelopeHeader(cParams.get("charset")), bodystructure.encoding);
                 }
                 final String subtype = toLowerCase(bodystructure.subtype);
                 if ("plain".equals(subtype)) {
