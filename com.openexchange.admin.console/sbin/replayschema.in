@@ -81,23 +81,20 @@ umask 066
 #######################
 usage() {
 	echo "Usage: $0 [-h] [-m <source_schema> -t <target_cluster_id> -i <dump_file> -A <admin_user> -P <admin_pass> [-l <jmxLogin> -s <jmxPassword> [-p <jmxPort]] -r <rmi-host>]"
-	echo "  -A,--adminuser <admin_user>                 Admin username"
-	echo "  -h                                          Prints a help text"
-	echo "  -i,--in <dump_file>                         The dump file previously created with dumpschema"
-	echo "  -l,--login <jmxLogin>                       The optional JMX login (if JMX authentication is enabled)"
-	echo "  -m,--source-schema <source_schema>          Source schema name"
-	echo "  -P,--adminpass <admin_pass>                 Admin password"
-	echo "  -p,--port <jmxPort>                         The optional JMX port (default:9999)"
-	echo "  -r,--rmi-host <rmi_host>                    A RMI host address e.g. 192.168.1.25:1099. If no port is given the default RMI port 1099 is taken. Default: rmi://localhost:1099/"
-	echo "  -s,--password <jmxPassword>                 The optional JMX password (if JMX authentication is enabled)"
-	echo "  -t,--target-cluster-id <target_cluster_id>  The target cluster identifier"
+	echo "  -h                                            Prints a help text"
+	echo "  -A,--adminuser <admin_user>                 ? Admin username"
+	echo "  -P,--adminpass <admin_pass>                 ? Admin password"
+	echo "  -i,--in <dump_file>                         * The dump file previously created with dumpschema"
+	echo "  -m,--source-schema <source_schema>          * Source schema name"
+	echo "  -t,--target-cluster-id <target_cluster_id>  * The target cluster identifier"
+	echo "  -r,--rmi-host <rmi_host>                      A RMI host address e.g. 192.168.1.25:1099. If no port is given the default RMI port 1099 is taken. Default: rmi://localhost:1099/"
 	echo ""
 	echo "Entries marked with an asterisk (*) are mandatory."
 	echo "Entries marked with an question mark (?) are mandatory depending on your configuration."
 	echo "Entries marked with a pipe (|) are mandatory for one another which means that at least one of them must be set."
 }
 
-ARGS=`getopt -o i:m:t:hA:l:P:p:s: --long in:,source-schema:,target-cluster-id:,help,adminuser:,login:,adminpass:,port:,password: -n 'replayschema' -- "$@"`
+ARGS=`getopt -o i:m:t:hA:P:r: --long in:,source-schema:,target-cluster-id:,help,adminuser:,adminpass:,rmi-host: -n 'replayschema' -- "$@"`
 
 if [ $? -ne 0 ]; then
 	exit 1
@@ -145,29 +142,6 @@ while true; do
 				*) adminpass=$2
 					shift 2;;
 			esac;;
-		-l | --jmxLogin)
-			case "$2" in
-				"") shift 2;;
-				*) jmxLogin=$2
-					optJmxArgs="$optJmxArgs -l $jmxLogin"
-					shift 2;;
-			esac;;
-		-s | --password)
-			case "$2" in
-				"") shift 2;;
-				*) jmxPassword=$2
-					optJmxArgs="$optJmxArgs -s $jmxPassword"
-					shift 2;;
-			esac;;
-		-p | --port)
-			case "$2" in
-				"") jmxPort=9999 
-					optJmxArgs="$optJmxArgs -p $jmxPort"
-					shift 2;break;;
-				*) jmxPort=$2
-					optJmxArgs="$optJmxArgs -p $jmxPort"
-					shift 2;;
-			esac;;
 		-r | --rmi-host)
 			case "$2" in
 				"") rmiHost="localhost"
@@ -186,7 +160,7 @@ while true; do
 done
 
 # invoke create schema
-OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.CreateSchema -A $adminuser -P $adminpass -t $target $optJmxArgs $optRMIArgs 2>&1)"
+OUTPUT="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.CreateSchema -A $adminuser -P $adminpass -t $target $optRMIArgs 2>&1)"
 RETVAL=$?
 
 # pump data in mysql
@@ -215,7 +189,7 @@ else
 fi
 
 # restore configdb references
-RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -A $adminuser -P $adminpass -m $schema -n $targetSchema -t $target $optJmxArgs $optRMIArgs 2>&1)"
+RESTORE="$(exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.admin.console.schemamove.RestoreReference -A $adminuser -P $adminpass -m $schema -n $targetSchema -t $target $optRMIArgs 2>&1)"
 RETVAL=$?
 echo -e "$RESTORE"
 exit $RETVAL
