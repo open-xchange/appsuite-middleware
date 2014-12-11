@@ -67,7 +67,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mobilepush.MobilePushConstants;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushEventService;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
@@ -106,10 +105,10 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
-        if (isTriggeredByPushClient(session)) {
-            LOG.debug("Ignoring event because it is triggered by the push device. Client Id: {}", session.getClient());
-            return;
-        }
+//        if (isTriggeredByPushClient(session)) {
+//            LOG.debug("Ignoring event because it is triggered by the push device. Client Id: {}", session.getClient());
+//            return;
+//        }
         if (!isRemoteEvent(event)) {
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
@@ -128,15 +127,13 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         notifySubscribers(new MobilePushMailEvent(contextId, userId, props));
     }
 
-    /**
-     * Checks if the event is triggered by the push device themselfs
-     */
-    private boolean isTriggeredByPushClient(Session session) {
-        if (MobilePushConstants.PUSH_CLIENT_ID.equals(session.getClient())) {
-            return true;
-        }
-        return false;
-    }
+//    /**
+//     * Checks if the event is triggered by the push device themself
+//     * TODO: Check if triggered by client
+//     */
+//    private boolean isTriggeredByPushClient(Session session) {
+
+//    }
 
     private boolean hasFolderProperty(Event event) {
         if (event != null && event.containsProperty(PushEventConstants.PROPERTY_FOLDER)) {
