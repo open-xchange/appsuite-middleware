@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.internal;
 
-import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.drive.management.DriveConfig;
 
 
@@ -86,15 +85,14 @@ public class JumpLinkGenerator {
         return getJumpLink(folderId, null, method, null);
     }
 
-    public String getJumpLink(String folderId, String fileId, String method, DriveFileMetadata metadata) {
+    public String getJumpLink(String folderId, String fileId, String method, String mimeType) {
         String redirectUrl = DriveConfig.getInstance().getJumpLink()
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", trimSlashes(DriveConfig.getInstance().getUiWebPath()))
             .replaceAll("\\[folder\\]", "folder=" + folderId);
 
-        if (null != metadata && null != fileId) {
-            String mimeType = metadata.getMimeType();
+        if (null != mimeType && null != fileId) {
             switch (method) {
             case "edit":
                 if (inArray(OFFICE_TEXT_MIMETYPES, mimeType) && session.hasCapability("text")) {
