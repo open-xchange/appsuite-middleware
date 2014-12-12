@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.internal;
 
+import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.file.storage.File;
 import com.openexchange.java.Strings;
@@ -180,7 +181,7 @@ public class DirectLinkGenerator {
     }
 
     private String getFileImageLink(File file, int width, int height) {
-        String mimeType = file.getFileMIMEType();
+        String mimeType = DriveUtils.determineMimeType(file);
         if (false == Strings.isEmpty(mimeType)) {
             // patterns borrowed from web interface
             if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$")) {

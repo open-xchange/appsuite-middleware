@@ -498,9 +498,12 @@ public class DriveServiceImpl implements DriveService {
             folderId = storage.getFolderID(path);
         } else {
             File file = storage.getFileByName(path, fileName);
+            if (null == file) {
+                throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileName, path);
+            }
             folderId = file.getFolderId();
             fileId = file.getId();
-            mimeType = file.getFileMIMEType();
+            mimeType = DriveUtils.determineMimeType(file);
         }
         return new JumpLinkGenerator(syncSession).getJumpLink(folderId, fileId, method, mimeType);
     }

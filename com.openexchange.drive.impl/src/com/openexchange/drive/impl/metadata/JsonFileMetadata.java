@@ -57,6 +57,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -65,7 +66,6 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 
@@ -202,7 +202,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         /*
          * dynamically add jump actions per file content type / user capabilities
          */
-        String mimeType = determineMimeType(file);
+        String mimeType = DriveUtils.determineMimeType(file);
         if (false == Strings.isEmpty(mimeType)) {
             if (mimeType.matches("(?i)^text\\/.*(rtf|plain).*$")) {
                 jumpActions.add("edit");
@@ -256,17 +256,6 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
             }
         }
         return false;
-    }
-
-    private static String determineMimeType(File file) {
-        String mimeType = null;
-        if (false == Strings.isEmpty(file.getFileName())) {
-            mimeType = MimeType2ExtMap.getContentType(file.getFileMIMEType(), null);
-        }
-        if (null == mimeType) {
-            mimeType = file.getFileMIMEType();
-        }
-        return mimeType;
     }
 
 }

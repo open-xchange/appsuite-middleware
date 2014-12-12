@@ -74,6 +74,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.session.Session;
 
@@ -324,6 +325,23 @@ public class DriveUtils {
      */
     public static boolean isDriveSession(Session session) {
         return null != session && false == DriveClientType.UNKNOWN.equals(DriveClientType.parse(session.getClient()));
+    }
+
+    /**
+     * Tries to determine the MIME type for a file by looking at the extension of the filename and the file's MIME type property.
+     *
+     * @param file The file to get the MIME type for
+     * @return The MIME type, or <code>null</code> if not available
+     */
+    public static String determineMimeType(File file) {
+        String mimeType = null;
+        if (false == Strings.isEmpty(file.getFileName())) {
+            mimeType = MimeType2ExtMap.getContentType(file.getFileMIMEType(), null);
+        }
+        if (null == mimeType) {
+            mimeType = file.getFileMIMEType();
+        }
+        return mimeType;
     }
 
     private DriveUtils() {
