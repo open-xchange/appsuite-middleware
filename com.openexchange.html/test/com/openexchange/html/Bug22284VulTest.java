@@ -49,34 +49,54 @@
 
 package com.openexchange.html;
 
-import static org.junit.Assert.*;
-import com.openexchange.java.Strings;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
+
 
 /**
- * {@link AssertionHelper}
+ * {@link Bug22284VulTest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class AssertionHelper {
+public class Bug22284VulTest {
+    private HtmlService service;
 
-    public static void assertSanitizedDoesNotContain(HtmlService service, String html, String mailiciousParam) {
-        assertSanitized(service, html, mailiciousParam, AssertExpression.NOT_CONTAINED);
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
     }
 
-    public static void assertSanitizedEmpty(HtmlService service, String html) {
-        assertSanitized(service, html, null, AssertExpression.EMPTY);
+    @After
+    public void tearDown() {
+        service = null;
     }
 
-    public static void assertSanitized(HtmlService service, String html, String mailiciousParam, AssertExpression ae) {
-        String sanitized = service.sanitize(html, null, false, null, null);
-        if(!Strings.isEmpty(sanitized)) {
-            sanitized = sanitized.toLowerCase();
-        }
-        if (AssertExpression.NOT_CONTAINED.equals(ae)) {
-            int index = sanitized.indexOf(mailiciousParam);
-            assertEquals(sanitized + " contains " + mailiciousParam, -1, index); //TODO
-        } else if(AssertExpression.EMPTY.equals(ae)) {
-            assertTrue("expected sanitized to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
-        }
+    @Test
+    public void testSanitize() {
+        String content = "<HTML><HEAD><STYLE " +
+            "id=\"styletagforeditor\">body{background-color:rgb(255,255,255);direction:ltr;font-family:times " +
+            "new " +
+            "roman;font-size:12pt;line-height:1.2;padding-top:0.787in;padding-right:0.787in;padding-bottom:0.787i " +
+            "n;padding-left:0.787in;margin:0in;} " +
+            "p{margin-top:0pt;margin-bottom:0pt;}</STYLE><STYLE " +
+            "id=\"styletagtwoforeditor\" type=\"text/css\">table { font-size: 12pt } " +
+            "table p, li p { margin : 0px; }</STYLE></HEAD><BODY><P><IMG  " +
+            "align=\"bottom\" alt=\"onerror=\\`\\`alert(1)\"  " +
+            "src=\"http://localhost\"></P></BODY></HTML>";
+
+        // AssertionHelper.assertSanitizedEmpty(service, content);
     }
 }
