@@ -13,7 +13,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,6 +56,8 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 /opt/open-xchange/lib/oxfunctions.sh
 
 %changelog
+* Fri Dec 12 2014 Carsten Hoeger <choeger@open-xchange.com>
+Fourth candidate for 7.6.2 release
 * Fri Dec 05 2014 Carsten Hoeger <choeger@open-xchange.com>
 Third candidate for 7.6.2 release
 * Tue Dec 02 2014 Carsten Hoeger <choeger@open-xchange.com>

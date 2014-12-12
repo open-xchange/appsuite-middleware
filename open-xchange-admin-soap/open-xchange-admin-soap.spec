@@ -57,19 +57,17 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Dec 12 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.6.2 release
 * Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-10
 * Fri Dec 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.6.2 release
 * Thu Dec 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-09
-* Thu Dec 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-12-09
 * Tue Dec 02 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-03
 * Tue Nov 25 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-12-01
-* Mon Nov 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-01
 * Mon Nov 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-01
@@ -81,12 +79,8 @@ Second candidate for 7.6.2 release
 Build for patch 2014-12-01
 * Wed Nov 19 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-21
-* Wed Nov 19 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-11-21
 * Tue Nov 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-20
-* Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-11-17
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>

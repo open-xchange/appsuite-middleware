@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -53,19 +53,17 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Dec 12 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Fourth candidate for 7.6.2 release
 * Mon Dec 08 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-12-10
 * Fri Dec 05 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Third candidate for 7.6.2 release
 * Thu Dec 04 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-12-09
-* Thu Dec 04 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
-Build for patch 2014-12-09
 * Tue Dec 02 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-12-03
 * Tue Nov 25 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
-Build for patch 2014-12-01
-* Mon Nov 24 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-12-01
 * Mon Nov 24 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-12-01
@@ -77,12 +75,8 @@ Second candidate for 7.6.2 release
 Build for patch 2014-12-01
 * Wed Nov 19 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-11-21
-* Wed Nov 19 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
-Build for patch 2014-11-21
 * Tue Nov 18 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-11-20
-* Mon Nov 10 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
-Build for patch 2014-11-17
 * Mon Nov 10 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-11-17
 * Mon Nov 10 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
