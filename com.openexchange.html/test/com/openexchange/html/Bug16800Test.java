@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,26 +49,22 @@
 
 package com.openexchange.html;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Map;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
+
 /**
- * {@link Bug26611Test}
+ * {@link Bug16800Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug26611Test {
-
+public class Bug16800Test {
     private HtmlService service;
-
-    public Bug26611Test() {
-        super();
-    }
 
     @Before
     public void setUp() {
@@ -90,13 +86,9 @@ public class Bug26611Test {
     }
 
     @Test
-    public void testSanitize() {
-        String content = "foo <object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"<!-- --></object//-->> bar";
-        String test = service.sanitize(content, null, false, null, null);
-        Assert.assertFalse("Sanitized content still contains object tag.", test.contains("<object"));
-        Assert.assertFalse("Sanitized content still contains object tag.", test.contains("</object>"));
-        Assert.assertFalse("Sanitized content still contains base64 string.", test.contains("PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg=="));
-        Assert.assertFalse("Sanitized content still contains data type.", test.contains("text/html"));
-        Assert.assertFalse("Sanitized content still contains base64 encoding description.", test.contains("base64"));
+    public void testPunycodeLinkGeneration() {
+        String link = "http://schnösel.ws";
+        String formattedLink = service.formatHrefLinks(link);
+        assertEquals("Link " + link + "not correctly formatted, was: " + formattedLink, "<a href=\"http://xn--schnsel-d1a.ws\" target=\"_blank\">http://schnösel.ws</a>", formattedLink);
     }
 }

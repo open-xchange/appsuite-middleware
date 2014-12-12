@@ -49,37 +49,46 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
+import static org.junit.Assert.assertEquals;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
+
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link Bug16843Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    Bug26237VulTest.class,
-    Bug26611VulTest.class,
-    Bug27335Test.class,
-    Bug27708Test.class,
-    CSSMatcherTest.class,
-    Bug30114Test.class,
-    Bug31826Test.class,
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class,
-    com.openexchange.html.internal.SaneScriptTagsTest.class
-})
-public class UnitTests {
+public class Bug16843Test {
+    private HtmlService service;
 
-    private UnitTests() {
-        super();
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
+    }
+
+    @After
+    public void tearDown() {
+        service = null;
+    }
+
+    @Test
+    public void testLinkGeneration() {
+        String link = "(http://www.google.de)";
+        String formattedLink = service.formatHrefLinks(link);
+        assertEquals("Link " + link + "not correctly formatted, was: " + formattedLink, "(<a href=\"http://www.google.de\" target=\"_blank\">http://www.google.de</a>)", formattedLink);
     }
 }

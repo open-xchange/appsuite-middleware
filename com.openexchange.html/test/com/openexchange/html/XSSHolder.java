@@ -49,37 +49,37 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
-
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link XSSHolder}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    Bug26237VulTest.class,
-    Bug26611VulTest.class,
-    Bug27335Test.class,
-    Bug27708Test.class,
-    CSSMatcherTest.class,
-    Bug30114Test.class,
-    Bug31826Test.class,
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class,
-    com.openexchange.html.internal.SaneScriptTagsTest.class
-})
-public class UnitTests {
+public class XSSHolder {
 
-    private UnitTests() {
-        super();
+    private final String xssAttack;
+    private final String maliciousParam;
+    private final AssertExpression assertExpression;
+
+    public XSSHolder(String xssAttack) {
+        this(xssAttack, AssertExpression.EMPTY, null);
     }
+
+    public XSSHolder(String xssAttack, AssertExpression assertExpression, String maliciousParam) {
+        this.xssAttack = xssAttack;
+        this.maliciousParam = maliciousParam;
+        this.assertExpression = assertExpression;
+    }
+
+    public String getXssAttack() {
+        return xssAttack;
+    }
+
+    public String getMalicious() {
+        return maliciousParam;
+    }
+
+    public AssertExpression getAssertExpression() {
+        return assertExpression;
+    }
+
 }
