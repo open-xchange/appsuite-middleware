@@ -186,6 +186,17 @@ public class ConfigCascade implements ConfigViewFactory {
                     }
                     return null;
                 }
+                
+                public String getScope() throws OXException {
+                	final String finalScope = getFinalScope();
+                    for (final ConfigProviderService provider : getConfigProviders(finalScope)) {
+                        final String value = provider.get(property, context, user).get();
+                        if (value != null) {
+                            return provider.getScope();
+                        }
+                    }
+                    return null;
+                }
 
                 @Override
                 public <M> M get(final String metadataName, final Class<M> m) throws OXException {

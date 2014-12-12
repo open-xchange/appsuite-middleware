@@ -57,6 +57,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
@@ -260,6 +261,11 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             }
 
         }
+    }
+    
+    @Override
+    public String getScope() {
+    	return "contextSets";
     }
 
     private class ContextSetConfig {

@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.BasicProperty;
@@ -91,6 +92,11 @@ public class UserConfigProvider implements ConfigProviderService {
     public UserConfigProvider(final ServiceLookup services) {
         super();
         this.services = services;
+    }
+    
+    @Override
+    public String getScope() {
+    	return "user";
     }
 
     /**
