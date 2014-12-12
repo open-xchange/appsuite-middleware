@@ -76,7 +76,7 @@ import org.jaudiotagger.tag.mp4.Mp4FieldKey;
 import org.jaudiotagger.tag.mp4.Mp4Tag;
 import org.jaudiotagger.tag.mp4.field.Mp4TagCoverField;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.filemanagement.ManagedFile;

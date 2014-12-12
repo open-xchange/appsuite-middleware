@@ -70,8 +70,8 @@ import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.FileHolder;
-import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -107,7 +107,6 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeStructureFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -136,7 +135,6 @@ import com.openexchange.tools.session.ServerSession;
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     private static final long EXPIRES_MILLIS_YEAR = AJAXRequestResult.YEAR_IN_MILLIS * 50;
-    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
     private static final String PARAMETER_FILTER = Mail.PARAMETER_FILTER;
     private static final String PARAMETER_SAVE = Mail.PARAMETER_SAVE;
     private static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
@@ -364,16 +362,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private boolean fileNameIndicatesHtml(String fileName) {
-        String mimeTypeByFileName = MimeType2ExtMap.getContentType(fileName, null);
-        if (null == mimeTypeByFileName) {
-            return false;
-        }
-
-        String lc = Strings.asciiLowerCase(mimeTypeByFileName);
-        return lc.startsWith("text/htm") || lc.startsWith("text/xhtm");
     }
 
     private boolean fileNameAbsentOrIndicatesHtml(String fileName) {

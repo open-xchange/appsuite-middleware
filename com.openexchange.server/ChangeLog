@@ -1,3 +1,20 @@
+* 2014-12-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35808: Do ENVELOPE header decoding to not interpret "=? ?=" sequences as a whitespace
+
+* 2014-12-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35313: Added option to override language for drive "settings" request
+
+* 2014-12-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35777: Fixed typo in the name for the standard folder in en_GB
+
+* 2014-12-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35641: Do not perform check for duplicate transport account in case transport server credentials are supposed to be taken from the mail settings
+ - Fix for bug 35784: Examine passed "version" parameter if it represents "null"
+
 * 2014-12-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 35746: Only delete referenced original message if a draft-edit operation takes place
@@ -133,6 +150,7 @@
 
  - Fix for bug 35073: set default subject when processed mail was sent without subject
  - Fix for bug 34894: set default subject when processed mail was sent without subject
+ - Fix for bug 33966: Apply string normalization only to non-ascii characters
 
 * 2014-10-29 - thorben.betten@open-xchange.com
 

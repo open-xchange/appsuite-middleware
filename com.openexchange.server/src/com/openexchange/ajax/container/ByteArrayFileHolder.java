@@ -50,6 +50,7 @@
 package com.openexchange.ajax.container;
 
 import java.io.InputStream;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**

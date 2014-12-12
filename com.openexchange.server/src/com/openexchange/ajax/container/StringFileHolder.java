@@ -51,6 +51,7 @@ package com.openexchange.ajax.container;
 
 import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 

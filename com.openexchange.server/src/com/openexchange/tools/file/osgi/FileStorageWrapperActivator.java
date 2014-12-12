@@ -57,7 +57,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorages;
 import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
@@ -110,7 +109,6 @@ public class FileStorageWrapperActivator implements BundleActivator {
         public FileStorageService addingService(ServiceReference<FileStorageService> reference) {
             final FileStorageService service = context.getService(reference);
             FileStorage.setFileStorageStarter(service);
-            FileStorages.setFileStorageService(service);
             return service;
         }
 
@@ -122,7 +120,6 @@ public class FileStorageWrapperActivator implements BundleActivator {
 
         @Override
         public void removedService(ServiceReference<FileStorageService> reference, FileStorageService service) {
-            FileStorages.setFileStorageService(null);
             FileStorage.setFileStorageStarter(null);
             context.ungetService(reference);
         }
@@ -141,7 +138,6 @@ public class FileStorageWrapperActivator implements BundleActivator {
         public QuotaFileStorageService addingService(ServiceReference<QuotaFileStorageService> reference) {
             QuotaFileStorageService service = context.getService(reference);
             QuotaFileStorage.setQuotaFileStorageStarter(service);
-            FileStorages.setQuotaFileStorageService(service);
             return service;
         }
 
@@ -153,7 +149,6 @@ public class FileStorageWrapperActivator implements BundleActivator {
 
         @Override
         public void removedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
-            FileStorages.setQuotaFileStorageService(null);
             QuotaFileStorage.setQuotaFileStorageStarter(null);
             context.ungetService(reference);
         }

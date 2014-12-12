@@ -13,7 +13,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:	   @OXVERSION@
-%define        ox_release 0
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -76,6 +76,10 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Fri Dec 12 2014 Carsten Hoeger <choeger@open-xchange.com>
+Fourth candidate for 7.6.2 release
+* Mon Dec 08 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-12-10
 * Fri Dec 05 2014 Carsten Hoeger <choeger@open-xchange.com>
 Third candidate for 7.6.2 release
 * Thu Dec 04 2014 Carsten Hoeger <choeger@open-xchange.com>
@@ -516,16 +520,28 @@ prepare for 7.0.2 release
 Second release candidate for 7.0.1
 * Fri Feb 01 2013 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 7.0.1
-* Mon Nov 19 2012 Carsten Hoeger <choeger@open-xchange.com>
-bugfix release
-* Tue Sep 20 2011 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
-bugfix release
-* Mon Jul 11 2011 Carsten Hoeger <choeger@open-xchange.com>
-bugfix release
-* Fri Apr 29 2011 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
-New build
 * Mon Jan 17 2011 Carsten Hoeger <choeger@open-xchange.com>
-new build including latest changes
+bugfix release
+
+
+open-xchange-munin-scripts (0.1-7) unstable; urgency=low
+
+  * bugfix release
+
+
+open-xchange-munin-scripts (0.1-6) unstable; urgency=low
+
+  * bugfix release
+
+
+open-xchange-munin-scripts (0.1-5) unstable; urgency=low
+
+  * New build
+
+
+open-xchange-munin-scripts (0.1-4) unstable; urgency=low
+
+  * new build including latest changes
 * Fri Oct 08 2010 Carsten Hoeger <choeger@open-xchange.com>
 new build with fix for rpm packages
 * Wed Oct 06 2010 Holger Achtziger <holger.achtziger@open-xchange.com>

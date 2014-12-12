@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.context.ContextService;
@@ -72,6 +73,11 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
     public ContextConfigProvider(final ContextService contexts) {
         super(contexts);
+    }
+    
+    @Override
+    public String getScope() {
+    	return "context";
     }
 
     @Override

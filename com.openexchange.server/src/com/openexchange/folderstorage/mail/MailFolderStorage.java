@@ -82,6 +82,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolderWrapper;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -1472,7 +1473,13 @@ public final class MailFolderStorage implements FolderStorage {
                 }
             }
             // Subscribed
-            mfd.setSubscribed(folder.isSubscribed());
+            if (folder instanceof SetterAwareFolder) {
+                if (((SetterAwareFolder) folder).containsSubscribed()) {
+                    mfd.setSubscribed(folder.isSubscribed());
+                }
+            } else {
+                mfd.setSubscribed(folder.isSubscribed());
+            }
             // Permissions
             MailPermission[] mailPermissions = null;
             {

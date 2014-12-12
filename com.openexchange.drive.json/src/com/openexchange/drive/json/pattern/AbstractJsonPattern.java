@@ -51,7 +51,7 @@ package com.openexchange.drive.json.pattern;
 
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.impl.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**

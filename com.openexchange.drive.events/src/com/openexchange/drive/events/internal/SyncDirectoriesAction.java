@@ -51,8 +51,8 @@ package com.openexchange.drive.events.internal;
 
 import java.util.Map;
 import com.openexchange.drive.Action;
-import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DirectoryVersion;
 
 /**
  * {@link SyncDirectoriesAction}

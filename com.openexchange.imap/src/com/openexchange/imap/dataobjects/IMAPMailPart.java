@@ -75,6 +75,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.ByteArray;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPInputStream;
@@ -234,7 +235,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
                 if (null != dParams) {
                     for (final Enumeration<?> names = dParams.getNames(); names.hasMoreElements();) {
                         final String name = names.nextElement().toString();
-                        contentDisposition.setParameter(name, dParams.get(name));
+                        contentDisposition.setParameter(name, MimeMessageUtility.decodeEnvelopeHeader(dParams.get(name)));
                     }
                 }
                 setContentDisposition(contentDisposition);
@@ -253,7 +254,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
                 if (null != cParams) {
                     for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
                         final String name = names.nextElement().toString();
-                        contentType.setParameter(name, cParams.get(name));
+                        contentType.setParameter(name, MimeMessageUtility.decodeEnvelopeHeader(cParams.get(name)));
                     }
                 }
                 setContentType(contentType);

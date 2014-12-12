@@ -100,12 +100,16 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         /**
          * Check event
          */
-        if (!isRemoteEvent(event)) {
+        Session session = getSession(event);
+        if (session == null) {
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
-        Session session = getSession(event);
-        if (session == null) {
+//        if (isTriggeredByPushClient(session)) {
+//            LOG.debug("Ignoring event because it is triggered by the push device. Client Id: {}", session.getClient());
+//            return;
+//        }
+        if (!isRemoteEvent(event)) {
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
@@ -117,28 +121,19 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         /**
          * Build publish message for push provider
          */
-        Map<String, String> props = new HashMap<String, String>();
-        handleEvents(event, session, props);
-
         int userId = session.getUserId();
         int contextId = session.getContextId();
+        Map<String, String> props = handleEvents(event, session);
         notifySubscribers(new MobilePushMailEvent(contextId, userId, props));
     }
 
-    /**
-     * @param event
-     * @param session
-     * @param props
-     */
-    private void handleEvents(Event event, Session session, Map<String, String> props) {
-        if (!event.containsProperty(PushEventConstants.PROPERTY_DELETED) ||
-            (event.containsProperty(PushEventConstants.PROPERTY_DELETED) && !(boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED))) {
-            handleNewMailEvent(event, session, props);
-        }
-        else {
-            handleDeleteMailEvent(event, props);
-        }
-    }
+//    /**
+//     * Checks if the event is triggered by the push device themself
+//     * TODO: Check if triggered by client
+//     */
+//    private boolean isTriggeredByPushClient(Session session) {
+
+//    }
 
     private boolean hasFolderProperty(Event event) {
         if (event != null && event.containsProperty(PushEventConstants.PROPERTY_FOLDER)) {
@@ -172,7 +167,24 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         return null;
     }
 
-    private void handleNewMailEvent(Event event, Session session, Map<String, String> props) {
+    /**
+     * Handles new mail or delete mail events
+     *
+     * @param event - The event to analyze
+     * @param session - The session
+     * @param props - A map
+     */
+    private Map<String, String> handleEvents(Event event, Session session) {
+        if (!event.containsProperty(PushEventConstants.PROPERTY_DELETED) ||
+            (event.containsProperty(PushEventConstants.PROPERTY_DELETED) && !(boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED))) {
+            return getNewMailProperties(event, session);
+        } else {
+            return getDeleteMailPayload(event);
+        }
+    }
+
+    private Map<String, String> getNewMailProperties(Event event, Session session) {
+        Map<String, String> props = new HashMap<String, String>(9);
         props.put("SYNC_EVENT", "NEW_MAIL");
         props.put("title", "OX Mail");
         props.put("message", "You've received a new mail");
@@ -201,6 +213,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                 }
             }
         }
+        return props;
     }
 
     /**
@@ -249,11 +262,13 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         return null;
     }
 
-    private void handleDeleteMailEvent(Event event, Map<String, String> props) {
+    private Map<String, String> getDeleteMailPayload(Event event) {
+        Map<String, String> props = new HashMap<String, String>(4);
         props.put("SYNC_EVENT", "MAIL");
         props.put("title", "OX Mail");
         props.put("message", "refresh");
         props.put("msgcnt", "1");
+        return props;
     }
 
     @Override
@@ -282,27 +297,26 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
 
     @Override
     public void notifyLogin(final List<ContextUsers> contextUsers) throws OXException {
-        Map<String, String> props = new HashMap<String, String>();
-        handleLoginMessage(props);
-
-        MobilePushMailEvent loginEvent = new MobilePushMailEvent(contextUsers, props);
-
         MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
 
         //Currently blocked for seven days (configurable?)
         long timeToWait = 1000 * 60 * 60 * 24 * 7;
         mnss.blockLoginPush(contextUsers, timeToWait);
 
+        Map<String, String> props = getLoginMessagePayload();
+        MobilePushMailEvent loginEvent = new MobilePushMailEvent(contextUsers, props);
         for (MobilePushPublisher publisher : publishers) {
             LOG.debug("Publishing new login event: {}", contextUsers);
             publisher.multiPublish(loginEvent);
         }
     }
 
-    private void handleLoginMessage(Map<String, String> props) {
+    private Map<String, String> getLoginMessagePayload() {
+        Map<String, String> props = new HashMap<String, String>(4);
         props.put("SYNC_EVENT", "LOGIN");
         props.put("title", "OX Mail");
         props.put("message", "You've received a new login");
         props.put("msgcnt", "1");
+        return props;
     }
 }

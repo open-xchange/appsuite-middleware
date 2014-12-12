@@ -57,6 +57,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;
@@ -114,6 +115,11 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
             return alreadyDefined;
         }
         return retval;
+    }
+    
+    @Override
+    public String getScope() {
+    	return "server";
     }
 
     @Override

@@ -52,6 +52,7 @@ package com.openexchange.config.cascade;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 import com.openexchange.exception.OXException;
 
 
@@ -124,5 +125,11 @@ public interface ConfigProviderService {
      * @throws OXException If returning property names fails for any reason
      */
     Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException;
+
+	/**
+	 * Gets the scope of this provider
+	 * @return The scope of the provider
+	 */
+	String getScope();
 
 }

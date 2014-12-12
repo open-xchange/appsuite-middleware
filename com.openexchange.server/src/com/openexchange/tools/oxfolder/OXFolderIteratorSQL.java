@@ -680,7 +680,7 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath system's private folder.
      */
     private static SearchIterator<FolderObject> getVisiblePrivateFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
@@ -693,25 +693,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -875,7 +857,7 @@ public final class OXFolderIteratorSQL {
      */
     private static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final FolderObject parentFolder, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         final boolean shared = parentFolder.isShared(userId);
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
@@ -890,25 +872,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -981,30 +945,12 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If an error occurs
      */
     public static boolean isVisibleFolder(final int folderId, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 return treeMap.isVisibleFolder(userId, memberInGroups, accessibleModules, folderId);
-            } catch (final Exception e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+            } catch (final OXException e) {
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -1065,31 +1011,13 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If an error occurs
      */
     public static TIntList getVisibleSubfolders(final int parent, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = Collections.<Condition> singletonList(new ConditionTreeMap.ParentCondition(parent));
                 return new TIntArrayList(treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions));
-            } catch (final Exception e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+            } catch (final OXException e) {
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -1164,7 +1092,7 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances of user-visible shared folders.
      */
     public static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
@@ -1179,25 +1107,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -1844,7 +1754,7 @@ public final class OXFolderIteratorSQL {
      * type and a certain parent folder.
      */
     private static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx, final Connection con) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final List<Condition> conditions = new ArrayList<Condition>(3);
@@ -1864,25 +1774,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -1965,33 +1857,15 @@ public final class OXFolderIteratorSQL {
     /**
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances of a certain module
      */
-    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection readConArg) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection con) throws OXException {
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final TIntSet set = treeMap.getVisibleModuleForUser(userId, memberInGroups, accessibleModules, module);
-                final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, readConArg);
+                final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -2005,13 +1879,13 @@ public final class OXFolderIteratorSQL {
                 new StringBuilder("AND (ot.module = ").append(module).append(')').toString(),
                 getSubfolderOrderBy(STR_OT));
         final Connection readCon;
-        final boolean closeReadCon = (readConArg == null);
+        final boolean closeReadCon = (con == null);
         final int contextId = ctx.getContextId();
         {
             if (closeReadCon) {
                 readCon = DBPool.pickup(ctx);
             } else {
-                readCon = readConArg;
+                readCon = con;
             }
         }
         PreparedStatement stmt = null;
@@ -2309,6 +2183,36 @@ public final class OXFolderIteratorSQL {
             }
         }
         return StringCollection.getSqlInString(userId, groups);
+    }
+
+    private static boolean isNullOrAutocommit(Connection con) {
+        try {
+            return con == null || con.getAutoCommit();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    private static void handleConditionTreeMapException(OXException e, final Context ctx) {
+        LOG.debug("", e);
+        ConditionTreeMapManagement.dropFor(ctx.getContextId());
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        final Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        };
+        if (null == threadPool) {
+            task.run();
+        } else {
+            threadPool.submit(ThreadPools.trackableTask(task));
+        }
+        // Retry from storage...
     }
 
 }

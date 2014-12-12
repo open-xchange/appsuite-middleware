@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.TransactionManager;
@@ -190,7 +191,16 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
                 }
             }
-            final boolean changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
+            boolean changeSubscription = false;
+            {
+                if (folder instanceof SetterAwareFolder) {
+                    if (((SetterAwareFolder) folder).containsSubscribed()) {
+                        changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
+                    }
+                } else {
+                    changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
+                }
+            }
             final boolean changedMetaInfo;
             {
                 Map<String, Object> meta = folder.getMeta();

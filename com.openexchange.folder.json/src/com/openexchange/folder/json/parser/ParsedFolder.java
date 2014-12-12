@@ -54,8 +54,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.Type;
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.folderstorage.Type;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ParsedFolder implements Folder {
+public final class ParsedFolder implements SetterAwareFolder {
 
     private static final long serialVersionUID = 11110622220507954L;
 
@@ -88,6 +88,7 @@ public final class ParsedFolder implements Folder {
     protected String[] subfolders;
 
     protected boolean subscribed;
+    protected boolean containsSubscribed;
 
     protected ContentType contentType;
 
@@ -297,6 +298,12 @@ public final class ParsedFolder implements Folder {
     @Override
     public void setSubscribed(final boolean subscribed) {
         this.subscribed = subscribed;
+        containsSubscribed = true;
+    }
+
+    @Override
+    public boolean containsSubscribed() {
+        return containsSubscribed;
     }
 
     @Override

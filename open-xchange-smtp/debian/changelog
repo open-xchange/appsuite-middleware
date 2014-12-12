@@ -4,6 +4,12 @@ open-xchange-smtp (7.8.0-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:41:18 +0100
 
+open-xchange-smtp (7.6.2-4) stable; urgency=low
+
+  * Fourth candidate for 7.6.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Dec 2014 13:11:11 +0100
+
 open-xchange-smtp (7.6.2-3) stable; urgency=medium
 
   * Third candidate for 7.6.2 release
@@ -105,6 +111,12 @@ open-xchange-smtp (7.6.1-0) unstable; urgency=medium
   * prepare for 7.6.1
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Jun 2014 11:40:05 +0200
+
+open-xchange-smtp (7.6.0-34) stable; urgency=medium
+
+  * Build for patch 2014-12-10
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 08 Dec 2014 16:14:51 +0100
 
 open-xchange-smtp (7.6.0-33) stable; urgency=medium
 

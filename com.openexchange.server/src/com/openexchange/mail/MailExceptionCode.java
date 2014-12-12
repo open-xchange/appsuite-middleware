@@ -522,6 +522,15 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     private static String PREFIX = "MSG";
 
     /**
+     * Gets the <code>"MSG"</code> prefix for mail-related exceptions
+     *
+     * @return The <code>"MSG"</code> prefix
+     */
+    public static String prefix() {
+        return PREFIX;
+    }
+
+    /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
      *
      * @param e The {@code OXException} to check

@@ -50,12 +50,12 @@
 package com.openexchange.drive.json.action;
 
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.impl.DriveExceptionCodes;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonFileVersion;

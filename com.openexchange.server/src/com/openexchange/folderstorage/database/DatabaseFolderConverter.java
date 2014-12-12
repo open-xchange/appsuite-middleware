@@ -436,7 +436,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * User-sensitive loading of user infostore folder
                      */
-                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userPerm.getAccessibleModules(), ctx, null);
+                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userPerm.getAccessibleModules(), ctx, con);
                     if (subfolders.isEmpty()) {
                         databaseFolder.setSubfolderIDs(new String[0]);
                         databaseFolder.setSubscribedSubfolders(false);

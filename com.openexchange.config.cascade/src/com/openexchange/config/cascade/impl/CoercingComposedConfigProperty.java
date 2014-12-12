@@ -50,6 +50,7 @@
 package com.openexchange.config.cascade.impl;
 
 import java.util.List;
+
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -137,6 +138,11 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
     @Override
     public List<String> getMetadataNames() throws OXException {
         return delegate.getMetadataNames();
+    }
+    
+    @Override
+    public String getScope() throws OXException {
+    	return delegate.getScope();
     }
 
 }

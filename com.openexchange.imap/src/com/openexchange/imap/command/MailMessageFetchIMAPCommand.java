@@ -965,19 +965,19 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws OXException {
-            final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-            final ContentType contentType = new ContentType().setPrimaryType(bs.type).setSubType(bs.subtype);
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) throws OXException {
+            BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
+            ContentType contentType = new ContentType().setPrimaryType(bs.type).setSubType(bs.subtype);
             {
-                final ParameterList cParams = bs.cParams;
+                ParameterList cParams = bs.cParams;
                 if (cParams != null) {
-                    for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
-                        final String name = names.nextElement().toString();
-                        final String value = cParams.get(name);
+                    for (Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
+                        String name = names.nextElement().toString();
+                        String value = cParams.get(name);
                         if (!isEmpty(value)) {
                             try {
-                                contentType.setParameterErrorAware(name, value);
-                            } catch (final OXException e) {
+                                contentType.setParameterErrorAware(name, MimeMessageUtility.decodeEnvelopeHeader(value));
+                            } catch (OXException e) {
                                 final long uid = msg.getUid();
                                 final String folder = msg.getFolder();
                                 LOG.debug("Ignoring invalid parameter in Content-Type header contained in message {} of folder {}.", uid <= 0 ? "<unknown>" : Long.toString(uid), null == folder ? "<unknown>" : folder);

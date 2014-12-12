@@ -52,7 +52,7 @@ package com.openexchange.drive;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;

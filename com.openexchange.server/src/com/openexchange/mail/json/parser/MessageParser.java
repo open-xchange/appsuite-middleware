@@ -94,7 +94,6 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -912,30 +911,29 @@ public final class MessageParser {
      * @throws AddressException If parsing an address fails
      */
     public static InternetAddress[] parseAddressKey(String key, JSONObject jo, boolean failOnError) throws JSONException, AddressException {
-        String value = null;
-        if (!jo.has(key) || jo.isNull(key) || Strings.isEmpty( (value = jo.getString(key)) )) {
+        if (!jo.has(key) || jo.isNull(key)) {
             return EMPTY_ADDRS;
         }
-        if (value.charAt(0) == '[') {
-            /*
-             * Treat as JSON array
-             */
-            try {
-                JSONArray jsonArr = new JSONArray(value);
-                int length = jsonArr.length();
-                if (length == 0) {
-                    return EMPTY_ADDRS;
-                }
-                return parseAdressArray(jsonArr, length);
-            } catch (JSONException e) {
-                LOG.error("", e);
-                /*
-                 * Reset
-                 */
-                value = jo.getString(key);
-            }
+
+        JSONArray jAddresses = jo.optJSONArray(key);
+        if (null == jAddresses) {
+            return parseAddressList(jo.getString(key), true, failOnError);
         }
-        return parseAddressList(value, true, failOnError);
+
+        // Treat as JSON array
+        try {
+            int length = jAddresses.length();
+            if (length == 0) {
+                return EMPTY_ADDRS;
+            }
+            return parseAdressArray(jAddresses, length);
+        } catch (JSONException e) {
+            LOG.error("", e);
+            /*
+             * Reset
+             */
+            return parseAddressList(jo.getString(key), true, failOnError);
+        }
     }
 
     /**

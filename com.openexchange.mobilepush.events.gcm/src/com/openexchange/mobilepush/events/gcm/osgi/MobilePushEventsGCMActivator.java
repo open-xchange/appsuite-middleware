@@ -97,7 +97,7 @@ public class MobilePushEventsGCMActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
-        getService(MobilePushEventService.class).unregisterPushPublisher(new MobilePushGCMPublisherImpl());
         Services.set(null);
+        super.stopBundle();
     }
 }

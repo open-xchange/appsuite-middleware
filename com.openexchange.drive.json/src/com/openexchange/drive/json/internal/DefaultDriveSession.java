@@ -54,9 +54,9 @@ import java.util.Locale;
 import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveClientType;
 import com.openexchange.drive.DriveClientVersion;
+import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.drive.FilePattern;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.tools.session.ServerSession;
@@ -74,6 +74,7 @@ public class DefaultDriveSession implements DriveSession {
     private final HostData hostData;
     private final DriveClientVersion clientVersion;
     private String deviceName;
+    private final Locale localeOverride;
     private Boolean diagnostics;
     private List<DriveFileField> fields;
     private List<FilePattern> fileExclusions;
@@ -87,14 +88,16 @@ public class DefaultDriveSession implements DriveSession {
      * @param hostData The host data as extracted from the corresponding http request
      * @param apiVersion The API version as set by the client, or <code>0</code> if not set
      * @param clientVersion The client version as set by the client, or {@link DriveClientVersion#VERSION_0} if not set
+     * @param localeOverride The locale string if overridden by client, or <code>null</code> to fall back to the user's locale
      */
-    public DefaultDriveSession(ServerSession session, String rootFolderID, HostData hostData, int apiVersion, DriveClientVersion clientVersion) {
+    public DefaultDriveSession(ServerSession session, String rootFolderID, HostData hostData, int apiVersion, DriveClientVersion clientVersion, Locale localeOverride) {
         super();
         this.session = session;
         this.rootFolderID = rootFolderID;
         this.hostData = hostData;
         this.apiVersion = apiVersion;
         this.clientVersion = clientVersion;
+        this.localeOverride = localeOverride;
     }
 
     /**
@@ -164,6 +167,9 @@ public class DefaultDriveSession implements DriveSession {
 
     @Override
     public Locale getLocale() {
+        if (null != localeOverride) {
+            return localeOverride;
+        }
         Locale locale = null;
         if (null != session) {
             User user = session.getUser();
