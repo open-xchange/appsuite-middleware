@@ -107,7 +107,7 @@ public class SyncSession {
         this.session = session;
         this.tracer = new Tracer(session.isDiagnostics());
         if (isTraceEnabled()) {
-            trace("Creating new sync session for user " + session.getServerSession().getLoginName() + " (" +
+            trace("Initializing sync session for user " + session.getServerSession().getLoginName() + " (" +
                 session.getServerSession().getUserId() + ") in context " + session.getServerSession().getContextId() +
                 ", root folder ID is " + session.getRootFolderID() +
                 " via client " + session.getClientType() + " v" + session.getClientVersion());
