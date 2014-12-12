@@ -1,3 +1,7 @@
+* 2014-12-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35641: Do not perform check for duplicate transport account in case transport server credentials are supposed to be taken from the mail settings
+
 * 2014-12-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 35693: Fixed conditional expression to check for possible HTML content by Content-Type and/or file name values
