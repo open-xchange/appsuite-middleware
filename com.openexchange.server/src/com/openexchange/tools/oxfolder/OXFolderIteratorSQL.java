@@ -693,25 +693,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -890,25 +872,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -985,26 +949,8 @@ public final class OXFolderIteratorSQL {
         if (null != treeMap) {
             try {
                 return treeMap.isVisibleFolder(userId, memberInGroups, accessibleModules, folderId);
-            } catch (final Exception e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+            } catch (final OXException e) {
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -1070,26 +1016,8 @@ public final class OXFolderIteratorSQL {
             try {
                 final List<Condition> conditions = Collections.<Condition> singletonList(new ConditionTreeMap.ParentCondition(parent));
                 return new TIntArrayList(treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions));
-            } catch (final Exception e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+            } catch (final OXException e) {
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -1179,25 +1107,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -1864,25 +1774,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -1955,14 +1847,6 @@ public final class OXFolderIteratorSQL {
         }
     }
 
-    private static boolean isNullOrAutocommit(Connection con) {
-        try {
-            return con == null || con.getAutoCommit();
-        } catch (SQLException e) {
-            return false;
-        }
-    }
-
     /**
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances of a certain module
      */
@@ -1973,33 +1857,15 @@ public final class OXFolderIteratorSQL {
     /**
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances of a certain module
      */
-    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection readConArg) throws OXException {
-        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+    public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection con) throws OXException {
+        final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId(), isNullOrAutocommit(con));
         if (null != treeMap) {
             try {
                 final TIntSet set = treeMap.getVisibleModuleForUser(userId, memberInGroups, accessibleModules, module);
-                final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, readConArg);
+                final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug("", e);
-                ConditionTreeMapManagement.dropFor(ctx.getContextId());
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                final Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                };
-                if (null == threadPool) {
-                    task.run();
-                } else {
-                    threadPool.submit(ThreadPools.trackableTask(task));
-                }
-                // Retry from storage...
+                handleConditionTreeMapException(e, ctx);
             }
         }
         /*
@@ -2013,13 +1879,13 @@ public final class OXFolderIteratorSQL {
                 new StringBuilder("AND (ot.module = ").append(module).append(')').toString(),
                 getSubfolderOrderBy(STR_OT));
         final Connection readCon;
-        final boolean closeReadCon = (readConArg == null);
+        final boolean closeReadCon = (con == null);
         final int contextId = ctx.getContextId();
         {
             if (closeReadCon) {
                 readCon = DBPool.pickup(ctx);
             } else {
-                readCon = readConArg;
+                readCon = con;
             }
         }
         PreparedStatement stmt = null;
@@ -2317,6 +2183,36 @@ public final class OXFolderIteratorSQL {
             }
         }
         return StringCollection.getSqlInString(userId, groups);
+    }
+
+    private static boolean isNullOrAutocommit(Connection con) {
+        try {
+            return con == null || con.getAutoCommit();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    private static void handleConditionTreeMapException(OXException e, final Context ctx) {
+        LOG.debug("", e);
+        ConditionTreeMapManagement.dropFor(ctx.getContextId());
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        final Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ConditionTreeMapManagement.getInstance().getMapFor(ctx.getContextId());
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        };
+        if (null == threadPool) {
+            task.run();
+        } else {
+            threadPool.submit(ThreadPools.trackableTask(task));
+        }
+        // Retry from storage...
     }
 
 }
