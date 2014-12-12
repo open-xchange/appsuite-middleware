@@ -60,10 +60,23 @@ public class XSSHolder {
     private final String maliciousParam;
     private final AssertExpression assertExpression;
 
+    /**
+     * Initializes a new {@link XSSHolder}.
+     * Asserts that the provided XSS attack should be completely sanitized <code>AssertExpression.NOT_CONTAINED</code>.
+     *
+     * @param xssAttack - the string containing the XSS injection
+     */
     public XSSHolder(String xssAttack) {
         this(xssAttack, AssertExpression.EMPTY, null);
     }
 
+    /**
+     * Initializes a new {@link XSSHolder}.
+     *
+     * @param xssAttack - the string containing the XSS injection
+     * @param assertExpression - the expression to be evaluated
+     * @param maliciousParam - the param which should not be contained after sanitizing; important for <code>AssertExpression.NOT_CONTAINED</code>
+     */
     public XSSHolder(String xssAttack, AssertExpression assertExpression, String maliciousParam) {
         this.xssAttack = xssAttack;
         this.maliciousParam = maliciousParam;

@@ -65,8 +65,18 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
+    Bug16800Test.class,
+    Bug16843Test.class,
+    Bug17991VulTest.class,
+    Bug18911VulTest.class,
+    Bug22286VulTest.class,
+    Bug25321VulTest.class,
     Bug26237VulTest.class,
     Bug26611VulTest.class,
+    Bug26789Test.class,
+    Bug28094Test.class,
+    Bug29412VulTest.class,
+    Bug30357VulTest.class,
     Bug27335Test.class,
     Bug27708Test.class,
     CSSMatcherTest.class,
@@ -75,6 +85,7 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
     ConformHtmlTest.class,
     HtmlServiceImplTest.class,
     FilterJerichoHandlerTest.class,
+    OwaspTest.class,
     com.openexchange.html.internal.SaneScriptTagsTest.class
 })
 public class UnitTests {

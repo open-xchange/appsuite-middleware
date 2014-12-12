@@ -86,7 +86,6 @@ public class Bug22286VulTest {
 
     @Test
     public void testSanitize() {
-        //TODO: unsafe escape??
         String content = "\n" +
             "<!--[if<img src=x onerror=alert(1)//]>-->\n" +
             "<!--[if<img src=x onerror=alert(2)//]--!>-->";
