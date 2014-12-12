@@ -58,15 +58,15 @@ import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
- * {@link Bug26237Test}
+ * {@link Bug26611VulTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Bug26237Test {
+public class Bug26611VulTest {
 
     private HtmlService service;
 
-    public Bug26237Test() {
+    public Bug26611VulTest() {
         super();
     }
 
@@ -91,7 +91,7 @@ public class Bug26237Test {
 
     @Test
     public void testSanitize() {
-        String content = "foo <object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"></object> bar";
+        String content = "foo <object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"<!-- --></object//-->> bar";
         String test = service.sanitize(content, null, false, null, null);
         Assert.assertFalse("Sanitized content still contains object tag.", test.contains("<object"));
         Assert.assertFalse("Sanitized content still contains object tag.", test.contains("</object>"));

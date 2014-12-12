@@ -49,37 +49,12 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link AssertExpression}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    Bug26237VulTest.class,
-    Bug26611VulTest.class,
-    Bug27335Test.class,
-    Bug27708Test.class,
-    CSSMatcherTest.class,
-    Bug30114Test.class,
-    Bug31826Test.class,
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class,
-    com.openexchange.html.internal.SaneScriptTagsTest.class
-})
-public class UnitTests {
-
-    private UnitTests() {
-        super();
-    }
+public enum AssertExpression {
+    EMPTY, NOT_CONTAINED,
 }

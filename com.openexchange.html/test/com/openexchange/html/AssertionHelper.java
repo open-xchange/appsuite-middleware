@@ -49,37 +49,36 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
+import static org.junit.Assert.*;
+import com.openexchange.java.Strings;
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link AssertionHelper}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    Bug26237VulTest.class,
-    Bug26611VulTest.class,
-    Bug27335Test.class,
-    Bug27708Test.class,
-    CSSMatcherTest.class,
-    Bug30114Test.class,
-    Bug31826Test.class,
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class,
-    com.openexchange.html.internal.SaneScriptTagsTest.class
-})
-public class UnitTests {
+public class AssertionHelper {
 
-    private UnitTests() {
-        super();
+    public static void assertSanitizedDoesNotContain(HtmlService service, String html, String mailiciousParam) {
+        assertSanitized(service, html, mailiciousParam, AssertExpression.NOT_CONTAINED);
+    }
+
+    public static void assertSanitizedEmpty(HtmlService service, String html) {
+        assertSanitized(service, html, null, AssertExpression.EMPTY);
+    }
+
+    public static void assertSanitized(HtmlService service, String html, String mailiciousParam, AssertExpression ae) {
+        String sanitized = service.sanitize(html, null, false, null, null);
+        if(!Strings.isEmpty(sanitized)) {
+            sanitized = sanitized.toLowerCase();
+        }
+        if (AssertExpression.NOT_CONTAINED.equals(ae)) {
+            int index = sanitized.indexOf(mailiciousParam);
+            System.out.println(sanitized);
+            assertEquals(sanitized + " contains " + mailiciousParam, -1, index); //TODO
+        } else if(AssertExpression.EMPTY.equals(ae)) {
+            System.out.println(sanitized);
+            assertTrue("expected sanitized to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
+        }
     }
 }

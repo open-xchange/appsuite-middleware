@@ -55,7 +55,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
 
-
 /**
  * {@link FileStorages} - Utility class for file storages.
  *
@@ -170,6 +169,32 @@ public final class FileStorages {
         } catch (URISyntaxException e) {
             // Cannot occur
             return null;
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Ensures URI's path component does end with a slash <code>'/'</code> character
+     *
+     * @param uri The URI
+     * @return The URI having the path component end with a slash <code>'/'</code> character
+     */
+    public static URI ensureEndingSlash(URI uri) {
+        if (null == uri) {
+            return null;
+        }
+
+        String path = uri.getPath();
+        if (null == path) {
+            return uri;
+        }
+
+        try {
+            return path.endsWith("/") ? uri : new URI(uri.getScheme(), uri.getAuthority(), uri.getPath() + '/', uri.getQuery(), uri.getFragment());
+        } catch (URISyntaxException e) {
+            // Cannot occur
+            return uri;
         }
     }
 
