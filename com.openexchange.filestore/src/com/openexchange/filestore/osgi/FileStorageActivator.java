@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.file.osgi;
+package com.openexchange.filestore.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -55,20 +55,27 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
+
 
 /**
- * {@link FileStorageWrapperActivator} - The activator that wraps old legacy file storage layer around new
- * <code>com.openexchange.filestore</code> API.
+ * {@link FileStorageActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class FileStorageWrapperActivator implements BundleActivator {
+public class FileStorageActivator implements BundleActivator {
 
-    private ServiceTracker<FileStorageService, FileStorageService> fsTracker;
-    private ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
+    private volatile ServiceTracker<FileStorageService, FileStorageService> fsTracker;
+    private volatile ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
+
+    /**
+     * Initializes a new {@link FileStorageActivator}.
+     */
+    public FileStorageActivator() {
+        super();
+    }
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -101,14 +108,14 @@ public class FileStorageWrapperActivator implements BundleActivator {
 
         private final BundleContext context;
 
-        public FSTrackerCustomizer(final BundleContext context) {
+        FSTrackerCustomizer(final BundleContext context) {
             this.context = context;
         }
 
         @Override
         public FileStorageService addingService(ServiceReference<FileStorageService> reference) {
             final FileStorageService service = context.getService(reference);
-            FileStorage.setFileStorageStarter(service);
+            FileStorages.setFileStorageService(service);
             return service;
         }
 
@@ -120,7 +127,7 @@ public class FileStorageWrapperActivator implements BundleActivator {
 
         @Override
         public void removedService(ServiceReference<FileStorageService> reference, FileStorageService service) {
-            FileStorage.setFileStorageStarter(null);
+            FileStorages.setFileStorageService(null);
             context.ungetService(reference);
         }
 
@@ -130,14 +137,14 @@ public class FileStorageWrapperActivator implements BundleActivator {
 
         private final BundleContext context;
 
-        public QFSTrackerCustomizer(final BundleContext context) {
+        QFSTrackerCustomizer(final BundleContext context) {
             this.context = context;
         }
 
         @Override
         public QuotaFileStorageService addingService(ServiceReference<QuotaFileStorageService> reference) {
             QuotaFileStorageService service = context.getService(reference);
-            QuotaFileStorage.setQuotaFileStorageStarter(service);
+            FileStorages.setQuotaFileStorageService(service);
             return service;
         }
 
@@ -149,7 +156,7 @@ public class FileStorageWrapperActivator implements BundleActivator {
 
         @Override
         public void removedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
-            QuotaFileStorage.setQuotaFileStorageStarter(null);
+            FileStorages.setQuotaFileStorageService(null);
             context.ungetService(reference);
         }
 

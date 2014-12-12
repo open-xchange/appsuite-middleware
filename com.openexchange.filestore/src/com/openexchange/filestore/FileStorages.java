@@ -47,8 +47,10 @@
  *
  */
 
-package com.openexchange.tools.file;
+package com.openexchange.filestore;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -111,6 +113,64 @@ public final class FileStorages {
      */
     public static FileStorageService getFileStorageService() {
         return FS_REF.get();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the context-related appendix for a file storage's base URI.
+     *
+     * @param contextId The context identifier
+     * @return The context-related appendix for a file storage's base URI
+     */
+    public static String getContextAppendix(int contextId) {
+        return new StringBuilder(16).append(contextId).append("_ctx_store").toString();
+    }
+
+    /**
+     * Gets the user-related appendix for a file storage's base URI.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The user-related appendix for a file storage's base URI
+     */
+    public static String getUserAppendix(int userId, int contextId) {
+        return new StringBuilder(16).append(contextId).append("_ctx_").append(userId).append("_user_store").toString();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the fully qualifying URI for given context.
+     *
+     * @param contextId The context identifier
+     * @param baseUri The file storage's base URI
+     * @return The fully qualifying URI
+     */
+    public static URI getFullyQualifyingUriForContext(int contextId, URI baseUri) {
+        try {
+            return new URI(baseUri.getScheme(), baseUri.getAuthority(), baseUri.getPath() + '/' + getContextAppendix(contextId), baseUri.getQuery(), baseUri.getFragment());
+        } catch (URISyntaxException e) {
+            // Cannot occur
+            return null;
+        }
+    }
+
+    /**
+     * Gets the fully qualifying URI for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param baseUri The file storage's base URI
+     * @return The fully qualifying URI
+     */
+    public static URI getFullyQualifyingUriForUser(int userId, int contextId, URI baseUri) {
+        try {
+            return new URI(baseUri.getScheme(), baseUri.getAuthority(), baseUri.getPath() + '/' + getUserAppendix(userId, contextId), baseUri.getQuery(), baseUri.getFragment());
+        } catch (URISyntaxException e) {
+            // Cannot occur
+            return null;
+        }
     }
 
 }
