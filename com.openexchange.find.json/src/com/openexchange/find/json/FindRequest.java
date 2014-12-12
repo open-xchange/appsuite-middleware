@@ -217,14 +217,20 @@ public class FindRequest {
                     throw FindExceptionCode.UNSUPPORTED_FACET.create(jType, module.getIdentifier());
                 }
 
-                String valueId = jFacet.getString("value");
-                JSONObject jFilter = jFacet.optJSONObject("filter");
+                String valueId = getValueId(jFacet.get("value"));
+                if (valueId == null) {
+                    // ignore invalid facets
+                    continue;
+                }
+
                 Filter filter;
-                if (jFilter == null) {
+                JSONObject jFilter = jFacet.optJSONObject("filter");
+                if (jFilter == null || jFilter == JSONObject.NULL) {
                     filter = Filter.NO_FILTER;
                 } else {
                     filter = parseFilter(jFilter);
                 }
+
                 facets.add(new ActiveFacet(type, valueId, filter));
             }
 
@@ -232,6 +238,21 @@ public class FindRequest {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
+    }
+
+    private static String getValueId(Object valueObj) {
+        String valueId;
+        if (valueObj == null || valueObj == JSONObject.NULL) {
+            valueId = null;
+        } else {
+            valueId = valueObj.toString();
+        }
+
+        if (Strings.isEmpty(valueId)) {
+            return null;
+        }
+
+        return valueId;
     }
 
     /**
