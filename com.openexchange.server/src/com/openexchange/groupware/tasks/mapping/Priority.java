@@ -112,7 +112,16 @@ public class Priority implements Mapper<Integer> {
 
     @Override
     public boolean equals(Task task1, Task task2) {
-        return task1.getPriority() == task2.getPriority();
+        Integer prio1 = task1.getPriority();
+        Integer prio2 = task2.getPriority();
+
+        if (null == prio1) {
+            return null == prio2;
+        }
+        if (null == prio2) {
+            return false;
+        }
+        return prio1.intValue() == prio2.intValue();
     }
 
     @Override
