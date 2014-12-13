@@ -261,9 +261,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                 }
             }
 
-            // TODO: Check if all request looks reasonable
-            // MailFields mailFields = MailFields.valueOf(columns);
-
             final boolean ignoreSeen = req.optBool("unseen");
             final boolean ignoreDeleted = !req.optBool("deleted", true);
             final boolean filterApplied = (ignoreSeen || ignoreDeleted);

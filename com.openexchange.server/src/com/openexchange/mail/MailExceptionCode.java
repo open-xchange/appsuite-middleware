@@ -517,6 +517,12 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s.
      */
     MAX_DRIVE_ATTACHMENTS_EXCEEDED("The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s.", MailExceptionStrings.MAX_DRIVE_ATTACHMENTS_EXCEEDED_MSG, CATEGORY_USER_INPUT, 94),
+    /**
+     * The client request is not permitted. Details: %1$s
+     */
+    REQUEST_NOT_PERMITTED("The client request is not permitted. Details: %1$s", MailExceptionStrings.REQUEST_NOT_PERMITTED_MSG, CATEGORY_PERMISSION_DENIED, 95)
+
+
     ;
 
     private static String PREFIX = "MSG";
