@@ -10,3 +10,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.filestore
+Bundle-Activator: com.openexchange.filestore.osgi.FileStorageActivator

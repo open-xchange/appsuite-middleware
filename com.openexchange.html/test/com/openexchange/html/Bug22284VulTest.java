@@ -49,50 +49,54 @@
 
 package com.openexchange.html;
 
+import java.util.Map;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
+
+
 /**
- * {@link XSSHolder}
+ * {@link Bug22284VulTest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class XSSHolder {
+public class Bug22284VulTest {
+    private HtmlService service;
 
-    private final String xssAttack;
-    private final String maliciousParam;
-    private final AssertExpression assertExpression;
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
 
-    /**
-     * Initializes a new {@link XSSHolder}.
-     * Asserts that the provided XSS attack should be completely sanitized <code>AssertExpression.NOT_CONTAINED</code>.
-     *
-     * @param xssAttack - the string containing the XSS injection
-     */
-    public XSSHolder(String xssAttack) {
-        this(xssAttack, AssertExpression.EMPTY, null);
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
     }
 
-    /**
-     * Initializes a new {@link XSSHolder}.
-     *
-     * @param xssAttack - the string containing the XSS injection
-     * @param assertExpression - the expression to be evaluated
-     * @param maliciousParam - the param which should not be contained after sanitizing; important for <code>AssertExpression.NOT_CONTAINED</code>
-     */
-    public XSSHolder(String xssAttack, AssertExpression assertExpression, String maliciousParam) {
-        this.xssAttack = xssAttack;
-        this.maliciousParam = maliciousParam;
-        this.assertExpression = assertExpression;
+    @After
+    public void tearDown() {
+        service = null;
     }
 
-    public String getXssAttack() {
-        return xssAttack;
-    }
+    @Test
+    public void testSanitize() {
+        String content = "<HTML><HEAD><STYLE " +
+            "id=\"styletagforeditor\">body{background-color:rgb(255,255,255);direction:ltr;font-family:times " +
+            "new " +
+            "roman;font-size:12pt;line-height:1.2;padding-top:0.787in;padding-right:0.787in;padding-bottom:0.787i " +
+            "n;padding-left:0.787in;margin:0in;} " +
+            "p{margin-top:0pt;margin-bottom:0pt;}</STYLE><STYLE " +
+            "id=\"styletagtwoforeditor\" type=\"text/css\">table { font-size: 12pt } " +
+            "table p, li p { margin : 0px; }</STYLE></HEAD><BODY><P><IMG  " +
+            "align=\"bottom\" alt=\"onerror=\\`\\`alert(1)\"  " +
+            "src=\"http://localhost\"></P></BODY></HTML>";
 
-    public String getMalicious() {
-        return maliciousParam;
+        // AssertionHelper.assertSanitizedEmpty(service, content);
     }
-
-    public AssertExpression getAssertExpression() {
-        return assertExpression;
-    }
-
 }
