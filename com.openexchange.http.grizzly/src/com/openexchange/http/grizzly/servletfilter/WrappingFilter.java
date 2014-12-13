@@ -185,7 +185,6 @@ public class WrappingFilter implements Filter {
             // Remote infos
             LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, Integer.toString(httpRequestWrapper.getRemotePort()));
             LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpRequestWrapper.getRemoteAddr());
-            LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpRequestWrapper.getRemoteAddr());
 
             // Names, addresses
             final Thread currentThread = Thread.currentThread();

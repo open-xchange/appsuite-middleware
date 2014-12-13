@@ -193,10 +193,6 @@ public final class LogProperties {
          */
         GRIZZLY_PATH_INFO("com.openexchange.grizzly.pathInfo"),
         /**
-         * com.openexchange.grizzly.requestIp
-         */
-        GRIZZLY_REQUEST_IP("com.openexchange.grizzly.requestIp"),
-        /**
          * com.openexchange.grizzly.serverName
          */
         GRIZZLY_SERVER_NAME("com.openexchange.grizzly.serverName"),
