@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -79,28 +80,40 @@ public class FileStorageActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        ServiceTracker<FileStorageService, FileStorageService> fsTracker = new ServiceTracker<FileStorageService, FileStorageService>(context, FileStorageService.class, new FSTrackerCustomizer(context));
-        this.fsTracker = fsTracker;
+        try {
+            ServiceTracker<FileStorageService, FileStorageService> fsTracker = new ServiceTracker<FileStorageService, FileStorageService>(context, FileStorageService.class, new FSTrackerCustomizer(context));
+            this.fsTracker = fsTracker;
 
-        ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker = new ServiceTracker<QuotaFileStorageService, QuotaFileStorageService>(context, QuotaFileStorageService.class, new QFSTrackerCustomizer(context));
-        this.qfsTracker = qfsTracker;
+            ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker = new ServiceTracker<QuotaFileStorageService, QuotaFileStorageService>(context, QuotaFileStorageService.class, new QFSTrackerCustomizer(context));
+            this.qfsTracker = qfsTracker;
 
-        fsTracker.open();
-        qfsTracker.open();
+            fsTracker.open();
+            qfsTracker.open();
+        } catch (Exception e) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
+            logger.error("Failed to start {}", context.getBundle().getSymbolicName(), e);
+            throw e;
+        }
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        ServiceTracker<FileStorageService, FileStorageService> fsTracker = this.fsTracker;
-        if (null != fsTracker) {
-            fsTracker.close();
-            this.fsTracker = null;
-        }
+        try {
+            ServiceTracker<FileStorageService, FileStorageService> fsTracker = this.fsTracker;
+            if (null != fsTracker) {
+                fsTracker.close();
+                this.fsTracker = null;
+            }
 
-        ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker = this.qfsTracker;
-        if (null != qfsTracker) {
-            qfsTracker.close();
-            this.qfsTracker = null;
+            ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker = this.qfsTracker;
+            if (null != qfsTracker) {
+                qfsTracker.close();
+                this.qfsTracker = null;
+            }
+        } catch (Exception e) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
+            logger.error("Failed to stop {}", context.getBundle().getSymbolicName(), e);
+            throw e;
         }
     }
 
