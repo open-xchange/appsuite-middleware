@@ -1,3 +1,7 @@
+* 2014-12-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35846: Pass incoming index range to executed account-wise calls
+
 * 2014-12-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 35808: Do ENVELOPE header decoding to not interpret "=? ?=" sequences as a whitespace
