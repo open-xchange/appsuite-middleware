@@ -365,7 +365,7 @@ public class MimeMessageFiller {
         if (isLocalhost(localIp)) {
             LOG.debug("Session provides localhost as client IP address: {}", localIp);
             // Prefer request's remote address if local IP seems to denote local host
-            String clientIp = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_REQUEST_IP);
+            String clientIp = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
             mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
         } else {
             mimeMessage.setHeader("X-Originating-IP", localIp);
