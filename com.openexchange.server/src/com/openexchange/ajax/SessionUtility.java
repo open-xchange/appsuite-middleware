@@ -695,7 +695,7 @@ public final class SessionUtility {
             return false;
         }
         BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
-        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && "5.0".equals(bd.getBrowserVersion());
+        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
     }
 
     /**
