@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
+import com.openexchange.groupware.filestore.FileLocationUpdater;
 
 
 /**
@@ -62,7 +62,7 @@ import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class PreviewFilestoreLocationUpdater implements FilestoreLocationUpdater {
+public class PreviewFilestoreLocationUpdater implements FileLocationUpdater {
 
     /**
      * Initializes a new {@link PreviewFilestoreLocationUpdater}.
@@ -71,16 +71,13 @@ public class PreviewFilestoreLocationUpdater implements FilestoreLocationUpdater
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.filestore.FilestoreLocationUpdater#updateFilestoreLocation(java.util.Map, int, java.sql.Connection)
-     */
     @Override
-    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException {
+    public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
         PreparedStatement stmt = con.prepareStatement("UPDATE preview SET refId = ? WHERE cid = ? AND refId = ?");
-        for (String old : fileMapping.keySet()) {
-            stmt.setString(1, fileMapping.get(old));
-            stmt.setInt(2, ctxId);
-            stmt.setString(3, old);
+        for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
+            stmt.setString(1, entry.getValue());
+            stmt.setInt(2, contextId);
+            stmt.setString(3, entry.getKey());
             stmt.addBatch();
         }
         stmt.executeBatch();

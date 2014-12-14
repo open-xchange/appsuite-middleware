@@ -97,7 +97,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
+import com.openexchange.groupware.filestore.FileLocationUpdater;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -312,7 +312,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         /*
          * Register preview filestore updater for move context filestore
          */
-        registerService(FilestoreLocationUpdater.class, new PreviewFilestoreLocationUpdater());
+        registerService(FileLocationUpdater.class, new PreviewFilestoreLocationUpdater());
     }
 
     @Override

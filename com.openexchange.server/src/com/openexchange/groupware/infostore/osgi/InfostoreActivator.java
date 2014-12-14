@@ -70,7 +70,7 @@ import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
+import com.openexchange.groupware.filestore.FileLocationUpdater;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.InfostoreAvailable;
 import com.openexchange.groupware.infostore.InfostoreFacades;
@@ -125,7 +125,7 @@ public class InfostoreActivator implements BundleActivator {
             /*
              * Register infostore filestore location updater for move context filestore
              */
-            registrations.offer(context.registerService(FilestoreLocationUpdater.class, new InfostoreFilestoreLocationUpdater(), null));
+            registrations.offer(context.registerService(FileLocationUpdater.class, new InfostoreFilestoreLocationUpdater(), null));
 
             this.registrations = registrations;
             /*

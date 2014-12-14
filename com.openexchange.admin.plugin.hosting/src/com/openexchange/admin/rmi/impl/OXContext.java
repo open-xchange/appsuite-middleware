@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,8 +94,8 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
-import com.openexchange.admin.tools.FilestoreDataMover;
-import com.openexchange.admin.tools.FilestoreDataMover.PostProcessTask;
+import com.openexchange.admin.tools.filestore.FilestoreDataMover;
+import com.openexchange.admin.tools.filestore.PostProcessTask;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -1021,45 +1020,29 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             oxcox.disable(ctx, reason);
             retval = oxcox.getData(ctx);
 
-            final int srcStore_id = retval.getFilestoreId().intValue();
-            ctx.setFilestoreId(srcStore_id);
+            // Check equality
+            int srcStore_id = retval.getFilestoreId().intValue();
+            ctx.setFilestoreId(Integer.valueOf(srcStore_id));
             if (srcStore_id == dst_filestore.getId().intValue()) {
-                throw new OXContextException("Src and dst store id is the same: " + dst_filestore);
+                throw new OXContextException("The identifiers for the source and destination storage are equal: " + dst_filestore);
             }
-            final String ctxdir = retval.getFilestore_name();
+
+            // Check storage name
+            String ctxdir = retval.getFilestore_name();
             if (ctxdir == null) {
                 throw new OXContextException("Unable to get filestore directory " + ctx.getIdAsString());
             }
 
-            final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            final Filestore destFilestore = oxu.getFilestore(dst_filestore.getId().intValue());
+            // Check capacity
+            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore destFilestore = oxu.getFilestore(dst_filestore.getId().intValue());
             if (!oxu.hasSpaceForAnotherContext(destFilestore)) {
                 throw new StorageException("Destination filestore does not have enough space for another context.");
             }
-            // get src and dst path from filestores
-            try {
-                final Filestore srcfilestore = oxu.getFilestore(srcStore_id);
-                URI sourceURI = new URI(srcfilestore.getUrl());
-                URI destURI = new URI(destFilestore.getUrl());
-                final StringBuilder src = builduppath(ctxdir, sourceURI);
-                final String dst = destURI.getPath();
-                final OXContextException contextException = new OXContextException("Unable to move filestore");
-                if (src == null) {
-                    LOGGER.error("src is null");
-                    throw contextException;
-                } else if (dst == null) {
-                    LOGGER.error("dst is null");
-                    throw contextException;
-                }
 
+            try {
                 // Initialize mover instance
-                FilestoreDataMover fsdm;
-                boolean rsyncEnabled = "file".equalsIgnoreCase(sourceURI.getScheme()) && "file".equalsIgnoreCase(destURI.getScheme());
-                if (rsyncEnabled) {
-                    fsdm = FilestoreDataMover.newContextFilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore, true);
-                } else {
-                    fsdm = FilestoreDataMover.newContextFilestoreDataMover(sourceURI.toString() + "/" + ctxdir, destURI.toString(), ctx, dst_filestore, false);
-                }
+                FilestoreDataMover fsdm = FilestoreDataMover.newContextMover(oxu.getFilestore(srcStore_id), dst_filestore, ctx);
 
                 // Enable context after processing
                 fsdm.addPostProcessTask(new PostProcessTask() {
@@ -1070,14 +1053,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     }
                 });
 
+                // Schedule task
                 return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId(), ctx.getId());
             } catch (final StorageException e) {
                 throw new OXContextException(e);
             }
-        } catch (final URISyntaxException e) {
-            final StorageException storageException = new StorageException(e);
-            LOGGER.error("", storageException);
-            throw storageException;
         } catch (final NoSuchFilestoreException e) {
             LOGGER.error("", e);
             throw e;

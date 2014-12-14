@@ -55,13 +55,22 @@ import java.util.Map;
 
 
 /**
- * {@link FilestoreLocationUpdater}
+ * {@link FileLocationUpdater}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public interface FilestoreLocationUpdater {
+public interface FileLocationUpdater {
 
-    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException;
+    /**
+     * Updates file locations
+     *
+     * @param prevFileName2newFileName The previous file name to new file name mapping
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @throws SQLException If an SQL error occurs
+     */
+    public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException;
 
 }

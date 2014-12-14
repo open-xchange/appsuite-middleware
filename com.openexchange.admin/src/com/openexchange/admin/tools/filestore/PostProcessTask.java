@@ -47,40 +47,23 @@
  *
  */
 
-package com.openexchange.snippet.rdb;
+package com.openexchange.admin.tools.filestore;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Map;
-import com.openexchange.groupware.filestore.FileLocationUpdater;
-
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
- * {@link RdbSnippetFilestoreLocationUpdater}
+ * {@link PostProcessTask} - A task that gets executed after successful completion.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class RdbSnippetFilestoreLocationUpdater implements FileLocationUpdater {
+public interface PostProcessTask {
 
     /**
-     * Initializes a new {@link RdbSnippetFilestoreLocationUpdater}.
+     * Performs the post-process task.
+     *
+     * @throws StorageException If task fails
      */
-    public RdbSnippetFilestoreLocationUpdater() {
-        super();
-    }
-
-    @Override
-    public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = con.prepareStatement("UPDATE snippet SET refId = ? WHERE cid = ? AND refId = ?");
-        for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
-            stmt.setString(1, entry.getValue());
-            stmt.setInt(2, contextId);
-            stmt.setString(3, entry.getKey());
-            stmt.addBatch();
-        }
-        stmt.executeBatch();
-    }
+    void perform() throws StorageException;
 
 }

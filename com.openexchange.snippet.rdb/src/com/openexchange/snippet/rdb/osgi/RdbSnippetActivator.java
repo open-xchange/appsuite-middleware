@@ -61,7 +61,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
+import com.openexchange.groupware.filestore.FileLocationUpdater;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
@@ -111,7 +111,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
             /*
              * Register filestore location updater for move context filestore
              */
-            registerService(FilestoreLocationUpdater.class, new RdbSnippetFilestoreLocationUpdater());
+            registerService(FileLocationUpdater.class, new RdbSnippetFilestoreLocationUpdater());
 
             /*
              * Register
