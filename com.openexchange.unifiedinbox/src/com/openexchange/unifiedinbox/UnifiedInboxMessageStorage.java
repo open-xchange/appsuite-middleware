@@ -1394,14 +1394,14 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             // Get account's messages
                             MailMessage[] accountMails;
                             if (null == headerNames || headerNames.length <= 0) {
-                                accountMails = mailAccess.getMessageStorage().searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
+                                accountMails = mailAccess.getMessageStorage().searchMessages(fn, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
                             } else {
                                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                                 if (messageStorage instanceof IMailMessageStorageExt) {
-                                    accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields, headerNames);
+                                    accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields, headerNames);
                                 } else {
                                     MailField[] checkedFields2 = MailFields.addIfAbsent(checkedFields, MailField.ID);
-                                    accountMails = messageStorage.searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields2);
+                                    accountMails = messageStorage.searchMessages(fn, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields2);
 
                                     if (null == accountMails || accountMails.length <= 0) {
                                         return Collections.emptyList();

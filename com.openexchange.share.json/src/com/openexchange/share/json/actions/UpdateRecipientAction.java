@@ -119,7 +119,7 @@ public class UpdateRecipientAction extends AbstractShareAction {
         UserService userService = getUserService();
         User guestUser = userService.getUser(guestID, context);
         String previousPassword = guestUser.getUserPassword();
-        if (null == updatedPassword && null != previousPassword || false == updatedPassword.equals(previousPassword)) {
+        if ((null == updatedPassword && null != previousPassword) || (null != updatedPassword && false == updatedPassword.equals(previousPassword))) {
             UserImpl updatedUser = new UserImpl(guestUser);
             if (Strings.isEmpty(updatedPassword)) {
                 updatedUser.setPasswordMech("");

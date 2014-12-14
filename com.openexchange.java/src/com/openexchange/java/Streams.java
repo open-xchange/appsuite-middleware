@@ -141,14 +141,14 @@ public class Streams {
      * @return The reader's content
      * @throws IOException If an I/O error occurs
      */
-    public static String reader2string(final Reader reader) throws IOException {
+    public static String reader2string(Reader reader) throws IOException {
         if (null == reader) {
             return null;
         }
-        final int buflen = 2048;
-        final char[] cbuf = new char[buflen];
-        final StringBuilder builder = new StringBuilder(8192);
-        for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+        int buflen = 2048;
+        char[] cbuf = new char[buflen];
+        StringBuilder builder = new StringBuilder(8192);
+        for (int read; (read = reader.read(cbuf, 0, buflen)) > 0;) {
             builder.append(cbuf, 0, read);
         }
         if (0 == builder.length()) {

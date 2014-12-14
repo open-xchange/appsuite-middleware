@@ -217,33 +217,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      */
 
     private final Context ctx;
-
     private final int contextId;
-
     private boolean init;
-
     private MailConfig mailConfig;
-
     private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
-
     private int accountId;
-
-    /**
-     * The session instance.
-     */
     final Session session;
-
     private final UserSettingMail usm;
-
     private Locale locale;
-
     private User user;
-
     private final Collection<OXException> warnings;
-
     private final ArrayList<MailImportResult> mailImportResults;
-
     private MailAccount mailAccount;
+    private final MailFields folderAndId;
+    private final boolean checkParameters;
 
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
@@ -271,6 +258,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         this.session = session;
         contextId = session.getContextId();
+        folderAndId = new MailFields(MailField.ID, MailField.FOLDER_ID);
+        checkParameters = false;
     }
 
     private User getUser() throws OXException {
@@ -1765,17 +1754,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return getMessagesInternal(prepareMailFolderParam(folder), searchTerm, fromToIndices, sortCol, order, fields, headerFields, supportsContinuation);
     }
 
-    private static final Set<String> NON_CACHES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange-appsuite")));
-
-    private static boolean isCacheApplicable(Session session) {
-        String client = session.getClient();
-        return null == client || !NON_CACHES.contains(client);
-    }
-
     private SearchIterator<MailMessage> getMessagesInternal(FullnameArgument argument, SearchTerm<?> searchTerm, int[] fromToIndices, int sortCol, int order, int[] fields, String[] headerNames, boolean supportsContinuation) throws OXException {
-        /*
-         * Identify and sort messages according to search term and sort criteria while only fetching their IDs
-         */
+        if (checkParameters) {
+            // Check if all request looks reasonable
+            MailFields mailFields = MailFields.valueOf(fields);
+            if (null == fromToIndices) {
+                if (mailFields.retainAll(folderAndId)) {
+                    // More than folder an ID requested
+                    throw MailExceptionCode.REQUEST_NOT_PERMITTED.create("Only folder and ID are allowed to be queried without a range");
+                }
+            }
+        }
+
+        // Identify and sort messages according to search term and sort criteria while only fetching their IDs
         String fullName = argument.getFullname();
         MailMessage[] mails = null;
         {

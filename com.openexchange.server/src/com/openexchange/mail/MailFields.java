@@ -104,6 +104,16 @@ public final class MailFields {
         return new MailFields(fields).toArray();
     }
 
+    /**
+     * Gets the mail fields for given columns.
+     *
+     * @param columns The columns
+     * @return The mail fields
+     */
+    public static MailFields valueOf(int[] columns) {
+        return null == columns ? new MailFields() : new MailFields(MailField.getFields(columns));
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------------------------------ //
 
     private final boolean[] arr;

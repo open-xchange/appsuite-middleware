@@ -132,7 +132,7 @@ public final class SessionCompositionParameters implements CompositionParameters
         if (MimeMessageFiller.isLocalhost(origIp)) {
             MimeMessageFiller.LOG.debug("Session provides localhost as client IP address: {}", origIp);
             // Prefer request's remote address if local IP seems to denote local host
-            origIp = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_REQUEST_IP);
+            origIp = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
         }
 
         return origIp;

@@ -134,22 +134,35 @@ public final class LogProperties {
         SESSION_LOGIN_NAME("com.openexchange.session.loginName"),
         /**
          * com.openexchange.grizzly.requestURI
+         * <p>
+         * The part of this request's URL from the protocol name up to the query string in the first line of the HTTP request.
          */
         GRIZZLY_REQUEST_URI("com.openexchange.grizzly.requestURI"),
         /**
+         * com.openexchange.grizzly.queryString
+         * <p>
+         * The query string that is contained in the request URL after the path
+         */
+        GRIZZLY_QUERY_STRING("com.openexchange.grizzly.queryString"),
+        /**
          * com.openexchange.grizzly.servletPath
+         * <p>
+         * The part of this request's URL that calls the servlet. This path starts with a "/" character and includes either the servlet name
+         * or a path to the servlet, but does not include any extra path information or a query string.
          */
         GRIZZLY_SERVLET_PATH("com.openexchange.grizzly.servletPath"),
         /**
          * com.openexchange.grizzly.pathInfo
+         * <p>
+         * The extra path information associated with the URL the client sent when it made this request. The extra path information follows
+         * the servlet path but precedes the query string and will start with a "/" character.
          */
         GRIZZLY_PATH_INFO("com.openexchange.grizzly.pathInfo"),
         /**
-         * com.openexchange.grizzly.requestIp
-         */
-        GRIZZLY_REQUEST_IP("com.openexchange.grizzly.requestIp"),
-        /**
          * com.openexchange.grizzly.serverName
+         * <p>
+         * The host name of the server to which the request was sent. It is the value of the part before ":" in the <code>Host</code> header
+         * value, if any, or the resolved server name, or the server IP address.
          */
         GRIZZLY_SERVER_NAME("com.openexchange.grizzly.serverName"),
         /**
@@ -158,18 +171,24 @@ public final class LogProperties {
         GRIZZLY_THREAD_NAME("com.openexchange.grizzly.threadName"),
         /**
          * com.openexchange.grizzly.remotePort
+         * <p>
+         * The Internet Protocol (IP) address of the client or last proxy that sent the request
          */
         GRIZZLY_REMOTE_PORT("com.openexchange.grizzly.remotePort"),
         /**
          * com.openexchange.grizzly.remoteAddres
+         * <p>
+         * The Internet Protocol (IP) address of the client or last proxy that sent the request
          */
         GRIZZLY_REMOTE_ADDRESS("com.openexchange.grizzly.remoteAddress"),
         /**
-         * com.openexchange.http.grizzly.session
+         * com.openexchange.grizzly.session
          */
         GRIZZLY_HTTP_SESSION("com.openexchange.grizzly.session"),
         /**
-         * com.openexchange.http.grizzly.userAgent
+         * com.openexchange.grizzly.userAgent
+         * <p>
+         * The content of the <code>User-Agent</code> header.
          */
         GRIZZLY_USER_AGENT("com.openexchange.grizzly.userAgent"),
         /**
