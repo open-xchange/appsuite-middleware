@@ -49,15 +49,27 @@
 
 package com.openexchange.drive.json.action;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.authentication.Cookie;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.tokenlogin.TokenLoginService;
+import com.openexchange.login.Interface;
+import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -68,11 +80,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class JumpAction extends AbstractDriveAction {
 
-    private final TokenLoginService tokenLoginService;
-
-    public JumpAction(TokenLoginService service) {
+    public JumpAction() {
         super();
-        this.tokenLoginService = service;
     }
 
     @Override
@@ -82,6 +91,14 @@ public class JumpAction extends AbstractDriveAction {
             /*
              * get parameters
              */
+            String authId = requestData.getParameter("authId");
+            if (Strings.isEmpty(authId)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("authId");
+            }
+            String clientToken = requestData.getParameter("clientToken");
+            if (Strings.isEmpty(clientToken)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("clientToken");
+            }
             String path = requestData.getParameter("path");
             if (Strings.isEmpty(path)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
@@ -90,19 +107,76 @@ public class JumpAction extends AbstractDriveAction {
             if (Strings.isEmpty(method)) {
                 method = "preview";
             }
-            String token = tokenLoginService.acquireToken(session.getServerSession());
+            HttpServletRequest request = requestData.optHttpServletRequest();
+            Cookie[] cookies = getCookies(request);
+            Map<String, List<String>> headers = getHeaders(request);
+            String client = getClient();
+            String hash = HashCalculator.getInstance().getHash(request, requestData.getUserAgent(), client);
+            LoginRequestImpl req = new LoginRequestImpl(session.getServerSession().getLogin(), session.getServerSession().getPassword(), session.getServerSession().getLocalIp(), requestData.getUserAgent(), authId, client, "Drive Jump", hash, Interface.HTTP_JSON, headers, cookies, requestData.isSecure(), request.getServerName(), request.getServerPort(), requestData.getRoute());
+            req.setClientToken(clientToken);
+            LoginResult res = LoginPerformer.getInstance().doLogin(req);
+            String serverToken = res.getServerToken();
             String name = requestData.getParameter("name");
             String link = driveService.getJumpRedirectUrl(session, path, name, method);
+            StringBuilder sb = new StringBuilder(link).append("&serverToken=").append(serverToken);
             /*
              * get & return metadata as json
              */
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("link", link);
-            jsonObject.put("token", token);
+            jsonObject.put("redirectUrl", sb.toString());
             return new AJAXRequestResult(jsonObject, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private Cookie[] getCookies(HttpServletRequest req) {
+        if (null != req) {
+            Cookie[] cookies = new Cookie[req.getCookies().length];
+            for (int i = 0; i < cookies.length; i++) {
+                final javax.servlet.http.Cookie c = req.getCookies()[i];
+                cookies[i] = new Cookie() {
+
+                    @Override
+                    public String getValue() {
+                        return c.getValue();
+                    }
+
+                    @Override
+                    public String getName() {
+                        return c.getName();
+                    }
+                };
+            }
+            return cookies;
+        }
+        return null;
+    }
+
+    private Map<String, List<String>> getHeaders(HttpServletRequest req) {
+        if (null != req) {
+            Enumeration<String> headerNames = req.getHeaderNames();
+            Map<String, List<String>> headers = new HashMap<String, List<String>>();
+            while (headerNames.hasMoreElements()) {
+                String name = headerNames.nextElement();
+                List<String> header = new ArrayList<String>();
+                if (headers.containsKey(name)) {
+                    header = headers.get(name);
+                }
+                header.add(req.getHeader(name));
+                headers.put(name, header);
+            }
+            return headers;
+        }
+        return null;
+    }
+
+    private String getClient() {
+        DriveConfig config = DriveConfig.getInstance();
+        if (!config.getUiWebPath().contains("appsuite")) {
+            return "com.openexchange.ox.gui.dhtml";
+        }
+        return "open-xchange-appsuite";
     }
 
 }

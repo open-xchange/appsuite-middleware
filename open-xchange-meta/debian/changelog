@@ -322,6 +322,12 @@ open-xchange-meta (7.6.0-0) unstable; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Feb 2014 09:36:12 +0100
 
+open-xchange-meta (7.4.2-41) stable; urgency=low
+
+  * Build for patch 2014-12-15
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 08 Dec 2014 16:09:00 +0100
+
 open-xchange-meta (7.4.2-40) stable; urgency=medium
 
   * Build for patch 2014-12-01
