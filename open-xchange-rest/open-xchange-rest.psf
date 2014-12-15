@@ -7,5 +7,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.services.database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.services.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.services.users.mailMapping"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mailmapping"/>
 </provider>
 </psf>

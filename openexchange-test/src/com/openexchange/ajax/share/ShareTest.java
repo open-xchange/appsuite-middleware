@@ -109,8 +109,8 @@ import com.openexchange.share.recipient.ShareRecipient;
 public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
-//        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
-//        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
+        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
+        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
         createAnonymousAuthorPermission("secret"),
         createAnonymousGuestPermission()
     };
@@ -118,8 +118,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static final FileStorageGuestObjectPermission[] TESTED_OBJECT_PERMISSIONS = new FileStorageGuestObjectPermission[] {
         asObjectPermission(TESTED_PERMISSIONS[0]),
         asObjectPermission(TESTED_PERMISSIONS[1]),
-//        asObjectPermission(TESTED_PERMISSIONS[2]),
-//        asObjectPermission(TESTED_PERMISSIONS[3])
+        asObjectPermission(TESTED_PERMISSIONS[2]),
+        asObjectPermission(TESTED_PERMISSIONS[3])
     };
 
     protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };
