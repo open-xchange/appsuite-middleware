@@ -134,6 +134,8 @@ public interface CalendarCollectionService {
 
     public boolean checkIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up);
 
+    public void removeConfirmations(CalendarDataObject cdao, int uid);
+
     public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid, int inFolder) throws OXException;
 
     /**
@@ -872,11 +874,13 @@ public interface CalendarCollectionService {
      *
      * @param cdao The current calendar object denoting the change exception
      * @param edao The calendar object's storage version
-     * @param sessionUser The session user performing the operation
+     * @param ctx The context
+     * @param session The session
+     * @param inFolder The folder the action is performed in.
      * @return A cloned version ready for being used to create the denoted change exception
      * @throws OXException If cloned version cannot be created
      */
-    public CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao, final int sessionUser) throws OXException;
+    public CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao, Context ctx, final Session session, int inFolder) throws OXException;
 
     /**
      * Replaces the start date and end date of specified recurring appointment with the start date and end date of its first occurrence.

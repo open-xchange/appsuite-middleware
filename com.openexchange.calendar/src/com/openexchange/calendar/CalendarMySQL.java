@@ -2836,7 +2836,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             /*
              * Create a clone for the "new" change exception
              */
-            clone = COLLECTION.cloneObjectForRecurringException(cdao, edao, so.getUserId());
+            clone = COLLECTION.cloneObjectForRecurringException(cdao, edao, ctx, so, inFolder);
             try {
                 cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
                 if (cdao.containsAlarm()) {
@@ -2859,6 +2859,21 @@ public class CalendarMySQL implements CalendarSqlImp {
                     clone.setUid(edao.getUid());
                 }
 
+//                {
+//                    // Reset Confirmation status on time change.
+//                    RecurringResultsInterface rss = COLLECTION.calculateRecurring(edao, 0, 0, cdao.getRecurrencePosition());
+//                    if (rss == null) {
+//                        throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create(cdao.getRecurrencePosition());
+//                    }
+//                    RecurringResultInterface rs = rss.getRecurringResult(0);
+//                    CalendarDataObject occurrenceTimeContainer = new CalendarDataObject();
+//                    occurrenceTimeContainer.setStartDate(new Date(rs.getStart()));
+//                    occurrenceTimeContainer.setEndDate(new Date(rs.getEnd()));
+//                    if (COLLECTION.detectTimeChange(clone, occurrenceTimeContainer)) {
+//                        COLLECTION.removeConfirmations(clone);
+//                        COLLECTION.updateDefaultStatus(clone, ctx, so.getUserId(), inFolder);
+//                    }
+//                }
                 // Insert without triggering event
                 insertAppointment0(clone, writecon, so, false);
                 // Trigger NEW event for new (user) participants only
