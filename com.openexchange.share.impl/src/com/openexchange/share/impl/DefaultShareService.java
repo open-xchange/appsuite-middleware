@@ -75,7 +75,6 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -282,14 +281,14 @@ public class DefaultShareService implements ShareService {
     /**
      * Recognizes the email addresses that should be collected and adds them to the ContactCollector.
      *
-     * @param session - the {@link Session} to get aliases for
+     * @param session - the {@link Session} of the user to collect the addresses for
      * @param shareRecipients - List of {@link ShareRecipient}s to collect addresses for
      * @throws OXException
      */
     private void collectAddresses(final Session session, final List<ShareRecipient> shareRecipients) throws OXException {
         final ContactCollectorService ccs = services.getService(ContactCollectorService.class);
         if (null != ccs) {
-            final Set<InternetAddress> addrs = getEmailAddresses(shareRecipients, session);
+            final Set<InternetAddress> addrs = getEmailAddresses(shareRecipients);
             if (!addrs.isEmpty()) {
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
             }
@@ -300,44 +299,22 @@ public class DefaultShareService implements ShareService {
      * Returns a <code>Set</code> of <code>InternetAddress</code>es that should be collected by the {@link ContactCollectorService}
      *
      * @param shareRecipients - a list of {@link ShareRecipient}s to get addresses from
-     * @param session - {@link Session} to get aliases for
      * @return <code>Set</code> of <code>InternetAddress</code>es for further processing
      * @throws OXException
      */
-    private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients, Session session) throws OXException {
+    private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients) throws OXException {
         Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-        try {
-            for (ShareRecipient shareRecipient : shareRecipients) {
-                RecipientType recipientType = RecipientType.of(shareRecipient);
-                if ((recipientType == null) || (recipientType != RecipientType.GUEST)) {
-                    continue;
-                }
-
-                GuestRecipient guest = (GuestRecipient) shareRecipient;
-                String emailAddress = guest.getEmailAddress();
+        for (ShareRecipient shareRecipient : shareRecipients) {
+            if (RecipientType.GUEST.equals(RecipientType.of(shareRecipient))) {
+                String emailAddress = ((GuestRecipient) shareRecipient).getEmailAddress();
                 if (emailAddress != null) {
-                    addrs.add(new InternetAddress(emailAddress));
+                    try {
+                        addrs.add(new InternetAddress(emailAddress));
+                    } catch (final AddressException addressException) {
+                        LOG.warn("Unable to add address to ContactCollector.", addressException);
+                    }
                 }
             }
-            if (addrs.size() == 0) {
-                return addrs;
-            }
-            // Strip by aliases
-            if (session == null) {
-                LOG.info("Provided Session object is null. Cannot remove already known addresses!");
-                return addrs;
-            }
-
-            final Set<InternetAddress> knownAddresses = new HashSet<InternetAddress>();
-            final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-            knownAddresses.add(new InternetAddress(user.getMail()));
-            final String[] aliases = user.getAliases();
-            for (final String alias : aliases) {
-                knownAddresses.add(new InternetAddress(alias));
-            }
-            addrs.removeAll(knownAddresses);
-        } catch (final AddressException addressException) {
-            LOG.warn("Unable to add address to ContactCollector.", addressException);
         }
         return addrs;
     }
