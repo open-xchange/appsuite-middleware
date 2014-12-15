@@ -49,6 +49,7 @@
 
 package com.openexchange.session.delegate;
 
+import java.util.Set;
 import com.openexchange.session.Session;
 import com.openexchange.session.SetableSession;
 
@@ -192,4 +193,8 @@ public class DelegateSession implements SetableSession {
         return session.isTransient();
     }
 
+    @Override
+    public Set<String> getParameterNames() {
+        return session.getParameterNames();
+    }
 }

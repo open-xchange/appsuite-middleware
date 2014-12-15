@@ -52,6 +52,7 @@ package com.openexchange.sessionstorage;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.PutIfAbsent;
@@ -123,6 +124,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
+            this.parameters.putAll(parameters);
             List<String> remoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
             for (String parameterName : remoteParameterNames) {
                 Object value = parameters.get(parameterName);
@@ -151,6 +153,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
+            this.parameters.putAll(parameters);
             List<String> remoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
             for (String parameterName : remoteParameterNames) {
                 Object value = session.getParameter(parameterName);
@@ -419,4 +422,8 @@ public class StoredSession implements PutIfAbsent, Serializable {
         return builder.toString();
     }
 
+    @Override
+    public Set<String> getParameterNames() {
+        return parameters.keySet();
+    }
 }
