@@ -235,7 +235,9 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     public boolean stopWatching() {
         ScheduledTimerTask requestWatcherTask = this.requestWatcherTask;
         if (null != requestWatcherTask) {
-            return requestWatcherTask.cancel();
+            boolean canceled = requestWatcherTask.cancel();
+            this.requestWatcherTask = null;
+            return canceled;
         }
         return true;
     }
