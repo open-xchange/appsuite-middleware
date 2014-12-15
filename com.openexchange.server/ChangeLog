@@ -1,3 +1,7 @@
+* 2014-12-15 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 35610: Reset confirmation status on exception creation.
+
 * 2014-12-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 35864: Use patched logback-classic bundle and enhanced "/opt/open-xchange/etc/ox-scriptconf.sh" by "-Dlogback.threadlocal.put.duplicate=false" system property

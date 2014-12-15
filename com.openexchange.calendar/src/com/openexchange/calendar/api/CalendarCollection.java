@@ -1290,12 +1290,14 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
      *
      * @param cdao The current calendar object denoting the change exception
      * @param edao The calendar object's storage version
-     * @param sessionUser The session user performing the operation
+     * @param ctx The context
+     * @param session The session
+     * @param inFolder The folder the action is performed in
      * @return A cloned version ready for being used to create the denoted change exception
      * @throws OXException If cloned version cannot be created
      */
     @Override
-    public CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao, final int sessionUser) throws OXException {
+    public CalendarDataObject cloneObjectForRecurringException(final CalendarDataObject cdao, final CalendarDataObject edao, Context ctx, final Session session, int inFolder) throws OXException {
         final CalendarDataObject clone = edao.clone();
         // Recurrence exceptions MUST contain the position and date position.
         // This is necessary for further handling of the series.
@@ -1336,7 +1338,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
              */
             final UserParticipant[] users = clone.getUsers();
             for (final UserParticipant userParticipant : users) {
-                if (userParticipant.getIdentifier() == sessionUser) {
+                if (userParticipant.getIdentifier() == session.getUserId()) {
                     userParticipant.setConfirm(CalendarObject.ACCEPT);
                 } else {
                     userParticipant.setConfirm(CalendarObject.NONE);
@@ -1348,19 +1350,29 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         clone.removeChangeExceptions();
         // We store the date_position in the exception field
         clone.setChangeExceptions(new java.util.Date[] { clone.getRecurrenceDatePosition() });
+        // Calculate real times !!!!
+        fillDAO(edao);
+        final RecurringResultsInterface rss = calculateRecurring(edao, 0, 0, clone.getRecurrencePosition());
+        if (rss == null) {
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create(clone.getRecurrencePosition());
+        }
+        final RecurringResultInterface rs = rss.getRecurringResult(0);
         if (!cdao.containsStartDate()  || !cdao.containsEndDate()) {
-            // Calculate real times !!!!
-            fillDAO(edao);
-            final RecurringResultsInterface rss = calculateRecurring(edao, 0, 0, clone.getRecurrencePosition());
-            if (rss == null) {
-                throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create(clone.getRecurrencePosition());
-            }
-            final RecurringResultInterface rs = rss.getRecurringResult(0);
             clone.setStartDate(new Date(rs.getStart()));
             clone.setEndDate(new Date(rs.getEnd()));
         }
 
         ensureOriginFolder(edao, clone);
+
+        // Reset Confirmation status on time change.
+        CalendarDataObject originalTimeContainer = new CalendarDataObject();
+        originalTimeContainer.setStartDate(new Date(rs.getStart()));
+        originalTimeContainer.setEndDate(new Date(rs.getEnd()));
+        if (detectTimeChange(clone, originalTimeContainer)) {
+            removeConfirmations(clone, session.getUserId());
+            updateDefaultStatus(clone, ctx, session.getUserId(), inFolder);
+        }
+
         return clone;
     }
 
@@ -1874,6 +1886,19 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                     user.setConfirm(CalendarObject.ACCEPT);
                     cdao.setUsers(check);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void removeConfirmations(CalendarDataObject cdao, int uid) {
+        if (cdao.getUsers() == null) {
+            return;
+        }
+        for (UserParticipant up : cdao.getUsers()) {
+            if (up.getIdentifier() != uid) {
+                up.removeConfirm();
+                up.removeConfirmMessage();
             }
         }
     }
@@ -2657,11 +2682,33 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         if (source.containsNote()) {
             destination.setNote(source.getNote());
         }
+//        if (source.containsParticipants()) {
+//            destination.setParticipants(source.getParticipants());
+//        }
+//        if (source.containsUserParticipants()) {
+//            destination.setUsers(source.getUsers());
+//        }
         if (source.containsParticipants()) {
-            destination.setParticipants(source.getParticipants());
+            try {
+                List<Participant> participants = new ArrayList<Participant>();
+                for (Participant participant : source.getParticipants()) {
+                    participants.add(participant.getClone());
+                }
+                destination.setParticipants(participants);
+            } catch (CloneNotSupportedException e) {
+                destination.setParticipants(source.getParticipants());
+            }
         }
         if (source.containsUserParticipants()) {
-            destination.setUsers(source.getUsers());
+            try {
+                List<UserParticipant> users = new ArrayList<UserParticipant>();
+                for (UserParticipant user : source.getUsers()) {
+                    users.add(user.getClone());
+                }
+                destination.setUsers(users);
+            } catch (CloneNotSupportedException e) {
+                destination.setUsers(source.getUsers());
+            }
         }
         if (source.containsPrivateFlag()) {
             destination.setPrivateFlag(source.getPrivateFlag());
