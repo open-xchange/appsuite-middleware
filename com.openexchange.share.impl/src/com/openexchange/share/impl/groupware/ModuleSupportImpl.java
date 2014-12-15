@@ -53,6 +53,7 @@ import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -115,6 +116,32 @@ public class ModuleSupportImpl implements ModuleSupport {
             }
         } else {
             return handlers.get(target.getModule()).loadTarget(target, session);
+        }
+    }
+
+    @Override
+    public boolean isVisible(ShareTarget target, Session session) throws OXException {
+        if (null == target) {
+            return false;
+        }
+        if (target.isFolder()) {
+            User user = requireService(UserService.class, services).getUser(session.getUserId(), session.getContextId());
+            if (null != Module.getForFolderConstant(target.getModule())) {
+                try {
+                    requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
+                    return true;
+                } catch (OXException e) {
+                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+                        return false;
+                    }
+                    throw e;
+                }
+            } else {
+                new VirtualTargetProxy(user, target.getFolder(), target.getItem(), String.valueOf(target.getMeta().get("title")));
+                return true;
+            }
+        } else {
+            return handlers.get(target.getModule()).isVisible(target, session);
         }
     }
 

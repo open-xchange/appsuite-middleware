@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -145,7 +146,7 @@ public class DefaultShareService implements ShareService {
             }
             throw e;
         }
-        if (false == guest.isGuest() || false == shareToken.equals(new ShareToken(contextID, guest))) {
+        if (false == shareToken.matches(contextID, guest)) {
             LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
@@ -156,22 +157,29 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public List<ShareInfo> getShares(Session session, String token) throws OXException {
+        /*
+         * resolve share token & get associated guest user
+         */
         ShareToken shareToken = new ShareToken(token);
-        int contextID = shareToken.getContextID();
+        int contextID = session.getContextId();
         User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
-        if (false == guest.isGuest() || false == shareToken.equals(new ShareToken(contextID, guest))) {
+        if (false == shareToken.matches(contextID, guest)) {
             LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
+        /*
+         * get shares for guest and filter results as needed
+         */
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
-
-        // TODO:
-        // theoretically, we should check the session user's permission to each target before returning them, since the shares may
-        // contain information how to access foreign share targets that were added by other users
-        // however, probably the check can be skipped safely for "anonymous" guests that were created by the session's user
-
-        return ShareTool.toShareInfos(services, session.getContextId(), shares);
+        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken);
+        if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
+            /*
+             * filter share targets not accessible for the session's user before returning results
+             */
+            shares = removeInaccessible(session, shares);
+        }
+        return ShareTool.toShareInfos(services, contextID, shares);
     }
 
     @Override
@@ -677,6 +685,7 @@ public class DefaultShareService implements ShareService {
      * Filters expired shares from the supplied list of shares and triggers their final deletion, adjusting target permissions as well as
      * cleaning up guest users as needed.
      *
+     * @param contextID The context identifier
      * @param share The shares
      * @return The filtered shares, which may be an empty list if all shares were expired
      * @throws OXException
@@ -700,6 +709,28 @@ public class DefaultShareService implements ShareService {
              */
             if (0 < affectedShares) {
                 scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(expiredShares)));
+            }
+        }
+        return shares;
+    }
+
+    /**
+     * Filters out those shares from the supplied list where the session's user has no access to the targets.
+     * cleaning up guest users as needed.
+     *
+     * @param session The session
+     * @param share The shares
+     * @return The filtered shares, which may be an empty list if all shares were expired
+     */
+    private List<Share> removeInaccessible(Session session, List<Share> shares) throws OXException {
+        if (null != shares && 0 < shares.size()) {
+            ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+            Iterator<Share> iterator = shares.iterator();
+            while (iterator.hasNext()) {
+                Share share = iterator.next();
+                if (false == moduleSupport.isVisible(share.getTarget(), session)) {
+                    iterator.remove();
+                }
             }
         }
         return shares;

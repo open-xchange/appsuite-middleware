@@ -87,4 +87,15 @@ public interface ModuleHandler {
      */
     ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException;
 
+    /**
+     * Gets a value indicating whether a share target is visible for the session's user or not, i.e. if the user has sufficient
+     * permissions to read the folder or item represented by the share target.
+     *
+     * @param target The share target to check
+     * @param session The session of the user trying to access the share target
+     * @return <code>true</code> if the share target is visible, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    boolean isVisible(ShareTarget target, Session session) throws OXException;
+
 }

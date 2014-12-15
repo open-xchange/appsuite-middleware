@@ -154,6 +154,18 @@ public class ShareToken {
             contextID ^ getContextObfuscator(baseToken), userID ^ getUserObfuscator(baseToken), baseToken);
     }
 
+    /**
+     * Gets a value indicating whether this share token is associated to the supplied guest user or not.
+     *
+     * @param contextID The context identifier of the guest user to check
+     * @param guestUser The guest user to check
+     * @return <code>true</code> if the guest user matches this token, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean matches(int contextID, User guestUser) throws OXException {
+        return equals(new ShareToken(contextID, guestUser));
+    }
+
     private static int getContextObfuscator(String baseToken) {
         return Integer.parseInt(baseToken.substring(0, 7), 16);
     }
