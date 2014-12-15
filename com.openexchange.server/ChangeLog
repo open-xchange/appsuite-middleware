@@ -1,3 +1,7 @@
+* 2014-12-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35864: Use patched logback-classic bundle and enhanced "/opt/open-xchange/etc/ox-scriptconf.sh" by "-Dlogback.threadlocal.put.duplicate=false" system property
+
 * 2014-12-15 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 35859: Fall back to virtual contact data in case no user contact data found in folder 6
