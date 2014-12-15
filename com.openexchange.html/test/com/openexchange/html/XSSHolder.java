@@ -62,7 +62,7 @@ public class XSSHolder {
 
     /**
      * Initializes a new {@link XSSHolder}.
-     * Asserts that the provided XSS attack should be completely sanitized <code>AssertExpression.NOT_CONTAINED</code>.
+     * Asserts that the provided XSS attack should be completely sanitized. <code>AssertExpression.EMPTY</code> is assumed.
      *
      * @param xssAttack - the string containing the XSS injection
      */
