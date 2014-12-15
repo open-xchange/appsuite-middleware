@@ -62,7 +62,6 @@ import com.openexchange.drive.json.action.DriveActionFactory;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.listener.BlockingListenerFactory;
-import com.openexchange.tokenlogin.TokenLoginService;
 
 /**
  * {@link DriveJsonActivator}
@@ -91,9 +90,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.drive.json\"");
         Services.set(this);
-        DriveActionFactory factory = new DriveActionFactory(context);
-        track(TokenLoginService.class, factory);
-        registerModule(factory, "drive");
+        registerModule(new DriveActionFactory(), "drive");
         getService(DriveEventService.class).registerPublisher(ListenerRegistrar.getInstance());
         track(LongPollingListenerFactory.class, new ServiceTrackerCustomizer<LongPollingListenerFactory, LongPollingListenerFactory>() {
 

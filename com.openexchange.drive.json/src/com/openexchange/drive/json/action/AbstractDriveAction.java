@@ -70,7 +70,6 @@ import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
-import com.openexchange.tokenlogin.TokenLoginService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.session.ServerSession;
@@ -88,10 +87,6 @@ public abstract class AbstractDriveAction implements AJAXActionService {
 
     protected DriveSubscriptionStore getSubscriptionStore() throws OXException {
         return Services.getService(DriveSubscriptionStore.class, true);
-    }
-
-    protected TokenLoginService getTokenLoginService() throws OXException {
-        return Services.getService(TokenLoginService.class, true);
     }
 
     protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException;
