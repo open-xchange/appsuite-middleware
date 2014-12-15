@@ -47,23 +47,34 @@
  *
  */
 
-package com.openexchange.mobilepush.events.gcm.osgi;
+package com.openexchange.mobilepush.events.apn.osgi;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mobilepush.events.MobilePushEventService;
-import com.openexchange.mobilepush.events.gcm.impl.MobilePushGCMPublisherImpl;
+import com.openexchange.mobilepush.events.apn.APNAccess;
+import com.openexchange.mobilepush.events.apn.impl.MobilePushAPNPublisherImpl;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link MobilePushEventsGCMActivator}
+ * {@link MobilePushEventsAPNActivator}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class MobilePushEventsGCMActivator extends HousekeepingActivator {
+public class MobilePushEventsAPNActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushEventsGCMActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushEventsAPNActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -76,18 +87,20 @@ public class MobilePushEventsGCMActivator extends HousekeepingActivator {
         Services.set(this);
 
         ConfigurationService configService = Services.getService(ConfigurationService.class, true);
-        if (configService.getBoolProperty("com.openxchange.mobilepush.events.gcm.enabled", false)) {
-            final String configuredKey = configService.getProperty("com.openxchange.mobilepush.events.gcm.key");
+
+        String password = configService.getProperty("com.openxchange.mobilepush.events.apn.ios.password");
+        boolean production = configService.getBoolProperty("com.openxchange.mobilepush.events.apn.ios.production", false);
+        String resourceName = configService.getProperty("com.openxchange.mobilepush.events.apn.ios.keystore");
+
+        if (configService.getBoolProperty("com.openxchange.mobilepush.events.apn.ios.enabled", false)) {
+            final String configuredKey = configService.getProperty("com.openxchange.mobilepush.events.apn.ios.keystore");
             if (false == Strings.isEmpty(configuredKey)) {
+                final APNAccess access = createAccess(resourceName, password, production);
                 /*
                  * register publisher
                  */
-                getService(MobilePushEventService.class).registerPushPublisher(new MobilePushGCMPublisherImpl());
-            } else {
-                LOG.info("Mobile push events via GCM are disabled. A GCM key is not set in the properties.");
+                getService(MobilePushEventService.class).registerPushPublisher(new MobilePushAPNPublisherImpl(access));
             }
-        } else {
-            LOG.info("Mobile push events via GCM are disabled, skipping publisher registration.");
         }
     }
 
@@ -95,6 +108,28 @@ public class MobilePushEventsGCMActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         Services.set(null);
-        super.stopBundle();
+    }
+
+    private APNAccess createAccess(String resourceName, String password, boolean production) {
+        KeyStore keyStore = null;
+        InputStream resourceStream = null;
+        try {
+            resourceStream = new FileInputStream(new File(resourceName));
+            keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(resourceStream, password.toCharArray());
+        } catch (KeyStoreException e) {
+            LOG.error("An unexpected error occured for APN push certificiate {}", resourceName, e);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("An unexpected error occured for APN push certificiate {}", resourceName, e);
+        } catch (CertificateException e) {
+            LOG.error("An unexpected error occured for APN push certificiate {}", resourceName, e);
+        } catch (FileNotFoundException e) {
+            LOG.error("Resource '" + resourceName + "' not found.", e);
+        } catch (IOException e) {
+            LOG.error("Resource '" + resourceName + "' not found.", e);
+        } finally {
+            Streams.close(resourceStream);
+        }
+        return new APNAccess(keyStore, password, production);
     }
 }

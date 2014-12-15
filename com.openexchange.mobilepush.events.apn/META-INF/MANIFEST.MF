@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-Name: Open-Xchange Mobilenotifier Event APN Bundle
+Bundle-SymbolicName: com.openexchange.mobilepush.events.apn
+Bundle-Version: 7.8.0
+Bundle-Activator: com.openexchange.mobilepush.events.apn.osgi.MobilePushEventsAPNActivator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: 
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.mobilepush,
+ com.openexchange.mobilepush.events,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ javapns,
+ javapns.communication.exceptions,
+ javapns.devices,
+ javapns.devices.exceptions,
+ javapns.json,
+ javapns.notification,
+ org.osgi.framework,
+ org.slf4j
+Bundle-ActivationPolicy: lazy
+Require-Bundle: com.openexchange.mobilepush.events.storage
