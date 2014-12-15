@@ -2326,7 +2326,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return protocol1.equalsIgnoreCase(protocol2);
     }
 
-    private void checkDuplicateTransportAccount(final MailAccountDescription mailAccount, final TIntSet excepts, final int user, final int cid, final Connection con) throws OXException {
+    private void checkDuplicateTransportAccount(final MailAccountDescription mailAccount, final TIntSet excepts, final int userId, final int contextId, final Connection con) throws OXException {
         final String server = mailAccount.getTransportServer();
         if (isEmpty(server)) {
             // No transport server specified
@@ -2343,8 +2343,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         ResultSet result = null;
         try {
             stmt = con.prepareStatement("SELECT id, url, login FROM user_transport_account WHERE cid = ? AND user = ?");
-            stmt.setLong(1, cid);
-            stmt.setLong(2, user);
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, userId);
             result = stmt.executeQuery();
             if (!result.next()) {
                 return;
@@ -2363,7 +2363,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
                     current.parseTransportServerURL(result.getString(2));
                     if (checkTransportServer(server, addr, current) && checkProtocol(mailAccount.getTransportProtocol(), current.getTransportProtocol()) && current.getTransportPort() == port && (null != login && login.equals(result.getString(3)))) {
-                        throw MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT.create(I(user), I(cid));
+                        throw MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT.create(I(userId), I(contextId));
                     }
                 }
             } while (result.next());
@@ -2374,21 +2374,19 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private boolean isMailTransportAuth(MailAccountDescription mailAccount,  int userId, int contextId, Connection con) throws OXException {
+    private boolean isMailTransportAuth(MailAccountDescription mailAccount, int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT value FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            stmt = con.prepareStatement("SELECT login FROM user_transport_account WHERE cid = ? AND user = ? AND id = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, userId);
             stmt.setInt(3, mailAccount.getId());
-            stmt.setString(4, "transport.auth");
             result = stmt.executeQuery();
             if (!result.next()) {
                 return true;
             }
-            String sTransportAuth = result.getString(1);
-            return null == sTransportAuth || TransportAuth.MAIL.getId().equals(sTransportAuth);
+            return Strings.isEmpty(result.getString(1));
         } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
