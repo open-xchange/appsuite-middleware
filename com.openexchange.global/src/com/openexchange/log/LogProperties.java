@@ -356,15 +356,17 @@ public final class LogProperties {
                 if (null == field) {
                     throw new NoSuchFieldException("InheritableThreadLocal");
                 }
+                field.setAccessible(true);
+                FIELD_CACHE.put(clazz, field);
             }
             return (InheritableThreadLocal<Map<String, String>>) field.get(mdcAdapter);
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             throw OXException.general(e.getMessage(), e);
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw OXException.general(e.getMessage(), e);
-        } catch (final NoSuchFieldException e) {
+        } catch (NoSuchFieldException e) {
             throw OXException.general(e.getMessage(), e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw OXException.general(e.getMessage(), e);
         }
     }
