@@ -140,6 +140,29 @@ public final class FileStorages {
     // -------------------------------------------------------------------------------------------------------------------------
 
     /**
+     * Gets the storage name for given context.
+     *
+     * @param contextId The context identifier
+     * @return The storage name
+     */
+    public static String getNameForContext(int contextId) {
+        return getContextAppendix(contextId);
+    }
+
+    /**
+     * Gets the storage name for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The storage name
+     */
+    public static String getNameForUser(int userId, int contextId) {
+        return getUserAppendix(userId, contextId);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
+    /**
      * Gets the fully qualifying URI for given context.
      *
      * @param contextId The context identifier
