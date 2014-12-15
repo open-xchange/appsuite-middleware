@@ -465,9 +465,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final int context_id = ctx.getId().intValue();
             try {
 
-                if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
+                Integer fsId = filestore.getId();
+                if (fsId != null && -1 != fsId.intValue()) {
                     prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ?");
-                    prep.setInt(1, filestore.getId().intValue());
+                    prep.setInt(1, fsId.intValue());
+                    prep.setInt(2, context_id);
+                    prep.setInt(3, user.getId().intValue());
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+                Integer fsOnwer = user.getFilestoreOwner();
+                if (fsOnwer != null && -1 != fsOnwer.intValue()) {
+                    prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
+                    prep.setInt(1, fsOnwer.intValue());
                     prep.setInt(2, context_id);
                     prep.setInt(3, user.getId().intValue());
                     prep.executeUpdate();

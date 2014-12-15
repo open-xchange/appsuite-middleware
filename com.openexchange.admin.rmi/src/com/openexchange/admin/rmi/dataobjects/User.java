@@ -135,6 +135,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean filestore_idset;
 
+    private Integer filestore_owner;
+
+    private boolean filestore_ownerset;
+
     private String filestore_name;
 
     private boolean filestore_nameset;
@@ -1748,6 +1752,15 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public final void setFilestoreId(final Integer filestore_id) {
         this.filestore_id = filestore_id;
         this.filestore_idset = true;
+    }
+
+    public final Integer getFilestoreOwner() {
+        return filestore_owner;
+    }
+
+    public final void setFilestoreOwner(final Integer filestore_owner) {
+        this.filestore_owner = filestore_owner;
+        this.filestore_ownerset = true;
     }
 
     /**
@@ -4227,6 +4240,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.mailenabled = null;
 
         this.filestore_id = null;
+        this.filestore_owner = null;
         this.filestore_name = null;
         this.maxQuota = null;
         this.usedQuota = null;

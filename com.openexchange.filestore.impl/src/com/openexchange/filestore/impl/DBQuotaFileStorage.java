@@ -60,6 +60,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -274,13 +275,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
-        final HashMap<String, Long> fileSizes = new HashMap<String, Long>();
-        final SortedSet<String> set = new TreeSet<String>();
-        for (final String identifier : identifiers) {
+        Map<String, Long> fileSizes = new HashMap<String, Long>();
+        SortedSet<String> set = new TreeSet<String>();
+        for (String identifier : identifiers) {
             boolean deleted;
             try {
                 // Get size before attempting delete. File is not found afterwards
-                final Long size = L(getFileSize(identifier));
+                Long size = L(getFileSize(identifier));
                 deleted = fileStorage.deleteFile(identifier);
                 fileSizes.put(identifier, size);
             } catch (final OXException e) {
@@ -294,9 +295,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
         }
         fileSizes.keySet().removeAll(set);
-        long sum = 0;
-        for (final long fileSize : fileSizes.values()) {
-            sum += fileSize;
+        long sum = 0L;
+        for (Long fileSize : fileSizes.values()) {
+            sum += fileSize.longValue();
         }
         decUsage(sum);
         return set;

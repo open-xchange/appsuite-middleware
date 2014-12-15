@@ -49,9 +49,6 @@
 
 package com.openexchange.admin.tools.filestore;
 
-import static com.openexchange.filestore.FileStorages.ensureEndingSlash;
-import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForContext;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -59,15 +56,13 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.io.FileUtils;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.admin.tools.ShellExecutor;
-import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -75,20 +70,23 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
 
 /**
- * {@link ContextFilestoreDataMover} - The implementation to move files from one storage to another for a single context.
- * <p>
- * E.g. Move a context's storage from HDD to S3.
+ * {@link User2UserFilestoreDataMover} - The implementation to move files from a userA's storage to userB's storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class ContextFilestoreDataMover extends FilestoreDataMover {
+public class User2UserFilestoreDataMover extends FilestoreDataMover {
+
+    private final User srcUser;
+    private final User dstUser;
 
     /**
-     * Initializes a new {@link ContextFilestoreDataMover}.
+     * Initializes a new {@link User2UserFilestoreDataMover}.
      */
-    protected ContextFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, Context ctx) {
+    protected User2UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User srcUser, User dstUser, Context ctx) {
         super(srcFilestore, dstFilestore, ctx);
+        this.srcUser = srcUser;
+        this.dstUser = dstUser;
     }
 
     /**
@@ -108,66 +106,47 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
      */
     @Override
     protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
-        // rsync can be used in case both file storages are disk-based storages
-        boolean useRsync = "file".equalsIgnoreCase(srcBaseUri.getScheme()) && "file".equalsIgnoreCase(dstBaseUri.getScheme());
+        try {
+            // Grab associated quota-aware file storages
+            FileStorage srcStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(srcUser.getId().intValue(), ctx.getId().intValue());
+            FileStorage dstStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(dstUser.getId().intValue(), ctx.getId().intValue());
 
-        if (useRsync) {
-            // Invoke rsync process
-            URI srcFullUri = getFullyQualifyingUriForContext(ctx.getId().intValue(), srcBaseUri);
-            File fsDirectory = new File(srcFullUri);
-            if (fsDirectory.exists()) {
-                ArrayOutput output = new ShellExecutor().executeprocargs(new String[] {
-                    "rsync", "-a", srcFullUri.toString(), ensureEndingSlash(dstBaseUri).toString() });
-                if (0 != output.exitstatus) {
-                    throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
+            // Copy each file from source to destination
+            Set<String> srcFiles = srcStorage.getFileList();
+            Map<String, String> prevFileName2newFileName = new HashMap<String, String>(srcFiles.size());
+            for (String file : srcFiles) {
+                InputStream is = srcStorage.getFile(file);
+                String newFile = dstStorage.saveNewFile(is);
+                if (null != newFile) {
+                    prevFileName2newFileName.put(file, newFile);
+                    LOGGER.info("Copied file " + file + " to " + newFile);
                 }
-                FileUtils.deleteDirectory(fsDirectory);
             }
-        } else {
-            // Not possible to use rsync; e.g. move from HDD to S3
-            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(ctx.getId().intValue(), srcBaseUri));
-            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(ctx.getId().intValue(), dstBaseUri));
 
-            try {
-                // Grab associated file storages
-                FileStorage srcStorage = FileStorages.getFileStorageService().getFileStorage(srcFullUri);
-                FileStorage dstStorage = FileStorages.getFileStorageService().getFileStorage(dstFullUri);
+            // Propagate new file locations throughout registered FilestoreLocationUpdater instances
+            propagateNewLocations(prevFileName2newFileName);
 
-                // Copy each file from source to destination
-                Set<String> srcFiles = srcStorage.getFileList();
-                Map<String, String> prevFileName2newFileName = new HashMap<String, String>(srcFiles.size());
-                for (String file : srcFiles) {
-                    InputStream is = srcStorage.getFile(file);
-                    String newFile = dstStorage.saveNewFile(is);
-                    if (null != newFile) {
-                        prevFileName2newFileName.put(file, newFile);
-                        LOGGER.info("Copied file " + file + " to " + newFile);
-                    }
-                }
-
-                // Propagate new file locations throughout registered FilestoreLocationUpdater instances
-                propagateNewLocations(prevFileName2newFileName);
-
-                srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
-            } catch (OXException e) {
-                throw new StorageException(e);
-            } catch (SQLException e) {
-                throw new StorageException(e);
-            }
+            srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+        } catch (OXException e) {
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            throw new StorageException(e);
         }
 
         // Apply changes to context & clear caches
         try {
-            ctx.setFilestoreId(dstFilestore.getId());
+            srcUser.setFilestoreId(dstFilestore.getId());
+            srcUser.setFilestore_name(FileStorages.getNameForUser(dstUser.getId().intValue(), ctx.getId().intValue()));
+            srcUser.setFilestoreOwner(dstUser.getId());
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-            oxcox.changeFilestoreDataFor(ctx);
+            oxcox.changeFilestoreDataFor(srcUser, ctx);
 
             CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
-            Cache contextCache = cacheService.getCache("Context");
-            contextCache.remove(ctx.getId());
+            Cache userCache = cacheService.getCache("User");
+            userCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), srcUser.getId().intValue()));
         } catch (OXException e) {
             throw new StorageException(e);
         }

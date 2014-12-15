@@ -50,7 +50,7 @@
 package com.openexchange.admin.tools.filestore;
 
 import static com.openexchange.filestore.FileStorages.ensureEndingSlash;
-import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForContext;
+import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForUser;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,6 +62,7 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -75,20 +76,23 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
 
 /**
- * {@link ContextFilestoreDataMover} - The implementation to move files from one storage to another for a single context.
+ * {@link UserFilestoreDataMover} - The implementation to move files from one storage to another for a single user.
  * <p>
- * E.g. Move a context's storage from HDD to S3.
+ * E.g. Move a user's storage from HDD to S3.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class ContextFilestoreDataMover extends FilestoreDataMover {
+public class UserFilestoreDataMover extends FilestoreDataMover {
+
+    private final User user;
 
     /**
-     * Initializes a new {@link ContextFilestoreDataMover}.
+     * Initializes a new {@link UserFilestoreDataMover}.
      */
-    protected ContextFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, Context ctx) {
+    protected UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
         super(srcFilestore, dstFilestore, ctx);
+        this.user = user;
     }
 
     /**
@@ -113,7 +117,7 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
 
         if (useRsync) {
             // Invoke rsync process
-            URI srcFullUri = getFullyQualifyingUriForContext(ctx.getId().intValue(), srcBaseUri);
+            URI srcFullUri = getFullyQualifyingUriForUser(user.getId().intValue(), ctx.getId().intValue(), srcBaseUri);
             File fsDirectory = new File(srcFullUri);
             if (fsDirectory.exists()) {
                 ArrayOutput output = new ShellExecutor().executeprocargs(new String[] {
@@ -125,8 +129,8 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
             }
         } else {
             // Not possible to use rsync; e.g. move from HDD to S3
-            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(ctx.getId().intValue(), srcBaseUri));
-            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(ctx.getId().intValue(), dstBaseUri));
+            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(user.getId().intValue(), ctx.getId().intValue(), srcBaseUri));
+            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(user.getId().intValue(), ctx.getId().intValue(), dstBaseUri));
 
             try {
                 // Grab associated file storages
@@ -158,16 +162,16 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
 
         // Apply changes to context & clear caches
         try {
-            ctx.setFilestoreId(dstFilestore.getId());
+            user.setFilestoreId(dstFilestore.getId());
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-            oxcox.changeFilestoreDataFor(ctx);
+            oxcox.changeFilestoreDataFor(user, ctx);
 
             CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
-            Cache contextCache = cacheService.getCache("Context");
-            contextCache.remove(ctx.getId());
+            Cache userCache = cacheService.getCache("User");
+            userCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
         } catch (OXException e) {
             throw new StorageException(e);
         }
