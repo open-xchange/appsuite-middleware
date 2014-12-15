@@ -47,139 +47,44 @@
  *
  */
 
-package com.openexchange.calendar.api.itip;
+package com.openexchange.sessiond.osgi;
 
-import java.util.Collections;
-import java.util.Set;
-import com.openexchange.session.Session;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.session.SessionSerializationInterceptor;
+import com.openexchange.sessiond.impl.SessionHandler;
 
-public class ITipSession implements Session {
+/**
+ * {@link SessionSerializationInterceptorTracker}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since 7.6.0
+ */
+public final class SessionSerializationInterceptorTracker implements ServiceTrackerCustomizer<SessionSerializationInterceptor, SessionSerializationInterceptor> {
 
-	private final int ctxId;
-	private final int userId;
+    private final BundleContext context;
 
-	public ITipSession(final int uid, final int ctxId) {
-		this.userId = uid;
-		this.ctxId = ctxId;
-	}
-
-	@Override
-    public int getContextId() {
-		return ctxId;
-	}
-
-	@Override
-    public String getLocalIp() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setLocalIp(final String ip) {
-		// Nothing to do
-
-	}
-
-	@Override
-    public String getLoginName() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public boolean containsParameter(final String name) {
-		// Nothing to do
-		return false;
-	}
-
-	@Override
-    public Object getParameter(final String name) {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getPassword() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getRandomToken() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSecret() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSessionID() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public int getUserId() {
-		return userId;
-	}
-
-	@Override
-    public String getUserlogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getLogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setParameter(final String name, final Object value) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getAuthId() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getHash() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setHash(final String hash) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getClient() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setClient(final String client) {
-		// Nothing to do
-
-	}
-
-    @Override
-    public boolean isTransient() {
-        return false;
+    public SessionSerializationInterceptorTracker(BundleContext context) {
+        super();
+        this.context = context;
     }
 
     @Override
-    public Set<String> getParameterNames() {
-        return Collections.emptySet();
+    public SessionSerializationInterceptor addingService(ServiceReference<SessionSerializationInterceptor> reference) {
+        SessionSerializationInterceptor interceptor = context.getService(reference);
+        SessionHandler.addSessionSerializationInterceptor(interceptor);
+        return interceptor;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<SessionSerializationInterceptor> reference, SessionSerializationInterceptor service) {
+        // Nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<SessionSerializationInterceptor> reference, SessionSerializationInterceptor interceptor) {
+        SessionHandler.removeSessionSerializationInterceptor(interceptor);
+        context.ungetService(reference);
     }
 }

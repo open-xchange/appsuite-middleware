@@ -74,7 +74,6 @@ public final class KerberosUtils {
     private static final int MIN_LIFETIME_SECONDS = 1 * 60;
 
     public static final String SESSION_SUBJECT = "kerberosSubject";
-
     public static final String SESSION_PRINCIPAL = "kerberosPrincipal";
 
     public static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(KerberosUtils.class);
@@ -149,6 +148,18 @@ public final class KerberosUtils {
             sb.append('\n');
         }
         LOG.info(sb.toString());
+    }
+
+    public static void disposeSubject(Subject subject) {
+        if (null != subject) {
+            for (final GSSCredential credential : subject.getPrivateCredentials(GSSCredential.class)) {
+                try {
+                    credential.dispose();
+                } catch (GSSException e) {
+                    LOG.error("", e);
+                }
+            }
+        }
     }
 
     public static Oid getKerberosName() throws GSSException {

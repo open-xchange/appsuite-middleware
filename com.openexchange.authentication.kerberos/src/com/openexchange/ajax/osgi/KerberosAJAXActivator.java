@@ -47,139 +47,55 @@
  *
  */
 
-package com.openexchange.calendar.api.itip;
+package com.openexchange.ajax.osgi;
 
-import java.util.Collections;
-import java.util.Set;
-import com.openexchange.session.Session;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_ACTION;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Stack;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.SessionServletInterceptor;
+import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.handler.KerberosTicketReload;
+import com.openexchange.ajax.session.MissingKerberosTicketInterceptor;
+import com.openexchange.kerberos.KerberosService;
+import com.openexchange.osgi.DependentServiceRegisterer;
+import com.openexchange.osgi.Tools;
+import com.openexchange.sessiond.SessiondService;
 
-public class ITipSession implements Session {
+/**
+ * Registers the Kerberos ticket reload login server action.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since 7.6.0
+ */
+public final class KerberosAJAXActivator implements BundleActivator {
 
-	private final int ctxId;
-	private final int userId;
+    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
 
-	public ITipSession(final int uid, final int ctxId) {
-		this.userId = uid;
-		this.ctxId = ctxId;
-	}
+    private ServiceRegistration<SessionServletInterceptor> registration;
 
-	@Override
-    public int getContextId() {
-		return ctxId;
-	}
-
-	@Override
-    public String getLocalIp() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setLocalIp(final String ip) {
-		// Nothing to do
-
-	}
-
-	@Override
-    public String getLoginName() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public boolean containsParameter(final String name) {
-		// Nothing to do
-		return false;
-	}
-
-	@Override
-    public Object getParameter(final String name) {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getPassword() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getRandomToken() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSecret() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSessionID() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public int getUserId() {
-		return userId;
-	}
-
-	@Override
-    public String getUserlogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getLogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setParameter(final String name, final Object value) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getAuthId() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getHash() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setHash(final String hash) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getClient() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setClient(final String client) {
-		// Nothing to do
-
-	}
-
-    @Override
-    public boolean isTransient() {
-        return false;
+    public KerberosAJAXActivator() {
+        super();
     }
 
     @Override
-    public Set<String> getParameterNames() {
-        return Collections.emptySet();
+    public void start(BundleContext context) throws Exception {
+        registration = context.registerService(SessionServletInterceptor.class, new MissingKerberosTicketInterceptor(), null);
+        Dictionary<String, String> d = new Hashtable<String, String>();
+        d.put(PARAMETER_ACTION, "ticketReload");
+        DependentServiceRegisterer<LoginRequestHandler> registerer = new DependentServiceRegisterer<LoginRequestHandler>(context, LoginRequestHandler.class, KerberosTicketReload.class, d, SessiondService.class, KerberosService.class);
+        trackers.push(new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer));
+        Tools.open(trackers);
+
+    }
+
+    @Override
+    public void stop(BundleContext context) {
+        Tools.close(trackers);
+        registration.unregister();
     }
 }

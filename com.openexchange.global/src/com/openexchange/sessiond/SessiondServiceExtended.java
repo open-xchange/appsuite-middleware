@@ -49,8 +49,6 @@
 
 package com.openexchange.sessiond;
 
-import com.openexchange.session.Session;
-
 /**
  * {@link SessiondServiceExtended} - The extended {@link SessiondService SessionD service}.
  *
@@ -73,15 +71,5 @@ public interface SessiondServiceExtended extends SessiondService {
      * @return <code>true</code> if <code>locally</code> active; otherwise <code>false</code>
      */
     boolean isActive(String sessionId);
-
-    /**
-     * Get the session object related to the given session identifier.
-     *
-     * @param sessionId The Session identifier
-     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
-     *            <code>false</code>
-     * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
-     */
-    Session getSession(String sessionId, boolean considerSessionStorage);
 
 }

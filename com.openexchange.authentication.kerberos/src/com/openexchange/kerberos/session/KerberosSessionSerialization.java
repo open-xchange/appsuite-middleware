@@ -47,139 +47,49 @@
  *
  */
 
-package com.openexchange.calendar.api.itip;
+package com.openexchange.kerberos.session;
 
-import java.util.Collections;
-import java.util.Set;
+import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
+import static com.openexchange.kerberos.KerberosUtils.SESSION_SUBJECT;
+import com.openexchange.exception.OXException;
+import com.openexchange.kerberos.ClientPrincipal;
+import com.openexchange.kerberos.KerberosService;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSerializationInterceptor;
 
-public class ITipSession implements Session {
+/**
+ * {@link KerberosSessionSerialization}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since 7.6.0
+ */
+public final class KerberosSessionSerialization implements SessionSerializationInterceptor {
 
-	private final int ctxId;
-	private final int userId;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(KerberosSessionSerialization.class);
 
-	public ITipSession(final int uid, final int ctxId) {
-		this.userId = uid;
-		this.ctxId = ctxId;
-	}
+    private final KerberosService kerberosService;
 
-	@Override
-    public int getContextId() {
-		return ctxId;
-	}
-
-	@Override
-    public String getLocalIp() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setLocalIp(final String ip) {
-		// Nothing to do
-
-	}
-
-	@Override
-    public String getLoginName() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public boolean containsParameter(final String name) {
-		// Nothing to do
-		return false;
-	}
-
-	@Override
-    public Object getParameter(final String name) {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getPassword() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getRandomToken() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSecret() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSessionID() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public int getUserId() {
-		return userId;
-	}
-
-	@Override
-    public String getUserlogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getLogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setParameter(final String name, final Object value) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getAuthId() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getHash() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setHash(final String hash) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getClient() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setClient(final String client) {
-		// Nothing to do
-
-	}
-
-    @Override
-    public boolean isTransient() {
-        return false;
+    public KerberosSessionSerialization(KerberosService kerberosService) {
+        super();
+        this.kerberosService = kerberosService;
     }
 
     @Override
-    public Set<String> getParameterNames() {
-        return Collections.emptySet();
+    public void serialize(Session session) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void deserialize(Session session) {
+        if (!"".equals(session.getPassword())) {
+            // Sessions created with a forwarded TGT from the client do not contain any password.
+            try {
+                ClientPrincipal principal = kerberosService.authenticate(session.getLogin(), session.getPassword());
+                session.setParameter(SESSION_SUBJECT, principal.getDelegateSubject());
+                session.setParameter(SESSION_PRINCIPAL, principal);
+            } catch (OXException e) {
+                LOG.error("Session migration for session created with login and password failed.", e);
+            }
+        }
     }
 }

@@ -52,6 +52,7 @@ package com.openexchange.sessiond;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
 import static com.openexchange.sessiond.SessionExceptionMessages.CONTEXT_LOCKED_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.KERBEROS_TICKET_MISSING_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_EXCEPTION_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_PER_CLIENT_EXCEPTION_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_PER_USER_EXCEPTION_MSG;
@@ -159,7 +160,11 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Can not find a session for server token %1$s and client token %2$s.
      */
-    NO_SESSION_FOR_CLIENT_TOKEN("Can not find a session for server token %1$s and client token %2$s.", NO_SESSION_FOR_TOKENS_MSG, Category.CATEGORY_USER_INPUT, 211);
+    NO_SESSION_FOR_CLIENT_TOKEN("Can not find a session for server token %1$s and client token %2$s.", NO_SESSION_FOR_TOKENS_MSG, Category.CATEGORY_USER_INPUT, 211),
+    /**
+     * Kerberos ticket is missing in session %1$s.
+     */
+    KERBEROS_TICKET_MISSING("Kerberos ticket is missing in session %1$s.", KERBEROS_TICKET_MISSING_MSG, Category.CATEGORY_TRY_AGAIN, 212);
 
     private static final String PREFIX = "SES";
 

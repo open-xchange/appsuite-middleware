@@ -153,6 +153,9 @@ public abstract class SessionServlet extends AJAXServlet {
                     sessionId = session.getSessionID();
                     threadCounter.increment(sessionId);
                 }
+                for (SessionServletInterceptor interceptor : SessionServletInterceptorRegistry.getInstance().getInterceptors()) {
+                    interceptor.intercept(session);
+                }
             }
             super.service(req, resp);
         } catch (final RateLimitedException e) {

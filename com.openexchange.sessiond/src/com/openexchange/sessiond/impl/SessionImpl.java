@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -147,6 +148,9 @@ public final class SessionImpl implements PutIfAbsent {
         this.client = s.getClient();
         this.tranzient = false;
         parameters = new ConcurrentHashMap<String, Object>();
+        for (String name : s.getParameterNames()) {
+            parameters.put(name, s.getParameter(name));
+        }
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
         final Object altId = s.getParameter(PARAM_ALTERNATIVE_ID);
@@ -557,4 +561,8 @@ public final class SessionImpl implements PutIfAbsent {
         return builder.toString();
     }
 
+    @Override
+    public Set<String> getParameterNames() {
+        return parameters.keySet();
+    }
 }

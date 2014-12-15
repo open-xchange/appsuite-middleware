@@ -59,6 +59,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,9 +78,11 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
+import com.openexchange.sessiond.SessionModifyCallback;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -138,6 +141,8 @@ public final class SessionHandler {
     private static volatile ScheduledTimerTask shortSessionContainerRotator;
 
     private static volatile ScheduledTimerTask longSessionContainerRotator;
+
+    private static List<SessionSerializationInterceptor> interceptors = Collections.synchronizedList(new LinkedList<SessionSerializationInterceptor>());
 
     /**
      * Initializes a new {@link SessionHandler session handler}
@@ -422,10 +427,11 @@ public final class SessionHandler {
      * @param clientHost The client host name or IP address
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
+     * @param callback after creating the session, this callback will be called when not <code>null</code> for extending the session.
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final String clientToken, final boolean tranzient) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final String clientToken, final boolean tranzient, SessionModifyCallback callback) throws OXException {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -438,6 +444,9 @@ public final class SessionHandler {
         final SessionImpl session = new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
             loginName, Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash,
             client, tranzient);
+        if (null != callback) {
+            callback.modify(session);
+        }
         // Add session
         final SessionImpl addedSession;
         if (null == clientToken) {
@@ -446,6 +455,9 @@ public final class SessionHandler {
             if (useSessionStorage(session)) {
                 final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
+                    for (SessionSerializationInterceptor interceptor : interceptors) {
+                        interceptor.serialize(addedSession);
+                    }
                     if (asyncPutToSessionStorage) {
                         // Enforced asynchronous put
                         storeSessionAsync(addedSession, sessionStorageService, false);
@@ -969,7 +981,7 @@ public final class SessionHandler {
      * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise <code>false</code>
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
-    protected static SessionControl getSession(final String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
+    static SessionControl getSession(final String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
         LOG.debug("getSession <{}>", sessionId);
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
@@ -983,7 +995,14 @@ public final class SessionHandler {
                 try {
                     final Session storedSession = getSessionFrom(sessionId, storageService);
                     if (null != storedSession) {
-                        final SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
+                        SessionImpl localCopy = new SessionImpl(storedSession);
+                        final SessionControl sc = sessionData.addSession(localCopy, noLimit, true);
+                        if (localCopy == sc.getSession()) {
+                            // we restored the session first
+                            for (SessionSerializationInterceptor interceptor : interceptors) {
+                                interceptor.deserialize(localCopy);
+                            }
+                        }
                         final SessionControl retval = null == sc ? sessionToSessionControl(storedSession) : sc;
                         if (null != retval) {
                             // Post event for restored session
@@ -1447,6 +1466,14 @@ public final class SessionHandler {
         if (null != sessionData) {
             sessionData.removeTimerService();
         }
+    }
+
+    public static void addSessionSerializationInterceptor(SessionSerializationInterceptor interceptor) {
+        interceptors.add(interceptor);
+    }
+
+    public static void removeSessionSerializationInterceptor(SessionSerializationInterceptor interceptor) {
+        interceptors.remove(interceptor);
     }
 
     private static SessionControl sessionToSessionControl(final Session session) {

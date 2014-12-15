@@ -97,7 +97,8 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getHash(),
             param.getClient(),
             param.getClientToken(),
-            param.isTransient());
+            param.isTransient(),
+            param.getCallback());
     }
 
     @Override
@@ -156,23 +157,10 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public SessionImpl getSession(final String sessionId) {
-        return getSession(sessionId, true);
-    }
-
-    @Override
-    public SessionImpl getSession(final String sessionId, final boolean considerSessionStorage) {
         if (null == sessionId) {
             return null;
         }
-        SessionControl sessionControl = SessionHandler.getSession(sessionId, considerSessionStorage);
-        /*-
-         *
-        if (!considerSessionStorage && null == sessionControl) {
-            // No local session found. Maybe available in session storage...
-            sessionControl = SessionHandler.getSession(sessionId, false, true);
-        }
-         *
-         */
+        SessionControl sessionControl = SessionHandler.getSession(sessionId, true);
         if (null == sessionControl) {
             if ("unset".equalsIgnoreCase(sessionId)) {
                 LOG.debug("Session not found. ID: {}", sessionId);

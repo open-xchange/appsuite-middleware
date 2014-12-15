@@ -62,10 +62,10 @@ public interface ClientPrincipal {
 
     Subject getDelegateSubject();
 
+    Subject getClientSubject();
+
     byte[] getResponseTicket();
 
     byte[] getClientTicket();
-
-    void dispose();
 
 }

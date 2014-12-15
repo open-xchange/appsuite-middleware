@@ -55,7 +55,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.kerberos.KerberosService;
+import com.openexchange.kerberos.session.KerberosSessionSerialization;
+import com.openexchange.osgi.DependentServiceRegisterer;
 import com.openexchange.osgi.Tools;
+import com.openexchange.session.SessionSerializationInterceptor;
 
 /**
  * Registers the service tracker that waits for the {@link ConfigrationService} and then registers the {@link KerberosService}.
@@ -69,6 +72,8 @@ public class KDCActivator implements BundleActivator {
     @Override
     public void start(BundleContext context) {
         trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class.getName(), new KerberosServiceRegisterer(context)));
+        DependentServiceRegisterer<SessionSerializationInterceptor> registerer = new DependentServiceRegisterer<SessionSerializationInterceptor>(context, SessionSerializationInterceptor.class, KerberosSessionSerialization.class, null, KerberosService.class);
+        trackers.push(new ServiceTracker<Object, Object>(context, KerberosService.class.getName(), registerer));
         Tools.open(trackers);
     }
 

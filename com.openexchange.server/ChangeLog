@@ -20,6 +20,11 @@
  - Fix for bug 34465: Check for a POP3 account by mail account data fetched from storage. Do no longer rely on valid data sent by client
  - Fix for bug 35261: Enum for client parameters passed to IMAp store
 
+* 2014-10-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34517: Create a new TGT for sessions created with login and password. Request a new forwarded TGT from the client for
+   sessions created with a forwarded TGT.
+
 * 2014-10-23 - marcus.klein@open-xchange.com
 
  - Fix for bug 35129: Do not throw any misleading log messages if client comes to HTTP auth URL without Authorization header.
