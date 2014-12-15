@@ -145,7 +145,7 @@ public class DefaultShareService implements ShareService {
             }
             throw e;
         }
-        if (false == guest.isGuest() || false == shareToken.equals(new ShareToken(contextID, guest))) {
+        if (shareToken.matches(contextID, guest)) {
             LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
@@ -157,9 +157,9 @@ public class DefaultShareService implements ShareService {
     @Override
     public List<ShareInfo> getShares(Session session, String token) throws OXException {
         ShareToken shareToken = new ShareToken(token);
-        int contextID = shareToken.getContextID();
+        int contextID = session.getContextId();
         User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
-        if (false == guest.isGuest() || false == shareToken.equals(new ShareToken(contextID, guest))) {
+        if (false == shareToken.matches(contextID, guest)) {
             LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
@@ -171,7 +171,7 @@ public class DefaultShareService implements ShareService {
         // contain information how to access foreign share targets that were added by other users
         // however, probably the check can be skipped safely for "anonymous" guests that were created by the session's user
 
-        return ShareTool.toShareInfos(services, session.getContextId(), shares);
+        return ShareTool.toShareInfos(services, contextID, shares);
     }
 
     @Override
