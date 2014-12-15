@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,59 @@
  *
  */
 
-package com.openexchange.mobilepush.watchdog.impl;
+package com.openexchange.mobilepush.events.apn.osgi;
+
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link WatchdogStatusTask}
+ * {@link SubscribeServiceLookup}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class WatchdogStatusTask implements Runnable {
+public final class Services {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WatchdogStatusTask.class);
+    /**
+     * Initializes a new {@link SubscribeServiceLookup}.
+     */
+    private Services() {
+        super();
+    }
 
-    @Override
-    public void run() {
-        try {
-            Watchdog.sessionLookup();
-        } catch(Exception e) {
-            LOG.error("", e);
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
+    }
+
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
         }
-    } 
+        return service;
+    }
+
 }
