@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.Set;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -158,6 +159,15 @@ public final class SessionImpl implements PutIfAbsent {
             parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
         } else {
             parameters.put(PARAM_ALTERNATIVE_ID, altId);
+        }
+        List<String> remoteParameterNames = SessionHandler.getRemoteParameterNames();
+        if (null != remoteParameterNames) {
+            for (String parameterName : remoteParameterNames) {
+                Object value = s.getParameter(parameterName);
+                if (null != value) {
+                    parameters.put(parameterName, value);
+                }
+            }
         }
     }
 
