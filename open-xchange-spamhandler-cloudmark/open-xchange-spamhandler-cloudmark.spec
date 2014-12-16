@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define        ox_release 33
+%define        ox_release 35
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -62,6 +62,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Tue Dec 16 2014 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2014-12-10
 * Mon Dec 08 2014 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2014-12-10
 * Thu Dec 04 2014 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
