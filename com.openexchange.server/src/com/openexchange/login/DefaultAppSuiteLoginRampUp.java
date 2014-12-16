@@ -61,7 +61,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.login.LoginRampUpService;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
@@ -69,9 +68,9 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DefaultAppSuiteLoginRampUp}
+ * {@link DefaultAppSuiteLoginRampUp} - The default ramp-up implementation.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
