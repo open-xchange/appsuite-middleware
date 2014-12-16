@@ -54,13 +54,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.requestwatcher.osgi.Services;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
+import com.openexchange.http.requestwatcher.osgi.services.RequestTrace;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.sessiond.SessiondService;
@@ -72,6 +71,7 @@ import com.openexchange.timer.TimerService;
  * {@link RequestWatcherServiceImpl}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RequestWatcherServiceImpl implements RequestWatcherService {
 
@@ -90,131 +90,23 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     private volatile ScheduledTimerTask requestWatcherTask;
 
     /**
-     * Initializes a new {@link RequestWatcherServiceImpl}.
+     * Initializes a new {@link RequestWatcherServiceImpl}
+     *
+     * @param configService The configuration service used for initialization
+     * @param timerService The timer service used for initialization
      */
-    public RequestWatcherServiceImpl() {
+    public RequestWatcherServiceImpl(ConfigurationService configService, TimerService timerService) {
         super();
         requestRegistry = new ConcurrentSkipListSet<RequestRegistryEntry>();
         // Get Configuration
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
         boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.requestwatcher.isEnabled", true);
         int watcherFrequency = configService.getIntProperty("com.openexchange.requestwatcher.frequency", 30000);
-        final int requestMaxAge = configService.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
+        int requestMaxAge = configService.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
         if (isWatcherEnabled) {
             // Create ScheduledTimerTask to watch requests
-            final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry = this.requestRegistry;
-            final String lineSeparator = System.getProperty("line.separator");
-            ScheduledTimerTask requestWatcherTask = Services.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
-
-                /** The property name for session identifier */
-                final String propSessionId = LogProperties.Name.SESSION_SESSION_ID.getName();
-
-                /*
-                 * Start at the end of the navigable Set to get the oldest request first. Then proceed to the younger requests. Stop
-                 * processing at the first still valid request.
-                 */
-                @Override
-                public void run() {
-                    try {
-                        boolean debugEnabled = LOG.isDebugEnabled();
-                        Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
-                        StringBuilder sb = new StringBuilder(256);
-                        boolean stillOldRequestsLeft = true;
-                        while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
-                            if (debugEnabled) {
-                                sb.setLength(0);
-                                for (RequestRegistryEntry entry : requestRegistry) {
-                                    sb.append(lineSeparator).append("RegisteredThreads:").append(lineSeparator).append("    age: ").append(entry.getAge()).append(" ms").append(
-                                        ", thread: ").append(entry.getThreadInfo());
-                                }
-                                final String entries = sb.toString();
-                                if (!entries.isEmpty()) {
-                                    LOG.debug(sb.toString());
-                                }
-                            }
-                            RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
-                            if (requestRegistryEntry.getAge() > requestMaxAge) {
-                                sb.setLength(0);
-                                logRequestRegistryEntry(requestRegistryEntry, sb);
-                                // Don't remove
-                                // requestRegistry.remove(requestRegistryEntry);
-                            } else {
-                                stillOldRequestsLeft = false;
-                            }
-                        }
-                    } catch (Exception e) {
-                        LOG.error("Request watcher run failed", e);
-                    }
-                }
-
-                private void logRequestRegistryEntry(RequestRegistryEntry entry, StringBuilder logBuilder) {
-                    Throwable trace = new FastThrowable();
-                    {
-                        StackTraceElement[] stackTrace = entry.getStackTrace();
-                        if (dontLog(stackTrace)) {
-                            return;
-                        }
-                        trace.setStackTrace(stackTrace);
-                    }
-                    logBuilder.append("Request").append(lineSeparator);
-
-                    // Append log properties from the ThreadLocal to logBuilder
-                    if (false == appendLogProperties(entry, logBuilder)) {
-                        // Turns out to be an invalid registry entry
-                        return;
-                    }
-
-                    LOG.info(logBuilder.append("with age: ").append(entry.getAge()).append("ms exceeds max. age of: ").append(requestMaxAge).append("ms.").toString(), trace);
-                }
-
-                private boolean appendLogProperties(RequestRegistryEntry entry, StringBuilder logBuilder) {
-                    Map<String, String> propertyMap = entry.getPropertyMap();
-                    if (null != propertyMap) {
-                        // Sort the properties for readability
-                        Map<String, String> sorted = new TreeMap<String, String>();
-                        for (Entry<String, String> propertyEntry : propertyMap.entrySet()) {
-                            String propertyName = propertyEntry.getKey();
-                            String value = propertyEntry.getValue();
-                            if (null != value) {
-                                if (propSessionId.equals(propertyName) && !isValidSession(value)) {
-                                    // Non-existent or elapsed session
-                                    entry.getThread().interrupt();
-                                    requestRegistry.remove(entry);
-                                    return false;
-                                }
-                                sorted.put(propertyName, value);
-                            }
-                        }
-                        logBuilder.append("with properties:").append(lineSeparator);
-                        // And add them to the logBuilder
-                        for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
-                            logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(lineSeparator);
-                        }
-                    }
-                    return true;
-                }
-
-                private boolean isValidSession(String sessionId) {
-                    final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-                    return sessiondService instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiondService).isActive(sessionId) : true;
-                }
-
-                private boolean dontLog(StackTraceElement[] stackTrace) {
-                    for (StackTraceElement ste : stackTrace) {
-                        String className = ste.getClassName();
-                        if (null != className) {
-                            if (className.startsWith("org.apache.commons.fileupload.MultipartStream$ItemInputStream")) {
-                                // A long-running file upload. Ignore
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                }
-            },
-                1000,
-                watcherFrequency,
-                TimeUnit.MILLISECONDS);
+            ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry = this.requestRegistry;
+            Watcher task = new Watcher(requestRegistry, requestMaxAge);
+            ScheduledTimerTask requestWatcherTask = timerService.scheduleAtFixedRate(task, requestMaxAge, watcherFrequency);
             this.requestWatcherTask = requestWatcherTask;
         }
     }
@@ -235,22 +127,174 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     public boolean stopWatching() {
         ScheduledTimerTask requestWatcherTask = this.requestWatcherTask;
         if (null != requestWatcherTask) {
-            return requestWatcherTask.cancel();
+            boolean canceled = requestWatcherTask.cancel();
+            this.requestWatcherTask = null;
+            return canceled;
         }
         return true;
     }
 
-    // ----------------------------------------------------------------------------- //
+    // ----------------------------------------------------------------------------------------------------------------------- //
 
-    static final class FastThrowable extends Throwable {
+    private final static class Watcher implements Runnable {
 
-        FastThrowable() {
-            super("tracked request");
+        private final String lineSeparator;
+        private final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry;
+        private final int requestMaxAge;
+        private final String propSessionId = LogProperties.Name.SESSION_SESSION_ID.getName();
+
+        /**
+         * Initializes a new {@link RunnableImplementation}.
+         */
+        Watcher(ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry, int requestMaxAge) {
+            super();
+            this.lineSeparator = System.getProperty("line.separator");
+            this.requestRegistry = requestRegistry;
+            this.requestMaxAge = requestMaxAge;
         }
 
+        /**
+         * Start at the end of the navigable Set to get the oldest request first. Then proceed to the younger requests. Stop
+         * processing at the first yet valid request.
+         */
         @Override
-        public synchronized Throwable fillInStackTrace() {
-            return this;
+        public void run() {
+            try {
+                boolean debugEnabled = LOG.isDebugEnabled();
+                Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
+                StringBuilder sb = new StringBuilder(256);
+                boolean stillOldRequestsLeft = true;
+                while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
+                    // Debug logging
+                    if (debugEnabled) {
+                        sb.setLength(0);
+                        for (RequestRegistryEntry entry : requestRegistry) {
+                            sb.append(lineSeparator).append("RegisteredThreads:").append(lineSeparator).append("    age: ").append(entry.getAge()).append(" ms").append(
+                                ", thread: ").append(entry.getThreadInfo());
+                        }
+                        final String entries = sb.toString();
+                        if (!entries.isEmpty()) {
+                            LOG.debug(sb.toString());
+                        }
+                    }
+
+                    // Check entry's age
+                    RequestRegistryEntry entry = descendingEntryIterator.next();
+                    if (entry.getAge() > requestMaxAge) {
+                        sb.setLength(0);
+                        boolean interrupted = handleEntry(entry, sb);
+                        if (interrupted) {
+                            requestRegistry.remove(entry);
+                        }
+                    } else {
+                        stillOldRequestsLeft = false;
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Request watcher run failed", e);
+            }
+        }
+
+        private boolean handleEntry(RequestRegistryEntry entry, StringBuilder logBuilder) {
+            // Get trace for associated thread's trace
+            Throwable trace = new RequestTrace();
+            boolean interrupt;
+            {
+                StackTraceElement[] stackTrace = entry.getStackTrace();
+                interrupt = interrupt(stackTrace, entry);
+                if (dontLog(stackTrace)) {
+                    if (interrupt) {
+                        entry.getThread().interrupt();
+                        return true;
+                    }
+                    return false;
+                }
+                trace.setStackTrace(stackTrace);
+            }
+            logBuilder.append("Request with age ").append(entry.getAge()).append("ms exceeds max. age of ").append(requestMaxAge).append("ms.");
+
+            // Append log properties from the ThreadLocal to logBuilder
+            if (false == appendLogProperties(entry, logBuilder)) {
+                // Turns out to be an invalid registry entry -- already interrupted at this point
+                return true;
+            }
+
+            // Check if request's thread is supposed to be interrupted
+            if (interrupt) {
+                logBuilder.append(lineSeparator).append("Associated thread will be interrupted!");
+                LOG.info(logBuilder.toString(), trace);
+                entry.getThread().interrupt();
+                return true;
+            }
+
+            // Non-interrupted entry
+            LOG.info(logBuilder.toString(), trace);
+            return false;
+        }
+
+        private boolean interrupt(StackTraceElement[] trace, RequestRegistryEntry entry) {
+            StackTraceElement traceElement = trace[0];
+
+            // Kept in socket read and exceeded doubled max. request age
+            if (traceElement.isNativeMethod() && "socketRead0".equals(traceElement.getMethodName()) && entry.getAge() > (requestMaxAge << 1)) {
+                return true;
+            }
+
+            // TODO: More interruptible traces?
+            return false;
+        }
+
+        private boolean appendLogProperties(RequestRegistryEntry entry, StringBuilder logBuilder) {
+            Map<String, String> propertyMap = entry.getPropertyMap();
+            if (null != propertyMap) {
+                // Sort the properties for readability
+                Map<String, String> sorted = new TreeMap<String, String>();
+                for (Entry<String, String> propertyEntry : propertyMap.entrySet()) {
+                    String propertyName = propertyEntry.getKey();
+                    String value = propertyEntry.getValue();
+                    if (null != value) {
+                        if (propSessionId.equals(propertyName) && !isValidSession(value)) {
+                            // Non-existent or elapsed session
+                            entry.getThread().interrupt();
+                            requestRegistry.remove(entry);
+                            return false;
+                        }
+                        sorted.put(propertyName, value);
+                    }
+                }
+                logBuilder.append("Request's properties:").append(lineSeparator);
+
+                // And add them to the logBuilder
+                Iterator<Entry<String, String>> it = sorted.entrySet().iterator();
+                if (it.hasNext()) {
+                    String prefix = "  ";
+                    Map.Entry<String, String> propertyEntry = it.next();
+                    logBuilder.append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                    while (it.hasNext()) {
+                        propertyEntry = it.next();
+                        logBuilder.append(lineSeparator).append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                    }
+                }
+            }
+            return true;
+        }
+
+        private boolean isValidSession(String sessionId) {
+            SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+            return sessiondService instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiondService).isActive(sessionId) : true;
+        }
+
+        private boolean dontLog(StackTraceElement[] trace) {
+            for (StackTraceElement ste : trace) {
+                String className = ste.getClassName();
+                if (null != className) {
+                    if (className.startsWith("org.apache.commons.fileupload.MultipartStream$ItemInputStream")) {
+                        // A long-running file upload. Ignore
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 
