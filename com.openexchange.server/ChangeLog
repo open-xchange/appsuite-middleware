@@ -1,3 +1,7 @@
+* 2014-12-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35866: Allow deep-parsing of nested messages only on first level + improved handing with binary content
+
 * 2015-06-02 - martin.herfurth@open-xchange.com
 
  - Fix for bug 38571: Added debug logging to track down unwanted notification mails.
@@ -128,7 +132,7 @@
 * 2014-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 35889: Consider parent folder identifier when retrieving a file for publication
- 
+
 * 2014-12-15 - martin.herfurth@open-xchange.com
 
  - Fix for bug 35610: Reset confirmation status on exception creation.

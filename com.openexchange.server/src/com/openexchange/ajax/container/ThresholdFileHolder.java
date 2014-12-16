@@ -58,6 +58,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import javax.mail.internet.SharedInputStream;
+import javax.mail.util.SharedByteArrayInputStream;
+import javax.mail.util.SharedFileInputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
@@ -489,20 +492,41 @@ public final class ThresholdFileHolder implements IFileHolder {
         if (count <= 0) {
             return Streams.EMPTY_INPUT_STREAM;
         }
-        final ByteArrayOutputStream buf = this.buf;
+        ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
             return Streams.asInputStream(buf);
         }
-        final File tempFile = this.tempFile;
+        File tempFile = this.tempFile;
         if (null == tempFile) {
-            final IOException e = new IOException("Already closed.");
+            IOException e = new IOException("Already closed.");
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
         try {
             return new FileInputStream(tempFile);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets this instance's content as a {@link SharedInputStream} appropriate to create MIME resources from it
+     *
+     * @return The shared input stream
+     * @throws IOException If an I/O error occurs
+     */
+    public SharedInputStream getSharedStream() throws IOException {
+        if (count <= 0) {
+            return new SharedByteArrayInputStream(new byte[0]);
+        }
+        ByteArrayOutputStream buf = this.buf;
+        if (null != buf) {
+            return new SharedByteArrayInputStream(buf.toByteArray());
+        }
+        File tempFile = this.tempFile;
+        if (null == tempFile) {
+            throw new IOException("Already closed.");
+        }
+        return new SharedFileInputStream(tempFile);
     }
 
     @Override
