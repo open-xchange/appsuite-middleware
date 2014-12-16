@@ -47,23 +47,29 @@
  *
  */
 
-package com.openexchange.mobilepush.watchdog.impl;
+package com.openexchange.http.requestwatcher.osgi.services;
 
 /**
- * {@link WatchdogStatusTask}
+ * {@link RequestTrace} - A fast {@link Throwable} implementation representing a tracked request's trace.
+ * <p>
+ * The {@link #fillInStackTrace()} simply returns the instance itself.
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class WatchdogStatusTask implements Runnable {
+public final class RequestTrace extends Throwable {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WatchdogStatusTask.class);
+    private static final long serialVersionUID = -3023507467815652875L;
+
+    /**
+     * Initializes a new {@link RequestTrace}.
+     */
+    public RequestTrace() {
+        super("tracked request");
+    }
 
     @Override
-    public void run() {
-        try {
-            Watchdog.sessionLookup();
-        } catch(Exception e) {
-            LOG.error("", e);
-        }
-    } 
+    public synchronized Throwable fillInStackTrace() {
+        return this;
+    }
+
 }

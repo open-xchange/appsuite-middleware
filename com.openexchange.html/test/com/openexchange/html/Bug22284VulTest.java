@@ -94,9 +94,9 @@ public class Bug22284VulTest {
             "p{margin-top:0pt;margin-bottom:0pt;}</STYLE><STYLE " +
             "id=\"styletagtwoforeditor\" type=\"text/css\">table { font-size: 12pt } " +
             "table p, li p { margin : 0px; }</STYLE></HEAD><BODY><P><IMG  " +
-            "align=\"bottom\" alt=\"onerror=\\`\\`alert(1)\"  " +
+            "align=\"bottom\" alt=\"onerror=``alert(1)\"  " +
             "src=\"http://localhost\"></P></BODY></HTML>";
 
-        // AssertionHelper.assertSanitizedEmpty(service, content);
+         AssertionHelper.assertSanitizedEmpty(service, content);
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,59 @@
  *
  */
 
-package com.openexchange.http.requestwatcher.osgi;
+package com.openexchange.mobilepush.events.apn.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link SubscribeServiceLookup}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class Services {
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link SubscribeServiceLookup}.
      */
     private Services() {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
     /**
-     * Sets the service lookup.
+     * Gets the service look-up
      *
-     * @param serviceLookup The service lookup or <code>null</code>
+     * @return The service look-up or <code>null</code>
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
     /**
-     * Gets the service lookup.
+     * Sets the service look-up
      *
-     * @return The service lookup or <code>null</code>
+     * @param serviceLookup The service look-up or <code>null</code>
      */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.http.requestwatcher\" not started?");
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
         }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+        return service;
     }
 
 }
