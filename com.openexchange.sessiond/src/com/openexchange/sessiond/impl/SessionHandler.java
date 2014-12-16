@@ -81,6 +81,7 @@ import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
@@ -176,6 +177,28 @@ public final class SessionHandler {
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Gets the session obfuscator that performs the conversion into/from a stored session
+     *
+     * @return The session obfuscator instance
+     */
+    public static Obfuscator getObfuscator() {
+        return obfuscator;
+    }
+
+    /**
+     * Gets the names of such parameters that are supposed to be taken over from session to stored session representation.
+     *
+     * @return The parameter names
+     */
+    public static List<String> getRemoteParameterNames() {
+        SessiondConfigInterface conf = config;
+        return null == conf ? Collections.<String> emptyList() : conf.getRemoteParameterNames();
+    }
+
+    /**
+>>>>>>> 41cf89f... Fix for bug 35426: Let session obfuscator properly maintain such parameters that are supposed to be taken over from session to stored session representation
      * Removes all sessions associated with given user in specified context
      *
      * @param userId The user ID
@@ -330,7 +353,23 @@ public final class SessionHandler {
 
                         @Override
                         public Session[] call() throws Exception {
-                            return storageService.getUserSessions(userId, contextId);
+                            Session[] userSessions = storageService.getUserSessions(userId, contextId);
+                            if (null == userSessions) {
+                                return new Session[0];
+                            }
+
+                            int length = userSessions.length;
+                            if (length == 0) {
+                                return userSessions;
+                            }
+
+                            // Unwrap
+                            Session[] retval = new Session[length];
+                            List<String> remoteParameterNames = getRemoteParameterNames();
+                            for (int i = length; i-- > 0;) {
+                                retval[i] = obfuscator.unwrap(userSessions[i], remoteParameterNames);
+                            }
+                            return retval;
                         }
                     };
                     final Session[] sessions = getFrom(c, new Session[0]);
@@ -373,9 +412,9 @@ public final class SessionHandler {
                             return storageService.getAnyActiveSessionForUser(userId, contextId);
                         }
                     };
-                    final Session storedSession = obfuscator.unwrap(getFrom(c, null));
-                    if (null != storedSession) {
-                        retval = sessionToSessionControl(storedSession);
+                    SessionImpl unwrappedSession = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
+                    if (null != unwrappedSession) {
+                        retval = new SessionControl(unwrappedSession);
                     }
                 } catch (final RuntimeException e) {
                     LOG.error("", e);
@@ -400,7 +439,7 @@ public final class SessionHandler {
 
                         @Override
                         public Session call() throws Exception {
-                            return obfuscator.unwrap(storageService.findFirstSessionForUser(userId, contextId));
+                            return obfuscator.unwrap(storageService.findFirstSessionForUser(userId, contextId), getRemoteParameterNames());
                         }
                     };
                     retval = getFrom(c, null);
@@ -425,46 +464,92 @@ public final class SessionHandler {
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final String clientToken, final boolean tranzient) throws OXException {
-        final SessionData sessionData = sessionDataRef.get();
+    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient) throws OXException {
+        SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
         }
+
+        // Various checks
         checkMaxSessPerUser(userId, contextId, false);
         checkMaxSessPerClient(client, userId, contextId, false);
         checkAuthId(login, authId);
-        final SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
-        final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
-        final SessionImpl session = new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
-            loginName, Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash,
-            client, tranzient);
-        // Add session
-        final SessionImpl addedSession;
+
+        // Create new session instance
+        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient);
+
+        // Either add session or yield short-time token for it
+        SessionImpl addedSession;
         if (null == clientToken) {
-            addedSession = sessionData.addSession(session, noLimit).getSession();
-            // store session if not marked as transient
-            if (useSessionStorage(session)) {
-                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-                if (sessionStorageService != null) {
-                    if (asyncPutToSessionStorage) {
-                        // Enforced asynchronous put
-                        storeSessionAsync(addedSession, sessionStorageService, false);
-                    } else {
-                        storeSessionSync(addedSession, sessionStorageService, false);
-                    }
-                }
-            }
+            addedSession = sessionData.addSession(newSession, noLimit).getSession();
+
+            // Store session if not marked as transient and associated client is applicable
+            putIntoSessionStorage(addedSession);
+
             // Post event for created session
             postSessionCreation(addedSession);
         } else {
-            final String serverToken = sessionIdGenerator.createRandomId();
+            String serverToken = sessionIdGenerator.createRandomId();
             // TODO change return type and return an interface that allows to dynamically add additional return values.
-            session.setParameter("serverToken", serverToken);
-            final TokenSessionControl control = TokenSessionContainer.getInstance().addSession(session, clientToken, serverToken);
-            addedSession = control.getSession();
+            newSession.setParameter("serverToken", serverToken);
+            TokenSessionContainer.getInstance().addSession(newSession, clientToken, serverToken);
+            addedSession = newSession;
         }
-        // Return session ID
+
+        // Return added  session
         return addedSession;
+    }
+
+    /**
+     * Creates a new instance of {@code SessionImpl} from specified arguments
+     *
+     * @param userId The user identifier
+     * @param loginName The login name
+     * @param password The password
+     * @param contextId The context identifier
+     * @param clientHost The client host name or IP address
+     * @param login The login; e.g. <code>"someone@invalid.com"</code>
+     * @param authId The authentication identifier
+     * @param hash The hash string
+     * @param client The client identifier
+     * @param tranzient Whether the session is meant to be transient/volatile; typically the session gets dropped soon
+     * @return The newly created {@code SessionImpl} instance
+     * @throws OXException If create attempt fails
+     */
+    public static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
+        // Generate identifier, secret, and random
+        SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
+        String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
+        String secret = sessionIdGenerator.createSecretId(loginName, Long.toString(System.currentTimeMillis()));
+        String randomToken = sessionIdGenerator.createRandomId();
+
+        // Create the instance
+        SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient);
+
+        // Return...
+        return newSession;
+    }
+
+    /**
+     * Puts the given session into session storage if possible
+     *
+     * @param session The session
+     * @return <code>true</code> if put into session storage; otherwise <code>false</code>
+     */
+    public static boolean putIntoSessionStorage(SessionImpl session) {
+        if (useSessionStorage(session)) {
+            SessionStorageService sessionStorageService = SessiondServiceRegistry.getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                if (asyncPutToSessionStorage) {
+                    // Enforced asynchronous put
+                    storeSessionAsync(session, sessionStorageService, false);
+                } else {
+                    storeSessionSync(session, sessionStorageService, false);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -693,7 +778,7 @@ public final class SessionHandler {
 
                 @Override
                 public Void call() throws Exception {
-                    Session wrappedSession = obfuscator.wrap(currentSession);
+                    Session wrappedSession = obfuscator.wrap(currentSession, getRemoteParameterNames());
                     sessionStorage.changePassword(sessionid, wrappedSession.getPassword());
                     return null;
                 }
@@ -895,9 +980,9 @@ public final class SessionHandler {
                             return storageService.getSessionByRandomToken(randomToken, newIP);
                         }
                     };
-                    final Session s = obfuscator.unwrap(getFrom(c, null));
-                    if (null != s) {
-                        return s;
+                    Session unwrappedSession = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
+                    if (null != unwrappedSession) {
+                        return unwrappedSession;
                     }
                 } catch (final RuntimeException e) {
                     LOG.error("", e);
@@ -981,14 +1066,14 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Session storedSession = getSessionFrom(sessionId, storageService);
-                    if (null != storedSession) {
-                        final SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
-                        final SessionControl retval = null == sc ? sessionToSessionControl(storedSession) : sc;
-                        if (null != retval) {
-                            // Post event for restored session
-                            postSessionRestauration(retval.getSession());
-                        }
+                    SessionImpl unwrappedSession = getSessionFrom(sessionId, timeout(), storageService);
+                    if (null != unwrappedSession) {
+                        SessionControl sc = sessionData.addSession(unwrappedSession, noLimit, true);
+                        SessionControl retval = null == sc ? new SessionControl(unwrappedSession) : sc;
+
+                        // Post event for restored session
+                        postSessionRestauration(retval.getSession());
+
                         return retval;
                     }
                 } catch (final OXException e) {
@@ -1047,9 +1132,9 @@ public final class SessionHandler {
                             return storageService.getSessionByAlternativeId(altId);
                         }
                     };
-                    Session session = obfuscator.unwrap(getFrom(c, null));
-                    if (null != session) {
-                        return sessionToSessionControl(session);
+                    SessionImpl unwrappedSession = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
+                    if (null != unwrappedSession) {
+                        return new SessionControl(unwrappedSession);
                     }
                 } catch (final RuntimeException e) {
                     LOG.error("", e);
@@ -1079,9 +1164,9 @@ public final class SessionHandler {
                         return storageService.getCachedSession(sessionId);
                     }
                 };
-                final Session session = obfuscator.unwrap(getFrom(c, null));
-                if (null != session) {
-                    return sessionToSessionControl(session);
+                SessionImpl unwrappedSession = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
+                if (null != unwrappedSession) {
+                    return new SessionControl(unwrappedSession);
                 }
             } catch (final RuntimeException e) {
                 LOG.error("", e);
@@ -1115,9 +1200,12 @@ public final class SessionHandler {
                 };
                 final List<Session> list = getFrom(c, Collections.<Session> emptyList());
                 if (null != list && !list.isEmpty()) {
-                    final List<SessionControl> result = new ArrayList<SessionControl>();
-                    for (final Session s : list) {
-                        result.add(sessionToSessionControl(obfuscator.unwrap(s)));
+                    List<SessionControl> result = new ArrayList<SessionControl>();
+                    for (Session s : list) {
+                        SessionImpl unwrappedSession = obfuscator.unwrap(s, getRemoteParameterNames());
+                        if (null != unwrappedSession) {
+                            result.add(new SessionControl(unwrappedSession));
+                        }
                     }
                     return result;
                 }
@@ -1270,8 +1358,10 @@ public final class SessionHandler {
             LOG.debug("Posted event for removed session");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
-                if (sessionData.isUserActive(session.getUserId(), session.getContextId())) {
-                    postLastSessionGone(session.getUserId(), session.getContextId(), eventAdmin);
+                int contextId = session.getContextId();
+                int userId = session.getUserId();
+                if (false == sessionData.isUserActive(userId, contextId, false)) {
+                    postLastSessionGone(userId, contextId, eventAdmin);
                 }
             }
         }
@@ -1283,7 +1373,23 @@ public final class SessionHandler {
             dic.put(SessiondEventConstants.PROP_USER_ID, Integer.valueOf(userId));
             dic.put(SessiondEventConstants.PROP_CONTEXT_ID, Integer.valueOf(contextId));
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic));
-            LOG.debug("Posted event for last removed session");
+            LOG.debug("Posted event for last removed session for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
+
+            SessionData sessionData = sessionDataRef.get();
+            if (null != sessionData) {
+                if (false == sessionData.hasForContext(contextId)) {
+                    postContextLastSessionGone(contextId, eventAdmin);
+                }
+            }
+        }
+    }
+
+    private static void postContextLastSessionGone(int contextId, EventAdmin eventAdmin) {
+        if (eventAdmin != null) {
+            Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+            dic.put(SessiondEventConstants.PROP_CONTEXT_ID, Integer.valueOf(contextId));
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT, dic));
+            LOG.debug("Posted event for last removed session for context {}", Integer.valueOf(contextId));
         }
     }
 
@@ -1335,8 +1441,8 @@ public final class SessionHandler {
             LOG.debug("Posted event for removed session container");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
-                for (final UserKey userKey : users) {
-                    if (sessionData.isUserActive(userKey.userId, userKey.contextId)) {
+                for (UserKey userKey : users) {
+                    if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
                         postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
                     }
                 }
@@ -1362,8 +1468,8 @@ public final class SessionHandler {
             LOG.debug("Posted event for removing temporary session data.");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
-                for (final UserKey userKey : users) {
-                    if (sessionData.isUserActive(userKey.userId, userKey.contextId)) {
+                for (UserKey userKey : users) {
+                    if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
                         postLastSessionGone(userKey.userId, userKey.contextId, eventAdmin);
                     }
                 }
@@ -1453,7 +1559,7 @@ public final class SessionHandler {
         if (session == null) {
             return null;
         }
-        return new SessionControl(new SessionImpl(session));
+        return new SessionControl(session instanceof SessionImpl ? (SessionImpl) session : new SessionImpl(session));
     }
 
     private static Session[] merge(final Session[] array1, final Session[] array2) {
@@ -1496,12 +1602,12 @@ public final class SessionHandler {
         public Void call() {
             try {
                 if (addIfAbsent) {
-                    if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session))) {
+                    if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session, config.getRemoteParameterNames()))) {
                         LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                         postSessionStored(session);
                     }
                 } else {
-                    sessionStorageService.addSession(obfuscator.wrap(session));
+                    sessionStorageService.addSession(obfuscator.wrap(session, config.getRemoteParameterNames()));
                     LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                     postSessionStored(session);
                 }
@@ -1509,31 +1615,6 @@ public final class SessionHandler {
                 LOG.warn("Failed to put session {} with Auth-Id {} into session storage (user={}, context={})",session.getSessionID(),session.getAuthId(),Integer.valueOf(session.getUserId()),Integer.valueOf(session.getContextId()), e);
             }
             return null;
-        }
-    }
-
-    private static final class GetStoredSessionTask extends AbstractTask<Session> {
-
-        private final SessionStorageService storageService;
-        private final String sessionId;
-
-        protected GetStoredSessionTask(final String sessionId, final SessionStorageService storageService) {
-            super();
-            this.storageService = storageService;
-            this.sessionId = sessionId;
-        }
-
-        @Override
-        public Session call() throws Exception {
-            try {
-                return obfuscator.unwrap(storageService.lookupSession(sessionId));
-            } catch (OXException e) {
-                if (SessionStorageExceptionCodes.INTERRUPTED.equals(e)) {
-                    // Expected...
-                    return null;
-                }
-                throw e;
-            }
         }
     }
 
@@ -1560,40 +1641,24 @@ public final class SessionHandler {
         return tmp.intValue();
     }
 
-    private static Session getSessionFrom(final String sessionId, final SessionStorageService storageService) throws OXException {
-        Future<Session> f;
+    /**
+     * Gets the denoted session from session storage using given timeout.
+     *
+     * @param sessionId The session identifier
+     * @param timeoutMillis The timeout in milliseconds; a value lower than or equal to zero is a synchronous call
+     * @param storageService The session storage instance
+     * @return The unwrapped session or <code>null</code> if timeout elapsed
+     * @throws OXException If fetching session from session storage fails
+     */
+    private static SessionImpl getSessionFrom(String sessionId, long timeoutMillis, SessionStorageService storageService) throws OXException {
         try {
-            f = ThreadPools.getThreadPool().submit(new GetStoredSessionTask(sessionId, storageService));
-        } catch (Exception e) {
-            return null;
-        }
-
-        int tout = timeout();
-        try {
-            return f.get(tout, TimeUnit.MILLISECONDS);
-        } catch (final RejectedExecutionException e) {
-            return storageService.lookupSession(sessionId);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
-            final Throwable t = e.getCause();
-            if (t instanceof OXException) {
-                throw (OXException) t;
+            return obfuscator.unwrap(storageService.lookupSession(sessionId, timeoutMillis), getRemoteParameterNames());
+        } catch (OXException e) {
+            if (SessionStorageExceptionCodes.INTERRUPTED.equals(e)) {
+                // Expected...
+                return null;
             }
-            if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
-            }
-            if (t instanceof Error) {
-                throw (Error) t;
-            }
-            throw new IllegalStateException("Not unchecked", t);
-        } catch (final TimeoutException e) {
-            LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, tout);
-            f.cancel(true);
-            return null;
-        } catch (final CancellationException e) {
-            return null;
+            throw e;
         }
     }
 

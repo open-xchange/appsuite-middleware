@@ -56,6 +56,7 @@ import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -106,6 +107,7 @@ public class FormLogin implements LoginRequestHandler {
     }
 
     private void doFormLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
+        // Parse HTTP request
         LoginRequest request = LoginTools.parseLogin(
             req,
             LoginFields.LOGIN_PARAM,
@@ -114,24 +116,32 @@ public class FormLogin implements LoginRequestHandler {
             conf.isCookieForceHTTPS(),
             conf.isDisableTrimLogin(),
             !conf.isFormLoginWithoutAuthId());
-        Map<String, Object> properties = new HashMap<String, Object>(1);
+
+        // Fill properties for re-authenticate attempt
+        Map<String, Object> properties = new HashMap<String, Object>(4);
         {
             String capabilities = req.getParameter("capabilities");
             if (null != capabilities) {
                 properties.put("client.capabilities", capabilities);
             }
-        }
-        /*
-         * Try to lookup session by auto-login
-         */
-        LoginResult result = reAuthenticate(tryAutologin(req), request.getLogin(), request.getPassword(), properties);
-        if (null == result) {
-            /*
-             * continue with form login
-             */
-             result = LoginPerformer.getInstance().doLogin(request, properties);
+            Map<String, List<String>> headers = request.getHeaders();
+            if (headers != null) {
+                properties.put("headers", headers);
+            }
+            com.openexchange.authentication.Cookie[] cookies = request.getCookies();
+            if (null != cookies) {
+                properties.put("cookies", cookies);
+            }
         }
 
+        // Try to lookup session by auto-login
+        LoginResult result = reAuthenticate(tryAutologin(req), request.getLogin(), request.getPassword(), properties);
+        if (null == result) {
+            // Continue with form login
+            result = LoginPerformer.getInstance().doLogin(request, properties);
+        }
+
+        // Such a session is already available, so reuse it
         Session session = result.getSession();
         User user = result.getUser();
 
@@ -141,7 +151,9 @@ public class FormLogin implements LoginRequestHandler {
         resp.sendRedirect(generateRedirectURL(
             req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
             req.getParameter(LoginFields.AUTOLOGIN_PARAM),
-            session, user.getPreferredLanguage(), conf.getUiWebPath()));
+            session,
+            user.getPreferredLanguage(),
+            conf.getUiWebPath()));
     }
 
     /**

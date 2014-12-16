@@ -98,12 +98,15 @@ import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegi
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.StoreOperation;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeStructureFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
@@ -202,6 +205,11 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 String filterParam = req.getParameter(PARAMETER_FILTER);
                 filter = Boolean.parseBoolean(filterParam) || "1".equals(filterParam);
             }
+            boolean fromStructure;
+            {
+                String fromStructureParam = req.getParameter("from_structure");
+                fromStructure = Boolean.parseBoolean(fromStructureParam) || "1".equals(fromStructureParam);
+            }
 
             // Get mail interface
             MailServletInterface mailInterface = getMailInterface(req);
@@ -210,12 +218,48 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             }
 
             long size = -1L; /* mail system does not provide exact size */
-            final MailPart mailPart;
-            final IFileHolder.InputStreamClosure isClosure;
+            MailPart mailPart = null;
+            IFileHolder.InputStreamClosure isClosure = null;
+
             if (imageContentId == null) {
-                mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
-                if (mailPart == null) {
-                    throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                // Check if part should be fetched from a previously "fixed" message
+                if (fromStructure) {
+                    MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                    if (null == mail) {
+                        throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
+                    }
+                    if (MimeStructureFixer.getInstance().isApplicableFor(mail)) {
+                        // Assume as being "fixed" before passing to client
+                        mail = MimeStructureFixer.getInstance().process(mail);
+                        final MailPartHandler handler = new MailPartHandler(sequenceId);
+                        new MailMessageParser().parseMailMessage(mail, handler);
+
+                        final MailPart ret = handler.getMailPart();
+                        if (ret == null) {
+                            throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, uid, folderPath);
+                        }
+
+                        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                        if (exactLength) {
+                            size = Streams.countInputStream(ret.getInputStream());
+                        }
+
+                        mailPart = ret;
+                        isClosure = new IFileHolder.InputStreamClosure() {
+
+                            @Override
+                            public InputStream newStream() throws OXException, IOException {
+                                return ret.getInputStream();
+                            }
+                        };
+                    }
+                }
+
+                if (null == mailPart) {
+                    mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
+                    if (mailPart == null) {
+                        throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                    }
                 }
 
                 if (filter && !saveToDisk && ((Strings.startsWithAny(toLowerCase(mailPart.getContentType().getSubType()), "htm", "xhtm") && fileNameAbsentOrIndicatesHtml(mailPart.getFileName())) || fileNameAbsentOrIndicatesHtml(mailPart.getFileName()))) {
@@ -246,7 +290,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     if (exactLength) {
                         size = Streams.countInputStream(mailPart.getInputStream());
                     }
-                    isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, sequenceId, false, req.getSession());
+                    if (null == isClosure) {
+                        isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, sequenceId, false, req.getSession());
+                    }
                 }
             } else {
                 mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);

@@ -47,61 +47,39 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessionstorage.hazelcast;
 
-import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
+
 
 /**
- * SessionConfig
+ * {@link AcquiredLatch}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SessiondConfigInterface {
+public final class AcquiredLatch {
 
-    long getSessionContainerTimeout();
+    /** The associated latch */
+    public final CountDownLatch latch;
 
-    long getLongTermSessionContainerTimeout();
+    /** The thread owning this instance */
+    public final Thread owner;
 
-    long getNumberOfSessionContainers();
-
-    int getMaxSessions();
-
-    int getMaxSessionsPerUser();
-
-    int getMaxSessionsPerClient();
-
-    long getLifeTime();
-
-    long getLongLifeTime();
-
-    long getRandomTokenTimeout();
-
-    long getNumberOfLongTermSessionContainers();
+    /** The reference to resulting object */
+    public final AtomicReference<Object> result;
 
     /**
-     * @return <code>true</code> if autologin is enabled.
-     */
-    boolean isAutoLogin();
-
-    /**
-     * Whether to enforce putting sessions into session storage asynchronously.
+     * Initializes a new {@link AcquiredLatch}.
      *
-     * @return <code>true</code> for async put; otherwise <code>false</code>
+     * @param owner The thread owning this instance
+     * @param latch The associated latch
      */
-    boolean isAsyncPutToSessionStorage();
-
-    /**
-     * Gets a key to encrypt passwords when putting session into storage.
-     *
-     * @return The obfuscation key
-     */
-    String getObfuscationKey();
-
-    /**
-     * Gets the names of such parameters that are supposed to be taken over from session to stored session representation.
-     *
-     * @return The parameter names
-     */
-    List<String> getRemoteParameterNames();
+    public AcquiredLatch(Thread owner, CountDownLatch latch) {
+        super();
+        this.owner = owner;
+        this.latch = latch;
+        result = new AtomicReference<Object>();
+    }
 
 }
