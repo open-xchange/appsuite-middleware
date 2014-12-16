@@ -215,14 +215,11 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
             // Append log properties from the ThreadLocal to logBuilder
             if (false == appendLogProperties(entry, logBuilder)) {
-                // Turns out to be an invalid registry entry
-                if (interrupt) {
-                    entry.getThread().interrupt();
-                    return true;
-                }
-                return false;
+                // Turns out to be an invalid registry entry -- already interrupted at this point
+                return true;
             }
 
+            // Check if request's thread is supposed to be interrupted
             if (interrupt) {
                 logBuilder.append(lineSeparator).append("Associated thread will be interrupted!");
                 LOG.info(logBuilder.toString(), trace);
