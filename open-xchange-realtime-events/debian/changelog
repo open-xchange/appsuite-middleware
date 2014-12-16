@@ -34,6 +34,12 @@ open-xchange-realtime-events (7.6.2-0) unstable; urgency=medium
 
  -- Marc Arens <marc.arens@open-xchange.com>  Wed, 17 Sep 2014 12:36:31 +0200
 
+open-xchange-realtime-events (7.6.0-16) stable; urgency=medium
+
+  * Build for patch 2014-12-15
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 08 Dec 2014 16:14:53 +0100
+
 open-xchange-realtime-events (7.6.0-15) stable; urgency=medium
 
   * Build for patch 2014-12-03

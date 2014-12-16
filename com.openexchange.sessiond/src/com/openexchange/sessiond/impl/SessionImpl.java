@@ -157,7 +157,6 @@ public final class SessionImpl implements PutIfAbsent {
         } else {
             parameters.put(PARAM_ALTERNATIVE_ID, altId);
         }
-
         List<String> remoteParameterNames = SessionHandler.getRemoteParameterNames();
         if (null != remoteParameterNames) {
             for (String parameterName : remoteParameterNames) {
