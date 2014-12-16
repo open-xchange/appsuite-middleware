@@ -78,7 +78,6 @@ import com.openexchange.mobilepush.events.storage.UserToken;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
-
     // https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/CommunicatingWIthAPS.html
     private final int STATUS_INVALID_TOKEN_SIZE = 5;
     private final int STATUS_INVALID_TOKEN = 8;
@@ -214,9 +213,7 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
             try {
                 //TODO: notify silently
                 PushNotificationPayload payload = new PushNotificationPayload();
-                payload.addCustomAlertLocKey("TRIGGER_LOGIN");
-                payload.addCustomAlertActionLocKey("OK");
-                payload.addCustomDictionary("SYNC", "TRIGGER");
+                payload.addAlert("LOGIN");
                 payloads.add(new PayloadPerDevice(payload, token));
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);

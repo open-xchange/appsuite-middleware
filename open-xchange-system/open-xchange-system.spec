@@ -58,6 +58,8 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 %changelog
 * Fri Dec 12 2014 Carsten Hoeger <choeger@open-xchange.com>
 Fourth candidate for 7.6.2 release
+* Mon Dec 08 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-12-15
 * Fri Dec 05 2014 Carsten Hoeger <choeger@open-xchange.com>
 Third candidate for 7.6.2 release
 * Tue Dec 02 2014 Carsten Hoeger <choeger@open-xchange.com>

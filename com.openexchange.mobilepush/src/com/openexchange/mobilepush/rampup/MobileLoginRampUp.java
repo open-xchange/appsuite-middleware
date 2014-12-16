@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,30 @@
  *
  */
 
-package com.openexchange.mobilepush.osgi;
+package com.openexchange.mobilepush.rampup;
 
-import com.openexchange.login.LoginRampUpService;
-import com.openexchange.mobilepush.rampup.MobileLoginRampUp;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.login.DefaultAppSuiteLoginRampUp;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link MobilePushActivator}
+ * {@link MobileLoginRampUp}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class MobilePushActivator extends HousekeepingActivator {
+public class MobileLoginRampUp extends DefaultAppSuiteLoginRampUp {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] {  };
+    /**
+     * Initializes a new {@link MobileLoginRampUp}.
+     */
+    public MobileLoginRampUp(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MobilePushActivator.class);
-        try {
-            logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
-            registerService(LoginRampUpService.class, new MobileLoginRampUp(this));
-        } catch (Exception e) {
-            logger.error("starting bundle {} failed: ", context.getBundle().getSymbolicName(), e);
-            throw e;
-        }
+    public boolean contributesTo(String client) {
+        return "open-xchange-mailapp".equals(client);
     }
 
 }
