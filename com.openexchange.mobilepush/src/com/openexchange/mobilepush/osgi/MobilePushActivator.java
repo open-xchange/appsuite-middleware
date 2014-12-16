@@ -60,22 +60,21 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class MobilePushActivator extends HousekeepingActivator {
 
-    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushActivator.class);
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
-            registerService(LoginRampUpService.class, new MobileLoginRampUp(this));
-        } catch (Exception e) {
-            LOG.error("starting bundle {} failed: ", context.getBundle().getSymbolicName(), e);
-            throw e;
-        }
-    }
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {  };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MobilePushActivator.class);
+        try {
+            logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
+            registerService(LoginRampUpService.class, new MobileLoginRampUp(this));
+        } catch (Exception e) {
+            logger.error("starting bundle {} failed: ", context.getBundle().getSymbolicName(), e);
+            throw e;
+        }
     }
 
 }
