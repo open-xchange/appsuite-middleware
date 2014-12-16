@@ -54,13 +54,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.requestwatcher.osgi.Services;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
+import com.openexchange.http.requestwatcher.osgi.services.RequestTrace;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.sessiond.SessiondService;
@@ -72,6 +71,7 @@ import com.openexchange.timer.TimerService;
  * {@link RequestWatcherServiceImpl}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RequestWatcherServiceImpl implements RequestWatcherService {
 
@@ -90,21 +90,23 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     private volatile ScheduledTimerTask requestWatcherTask;
 
     /**
-     * Initializes a new {@link RequestWatcherServiceImpl}.
+     * Initializes a new {@link RequestWatcherServiceImpl}
+     *
+     * @param configService The configuration service used for initialization
+     * @param timerService The timer service used for initialization
      */
-    public RequestWatcherServiceImpl() {
+    public RequestWatcherServiceImpl(ConfigurationService configService, TimerService timerService) {
         super();
         requestRegistry = new ConcurrentSkipListSet<RequestRegistryEntry>();
         // Get Configuration
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
         boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.requestwatcher.isEnabled", true);
         int watcherFrequency = configService.getIntProperty("com.openexchange.requestwatcher.frequency", 30000);
         int requestMaxAge = configService.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
         if (isWatcherEnabled) {
             // Create ScheduledTimerTask to watch requests
             ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry = this.requestRegistry;
-            RunnableImpl task = new RunnableImpl(requestRegistry, requestMaxAge);
-            ScheduledTimerTask requestWatcherTask = Services.getService(TimerService.class).scheduleAtFixedRate(task, requestMaxAge, watcherFrequency);
+            Watcher task = new Watcher(requestRegistry, requestMaxAge);
+            ScheduledTimerTask requestWatcherTask = timerService.scheduleAtFixedRate(task, requestMaxAge, watcherFrequency);
             this.requestWatcherTask = requestWatcherTask;
         }
     }
@@ -132,9 +134,9 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         return true;
     }
 
-    // ----------------------------------------------------------------------------- //
+    // ----------------------------------------------------------------------------------------------------------------------- //
 
-    private final static class RunnableImpl implements Runnable {
+    private final static class Watcher implements Runnable {
 
         private final String lineSeparator;
         private final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry;
@@ -144,7 +146,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         /**
          * Initializes a new {@link RunnableImplementation}.
          */
-        RunnableImpl(ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry, int requestMaxAge) {
+        Watcher(ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry, int requestMaxAge) {
             super();
             this.lineSeparator = System.getProperty("line.separator");
             this.requestRegistry = requestRegistry;
@@ -180,7 +182,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     RequestRegistryEntry entry = descendingEntryIterator.next();
                     if (entry.getAge() > requestMaxAge) {
                         sb.setLength(0);
-                        boolean interrupted = logRequestRegistryEntry(entry, sb);
+                        boolean interrupted = handleEntry(entry, sb);
                         if (interrupted) {
                             requestRegistry.remove(entry);
                         }
@@ -193,18 +195,23 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
             }
         }
 
-        private boolean logRequestRegistryEntry(RequestRegistryEntry entry, StringBuilder logBuilder) {
-            Throwable trace = new FastThrowable();
+        private boolean handleEntry(RequestRegistryEntry entry, StringBuilder logBuilder) {
+            // Get trace for associated thread's trace
+            Throwable trace = new RequestTrace();
             boolean interrupt;
             {
                 StackTraceElement[] stackTrace = entry.getStackTrace();
                 interrupt = interrupt(stackTrace, entry);
-                if (!interrupt && dontLog(stackTrace)) {
+                if (dontLog(stackTrace)) {
+                    if (interrupt) {
+                        entry.getThread().interrupt();
+                        return true;
+                    }
                     return false;
                 }
                 trace.setStackTrace(stackTrace);
             }
-            logBuilder.append("Request").append(lineSeparator);
+            logBuilder.append("Request with age ").append(entry.getAge()).append("ms exceeds max. age of ").append(requestMaxAge).append("ms.");
 
             // Append log properties from the ThreadLocal to logBuilder
             if (false == appendLogProperties(entry, logBuilder)) {
@@ -216,7 +223,6 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 return false;
             }
 
-            logBuilder.append("with age: ").append(entry.getAge()).append("ms exceeds max. age of: ").append(requestMaxAge).append("ms.");
             if (interrupt) {
                 logBuilder.append(lineSeparator).append("Associated thread will be interrupted!");
                 LOG.info(logBuilder.toString(), trace);
@@ -259,10 +265,18 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         sorted.put(propertyName, value);
                     }
                 }
-                logBuilder.append("with properties:").append(lineSeparator);
+                logBuilder.append("Request's properties:").append(lineSeparator);
+
                 // And add them to the logBuilder
-                for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
-                    logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(lineSeparator);
+                Iterator<Entry<String, String>> it = sorted.entrySet().iterator();
+                if (it.hasNext()) {
+                    String prefix = "  ";
+                    Map.Entry<String, String> propertyEntry = it.next();
+                    logBuilder.append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                    while (it.hasNext()) {
+                        propertyEntry = it.next();
+                        logBuilder.append(lineSeparator).append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                    }
                 }
             }
             return true;
@@ -284,20 +298,6 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 }
             }
             return false;
-        }
-    }
-
-    // ----------------------------------------------------------------------------- //
-
-    static final class FastThrowable extends Throwable {
-
-        FastThrowable() {
-            super("tracked request");
-        }
-
-        @Override
-        public synchronized Throwable fillInStackTrace() {
-            return this;
         }
     }
 
