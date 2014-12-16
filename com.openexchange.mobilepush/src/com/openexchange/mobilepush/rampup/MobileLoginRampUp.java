@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,30 @@
  *
  */
 
-package com.openexchange.appsuite;
+package com.openexchange.mobilepush.rampup;
 
 import com.openexchange.login.DefaultAppSuiteLoginRampUp;
 import com.openexchange.server.ServiceLookup;
 
+
 /**
- * {@link AppSuiteLoginRampUp}
+ * {@link MobileLoginRampUp}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class AppSuiteLoginRampUp extends DefaultAppSuiteLoginRampUp {
+public class MobileLoginRampUp extends DefaultAppSuiteLoginRampUp {
 
     /**
-     * Initializes a new {@link AppSuiteLoginRampUp}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link MobileLoginRampUp}.
      */
-    public AppSuiteLoginRampUp(ServiceLookup services) {
+    public MobileLoginRampUp(ServiceLookup services) {
         super(services);
     }
 
     @Override
     public boolean contributesTo(String client) {
-        return "open-xchange-appsuite".equals(client);
+        return "open-xchange-mailapp".equals(client);
     }
 
 }
