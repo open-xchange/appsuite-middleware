@@ -55,6 +55,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestShare;
@@ -68,8 +69,11 @@ import com.openexchange.share.ShareTarget;
  */
 public class ShareLoginConfiguration {
 
-    private LoginConfiguration loginConfiguration;
-    private boolean transientShareSessions;
+    private Boolean shareAutoLogin;
+    private String shareClientName;
+    private String shareClientVersion;
+    private Integer shareCookieTTL;
+    private boolean shareTransientSessions;
 
     /**
      * Initializes a new {@link ShareLoginConfiguration}.
@@ -87,18 +91,45 @@ public class ShareLoginConfiguration {
      *
      * @param share The share to get the login configuration for
      * @return The login configuration
+     * @throws OXException
      */
-    public LoginConfiguration getLoginConfig(GuestShare share) {
-        return adjustCookieTTL(loginConfiguration, share);
+    public LoginConfiguration getLoginConfig(GuestShare share) throws OXException {
+        return adjustCookieTTL(getLoginConfig(), share);
     }
 
     /**
-     * Gets the default login configuration.
+     * Gets the default login configuration used when logging in through the share servlet.
      *
      * @return The login configuration
+     * @throws OXException
      */
-    public LoginConfiguration getLoginConfig() {
-        return loginConfiguration;
+    public LoginConfiguration getLoginConfig() throws OXException {
+        /*
+         * construct custom login config based on default template, overridden with share-specific values
+         */
+        LoginConfiguration defaultConfig = LoginServlet.getLoginConfiguration();
+        if (null == defaultConfig) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("no default login configuration available");
+        }
+        return new LoginConfiguration(
+            defaultConfig.getUiWebPath(), // com.openexchange.UIWebPath
+            null != shareAutoLogin ? shareAutoLogin.booleanValue() : defaultConfig.isSessiondAutoLogin(),
+            defaultConfig.getHashSource(), // com.openexchange.cookie.hash
+            defaultConfig.getHttpAuthAutoLogin(),
+            null != shareClientName ? shareClientName : defaultConfig.getDefaultClient(),
+            null != shareClientVersion ? shareClientVersion : defaultConfig.getClientVersion(),
+            defaultConfig.getErrorPageTemplate(), // com.openexchange.ajax.login.errorPageTemplate
+            null != shareCookieTTL ? shareCookieTTL.intValue() : defaultConfig.getCookieExpiry(),
+            defaultConfig.isCookieForceHTTPS(),
+            defaultConfig.isInsecure(),
+            defaultConfig.isIpCheck(),
+            defaultConfig.getIpCheckWhitelist(),
+            defaultConfig.isRedirectIPChangeAllowed(),
+            defaultConfig.getRanges(),
+            defaultConfig.isDisableTrimLogin(),
+            defaultConfig.isFormLoginWithoutAuthId(),
+            defaultConfig.isRandomTokenEnabled()
+        );
     }
 
     /**
@@ -107,7 +138,7 @@ public class ShareLoginConfiguration {
      * @return The transientShareSessions
      */
     public boolean isTransientShareSessions() {
-        return transientShareSessions;
+        return shareTransientSessions;
     }
 
     /**
@@ -116,9 +147,21 @@ public class ShareLoginConfiguration {
      * @param configService A reference to the configuration service
      * @throws OXException
      */
-    void reinitialise(ConfigurationService configService) throws OXException {
-        this.loginConfiguration = init(LoginServlet.getLoginConfiguration(), configService);
-        this.transientShareSessions = configService.getBoolProperty("com.openexchange.share.transientSessions", true);
+    private void reinitialise(ConfigurationService configService) throws OXException {
+        /*
+         * get share-specific login config overrides from configuration service
+         */
+        String shareAutoLogin = configService.getProperty("com.openexchange.share.autoLogin");
+        if (false == Strings.isEmpty(shareAutoLogin)) {
+            this.shareAutoLogin = Boolean.valueOf(shareAutoLogin);
+        }
+        this.shareClientName = configService.getProperty("com.openexchange.share.clientName", "open-xchange-appsuite");
+        this.shareClientVersion = configService.getProperty("com.openexchange.share.clientVersion", "Share");
+        String shareCookieTTL = configService.getProperty("com.openexchange.share.cookieTTL");
+        if (false == Strings.isEmpty(shareCookieTTL)) {
+            this.shareCookieTTL = Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTL));
+        }
+        this.shareTransientSessions = configService.getBoolProperty("com.openexchange.share.transientSessions", true);
     }
 
     /**
@@ -167,47 +210,6 @@ public class ShareLoginConfiguration {
          * use supplied login config as default fallback
          */
         return loginConfig;
-    }
-
-    /**
-     * Initializes the custom share login configuration using the supplied default config as template.
-     *
-     * @param defaultConfig The default login configuration
-     * @param configService A reference to the config service
-     * @return The custom share login configuration
-     * @throws OXException
-     */
-    private static LoginConfiguration init(LoginConfiguration defaultConfig, ConfigurationService configService) throws OXException {
-        /*
-         * configure overrides
-         */
-        boolean sessiondAutoLogin = configService.getBoolProperty("com.openexchange.share.autoLogin", defaultConfig.isSessiondAutoLogin());
-        String defaultClient = configService.getProperty("com.openexchange.share.clientName", "open-xchange-appsuite");
-        String clientVersion = configService.getProperty("com.openexchange.share.clientVersion", "Share");
-        String cookieTTL = configService.getProperty("com.openexchange.share.cookieTTL");
-        int cookieExpiry = Strings.isEmpty(cookieTTL) ? defaultConfig.getCookieExpiry() : ConfigTools.parseTimespanSecs(cookieTTL);
-        /*
-         * construct custom login config from template
-         */
-        return new LoginConfiguration(
-            defaultConfig.getUiWebPath(), // com.openexchange.UIWebPath
-            sessiondAutoLogin,
-            defaultConfig.getHashSource(), // com.openexchange.cookie.hash
-            defaultConfig.getHttpAuthAutoLogin(),
-            defaultClient,
-            clientVersion,
-            defaultConfig.getErrorPageTemplate(), // com.openexchange.ajax.login.errorPageTemplate
-            cookieExpiry,
-            defaultConfig.isCookieForceHTTPS(),
-            defaultConfig.isInsecure(),
-            defaultConfig.isIpCheck(),
-            defaultConfig.getIpCheckWhitelist(),
-            defaultConfig.isRedirectIPChangeAllowed(),
-            defaultConfig.getRanges(),
-            defaultConfig.isDisableTrimLogin(),
-            defaultConfig.isFormLoginWithoutAuthId(),
-            defaultConfig.isRandomTokenEnabled()
-        );
     }
 
     /**
