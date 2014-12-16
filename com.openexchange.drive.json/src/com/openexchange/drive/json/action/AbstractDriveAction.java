@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.DriveService;
@@ -87,6 +88,10 @@ public abstract class AbstractDriveAction implements AJAXActionService {
 
     protected DriveSubscriptionStore getSubscriptionStore() throws OXException {
         return Services.getService(DriveSubscriptionStore.class, true);
+    }
+
+    protected ConfigurationService getConfigService() throws OXException {
+        return Services.getService(ConfigurationService.class, true);
     }
 
     protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException;

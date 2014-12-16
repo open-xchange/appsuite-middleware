@@ -62,8 +62,8 @@ import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.authentication.Cookie;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveService;
-import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -171,9 +171,9 @@ public class JumpAction extends AbstractDriveAction {
         return null;
     }
 
-    private String getClient() {
-        DriveConfig config = DriveConfig.getInstance();
-        if (!config.getUiWebPath().contains("appsuite")) {
+    private String getClient() throws OXException {
+        ConfigurationService configService = getConfigService();
+        if (!configService.getProperty("com.openexchange.UIWebPath").contains("appsuite")) {
             return "com.openexchange.ox.gui.dhtml";
         }
         return "open-xchange-appsuite";
