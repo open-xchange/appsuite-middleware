@@ -52,16 +52,18 @@ package com.openexchange.groupware.filestore;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link FileLocationUpdater}
+ * {@link FileLocationHandler} - Performs various actions related to file locations.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public interface FileLocationUpdater {
+public interface FileLocationHandler {
 
     /**
      * Updates file locations
@@ -71,6 +73,31 @@ public interface FileLocationUpdater {
      * @param con The connection to use
      * @throws SQLException If an SQL error occurs
      */
-    public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException;
+    void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException;
+
+    /**
+     * Determines the context-associated file locations from this handler.
+     *
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @return The file locations
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
+     * @since v7.8.0
+     */
+    Set<String> determineFileLocationsFor(int contextId, Connection con) throws OXException, SQLException;
+
+    /**
+     * Determines the user-associated file locations from this handler.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @return The file locations
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
+     * @since v7.8.0
+     */
+    Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) throws OXException, SQLException;
 
 }

@@ -49,11 +49,29 @@
 
 package com.openexchange.groupware.infostore.database;
 
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
-import com.openexchange.groupware.filestore.FileLocationUpdater;
+import java.util.Set;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.filestore.FileLocationHandler;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Reference;
 
 
 /**
@@ -62,7 +80,7 @@ import com.openexchange.groupware.filestore.FileLocationUpdater;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class InfostoreFilestoreLocationUpdater implements FileLocationUpdater {
+public class InfostoreFilestoreLocationUpdater implements FileLocationHandler {
 
     /**
      * Initializes a new {@link InfostoreFilestoreLocationUpdater}.
@@ -73,14 +91,153 @@ public class InfostoreFilestoreLocationUpdater implements FileLocationUpdater {
 
     @Override
     public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = con.prepareStatement("UPDATE infostore_document SET file_store_location = ? WHERE cid = ? AND file_store_location = ?");
-        for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
-            stmt.setString(1, entry.getValue());
-            stmt.setInt(2, contextId);
-            stmt.setString(3, entry.getKey());
-            stmt.addBatch();
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE infostore_document SET file_store_location = ? WHERE cid = ? AND file_store_location = ?");
+            for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
+                stmt.setString(1, entry.getValue());
+                stmt.setInt(2, contextId);
+                stmt.setString(3, entry.getKey());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        stmt.executeBatch();
+    }
+
+    @Override
+    public Set<String> determineFileLocationsFor(int contextId, Connection con) throws OXException, SQLException {
+        // Determine InfoStore folders
+        TIntObjectMap<TIntList> folders = fetchFolders(contextId, con);
+
+        // Determine those user that do not have a dedicated storage
+        Context context = ContextStorage.getInstance().getContext(contextId);
+        UserStorage userStorage = UserStorage.getInstance();
+        Set<String> locations = new LinkedHashSet<String>();
+        for (TIntObjectIterator<TIntList> it = folders.iterator(); it.hasNext();) {
+            it.advance();
+
+            // Check associated user
+            User user = userStorage.getUser(it.key(), context);
+            if (user.getFilestoreId() <= 0) {
+                // No specific, but context-related file storage.
+                // Therefore applicable
+                locations.addAll(getFileLocationsFor(it.value(), contextId, con));
+            }
+        }
+
+        return locations;
+    }
+
+    @Override
+    public Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) throws OXException, SQLException {
+        // Determine InfoStore folders
+        TIntList folderIds = fetchFolders(userId, contextId, con);
+
+        // Check associated user
+        User user = UserStorage.getInstance().getUser(userId, ContextStorage.getInstance().getContext(contextId));
+        if (user.getFilestoreId() <= 0) {
+            // No specific, but context-related file storage.
+            // Therefore NOT applicable
+            return Collections.emptySet();
+        }
+
+        return getFileLocationsFor(folderIds, contextId, con);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    private Set<String> getFileLocationsFor(TIntList folderIds, final int contextId, final Connection con) throws OXException, SQLException {
+        final Reference<Exception> error = new Reference<Exception>();
+        final Set<String> locations = new LinkedHashSet<String>();
+        folderIds.forEach(new TIntProcedure() {
+
+            @Override
+            public boolean execute(int folderId) {
+                boolean keepOn = false;
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = con.prepareStatement("SELECT d.file_store_location FROM infostore as i JOIN infostore_document as d ON i.cid=? AND d.cid=? AND i.id=d.infostore_id WHERE i.cid=? and folder_id=? AND d.file_store_location IS NOT NULL");
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, contextId);
+                    stmt.setInt(3, contextId);
+                    stmt.setInt(4, folderId);
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        locations.add(rs.getString(1));
+                    }
+                    keepOn = true;
+                } catch (SQLException e) {
+                    error.setValue(e);
+                } catch (RuntimeException e) {
+                    error.setValue(e);
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
+                }
+                return keepOn;
+            }
+        });
+        Exception exception = error.getValue();
+        if (null != exception) {
+            if (exception instanceof SQLException) {
+                throw (SQLException) exception;
+            }
+            throw OXException.general("", exception);
+        }
+        return locations;
+    }
+
+    private TIntObjectMap<TIntList> fetchFolders(int contextId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT created_from, fuid FROM oxfolder_tree WHERE cid=? AND module=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, FolderObject.INFOSTORE);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return new TIntObjectHashMap<TIntList>(0);
+            }
+            TIntObjectMap<TIntList> map = new TIntObjectHashMap<TIntList>(2048);
+            do {
+                int owner = rs.getInt(1);
+                TIntList folderIds = map.get(owner);
+                if (null == folderIds) {
+                    folderIds = new TIntLinkedList();
+                    map.put(owner, folderIds);
+                }
+                int folderId = rs.getInt(2);
+                folderIds.add(folderId);
+            } while (rs.next());
+            return map;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private TIntList fetchFolders(int userId, int contextId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid=? AND created_from=? AND module=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, FolderObject.INFOSTORE);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return new TIntLinkedList();
+            }
+            TIntList folderIds = new TIntLinkedList();
+            do {
+                int folderId = rs.getInt(1);
+                folderIds.add(folderId);
+            } while (rs.next());
+            return folderIds;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
     }
 
 }

@@ -51,18 +51,25 @@ package com.openexchange.snippet.rdb;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
-import com.openexchange.groupware.filestore.FileLocationUpdater;
+import java.util.Set;
+import com.openexchange.database.Databases;
+import com.openexchange.groupware.filestore.FileLocationHandler;
+import com.openexchange.snippet.ReferenceType;
 
 
 /**
  * {@link RdbSnippetFilestoreLocationUpdater}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class RdbSnippetFilestoreLocationUpdater implements FileLocationUpdater {
+public class RdbSnippetFilestoreLocationUpdater implements FileLocationHandler {
 
     /**
      * Initializes a new {@link RdbSnippetFilestoreLocationUpdater}.
@@ -73,14 +80,47 @@ public class RdbSnippetFilestoreLocationUpdater implements FileLocationUpdater {
 
     @Override
     public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = con.prepareStatement("UPDATE snippet SET refId = ? WHERE cid = ? AND refId = ?");
-        for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
-            stmt.setString(1, entry.getValue());
-            stmt.setInt(2, contextId);
-            stmt.setString(3, entry.getKey());
-            stmt.addBatch();
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE snippet SET refId = ? WHERE cid = ? AND refId = ?");
+            for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
+                stmt.setString(1, entry.getValue());
+                stmt.setInt(2, contextId);
+                stmt.setString(3, entry.getKey());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        stmt.executeBatch();
+    }
+
+    @Override
+    public Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) throws SQLException {
+        // Files for attachment are always stored in context-related storage
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> determineFileLocationsFor(int contextId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT refId FROM preview WHERE cid=? AND refType=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, ReferenceType.FILE_STORAGE.getType());
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptySet();
+            }
+            Set<String> locations = new LinkedHashSet<String>();
+            do {
+                locations.add(rs.getString(1));
+            } while (rs.next());
+            return locations;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
     }
 
 }

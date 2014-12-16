@@ -52,7 +52,7 @@ package com.openexchange.admin.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.groupware.filestore.FileLocationUpdater;
+import com.openexchange.groupware.filestore.FileLocationHandler;
 
 
 /**
@@ -61,7 +61,7 @@ import com.openexchange.groupware.filestore.FileLocationUpdater;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class FilestoreLocationUpdaterCustomizer implements ServiceTrackerCustomizer<FileLocationUpdater, FileLocationUpdater> {
+public class FilestoreLocationUpdaterCustomizer implements ServiceTrackerCustomizer<FileLocationHandler, FileLocationHandler> {
 
     private final BundleContext context;
 
@@ -74,19 +74,19 @@ public class FilestoreLocationUpdaterCustomizer implements ServiceTrackerCustomi
     }
 
     @Override
-    public FileLocationUpdater addingService(ServiceReference<FileLocationUpdater> arg0) {
-        FileLocationUpdater service = context.getService(arg0);
+    public FileLocationHandler addingService(ServiceReference<FileLocationHandler> arg0) {
+        FileLocationHandler service = context.getService(arg0);
         FilestoreLocationUpdaterRegistry.getInstance().addService(service);
         return service;
     }
 
     @Override
-    public void modifiedService(ServiceReference<FileLocationUpdater> arg0, FileLocationUpdater arg1) {
+    public void modifiedService(ServiceReference<FileLocationHandler> arg0, FileLocationHandler arg1) {
         // nothing to do
     }
 
     @Override
-    public void removedService(ServiceReference<FileLocationUpdater> arg0, FileLocationUpdater arg1) {
+    public void removedService(ServiceReference<FileLocationHandler> arg0, FileLocationHandler arg1) {
         context.ungetService(arg0);
     }
 

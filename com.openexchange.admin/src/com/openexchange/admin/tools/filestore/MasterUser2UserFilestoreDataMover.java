@@ -52,10 +52,13 @@ package com.openexchange.admin.tools.filestore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -65,27 +68,29 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.groupware.filestore.FileLocationHandler;
 
 /**
- * {@link User2UserFilestoreDataMover} - The implementation to move files from a userA's storage to userB's storage.
+ * {@link MasterUser2UserFilestoreDataMover} - The implementation to move files from master user's storage to a user's storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class User2UserFilestoreDataMover extends FilestoreDataMover {
+public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
 
-    private final User srcUser;
+    private final User masterUser;
     private final User dstUser;
 
     /**
-     * Initializes a new {@link User2UserFilestoreDataMover}.
+     * Initializes a new {@link MasterUser2UserFilestoreDataMover}.
      */
-    protected User2UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User srcUser, User dstUser, Context ctx) {
+    protected MasterUser2UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User masterUser, User dstUser, Context ctx) {
         super(srcFilestore, dstFilestore, ctx);
-        this.srcUser = srcUser;
+        this.masterUser = masterUser;
         this.dstUser = dstUser;
     }
 
@@ -108,11 +113,23 @@ public class User2UserFilestoreDataMover extends FilestoreDataMover {
     protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
         try {
             // Grab associated quota-aware file storages
-            FileStorage srcStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(srcUser.getId().intValue(), ctx.getId().intValue());
+            FileStorage srcStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(masterUser.getId().intValue(), ctx.getId().intValue());
             FileStorage dstStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(dstUser.getId().intValue(), ctx.getId().intValue());
 
+            // Determine the files to move
+            Set<String> srcFiles = new LinkedHashSet<String>();
+            {
+                Connection con = Database.getNoTimeout(ctx.getId().intValue(), true);
+                try {
+                    for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
+                        srcFiles.addAll(updater.determineFileLocationsFor(dstUser.getId().intValue(), ctx.getId().intValue(), con));
+                    }
+                } finally {
+                    Database.backNoTimeout(ctx.getId().intValue(), true, con);
+                }
+            }
+
             // Copy each file from source to destination
-            Set<String> srcFiles = srcStorage.getFileList();
             Map<String, String> prevFileName2newFileName = new HashMap<String, String>(srcFiles.size());
             for (String file : srcFiles) {
                 InputStream is = srcStorage.getFile(file);
@@ -135,18 +152,18 @@ public class User2UserFilestoreDataMover extends FilestoreDataMover {
 
         // Apply changes to context & clear caches
         try {
-            srcUser.setFilestoreId(dstFilestore.getId());
-            srcUser.setFilestore_name(FileStorages.getNameForUser(dstUser.getId().intValue(), ctx.getId().intValue()));
-            srcUser.setFilestoreOwner(dstUser.getId());
+            dstUser.setFilestoreId(dstFilestore.getId());
+            dstUser.setFilestore_name(FileStorages.getNameForUser(dstUser.getId().intValue(), ctx.getId().intValue()));
+            dstUser.setFilestoreOwner(dstUser.getId());
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-            oxcox.changeFilestoreDataFor(srcUser, ctx);
+            oxcox.changeFilestoreDataFor(dstUser, ctx);
 
             CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
             Cache userCache = cacheService.getCache("User");
-            userCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), srcUser.getId().intValue()));
+            userCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), dstUser.getId().intValue()));
         } catch (OXException e) {
             throw new StorageException(e);
         }

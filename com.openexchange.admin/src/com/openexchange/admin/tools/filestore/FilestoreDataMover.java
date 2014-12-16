@@ -67,11 +67,12 @@ import org.slf4j.Logger;
 import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.filestore.FileLocationUpdater;
+import com.openexchange.groupware.filestore.FileLocationHandler;
 
 /**
  * {@link FilestoreDataMover} - The base implementation to move files from one storage to another.
@@ -89,13 +90,73 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     /**
      * Creates a new instance appropriate for moving the files for a single context.
      *
-     * @param srcFilestore The  source file storage
+     * @param srcFilestore The source file storage
      * @param dstFilestore The destination file storage
      * @param ctx The associated context
      * @return The new instance
      */
     public static FilestoreDataMover newContextMover(Filestore srcFilestore, Filestore dstFilestore, Context ctx) {
         return new ContextFilestoreDataMover(srcFilestore, dstFilestore, ctx);
+    }
+
+    /**
+     * Creates a new instance appropriate for moving the files for a single user.
+     *
+     * @param srcFilestore The source file storage
+     * @param dstFilestore The destination file storage
+     * @param user The user
+     * @param ctx The associated context
+     * @return The new instance
+     */
+    public static FilestoreDataMover newUserMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
+        return new UserFilestoreDataMover(srcFilestore, dstFilestore, user, ctx);
+    }
+
+    /**
+     * Creates a new instance appropriate for moving the files for a single user into a master user' storage.
+     * <p>
+     * <img src="./drive-business.png" alt="OX Drive Stand-Alone">
+     *
+     * @param srcFilestore The source file storage
+     * @param dstFilestore The destination file storage
+     * @param user The user
+     * @param masterUser The master user
+     * @param ctx The associated context
+     * @return The new instance
+     */
+    public static FilestoreDataMover newUser2MasterMover(Filestore srcFilestore, Filestore dstFilestore, User user, User masterUser, Context ctx) {
+        return new User2MasterUserFilestoreDataMover(srcFilestore, dstFilestore, user, masterUser, ctx);
+    }
+
+    /**
+     * Creates a new instance appropriate for moving the files for a single user out off a master user' storage into its own one.
+     * <p>
+     * <img src="./drive-standalone.png" alt="OX Drive Stand-Alone">
+     *
+     * @param srcFilestore The source file storage
+     * @param dstFilestore The destination file storage
+     * @param user The user
+     * @param masterUser The master user
+     * @param ctx The associated context
+     * @return The new instance
+     */
+    public static FilestoreDataMover newUserFromMasterMover(Filestore srcFilestore, Filestore dstFilestore, User user, User masterUser, Context ctx) {
+        return new MasterUser2UserFilestoreDataMover(srcFilestore, dstFilestore, masterUser, user, ctx);
+    }
+
+    /**
+     * Creates a new instance appropriate for moving the files for a single user out off a master user' storage into its own one.
+     * <p>
+     * <img src="./drive-userstorage.png" alt="OX Drive Stand-Alone">
+     *
+     * @param srcFilestore The source file storage
+     * @param dstFilestore The destination file storage
+     * @param user The user
+     * @param ctx The associated context
+     * @return The new instance
+     */
+    public static FilestoreDataMover newContext2UserMover(Filestore srcFilestore, Filestore dstFilestore, User user,Context ctx) {
+        return new Context2UserFilestoreDataMover(srcFilestore, dstFilestore, user, ctx);
     }
 
     // ------------------------------------------------------------------------------------------------------------------
@@ -219,7 +280,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     protected void propagateNewLocations(Map<String, String> prevFileName2newFileName) throws OXException, SQLException {
         Connection con = Database.getNoTimeout(ctx.getId().intValue(), true);
         try {
-            for (FileLocationUpdater updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
+            for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
                 updater.updateFileLocations(prevFileName2newFileName, ctx.getId().intValue(), con);
             }
         } finally {

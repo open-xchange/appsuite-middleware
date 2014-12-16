@@ -51,7 +51,7 @@ package com.openexchange.admin.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.groupware.filestore.FileLocationUpdater;
+import com.openexchange.groupware.filestore.FileLocationHandler;
 
 
 /**
@@ -64,24 +64,24 @@ public class FilestoreLocationUpdaterRegistry {
 
     private static final FilestoreLocationUpdaterRegistry INSTANCE = new FilestoreLocationUpdaterRegistry();
 
-    private final List<FileLocationUpdater> services;
+    private final List<FileLocationHandler> services;
 
     /**
      * Initializes a new {@link FilestoreLocationUpdaterRegistry}.
      */
     private FilestoreLocationUpdaterRegistry() {
-        this.services = new ArrayList<FileLocationUpdater>(4);
+        this.services = new ArrayList<FileLocationHandler>(4);
     }
 
     public static FilestoreLocationUpdaterRegistry getInstance() {
         return INSTANCE;
     }
 
-    public void addService(FileLocationUpdater service) {
+    public void addService(FileLocationHandler service) {
         services.add(service);
     }
 
-    public List<FileLocationUpdater> getServices() {
+    public List<FileLocationHandler> getServices() {
         return services;
     }
 
