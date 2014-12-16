@@ -49,6 +49,8 @@
 
 package com.openexchange.mobilepush.osgi;
 
+import com.openexchange.login.LoginRampUpService;
+import com.openexchange.mobilepush.rampup.MobileLoginRampUp;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -64,6 +66,7 @@ public class MobilePushActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
+            registerService(LoginRampUpService.class, new MobileLoginRampUp(this));
         } catch (Exception e) {
             LOG.error("starting bundle {} failed: ", context.getBundle().getSymbolicName(), e);
             throw e;
@@ -75,13 +78,4 @@ public class MobilePushActivator extends HousekeepingActivator {
         return new Class[] {  };
     }
 
-    @Override
-    public void stopBundle() throws Exception {
-        try {
-            LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
-        } catch (Exception e) {
-            LOG.error("stopping bundle: {}", context.getBundle().getSymbolicName(), e);
-            throw e;
-        }
-    }
 }
