@@ -75,7 +75,7 @@ public class DefaultServiceProvider<S> implements ServiceProvider<S> {
         public int compareTo(RankedService<S> o) {
             int thisVal = this.ranking;
             int anotherVal = o.ranking;
-            return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
+            return (thisVal < anotherVal ? 1 : (thisVal == anotherVal ? 0 : -1));
         }
 
     }
