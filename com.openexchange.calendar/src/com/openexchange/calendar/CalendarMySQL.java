@@ -2516,9 +2516,14 @@ public class CalendarMySQL implements CalendarSqlImp {
             final int alarm = member.alarm;
             if (alarm > -1) {
                 up.setAlarmMinutes(alarm);
-                if (up.getIdentifier() == uid && up.getAlarmMinutes() >= 0) {
+                if (up.getAlarmMinutes() >= 0) {
                     for (final CalendarDataObject cdao : cdaos) {
-                        cdao.setAlarm(up.getAlarmMinutes());
+                        int folderType = cdao.getFolderType();
+                        if (folderType == FolderObject.SHARED && up.getIdentifier() == cdao.getSharedFolderOwner()) {
+                            cdao.setAlarm(up.getAlarmMinutes());
+                        } else if ((folderType == FolderObject.PRIVATE || folderType == FolderObject.PUBLIC) && up.getIdentifier() == uid) {
+                            cdao.setAlarm(up.getAlarmMinutes());
+                        }
                     }
                 }
             }
