@@ -1460,135 +1460,135 @@ msgid ""
 "failed!"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:63
+#. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
+msgid "Uploaded with %1$s (%2$s)"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:63
 msgid "The path \"%1$s\" was not found. Please retry the synchronization."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:64
 msgid ""
 "The file \"%1$s\" was not found at \"%2$s\". Please retry the "
 "synchronization."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:65
 msgid ""
 "Unable to access the file at the requested position. Please retry the "
 "synchronization."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:66
 msgid ""
 "The file version \"%1$s\" was not found at \"%3$s\". Please retry the "
 "synchronization."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:67
 msgid "Integrity checks failed for uploaded file \"%2$s\". Please try again."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:68
 msgid ""
 "The directory version \"%1$s\" was not found. Please retry the "
 "synchronization."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:69
 msgid "You are not allowed to delete the file \"%1$s\" at \"%2$s\"."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:70
 msgid "You are not allowed to create files at \"%1$s\"."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:71
 msgid "You are not allowed to modify the file \"%1$s\" at \"%2$s\"."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:72
 msgid "You are not allowed to delete the directory \"%1$s\"."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:73
 msgid "You are not allowed to create directories at \"%1$s\"."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:74
 msgid "The allowed quota is reached."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:75
 msgid "The path \"%1$s\" is invalid."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:76
 msgid "The file name \"%1$s\" is invalid."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:77
 msgid "The file name \"%1$s\" is ignored."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:78
 msgid "The path \"%1$s\" is conflicting."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:79
 msgid "The file version \"%1$s\" is invalid."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:80
 msgid "The directory version \"%1$s\" is invalid."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:81
 msgid "Push updates are not available."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
 msgid "The server is too busy at the moment - please try again later."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
 msgid "The path \"%1$s\" is ignored."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:84
 msgid "The file name \"%1$s\" is conflicting."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:85
 msgid "The directory \"%1$s\" caused repeated synchronization problems."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:86
 msgid ""
 "The client application you're using is outdated and no longer supported - "
 "please upgrade to a newer version."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:87
 msgid "A newer version of your client application is available for download."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
 msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
 msgid ""
 "The file name \"%1$s\" is conflicting with an equally named directory at "
 "\"%2$s\"."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveExceptionMessages.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
 msgid ""
 "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
-msgstr ""
-
-#. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
-msgid "Uploaded with %1$s (%2$s)"
 msgstr ""
 
 #. A Box error occurred: %1$s
