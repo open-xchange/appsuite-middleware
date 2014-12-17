@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -51,11 +51,10 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    # SoftwareChange_Request-1293
-    pfile=/opt/open-xchange/etc/grizzly.properties
-    if ! ox_exists_property com.openexchange.http.grizzly.hasAJPEnabled $pfile; then
-       ox_set_property com.openexchange.http.grizzly.hasAJPEnabled "false" $pfile
-    fi
+    PFILE=/opt/open-xchange/etc/grizzly.properties
+
+    # SoftwareChange_Request-2289
+    ox_remove_property com.openexchange.http.grizzly.hasAJPEnabled $PFILE
 fi
 
 %clean
