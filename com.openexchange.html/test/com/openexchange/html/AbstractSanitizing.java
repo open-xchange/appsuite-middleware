@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,28 +49,41 @@
 
 package com.openexchange.html;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Before;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
+
 
 /**
- * {@link Bug31826Test}
+ * {@link AbstractSanitizing}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug31826Test extends AbstractSanitizing {
-    public Bug31826Test() {
-        super();
+public abstract class AbstractSanitizing {
+    private HtmlService service;
+
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
     }
-    @Test
-    public void testKeepUnicode() {
-        String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
-        String test = getHtmlService().sanitize(content, null, true, null, null);
 
-        Assert.assertEquals("Unexpected retur value.", "dfg \u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 dfg", test);
+    @After
+    public void tearDown() {
+        service = null;
+    }
 
-        content = "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 <>";
-        test = getHtmlService().htmlFormat(content, true, "--==--");
-
-        Assert.assertEquals("Unexpected retur value.", "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 &lt;&gt;", test);
+    protected HtmlService getHtmlService() {
+        return service;
     }
 }

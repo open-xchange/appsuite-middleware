@@ -50,12 +50,7 @@
 package com.openexchange.html;
 
 import static org.junit.Assert.assertNotNull;
-import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
  * Verifies that parsing HTML does not fail due to some special HTML content.
@@ -64,45 +59,19 @@ import com.openexchange.html.osgi.HTMLServiceActivator;
  * files add the content here and enable test in test suite.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug26789Test {
-
-    private HtmlService service;
-
-    public Bug26789Test() {
-        super();
-    }
-
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown() {
-        service = null;
-    }
-
+public class Bug26789Test extends AbstractSanitizing {
     @Test
     public void testForNullPointerException() {
         String content = content1;
-        String test = service.getConformHTML(content, "UTF-8");
+        String test = getHtmlService().getConformHTML(content, "UTF-8");
         assertNotNull(test);
-        test = service.htmlFormat(content);
+        test = getHtmlService().htmlFormat(content);
         assertNotNull(test);
 
         content = content2;
-        test = service.getConformHTML(content, "UTF-8");
+        test = getHtmlService().getConformHTML(content, "UTF-8");
         assertNotNull(test);
-        test = service.htmlFormat(content);
+        test = getHtmlService().htmlFormat(content);
         assertNotNull(test);
     }
 
@@ -2598,11 +2567,11 @@ public class Bug26789Test {
         sb.append("</head><body>TEST</body></html>");
 
         String content = sb.toString();
-        String test = service.getConformHTML(content, "UTF-8");
+        String test = getHtmlService().getConformHTML(content, "UTF-8");
         assertNotNull(test);
-        test = service.htmlFormat(content);
+        test = getHtmlService().htmlFormat(content);
         assertNotNull(test);
-        test = service.sanitize(content, null, true, new boolean[1], "aabb-");
+        test = getHtmlService().sanitize(content, null, true, new boolean[1], "aabb-");
         assertNotNull(test);
     }
 }

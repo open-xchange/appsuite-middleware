@@ -63,6 +63,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
@@ -79,6 +80,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since v7.8.0
  */
 public class JumpAction extends AbstractDriveAction {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JumpAction.class);
 
     public JumpAction() {
         super();
@@ -108,6 +111,9 @@ public class JumpAction extends AbstractDriveAction {
                 method = "preview";
             }
             HttpServletRequest request = requestData.optHttpServletRequest();
+            if (null == request) {
+                throw DriveExceptionCodes.IO_ERROR.create("Request must not be null");
+            }
             Cookie[] cookies = getCookies(request);
             Map<String, List<String>> headers = getHeaders(request);
             String client = getClient();
@@ -173,7 +179,12 @@ public class JumpAction extends AbstractDriveAction {
 
     private String getClient() throws OXException {
         ConfigurationService configService = getConfigService();
-        if (!configService.getProperty("com.openexchange.UIWebPath").contains("appsuite")) {
+        String uiWebPath = configService.getProperty("com.openexchange.UIWebPath");
+        if (null == uiWebPath) {
+            LOG.warn("Property com.openexchange.UIWebPath is unset.");
+            return "open-xchange-appsuite";
+        }
+        if (!uiWebPath.contains("appsuite")) {
             return "com.openexchange.ox.gui.dhtml";
         }
         return "open-xchange-appsuite";

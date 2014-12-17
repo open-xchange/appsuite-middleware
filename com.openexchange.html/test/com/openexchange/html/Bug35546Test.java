@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,28 +49,23 @@
 
 package com.openexchange.html;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
+
 /**
- * {@link Bug31826Test}
+ * {@link Bug35546Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug31826Test extends AbstractSanitizing {
-    public Bug31826Test() {
-        super();
-    }
+public class Bug35546Test extends AbstractSanitizing {
     @Test
-    public void testKeepUnicode() {
-        String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
-        String test = getHtmlService().sanitize(content, null, true, null, null);
-
-        Assert.assertEquals("Unexpected retur value.", "dfg \u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 dfg", test);
-
-        content = "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 <>";
-        test = getHtmlService().htmlFormat(content, true, "--==--");
-
-        Assert.assertEquals("Unexpected retur value.", "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 &lt;&gt;", test);
+    public void testKeepEmptyBreaksAfterConversion() {
+        String content = getHtmlService().getConformHTML("<p>Text before one empty line</p><p><br></p><p>Text after empty line.</p>", "UTF-8");
+        assertEquals("Unexpected return value", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n" +
+            "\r\n" +
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
+            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
+            " </head><body><p>Text before one empty line</p><p><br></p><p>Text after empty line.</p></body></html>", content);
     }
 }

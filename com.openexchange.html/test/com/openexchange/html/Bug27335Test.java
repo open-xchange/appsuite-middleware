@@ -49,53 +49,22 @@
 
 package com.openexchange.html;
 
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
  * {@link Bug27335Test}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Bug27335Test {
-
-    private HtmlService service;
-
-    public Bug27335Test() {
-        super();
-    }
-
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown() {
-        service = null;
-    }
-
+public class Bug27335Test extends AbstractSanitizing {
     @Test
     public void testFormatURL1() {
         String content = "blah http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275 blah";
 
-        String test = service.formatURLs(content, "aaa");
+        String test = getHtmlService().formatURLs(content, "aaa");
 
         final String regex = "<a[^>]+href=\"([^\"]+)\"[^>]+>(.*?)</a>";
         final Matcher m = Pattern.compile(regex).matcher(test);
@@ -115,7 +84,7 @@ public class Bug27335Test {
     public void testFormatURL2() {
         String content = "blah (http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275) blah";
 
-        String test = service.formatURLs(content, "aaa");
+        String test = getHtmlService().formatURLs(content, "aaa");
 
         final String regex = "<a[^>]+href=\"([^\"]+)\"[^>]+>(.*?)</a>";
         final Matcher m = Pattern.compile(regex).matcher(test);
@@ -135,7 +104,7 @@ public class Bug27335Test {
     public void testFormatURL3() {
         String content = "blah [http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275] blah";
 
-        String test = service.formatURLs(content, "aaa");
+        String test = getHtmlService().formatURLs(content, "aaa");
 
         final String regex = "<a[^>]+href=\"([^\"]+)\"[^>]+>(.*?)</a>";
         final Matcher m = Pattern.compile(regex).matcher(test);
@@ -155,7 +124,7 @@ public class Bug27335Test {
     public void testFormatURL4() {
         String content = "echo \"Re: http://support.open-xchange.com/~karl/hidden/itil/data/Page_1_1_1.htm (change Management)\"";
 
-        String test = service.formatURLs(content, "aaa");
+        String test = getHtmlService().formatURLs(content, "aaa");
 
         final String regex = "<a[^>]+href=\"([^\"]+)\"[^>]+>(.*?)</a>";
         final Matcher m = Pattern.compile(regex).matcher(test);
