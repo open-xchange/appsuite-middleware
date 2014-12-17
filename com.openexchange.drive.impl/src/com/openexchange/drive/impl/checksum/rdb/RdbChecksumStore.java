@@ -65,7 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.impl.DriveExceptionCodes;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.impl.checksum.ChecksumStore;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.checksum.FileChecksum;

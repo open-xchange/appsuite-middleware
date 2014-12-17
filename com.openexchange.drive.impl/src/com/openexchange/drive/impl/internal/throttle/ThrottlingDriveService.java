@@ -56,13 +56,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
-import com.openexchange.drive.impl.DriveExceptionCodes;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
+import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.impl.management.DriveConfig;
@@ -76,7 +77,6 @@ import com.openexchange.exception.OXException;
 public class ThrottlingDriveService implements DriveService {
 
     private final DriveService delegate;
-
     private final AtomicInteger currentSyncOperations;
 
     /**
@@ -160,6 +160,16 @@ public class ThrottlingDriveService implements DriveService {
         }
     }
 
+    @Override
+    public String getJumpRedirectUrl(DriveSession session, String path, String fileName, String method) throws OXException {
+        return delegate.getJumpRedirectUrl(session, path, fileName, method);
+    }
+
+    @Override
+    public DriveUtility getUtility() {
+        return delegate.getUtility();
+    }
+
     private void enterSyncOperation() throws OXException {
         int maxConcurrentSyncOperations = DriveConfig.getInstance().getMaxConcurrentSyncOperations();
         if (0 < maxConcurrentSyncOperations && maxConcurrentSyncOperations < currentSyncOperations.incrementAndGet()) {
@@ -167,13 +177,8 @@ public class ThrottlingDriveService implements DriveService {
         }
     }
 
-    public void leaveSyncOperation() {
+    private void leaveSyncOperation() {
         currentSyncOperations.decrementAndGet();
-    }
-
-    @Override
-    public String getJumpRedirectUrl(DriveSession session, String path, String fileName, String method) throws OXException {
-        return delegate.getJumpRedirectUrl(session, path, fileName, method);
     }
 
 }

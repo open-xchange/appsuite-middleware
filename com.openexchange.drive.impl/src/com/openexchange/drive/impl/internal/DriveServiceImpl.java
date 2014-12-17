@@ -61,11 +61,12 @@ import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveClientVersion;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSettings;
+import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.impl.DriveConstants;
-import com.openexchange.drive.impl.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.drive.DriveQuota;
@@ -506,6 +507,11 @@ public class DriveServiceImpl implements DriveService {
             mimeType = DriveUtils.determineMimeType(file);
         }
         return new JumpLinkGenerator(syncSession).getJumpLink(folderId, fileId, method, mimeType);
+    }
+
+    @Override
+    public DriveUtility getUtility() {
+        return DriveUtilityImpl.getInstance();
     }
 
 }

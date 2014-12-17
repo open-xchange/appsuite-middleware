@@ -64,7 +64,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.drive.impl.DriveConstants;
-import com.openexchange.drive.impl.DriveExceptionCodes;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.storage.DriveStorage;

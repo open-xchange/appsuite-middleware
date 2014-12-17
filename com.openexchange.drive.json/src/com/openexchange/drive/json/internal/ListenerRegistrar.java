@@ -65,7 +65,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
-import com.openexchange.drive.impl.DriveExceptionCodes;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.LongPollingListenerFactory;

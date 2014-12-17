@@ -178,5 +178,12 @@ public interface DriveService {
      */
     String getJumpRedirectUrl(DriveSession session, String path, String fileName, String method) throws OXException;
 
+    /**
+     * Gets a reference providing additional utility methods.
+     *
+     * @return The drive utilities
+     */
+    DriveUtility getUtility();
+
 }
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.impl;
+package com.openexchange.drive;
 
 import com.openexchange.i18n.LocalizableStrings;
 
