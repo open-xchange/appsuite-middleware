@@ -226,6 +226,8 @@ public abstract class OXUtilStorageInterface {
 
     public abstract boolean hasSpaceForAnotherContext(Filestore filestore) throws StorageException;
 
+    public abstract boolean hasSpaceForAnotherUser(Filestore filestore) throws StorageException;
+
     /**
      * Create a new maintenance reason in configdb.They are needed to disable a
      * context.

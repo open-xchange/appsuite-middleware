@@ -1017,7 +1017,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new OXContextException("Unable to disable Context " + ctx.getIdAsString());
             }
 
-            oxcox.disable(ctx, reason);
             retval = oxcox.getData(ctx);
 
             // Check equality
@@ -1054,6 +1053,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 });
 
                 // Schedule task
+                oxcox.disable(ctx, reason);
                 return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId(), ctx.getId());
             } catch (final StorageException e) {
                 throw new OXContextException(e);

@@ -444,6 +444,85 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public void enableUser(int userId, Context ctx) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con;
+        try {
+            con = cache.getConnectionForContext(contextId);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        try {
+            setUserEnabled(userId, contextId, true, con);
+        } finally {
+            if (con != null) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox write connection to pool!", exp);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void disableUser(int userId, Context ctx) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con;
+        try {
+            con = cache.getConnectionForContext(contextId);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        try {
+            setUserEnabled(userId, contextId, false, con);
+        } finally {
+            if (con != null) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox write connection to pool!", exp);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setUserEnabled(int userId, int contextId, boolean value, Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE user SET mailEnabled = ? WHERE cid = ? AND id = ?");
+            stmt.setBoolean(1, value);
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
+            stmt.executeUpdate();
+
+            // JCS
+            BundleContext context = AdminCache.getBundleContext();
+            if (null != context) {
+                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        CacheKey key = cacheService.newCacheKey(contextId, userId);
+                        Cache cache = cacheService.getCache("User");
+                        cache.remove(key);
+                    } catch (OXException e) {
+                        log.error("", e);
+                    }
+                }
+            }
+            // End of JCS
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
     public void change(final Context ctx, final User usrdata) throws StorageException {
         final int contextId = ctx.getId().intValue();
         final Connection con;

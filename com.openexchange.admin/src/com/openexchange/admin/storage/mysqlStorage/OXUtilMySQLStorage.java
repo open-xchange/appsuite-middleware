@@ -1120,6 +1120,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
+    public boolean hasSpaceForAnotherUser(Filestore filestore) throws StorageException {
+        return !isContextLimitReached(filestore) && enoughSpaceForContext(filestore);
+    }
+
+    @Override
     public boolean hasSpaceForAnotherContext(final Filestore filestore) throws StorageException {
         return !isContextLimitReached(filestore) && enoughSpaceForContext(filestore);
     }

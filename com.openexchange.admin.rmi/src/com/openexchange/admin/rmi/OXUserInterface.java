@@ -53,12 +53,14 @@ import java.rmi.RemoteException;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
@@ -262,6 +264,68 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchUserException
      */
     public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Moves a user's files from one storage to another.
+     * <p>
+     * This operation leaves quota usage unchanged and thus can be considered as the user-sensitive counterpart for <code>OXContextInterface.moveContextFilestore()</code>.
+     *
+     * @param ctx The context in which the user resides
+     * @param user The user
+     * @param dstFilestore The destination file storage
+     * @param credentials The credentials
+     * @return The job identifier which can be used for retrieving progress information.
+     * @throws StorageException If an error in the subsystems occurred.
+     * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If no such context exists
+     * @throws NoSuchFilestoreException If no file storage context exists
+     * @throws InvalidDataException If passed data is invalid
+     * @throws DatabaseUpdateException If update operation fails
+     * @throws NoSuchUserException If no such user exists
+     */
+    public int moveUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Moves a user's files from his own storage to the storage of specified master.
+     * <p>
+     * This operation is quota-aware and thus transfers current quota usage to master account as well.
+     *
+     * @param ctx The context in which the user resides
+     * @param user The user
+     * @param masterUser The master user account
+     * @param dstFilestore The destination file storage
+     * @param credentials The credentials
+     * @return The job identifier which can be used for retrieving progress information.
+     * @throws StorageException If an error in the subsystems occurred.
+     * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If no such context exists
+     * @throws NoSuchFilestoreException If no file storage context exists
+     * @throws InvalidDataException If passed data is invalid
+     * @throws DatabaseUpdateException If update operation fails
+     * @throws NoSuchUserException If no such user exists
+     */
+    public int moveUserFilestore2Master(Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Moves a user's files from a master account to his own storage.
+     * <p>
+     * This operation is quota-aware and thus transfers current quota usage from master account to user.
+     *
+     * @param ctx The context in which the user resides
+     * @param user The user
+     * @param masterUser The master user account
+     * @param dstFilestore The destination file storage
+     * @param credentials The credentials
+     * @return The job identifier which can be used for retrieving progress information.
+     * @throws StorageException If an error in the subsystems occurred.
+     * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If no such context exists
+     * @throws NoSuchFilestoreException If no file storage context exists
+     * @throws InvalidDataException If passed data is invalid
+     * @throws DatabaseUpdateException If update operation fails
+     * @throws NoSuchUserException If no such user exists
+     */
+    public int moveUserFilestoreFromMaster(Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Manipulate user data within the given context.
