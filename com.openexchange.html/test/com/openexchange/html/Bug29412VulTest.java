@@ -49,12 +49,7 @@
 
 package com.openexchange.html;
 
-import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
 
 
 /**
@@ -62,35 +57,10 @@ import com.openexchange.html.osgi.HTMLServiceActivator;
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug29412VulTest {
-    private HtmlService service;
-
-    public Bug29412VulTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown() {
-        service = null;
-    }
-
+public class Bug29412VulTest extends AbstractSanitizing {
     @Test
     public void testInsecureHref() {
         String content = "http://www.ox.io/publications/infostore/141063539/%3Cscript%3Ealert%28%27Hello%27%29;%3C/script%3E?secret=49844a9e47566b68602e8cc88b50ebfa";
-        AssertionHelper.assertSanitizedDoesNotContain(service, content, "%3Cscript%3Ealert%28%27Hello%27%29;%3C/script%3E");
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "%3Cscript%3Ealert%28%27Hello%27%29;%3C/script%3E");
     }
 }

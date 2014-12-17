@@ -51,43 +51,14 @@ package com.openexchange.html;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
  * {@link OwaspTest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class OwaspTest {
-
-    private HtmlService service;
-
-    public OwaspTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked") final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked") final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown() {
-        service = null;
-    }
-
+public class OwaspTest extends AbstractSanitizing {
     @Test
     public void test() {
         List<XSSHolder> xss = new LinkedList<XSSHolder>();
@@ -115,7 +86,7 @@ public class OwaspTest {
         xss.add(new XSSHolder("<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>", AssertExpression.NOT_CONTAINED, "SRC=javascript:alert(String.fromCharCode(88,83,83))"));
 
         for(XSSHolder xssE : xss) {
-            AssertionHelper.assertSanitized(service, xssE.getXssAttack(), xssE.getMalicious(), xssE.getAssertExpression());
+            AssertionHelper.assertSanitized(getHtmlService(), xssE.getXssAttack(), xssE.getMalicious(), xssE.getAssertExpression());
         }
     }
 }

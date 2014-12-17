@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,28 +49,35 @@
 
 package com.openexchange.html;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
+
 /**
- * {@link Bug31826Test}
+ * {@link Bug29892Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug31826Test extends AbstractSanitizing {
-    public Bug31826Test() {
-        super();
-    }
+public class Bug29892Test extends AbstractSanitizing {
     @Test
-    public void testKeepUnicode() {
-        String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
-        String test = getHtmlService().sanitize(content, null, true, null, null);
+    public void testIgnoreHrefBaseTag() {
+        String content = getHtmlService().checkBaseTag("<html>\n" +
+            "<head>" +
+            "<base href=\"https://bugs.open-xchange.com/\" /> \n" +
+            "<style type=\"text/css\">\n" +
+            "table {\n" +
+            "font-size: 9pt;\n" +
+            "}\n" +
+            "</style>\n" +
+            "</head></html>", false);
 
-        Assert.assertEquals("Unexpected retur value.", "dfg \u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 dfg", test);
-
-        content = "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 <>";
-        test = getHtmlService().htmlFormat(content, true, "--==--");
-
-        Assert.assertEquals("Unexpected retur value.", "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 &lt;&gt;", test);
+        assertEquals("Base tag", "<html>\n" +
+            "<head> \n" +
+            "<style type=\"text/css\">\n" +
+            "table {\n" +
+            "font-size: 9pt;\n" +
+            "}\n" +
+            "</style>\n" +
+            "</head></html>",content);
     }
 }

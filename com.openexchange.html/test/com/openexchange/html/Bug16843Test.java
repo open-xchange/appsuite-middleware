@@ -50,12 +50,7 @@
 package com.openexchange.html;
 
 import static org.junit.Assert.assertEquals;
-import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
 
 
 /**
@@ -63,32 +58,11 @@ import com.openexchange.html.osgi.HTMLServiceActivator;
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug16843Test {
-    private HtmlService service;
-
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown() {
-        service = null;
-    }
-
+public class Bug16843Test extends AbstractSanitizing {
     @Test
     public void testLinkGeneration() {
         String link = "(http://www.google.de)";
-        String formattedLink = service.formatHrefLinks(link);
-        assertEquals("Link " + link + "not correctly formatted, was: " + formattedLink, "(<a href=\"http://www.google.de\" target=\"_blank\">http://www.google.de</a>)", formattedLink);
+        String formattedLink = getHtmlService().formatHrefLinks(link);
+        assertEquals("Link " + link + "not correctly formatted", "(<a href=\"http://www.google.de\" target=\"_blank\">http://www.google.de</a>)", formattedLink);
     }
 }

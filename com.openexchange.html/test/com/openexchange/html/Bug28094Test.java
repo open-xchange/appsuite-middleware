@@ -49,46 +49,15 @@
 
 package com.openexchange.html;
 
-import java.util.Map;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
  * {@link Bug28094Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug28094Test {
-
-    private HtmlService service;
-
-    public Bug28094Test() {
-        super();
-    }
-
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown() {
-        service = null;
-    }
-
+public class Bug28094Test extends AbstractSanitizing {
     @Test
     public void testInsecureHref() {
         String content = "<a href=\"http://www.raumausstatter-innung-schwalm-eder.de/"
@@ -101,7 +70,7 @@ public class Bug28094Test {
             + "</span>"
             + "</a>";
 
-        String test = service.sanitize(content, null, true, null, null);
+        String test = getHtmlService().sanitize(content, null, true, null, null);
 
         Assert.assertTrue("Anchor tag not properly sanitized.", test.indexOf("<a>") >= 0);
         Assert.assertTrue("Anchor tag not properly sanitized.", test.indexOf("href=\"") < 0);

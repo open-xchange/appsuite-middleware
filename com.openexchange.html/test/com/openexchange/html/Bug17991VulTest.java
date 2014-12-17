@@ -49,12 +49,7 @@
 
 package com.openexchange.html;
 
-import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
 
 
 /**
@@ -62,28 +57,7 @@ import com.openexchange.html.osgi.HTMLServiceActivator;
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug17991VulTest {
-    private HtmlService service;
-
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown() {
-        service = null;
-    }
-
+public class Bug17991VulTest extends AbstractSanitizing {
     @Test
     public void testSanitize() {
         String javaScript = "<script =" +
@@ -124,6 +98,6 @@ public class Bug17991VulTest {
             "</script>";
         String content = "<head>" + javaScript + "</head>";
 
-        AssertionHelper.assertSanitizedDoesNotContain(service, content, javaScript);
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, javaScript);
     }
 }
