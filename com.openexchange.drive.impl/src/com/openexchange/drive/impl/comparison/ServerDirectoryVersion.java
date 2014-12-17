@@ -52,7 +52,7 @@ package com.openexchange.drive.impl.comparison;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.drive.DirectoryVersion;
-import com.openexchange.drive.impl.DriveExceptionCodes;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.internal.PathNormalizer;

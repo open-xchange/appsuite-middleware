@@ -1869,8 +1869,60 @@ public final class IMAPCommandsCollection {
      * @return An array of <code>int</code> representing sorted messages' sequence numbers
      * @throws MessagingException
      */
-    public static int[] getServerSortList(final IMAPFolder folder, final String sortCrit, final int[] toSort) throws MessagingException {
-        return getServerSortList(folder, sortCrit, null == toSort ? RANGE_ALL : IMAPNumArgSplitter.getSeqNumArg(toSort, false, false, -1));
+    public static int[] getServerSortList(IMAPFolder folder, String sortCrit, int[] toSort) throws MessagingException {
+        if (null == toSort) {
+            return getServerSortList(folder, sortCrit, RANGE_ALL);
+        }
+
+        // Need to build message range argument
+        String[] numArgs = IMAPNumArgSplitter.getSeqNumArg(toSort, false, true, -1);
+        if (1 == numArgs.length) {
+            return getServerSortList(folder, sortCrit, numArgs);
+        }
+
+        // The messages to sort do not fit into a single command -- Sort them all
+        int[] allSorted = getServerSortList(folder, sortCrit, RANGE_ALL);
+
+        class SeqNumOrdinal implements Comparable<SeqNumOrdinal> {
+            final int seqNum;
+            final int ordinal;
+
+            SeqNumOrdinal(int seqNum, int ordinal) {
+                super();
+                this.seqNum = seqNum;
+                this.ordinal = ordinal;
+            }
+
+            @Override
+            public int compareTo(SeqNumOrdinal o) {
+                int thisOrdinal = ordinal;
+                int otherOrdinal = o.ordinal;
+                return thisOrdinal < otherOrdinal ? -1 : (thisOrdinal == otherOrdinal ? 0 : 1);
+            }
+        }
+
+        int length = toSort.length;
+        List<SeqNumOrdinal> list = new ArrayList<SeqNumOrdinal>(length);
+        for (int i = 0; i < length; i++) {
+            int seqNum = toSort[i];
+            list.add(new SeqNumOrdinal(seqNum, getIndexFor(seqNum, allSorted)));
+        }
+        Collections.sort(list);
+
+        int[] sorted = new int[length];
+        for (int i = 0; i < length; i++) {
+            sorted[i] = list.get(i).seqNum;
+        }
+        return sorted;
+    }
+
+    private static int getIndexFor(int seqNum, int[] seqNums) {
+        for (int i = 0; i < seqNums.length; i++) {
+            if (seqNum == seqNums[i]) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**

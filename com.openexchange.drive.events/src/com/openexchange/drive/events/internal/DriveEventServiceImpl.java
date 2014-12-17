@@ -64,10 +64,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.service.event.Event;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.java.Strings;
@@ -93,6 +94,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     private final int consolidationTime;
     private final int maxDelayTime ;
     private final int defaultDelayTime;
+    private final DriveUtility driveUtility;
 
     /**
      * Initializes a new {@link DriveEventServiceImpl}.
@@ -103,6 +105,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         super();
         this.publishers = new CopyOnWriteArrayList<DriveEventPublisher>();
         this.folderBuffers = new ConcurrentHashMap<Integer, FolderBuffer>();
+        this.driveUtility = DriveEventServiceLookup.getService(DriveService.class, true).getUtility();
         ConfigurationService configService = DriveEventServiceLookup.getService(ConfigurationService.class, true);
         this.consolidationTime = configService.getIntProperty("com.openexchange.drive.events.consolidationTime", 1000);
         this.maxDelayTime = configService.getIntProperty("com.openexchange.drive.events.maxDelayTime", 10000);
@@ -177,8 +180,8 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
-        String fileName = (String)event.getProperty(FILE_NAME);
-        if (false == Strings.isEmpty(fileName) && (DriveUtils.isInvalidFileName(fileName) || DriveUtils.isIgnoredFileName(fileName))) {
+        String fileName = (String) event.getProperty(FILE_NAME);
+        if (false == Strings.isEmpty(fileName) && (driveUtility.isInvalidFileName(fileName) || driveUtility.isIgnoredFileName(fileName))) {
             LOG.trace("Skipping event processing for ignored file: {}", fileName);
             return;
         }

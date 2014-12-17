@@ -236,9 +236,11 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
             StackTraceElement traceElement = trace[0];
 
             // Kept in socket read and exceeded doubled max. request age
+            /*-
             if (traceElement.isNativeMethod() && "socketRead0".equals(traceElement.getMethodName()) && entry.getAge() > (requestMaxAge << 1)) {
                 return true;
             }
+            */
 
             // TODO: More interruptible traces?
             return false;

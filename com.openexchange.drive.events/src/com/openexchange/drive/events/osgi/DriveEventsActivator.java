@@ -57,6 +57,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.DriveService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.internal.DriveEventServiceImpl;
 import com.openexchange.drive.events.internal.DriveEventServiceLookup;
@@ -91,7 +92,7 @@ public class DriveEventsActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class, TimerService.class,
-            ConfigurationService.class, ThreadPoolService.class };
+            ConfigurationService.class, ThreadPoolService.class, DriveService.class };
     }
 
     @Override

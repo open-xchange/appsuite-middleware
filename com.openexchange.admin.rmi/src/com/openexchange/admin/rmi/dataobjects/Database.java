@@ -149,27 +149,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         this.scheme = schema;
     }
 
-    /**
-     * @param login
-     * @param password
-     * @param driver
-     * @param url
-     * @param id
-     * @param displayname
-     */
-    public Database(final String login, final String password, final String driver, final String url, final int id, final String displayname) {
-        super();
-        this.login = login;
-        this.password = password;
-        this.driver = driver;
-        this.url = url;
-        this.id = Integer.valueOf(id);
-        this.name = displayname;
-    }
-
-    /**
-     *
-     */
     public Database() {
         super();
         init();
@@ -354,22 +333,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         }
         ret.append(" ]");
         return ret.toString();
-    }
-
-    /**
-     * @param login
-     * @param password
-     * @param driver
-     * @param url
-     * @param scheme
-     */
-    public Database(final String login, final String password, final String driver, final String url, final String scheme) {
-        super();
-        this.login = login;
-        this.password = password;
-        this.driver = driver;
-        this.url = url;
-        this.scheme = scheme;
     }
 
     /**

@@ -61,4 +61,3 @@ Import-Package: com.openexchange.ajax.container,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j
-Export-Package: com.openexchange.drive.impl
