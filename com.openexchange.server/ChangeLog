@@ -1,3 +1,7 @@
+* 2014-12-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35889: Consider parent folder identifier when retrieving a file for publication
+
 * 2014-12-17 - martin.herfurth@open-xchange.com
 
  - Fix for bug 35687: Correct alarm value for appointments in shared folders.
