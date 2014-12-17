@@ -1169,6 +1169,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue Dec 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-10
 * Fri Dec 12 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.6.2 release
 * Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1177,6 +1179,8 @@ Build for patch 2014-12-10
 Build for patch 2014-12-15
 * Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-15
+* Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-10
 * Fri Dec 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.6.2 release
 * Thu Dec 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
