@@ -61,7 +61,6 @@ import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.osgi.Services;
 import com.openexchange.html.tools.HTMLUtils;
 
-
 /**
  * {@link HtmlServices} - A utility class for {@link HtmlService}.
  *

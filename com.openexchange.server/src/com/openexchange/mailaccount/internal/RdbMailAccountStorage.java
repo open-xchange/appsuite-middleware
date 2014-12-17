@@ -2359,7 +2359,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private boolean isMailTransportAuth(MailAccountDescription mailAccount,  int userId, int contextId, Connection con) throws OXException {
+    private boolean isMailTransportAuth(MailAccountDescription mailAccount, int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
