@@ -69,6 +69,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.mail.Message;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -115,6 +116,8 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
+import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -1545,35 +1548,27 @@ public final class MailFolderStorage implements FolderStorage {
                     try {
                         otherAccess = MailAccess.getInstance(session, parentAccountID);
                         otherAccess.connect();
-                        final String newParent = mfd.getParentFullname();
+                        String newParent = mfd.getParentFullname();
                         // Check if parent mail folder exists
-                        final MailFolder p = otherAccess.getFolderStorage().getFolder(newParent);
+                        MailFolder p = otherAccess.getFolderStorage().getFolder(newParent);
                         // Check permission on new parent
                         final MailPermission ownPermission = p.getOwnPermission();
                         if (!ownPermission.canCreateSubfolders()) {
                             throw MailExceptionCode.NO_CREATE_ACCESS.create(newParent);
                         }
                         // Check for duplicate
-                        final MailFolder[] tmp = otherAccess.getFolderStorage().getSubfolders(newParent, true);
-                        final String lookFor = mfd.containsName() ? mfd.getName() : oldName;
-                        for (final MailFolder sub : tmp) {
+                        MailFolder[] tmp = otherAccess.getFolderStorage().getSubfolders(newParent, true);
+                        String lookFor = mfd.containsName() ? mfd.getName() : oldName;
+                        for (MailFolder sub : tmp) {
                             if (sub.getName().equals(lookFor)) {
                                 throw MailExceptionCode.DUPLICATE_FOLDER.create(lookFor);
                             }
                         }
                         // Copy
-                        final String destFullname =
-                            fullCopy(
-                                mailAccess,
-                                fullname,
-                                otherAccess,
-                                newParent,
-                                p.getSeparator(),
-                                storageParameters.getUserId(),
-                                otherAccess.getMailConfig().getCapabilities().hasPermissions());
+                        String destFullname = fullCopy(mailAccess, fullname, otherAccess, newParent, p.getSeparator(), storageParameters.getUserId(), otherAccess.getMailConfig().getCapabilities().hasPermissions());
                         postEventRemote(parentAccountID, newParent, false, storageParameters);
                         // Delete source
-                        final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
+                        Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
                         mailAccess.getFolderStorage().deleteFolder(fullname, true);
                         // Perform other updates
                         otherAccess.getFolderStorage().updateFolder(destFullname, mfd);
@@ -1662,37 +1657,78 @@ public final class MailFolderStorage implements FolderStorage {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
-        final String destFullname = destAccess.getFolderStorage().createFolder(mfd);
-        // Copy messages
-        final MailMessage[] msgs =
-            srcAccess.getMessageStorage().getAllMessages(
-                srcFullname,
-                null,
-                MailSortField.RECEIVED_DATE,
-                OrderDirection.ASC,
-                new MailField[] { MailField.FULL });
-        final IMailMessageStorage destMessageStorage = destAccess.getMessageStorage();
-        // Append messages to destination account
-        /* final String[] mailIds = */destMessageStorage.appendMessages(destFullname, msgs);
-        /*-
-         *
-        // Ensure flags
-        final String[] arr = new String[1];
-        for (int i = 0; i < msgs.length; i++) {
-            final MailMessage m = msgs[i];
-            final String mailId = mailIds[i];
-            if (null != m && null != mailId) {
-                arr[0] = mailId;
-                // System flags
-                destMessageStorage.updateMessageFlags(destFullname, arr, m.getFlags(), true);
-                // Color label
-                if (m.containsColorLabel() && m.getColorLabel() != MailMessage.COLOR_LABEL_NONE) {
-                    destMessageStorage.updateMessageColorLabel(destFullname, arr, m.getColorLabel());
+
+        // Create destination folder
+        String destFullname = destAccess.getFolderStorage().createFolder(mfd);
+
+        // Message storages
+        IMailMessageStorage srcMessageStorage = srcAccess.getMessageStorage();
+        IMailMessageStorage destMessageStorage = destAccess.getMessageStorage();
+
+        // Fetch IDs
+        MailMessage[] msgs = srcMessageStorage.getAllMessages(srcFullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new MailField[] { MailField.ID });
+        IMailMessageStorageExt storageExt = srcMessageStorage instanceof IMailMessageStorageExt ? (IMailMessageStorageExt) srcMessageStorage : null;
+
+        // Check for MIME support
+        if ((srcMessageStorage instanceof IMailMessageStorageMimeSupport) && (destMessageStorage instanceof IMailMessageStorageMimeSupport)) {
+            IMailMessageStorageMimeSupport srcMimeSupport = (IMailMessageStorageMimeSupport) srcMessageStorage;
+            IMailMessageStorageMimeSupport dstMimeSupport = (IMailMessageStorageMimeSupport) destMessageStorage;
+
+            int len = msgs.length;
+            int limit = 15;
+            int offset = 0;
+            List<Message> arr = new ArrayList<Message>(limit);
+
+            do {
+                int end = offset + limit;
+                if (end > len) {
+                    end = len;
                 }
-            }
+
+                arr.clear();
+                for (int i = offset; i < end; i++) {
+                    String mailId = msgs[i].getMailId();
+                    arr.add(srcMimeSupport.getMimeMessage(srcFullname, mailId, false));
+                }
+                dstMimeSupport.appendMimeMessages(destFullname, arr.toArray(new Message[arr.size()]));
+
+                if (null != storageExt) {
+                    storageExt.clearCache();
+                }
+
+                offset = end;
+            } while (offset < len);
+        } else {
+            int len = msgs.length;
+            int limit = 15;
+            int offset = 0;
+            List<String> ids = new ArrayList<String>(limit);
+
+            do {
+                int end = offset + limit;
+                if (end > len) {
+                    end = len;
+                }
+
+                // Copy messages
+                ids.clear();
+                for (int i = offset; i < end; i++) {
+                    ids.add(msgs[i].getMailId());
+                }
+                MailMessage[] chunk = srcMessageStorage.getMessages(srcFullname, ids.toArray(new String[ids.size()]), new MailField[] { MailField.FULL });
+
+                // Append messages to destination account
+                destMessageStorage.appendMessages(destFullname, chunk);
+
+                if (null != storageExt) {
+                    storageExt.clearCache();
+                }
+
+                offset = end;
+            } while (offset < len);
         }
-         */
-        // Iterate subfolders
+
+        // Iterate sub-folders
         final MailFolder[] tmp = srcAccess.getFolderStorage().getSubfolders(srcFullname, true);
         for (final MailFolder element : tmp) {
             fullCopy(srcAccess, element.getFullname(), destAccess, destFullname, destSeparator, user, hasPermissions);

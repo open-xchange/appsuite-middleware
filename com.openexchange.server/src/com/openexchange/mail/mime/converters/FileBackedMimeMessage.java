@@ -50,12 +50,16 @@
 package com.openexchange.mail.mime.converters;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.SharedInputStream;
 import javax.mail.util.SharedFileInputStream;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeCleanUp;
 
 /**
@@ -64,6 +68,31 @@ import com.openexchange.mail.mime.MimeCleanUp;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileBackedMimeMessage extends MimeMessage implements MimeCleanUp {
+
+    /**
+     * Flushes passed input stream to denoted file
+     *
+     * @param in The input stream to write
+     * @param tempFile The target file
+     * @throws IOException If an I/O error occurs
+     */
+    public static void writeToFile(InputStream in, File tempFile) throws IOException {
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(tempFile);
+            int len = 8192;
+            byte[] buf = new byte[len];
+            for (int read; (read = in.read(buf, 0, len)) > 0;) {
+                out.write(buf, 0, read);
+            }
+            out.flush();
+        } finally {
+            Streams.close(out);
+        }
+
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------
 
     /** The backing file */
     private File tempFile;
@@ -90,6 +119,28 @@ public class FileBackedMimeMessage extends MimeMessage implements MimeCleanUp {
     public FileBackedMimeMessage(Session session, File tempFile, Date receivedDate) throws MessagingException, IOException {
         super(session, new SharedFileInputStream(tempFile));
         this.tempFile = tempFile;
+        this.receivedDate = receivedDate;
+    }
+
+    /**
+     * Initializes a new {@link FileBackedMimeMessage}.
+     *
+     * @throws IOException If an I/O error occurs
+     * @throws MessagingException If message cannot be parsed
+     */
+    public FileBackedMimeMessage(Session session, SharedInputStream sharedIn) throws MessagingException {
+        this(session, sharedIn, null);
+    }
+
+    /**
+     * Initializes a new {@link FileBackedMimeMessage}.
+     *
+     * @throws IOException If an I/O error occurs
+     * @throws MessagingException If message cannot be parsed
+     */
+    public FileBackedMimeMessage(Session session, SharedInputStream sharedIn, Date receivedDate) throws MessagingException {
+        super(session, (InputStream) sharedIn);
+        this.tempFile = null;
         this.receivedDate = receivedDate;
     }
 

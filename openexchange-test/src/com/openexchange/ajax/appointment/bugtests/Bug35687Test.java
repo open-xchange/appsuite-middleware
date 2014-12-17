@@ -47,34 +47,75 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.ajax.appointment.bugtests;
 
-import java.util.Set;
-import java.util.TreeSet;
-import com.openexchange.osgi.util.RankedService;
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.List;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.FolderTestManager;
 
 /**
- * {@link DefaultServiceProvider}
+ * {@link Bug35687Test}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class DefaultServiceProvider<S> implements ServiceProvider<S> {
+public class Bug35687Test extends AbstractAJAXSession {
 
-    private final Set<RankedService<S>> set;
+    private CalendarTestManager ctm;
+    private FolderTestManager ftm;
+    private AJAXClient client2;
+    private FolderObject folder;
+    private Appointment app;
 
-    public DefaultServiceProvider() {
-        super();
-        set = new TreeSet<RankedService<S>>();
+    public Bug35687Test(String name) {
+        super(name);
     }
 
     @Override
-    public S getService() {
-        return set.isEmpty() ? null : set.iterator().next().service;
+    public void setUp() throws Exception {
+        super.setUp();
+
+        client2 = new AJAXClient(User.User2);
+
+        ctm = new CalendarTestManager(client);
+        ftm = new FolderTestManager(client);
+        folder = ftm.generateSharedFolder("Bug35687Folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId(), client2.getValues().getUserId());
+        folder = ftm.insertFolderOnServer(folder);
+
+        ctm.setClient(client2);
+
+        app = new Appointment();
+        app.setTitle("Bug 35687 Test");
+        app.setStartDate(D("16.12.2014 08:00"));
+        app.setEndDate(D("16.12.2014 09:00"));
+        app.setParentFolderID(folder.getObjectID());
+        app.setAlarm(15);
+        app.setIgnoreConflicts(true);
+
+        app = ctm.insert(app);
+        System.out.println("hello");
+    }
+
+    public void testBug35687() throws Exception {
+        Appointment loaded = ctm.get(app);
+        assertEquals("Wrong alarm value", 15, loaded.getAlarm());
+
+        List<Appointment> listAppointment = ctm.list(new ListIDs(folder.getObjectID(), app.getObjectID()), new int[] { Appointment.ALARM });
+        assertTrue("Missing alarm value for list request.", listAppointment.get(0).containsAlarm());
+        assertEquals("Wrong alarm value for list request.", 15, listAppointment.get(0).getAlarm());
     }
 
     @Override
-    public void addService(S service, int ranking) {
-        set.add(new RankedService<S>(service, ranking));
+    public void tearDown() throws Exception {
+        ctm.cleanUp();
+        ftm.cleanUp();
+        super.tearDown();
     }
 
 }
