@@ -57,7 +57,6 @@ import org.junit.Test;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
 
-
 /**
  * {@link Bug16800Test}
  *
@@ -87,8 +86,8 @@ public class Bug16800Test {
 
     @Test
     public void testPunycodeLinkGeneration() {
-        String link = "http://schnösel.ws";
+        String link = "http://schn\u00f6sel.ws";
         String formattedLink = service.formatHrefLinks(link);
-        assertEquals("Link " + link + "not correctly formatted, was: " + formattedLink, "<a href=\"http://xn--schnsel-d1a.ws\" target=\"_blank\">http://schnösel.ws</a>", formattedLink);
+        assertEquals("Link " + link + "not correctly formatted, was: " + formattedLink, "<a href=\"http://xn--schnsel-d1a.ws\" target=\"_blank\">http://schn\u00f6sel.ws</a>", formattedLink);
     }
 }
