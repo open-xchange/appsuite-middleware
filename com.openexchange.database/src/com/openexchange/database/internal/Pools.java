@@ -51,13 +51,12 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -69,35 +68,14 @@ public final class Pools implements Runnable {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Pools.class);
 
-    private final Runnable cleaner;
-    private final Queue<PoolLifeCycle> lifeCycles;
-    private final ConcurrentMap<Integer, ConnectionPool> pools;
+    private final List<PoolLifeCycle> lifeCycles = new ArrayList<PoolLifeCycle>(2);
 
-    /**
-     * Initializes a new instance.
-     *
-     * @param timer The timer used to schedule clean-up task
-     */
-    Pools(Timer timer) {
+    private final Lock poolsLock = new ReentrantLock(true);
+
+    private final Map<Integer, ConnectionPool> pools = new HashMap<Integer, ConnectionPool>();
+
+    Pools(final Timer timer) {
         super();
-        lifeCycles = new ConcurrentLinkedQueue<PoolLifeCycle>();
-        pools = new ConcurrentHashMap<Integer, ConnectionPool>();
-
-        cleaner = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final Thread thread = Thread.currentThread();
-                    final String origName = thread.getName();
-                    thread.setName("PoolsCleaner");
-                    Pools.this.run();
-                    thread.setName(origName);
-                } catch (Throwable t) {
-                    LOG.error("", t);
-                }
-            }
-        };
-
         timer.addTask(cleaner);
     }
 
@@ -105,8 +83,13 @@ public final class Pools implements Runnable {
      * @return an array with all connection pools.
      */
     ConnectionPool[] getPools() {
-        List<ConnectionPool> retval = new ArrayList<ConnectionPool>();
-        retval.addAll(pools.values());
+        final List<ConnectionPool> retval = new ArrayList<ConnectionPool>();
+        poolsLock.lock();
+        try {
+            retval.addAll(pools.values());
+        } finally {
+            poolsLock.unlock();
+        }
         return retval.toArray(new ConnectionPool[retval.size()]);
     }
 
@@ -115,47 +98,71 @@ public final class Pools implements Runnable {
      * @throws OXException if creating the pool fails.
      */
     ConnectionPool getPool(final int poolId) throws OXException {
-        ConnectionPool retval = pools.get(I(poolId));
-        if (null == retval) {
-            ConnectionPool connectionPool = null;
-            for (Iterator<PoolLifeCycle> it = lifeCycles.iterator(); null == connectionPool && it.hasNext();) {
-                PoolLifeCycle lifeCycle = it.next();
-                connectionPool = lifeCycle.create(poolId);
-            }
-
-            if (null == connectionPool) {
-                throw DBPoolingExceptionCodes.NO_DBPOOL.create(I(poolId));
-            }
-
-            retval = pools.putIfAbsent(I(poolId), connectionPool);
+        ConnectionPool retval;
+        poolsLock.lock();
+        try {
+            retval = pools.get(I(poolId));
             if (null == retval) {
-                retval = connectionPool;
+                for (final PoolLifeCycle lifeCycle : lifeCycles) {
+                    retval = lifeCycle.create(poolId);
+                    if (null != retval) {
+                        break;
+                    }
+                }
+                if (null == retval) {
+                    throw DBPoolingExceptionCodes.NO_DBPOOL.create(I(poolId));
+                }
+                pools.put(I(poolId), retval);
             }
+        } finally {
+            poolsLock.unlock();
         }
         return retval;
     }
 
+    private final Runnable cleaner = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                final Thread thread = Thread.currentThread();
+                final String origName = thread.getName();
+                thread.setName("PoolsCleaner");
+                Pools.this.run();
+                thread.setName(origName);
+            } catch (final Throwable t) {
+                LOG.error("", t);
+            }
+        }
+    };
+
     @Override
     public void run() {
         LOG.trace("Starting cleaner run.");
-
-        for (Iterator<Map.Entry<Integer, ConnectionPool>> iter = pools.entrySet().iterator(); iter.hasNext();) {
-            Map.Entry<Integer, ConnectionPool> entry = iter.next();
-            ConnectionPool pool = entry.getValue();
-            if (pool.isEmpty()) {
-                iter.remove();
-                boolean destroyed = false;
-                for (Iterator<PoolLifeCycle> it = lifeCycles.iterator(); !destroyed && it.hasNext();) {
-                    PoolLifeCycle lifeCycle = it.next();
-                    destroyed = lifeCycle.destroy(entry.getKey().intValue());
-                }
-                if (!destroyed) {
-                    LOG.error("", DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey()));
+        poolsLock.lock();
+        try {
+            final Iterator<Map.Entry<Integer, ConnectionPool>> iter = pools.entrySet().iterator();
+            while (iter.hasNext()) {
+                final Map.Entry<Integer, ConnectionPool> entry = iter.next();
+                final ConnectionPool pool = entry.getValue();
+                if (pool.isEmpty()) {
+                    iter.remove();
+                    boolean destroyed = false;
+                    for (final PoolLifeCycle lifeCycle : lifeCycles) {
+                        destroyed = lifeCycle.destroy(entry.getKey().intValue());
+                        if (destroyed) {
+                            break;
+                        }
+                    }
+                    if (!destroyed) {
+                        final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey());
+                        LOG.error("", e);
+                    }
                 }
             }
+        } finally {
+            poolsLock.unlock();
         }
-
-        LOG.trace("Cleaner run done.");
+        LOG.trace("Cleaner run ending.");
     }
 
     void start(final Timer timer) {
@@ -168,18 +175,24 @@ public final class Pools implements Runnable {
 
     void stop(final Timer timer) {
         timer.removeTask(cleaner);
-
-        for (Map.Entry<Integer, ConnectionPool> entry : pools.entrySet()) {
-            boolean destroyed = false;
-            for (Iterator<PoolLifeCycle> it = lifeCycles.iterator(); !destroyed && it.hasNext();) {
-                PoolLifeCycle lifeCycle = it.next();
-                destroyed = lifeCycle.destroy(entry.getKey().intValue());
+        poolsLock.lock();
+        try {
+            for (final Map.Entry<Integer, ConnectionPool> entry : pools.entrySet()) {
+                boolean destroyed = false;
+                for (final PoolLifeCycle lifeCycle : lifeCycles) {
+                    destroyed = lifeCycle.destroy(entry.getKey().intValue());
+                    if (destroyed) {
+                        break;
+                    }
+                }
+                if (!destroyed) {
+                    final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey());
+                    LOG.error("", e);
+                }
             }
-            if (!destroyed) {
-                LOG.error("", DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey()));
-            }
+            pools.clear();
+        } finally {
+            poolsLock.unlock();
         }
-        pools.clear();
     }
-
 }
