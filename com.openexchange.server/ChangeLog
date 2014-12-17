@@ -1,3 +1,7 @@
+* 2014-12-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35889: Consider parent folder identifier when retrieving a file for publication
+
 * 2014-12-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 35641: Do not perform check for duplicate transport account in case transport server credentials are supposed to be taken from the mail settings
