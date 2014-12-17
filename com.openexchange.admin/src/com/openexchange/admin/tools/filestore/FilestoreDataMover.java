@@ -145,7 +145,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     * Creates a new instance appropriate for moving the files for a single user out off a master user' storage into its own one.
+     * Creates a new instance appropriate for moving files from a context to a dedicated user storage
      * <p>
      * <img src="./drive-userstorage.png" alt="OX Drive Stand-Alone">
      *
