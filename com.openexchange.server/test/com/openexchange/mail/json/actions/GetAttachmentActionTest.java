@@ -55,8 +55,12 @@ import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.AJAXServlet;
@@ -65,10 +69,12 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.strings.BasicTypesStringParser;
@@ -81,11 +87,25 @@ import com.openexchange.tools.strings.StringParser;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GetAttachmentAction.class, AbstractMailAction.class, MailRequest.class})
+@PrepareForTest({GetAttachmentAction.class, AbstractMailAction.class, MailRequest.class, MailProperties.class, MessageUtility.class})
 public class GetAttachmentActionTest {
 
     public GetAttachmentActionTest() {
         super();
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        PowerMockito.mockStatic(MailProperties.class);
+        PowerMockito.mockStatic(MessageUtility.class);
+
+        PowerMockito.when(MessageUtility.readMailPart((MailPart)Matchers.any(), Matchers.anyString())).thenReturn("MailPartContent_but_I_am_not_in_the_mood_to_get_a_correct_content_example");
+
+        MailProperties mailProperties = PowerMockito.mock(MailProperties.class);
+        PowerMockito.when(mailProperties.getDefaultMimeCharset()).thenReturn("UTF-8");
+        PowerMockito.when(MailProperties.getInstance()).thenReturn(mailProperties);
     }
 
     /**
