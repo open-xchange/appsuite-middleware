@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.cache.osgi;
 import static com.openexchange.folderstorage.cache.CacheServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -254,7 +255,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     if (FolderEventConstants.TOPIC_IDENTIFIERS.equals(event.getTopic())) {
                         final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
                         final String oldFolder = (String) event.getProperty(FolderEventConstants.PROPERTY_OLD_IDENTIFIER);
-                        tmp.removeSingleFromCache(sanitizeFolderId(oldFolder), FolderStorage.REAL_TREE_ID, session.getUserId(), session.getContextId(), true, session);
+                        tmp.removeSingleFromCache(Collections.singletonList(sanitizeFolderId(oldFolder)), FolderStorage.REAL_TREE_ID, session.getUserId(), session.getContextId(), true, session);
                         return;
                     }
                     final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
@@ -265,7 +266,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final String[] folderPath = (String[]) event.getProperty(FolderEventConstants.PROPERTY_FOLDER_PATH);
                     try {
                         if (null == session) {
-                            tmp.removeSingleFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true, session);
+                            tmp.removeSingleFromCache(Collections.singletonList(sanitizeFolderId(folderId)), FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true, session);
                         } else {
                             if (null != folderPath) {
                                 tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session, Arrays.asList(folderPath));
