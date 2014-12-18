@@ -223,6 +223,59 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             registrations.add(context.registerService(FolderStorage.class, cache, dictionary));
             registrations.add(context.registerService(FolderCacheInvalidationService.class, cache, null));
         }
+        // Register event handler for content-related changes on a mail folder
+        {
+            final EventHandler eventHandler = new EventHandler() {
+
+                @Override
+                public void handleEvent(final Event event) {
+                    final ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                    if (null == threadPool) {
+                        doHandleEvent(cache, event);
+                    } else {
+                        final AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    doHandleEvent(cache, event);
+                                } catch (final Exception e) {
+                                    LOG.warn("Handling event {} failed.", event.getTopic(), e);
+                                }
+                                return null;
+                            }
+                        };
+                        threadPool.submit(t, CallerRunsBehavior.<Void> getInstance());
+                    }
+                }
+
+                /**
+                 * Handles given event.
+                 *
+                 * @param event The event
+                 */
+                protected void doHandleEvent(final CacheFolderStorage tmp, final Event event) {
+                    final Object operation = event.getProperty("operation");
+                    if (null != operation && operation.toString().startsWith("update")) {
+                        return;
+                    }
+                    // There is no session available for remotely received events
+                    final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
+                    if (null != session) {
+                        final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                        final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                        try {
+                            tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                        } catch (final OXException e) {
+                            LOG.error("", e);
+                        }
+                    }
+                }
+            };
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+            dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
+            registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
+        }
         {
             final EventHandler eventHandler = new EventHandler() {
 
