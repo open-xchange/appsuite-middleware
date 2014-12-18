@@ -472,11 +472,15 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
 
     @Override
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
-        final String treeId = folder.getTreeID();
-        final Lock lock = writeLockFor(treeId, storageParameters);
+        String treeId = folder.getTreeID();
+        Lock lock = writeLockFor(treeId, storageParameters);
         acquire(lock);
+
+        // Locked -- Go ahead...
+        boolean created = false;
+        Session session = storageParameters.getSession();
+        int userId = storageParameters.getUserId();
         try {
-            final Session session = storageParameters.getSession();
             /*
              * Perform create operation via non-cache storage
              */
@@ -487,47 +491,48 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                 createPerformer = new CreatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
             }
             createPerformer.setCheck4Duplicates(false);
-            final String folderId = createPerformer.doCreate(folder);
+            String folderId = createPerformer.doCreate(folder);
+            created = true;
             /*
              * Get folder from appropriate storage
              */
-            final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
+            FolderStorage storage = registry.getFolderStorage(treeId, folderId);
             if (null == storage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
             }
-            /*
-             * Load created folder from real tree
-             */
-            final int contextId = storageParameters.getContextId();
+
+            // Load created folder from real tree
+            int contextId = storageParameters.getContextId();
             Folder createdFolder = null;
             try {
                 createdFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, true, storageParameters);
                 if (createdFolder.isCacheable()) {
                     putFolder(createdFolder, realTreeId, storageParameters, false);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.warn("Newly created folder could not be loaded from appropriate storage.", e);
             }
-            /*
-             * Remove parent from cache(s)
-             */
-            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-            final Cache cache = globalCache;
-            final String sContextId = Integer.toString(contextId);
-            final int userId = storageParameters.getUserId();
-            for (final String tid : new String[] { treeId, realTreeId }) {
-                final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
-                cache.removeFromGroup(cacheKey, sContextId);
+
+            // Remove parent from cache(s)
+            FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+            Cache cache = globalCache;
+            String sContextId = Integer.toString(contextId);
+            List<Serializable> keys = new LinkedList<Serializable>();
+            for (String tid : new String[] { treeId, realTreeId }) {
+                keys.add(newCacheKey(folder.getParentID(), tid));
                 // Cleanse parent from caches, too
                 folderMapManagement.dropFor(folder.getParentID(), tid, userId, contextId, session);
             }
+            cache.removeFromGroup(keys, sContextId);
+
             if (null != createdFolder && false == createdFolder.getParentID().equals(folder.getParentID())) {
+                keys.clear();
                 for (final String tid : new String[] { treeId, realTreeId }) {
-                    final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
-                    cache.removeFromGroup(cacheKey, sContextId);
+                    keys.add(newCacheKey(createdFolder.getParentID(), tid));
                     // Cleanse parent from caches, too
                     folderMapManagement.dropFor(createdFolder.getParentID(), tid, userId, contextId, session);
                 }
+                cache.removeFromGroup(keys, sContextId);
             }
             /*
              * Load parent from real tree
@@ -543,6 +548,9 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                 }
             }
         } finally {
+            if (false == created) {
+                removeSingleFromCache(Collections.singletonList(folder.getParentID()), treeId, userId, session, false);
+            }
             lock.unlock();
         }
     }
@@ -698,7 +706,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
      * @param treeId The tree identifier
      * @param session The session
      */
-    public void removeSingleFromCache(final List<String> ids, final String treeId, final int userId, final Session session, final boolean deleted) {
+    public void removeSingleFromCache(List<String> ids, String treeId, int userId, Session session, boolean deleted) {
         removeSingleFromCache(ids, treeId, userId, session.getContextId(), deleted, session);
     }
 
@@ -709,7 +717,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
      * @param treeId The tree identifier
      * @param contextId The context identifier
      */
-    public void removeSingleFromCache(final List<String> ids, final String treeId, final int optUserId, final int contextId, final boolean deleted, final Session optSession) {
+    public void removeSingleFromCache(List<String> ids, String treeId, int optUserId, int contextId, boolean deleted, Session optSession) {
         removeSingleFromCache(ids, treeId, optUserId, contextId, deleted, false, optSession);
     }
 
@@ -720,7 +728,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
      * @param treeId The tree identifier
      * @param contextId The context identifier
      */
-    public void removeSingleFromCache(final List<String> ids, final String treeId, final int optUserId, final int contextId, final boolean deleted, final boolean userCacheOnly, final Session optSession) {
+    public void removeSingleFromCache(List<String> ids, String treeId, int optUserId, int contextId, boolean deleted, boolean userCacheOnly, Session optSession) {
         final Lock lock = optUserId > 0 ? TreeLockManagement.getInstance().getFor(treeId, optUserId, contextId).writeLock() : Session.EMPTY_LOCK;
         try {
             acquire(lock);

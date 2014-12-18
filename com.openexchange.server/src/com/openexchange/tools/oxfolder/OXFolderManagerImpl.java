@@ -445,13 +445,20 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Call SQL insert
          */
+        boolean created = false;
         try {
             OXFolderSQL.insertFolderSQL(fuid, user.getId(), folderObj, createTime, ctx, writeCon);
+            created = true;
             folderObj.setObjectID(fuid);
         } catch (final DataTruncation e) {
             throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (false == created) {
+                FolderCacheManager manager = FolderCacheManager.getInstance();
+                manager.removeFolderObject(parentFolder.getObjectID(), ctx);
+            }
         }
         /*
          * Update cache with writable connection!
