@@ -57,6 +57,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.database.internal.Configuration.Property;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -68,18 +70,15 @@ import com.openexchange.timer.TimerService;
  */
 public final class Timer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Timer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Timer.class);
 
     private final Lock waitingLock = new ReentrantLock();
-
     private final List<Runnable> waiting = new ArrayList<Runnable>();
-
+    private final List<Runnable> onceWaiting = new ArrayList<Runnable>();
     private final Lock runningLock = new ReentrantLock();
-
     private final Map<Runnable, ScheduledTimerTask> running = new HashMap<Runnable, ScheduledTimerTask>();
 
     private long interval = 10000;
-
     private TimerService timer;
 
     public Timer() {
@@ -91,6 +90,14 @@ public final class Timer {
             addWaiting(task);
         } else {
             start(task);
+        }
+    }
+
+    void addOnceTask(Runnable task) {
+        if (null == timer) {
+            addFireOnce(task);
+        } else {
+            fireOnce(task);
         }
     }
 
@@ -125,6 +132,15 @@ public final class Timer {
         }
     }
 
+    private void addFireOnce(Runnable task) {
+        waitingLock.lock();
+        try {
+            onceWaiting.add(task);
+        } finally {
+            waitingLock.unlock();
+        }
+    }
+
     private boolean isWaiting(Runnable task) {
         waitingLock.lock();
         try {
@@ -152,6 +168,15 @@ public final class Timer {
         }
     }
 
+    private Runnable getFireOnce() {
+        waitingLock.lock();
+        try {
+            return onceWaiting.isEmpty() ? null : onceWaiting.remove(0);
+        } finally {
+            waitingLock.unlock();
+        }
+    }
+
     private void start(Runnable task) {
         ScheduledTimerTask scheduled = timer.scheduleAtFixedRate(task, interval, interval);
         final ScheduledTimerTask alreadyRunning;
@@ -167,6 +192,10 @@ public final class Timer {
                 LOG.error("Can not stop already running cleaner task.");
             }
         }
+    }
+
+    private void fireOnce(Runnable task) {
+        timer.schedule(task, 0);
     }
 
     private void stop(Runnable task) {
@@ -217,6 +246,9 @@ public final class Timer {
         Runnable task;
         while ((task = getFirstWaiting()) != null) {
             start(task);
+        }
+        while (null != (task = getFireOnce())) {
+            fireOnce(task);
         }
     }
 

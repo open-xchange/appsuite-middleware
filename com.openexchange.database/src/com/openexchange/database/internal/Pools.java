@@ -69,9 +69,7 @@ public final class Pools implements Runnable {
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Pools.class);
 
     private final List<PoolLifeCycle> lifeCycles = new ArrayList<PoolLifeCycle>(2);
-
     private final Lock poolsLock = new ReentrantLock(true);
-
     private final Map<Integer, ConnectionPool> pools = new HashMap<Integer, ConnectionPool>();
 
     Pools(final Timer timer) {
@@ -98,7 +96,10 @@ public final class Pools implements Runnable {
      * @throws OXException if creating the pool fails.
      */
     ConnectionPool getPool(final int poolId) throws OXException {
-        ConnectionPool retval;
+        ConnectionPool retval = pools.get(I(poolId));
+        if (null != retval) {
+            return retval;
+        }
         poolsLock.lock();
         try {
             retval = pools.get(I(poolId));
@@ -146,17 +147,7 @@ public final class Pools implements Runnable {
                 final ConnectionPool pool = entry.getValue();
                 if (pool.isEmpty()) {
                     iter.remove();
-                    boolean destroyed = false;
-                    for (final PoolLifeCycle lifeCycle : lifeCycles) {
-                        destroyed = lifeCycle.destroy(entry.getKey().intValue());
-                        if (destroyed) {
-                            break;
-                        }
-                    }
-                    if (!destroyed) {
-                        final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey());
-                        LOG.error("", e);
-                    }
+                    destroy(entry.getKey().intValue());
                 }
             }
         } finally {
@@ -178,21 +169,25 @@ public final class Pools implements Runnable {
         poolsLock.lock();
         try {
             for (final Map.Entry<Integer, ConnectionPool> entry : pools.entrySet()) {
-                boolean destroyed = false;
-                for (final PoolLifeCycle lifeCycle : lifeCycles) {
-                    destroyed = lifeCycle.destroy(entry.getKey().intValue());
-                    if (destroyed) {
-                        break;
-                    }
-                }
-                if (!destroyed) {
-                    final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey());
-                    LOG.error("", e);
-                }
+                destroy(entry.getKey().intValue());
             }
             pools.clear();
         } finally {
             poolsLock.unlock();
+        }
+    }
+
+    void destroy(int poolId) {
+        boolean destroyed = false;
+        for (final PoolLifeCycle lifeCycle : lifeCycles) {
+            destroyed = lifeCycle.destroy(poolId);
+            if (destroyed) {
+                break;
+            }
+        }
+        if (!destroyed) {
+            final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(I(poolId));
+            LOG.error(e.getMessage(), e);
         }
     }
 }
