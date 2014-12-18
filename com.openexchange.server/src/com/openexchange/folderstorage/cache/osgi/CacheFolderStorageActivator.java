@@ -262,10 +262,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     // There is no session available for remotely received events
                     final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
                     if (null != session) {
-                        final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
-                        final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                        String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                        Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                        String[] folderPath = (String[]) event.getProperty(FolderEventConstants.PROPERTY_FOLDER_PATH);
                         try {
-                            tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                            List<String> fp = null == folderPath ? null : Arrays.asList(folderPath);
+                            boolean singleOnly = null != contentRelated && contentRelated.booleanValue();
+                            tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, singleOnly, session, fp);
                         } catch (final OXException e) {
                             LOG.error("", e);
                         }
