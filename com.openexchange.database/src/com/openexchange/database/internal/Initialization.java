@@ -112,8 +112,8 @@ public final class Initialization {
 
     // -------------------------------------------------------------------------------------------------------------- //
 
-    private final Management management = new Management();
     private final Timer timer = new Timer();
+    private final Management management = new Management(timer);
     private final Configuration configuration = new Configuration();
 
     private CacheService cacheService;
