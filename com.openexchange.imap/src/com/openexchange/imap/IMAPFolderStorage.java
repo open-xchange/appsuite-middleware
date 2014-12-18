@@ -1077,6 +1077,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             final String parentFullname = toCreate.getParentFullname();
             final String fullName = DEFAULT_FOLDER_ID.equals(parentFullname) ? name : new StringBuilder(parentFullname).append(toCreate.getSeparator()).append(name).toString();
             if (getIMAPFolder(fullName).exists()) {
+                // Assume outdated cache as client expected that such a folder does not exist
+                ListLsubCache.clearCache(accountId, session);
                 throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, fullName);
             }
         } catch (final MessagingException e) {
@@ -1183,6 +1185,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  */
                 synchronized (createMe) {
                     if (createMe.exists()) {
+                        // Assume outdated cache as client expected that such a folder does not exist
+                        ListLsubCache.clearCache(accountId, session);
                         throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, createMe.getFullName());
                     }
                     final int ftype = mboxEnabled ? getNameOf(createMe).endsWith(String.valueOf(separator)) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES : FOLDER_TYPE;

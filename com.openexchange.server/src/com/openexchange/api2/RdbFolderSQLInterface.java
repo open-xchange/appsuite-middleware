@@ -58,6 +58,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -338,8 +339,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 final long lastModfified = System.currentTimeMillis();
                 manager.updateFolder(folderobject, false, false, lastModfified);
                 {
-                    CacheFolderStorage.getInstance().removeSingleFromCache(Integer.toString(folderobject.getObjectID()), FolderStorage.REAL_TREE_ID, userId, session, false);
-                    CacheFolderStorage.getInstance().removeSingleFromCache(Integer.toString(folderobject.getParentFolderID()), FolderStorage.REAL_TREE_ID, userId, session, false);
+                    CacheFolderStorage.getInstance().removeSingleFromCache(Collections.singletonList(Integer.toString(folderobject.getObjectID())), FolderStorage.REAL_TREE_ID, userId, session, false);
+                    CacheFolderStorage.getInstance().removeSingleFromCache(Collections.singletonList(Integer.toString(folderobject.getParentFolderID())), FolderStorage.REAL_TREE_ID, userId, session, false);
                 }
             }
             return folderobject;
@@ -420,8 +421,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).deleteFolder(folderobject, false, lastModified);
             {
-                CacheFolderStorage.getInstance().removeSingleFromCache(Integer.toString(folderId), FolderStorage.REAL_TREE_ID, userId, session, true);
-                CacheFolderStorage.getInstance().removeSingleFromCache(Integer.toString(folderobject.getParentFolderID()), FolderStorage.REAL_TREE_ID, userId, session, false);
+                CacheFolderStorage.getInstance().removeSingleFromCache(Collections.singletonList(Integer.toString(folderId)), FolderStorage.REAL_TREE_ID, userId, session, true);
+                CacheFolderStorage.getInstance().removeSingleFromCache(Collections.singletonList(Integer.toString(folderobject.getParentFolderID())), FolderStorage.REAL_TREE_ID, userId, session, false);
             }
             return folderId;
         } catch (final RuntimeException e) {
