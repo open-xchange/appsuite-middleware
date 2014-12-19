@@ -64,6 +64,8 @@ import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEvent;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.services.Services;
@@ -85,6 +87,8 @@ public final class ListLsubCache {
      * The logger
      */
     protected static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ListLsubCache.class);
+
+    private static final ListLsubCache INSTANCE = new ListLsubCache();
 
     private static final class KeyedCache {
 
@@ -226,6 +230,8 @@ public final class ListLsubCache {
                     synchronized (collection) {
                         collection.remove(fullName);
                     }
+
+                    fireInvalidateCacheEvent(session);
                 }
             }
         }
@@ -278,6 +284,8 @@ public final class ListLsubCache {
                     synchronized (collection) {
                         collection.clear();
                     }
+
+                    fireInvalidateCacheEvent(userId, contextId);
                 }
             }
         }
@@ -300,6 +308,8 @@ public final class ListLsubCache {
                 return;
             }
             collection.addSingle(fullName, imapFolder, DO_STATUS, DO_GETACL);
+
+            fireInvalidateCacheEvent(session);
         }
     }
 
@@ -373,6 +383,7 @@ public final class ListLsubCache {
              * Update & re-check
              */
             collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL);
+            fireInvalidateCacheEvent(session);
             entry = collection.getLsub(fullName);
             return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
         }
@@ -414,6 +425,7 @@ public final class ListLsubCache {
                  * Update & re-check
                  */
                 collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL);
+                fireInvalidateCacheEvent(session);
                 entry = collection.getList(fullName);
                 return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
             }
@@ -503,6 +515,7 @@ public final class ListLsubCache {
              * Update & re-check
              */
             collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL);
+            fireInvalidateCacheEvent(session);
             entry = collection.getList(fullName);
             return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
         }
@@ -567,6 +580,7 @@ public final class ListLsubCache {
              * Update & re-check
              */
             collection.reinit(imapStore, DO_STATUS, DO_GETACL);
+            fireInvalidateCacheEvent(session);
             if (null == optParentFullName) {
                 return subscribedOnly ? collection.getLsubs() : collection.getLists();
             }
@@ -616,6 +630,7 @@ public final class ListLsubCache {
                  * Update & re-check
                  */
                 collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL);
+                fireInvalidateCacheEvent(session);
                 listEntry = collection.getList(fullName);
             }
             final ListLsubEntry lsubEntry = collection.getLsub(fullName);
@@ -906,6 +921,22 @@ public final class ListLsubCache {
                 throw new IllegalStateException("Not unchecked", t);
             }
         }
+    }
+
+    private static void fireInvalidateCacheEvent(Session session) {
+        fireInvalidateCacheEvent(session.getUserId(), session.getContextId());
+    }
+
+    private static void fireInvalidateCacheEvent(int userId, int contextId) {
+        CacheEventService cacheEventService = Services.optService(CacheEventService.class);
+        if (null != cacheEventService) {
+            CacheEvent event = newCacheEventFor(userId, contextId);
+            cacheEventService.notify(INSTANCE, event, false);
+        }
+    }
+
+    private static CacheEvent newCacheEventFor(int userId, int contextId) {
+        return CacheEvent.INVALIDATE(REGION, null, new StringBuilder(16).append(userId).append('@').append(contextId).toString());
     }
 
 }
