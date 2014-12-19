@@ -95,9 +95,11 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
                 for (Serializable cacheKey : cacheEvent.getKeys()) {
                     String key = String.valueOf(cacheKey); // <user-id> + "@" + <context-id>
                     int pos = key.indexOf('@');
-                    int userId = Integer.parseInt(key.substring(0, pos));
-                    int contextId = Integer.parseInt(key.substring(pos + 1));
-                    ListLsubCache.dropFor(userId, contextId);
+                    if (pos > 0) {
+                        int userId = Integer.parseInt(key.substring(0, pos));
+                        int contextId = Integer.parseInt(key.substring(pos + 1));
+                        ListLsubCache.dropFor(userId, contextId);
+                    }
                 }
             }
         }
