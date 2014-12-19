@@ -85,7 +85,7 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
     }
 
     @Override
-    public void onEvent(final Object sender, final CacheEvent cacheEvent, final boolean fromRemote) {
+    public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (fromRemote) {
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
@@ -93,10 +93,10 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
             final String region = cacheEvent.getRegion();
             if (REGION.equals(region)) {
                 for (Serializable cacheKey : cacheEvent.getKeys()) {
-                    final String key = String.valueOf(cacheKey); // <user-id> + "@" + <context-id>
-                    final int pos = key.indexOf('@');
-                    final int userId = Integer.parseInt(key.substring(0, pos));
-                    final int contextId = Integer.parseInt(key.substring(pos + 1));
+                    String key = String.valueOf(cacheKey); // <user-id> + "@" + <context-id>
+                    int pos = key.indexOf('@');
+                    int userId = Integer.parseInt(key.substring(0, pos));
+                    int contextId = Integer.parseInt(key.substring(pos + 1));
                     ListLsubCache.dropFor(userId, contextId);
                 }
             }
