@@ -72,7 +72,6 @@ import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
-import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.lock.UserLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
@@ -378,7 +377,6 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                             Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                             if (null != userId) {
                                 FolderMapManagement.getInstance().dropFor(userId.intValue(), contextId.intValue());
-                                TreeLockManagement.getInstance().dropFor(userId, contextId);
                                 UserLockManagement.getInstance().dropFor(userId, contextId);
                             }
                         }
@@ -386,7 +384,6 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                         Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
                         if (null != contextId) {
                             FolderMapManagement.getInstance().dropFor(contextId.intValue());
-                            TreeLockManagement.getInstance().dropFor(contextId.intValue());
                             UserLockManagement.getInstance().dropFor(contextId.intValue());
                         }
                     }
