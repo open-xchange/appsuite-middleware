@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.osgi;
 
+import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.activation.MailcapCommandMap;
@@ -136,11 +137,36 @@ public final class IMAPActivator extends HousekeepingActivator {
             Config.LoggerProvider = LoggerProvider.DISABLED;
             IMAPStoreCache.initInstance();
             /*
+             * Define cache regions
+             */
+            {
+                // @formatter:off
+                String regionName = ListLsubCache.REGION;
+                byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                    "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                    "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                    "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
+                    "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                    "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                    "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                    "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                    "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
+                    "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
+                // @formatter:on
+            }
+            /*
              * Register IMAP mail provider
              */
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
-            registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
+            {
+                Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
+                dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
+                registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
+            }
             /*
              * Register IMAP notifier registry
              */
