@@ -50,6 +50,9 @@
 package com.openexchange.imap.osgi;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -58,6 +61,7 @@ import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.imap.cache.ListLsubCache;
+import com.openexchange.java.util.Pair;
 
 
 /**
@@ -92,14 +96,20 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
 
             final String region = cacheEvent.getRegion();
             if (REGION.equals(region)) {
-                for (Serializable cacheKey : cacheEvent.getKeys()) {
+                List<Serializable> keys = cacheEvent.getKeys();
+                Set<Pair<Integer, Integer>> pairs = new LinkedHashSet<Pair<Integer,Integer>>(keys.size());
+                for (Serializable cacheKey : keys) {
                     String key = String.valueOf(cacheKey); // <user-id> + "@" + <context-id>
                     int pos = key.indexOf('@');
                     if (pos > 0) {
-                        int userId = Integer.parseInt(key.substring(0, pos));
-                        int contextId = Integer.parseInt(key.substring(pos + 1));
-                        ListLsubCache.dropFor(userId, contextId);
+                        Integer userId = Integer.valueOf(key.substring(0, pos));
+                        Integer contextId = Integer.valueOf(key.substring(pos + 1));
+                        pairs.add(new Pair<Integer, Integer>(contextId, userId));
                     }
+                }
+
+                for (Pair<Integer, Integer> pair : pairs) {
+                    ListLsubCache.dropFor(pair.getSecond().intValue(), pair.getFirst().intValue());
                 }
             }
         }
