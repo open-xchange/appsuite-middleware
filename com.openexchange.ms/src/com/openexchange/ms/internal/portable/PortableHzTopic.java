@@ -50,9 +50,11 @@
 package com.openexchange.ms.internal.portable;
 
 import java.util.List;
+import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.ITopic;
+import com.hazelcast.nio.serialization.HazelcastSerializationException;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.internal.AbstractHzTopic;
@@ -63,6 +65,8 @@ import com.openexchange.ms.internal.AbstractHzTopic;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class PortableHzTopic<P extends Portable> extends AbstractHzTopic<P> {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PortableHzTopic.class);
 
     private final ITopic<PortableMessage<P>> hzTopic;
 
@@ -101,15 +105,23 @@ public final class PortableHzTopic<P extends Portable> extends AbstractHzTopic<P
             hzTopic.publish(new PortableMessage<P>(senderId, message));
         } catch (HazelcastInstanceNotActiveException e) {
             throw handleNotActiveException(e);
+        } catch (HazelcastSerializationException e) {
+            // Could not create a PortableMessage object
+            LOGGER.warn("Could no create a {} instance from message of type {}", PortableMessage.class.getSimpleName(), message.getClass().getName(), e);
         }
     }
 
     @Override
     protected void publish(String senderId, List<P> messages) {
-        try {
-            hzTopic.publish(new PortableMessage<P>(senderId, messages));
-        } catch (HazelcastInstanceNotActiveException e) {
-            throw handleNotActiveException(e);
+        if (null != messages && !messages.isEmpty()) {
+            try {
+                hzTopic.publish(new PortableMessage<P>(senderId, messages));
+            } catch (HazelcastInstanceNotActiveException e) {
+                throw handleNotActiveException(e);
+            } catch (HazelcastSerializationException e) {
+                // Could not create a PortableMessage object
+                LOGGER.warn("Could no create a {} instance from message of type {}", PortableMessage.class.getSimpleName(), messages.get(0).getClass().getName(), e);
+            }
         }
     }
 
