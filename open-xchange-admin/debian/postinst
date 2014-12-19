@@ -115,33 +115,52 @@ postFix() {
     # SoftwareChange_Request-1831
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
-    
+
 	if grep -E "projects" $pfile > /dev/null; then
 	   ptmp=${pfile}.$$
-	   
+
 	   sed -e 's;projects *,;;g' -e 's;, *projects;;g' $pfile > $ptmp
-	
+
 	   if [ -s $ptmp ]; then
 	      cp $ptmp $pfile
 	   fi
 	   rm -f $ptmp
-	fi 
-	
+	fi
+
     # SoftwareChange_Request-2074
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
     for key in rssbookmarks rssportal forum pinboardwrite; do
         if grep -E $key $pfile > /dev/null; then
             ptmp=${pfile}.$$
-        
+
             sed -e "s;$key *,;;g" -e "s;, *$key;;g" $pfile > $ptmp
-        
+
             if [ -s $ptmp ]; then
                 cp $ptmp $pfile
             fi
             rm -f $ptmp
-        fi 
+        fi
     done
+
+    # SoftwareChange_Request-2285
+    TMPFILE=$(mktemp)
+    while read LINE; do
+        case "$LINE" in
+            \#*|*:crypt:*)
+                # ignore commented and already converted lines
+                echo $LINE
+                ;;
+            *)
+                IFS=":"
+                PARTS=( $LINE )
+                unset IFS
+                echo ${PARTS[0]}:crypt:${PARTS[1]}
+                ;;
+        esac
+    done < /opt/open-xchange/etc/mpasswd >$TMPFILE
+    cat $TMPFILE > /opt/open-xchange/etc/mpasswd
+    rm $TMPFILE
 }
 
 setConfigFilePermissions() {

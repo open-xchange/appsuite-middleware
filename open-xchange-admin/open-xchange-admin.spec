@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -181,6 +181,25 @@ if [ ${1:-0} -eq 2 ]; then
             rm -f $ptmp
         fi
     done
+
+    # SoftwareChange_Request-2285
+    TMPFILE=$(mktemp)
+    while read LINE; do
+        case "$LINE" in
+            \#*|*:crypt:*)
+                # ignore commented and already converted lines
+                echo $LINE
+                ;;
+            *)
+                IFS=":"
+                PARTS=( $LINE )
+                unset IFS
+                echo ${PARTS[0]}:crypt:${PARTS[1]}
+                ;;
+        esac
+    done < /opt/open-xchange/etc/mpasswd >$TMPFILE
+    cat $TMPFILE > /opt/open-xchange/etc/mpasswd
+    rm $TMPFILE
 
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
