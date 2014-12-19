@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.cache;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,10 +61,15 @@ import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.Logger;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -80,58 +86,80 @@ public final class ListLsubCache {
      */
     protected static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ListLsubCache.class);
 
-    private static final class Key {
+    private static final class KeyedCache {
 
-        private final int cid;
+        private final Cache cache;
+        private final CacheKey key;
 
-        private final int user;
-
-        private final int hash;
-
-        protected Key(final int user, final int cid) {
+        KeyedCache(Cache cache, CacheKey key) {
             super();
-            this.user = user;
-            this.cid = cid;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + user;
-            hash = result;
+            this.cache = cache;
+            this.key = key;
         }
 
-        @Override
-        public int hashCode() {
-            return hash;
+        void clear() throws OXException {
+            cache.clear();
         }
 
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
+        /**
+         * Gets the associated object from cache
+         *
+         * @return The object or <code>null</code>
+         */
+        <V> V get() {
+            return (V) cache.get(key);
         }
 
-    } // End of class Key
+        /**
+         * Safely puts given object into cache
+         *
+         * @param value The object to put
+         * @return The object previously in cache or <code>null</code>
+         * @throws OXException If there is already such an entry in cache
+         */
+        <V> V putIfAbsent(Serializable value) {
+            try {
+                cache.putSafe(key, value);
+                return null;
+            } catch (OXException e) {
+                return (V) cache.get(key);
+            }
+        }
 
-    private static Key keyFor(final Session session) {
-        return new Key(session.getUserId(), session.getContextId());
-    }
+        /**
+         * Removes the object from cache
+         *
+         * @throws OXException If removal fails
+         */
+        void remove() throws OXException {
+            cache.remove(key);
+        }
+
+    } // End of class KeyedCache
 
     /**
-     * The virtual region name.
+     * The region name.
      */
     public static final String REGION = "ListLsubCache";
+
+    private static KeyedCache optCache(Session session) {
+        return optCache(session.getUserId(), session.getContextId());
+    }
+
+    private static KeyedCache optCache(int userId, int contextId) {
+        try {
+            CacheService cacheService = Services.optService(CacheService.class);
+            if (null == cacheService) {
+                return null;
+            }
+
+            Cache cache = cacheService.getCache(REGION);
+            return new KeyedCache(cache, cacheService.newCacheKey(contextId, userId));
+        } catch (Exception e) {
+            LOG.error("Could not return cache for {}", REGION, e);
+            return null;
+        }
+    }
 
     /** The default timeout for LIST/LSUB cache (5 minutes) */
     private static final long DEFAULT_TIMEOUT = 300000;
@@ -141,8 +169,6 @@ public final class ListLsubCache {
     private static final boolean DO_STATUS = false;
 
     private static final boolean DO_GETACL = false;
-
-    private static final ConcurrentMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>> MAP = new NonBlockingHashMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>>();
 
     /**
      * No instance
@@ -169,8 +195,16 @@ public final class ListLsubCache {
      * @param contextId The context identifier
      */
     public static void dropFor(final int userId, final int contextId) {
-        MAP.remove(new Key(userId, contextId));
-        LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", userId, contextId);
+
+        KeyedCache cache = optCache(userId, contextId);
+        if (null != cache) {
+            try {
+                cache.remove();
+                LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", userId, contextId);
+            } catch (OXException e) {
+                LOG.error("Could not remove entry from cache {} for user {} in context {}", REGION, userId, contextId, e);
+            }
+        }
     }
 
     /**
@@ -181,14 +215,18 @@ public final class ListLsubCache {
      * @param session The session
      */
     public static void removeCachedEntry(final String fullName, final int accountId, final Session session) {
-        final ConcurrentMap<Integer, Future<ListLsubCollection>> map = MAP.get(keyFor(session));
-        if (null == map) {
-            return;
-        }
-        final ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
-        if (null != collection) {
-            synchronized (collection) {
-                collection.remove(fullName);
+        KeyedCache cache = optCache(session);
+        if (null != cache) {
+            Object object = cache.get();
+            if (object instanceof ConcurrentMap) {
+                @SuppressWarnings("unchecked")
+                ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
+                ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
+                if (null != collection) {
+                    synchronized (collection) {
+                        collection.remove(fullName);
+                    }
+                }
             }
         }
     }
@@ -229,14 +267,18 @@ public final class ListLsubCache {
      * @param contextId The context identifier
      */
     public static void clearCache(final int accountId, final int userId, final int contextId) {
-        final ConcurrentMap<Integer, Future<ListLsubCollection>> map = MAP.get(new Key(userId, contextId));
-        if (null == map) {
-            return;
-        }
-        final ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
-        if (null != collection) {
-            synchronized (collection) {
-                collection.clear();
+        KeyedCache cache = optCache(userId, contextId);
+        if (null != cache) {
+            Object object = cache.get();
+            if (object instanceof ConcurrentMap) {
+                @SuppressWarnings("unchecked")
+                ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
+                ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
+                if (null != collection) {
+                    synchronized (collection) {
+                        collection.clear();
+                    }
+                }
             }
         }
     }
@@ -497,43 +539,43 @@ public final class ListLsubCache {
      * @throws OXException If loading the entry fails
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<ListLsubEntry> getAllEntries(final String optParentFullName, final int accountId, final boolean subscribedOnly, final IMAPStore imapStore, final Session session) throws OXException, MessagingException {
-        final IMAPFolder imapFolder = (IMAPFolder) imapStore.getDefaultFolder();
-        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+    public static List<ListLsubEntry> getAllEntries(String optParentFullName, int accountId, boolean subscribedOnly, IMAPStore imapStore, Session session) throws OXException, MessagingException {
+        IMAPFolder imapFolder = (IMAPFolder) imapStore.getDefaultFolder();
+        ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
-            if (null != optParentFullName) {
-                final ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
-                if (null != entry) {
-                    return entry.getChildren();
-                }
-            } else {
+            if (null == optParentFullName) {
                 return subscribedOnly ? collection.getLsubs() : collection.getLists();
+            }
+
+            ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
+            if (null != entry) {
+                return entry.getChildren();
             }
         }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
-                if (null != optParentFullName) {
-                    final ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
-                    if (null != entry) {
-                        return entry.getChildren();
-                    }
-                } else {
+                if (null == optParentFullName) {
                     return subscribedOnly ? collection.getLsubs() : collection.getLists();
+                }
+
+                ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
+                if (null != entry) {
+                    return entry.getChildren();
                 }
             }
             /*
              * Update & re-check
              */
             collection.reinit(imapStore, DO_STATUS, DO_GETACL);
-            if (null != optParentFullName) {
-                final ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
-                if (null != entry) {
-                    return entry.getChildren();
-                }
-                return Collections.emptyList();
-            } else {
+            if (null == optParentFullName) {
                 return subscribedOnly ? collection.getLsubs() : collection.getLists();
             }
+
+            ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
+            if (null != entry) {
+                return entry.getChildren();
+            }
+            return Collections.emptyList();
         }
     }
 
@@ -548,7 +590,7 @@ public final class ListLsubCache {
      * @throws OXException If loading the entry fails
      * @throws MessagingException If a messaging error occurs
      */
-    public static ListLsubEntry[] getCachedEntries(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
+    public static ListLsubEntry[] getCachedEntries(String fullName, int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             final ListLsubEntry listEntry = collection.getList(fullName);
@@ -698,29 +740,37 @@ public final class ListLsubCache {
         /*
          * Initialize appropriate cache entry
          */
-        final Key key = keyFor(session);
-        ConcurrentMap<Integer, Future<ListLsubCollection>> map = MAP.get(key);
+        KeyedCache cache = optCache(session);
+        if (null == cache) {
+            throw ServiceExceptionCode.absentService(CacheService.class);
+        }
+
+        // Get the associated map
+        @SuppressWarnings("unchecked")
+        ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) cache.get();
         if (null == map) {
-            final ConcurrentMap<Integer, Future<ListLsubCollection>> newmap = new NonBlockingHashMap<Integer, Future<ListLsubCollection>>();
-            map = MAP.putIfAbsent(key, newmap);
+            NonBlockingHashMap<Integer, Future<ListLsubCollection>> newmap = new NonBlockingHashMap<Integer, Future<ListLsubCollection>>();
+            map = cache.putIfAbsent(newmap);
             if (null == map) {
                 map = newmap;
             }
         }
+
+        // Submit task
         Future<ListLsubCollection> f = map.get(Integer.valueOf(accountId));
         boolean caller = false;
         if (null == f) {
-            final FutureTask<ListLsubCollection> ft = new FutureTask<ListLsubCollection>(new Callable<ListLsubCollection>() {
+            FutureTask<ListLsubCollection> ft = new FutureTask<ListLsubCollection>(new Callable<ListLsubCollection>() {
 
                 @Override
                 public ListLsubCollection call() throws OXException, MessagingException {
                     String[] shared;
                     String[] user;
                     try {
-                        final IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
+                        IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
                         try {
                             shared = check(NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId));
-                        } catch (final MessagingException e) {
+                        } catch (MessagingException e) {
                             if (imapStore.hasCapability("NAMESPACE")) {
                                 LOG.warn("Couldn't get shared namespaces.", e);
                             } else {
@@ -733,18 +783,18 @@ public final class ListLsubCache {
                         }
                         try {
                             user = check(NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId));
-                        } catch (final MessagingException e) {
+                        } catch (MessagingException e) {
                             if (imapStore.hasCapability("NAMESPACE")) {
                                 LOG.warn("Couldn't get user namespaces.", e);
                             } else {
                                 LOG.debug("Couldn't get user namespaces.", e);
                             }
                             user = new String[0];
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             LOG.warn("Couldn't get user namespaces.", e);
                             user = new String[0];
                         }
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         throw MimeMailException.handleMessagingException(e);
                     }
                     return new ListLsubCollection(imapFolder, shared, user, DO_STATUS, DO_GETACL);
@@ -759,21 +809,21 @@ public final class ListLsubCache {
         }
         try {
             return getFrom(f);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (caller) {
-                MAP.remove(key);
+                cache.remove();
             }
             throw e;
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
     }
 
-    static String[] check(final String[] array) {
-        final List<String> list = new ArrayList<String>(array.length);
+    static String[] check(String[] array) {
+        List<String> list = new ArrayList<String>(array.length);
         for (int i = 0; i < array.length; i++) {
-            final String s = array[i];
+            String s = array[i];
             if (!isEmpty(s)) {
                 list.add(s);
             }
@@ -781,11 +831,11 @@ public final class ListLsubCache {
         return list.toArray(new String[list.size()]);
     }
 
-    private static boolean isEmpty(final String string) {
+    private static boolean isEmpty(String string) {
         if (null == string) {
             return true;
         }
-        final int len = string.length();
+        int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
             isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
