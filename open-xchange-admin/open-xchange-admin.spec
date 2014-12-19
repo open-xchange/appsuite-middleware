@@ -175,6 +175,12 @@ if [ ${1:-0} -eq 2 ]; then
         fi
     done
 
+    # SoftwareChange_Request-2323
+    VALUE=$(ox_read_property SENT_MAILFOLDER_EN_GB /opt/open-xchange/etc/AdminUser.properties)
+    if [ "SentMail" == "$VALUE" ]; then
+        ox_set_property SENT_MAILFOLDER_EN_GB "Sent Mail" /opt/open-xchange/etc/AdminUser.properties
+    fi
+
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
 
