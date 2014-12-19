@@ -54,12 +54,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -749,7 +749,7 @@ public final class ListLsubCache {
         @SuppressWarnings("unchecked")
         ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) cache.get();
         if (null == map) {
-            NonBlockingHashMap<Integer, Future<ListLsubCollection>> newmap = new NonBlockingHashMap<Integer, Future<ListLsubCollection>>();
+            ConcurrentHashMap<Integer, Future<ListLsubCollection>> newmap = new ConcurrentHashMap<Integer, Future<ListLsubCollection>>();
             map = cache.putIfAbsent(newmap);
             if (null == map) {
                 map = newmap;
