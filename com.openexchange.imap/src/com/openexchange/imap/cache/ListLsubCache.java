@@ -204,7 +204,7 @@ public final class ListLsubCache {
      *
      * @param session The session providing user information
      */
-    public static void dropFor(final Session session) {
+    public static void dropFor(Session session) {
         if (null != session) {
             dropFor(session.getUserId(), session.getContextId());
         }
@@ -216,9 +216,22 @@ public final class ListLsubCache {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public static void dropFor(final int userId, final int contextId) {
-        KeyedCache cache = getCache(userId, contextId);
-        cache.remove();
+    public static void dropFor(int userId, int contextId) {
+        dropFor(userId, contextId, true);
+    }
+
+    /**
+     * Drop caches for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param notify Whether to notify
+     */
+    public static void dropFor(int userId, int contextId, boolean notify) {
+        getCache(userId, contextId).remove();
+        if (notify) {
+            fireInvalidateCacheEvent(userId, contextId);
+        }
         LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
     }
 
