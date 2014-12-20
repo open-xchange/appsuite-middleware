@@ -121,26 +121,35 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
             String region = cacheEvent.getRegion();
             if (REGION.equals(region)) {
                 for (Serializable cacheKey : cacheEvent.getKeys()) {
-                    JSONObject jKey = optJsonObject(String.valueOf(cacheKey));
-                    if (null != jKey) {
-                        String folderId = jKey.optString(KEYP_FOLDER_ID);
-                        String treeId = jKey.optString(KEYP_TREE_ID);
-                        int optUser = jKey.optInt(KEYP_USER_ID, -1);
-                        int contextId = jKey.optInt(KEYP_CONTEXT_ID, -1);
-                        if (null == folderId && null == treeId && optUser <= 0) {
-                            FolderMapManagement.getInstance().dropFor(contextId, false);
-                        } else if (null == folderId && null == treeId && optUser > 0) {
-                            FolderMapManagement.getInstance().dropFor(optUser, contextId, false);
-                        } else {
-                            FolderMapManagement.getInstance().dropFor(folderId, treeId, optUser, contextId, null, false);
-                        }
-                    }
+                    handleCacheKey(cacheKey);
                 }
             }
         }
     }
 
-    private JSONObject optJsonObject(String key)  {
+    /**
+     * Handles specified cache key.
+     *
+     * @param cacheKey The cache key to handle
+     */
+    public static void handleCacheKey(Serializable cacheKey) {
+        JSONObject jKey = optJsonObject(String.valueOf(cacheKey));
+        if (null != jKey) {
+            String folderId = jKey.optString(KEYP_FOLDER_ID);
+            String treeId = jKey.optString(KEYP_TREE_ID);
+            int optUser = jKey.optInt(KEYP_USER_ID, -1);
+            int contextId = jKey.optInt(KEYP_CONTEXT_ID, -1);
+            if (null == folderId && null == treeId && optUser <= 0) {
+                FolderMapManagement.getInstance().dropFor(contextId, false);
+            } else if (null == folderId && null == treeId && optUser > 0) {
+                FolderMapManagement.getInstance().dropFor(optUser, contextId, false);
+            } else {
+                FolderMapManagement.getInstance().dropFor(folderId, treeId, optUser, contextId, null, false);
+            }
+        }
+    }
+
+    private static JSONObject optJsonObject(String key)  {
         try {
             return new JSONObject(key);
         } catch (JSONException e) {
