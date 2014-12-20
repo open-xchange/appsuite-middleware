@@ -285,8 +285,7 @@ public final class ListLsubCache {
         KeyedCache cache = getCache(userId, contextId);
         Object object = cache.get();
         if (object instanceof ConcurrentMap) {
-            @SuppressWarnings("unchecked")
-            ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
+            @SuppressWarnings("unchecked") ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
             ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
             if (null != collection) {
                 synchronized (collection) {
