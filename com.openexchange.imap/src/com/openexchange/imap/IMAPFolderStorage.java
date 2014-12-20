@@ -700,7 +700,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
-        return FolderCache.getCachedFolder(fullName, this);
+        try {
+            return FolderCache.getCachedFolder(fullName, this);
+        } catch (OXException e) {
+            if (e.equalsCode(MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber(), IMAPException.IMAPCode.prefix())) {
+                ListLsubCache.clearCache(accountId, session);
+            }
+            throw e;
+        }
     }
 
     /**
