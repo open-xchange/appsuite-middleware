@@ -83,7 +83,7 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
      *
      * @param context The bundle context
      */
-    public ListLsubInvalidator(final BundleContext context) {
+    public ListLsubInvalidator(BundleContext context) {
         super();
         this.context = context;
     }
@@ -94,7 +94,7 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
 
-            final String region = cacheEvent.getRegion();
+            String region = cacheEvent.getRegion();
             if (REGION.equals(region)) {
                 List<Serializable> keys = cacheEvent.getKeys();
                 Set<Pair<Integer, Integer>> pairs = new LinkedHashSet<Pair<Integer,Integer>>(keys.size());
@@ -114,19 +114,19 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
     }
 
     @Override
-    public CacheEventService addingService(final ServiceReference<CacheEventService> reference) {
-        final CacheEventService service = context.getService(reference);
+    public CacheEventService addingService(ServiceReference<CacheEventService> reference) {
+        CacheEventService service = context.getService(reference);
         service.addListener(REGION, this);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<CacheEventService> reference, final CacheEventService service) {
+    public void modifiedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference<CacheEventService> reference, final CacheEventService service) {
+    public void removedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
         service.removeListener(REGION, this);
         context.ungetService(reference);
     }
