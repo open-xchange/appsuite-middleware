@@ -107,7 +107,7 @@ public final class PortableHzTopic<P extends Portable> extends AbstractHzTopic<P
             throw handleNotActiveException(e);
         } catch (HazelcastSerializationException e) {
             // Could not create a PortableMessage object
-            LOGGER.warn("Could no create a {} instance from message of type {}", PortableMessage.class.getSimpleName(), message.getClass().getName(), e);
+            LOGGER.warn("Could no create a {} instance from message of type {}. Please ensure proper start levels for active OSGi bundles.", PortableMessage.class.getSimpleName(), message.getClass().getName(), e);
         }
     }
 
