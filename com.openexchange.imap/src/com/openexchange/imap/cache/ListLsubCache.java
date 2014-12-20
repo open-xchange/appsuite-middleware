@@ -243,19 +243,14 @@ public final class ListLsubCache {
      * @param session The session
      */
     public static void removeCachedEntry(final String fullName, final int accountId, final Session session) {
-        KeyedCache cache = getCache(session);
-        Object object = cache.get();
-        if (object instanceof ConcurrentMap) {
-            @SuppressWarnings("unchecked")
-            ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
-            ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
-            if (null != collection) {
-                synchronized (collection) {
-                    collection.remove(fullName);
-                }
-
-                fireInvalidateCacheEvent(session);
+        ConcurrentMap<Integer, Future<ListLsubCollection>> map = getCache(session).get();
+        ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
+        if (null != collection) {
+            synchronized (collection) {
+                collection.remove(fullName);
             }
+
+            fireInvalidateCacheEvent(session);
         }
     }
 
@@ -295,18 +290,14 @@ public final class ListLsubCache {
      * @param contextId The context identifier
      */
     public static void clearCache(final int accountId, final int userId, final int contextId) {
-        KeyedCache cache = getCache(userId, contextId);
-        Object object = cache.get();
-        if (object instanceof ConcurrentMap) {
-            @SuppressWarnings("unchecked") ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
-            ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
-            if (null != collection) {
-                synchronized (collection) {
-                    collection.clear();
-                }
-
-                fireInvalidateCacheEvent(userId, contextId);
+        ConcurrentMap<Integer, Future<ListLsubCollection>> map = getCache(userId, contextId).get();
+        ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
+        if (null != collection) {
+            synchronized (collection) {
+                collection.clear();
             }
+
+            fireInvalidateCacheEvent(userId, contextId);
         }
     }
 
