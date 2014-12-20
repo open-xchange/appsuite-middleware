@@ -106,6 +106,8 @@ public class CacheFolderStorageInvalidator implements CacheListener, ServiceTrac
                                 String treeId = keys[0].toString();
                                 removeFromUserCache(id, treeId, contextId);
                             }
+                        } else if (cacheKey instanceof String) {
+                            FolderMapInvalidator.handleCacheKey(cacheKey);
                         }
                     }
                 }
