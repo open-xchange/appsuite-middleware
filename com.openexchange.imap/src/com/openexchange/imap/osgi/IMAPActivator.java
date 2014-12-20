@@ -205,7 +205,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                         if (null != contextId) {
                             Integer userId = (Integer) lastSessionEvent.getProperty(SessiondEventConstants.PROP_USER_ID);
                             if (null != userId) {
-                                ListLsubCache.dropFor(userId.intValue(), contextId.intValue());
+                                ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false);
                                 IMAPStoreCache.getInstance().dropFor(userId.intValue(), contextId.intValue());
                                 ThreadableCache.dropFor(userId.intValue(), contextId.intValue());
 
