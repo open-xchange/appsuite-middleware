@@ -49,7 +49,7 @@
 
 package com.openexchange.imap.cache;
 
-import java.io.Serializable;
+import static com.openexchange.java.Strings.isEmpty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,10 +60,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.Logger;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheKey;
-import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.exception.OXException;
@@ -71,7 +69,6 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -90,19 +87,55 @@ public final class ListLsubCache {
 
     private static final ListLsubCache INSTANCE = new ListLsubCache();
 
-    private static final class KeyedCache {
+    private static final class Key {
 
-        private final Cache cache;
-        private final CacheKey key;
+        private final int cid;
+        private final int user;
+        private final int hash;
 
-        KeyedCache(Cache cache, CacheKey key) {
+        protected Key(final int user, final int cid) {
             super();
-            this.cache = cache;
-            this.key = key;
+            this.user = user;
+            this.cid = cid;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + cid;
+            result = prime * result + user;
+            hash = result;
         }
 
-        void clear() throws OXException {
-            cache.clear();
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (cid != other.cid) {
+                return false;
+            }
+            if (user != other.user) {
+                return false;
+            }
+            return true;
+        }
+
+    } // End of class Key
+
+    private static final class KeyedCache {
+
+        private final Key key;
+
+        KeyedCache(Key key) {
+            super();
+            this.key = key;
         }
 
         /**
@@ -110,8 +143,8 @@ public final class ListLsubCache {
          *
          * @return The object or <code>null</code>
          */
-        <V> V get() {
-            return (V) cache.get(key);
+        ConcurrentMap<Integer, Future<ListLsubCollection>> get() {
+            return CACHE.get(key);
         }
 
         /**
@@ -121,22 +154,15 @@ public final class ListLsubCache {
          * @return The object previously in cache or <code>null</code>
          * @throws OXException If there is already such an entry in cache
          */
-        <V> V putIfAbsent(Serializable value) {
-            try {
-                cache.putSafe(key, value);
-                return null;
-            } catch (OXException e) {
-                return (V) cache.get(key);
-            }
+        ConcurrentMap<Integer, Future<ListLsubCollection>> putIfAbsent(ConcurrentMap<Integer, Future<ListLsubCollection>> map) {
+            return CACHE.putIfAbsent(key, map);
         }
 
         /**
          * Removes the object from cache
-         *
-         * @throws OXException If removal fails
          */
-        void remove() throws OXException {
-            cache.remove(key);
+        void remove() {
+            CACHE.remove(key);
         }
 
     } // End of class KeyedCache
@@ -146,23 +172,12 @@ public final class ListLsubCache {
      */
     public static final String REGION = "ListLsubCache";
 
-    private static KeyedCache optCache(Session session) {
-        return optCache(session.getUserId(), session.getContextId());
+    private static KeyedCache getCache(Session session) {
+        return getCache(session.getUserId(), session.getContextId());
     }
 
-    private static KeyedCache optCache(int userId, int contextId) {
-        try {
-            CacheService cacheService = Services.optService(CacheService.class);
-            if (null == cacheService) {
-                return null;
-            }
-
-            Cache cache = cacheService.getCache(REGION);
-            return new KeyedCache(cache, cacheService.newCacheKey(contextId, userId));
-        } catch (Exception e) {
-            LOG.error("Could not return cache for {}", REGION, e);
-            return null;
-        }
+    private static KeyedCache getCache(int userId, int contextId) {
+        return new KeyedCache(new Key(userId, contextId));
     }
 
     /** The default timeout for LIST/LSUB cache (5 minutes) */
@@ -173,6 +188,9 @@ public final class ListLsubCache {
     private static final boolean DO_STATUS = false;
 
     private static final boolean DO_GETACL = false;
+
+    /** The cache */
+    static final ConcurrentMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>> CACHE = new NonBlockingHashMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>>();
 
     /**
      * No instance
@@ -198,17 +216,23 @@ public final class ListLsubCache {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public static void dropFor(final int userId, final int contextId) {
+    public static void dropFor(int userId, int contextId) {
+        dropFor(userId, contextId, true);
+    }
 
-        KeyedCache cache = optCache(userId, contextId);
-        if (null != cache) {
-            try {
-                cache.remove();
-                LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", userId, contextId);
-            } catch (OXException e) {
-                LOG.error("Could not remove entry from cache {} for user {} in context {}", REGION, userId, contextId, e);
-            }
+    /**
+     * Drop caches for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param notify Whether to notify
+     */
+    public static void dropFor(int userId, int contextId, boolean notify) {
+        getCache(userId, contextId).remove();
+        if (notify) {
+            fireInvalidateCacheEvent(userId, contextId);
         }
+        LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
     }
 
     /**
@@ -219,20 +243,18 @@ public final class ListLsubCache {
      * @param session The session
      */
     public static void removeCachedEntry(final String fullName, final int accountId, final Session session) {
-        KeyedCache cache = optCache(session);
-        if (null != cache) {
-            Object object = cache.get();
-            if (object instanceof ConcurrentMap) {
-                @SuppressWarnings("unchecked")
-                ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
-                ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
-                if (null != collection) {
-                    synchronized (collection) {
-                        collection.remove(fullName);
-                    }
-
-                    fireInvalidateCacheEvent(session);
+        KeyedCache cache = getCache(session);
+        Object object = cache.get();
+        if (object instanceof ConcurrentMap) {
+            @SuppressWarnings("unchecked")
+            ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
+            ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
+            if (null != collection) {
+                synchronized (collection) {
+                    collection.remove(fullName);
                 }
+
+                fireInvalidateCacheEvent(session);
             }
         }
     }
@@ -273,20 +295,18 @@ public final class ListLsubCache {
      * @param contextId The context identifier
      */
     public static void clearCache(final int accountId, final int userId, final int contextId) {
-        KeyedCache cache = optCache(userId, contextId);
-        if (null != cache) {
-            Object object = cache.get();
-            if (object instanceof ConcurrentMap) {
-                @SuppressWarnings("unchecked")
-                ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
-                ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
-                if (null != collection) {
-                    synchronized (collection) {
-                        collection.clear();
-                    }
-
-                    fireInvalidateCacheEvent(userId, contextId);
+        KeyedCache cache = getCache(userId, contextId);
+        Object object = cache.get();
+        if (object instanceof ConcurrentMap) {
+            @SuppressWarnings("unchecked")
+            ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) object;
+            ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
+            if (null != collection) {
+                synchronized (collection) {
+                    collection.clear();
                 }
+
+                fireInvalidateCacheEvent(userId, contextId);
             }
         }
     }
@@ -752,17 +772,10 @@ public final class ListLsubCache {
     }
 
     private static ListLsubCollection getCollection(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
-        /*
-         * Initialize appropriate cache entry
-         */
-        KeyedCache cache = optCache(session);
-        if (null == cache) {
-            throw ServiceExceptionCode.absentService(CacheService.class);
-        }
+        KeyedCache cache = getCache(session);
 
         // Get the associated map
-        @SuppressWarnings("unchecked")
-        ConcurrentMap<Integer, Future<ListLsubCollection>> map = (ConcurrentMap<Integer, Future<ListLsubCollection>>) cache.get();
+        ConcurrentMap<Integer, Future<ListLsubCollection>> map = cache.get();
         if (null == map) {
             ConcurrentHashMap<Integer, Future<ListLsubCollection>> newmap = new ConcurrentHashMap<Integer, Future<ListLsubCollection>>();
             map = cache.putIfAbsent(newmap);
@@ -844,18 +857,6 @@ public final class ListLsubCache {
             }
         }
         return list.toArray(new String[list.size()]);
-    }
-
-    private static boolean isEmpty(String string) {
-        if (null == string) {
-            return true;
-        }
-        int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**

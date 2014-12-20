@@ -78,15 +78,17 @@ public interface IMAPNotifierRegistryService {
     /**
      * Removes and shuts down all notifier tasks for specified session's user.
      *
-     * @param session The session providing user information
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public void removeTaskFor(final Session session);
+    public void removeTaskFor(int userId, int contextId);
 
     /**
      * Handles tracked removal of specified session
      *
-     * @param session The removed session
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public void handleRemovedSession(final Session session);
+    public void handleRemovedSession(int userId, int contextId);
 
 }
