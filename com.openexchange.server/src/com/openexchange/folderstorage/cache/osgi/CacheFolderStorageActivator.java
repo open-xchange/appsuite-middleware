@@ -109,7 +109,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class, ThreadPoolService.class, ConfigurationService.class, SessiondService.class, MailAccountStorageService.class };
+        return new Class<?>[] { CacheService.class, ThreadPoolService.class, ConfigurationService.class, SessiondService.class,
+            MailAccountStorageService.class, CacheEventService.class };
     }
 
     @Override
@@ -162,6 +163,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             List<ServiceTracker<?,?>> serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
             this.serviceTrackers = serviceTrackers;
             serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new CacheFolderStorageServiceTracker(context)));
+            serviceTrackers.add(new ServiceTracker<CacheEventService, CacheEventService>(context, CacheEventService.class, new CacheFolderStorageInvalidator(context)));
             serviceTrackers.add(new ServiceTracker<CacheEventService, CacheEventService>(context, CacheEventService.class, new FolderMapInvalidator(context)));
             for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
