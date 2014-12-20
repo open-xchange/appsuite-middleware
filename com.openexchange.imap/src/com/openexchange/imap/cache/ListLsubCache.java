@@ -204,7 +204,7 @@ public final class ListLsubCache {
      *
      * @param session The session providing user information
      */
-    public static void dropFor(final Session session) {
+    public static void dropFor(Session session) {
         if (null != session) {
             dropFor(session.getUserId(), session.getContextId());
         }

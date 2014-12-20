@@ -105,7 +105,7 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
                         Integer userId = Integer.valueOf(key.substring(0, pos));
                         Integer contextId = Integer.valueOf(key.substring(pos + 1));
                         if (pairs.add(new Pair<Integer, Integer>(contextId, userId))) {
-                            ListLsubCache.dropFor(userId.intValue(), contextId.intValue());
+                            ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false);
                         }
                     }
                 }
