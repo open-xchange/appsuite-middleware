@@ -241,7 +241,7 @@ public final class CacheEventServiceImpl implements CacheEventService {
                         listener.onEvent(sender, event, fromRemote);
                     } catch (Throwable t) {
                         ExceptionUtils.handleThrowable(t);
-                        LOG.error("Error while executing event listener.", t);
+                        LOG.error("Error while executing event listener {} for event: {}", listener.getClass().getName(), event.toString(), t);
                     }
                 }
             }
