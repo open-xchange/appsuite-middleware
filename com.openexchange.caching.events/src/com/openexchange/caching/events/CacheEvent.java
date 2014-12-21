@@ -148,23 +148,27 @@ public class CacheEvent implements Serializable {
         }
 
         // Check region name
-        String thisRegion = this.region;
-        if (null == thisRegion) {
-            if (null != event.region) {
+        {
+            String thisRegion = this.region;
+            if (null == thisRegion) {
+                if (null != event.region) {
+                    return false;
+                }
+            } else if (!thisRegion.equals(event.region)) {
                 return false;
             }
-        } else if (!thisRegion.equals(region)) {
-            return false;
         }
 
         // Check group name
-        String thisGroupName = this.groupName;
-        if (null == thisGroupName) {
-            if (null != event.groupName) {
+        {
+            String thisGroupName = this.groupName;
+            if (null == thisGroupName) {
+                if (null != event.groupName) {
+                    return false;
+                }
+            } else if (!thisGroupName.equals(event.groupName)) {
                 return false;
             }
-        } else if (!thisGroupName.equals(groupName)) {
-            return false;
         }
 
         // Check keys

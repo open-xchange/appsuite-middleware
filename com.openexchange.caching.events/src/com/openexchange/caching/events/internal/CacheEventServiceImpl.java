@@ -184,7 +184,7 @@ public final class CacheEventServiceImpl implements CacheEventService {
         /*
          * perform notifications
          */
-        if (0 < listenersToNotify.size()) {
+        if (false == listenersToNotify.isEmpty()) {
             delayedEvents.offerIfAbsentElseReset(listenersToNotify, sender, event, fromRemote);
         }
     }
