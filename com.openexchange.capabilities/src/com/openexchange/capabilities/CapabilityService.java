@@ -49,6 +49,9 @@
 
 package com.openexchange.capabilities;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -119,4 +122,19 @@ public interface CapabilityService {
      */
     boolean undeclareCapability(String capability);
 
+    /**
+     * Gets the user configuration and its source based on the given search pattern.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param searchPattern A pattern to filter
+     * @return List with {@link ConfigurationProperty}s that match the parameters
+     * @throws OXException If capabilities cannot be determined
+     */
+    List<ConfigurationProperty> getConfigurationSource(int userId, int contextId, String searchPattern) throws OXException;
+
+    /**
+     * TODO
+     */
+    Map<String, Map<String, Set<String>>> getCapabilitiesSource(int userId, int contextId) throws OXException;
 }

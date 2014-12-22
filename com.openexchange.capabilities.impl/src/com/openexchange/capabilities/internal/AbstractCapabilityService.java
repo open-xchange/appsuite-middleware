@@ -56,12 +56,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,6 +76,7 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.capabilities.ConfigurationProperty;
 import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.config.ConfigurationService;
@@ -296,178 +299,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
 
-    /**
-     * Gets the capabilities tree showing which capability comes from which source
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The capabilities tree
-     * @throws OXException If capabilities tree cannot be returned
-     */
-    public Map<String, Map<String, Set<String>>> getCapabilitiesTree(int userId, int contextId) throws OXException {
-        Map<String, Map<String, Set<String>>> sets = new LinkedHashMap<String, Map<String, Set<String>>>(6);
-
-        {
-            Set<String> capabilities = new TreeSet<String>();
-            UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(userId, contextId);
-            // Capabilities by user permission bits
-            for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
-                capabilities.add(p.getCapabilityName());
-            }
-
-            Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
-            arr.put("granted", capabilities);
-            arr.put("denied", new HashSet<String>(0));
-            sets.put("permissions", arr);
-        }
-
-        {
-            CapabilitySet grantedCapabilities = new CapabilitySet(16);
-            CapabilitySet deniedCapabilities = new CapabilitySet(16);
-            final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-            if (configViews != null) {
-                final ConfigView view = configViews.getView(userId, contextId);
-                final String property = PERMISSION_PROPERTY;
-                for (final String scope : configViews.getSearchPath()) {
-                    final String permissions = view.property(property, String.class).precedence(scope).get();
-                    if (permissions != null) {
-                        for (String permissionModifier : P_SPLIT.split(permissions)) {
-                            if (!isEmpty(permissionModifier)) {
-                                permissionModifier = permissionModifier.trim();
-                                final char firstChar = permissionModifier.charAt(0);
-                                if ('-' == firstChar) {
-                                    deniedCapabilities.add(getCapability(permissionModifier.substring(1)));
-                                } else {
-                                    if ('+' == firstChar) {
-                                        grantedCapabilities.add(getCapability(permissionModifier.substring(1)));
-                                    } else {
-                                        grantedCapabilities.add(getCapability(permissionModifier));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                final Map<String, ComposedConfigProperty<String>> all = view.all();
-                for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-                    final String propName = entry.getKey();
-                    if (propName.startsWith("com.openexchange.capability.")) {
-                        boolean value = Boolean.parseBoolean(entry.getValue().get());
-                        String name = toLowerCase(propName.substring(28));
-                        if (value) {
-                            grantedCapabilities.add(getCapability(name));
-                        } else {
-                            deniedCapabilities.add(getCapability(name));
-                        }
-                    }
-                }
-
-                // Check for a property handler
-                for (final Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
-                    final ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
-                    if (null != composedConfigProperty) {
-                        entry.getValue().handleProperty(composedConfigProperty.get(), grantedCapabilities);
-                    }
-                }
-
-                Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
-                {
-                    Set<String> set = new TreeSet<String>();
-                    for (Capability cap : grantedCapabilities) {
-                        set.add(cap.getId());
-                    }
-                    arr.put("granted", set);
-                }
-                {
-                    Set<String> set = new TreeSet<String>();
-                    for (Capability cap : deniedCapabilities) {
-                        set.add(cap.getId());
-                    }
-                    arr.put("denied", set);
-                }
-                sets.put("configuration", arr);
-            }
-        }
-
-        {
-            if (contextId > 0) {
-                final Set<String> set = new HashSet<String>();
-                final Set<String> removees = new HashSet<String>();
-                // Context-sensitive
-                for (final String sCap : getContextCaps(contextId, false)) {
-                    if (!isEmpty(sCap)) {
-                        final char firstChar = sCap.charAt(0);
-                        if ('-' == firstChar) {
-                            final String val = toLowerCase(sCap.substring(1));
-                            set.remove(val);
-                            removees.add(val);
-                        } else {
-                            if ('+' == firstChar) {
-                                set.add(toLowerCase(sCap.substring(1)));
-                            } else {
-                                set.add(toLowerCase(sCap));
-                            }
-                        }
-                    }
-                }
-                // User-sensitive
-                if (userId > 0) {
-                    for (final String sCap : getUserCaps(userId, contextId, false)) {
-                        if (!isEmpty(sCap)) {
-                            final char firstChar = sCap.charAt(0);
-                            if ('-' == firstChar) {
-                                final String val = toLowerCase(sCap.substring(1));
-                                set.remove(val);
-                                removees.add(val);
-                            } else {
-                                if ('+' == firstChar) {
-                                    final String cap = toLowerCase(sCap.substring(1));
-                                    set.add(cap);
-                                    removees.remove(cap);
-                                } else {
-                                    final String cap = toLowerCase(sCap);
-                                    set.add(cap);
-                                    removees.remove(cap);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Merge them into result set
-                Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
-                arr.put("granted", set);
-                arr.put("denied", removees);
-                sets.put("provisioning", arr);
-            }
-        }
-
-        {
-            // Now the declared ones
-            CapabilitySet grantedCapabilities = new CapabilitySet(16);
-            FakeSession fakeSession = new FakeSession(userId, contextId);
-            for (String cap : declaredCapabilities.keySet()) {
-                if (check(cap, fakeSession, grantedCapabilities)) {
-                    grantedCapabilities.add(getCapability(cap));
-                }
-            }
-
-            Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
-            {
-                Set<String> set = new TreeSet<String>();
-                for (Capability cap : grantedCapabilities) {
-                    set.add(cap.getId());
-                }
-                arr.put("granted", set);
-            }
-            arr.put("denied", new HashSet<String>(0));
-            sets.put("programmatic", arr);
-        }
-
-        return sets;
-    }
-
     @Override
     public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters, final boolean allowCache) throws OXException {
         // Initialize server session
@@ -688,10 +519,10 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             applyUIFilter(capabilities, isGuest(serverSession));
         }
 
-//        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-//        System.out.println("AbstractCapabilityService.getCapabilities()");
-//        new Throwable().printStackTrace(System.out);
-//        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        //        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        //        System.out.println("AbstractCapabilityService.getCapabilities()");
+        //        new Throwable().printStackTrace(System.out);
+        //        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 
         return capabilities;
     }
@@ -832,6 +663,206 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
 
         return removed;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ConfigurationProperty> getConfigurationSource(int userId, int contextId, String searchPattern) throws OXException {
+        List<ConfigurationProperty> properties = new ArrayList<ConfigurationProperty>();
+
+        final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+        if (configViews != null) {
+            final ConfigView view = configViews.getView(userId, contextId);
+
+            if (view != null) {
+                Map<String, ComposedConfigProperty<String>> all = view.all();
+
+                for (Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+                    String key = entry.getKey();
+                    if (!key.startsWith(searchPattern)) {
+                        continue;
+                    }
+                    properties.add(new ConfigurationProperty(entry.getValue().getScope(), key, entry.getValue().get()));
+                }
+            }
+        }
+        return properties;
+    }
+
+    /**
+     * Gets the capabilities tree showing which capability comes from which source
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The capabilities tree
+     * @throws OXException If capabilities tree cannot be returned
+     */
+    @Override
+    public Map<String, Map<String, Set<String>>> getCapabilitiesSource(int userId, int contextId) throws OXException {
+        Map<String, Map<String, Set<String>>> sets = new LinkedHashMap<String, Map<String, Set<String>>>(6);
+
+        {
+            Set<String> capabilities = new TreeSet<String>();
+            UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(userId, contextId);
+            // Capabilities by user permission bits
+            for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
+                capabilities.add(p.getCapabilityName());
+            }
+
+            Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
+            arr.put("granted", capabilities);
+            arr.put("denied", new HashSet<String>(0));
+            sets.put("permissions", arr);
+        }
+
+        {
+            CapabilitySet grantedCapabilities = new CapabilitySet(16);
+            CapabilitySet deniedCapabilities = new CapabilitySet(16);
+            final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+            if (configViews != null) {
+                final ConfigView view = configViews.getView(userId, contextId);
+                final String property = PERMISSION_PROPERTY;
+                for (final String scope : configViews.getSearchPath()) {
+                    final String permissions = view.property(property, String.class).precedence(scope).get();
+                    if (permissions != null) {
+                        for (String permissionModifier : P_SPLIT.split(permissions)) {
+                            if (!isEmpty(permissionModifier)) {
+                                permissionModifier = permissionModifier.trim();
+                                final char firstChar = permissionModifier.charAt(0);
+                                if ('-' == firstChar) {
+                                    deniedCapabilities.add(getCapability(permissionModifier.substring(1)));
+                                } else {
+                                    if ('+' == firstChar) {
+                                        grantedCapabilities.add(getCapability(permissionModifier.substring(1)));
+                                    } else {
+                                        grantedCapabilities.add(getCapability(permissionModifier));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                final Map<String, ComposedConfigProperty<String>> all = view.all();
+                for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+                    final String propName = entry.getKey();
+                    if (propName.startsWith("com.openexchange.capability.")) {
+                        boolean value = Boolean.parseBoolean(entry.getValue().get());
+                        String name = toLowerCase(propName.substring(28));
+                        if (value) {
+                            grantedCapabilities.add(getCapability(name));
+                        } else {
+                            deniedCapabilities.add(getCapability(name));
+                        }
+                    }
+                }
+
+                // Check for a property handler
+                for (final Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
+                    final ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
+                    if (null != composedConfigProperty) {
+                        entry.getValue().handleProperty(composedConfigProperty.get(), grantedCapabilities);
+                    }
+                }
+
+                Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
+                {
+                    Set<String> set = new TreeSet<String>();
+                    for (Capability cap : grantedCapabilities) {
+                        set.add(cap.getId());
+                    }
+                    arr.put("granted", set);
+                }
+                {
+                    Set<String> set = new TreeSet<String>();
+                    for (Capability cap : deniedCapabilities) {
+                        set.add(cap.getId());
+                    }
+                    arr.put("denied", set);
+                }
+                sets.put("configuration", arr);
+            }
+        }
+
+        {
+            if (contextId > 0) {
+                final Set<String> set = new HashSet<String>();
+                final Set<String> removees = new HashSet<String>();
+                // Context-sensitive
+                for (final String sCap : getContextCaps(contextId, false)) {
+                    if (!isEmpty(sCap)) {
+                        final char firstChar = sCap.charAt(0);
+                        if ('-' == firstChar) {
+                            final String val = toLowerCase(sCap.substring(1));
+                            set.remove(val);
+                            removees.add(val);
+                        } else {
+                            if ('+' == firstChar) {
+                                set.add(toLowerCase(sCap.substring(1)));
+                            } else {
+                                set.add(toLowerCase(sCap));
+                            }
+                        }
+                    }
+                }
+                // User-sensitive
+                if (userId > 0) {
+                    for (final String sCap : getUserCaps(userId, contextId, false)) {
+                        if (!isEmpty(sCap)) {
+                            final char firstChar = sCap.charAt(0);
+                            if ('-' == firstChar) {
+                                final String val = toLowerCase(sCap.substring(1));
+                                set.remove(val);
+                                removees.add(val);
+                            } else {
+                                if ('+' == firstChar) {
+                                    final String cap = toLowerCase(sCap.substring(1));
+                                    set.add(cap);
+                                    removees.remove(cap);
+                                } else {
+                                    final String cap = toLowerCase(sCap);
+                                    set.add(cap);
+                                    removees.remove(cap);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Merge them into result set
+                Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
+                arr.put("granted", set);
+                arr.put("denied", removees);
+                sets.put("provisioning", arr);
+            }
+        }
+
+        {
+            // Now the declared ones
+            CapabilitySet grantedCapabilities = new CapabilitySet(16);
+            FakeSession fakeSession = new FakeSession(userId, contextId);
+            for (String cap : declaredCapabilities.keySet()) {
+                if (check(cap, fakeSession, grantedCapabilities)) {
+                    grantedCapabilities.add(getCapability(cap));
+                }
+            }
+
+            Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
+            {
+                Set<String> set = new TreeSet<String>();
+                for (Capability cap : grantedCapabilities) {
+                    set.add(cap.getId());
+                }
+                arr.put("granted", set);
+            }
+            arr.put("denied", new HashSet<String>(0));
+            sets.put("programmatic", arr);
+        }
+
+        return sets;
     }
 
     /**
