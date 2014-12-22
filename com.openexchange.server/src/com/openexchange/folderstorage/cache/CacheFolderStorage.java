@@ -1364,7 +1364,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
     }
 
     @Override
-    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
+    public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
         String treeId = folder.getTreeID();
         Session session = storageParameters.getSession();
         /*
@@ -1790,7 +1790,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         return FolderMapManagement.getInstance().getFor(session);
     }
 
-    private static FolderMap optFolderMapFor(final StorageParameters parameters) {
+    private static FolderMap optFolderMapFor(StorageParameters parameters) {
         return FolderMapManagement.getInstance().optFor(parameters.getUserId(), parameters.getContextId());
     }
 
