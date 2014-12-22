@@ -134,6 +134,8 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(allowPublicSession = true)
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAttachmentAction.class);
+
     private static final long EXPIRES_MILLIS_YEAR = AJAXRequestResult.YEAR_IN_MILLIS * 50;
     private static final String PARAMETER_FILTER = Mail.PARAMETER_FILTER;
     private static final String PARAMETER_SAVE = Mail.PARAMETER_SAVE;
@@ -483,6 +485,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     }
 
     static String sanitizeHtml(String htmlContent, HtmlService htmlService) {
+        if (htmlService == null) {
+            LOG.warn("HtmlService absent. Unable to sanitize content. Return unsanitized content.");
+            return htmlContent;
+        }
         return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 
