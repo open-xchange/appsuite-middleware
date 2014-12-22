@@ -76,7 +76,7 @@ public class Bug24899Test extends AbstractSanitizing {
             "an Sie versandt.\n" +
             "\n" +
             "<h1>Sofortige Benachrichtigung per E-Mail</h1>\n" +
-            "<H2>Aktivitäten in <I>IT-Koordinatoren WSV</I></H2>\n" +
+            "<H2>Aktivit\u00e4ten in <I>IT-Koordinatoren WSV</I></H2>\n" +
             "<dl><dt><a href=\"867920?op=inf&amp;back_object=107728\"><img alt=\"Mehr Information\" title=\"Mehr Information\" src=\"/bscw_resources/120420-1504-25392/icons/info.gif\" class=\"plain inlist\"  /></a> <a href=\"867920\"><img alt=\"Ordner\" title=\"Ordner\" src=\"/bscw_resources/120420-1504-25392/icons/s_folder.gif\" class=\"plain inlist\"  /></a><strong><a href=\"867920\">IT-Koordinatoren WSV</a></strong></dt><dd>\n" +
             "\n" +
             "<dl><dt><a href=\"17607708?op=inf&amp;back_object=107728\"><img alt=\"Mehr Information\" title=\"Mehr Information\" src=\"/bscw_resources/120420-1504-25392/icons/info.gif\" class=\"plain inlist\"  /></a> <a href=\"17607708\"><img alt=\"Ordner\" title=\"Ordner\" src=\"/bscw_resources/120420-1504-25392/icons/s_folder.gif\" class=\"plain inlist\"  /></a><strong><a href=\"17607708\">Besprechungen_2013</a></strong></dt><dd>\n" +
@@ -87,13 +87,13 @@ public class Bug24899Test extends AbstractSanitizing {
             "</dd></dl>\n" +
             "</dd></dl>\n" +
             "<hr />\n" +
-            "<h5>Die Nachricht wurde erzeugt, weil Sie für das betreffende Objekt\n" +
-            "und die aktuelle Aktivität eine sofortige Benachrichtigung per E-Mail\n" +
+            "<h5>Die Nachricht wurde erzeugt, weil Sie f\u00fcr das betreffende Objekt\n" +
+            "und die aktuelle Aktivit\u00e4t eine sofortige Benachrichtigung per E-Mail\n" +
             "abonniert haben. Falls Sie weitere Nachrichten dieser Art vermeiden\n" +
-            "wollen, ändern Sie bitte die Ereignis-Einstellung des betreffenden\n" +
-            "Ordners oder Objekts. Sie können die direkte Benachrichtigung auch\n" +
+            "wollen, \u00e4ndern Sie bitte die Ereignis-Einstellung des betreffenden\n" +
+            "Ordners oder Objekts. Sie k\u00f6nnen die direkte Benachrichtigung auch\n" +
             "generell ausschalten unter <em>Optionen &gt; Ereignisse</em>\n" +
-            "im oberen Menü der BSCW-Benutzerschnittstelle.</h5>\n" +
+            "im oberen Men\u00fc der BSCW-Benutzerschnittstelle.</h5>\n" +
             "</body>\n" +
             "</html>";
 
@@ -112,7 +112,7 @@ public class Bug24899Test extends AbstractSanitizing {
             "an Sie versandt.\n" +
             "\n" +
             "<h1>Sofortige Benachrichtigung per E-Mail</h1>\n" +
-            "<H2>Aktivitäten in <I>IT-Koordinatoren WSV</I></H2>\n" +
+            "<H2>Aktivit\u00e4ten in <I>IT-Koordinatoren WSV</I></H2>\n" +
             "<dl><dt><a href=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/867920?op=inf&amp;back_object=107728\"\"><img alt=\"Mehr Information\" title=\"Mehr Information\" src=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/bscw_resources/120420-1504-25392/icons/info.gif\"\" class=\"plain inlist\"  /></a> <a href=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/867920\"\"><img alt=\"Ordner\" title=\"Ordner\" src=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/bscw_resources/120420-1504-25392/icons/s_folder.gif\"\" class=\"plain inlist\"  /></a><strong><a href=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/867920\"\">IT-Koordinatoren WSV</a></strong></dt><dd>\n" +
             "\n" +
             "<dl><dt><a href=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/17607708?op=inf&amp;back_object=107728\"\"><img alt=\"Mehr Information\" title=\"Mehr Information\" src=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/bscw_resources/120420-1504-25392/icons/info.gif\"\" class=\"plain inlist\"  /></a> <a href=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/17607708\"\"><img alt=\"Ordner\" title=\"Ordner\" src=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/bscw_resources/120420-1504-25392/icons/s_folder.gif\"\" class=\"plain inlist\"  /></a><strong><a href=\"https://bscw.ilmenau.baw.de/bscw/bscw.cgi/107731/17607708\"\">Besprechungen_2013</a></strong></dt><dd>\n" +
@@ -123,13 +123,13 @@ public class Bug24899Test extends AbstractSanitizing {
             "</dd></dl>\n" +
             "</dd></dl>\n" +
             "<hr />\n" +
-            "<h5>Die Nachricht wurde erzeugt, weil Sie für das betreffende Objekt\n" +
-            "und die aktuelle Aktivität eine sofortige Benachrichtigung per E-Mail\n" +
+            "<h5>Die Nachricht wurde erzeugt, weil Sie f\u00fcr das betreffende Objekt\n" +
+            "und die aktuelle Aktivit\u00e4t eine sofortige Benachrichtigung per E-Mail\n" +
             "abonniert haben. Falls Sie weitere Nachrichten dieser Art vermeiden\n" +
-            "wollen, ändern Sie bitte die Ereignis-Einstellung des betreffenden\n" +
-            "Ordners oder Objekts. Sie können die direkte Benachrichtigung auch\n" +
+            "wollen, \u00e4ndern Sie bitte die Ereignis-Einstellung des betreffenden\n" +
+            "Ordners oder Objekts. Sie k\u00f6nnen die direkte Benachrichtigung auch\n" +
             "generell ausschalten unter <em>Optionen &gt; Ereignisse</em>\n" +
-            "im oberen Menü der BSCW-Benutzerschnittstelle.</h5>\n" +
+            "im oberen Men\u00fc der BSCW-Benutzerschnittstelle.</h5>\n" +
             "</body>\n" +
             "</html>";
 
