@@ -99,8 +99,7 @@ import com.openexchange.user.UserService;
  */
 public final class IMAPActivator extends HousekeepingActivator {
 
-    protected static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(IMAPActivator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPActivator.class);
 
     private WhiteboardSecretService secretService;
 
@@ -138,9 +137,11 @@ public final class IMAPActivator extends HousekeepingActivator {
             /*
              * Register IMAP mail provider
              */
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
-            registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
+            {
+                Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
+                dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
+                registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
+            }
             /*
              * Register IMAP notifier registry
              */
@@ -166,23 +167,25 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Register event handler
              */
             {
-                final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-                serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-                final EventHandler eventHandler = new EventHandler() {
+                EventHandler eventHandler = new EventHandler() {
 
                     @Override
                     public void handleEvent(final Event event) {
-                        final ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                        if (false == SessiondEventConstants.TOPIC_LAST_SESSION.equals(event.getTopic())) {
+                            return;
+                        }
+
+                        ThreadPoolService threadPool = getService(ThreadPoolService.class);
                         if (null == threadPool) {
                             doHandleEvent(event);
                         } else {
-                            final AbstractTask<Void> t = new AbstractTask<Void>() {
+                            AbstractTask<Void> t = new AbstractTask<Void>() {
 
                                 @Override
                                 public Void call() throws Exception {
                                     try {
                                         doHandleEvent(event);
-                                    } catch (final Exception e) {
+                                    } catch (Exception e) {
                                         LOG.warn("Handling event {} failed.", event.getTopic(), e);
                                     }
                                     return null;
@@ -195,72 +198,74 @@ public final class IMAPActivator extends HousekeepingActivator {
                     /**
                      * Handles given event.
                      *
-                     * @param event The event
+                     * @param lastSessionEvent The event
                      */
-                    protected void doHandleEvent(final Event event) {
-                        final String topic = event.getTopic();
-                        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-                            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                            if (null != contextId) {
-                                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                                if (null != userId) {
-                                    ListLsubCache.dropFor(userId, contextId);
-                                    IMAPStoreCache.getInstance().dropFor(userId, contextId);
-                                    ThreadableCache.dropFor(userId, contextId);
+                    protected void doHandleEvent(Event lastSessionEvent) {
+                        Integer contextId = (Integer) lastSessionEvent.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                        if (null != contextId) {
+                            Integer userId = (Integer) lastSessionEvent.getProperty(SessiondEventConstants.PROP_USER_ID);
+                            if (null != userId) {
+                                ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false);
+                                IMAPStoreCache.getInstance().dropFor(userId.intValue(), contextId.intValue());
+                                ThreadableCache.dropFor(userId.intValue(), contextId.intValue());
 
-                                    IMAPNotifierRegistry.getInstance().handleRemovedSession(userId, contextId);
-                                }
+                                IMAPNotifierRegistry.getInstance().handleRemovedSession(userId.intValue(), contextId.intValue());
                             }
                         }
                     }
                 };
+
+                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }
             {
-                final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-                serviceProperties.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
-                final EventHandler eventHandler = new EventHandler() {
+                EventHandler eventHandler = new EventHandler() {
 
                     @Override
-                    public void handleEvent(final Event event) {
-                        final int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
-                        final int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
-                        final Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+                    public void handleEvent(Event event) {
+                        int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
+                        int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
+                        Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
                         ListLsubCache.dropFor(session);
                         IMAPStoreCache.getInstance().dropFor(userId, contextId);
                         ThreadableCache.dropFor(session);
                     }
 
                 };
+
+                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }
             {
-                final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-                serviceProperties.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
-                final EventHandler eventHandler = new EventHandler() {
+                EventHandler eventHandler = new EventHandler() {
 
                     @Override
-                    public void handleEvent(final Event event) {
+                    public void handleEvent(Event event) {
                         if (Boolean.TRUE.equals(event.getProperty("__isRemoteEvent"))) { // Remotely received
-                            final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
+                            Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
                             if (null != session) {
                                 try {
-                                    final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
-                                    final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderId);
-                                    final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                                    String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                                    FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderId);
+                                    Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
                                     if (null == contentRelated || false == contentRelated.booleanValue()) {
                                         ListLsubCache.clearCache(fa.getAccountId(), session);
                                     }
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     LOG.error("Failed to handle event: {}", event.getTopic(), e);
                                 }
                             }
                         }
                     }
                 };
+
+                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

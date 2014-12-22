@@ -700,7 +700,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
-        return FolderCache.getCachedFolder(fullName, this);
+        try {
+            return FolderCache.getCachedFolder(fullName, this);
+        } catch (OXException e) {
+            if (e.equalsCode(MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber(), IMAPException.IMAPCode.prefix())) {
+                ListLsubCache.clearCache(accountId, session);
+            }
+            throw e;
+        }
     }
 
     /**
@@ -1262,7 +1269,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*
              * No folder deletion on IMAP error "NO_ADMINISTER_ACCESS_ON_INITIAL"
              */
@@ -1280,20 +1287,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
             throw e;
-        } catch (final RuntimeException e) {
-            if (createMe != null && created) {
-                try {
-                    if (doesExist(createMe, false)) {
-                        createMe.delete(true);
-                        created = false;
-                    }
-                } catch (final Throwable e2) {
-                    LOG.error("Temporary created IMAP folder \"{}\" could not be deleted", createMe.getFullName(),
-                        e2);
-                }
-            }
-            throw handleRuntimeException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (createMe != null && created) {
                 try {
                     if (doesExist(createMe, false)) {
@@ -1310,7 +1304,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (createMe != null) {
                 if (created) {
                     try {
-                        final Folder parent = createMe.getParent();
+                        Folder parent = createMe.getParent();
                         if (null != parent) {
                             final String parentFullName = parent.getFullName();
                             ListLsubCache.addSingle(parentFullName, accountId, createMe, session);
@@ -1321,7 +1315,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         } else {
                             ListLsubCache.clearCache(accountId, session);
                         }
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         // Updating LIST/LSUB cache failed
                         ListLsubCache.clearCache(accountId, session);
                     } finally {

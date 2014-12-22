@@ -1087,6 +1087,15 @@ public final class IMAPException extends OXException {
 
         private static final String PREFIX = IMAPProvider.PROTOCOL_IMAP.getName().toUpperCase();
 
+        /**
+         * Gets the <code>"IMAP"</code> prefix.
+         *
+         * @return The prefix
+         */
+        public static String prefix() {
+            return PREFIX;
+        }
+
         private IMAPCode(final String message, final Category category, final int detailNumber, final String displayMessage) {
             this.message = message;
             this.displayMessage = displayMessage;

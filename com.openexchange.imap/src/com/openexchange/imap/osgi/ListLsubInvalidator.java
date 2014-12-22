@@ -50,6 +50,9 @@
 package com.openexchange.imap.osgi;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -58,6 +61,7 @@ import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.imap.cache.ListLsubCache;
+import com.openexchange.java.util.Pair;
 
 
 /**
@@ -79,44 +83,50 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
      *
      * @param context The bundle context
      */
-    public ListLsubInvalidator(final BundleContext context) {
+    public ListLsubInvalidator(BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public void onEvent(final Object sender, final CacheEvent cacheEvent, final boolean fromRemote) {
+    public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (fromRemote) {
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
 
-            final String region = cacheEvent.getRegion();
+            String region = cacheEvent.getRegion();
             if (REGION.equals(region)) {
-                for (Serializable cacheKey : cacheEvent.getKeys()) {
-                    final String key = String.valueOf(cacheKey); // <user-id> + "@" + <context-id>
-                    final int pos = key.indexOf('@');
-                    final int userId = Integer.parseInt(key.substring(0, pos));
-                    final int contextId = Integer.parseInt(key.substring(pos + 1));
-                    ListLsubCache.dropFor(userId, contextId);
+                List<Serializable> keys = cacheEvent.getKeys();
+                Set<Pair<Integer, Integer>> pairs = new LinkedHashSet<Pair<Integer,Integer>>(keys.size());
+                for (Serializable cacheKey : keys) {
+                    String key = String.valueOf(cacheKey); // <user-id> + "@" + <context-id>
+                    int pos = key.indexOf('@');
+                    if (pos > 0) {
+                        Integer userId = Integer.valueOf(key.substring(0, pos));
+                        Integer contextId = Integer.valueOf(key.substring(pos + 1));
+                        if (pairs.add(new Pair<Integer, Integer>(contextId, userId))) {
+                            ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false);
+                        }
+                    }
                 }
             }
         }
     }
 
     @Override
-    public CacheEventService addingService(final ServiceReference<CacheEventService> reference) {
-        final CacheEventService service = context.getService(reference);
+    public CacheEventService addingService(ServiceReference<CacheEventService> reference) {
+        CacheEventService service = context.getService(reference);
         service.addListener(REGION, this);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<CacheEventService> reference, final CacheEventService service) {
+    public void modifiedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference<CacheEventService> reference, final CacheEventService service) {
+    public void removedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
         service.removeListener(REGION, this);
         context.ungetService(reference);
     }
