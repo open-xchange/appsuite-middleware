@@ -135,6 +135,9 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
                     }
                     prev = pos + 1;
                 }
+                if (prev < length) {
+                    names.add(tmp.substring(prev));
+                }
 
                 remoteParameterNames = new ArrayList<String>(names);
             }
