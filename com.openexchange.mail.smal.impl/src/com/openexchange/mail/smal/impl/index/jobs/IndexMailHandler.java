@@ -63,6 +63,7 @@ import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
@@ -182,7 +183,7 @@ public class IndexMailHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleInlineHtml(String htmlContent, ContentType contentType, long size, String fileName, String id) throws OXException {
+    public boolean handleInlineHtml(ContentProvider htmlContent, ContentType contentType, long size, String fileName, String id) throws OXException {
         return true;
     }
 
