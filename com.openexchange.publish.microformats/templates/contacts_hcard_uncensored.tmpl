@@ -1,7 +1,6 @@
-<#--                                                                             --> 
-<#--                                                                             --> 
-<#--   For more extensive templates, and examples, see http://ox.io              --> 
-<#--                                                                             --> 
+<#--                                                                             -->
+<#--                                                                             -->
+<#--                                                                             -->
 <#macro display key value title>
 	<#if value != "">
 		<span class="${key}">${value?html}</span>
@@ -49,7 +48,7 @@
 						<td class="left">
 							${title} <#if type != "" || type0 != ""  || type1 != ""  || type2 != "" >(</#if><#if type != ""> <span class="type">${type}</span></#if><#if type0 != ""> <span class="type">${type0}</span></#if><#if type1 != ""> <span class="type">${type1}</span></#if><#if type2 != ""> <span class="type">${type2}</span></#if><#if type != "" || type0 != ""  || type1 != ""  || type2 != "" >)</#if>
 							:
-						</td> 
+						</td>
 						<td class="right">
 							<span class="value">${value?html}</span>
 						</td>
@@ -63,7 +62,7 @@
 <#macro render_mail value type>
 	<#if value != "">
 					<tr>
-						<td class="left">e-Mail :</td> 
+						<td class="left">e-Mail :</td>
 						<td class="right">
 							<a href="mailto:${value?html}" class="email">
 								${value?html}
@@ -77,7 +76,7 @@
 <#macro render_organisation name>
 	<#if name != "">
 					<tr>
-						<td class="left">Organisation:</td> 
+						<td class="left">Organisation:</td>
 						<td class="right org"><span class="organization-name">${name}</span></td>
 					</tr>
 	</#if>
@@ -91,8 +90,8 @@
 					</tr>
 					<@render key="street-address" title="Street" value=contact.streetHome!"" />
 					<@render key="postal-code" title="Postal code" value=contact.postalCodeHome!"" />
-					<@render key="locality" title="City" value=contact.cityHome!"" /> 
-					<@render key="region" title="State" value=contact.stateHome!"" /> 
+					<@render key="locality" title="City" value=contact.cityHome!"" />
+					<@render key="region" title="State" value=contact.stateHome!"" />
 					<@render key="country-name" title="Country" value=contact.countryHome!"" />
 				</div>
 			</#if>
@@ -106,8 +105,8 @@
 					</tr>
 					<@render key="street-address" title="Street" value=contact.streetBusiness!"" />
 					<@render key="postal-code" title="Postal code" value=contact.postalCodeBusiness!"" />
-					<@render key="locality" title="City" value=contact.cityBusiness!"" /> 
-					<@render key="region" title="State" value=contact.stateBusiness!"" /> 
+					<@render key="locality" title="City" value=contact.cityBusiness!"" />
+					<@render key="region" title="State" value=contact.stateBusiness!"" />
 					<@render key="country-name" title="Country" value=contact.countryBusiness!"" />
 				</div>
 			</#if>
@@ -121,10 +120,10 @@
 					</tr>
 					<@render key="street-address" title="Street" value=contact.streetOther!"" />
 					<@render key="postal-code" title="Postal code" value=contact.postalCodeOther!"" />
-					<@render key="locality" title="City" value=contact.cityOther!"" /> 
-					<@render key="region" title="State" value=contact.stateOther!"" /> 
+					<@render key="locality" title="City" value=contact.cityOther!"" />
+					<@render key="region" title="State" value=contact.stateOther!"" />
 					<@render key="country-name" title="Country" value=contact.countryOther!"" />
-				</div> 
+				</div>
 			</#if>
 </#macro>
 
@@ -216,7 +215,7 @@
 		color: #446;
 	}
 	#nav li, #nav ul {
-		list-style-type: none; 
+		list-style-type: none;
 		margin: 0;
 		padding: 0;
 		left-indent: 0;
@@ -243,7 +242,7 @@
 
 <body>
 	<a id="top">
-	
+
 	<#assign contacts = utils.onlyPublic(contacts)>
 	<#if (contacts?size == 0)>
 		<div class="message">Folder is empty</div>
@@ -262,7 +261,7 @@
 		</ul>
 	</div>
 	</#if>
-	
+
 	<div id="contacts">
 		<#list contacts as contact>
 		<div class="vcard" id="contact_${contacts?seq_index_of(contact)}">
@@ -276,80 +275,80 @@
 				<@render_other_adr contact=contact />
 
 				<#if contact.birthday??><tr><td class="left">Birthday:</td><td class="bday right">${contact.birthday?string("yyyy-MM-dd")}</td></tr></#if>
-				<@render key="ox_maritalStatus" title="Marital status" value=contact.maritalStatus!"" /> 
+				<@render key="ox_maritalStatus" title="Marital status" value=contact.maritalStatus!"" />
 				<@render key="ox_numberOfChildren" title="Number of children" value=contact.numberOfChildren!"" />
-				<@render key="ox_profession" title="Profession" value=contact.profession!"" /> 
-				<@render key="ox_nickname" title="Nickname" value=contact.nickname!"" /> 
-				<@render key="ox_spouse_name" title="Spouse name" value=contact.spouseName!"" /> 
+				<@render key="ox_profession" title="Profession" value=contact.profession!"" />
+				<@render key="ox_nickname" title="Nickname" value=contact.nickname!"" />
+				<@render key="ox_spouse_name" title="Spouse name" value=contact.spouseName!"" />
 				<#if contact.anniversary??><tr><td class="left">Anniversary:</td><td class="ox_anniversary right">${contact.anniversary?string("yyyy-MM-dd")}</td></tr></#if>
-				<@render key="note" title="Note" value=contact.note!"" /> 
-				<@render key="ox_department" title="Department" value=contact.department!"" /> 
-				<@render key="role" title="Position" value=contact.position!"" /> 
-				<@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" /> 
-				<@render key="ox_roomNumber" title="Room number" value=contact.roomNumber!"" /> 
-				<@render key="ox_numberOfEmployees" title="Number of employees" value=contact.numberOfEmployee!"" /> 
-				<@render key="ox_salesVolume" title="Sales volume" value=contact.salesVolume!"" /> 
-				<@render key="ox_taxId" title="Tax id" value=contact.taxID!"" /> 
-				<@render key="ox_commercialRegister" title="Commercial register" value=contact.commercialRegister!"" /> 
-				<@render key="ox_branches" title="Branches" value=contact.branches!"" /> 
-				<@render key="ox_businessCategory" title="Business category" value=contact.businessCategory!"" /> 
-				<@render key="ox_info" title="Info" value=contact.info!"" /> 
-				<@render key="ox_managerName" title="Manager name" value=contact.managerName!"" /> 
-				<@render key="ox_assistantName" title="Assistant name" value=contact.assistantName!"" /> 
-				<@render key="tel" type="home" title="Telephone" value=contact.telephoneHome1!"" /> 
-				<@render key="tel" type="ox_home2" title="Telephone" value=contact.telephoneHome2!"" /> 
-				<@render key="tel" type="work" title="Telephone" value=contact.telephoneBusiness1!"" /> 
-				<@render key="tel" type="ox_business2" title="Telephone" value=contact.telephoneBusiness2!"" /> 
-				<@render key="tel" type="ox_other" title="Telephone" value=contact.telephoneOther!"" /> 
-				<@render key="tel" type="fax" type0="work" title="Fax" value=contact.faxBusiness!"" /> 
-				<@render key="tel" type="ox_callback" title="Telephone" value=contact.telephoneCallback!"" /> 
-				<@render key="tel" type="car" title="Telephone" value=contact.telephoneCar!"" /> 
-				<@render key="tel" type="ox_company" title="Telephone" value=contact.telephoneCompany!"" /> 
-				<@render key="tel" type="fax" type0="home" title="Telephone" value=contact.faxHome!"" /> 
-				<@render key="tel" type="cell" title="Telephone" value=contact.cellularTelephone1!"" /> 
-				<@render key="tel" type="ox_cellular2" title="Telephone" value=contact.cellularTelephone2!"" /> 
-				<@render key="tel" type="fax" type0="ox_other" title="Telephone" value=contact.faxOther!"" /> 
-				<@render key="tel" type="isdn"  title="Telephone" value=contact.telephoneISDN!"" /> 
-				<@render key="tel" type="ox_pager" title="Telephone" value=contact.telephonePager!"" /> 
-				<@render key="tel" type="ox_primary" title="Telephone" value=contact.telephonePrimary!"" /> 
-				<@render key="tel" type="ox_radio" title="Telephone" value=contact.telephoneRadio!"" /> 
-				<@render key="tel" type="ox_telex"  title="Telephone" value=contact.telephoneTelex!"" /> 
-				<@render key="tel" type="ox_ttytdd" title="Telephone" value=contact.telephoneTTYTTD!"" /> 
-				<@render key="tel" type="ox_ip" title="Telephone" value=contact.telephoneIP!"" /> 
-				<@render key="tel" type="ox_assistant" title="Telephone" value=contact.telephoneAssistant!"" /> 
-				<@render_mail type="work" value=contact.email1!"" /> 
-				<@render_mail type="home" value=contact.email2!"" /> 
-				<@render_mail type="ox_other" value=contact.email3!"" /> 
-				<@render key="url" title="Url" value=contact.uRL!"" /> 
-				<@render key="ox_instantMessenger1" title="IM" value=contact.instantMessenger1!"" /> 
-				<@render key="ox_instantMessenger2" title="IM" value=contact.instantMessenger2!"" /> 
-		
-				<@render key="ox_userfield01" title="Userfield01" value=contact.userField01!"" /> 
-				<@render key="ox_userfield02" title="Userfield02" value=contact.userField02!"" /> 
-				<@render key="ox_userfield03" title="Userfield03" value=contact.userField03!"" /> 
-				<@render key="ox_userfield04" title="Userfield04" value=contact.userField04!"" /> 
-				<@render key="ox_userfield05" title="Userfield05" value=contact.userField05!"" /> 
-				<@render key="ox_userfield06" title="Userfield06" value=contact.userField06!"" /> 
-				<@render key="ox_userfield07" title="Userfield07" value=contact.userField07!"" /> 
-				<@render key="ox_userfield08" title="Userfield08" value=contact.userField08!"" /> 
-				<@render key="ox_userfield09" title="Userfield09" value=contact.userField09!"" /> 
-				<@render key="ox_userfield10" title="Userfield10" value=contact.userField10!"" /> 
-				<@render key="ox_userfield11" title="Userfield11" value=contact.userField11!"" /> 
-				<@render key="ox_userfield12" title="Userfield12" value=contact.userField12!"" /> 
-				<@render key="ox_userfield13" title="Userfield13" value=contact.userField13!"" /> 
-				<@render key="ox_userfield14" title="Userfield14" value=contact.userField14!"" /> 
-				<@render key="ox_userfield15" title="Userfield15" value=contact.userField15!"" /> 
-				<@render key="ox_userfield16" title="Userfield16" value=contact.userField16!"" /> 
-				<@render key="ox_userfield17" title="Userfield17" value=contact.userField17!"" /> 
-				<@render key="ox_userfield18" title="Userfield18" value=contact.userField18!"" /> 
-				<@render key="ox_userfield19" title="Userfield19" value=contact.userField19!"" /> 
-				<@render key="ox_userfield20" title="Userfield20" value=contact.userField20!"" /> 
+				<@render key="note" title="Note" value=contact.note!"" />
+				<@render key="ox_department" title="Department" value=contact.department!"" />
+				<@render key="role" title="Position" value=contact.position!"" />
+				<@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" />
+				<@render key="ox_roomNumber" title="Room number" value=contact.roomNumber!"" />
+				<@render key="ox_numberOfEmployees" title="Number of employees" value=contact.numberOfEmployee!"" />
+				<@render key="ox_salesVolume" title="Sales volume" value=contact.salesVolume!"" />
+				<@render key="ox_taxId" title="Tax id" value=contact.taxID!"" />
+				<@render key="ox_commercialRegister" title="Commercial register" value=contact.commercialRegister!"" />
+				<@render key="ox_branches" title="Branches" value=contact.branches!"" />
+				<@render key="ox_businessCategory" title="Business category" value=contact.businessCategory!"" />
+				<@render key="ox_info" title="Info" value=contact.info!"" />
+				<@render key="ox_managerName" title="Manager name" value=contact.managerName!"" />
+				<@render key="ox_assistantName" title="Assistant name" value=contact.assistantName!"" />
+				<@render key="tel" type="home" title="Telephone" value=contact.telephoneHome1!"" />
+				<@render key="tel" type="ox_home2" title="Telephone" value=contact.telephoneHome2!"" />
+				<@render key="tel" type="work" title="Telephone" value=contact.telephoneBusiness1!"" />
+				<@render key="tel" type="ox_business2" title="Telephone" value=contact.telephoneBusiness2!"" />
+				<@render key="tel" type="ox_other" title="Telephone" value=contact.telephoneOther!"" />
+				<@render key="tel" type="fax" type0="work" title="Fax" value=contact.faxBusiness!"" />
+				<@render key="tel" type="ox_callback" title="Telephone" value=contact.telephoneCallback!"" />
+				<@render key="tel" type="car" title="Telephone" value=contact.telephoneCar!"" />
+				<@render key="tel" type="ox_company" title="Telephone" value=contact.telephoneCompany!"" />
+				<@render key="tel" type="fax" type0="home" title="Telephone" value=contact.faxHome!"" />
+				<@render key="tel" type="cell" title="Telephone" value=contact.cellularTelephone1!"" />
+				<@render key="tel" type="ox_cellular2" title="Telephone" value=contact.cellularTelephone2!"" />
+				<@render key="tel" type="fax" type0="ox_other" title="Telephone" value=contact.faxOther!"" />
+				<@render key="tel" type="isdn"  title="Telephone" value=contact.telephoneISDN!"" />
+				<@render key="tel" type="ox_pager" title="Telephone" value=contact.telephonePager!"" />
+				<@render key="tel" type="ox_primary" title="Telephone" value=contact.telephonePrimary!"" />
+				<@render key="tel" type="ox_radio" title="Telephone" value=contact.telephoneRadio!"" />
+				<@render key="tel" type="ox_telex"  title="Telephone" value=contact.telephoneTelex!"" />
+				<@render key="tel" type="ox_ttytdd" title="Telephone" value=contact.telephoneTTYTTD!"" />
+				<@render key="tel" type="ox_ip" title="Telephone" value=contact.telephoneIP!"" />
+				<@render key="tel" type="ox_assistant" title="Telephone" value=contact.telephoneAssistant!"" />
+				<@render_mail type="work" value=contact.email1!"" />
+				<@render_mail type="home" value=contact.email2!"" />
+				<@render_mail type="ox_other" value=contact.email3!"" />
+				<@render key="url" title="Url" value=contact.uRL!"" />
+				<@render key="ox_instantMessenger1" title="IM" value=contact.instantMessenger1!"" />
+				<@render key="ox_instantMessenger2" title="IM" value=contact.instantMessenger2!"" />
+
+				<@render key="ox_userfield01" title="Userfield01" value=contact.userField01!"" />
+				<@render key="ox_userfield02" title="Userfield02" value=contact.userField02!"" />
+				<@render key="ox_userfield03" title="Userfield03" value=contact.userField03!"" />
+				<@render key="ox_userfield04" title="Userfield04" value=contact.userField04!"" />
+				<@render key="ox_userfield05" title="Userfield05" value=contact.userField05!"" />
+				<@render key="ox_userfield06" title="Userfield06" value=contact.userField06!"" />
+				<@render key="ox_userfield07" title="Userfield07" value=contact.userField07!"" />
+				<@render key="ox_userfield08" title="Userfield08" value=contact.userField08!"" />
+				<@render key="ox_userfield09" title="Userfield09" value=contact.userField09!"" />
+				<@render key="ox_userfield10" title="Userfield10" value=contact.userField10!"" />
+				<@render key="ox_userfield11" title="Userfield11" value=contact.userField11!"" />
+				<@render key="ox_userfield12" title="Userfield12" value=contact.userField12!"" />
+				<@render key="ox_userfield13" title="Userfield13" value=contact.userField13!"" />
+				<@render key="ox_userfield14" title="Userfield14" value=contact.userField14!"" />
+				<@render key="ox_userfield15" title="Userfield15" value=contact.userField15!"" />
+				<@render key="ox_userfield16" title="Userfield16" value=contact.userField16!"" />
+				<@render key="ox_userfield17" title="Userfield17" value=contact.userField17!"" />
+				<@render key="ox_userfield18" title="Userfield18" value=contact.userField18!"" />
+				<@render key="ox_userfield19" title="Userfield19" value=contact.userField19!"" />
+				<@render key="ox_userfield20" title="Userfield20" value=contact.userField20!"" />
 			</table>
 		<div class="back"><a href="#top">Back to the top</a></div>
 		</div>
 		</#list>
 	</div>
-	
+
 	<#if (contacts?size > 0)>
 	<div id="disclaimer">
 		${privacy}

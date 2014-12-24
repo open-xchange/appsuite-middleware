@@ -1552,7 +1552,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 // Remove comma
                 sb.deleteCharAt(sb.length() - 1);
-                sb.append(") VALUES (?,?,?,?,?,?,?,?,?,?,");
+                sb.append(") VALUES (?,?,?,?,?,?,?,?,?,?,?,");
                 if (uploadFileSizeLimitset) {
                     sb.append("?,");
                 }
