@@ -354,7 +354,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveUserFilestore2Master(final Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveUserFilestore2Master(final Context ctx, User user, User masterUser, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -385,7 +385,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             User storageUser = data[0];
             User storageMasterUser = data[1];
 
-            if (!tool.existsStore(dstFilestore.getId().intValue())) {
+            if (null == storageMasterUser.getFilestoreId()) {
+                throw new StorageException("Master user " + storageMasterUser.getId() + " has no file storage set.");
+            }
+            if (null == storageUser.getFilestoreId()) {
+                throw new StorageException("User " + storageUser.getId() + " has no file storage set.");
+            }
+            if (storageMasterUser.getFilestoreId().intValue() == storageUser.getFilestoreId().intValue()) {
+                throw new StorageException("User " + storageUser.getId() + " already has a master file storage set.");
+            }
+
+            if (!tool.existsStore(storageMasterUser.getFilestoreId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
             if (!tool.existsStore(storageUser.getFilestoreId().intValue())) {
@@ -393,7 +403,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue());
+            Filestore destFilestore = oxu.getFilestore(storageMasterUser.getFilestoreId().intValue());
             Filestore srcFilestore = oxu.getFilestore(storageUser.getFilestoreId().intValue());
 
             // Check equality
@@ -489,10 +499,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             User storageUser = data[0];
             User storageMasterUser = data[1];
 
+            if (null == storageMasterUser.getFilestoreId()) {
+                throw new StorageException("Master user " + storageMasterUser.getId() + " has no file storage set.");
+            }
+            if (null == storageUser.getFilestoreId()) {
+                throw new StorageException("User " + storageUser.getId() + " has no file storage set.");
+            }
+            if (storageMasterUser.getFilestoreId().intValue() != storageUser.getFilestoreId().intValue()) {
+                throw new StorageException("User " + storageUser.getId() + " has no master file storage set.");
+            }
+
             if (!tool.existsStore(dstFilestore.getId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
-            if (!tool.existsStore(storageUser.getFilestoreId().intValue())) {
+            if (!tool.existsStore(storageMasterUser.getFilestoreId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
 

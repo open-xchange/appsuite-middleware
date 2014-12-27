@@ -295,7 +295,6 @@ public interface OXUserInterface extends Remote {
      * @param ctx The context in which the user resides
      * @param user The user
      * @param masterUser The master user account
-     * @param dstFilestore The destination file storage
      * @param credentials The credentials
      * @return The job identifier which can be used for retrieving progress information.
      * @throws StorageException If an error in the subsystems occurred.
@@ -306,7 +305,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveUserFilestore2Master(Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveUserFilestore2Master(Context ctx, User user, User masterUser, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from a master account to his own storage.
@@ -316,7 +315,7 @@ public interface OXUserInterface extends Remote {
      * @param ctx The context in which the user resides
      * @param user The user
      * @param masterUser The master user account
-     * @param dstFilestore The destination file storage
+     * @param dstFilestore The destination file storage to move to
      * @param credentials The credentials
      * @return The job identifier which can be used for retrieving progress information.
      * @throws StorageException If an error in the subsystems occurred.
