@@ -186,7 +186,8 @@ public class ConfigCascade implements ConfigViewFactory {
                     }
                     return null;
                 }
-                
+
+                @Override
                 public String getScope() throws OXException {
                 	final String finalScope = getFinalScope();
                     for (final ConfigProviderService provider : getConfigProviders(finalScope)) {

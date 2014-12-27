@@ -87,6 +87,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -424,10 +425,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
+    public boolean handleInlineHtml(final ContentProvider contentProvider, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         /*
          * Append HTML content as-is
          */
+        String htmlContent = contentProvider.getContent();
         if (bodyAdded) {
             if (isAlternative) {
                 if (containsContent("text/htm")) {

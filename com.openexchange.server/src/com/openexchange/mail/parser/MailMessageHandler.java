@@ -170,7 +170,7 @@ public interface MailMessageHandler {
     /**
      * Handle a html inline part (<code>text/html</code>)
      */
-    public boolean handleInlineHtml(String htmlContent, ContentType contentType, long size, String fileName, String id) throws OXException;
+    public boolean handleInlineHtml(ContentProvider htmlContent, ContentType contentType, long size, String fileName, String id) throws OXException;
 
     /**
      * Handle an attachment part (any non-inline parts and file attachments)

@@ -50,29 +50,43 @@
 package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.Part;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -90,6 +104,190 @@ public final class MimeProcessingUtility {
      */
     private MimeProcessingUtility() {
         super();
+    }
+
+    /**
+     * Resolves specified "from" address to associated account identifier
+     *
+     * @param session The session
+     * @param from The from addresses
+     * @return The account identifier
+     * @throws OXException If address cannot be resolved
+     */
+    static int resolveFrom2Account(final Session session, final InternetAddress[] from) throws OXException {
+        if (null == from || from.length == 0) {
+            return MailAccount.DEFAULT_ID;
+        }
+        return resolveFrom2Account(session, from[0]);
+    }
+
+    /**
+     * Resolves specified "from" address to associated account identifier
+     *
+     * @param session The session
+     * @param from The from address
+     * @return The account identifier
+     * @throws OXException If address cannot be resolved
+     */
+    static int resolveFrom2Account(final Session session, final InternetAddress from) throws OXException {
+        /*
+         * Resolve "From" to proper mail account to select right transport server
+         */
+        int accountId;
+        if (null == from) {
+            accountId = MailAccount.DEFAULT_ID;
+        } else {
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService( MailAccountStorageService.class);
+            final int user = session.getUserId();
+            final int cid = session.getContextId();
+            accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
+            if (accountId != -1) {
+                // Retry with IDN representation
+                accountId = storageService.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
+            }
+        }
+        if (accountId == -1) {
+            accountId = MailAccount.DEFAULT_ID;
+        }
+        return accountId;
+    }
+
+    /**
+     * Determines a possible <code>From</code> address
+     *
+     * @param origMsg The referenced message
+     * @param accountId The associated account identifier
+     * @param session The session
+     * @param ctx The context
+     * @return The possible <code>From</code> address or <code>null</code>
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws AddressException If address cannot be parsed
+     */
+    static InternetAddress determinePossibleFrom(boolean isForward, MailMessage origMsg, int accountId, Session session, Context ctx) throws OXException, AddressException {
+        final Set<InternetAddress> fromCandidates;
+        if (accountId == MailAccount.DEFAULT_ID) {
+            if (isForward) {
+                // Fall-back to primary address
+                return null;
+            }
+            fromCandidates = new HashSet<InternetAddress>(8);
+            addUserAliases(fromCandidates, session, ctx);
+        } else {
+            // Check for Unified Mail account
+            ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+            UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
+            if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
+                int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
+                if (realAccountId == MailAccount.DEFAULT_ID) {
+                    if (isForward) {
+                        // Fall-back to primary address
+                        return null;
+                    }
+                    fromCandidates = new HashSet<InternetAddress>(8);
+                    addUserAliases(fromCandidates, session, ctx);
+                } else {
+                    MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                    if (null == mass) {
+                        if (isForward) {
+                            // Fall-back to primary address
+                            return null;
+                        }
+                        fromCandidates = new HashSet<InternetAddress>(8);
+                        addUserAliases(fromCandidates, session, ctx);
+                    } else {
+                        QuotedInternetAddress a =
+                            new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false);
+                        if (isForward) {
+                            return a;
+                        }
+                        fromCandidates = new HashSet<InternetAddress>(2);
+                        fromCandidates.add(a);
+                    }
+                }
+            } else {
+                MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                if (null == mass) {
+                    if (isForward) {
+                        // Fall-back to primary address
+                        return null;
+                    }
+                    fromCandidates = new HashSet<InternetAddress>(8);
+                    addUserAliases(fromCandidates, session, ctx);
+                } else {
+                    QuotedInternetAddress a = new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false);
+                    if (isForward) {
+                        return a;
+                    }
+                    fromCandidates = new HashSet<InternetAddress>(2);
+                    fromCandidates.add(a);
+                }
+            }
+        }
+        /*
+         * Check if present anywhere
+         */
+        InternetAddress from = null;
+        {
+            String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
+            InternetAddress[] toAddrs = null;
+            if (hdrVal != null) {
+                toAddrs = parseAddressList(hdrVal, true);
+                for (final InternetAddress addr : toAddrs) {
+                    if (fromCandidates.contains(addr)) {
+                        from = addr;
+                        break;
+                    }
+                }
+            }
+            if (null == from) {
+                hdrVal = origMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
+                if (hdrVal != null) {
+                    toAddrs = parseAddressList(unfold(hdrVal), true);
+                    for (final InternetAddress addr : toAddrs) {
+                        if (fromCandidates.contains(addr)) {
+                            from = addr;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (null == from) {
+                hdrVal = origMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
+                if (hdrVal != null) {
+                    toAddrs = parseAddressList(unfold(hdrVal), true);
+                    for (final InternetAddress addr : toAddrs) {
+                        if (fromCandidates.contains(addr)) {
+                            from = addr;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return from;
+    }
+
+    /**
+     * Adds the session's user aliases to given set.
+     *
+     * @param set The set to add to
+     * @param session The session providing user information
+     * @param ctx The associated context
+     * @throws OXException If operation fails
+     */
+    static void addUserAliases(Set<InternetAddress> set, Session session, Context ctx) throws OXException {
+        /*
+         * Add user's aliases to set
+         */
+        String[] userAddrs = UserStorage.getInstance().getUser(session.getUserId(), ctx).getAliases();
+        if (userAddrs != null && userAddrs.length > 0) {
+            StringBuilder addrBuilder = new StringBuilder();
+            addrBuilder.append(userAddrs[0]);
+            for (int i = 1; i < userAddrs.length; i++) {
+                addrBuilder.append(',').append(userAddrs[i]);
+            }
+            set.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
+        }
     }
 
     /**

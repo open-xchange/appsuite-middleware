@@ -1,3 +1,14 @@
+* 2014-12-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35933: Check for possible duplicate subscription
+ - Fix for bug 35937: Fixed number of placeholders in prepared statement
+ - Fix for bug 35914: Dropped "ox.io" remnants from template files
+
+* 2014-12-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35895: Have the message format set to BOTH by default on user creation.
+                     Check for possibly preset message format preference in JSLob and align the DB value accordingly
+
 * 2014-12-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 35913: Fixed CacheEvent.aggregate(CacheEvent) implementation

@@ -47,43 +47,78 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.admin.rmi.dataobjects;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.secret.SecretEncryptionStrategy;
+import java.io.Serializable;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * Class representing one configuration property for a user
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public interface SubscriptionStorage extends SecretEncryptionStrategy<EncryptedField> {
+public class UserProperty implements Serializable, Cloneable {
 
-    public void rememberSubscription(Subscription subscription) throws OXException;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1751457900331133343L;
 
-    public void forgetSubscription(Subscription subscription) throws OXException;
+    private final String scope;
 
-    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws OXException;
+    private final String name;
 
-    public Subscription getSubscription(Context ctx, int id) throws OXException;
+    private final String value;
 
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws OXException;
+    /**
+     *
+     * Initializes a new {@link UserProperty}.
+     * @param scope
+     * @param name
+     * @param value
+     */
+    public UserProperty(String scope, String name, String value) {
+        this.scope = scope;
+        this.name = name;
+        this.value = value;
+    }
 
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId, String sourceId) throws OXException;
+    /**
+     * Gets the scope
+     *
+     * @return The scope
+     */
+    public String getScope() {
+        return scope;
+    }
 
-    public void updateSubscription(Subscription subscription) throws OXException;
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
 
-    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws OXException;
+    /**
+     * Gets the value
+     *
+     * @return The value
+     */
+    public String getValue() {
+        return value;
+    }
 
-    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws OXException;
+    /**
+     * Returns the state in pattern: "property-name: property-value; Scope: property-scope"<br>
+     * <br>
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(name + ": " + value + "; Scope: " + scope);
 
-    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws OXException;
-
-    public Map<String, Boolean> hasSubscriptions(Context ctx, List<String> folderIds) throws OXException;
-
-    public boolean hasSubscriptions(Context ctx, User user) throws OXException;
-
-    public void touch(Context ctx, int subscriptionId, long currentTimeMillis) throws OXException;
+        return builder.toString();
+    }
 }

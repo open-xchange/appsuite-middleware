@@ -55,7 +55,9 @@ import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.mail.internet.idn.IDNA;
 import org.osgi.framework.BundleContext;
@@ -70,6 +72,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.dataobjects.UserProperty;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -79,6 +82,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.impl.util.OXUserPropertySorter;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
@@ -94,6 +98,8 @@ import com.openexchange.admin.tools.filestore.PostProcessTask;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.ConfigurationProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -2002,5 +2008,73 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         return retval;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public List<UserProperty> getUserConfigurationSource(final Context ctx, final User user, final String searchPattern, final Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException {
+        if (user == null) {
+            throw new InvalidDataException("Invalid user id.");
+        }
+        if (ctx == null) {
+            throw new InvalidDataException("Invalid context id.");
+        }
+
+        List<UserProperty> userProperties = new ArrayList<UserProperty>();
+
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            contextcheck(ctx);
+            final int user_id = user.getId().intValue();
+            if (!tool.existsUser(ctx, user_id)) {
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
+            }
+
+            final CapabilityService capabilityService = AdminServiceRegistry.getInstance().getService(CapabilityService.class);
+            if (capabilityService == null) {
+                LOGGER.warn("CapabilityService absent. Unable to retrieve user configuration.");
+                return userProperties;
+            }
+            List<ConfigurationProperty> capabilitiesSource = capabilityService.getConfigurationSource(user_id, ctx.getId().intValue(), searchPattern);
+
+            for (ConfigurationProperty property: capabilitiesSource) {
+                userProperties.add(new UserProperty(property.getScope(), property.getName(), property.getValue()));
+            }
+
+            Collections.sort(userProperties, new OXUserPropertySorter());
+
+            return userProperties;
+
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (OXException e) {
+            LOGGER.error("Error retrieving configuration source for user {} in context {}.",user.getId().intValue(), ctx.getId(), e);
+        }
+        return userProperties;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public void getUserPermissionsSource(Context ctx, User user, Credentials auth) throws RemoteException {
+        // TODO Auto-generated method stub
+
     }
 }

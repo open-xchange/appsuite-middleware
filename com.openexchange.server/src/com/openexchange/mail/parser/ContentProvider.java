@@ -47,43 +47,24 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.mail.parser;
 
-import java.util.List;
-import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.secret.SecretEncryptionStrategy;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link ContentProvider} - Provides textual content for referenced mail parts.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SubscriptionStorage extends SecretEncryptionStrategy<EncryptedField> {
+public interface ContentProvider {
 
-    public void rememberSubscription(Subscription subscription) throws OXException;
+    /**
+     * Gets the textual content for referenced mail part.
+     *
+     * @return The content
+     * @throws OXException If content cannot be returned
+     */
+    String getContent() throws OXException;
 
-    public void forgetSubscription(Subscription subscription) throws OXException;
-
-    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws OXException;
-
-    public Subscription getSubscription(Context ctx, int id) throws OXException;
-
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws OXException;
-
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId, String sourceId) throws OXException;
-
-    public void updateSubscription(Subscription subscription) throws OXException;
-
-    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws OXException;
-
-    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws OXException;
-
-    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws OXException;
-
-    public Map<String, Boolean> hasSubscriptions(Context ctx, List<String> folderIds) throws OXException;
-
-    public boolean hasSubscriptions(Context ctx, User user) throws OXException;
-
-    public void touch(Context ctx, int subscriptionId, long currentTimeMillis) throws OXException;
 }

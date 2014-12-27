@@ -50,12 +50,14 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.dataobjects.UserProperty;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -739,4 +741,21 @@ public interface OXUserInterface extends Remote {
      */
     public boolean exists(final Context ctx, final User user, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException;
 
+    /**
+     * Retrieve user configuration (within {@link UserProperty}) and its source.
+     * @param ctx Context object the user is associated to
+     * @param user User object to retrieve the configuration for
+     * @param searchPattern Name the configuration property starts with
+     * @param credentials Credentials for authenticating against server
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws NoSuchUserException
+     * @throws InvalidCredentialsException
+     */
+    public List<UserProperty> getUserConfigurationSource(final Context ctx, final User user, final String searchPattern, final Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException;
+
+    /**
+     * TODO
+     */
+    public void getUserPermissionsSource(Context ctx, User user, Credentials auth) throws RemoteException;
 }

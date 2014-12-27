@@ -1,7 +1,6 @@
-<#--                                                                             --> 
-<#--                                                                             --> 
-<#--   For more extensive templates, and examples, see http://ox.io              --> 
-<#--                                                                             --> 
+<#--                                                                             -->
+<#--                                                                             -->
+<#--                                                                             -->
 <#macro display key value title>
 	<#if value != "">
 		<span class="${key}">${value?html}</span>
@@ -49,7 +48,7 @@
 						<td class="left">
 							${title} <#if type != "" || type0 != ""  || type1 != ""  || type2 != "" >(</#if><#if type != ""> <span class="type">${type}</span></#if><#if type0 != ""> <span class="type">${type0}</span></#if><#if type1 != ""> <span class="type">${type1}</span></#if><#if type2 != ""> <span class="type">${type2}</span></#if><#if type != "" || type0 != ""  || type1 != ""  || type2 != "" >)</#if>
 							:
-						</td> 
+						</td>
 						<td class="right">
 							<span class="value">${value?html}</span>
 						</td>
@@ -63,7 +62,7 @@
 <#macro render_mail value type>
 	<#if value != "">
 					<tr>
-						<td class="left">e-Mail :</td> 
+						<td class="left">e-Mail :</td>
 						<td class="right">
 							<a href="mailto:${value?html}" class="email">
 								${value?html}
@@ -77,7 +76,7 @@
 <#macro render_organisation name>
 	<#if name != "">
 					<tr>
-						<td class="left">Organisation:</td> 
+						<td class="left">Organisation:</td>
 						<td class="right org"><span class="organization-name">${name}</span></td>
 					</tr>
 	</#if>
@@ -171,7 +170,7 @@
 		color: #446;
 	}
 	#nav li, #nav ul {
-		list-style-type: none; 
+		list-style-type: none;
 		margin: 0;
 		padding: 0;
 		left-indent: 0;
@@ -198,7 +197,7 @@
 
 <body>
 	<a id="top">
-	
+
 	<#assign contacts = utils.onlyPublic(contacts)>
 	<#if (contacts?size == 0)>
 		<div class="message">Folder is empty</div>
@@ -217,7 +216,7 @@
 		</ul>
 	</div>
 	</#if>
-	
+
 	<div id="contacts">
 		<#list contacts as contact>
 		<div class="vcard" id="contact_${contacts?seq_index_of(contact)}">
@@ -226,18 +225,18 @@
 				<@render_name contact=contact />
 				<@render key="nickname" title="Display name" value=contact.displayName!"" />
 				<@render_organisation name=contact.company!"" />
-				<@render key="ox_profession" title="Profession" value=contact.profession!"" /> 
-				<@render key="ox_department" title="Department" value=contact.department!"" /> 
-				<@render key="role" title="Position" value=contact.position!"" /> 
-				<@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" /> 
-				<@render key="url" title="Url" value=contact.uRL!"" />  
-				<@render key="note" title="Note" value=contact.note!"" /> 
+				<@render key="ox_profession" title="Profession" value=contact.profession!"" />
+				<@render key="ox_department" title="Department" value=contact.department!"" />
+				<@render key="role" title="Position" value=contact.position!"" />
+				<@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" />
+				<@render key="url" title="Url" value=contact.uRL!"" />
+				<@render key="note" title="Note" value=contact.note!"" />
 			</table>
 		<div class="back"><a href="#top">Back to the top</a></div>
 		</div>
 		</#list>
 	</div>
-	
+
 	<#if (contacts?size > 0)>
 	<div id="disclaimer">
 		${privacy}

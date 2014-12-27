@@ -757,6 +757,9 @@ public final class InternalList {
 
         // +++++++++++++++++++++++++++++++++ Version 7.6.2 starts here. +++++++++++++++++++++++++++++++++
 
+        // Check for possibly preset message format preference in JSLob and aligns the DB value accordingly
+        list.add(new com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob());
+
         // +++++++++++++++++++++++++++++++++ Version 7.8.0 starts here. +++++++++++++++++++++++++++++++++
 
         // Adds the column 'guestCreatedBy' to the tables 'user' and 'del_user'

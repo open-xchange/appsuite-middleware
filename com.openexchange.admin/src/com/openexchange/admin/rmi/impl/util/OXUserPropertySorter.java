@@ -47,43 +47,25 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.admin.rmi.impl.util;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.secret.SecretEncryptionStrategy;
+import java.util.Comparator;
+import com.openexchange.admin.rmi.dataobjects.UserProperty;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link OXUserPropertySorter} sorts the provided {@link UserProperty}s based on their name.
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public interface SubscriptionStorage extends SecretEncryptionStrategy<EncryptedField> {
+public class OXUserPropertySorter implements Comparator<UserProperty> {
 
-    public void rememberSubscription(Subscription subscription) throws OXException;
-
-    public void forgetSubscription(Subscription subscription) throws OXException;
-
-    public List<Subscription> getSubscriptions(Context ctx, String folderId) throws OXException;
-
-    public Subscription getSubscription(Context ctx, int id) throws OXException;
-
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws OXException;
-
-    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId, String sourceId) throws OXException;
-
-    public void updateSubscription(Subscription subscription) throws OXException;
-
-    public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws OXException;
-
-    public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws OXException;
-
-    public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws OXException;
-
-    public Map<String, Boolean> hasSubscriptions(Context ctx, List<String> folderIds) throws OXException;
-
-    public boolean hasSubscriptions(Context ctx, User user) throws OXException;
-
-    public void touch(Context ctx, int subscriptionId, long currentTimeMillis) throws OXException;
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public int compare(UserProperty userProperty1, UserProperty userProperty2) {
+        return userProperty1.getName().compareToIgnoreCase(userProperty2.getName());
+    }
 }
