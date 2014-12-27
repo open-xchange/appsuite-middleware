@@ -268,7 +268,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck(user);
         } catch (final InvalidDataException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
@@ -320,7 +320,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Initialize mover instance
             FilestoreDataMover fsdm = FilestoreDataMover.newUserMover(oxu.getFilestore(srcStore_id), dstFilestore, storageUser, ctx);
 
-            // Enable context after processing
+            // Enable user after processing
             fsdm.addPostProcessTask(new PostProcessTask() {
 
                 @Override
@@ -359,7 +359,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck(user);
         } catch (final InvalidDataException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
@@ -424,7 +424,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Initialize mover instance
             FilestoreDataMover fsdm = FilestoreDataMover.newUser2MasterMover(srcFilestore, destFilestore, storageUser, storageMasterUser, ctx);
 
-            // Enable context after processing
+            // Enable user after processing
             fsdm.addPostProcessTask(new PostProcessTask() {
 
                 @Override
@@ -463,7 +463,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck(user);
         } catch (final InvalidDataException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
@@ -528,7 +528,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Initialize mover instance
             FilestoreDataMover fsdm = FilestoreDataMover.newUserFromMasterMover(srcFilestore, destFilestore, storageUser, storageMasterUser, ctx);
 
-            // Enable context after processing
+            // Enable user after processing
             fsdm.addPostProcessTask(new PostProcessTask() {
 
                 @Override
