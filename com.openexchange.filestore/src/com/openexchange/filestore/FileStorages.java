@@ -52,8 +52,6 @@ package com.openexchange.filestore;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.filestore.FileStorageService;
-import com.openexchange.filestore.QuotaFileStorageService;
 
 /**
  * {@link FileStorages} - Utility class for file storages.
@@ -118,6 +116,11 @@ public final class FileStorages {
 
     /**
      * Gets the context-related appendix for a file storage's base URI.
+     * <pre>
+     *   [context-id] + "_ctx_store"
+     *
+     *   Example: "1337_ctx_store"
+     * </pre>
      *
      * @param contextId The context identifier
      * @return The context-related appendix for a file storage's base URI
@@ -128,6 +131,11 @@ public final class FileStorages {
 
     /**
      * Gets the user-related appendix for a file storage's base URI.
+     * <pre>
+     *   [context-id] + "_ctx_" + [user-id] + "_user_store"
+     *
+     *   Example: "1337_ctx_17_user_store"
+     * </pre>
      *
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -141,6 +149,11 @@ public final class FileStorages {
 
     /**
      * Gets the storage name for given context.
+     * <pre>
+     *   [context-id] + "_ctx_store"
+     *
+     *   Example: "1337_ctx_store"
+     * </pre>
      *
      * @param contextId The context identifier
      * @return The storage name
@@ -151,6 +164,11 @@ public final class FileStorages {
 
     /**
      * Gets the storage name for given user.
+     * <pre>
+     *   [context-id] + "_ctx_" + [user-id] + "_user_store"
+     *
+     *   Example: "1337_ctx_17_user_store"
+     * </pre>
      *
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -214,11 +232,25 @@ public final class FileStorages {
         }
 
         try {
-            return path.endsWith("/") ? uri : new URI(uri.getScheme(), uri.getAuthority(), uri.getPath() + '/', uri.getQuery(), uri.getFragment());
+            return path.endsWith("/") ? uri : new URI(uri.getScheme(), uri.getAuthority(), new StringBuilder(path).append('/').toString(), uri.getQuery(), uri.getFragment());
         } catch (URISyntaxException e) {
             // Cannot occur
             return uri;
         }
+    }
+
+    /**
+     * Ensures specified path does end with a slash <code>'/'</code> character
+     *
+     * @param path The path to check
+     * @return The path ending with a slash <code>'/'</code> character
+     */
+    public static String ensureEndingSlash(String path) {
+        if (null == path) {
+            return null;
+        }
+
+        return path.endsWith("/") ? path : new StringBuilder(path).append('/').toString();
     }
 
 }
