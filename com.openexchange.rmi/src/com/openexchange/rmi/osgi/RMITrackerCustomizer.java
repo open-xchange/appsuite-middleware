@@ -54,70 +54,93 @@ import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.exception.OXException;
-import com.openexchange.rmi.RMIRegistry;
+import com.openexchange.rmi.internal.RMIUtility;
 
 /**
  * {@link RMITrackerCustomizer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Remote> {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RMITrackerCustomizer.class);
     private final BundleContext context;
+    private final Registry registry;
 
-    public RMITrackerCustomizer(final BundleContext context) {
+    /**
+     * Initializes a new {@link RMITrackerCustomizer}.
+     *
+     * @param registry The RMI registry
+     * @param context The bundle context
+     */
+    public RMITrackerCustomizer(Registry registry, BundleContext context) {
         super();
+        this.registry = registry;
         this.context = context;
     }
 
     @Override
-    public Remote addingService(final ServiceReference<Remote> reference) {
-        final Remote r = context.getService(reference);
-        if (r == null) {
-            log.warn("Added service is null.");
-        } else {
-            final String name = RMIRegistry.findRMIName(reference, r);
-            try {
-                RMIRegistry.getRMIRegistry().bind(name, UnicastRemoteObject.exportObject(r, 0));
-            } catch (final AccessException e) {
-                log.error("", e);
-            } catch (final RemoteException e) {
-                log.error("", e);
-            } catch (final AlreadyBoundException e) {
-                log.error("", e);
-            } catch (final OXException e) {
-                log.error("", e);
-            }
+    public Remote addingService(ServiceReference<Remote> reference) {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMITrackerCustomizer.class);
+
+        Remote r = context.getService(reference);
+        if (null == r) {
+            logger.warn("Remote reference is null");
+            context.ungetService(reference);
+            return null;
         }
-        return r;
-    }
 
-    @Override
-    public void modifiedService(final ServiceReference<Remote> reference, final Remote service) {
-        //nothing to do
-    }
-
-    @Override
-    public void removedService(final ServiceReference<Remote> reference, final Remote service) {
-        final String name = RMIRegistry.findRMIName(reference, service);
+        // Try to register/bind it...
+        String name = RMIUtility.findRMIName(reference, r);
         try {
-            RMIRegistry.getRMIRegistry().unbind(name);
-            UnicastRemoteObject.unexportObject(service, true);
-        } catch (final AccessException e) {
-            log.error("", e);
-        } catch (final RemoteException e) {
-            log.error("", e);
-        } catch (final NotBoundException e) {
-            log.error("", e);
-        } catch (final OXException e) {
-            log.error("", e);
+            Remote exportObject = UnicastRemoteObject.exportObject(r, 0);
+            registry.bind(name, exportObject);
+            return r;
+        } catch (AccessException e) {
+            logger.error("", e);
+        } catch (RemoteException e) {
+            logger.error("", e);
+        } catch (AlreadyBoundException e) {
+            logger.error("", e);
+        } catch (RuntimeException e) {
+            logger.error("", e);
+        }
+
+        // Apparently failed to register, thus nothing to track...
+        logger.warn("Could not register remote reference {}", r.getClass().getName());
+        context.ungetService(reference);
+        return null;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<Remote> reference, Remote r) {
+        // Nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<Remote> reference, Remote r) {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMITrackerCustomizer.class);
+
+        try {
+            String name = RMIUtility.findRMIName(reference, r);
+            registry.unbind(name);
+            UnicastRemoteObject.unexportObject(r, true);
+        } catch (AccessException e) {
+            logger.error("", e);
+        } catch (RemoteException e) {
+            logger.error("", e);
+        } catch (NotBoundException e) {
+            logger.error("", e);
+        } catch (RuntimeException e) {
+            logger.error("", e);
+        } finally {
+            context.ungetService(reference);
         }
     }
 
