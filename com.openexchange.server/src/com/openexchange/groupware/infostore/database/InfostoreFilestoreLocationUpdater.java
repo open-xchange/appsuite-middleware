@@ -132,9 +132,6 @@ public class InfostoreFilestoreLocationUpdater implements FileLocationHandler {
 
     @Override
     public Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) throws OXException, SQLException {
-        // Determine InfoStore folders
-        TIntList folderIds = fetchFolders(userId, contextId, con);
-
         // Check associated user
         User user = UserStorage.getInstance().getUser(userId, ContextStorage.getInstance().getContext(contextId));
         if (user.getFilestoreId() <= 0) {
@@ -142,6 +139,9 @@ public class InfostoreFilestoreLocationUpdater implements FileLocationHandler {
             // Therefore NOT applicable
             return Collections.emptySet();
         }
+
+        // Determine InfoStore folders
+        TIntList folderIds = fetchFolders(userId, contextId, con);
 
         return getFileLocationsFor(folderIds, contextId, con);
     }
