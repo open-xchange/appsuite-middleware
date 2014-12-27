@@ -189,7 +189,7 @@ public final class FileStorages {
      */
     public static URI getFullyQualifyingUriForContext(int contextId, URI baseUri) {
         try {
-            return new URI(baseUri.getScheme(), baseUri.getAuthority(), baseUri.getPath() + '/' + getContextAppendix(contextId), baseUri.getQuery(), baseUri.getFragment());
+            return new URI(baseUri.getScheme(), baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getContextAppendix(contextId), baseUri.getQuery(), baseUri.getFragment());
         } catch (URISyntaxException e) {
             // Cannot occur
             return null;
@@ -206,7 +206,7 @@ public final class FileStorages {
      */
     public static URI getFullyQualifyingUriForUser(int userId, int contextId, URI baseUri) {
         try {
-            return new URI(baseUri.getScheme(), baseUri.getAuthority(), baseUri.getPath() + '/' + getUserAppendix(userId, contextId), baseUri.getQuery(), baseUri.getFragment());
+            return new URI(baseUri.getScheme(), baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getUserAppendix(userId, contextId), baseUri.getQuery(), baseUri.getFragment());
         } catch (URISyntaxException e) {
             // Cannot occur
             return null;
