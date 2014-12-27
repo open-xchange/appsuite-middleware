@@ -53,7 +53,9 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -318,13 +320,33 @@ public class AdminDaemon {
             final OXTaskMgmtImpl oxtaskmgmt = new OXTaskMgmtImpl();
             final OXPublication oxpublication = new OXPublication();
 
-            services.add(context.registerService(Remote.class, oxuser_v2, null));
-            services.add(context.registerService(Remote.class, oxgrp_v2, null));
-            services.add(context.registerService(Remote.class, oxres_v2, null));
-            services.add(context.registerService(Remote.class, oxlogin_v2, null));
-            services.add(context.registerService(Remote.class, oxadmincore, null));
-            services.add(context.registerService(Remote.class, oxtaskmgmt, null));
-            services.add(context.registerService(Remote.class, oxpublication, null));
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXUserInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxuser_v2, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXGroupInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxgrp_v2, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXResourceInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxres_v2, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXLoginInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxlogin_v2, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXAdminCoreInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxadmincore, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXTaskMgmtInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxtaskmgmt, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXPublicationInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxpublication, properties));
         } catch (final RemoteException e) {
             LOG.error("Error creating RMI registry!", e);
         } catch (final StorageException e) {
