@@ -159,7 +159,7 @@ public class InfostoreFilestoreLocationUpdater implements FileLocationHandler {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = con.prepareStatement("SELECT d.file_store_location FROM infostore as i JOIN infostore_document as d ON i.cid=? AND d.cid=? AND i.id=d.infostore_id WHERE i.cid=? and folder_id=? AND d.file_store_location IS NOT NULL");
+                    stmt = con.prepareStatement("SELECT d.file_store_location FROM infostore AS i JOIN infostore_document AS d ON i.cid=? AND d.cid=? AND i.id=d.infostore_id WHERE i.cid=? and folder_id=? AND d.file_store_location IS NOT NULL");
                     stmt.setInt(1, contextId);
                     stmt.setInt(2, contextId);
                     stmt.setInt(3, contextId);
