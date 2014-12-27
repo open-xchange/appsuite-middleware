@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,33 +49,22 @@
 
 package com.openexchange.rmi;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.registry.Registry;
+
 
 /**
- * {@link LocalServerFactory}
+ * {@link RMIRegistryService} - Provides access to the <code>java.rmi.registry.Registry</code> instance.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.8.0
  */
-public class LocalServerFactory implements RMIServerSocketFactory {
+public interface RMIRegistryService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalServerFactory.class);
+    /**
+     * Gets the <code>java.rmi.registry.Registry</code> instance.
+     *
+     * @return The registry instance
+     */
+    Registry getRMIRegistry();
 
-    private final String hostname;
-
-    public LocalServerFactory(final String hostname) {
-        this.hostname = hostname;
-    }
-
-    @Override
-    public ServerSocket createServerSocket(final int port) throws IOException {
-        if (hostname.equalsIgnoreCase("0")) {
-            LOG.info("Admindaemon will listen on all network devices!");
-            return new ServerSocket(port, 0, null);
-        }
-        LOG.info("Admindaemon will listen on {}!", hostname);
-        return new ServerSocket(port, 0, InetAddress.getByName(hostname));
-    }
 }

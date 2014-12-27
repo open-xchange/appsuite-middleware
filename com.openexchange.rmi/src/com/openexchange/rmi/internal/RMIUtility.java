@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.rmi;
+package com.openexchange.rmi.internal;
 
 import java.lang.reflect.Field;
 import java.rmi.Remote;
@@ -55,79 +55,76 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.rmi.exceptions.RMIExceptionCodes;
-import com.openexchange.rmi.osgi.RMIActivator;
 
 /**
- * {@link RMIRegistry}
+ * {@link RMIUtility}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RMIRegistry {
-
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RMIRegistry.class);
-
-    private static Registry registry = null;
-
-    private static final Lock lock = new ReentrantLock();
+public class RMIUtility {
 
     /**
-     * Initializes a new {@link RMIRegistry}.
+     * Initializes a new {@link RMIUtility}.
      */
-    private RMIRegistry() {
+    private RMIUtility() {
         super();
     }
 
-    public static Registry getRMIRegistry() throws OXException {
-        lock.lock();
+    /**
+     * Creates a new <code>java.rmi.registry.Registry</code> instance.
+     *
+     * @param configService The configuration service to utilize
+     * @return The <code>java.rmi.registry.Registry</code> instance
+     * @throws OXException If initialization fails
+     */
+    public static Registry createRegistry(ConfigurationService configService) throws OXException {
         try {
-            if (registry == null) {
-                registry = createRMIRegistry();
-            }
-            return registry;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private static Registry createRMIRegistry() throws OXException {
-        lock.lock();
-        try {
-            final ConfigurationService configService = RMIActivator.getServiceRegistry().getService(ConfigurationService.class);
-            final int port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
-            final String hostname = configService.getProperty("com.openexchange.rmi.host", "localhost");
-            if (registry == null) {
-                registry = LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory(hostname));
-            }
-            return registry;
-        } catch (final RemoteException e) {
-            log.error("", e);
+            int port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
+            String hostname = configService.getProperty("com.openexchange.rmi.host", "localhost");
+            return LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory(hostname));
+        } catch (RemoteException e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMIUtility.class);
+            logger.error("", e);
             throw RMIExceptionCodes.RMI_CREATE_REGISTRY_FAILED.create(e);
-        } finally {
-            lock.unlock();
         }
     }
 
-    public static String findRMIName(final ServiceReference<Remote> reference, final Remote r) {
-        final Object name = reference.getProperty("RMIName");
-        if (name != null) {
-            return (String) name;
+    /**
+     * Looks up the appropriate name to associate with the remote reference
+     *
+     * @param reference The service reference for the remote reference
+     * @param r The remote reference
+     * @return The name to associate with the remote reference
+     */
+    public static String findRMIName(ServiceReference<Remote> reference, Remote r) {
+        // Check for "RMIName"/"RMI_NAME" service property
+        {
+            Object name = reference.getProperty("RMIName");
+            if (name != null) {
+                return (String) name;
+            }
+            name = reference.getProperty("RMI_NAME");
+            if (name != null) {
+                return (String) name;
+            }
         }
+
+        // Look-up by Java Reflection
         try {
-            final Field field = r.getClass().getField("RMI_NAME");
+            Field field = r.getClass().getField("RMI_NAME");
             return (String) field.get(r);
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             return r.getClass().getSimpleName();
-        } catch (final NoSuchFieldException e) {
+        } catch (NoSuchFieldException e) {
             return r.getClass().getSimpleName();
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return r.getClass().getSimpleName();
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             return r.getClass().getSimpleName();
         }
     }

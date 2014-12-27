@@ -47,74 +47,41 @@
  *
  */
 
-package com.openexchange.rmi.osgi;
+package com.openexchange.rmi.internal;
 
-import java.rmi.Remote;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rmi.RMIRegistryService;
-import com.openexchange.rmi.internal.RMIUtility;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.rmi.server.RMIServerSocketFactory;
 
 /**
- * {@link RMIService}
+ * {@link LocalServerFactory}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RMIActivator extends HousekeepingActivator {
+public class LocalServerFactory implements RMIServerSocketFactory {
 
-    private volatile Registry registry;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalServerFactory.class);
+
+    private final String hostname;
 
     /**
-     * Initializes a new {@link RMIActivator}.
+     * Initializes a new {@link LocalServerFactory}.
+     *
+     * @param hostname The host name
      */
-    public RMIActivator() {
+    public LocalServerFactory(String hostname) {
         super();
+        this.hostname = hostname;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMIActivator.class);
-        logger.info("Starting bundle com.openexchange.rmi");
-
-        // Create registry instance
-        final Registry registry = RMIUtility.createRegistry(getService(ConfigurationService.class));
-        this.registry = registry;
-
-        // Start tracker
-        track(Remote.class, new RMITrackerCustomizer(registry, context));
-        openTrackers();
-
-        // Register service
-        RMIRegistryService rmiRegistryService = new RMIRegistryService() {
-
-            @Override
-            public Registry getRMIRegistry() {
-                return registry;
-            }
-        };
-        registerService(RMIRegistryService.class, rmiRegistryService);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMIActivator.class);
-        logger.info("Stopping bundle com.openexchange.rmi");
-        super.stopBundle();
-
-        // De-register the registry
-        Registry registry = this.registry;
-        if (null != registry) {
-            UnicastRemoteObject.unexportObject(registry, true);
-            this.registry = null;
+    public ServerSocket createServerSocket(int port) throws IOException {
+        if (hostname.equalsIgnoreCase("0")) {
+            LOG.info("Admindaemon will listen on all network devices!");
+            return new ServerSocket(port, 0, null);
         }
+        LOG.info("Admindaemon will listen on {}!", hostname);
+        return new ServerSocket(port, 0, InetAddress.getByName(hostname));
     }
-
 }
