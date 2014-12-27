@@ -106,10 +106,18 @@ public class User2MasterUserFilestoreDataMover extends FilestoreDataMover {
      */
     @Override
     protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
+        int contextId = ctx.getId().intValue();
+        int srcUserId = srcUser.getId().intValue();
+        int masterUserId = masterUser.getId().intValue();
         try {
+            // Check
+            if (srcUser.getFilestoreOwner().intValue() != srcUserId) {
+                throw new StorageException("User's file storage does not belong to user. Owner " + srcUser.getFilestoreOwner() + " is not equal to " + srcUser.getId());
+            }
+
             // Grab associated quota-aware file storages
-            FileStorage srcStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(srcUser.getId().intValue(), ctx.getId().intValue());
-            FileStorage dstStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(masterUser.getId().intValue(), ctx.getId().intValue());
+            FileStorage srcStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(srcUserId, contextId);
+            FileStorage dstStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(masterUserId, contextId);
 
             // Copy each file from source to destination
             Set<String> srcFiles = srcStorage.getFileList();
@@ -136,7 +144,7 @@ public class User2MasterUserFilestoreDataMover extends FilestoreDataMover {
         // Apply changes to context & clear caches
         try {
             srcUser.setFilestoreId(dstFilestore.getId());
-            srcUser.setFilestore_name(FileStorages.getNameForUser(masterUser.getId().intValue(), ctx.getId().intValue()));
+            srcUser.setFilestore_name(FileStorages.getNameForUser(masterUserId, contextId));
             srcUser.setFilestoreOwner(masterUser.getId());
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
@@ -146,7 +154,7 @@ public class User2MasterUserFilestoreDataMover extends FilestoreDataMover {
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
             Cache userCache = cacheService.getCache("User");
-            userCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), srcUser.getId().intValue()));
+            userCache.remove(cacheService.newCacheKey(contextId, srcUserId));
         } catch (OXException e) {
             throw new StorageException(e);
         }

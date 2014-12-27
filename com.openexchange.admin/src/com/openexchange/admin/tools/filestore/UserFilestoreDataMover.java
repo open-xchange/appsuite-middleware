@@ -115,9 +115,11 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
         // rsync can be used in case both file storages are disk-based storages
         boolean useRsync = "file".equalsIgnoreCase(srcBaseUri.getScheme()) && "file".equalsIgnoreCase(dstBaseUri.getScheme());
 
+        int contextId = ctx.getId().intValue();
+        int userId = user.getId().intValue();
         if (useRsync) {
             // Invoke rsync process
-            URI srcFullUri = getFullyQualifyingUriForUser(user.getId().intValue(), ctx.getId().intValue(), srcBaseUri);
+            URI srcFullUri = getFullyQualifyingUriForUser(userId, contextId, srcBaseUri);
             File fsDirectory = new File(srcFullUri);
             if (fsDirectory.exists()) {
                 ArrayOutput output = new ShellExecutor().executeprocargs(new String[] {
@@ -129,8 +131,8 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
             }
         } else {
             // Not possible to use rsync; e.g. move from HDD to S3
-            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(user.getId().intValue(), ctx.getId().intValue(), srcBaseUri));
-            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(user.getId().intValue(), ctx.getId().intValue(), dstBaseUri));
+            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(userId, contextId, srcBaseUri));
+            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(userId, contextId, dstBaseUri));
 
             try {
                 // Grab associated file storages
@@ -171,7 +173,7 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
             Cache userCache = cacheService.getCache("User");
-            userCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+            userCache.remove(cacheService.newCacheKey(contextId, userId));
         } catch (OXException e) {
             throw new StorageException(e);
         }

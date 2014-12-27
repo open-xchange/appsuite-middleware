@@ -111,21 +111,29 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
      */
     @Override
     protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
+        int contextId = ctx.getId().intValue();
+        int dstUserId = dstUser.getId().intValue();
+        int masterUserId = masterUser.getId().intValue();
         try {
+            // Check
+            if (dstUser.getFilestoreOwner().intValue() != masterUserId) {
+                throw new StorageException("User's file storage does not belong to master user. Owner " + dstUser.getFilestoreOwner() + " is not equal to " + masterUser.getId());
+            }
+
             // Grab associated quota-aware file storages
-            FileStorage srcStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(masterUser.getId().intValue(), ctx.getId().intValue());
-            FileStorage dstStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(dstUser.getId().intValue(), ctx.getId().intValue());
+            FileStorage srcStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(masterUserId, contextId);
+            FileStorage dstStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(dstUserId, contextId);
 
             // Determine the files to move
             Set<String> srcFiles = new LinkedHashSet<String>();
             {
-                Connection con = Database.getNoTimeout(ctx.getId().intValue(), true);
+                Connection con = Database.getNoTimeout(contextId, true);
                 try {
                     for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
-                        srcFiles.addAll(updater.determineFileLocationsFor(dstUser.getId().intValue(), ctx.getId().intValue(), con));
+                        srcFiles.addAll(updater.determineFileLocationsFor(dstUserId, contextId, con));
                     }
                 } finally {
-                    Database.backNoTimeout(ctx.getId().intValue(), true, con);
+                    Database.backNoTimeout(contextId, true, con);
                 }
             }
 
@@ -153,7 +161,7 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
         // Apply changes to context & clear caches
         try {
             dstUser.setFilestoreId(dstFilestore.getId());
-            dstUser.setFilestore_name(FileStorages.getNameForUser(dstUser.getId().intValue(), ctx.getId().intValue()));
+            dstUser.setFilestore_name(FileStorages.getNameForUser(dstUserId, contextId));
             dstUser.setFilestoreOwner(dstUser.getId());
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
@@ -163,7 +171,7 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
             Cache userCache = cacheService.getCache("User");
-            userCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), dstUser.getId().intValue()));
+            userCache.remove(cacheService.newCacheKey(contextId, dstUserId));
         } catch (OXException e) {
             throw new StorageException(e);
         }
