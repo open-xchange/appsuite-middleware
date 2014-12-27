@@ -50,8 +50,9 @@
 package com.openexchange.admin;
 
 import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -65,47 +66,38 @@ import com.openexchange.config.ConfigurationService;
 
 public class PluginStarter {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PluginStarter.class);
-
-    private static com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = null;
-
-    private static com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = null;
-
-    private static PropertyHandlerExtended prop = null;
-
     private BundleContext context;
+    private final List<ServiceRegistration<Remote>> services = new LinkedList<ServiceRegistration<Remote>>();
 
-    private final List<ServiceRegistration<Remote>> services = new ArrayList<ServiceRegistration<Remote>>();
-
+    /**
+     * Initializes a new {@link PluginStarter}.
+     */
     public PluginStarter() {
         super();
     }
 
-    public void start(final BundleContext context, final ConfigurationService service) throws RemoteException, StorageException, OXGenericException {
+    public void start(BundleContext context, ConfigurationService service) throws StorageException, OXGenericException {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PluginStarter.class);
         try {
             AdminCache.compareAndSetBundleContext(null, context);
             AdminCache.compareAndSetConfigurationService(null, service);
             this.context = context;
-            initCache(service);
+            PropertyHandlerExtended prop = initCache(service, logger);
 
             // Create all OLD Objects and bind export them
-            oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext(context);
-
-            oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
+            com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext(context);
 
             // bind all NEW Objects to registry
-            services.add(context.registerService(Remote.class, oxctx_v2, null));
-            services.add(context.registerService(Remote.class, oxutil_v2, null));
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXContextInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxctx_v2, properties));
 
             // startJMX();
 
-            LOG.debug("Loading context implementation: {}", prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
-            LOG.debug("Loading util implementation: {}", prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
-        } catch (final RemoteException e) {
-            LOG.error("", e);
-            throw e;
-        } catch (final StorageException e) {
-            LOG.error("Error while creating one instance for RMI interface", e);
+            logger.debug("Loading context implementation: {}", prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
+            logger.debug("Loading util implementation: {}", prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
+        } catch (StorageException e) {
+            logger.error("Error while creating one instance for RMI interface", e);
             throw e;
         }
     }
@@ -116,12 +108,13 @@ public class PluginStarter {
         }
     }
 
-    private void initCache(final ConfigurationService service) throws OXGenericException {
-        final AdminCacheExtended cache = new AdminCacheExtended();
+    private PropertyHandlerExtended initCache(ConfigurationService service, org.slf4j.Logger logger) throws OXGenericException {
+        AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache(service);
         cache.initCacheExtended();
         ClientAdminThreadExtended.cache = cache;
-        prop = cache.getProperties();
-        LOG.info("Cache and Pools initialized!");
+        PropertyHandlerExtended prop = cache.getProperties();
+        logger.info("Cache and Pools initialized!");
+        return prop;
     }
 }

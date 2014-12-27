@@ -316,6 +316,7 @@ public class AdminDaemon {
             final com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup(context);
             final com.openexchange.admin.rmi.impl.OXResource oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource(context);
             final com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
+            final com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
             final OXAdminCoreImpl oxadmincore = new OXAdminCoreImpl(context);
             final OXTaskMgmtImpl oxtaskmgmt = new OXTaskMgmtImpl();
             final OXPublication oxpublication = new OXPublication();
@@ -347,6 +348,10 @@ public class AdminDaemon {
             properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXPublicationInterface.RMI_NAME);
             services.add(context.registerService(Remote.class, oxpublication, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXUtilInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxutil_v2, properties));
         } catch (final RemoteException e) {
             LOG.error("Error creating RMI registry!", e);
         } catch (final StorageException e) {
