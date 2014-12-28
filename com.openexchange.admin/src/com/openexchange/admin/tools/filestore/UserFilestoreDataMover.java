@@ -50,6 +50,7 @@
 package com.openexchange.admin.tools.filestore;
 
 import static com.openexchange.filestore.FileStorages.ensureEndingSlash;
+import static com.openexchange.filestore.FileStorages.getFileStorageService;
 import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForUser;
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +74,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
-import com.openexchange.filestore.FileStorages;
 
 /**
  * {@link UserFilestoreDataMover} - The implementation to move files from one storage to another for a single user.
@@ -136,8 +136,8 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
 
             try {
                 // Grab associated file storages
-                FileStorage srcStorage = FileStorages.getFileStorageService().getFileStorage(srcFullUri);
-                FileStorage dstStorage = FileStorages.getFileStorageService().getFileStorage(dstFullUri);
+                FileStorage srcStorage = getFileStorageService().getFileStorage(srcFullUri);
+                FileStorage dstStorage = getFileStorageService().getFileStorage(dstFullUri);
 
                 // Copy each file from source to destination
                 Set<String> srcFiles = srcStorage.getFileList();

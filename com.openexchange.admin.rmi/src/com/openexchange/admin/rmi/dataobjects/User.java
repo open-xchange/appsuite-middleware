@@ -1754,6 +1754,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.filestore_idset = true;
     }
 
+    public boolean isFilestore_idset() {
+        return filestore_idset;
+    }
+
     public final Integer getFilestoreOwner() {
         return filestore_owner;
     }
@@ -1761,6 +1765,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public final void setFilestoreOwner(final Integer filestore_owner) {
         this.filestore_owner = filestore_owner;
         this.filestore_ownerset = true;
+    }
+
+    public boolean isFilestore_ownerset() {
+        return filestore_ownerset;
     }
 
     /**
@@ -1777,6 +1785,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public final void setMaxQuota(final Long maxQuota) {
         this.maxQuota = maxQuota;
         this.maxQuotaset = true;
+    }
+
+    public boolean isMaxQuotaset() {
+        return maxQuotaset;
     }
 
     /**
@@ -1798,6 +1810,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public final void setFilestore_name(final String filestore_name) {
         this.filestore_name = filestore_name;
         this.filestore_nameset = true;
+    }
+
+    public boolean isFilestore_nameset() {
+        return filestore_nameset;
     }
 
     // -----------------------------------------------------------------------------------------

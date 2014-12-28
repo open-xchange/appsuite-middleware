@@ -66,44 +66,50 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Change extends ChangeCore {
 
-    public static void main(final String[] args) {
+    public static void main(String[] args) {
         new Change().execute(args);
     }
+
+    // ---------------------------------------------------------------------------------------------------
 
     public Change() {
         super();
     }
 
-    private void execute(final String[] args) {
-        final AdminParser parser = new AdminParser("changeuser");
+    private void execute(String[] args) {
+        AdminParser parser = new AdminParser("changeuser");
         commonfunctions(parser, args);
     }
 
     @Override
-    protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    protected void maincall(AdminParser parser, OXUserInterface oxusr, Context ctx, User usr, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        parseAndSetUserQuota(parser, usr);
+
         oxusr.change(ctx, usr, auth);
 
         // Change module access IF an access combination name was supplied!
         // The normal change of access rights is done in the "commonfunctions"
-        final String accesscombinationname = parseAndSetAccessCombinationName(parser);
+        String accesscombinationname = parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Change user with access rights combination name
             oxusr.changeModuleAccess(ctx, usr, accesscombinationname, auth);
         }
 
-        final Set<String> capabilitiesToAdd = parseAndSetCapabilitiesToAdd(parser);
-        final Set<String> capabilitiesToRemove = parseAndSetCapabilitiesToRemove(parser);
-        final Set<String> capabilitiesToDrop = parseAndSetCapabilitiesToDrop(parser);
+        Set<String> capabilitiesToAdd = parseAndSetCapabilitiesToAdd(parser);
+        Set<String> capabilitiesToRemove = parseAndSetCapabilitiesToRemove(parser);
+        Set<String> capabilitiesToDrop = parseAndSetCapabilitiesToDrop(parser);
         if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty()) || (null != capabilitiesToDrop && !capabilitiesToDrop.isEmpty())) {
             oxusr.changeCapabilities(ctx, usr, capabilitiesToAdd, capabilitiesToRemove, capabilitiesToDrop, auth);
         }
     }
 
     @Override
-    protected void setFurtherOptions(final AdminParser parser) {
+    protected void setFurtherOptions(AdminParser parser) {
         setAddAccessRightCombinationNameOption(parser);
         setCapsToAdd(parser);
         setCapsToRemove(parser);
         setCapsToDrop(parser);
+        setUserQuotaOption(parser, false);
     }
+
 }

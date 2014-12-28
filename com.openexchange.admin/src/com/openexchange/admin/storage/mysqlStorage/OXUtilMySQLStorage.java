@@ -84,6 +84,7 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.Databases;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -464,38 +465,54 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             PreparedStatement prep = null;
             final int context_id = ctx.getId().intValue();
             try {
-
+                boolean changed = false;
                 Integer fsId = filestore.getId();
                 if (fsId != null && -1 != fsId.intValue()) {
-                    prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ?");
+                    prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ? AND filestore_id <> ?");
                     prep.setInt(1, fsId.intValue());
                     prep.setInt(2, context_id);
                     prep.setInt(3, user.getId().intValue());
-                    prep.executeUpdate();
+                    prep.setInt(4, fsId.intValue());
+                    changed = prep.executeUpdate() > 0;
                     prep.close();
                 }
 
-                Integer fsOnwer = user.getFilestoreOwner();
-                if (fsOnwer != null && -1 != fsOnwer.intValue()) {
-                    prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
-                    prep.setInt(1, fsOnwer.intValue());
-                    prep.setInt(2, context_id);
-                    prep.setInt(3, user.getId().intValue());
-                    prep.executeUpdate();
-                    prep.close();
-                }
+                if (changed) {
+                    Integer fsOwner = user.getFilestoreOwner();
+                    if (fsOwner != null && -1 != fsOwner.intValue()) {
+                        prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
+                        prep.setInt(1, fsOwner.intValue());
+                        prep.setInt(2, context_id);
+                        prep.setInt(3, user.getId().intValue());
+                        prep.executeUpdate();
+                        prep.close();
+                    } else {
+                        prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
+                        prep.setInt(1, 0);
+                        prep.setInt(2, context_id);
+                        prep.setInt(3, user.getId().intValue());
+                        prep.executeUpdate();
+                        prep.close();
+                    }
 
-                final String filestore_name = user.getFilestore_name();
-                if (null != filestore_name) {
-                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
-                    prep.setString(1, filestore_name);
-                    prep.setInt(2, context_id);
-                    prep.setInt(3, user.getId().intValue());
-                    prep.executeUpdate();
-                    prep.close();
+                    final String filestore_name = user.getFilestore_name();
+                    if (null != filestore_name) {
+                        prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
+                        prep.setString(1, filestore_name);
+                        prep.setInt(2, context_id);
+                        prep.setInt(3, user.getId().intValue());
+                        prep.executeUpdate();
+                        prep.close();
+                    } else {
+                        prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
+                        prep.setString(1, FileStorages.getNameForUser(user.getId().intValue(), context_id));
+                        prep.setInt(2, context_id);
+                        prep.setInt(3, user.getId().intValue());
+                        prep.executeUpdate();
+                        prep.close();
+                    }
                 }
-
-            } catch (final SQLException exp) {
+            } catch (SQLException exp) {
                 throw new StorageException(exp);
             } finally {
                 Databases.closeSQLStuff(prep);

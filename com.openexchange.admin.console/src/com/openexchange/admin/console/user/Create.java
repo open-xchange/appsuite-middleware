@@ -50,7 +50,6 @@
 package com.openexchange.admin.console.user;
 
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -65,29 +64,31 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Create extends CreateCore {
 
-    public static void main(final String[] args) {
+    public static void main(String[] args) {
         new Create(args);
     }
 
-    public Create(final String[] args2) {
-        final AdminParser parser = new AdminParser("createuser");
+    // ---------------------------------------------------------------------------------------------------------------------
 
+    public Create(String[] args2) {
+        AdminParser parser = new AdminParser("createuser");
         commonfunctions(parser, args2);
-
     }
 
     @Override
-    protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    protected void maincall(AdminParser parser, OXUserInterface oxusr, Context ctx, User usr, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        parseAndSetUserQuota(parser, usr);
+        parseAndSetFilestoreId(parser, usr);
+        parseAndSetFilestoreOwner(parser, usr);
 
-        final String accesscombinationname = parseAndSetAccessCombinationName(parser);
+        String accesscombinationname = parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Create user with access rights combination name
-            final Integer id = oxusr.create(ctx, usr,accesscombinationname, auth).getId();
+            Integer id = oxusr.create(ctx, usr, accesscombinationname, auth).getId();
             displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
-        }else{
-
+        } else {
             // get the context-admins module access rights as baseline
-            final UserModuleAccess access = oxusr.getContextAdminUserModuleAccess(ctx, auth);
+            UserModuleAccess access = oxusr.getContextAdminUserModuleAccess(ctx, auth);
 
             if (access.isPublicFolderEditable()) {
                 // publicFolderEditable can only be applied to the context administrator.
@@ -98,14 +99,17 @@ public class Create extends CreateCore {
             setModuleAccessOptions(parser, access);
 
             // create the user with the adjusted module access rights
-            final Integer id = oxusr.create(ctx, usr, access, auth).getId();
+            Integer id = oxusr.create(ctx, usr, access, auth).getId();
             displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
         }
-
     }
 
     @Override
-    protected void setFurtherOptions(final AdminParser parser) {
+    protected void setFurtherOptions(AdminParser parser) {
         setAddAccessRightCombinationNameOption(parser);
+        setFilestoreIdOption(parser, false);
+        setFilestoreOwnerOption(parser, false);
+        setUserQuotaOption(parser, false);
     }
+
 }

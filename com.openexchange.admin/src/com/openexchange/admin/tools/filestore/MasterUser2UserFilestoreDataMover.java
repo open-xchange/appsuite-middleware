@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.tools.filestore;
 
+import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -121,8 +122,8 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
             }
 
             // Grab associated quota-aware file storages
-            FileStorage srcStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(masterUserId, contextId);
-            FileStorage dstStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(dstUserId, contextId);
+            FileStorage srcStorage = getQuotaFileStorageService().getQuotaFileStorage(masterUserId, contextId);
+            FileStorage dstStorage = getQuotaFileStorageService().getQuotaFileStorage(dstUserId, contextId);
 
             // Determine the files to move
             Set<String> srcFiles = new LinkedHashSet<String>();
@@ -172,6 +173,7 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
             cache.clear();
             Cache userCache = cacheService.getCache("User");
             userCache.remove(cacheService.newCacheKey(contextId, dstUserId));
+            userCache.remove(cacheService.newCacheKey(contextId, masterUserId));
         } catch (OXException e) {
             throw new StorageException(e);
         }

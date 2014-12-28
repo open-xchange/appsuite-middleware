@@ -101,6 +101,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -602,7 +603,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getPassword_expired() != null) {
-                stmt = con.prepareStatement("UPDATE user SET  shadowLastChange = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET shadowLastChange = ? WHERE cid = ? AND id = ?");
                 stmt.setInt(1, getintfrombool(usrdata.getPassword_expired()));
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
@@ -611,14 +612,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (isEmpty(usrdata.getImapServerString()) && usrdata.isImapServerset()) {
-                stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET imapserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             } else if (!isEmpty(usrdata.getImapServerString())) {
-                stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET imapserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
                 stmt.setString(1, URIParser.parse(usrdata.getImapServerString(), URIDefaults.IMAP).toString());
@@ -629,14 +630,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (isEmpty(usrdata.getImapLogin()) && usrdata.isImapLoginset()) {
-                stmt = con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             } else if (!isEmpty(usrdata.getImapLogin())) {
-                stmt = con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getImapLogin());
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
@@ -645,14 +646,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (isEmpty(usrdata.getSmtpServerString()) && usrdata.isSmtpServerset()) {
-                stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET smtpserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             } else if (!isEmpty(usrdata.getSmtpServerString())) {
-                stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET smtpserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
                 stmt.setString(1, URIParser.parse(usrdata.getSmtpServerString(), URIDefaults.SMTP).toString());
@@ -663,7 +664,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (!isEmpty(usrdata.getPassword())) {
-                stmt = con.prepareStatement("UPDATE user SET  userPassword = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET userPassword = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, cache.encryptPassword(usrdata));
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
@@ -672,7 +673,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (!isEmpty(usrdata.getPasswordMech())) {
-                stmt = con.prepareStatement("UPDATE user SET  passwordMech = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET passwordMech = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPasswordMech());
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
@@ -1324,61 +1325,83 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void changeQuotaForUser(final User user, final Context ctx, final Connection con) throws SQLException {
-
-        // check if max quota is set in context
-        if (user.getMaxQuota() != null) {
-
-            long quota_max_temp = user.getMaxQuota().longValue();
-
+    private void changeQuotaForUser(User user, Context ctx, Connection con) throws SQLException {
+        // check if max quota is set for user
+        Long maxQuota = user.getMaxQuota();
+        if (maxQuota != null) {
+            long quota_max_temp = maxQuota.longValue();
             if (quota_max_temp != -1) {
                 quota_max_temp *= Math.pow(2, 20);
             }
 
             PreparedStatement prep = null;
             try {
-
                 prep = con.prepareStatement("UPDATE user SET quota_max=? WHERE cid=? AND id=?");
                 prep.setLong(1, quota_max_temp);
                 prep.setInt(2, ctx.getId().intValue());
                 prep.setInt(3, user.getId().intValue());
                 prep.executeUpdate();
                 prep.close();
-
             } finally {
                 Databases.closeSQLStuff(prep);
             }
         }
     }
 
-    private void changeStorageDataImpl(final User user, final Context ctx, final Connection con) throws SQLException, StorageException {
-
-        if (user.getFilestoreId() != null) {
-            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-            final Filestore filestore = oxutil.getFilestore(user.getFilestoreId().intValue(), false);
+    private void changeStorageDataImpl(User user, Context ctx, Connection con) throws SQLException, StorageException {
+        Integer filestoreId = user.getFilestoreId();
+        if (filestoreId != null) {
+            OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            Filestore filestore = oxutil.getFilestore(filestoreId.intValue(), false);
             PreparedStatement prep = null;
-            final int context_id = ctx.getId().intValue();
+            int context_id = ctx.getId().intValue();
             try {
-
+                boolean changed = false;
                 if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
-                    prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ?");
+                    prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ? AND filestore_id <> ?");
                     prep.setInt(1, filestore.getId().intValue());
                     prep.setInt(2, context_id);
                     prep.setInt(3, user.getId().intValue());
-                    prep.executeUpdate();
+                    prep.setInt(4, filestore.getId().intValue());
+                    changed = prep.executeUpdate() > 0;
                     prep.close();
                 }
 
-                final String filestore_name = user.getFilestore_name();
-                if (null != filestore_name) {
-                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
-                    prep.setString(1, filestore_name);
-                    prep.setInt(2, context_id);
-                    prep.setInt(3, user.getId().intValue());
-                    prep.executeUpdate();
-                    prep.close();
-                }
+                if (changed) {
+                    Integer filestoreOwner = user.getFilestoreOwner();
+                    if (filestoreOwner != null && -1 != filestoreOwner.intValue()) {
+                        prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
+                        prep.setInt(1, filestoreOwner.intValue());
+                        prep.setInt(2, context_id);
+                        prep.setInt(3, user.getId().intValue());
+                        prep.executeUpdate();
+                        prep.close();
+                    } else {
+                        prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
+                        prep.setInt(1, 0);
+                        prep.setInt(2, context_id);
+                        prep.setInt(3, user.getId().intValue());
+                        prep.executeUpdate();
+                        prep.close();
+                    }
 
+                    String filestore_name = user.getFilestore_name();
+                    if (null != filestore_name) {
+                        prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
+                        prep.setString(1, filestore_name);
+                        prep.setInt(2, context_id);
+                        prep.setInt(3, user.getId().intValue());
+                        prep.executeUpdate();
+                        prep.close();
+                    } else {
+                        prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
+                        prep.setString(1, FileStorages.getNameForUser(user.getId().intValue(), context_id));
+                        prep.setInt(2, context_id);
+                        prep.setInt(3, user.getId().intValue());
+                        prep.executeUpdate();
+                        prep.close();
+                    }
+                }
             } finally {
                 Databases.closeSQLStuff(prep);
             }
@@ -1408,7 +1431,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             PreparedStatement stmt = null;
             try {
-                stmt = con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin,filestore_id,filestore_owner,filestore_name,quota_max) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, ctx.getId().intValue());
                 stmt.setInt(2, userId);
                 stmt.setString(3, passwd);
@@ -1501,6 +1524,46 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.setString(17, usrdata.getImapLogin());
                 } else {
                     stmt.setNull(17, java.sql.Types.VARCHAR);
+                }
+
+                {
+                    Integer fsId = usrdata.getFilestoreId();
+                    if (fsId != null && -1 != fsId.intValue()) {
+                        stmt.setInt(18, fsId.intValue());
+
+                        Integer fsOwner = usrdata.getFilestoreOwner();
+                        if (fsOwner != null && -1 != fsOwner.intValue()) {
+                            stmt.setInt(19, fsOwner.intValue());
+                        } else {
+                            stmt.setInt(19, 0);
+                        }
+
+                        String filestore_name = usrdata.getFilestore_name();
+                        if (null != filestore_name) {
+                            stmt.setString(20, filestore_name);
+                        } else {
+                            stmt.setString(20, FileStorages.getNameForUser(userId, ctx.getId().intValue()));
+                        }
+
+                    } else {
+                        // No file storage information
+                        stmt.setInt(18, 0);
+                        stmt.setInt(19, 0);
+                        stmt.setNull(20, java.sql.Types.VARCHAR);
+                    }
+                }
+
+                {
+                    Long maxQuota = usrdata.getMaxQuota();
+                    if (null != maxQuota) {
+                        long quota_max_temp = maxQuota.longValue();
+                        if (quota_max_temp != -1) {
+                            quota_max_temp *= Math.pow(2, 20);
+                        }
+                        stmt.setLong(21, quota_max_temp);
+                    } else {
+                        stmt.setLong(21, -1);
+                    }
                 }
 
                 stmt.executeUpdate();

@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.tools.filestore;
 
+import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -111,8 +112,8 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
     protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
         try {
             // Grab associated quota-aware file storages
-            FileStorage userStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(user.getId().intValue(), ctx.getId().intValue());
-            FileStorage srcStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(ctx.getId().intValue());
+            FileStorage userStorage = getQuotaFileStorageService().getQuotaFileStorage(user.getId().intValue(), ctx.getId().intValue());
+            FileStorage srcStorage = getQuotaFileStorageService().getQuotaFileStorage(ctx.getId().intValue());
 
             // Determine the files to move
             Set<String> srcFiles = new LinkedHashSet<String>();
@@ -161,6 +162,8 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
             cache.clear();
             Cache userCache = cacheService.getCache("User");
             userCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+            Cache contextCache = cacheService.getCache("Context");
+            contextCache.remove(ctx.getId());
         } catch (OXException e) {
             throw new StorageException(e);
         }
