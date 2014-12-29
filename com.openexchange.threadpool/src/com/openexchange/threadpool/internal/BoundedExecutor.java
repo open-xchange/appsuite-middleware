@@ -61,18 +61,17 @@ import java.util.concurrent.Semaphore;
 public final class BoundedExecutor {
 
     private final Executor executor;
-
     private final Semaphore semaphore;
 
     /**
      * Initializes a new {@link BoundedExecutor}.
      *
-     * @param exec The executor to delegate execution to
+     * @param executor The executor to delegate execution to
      * @param bound The capacity boundary; actually the pool size plus the number of queued tasks you want to allow
      */
-    public BoundedExecutor(final Executor exec, final int bound) {
+    public BoundedExecutor(Executor executor, int bound) {
         super();
-        this.executor = exec;
+        this.executor = executor;
         this.semaphore = new Semaphore(bound);
     }
 
@@ -83,27 +82,40 @@ public final class BoundedExecutor {
      * @throws InterruptedException If interrupted while waiting for queue space or thread to become available
      * @throws RejectedExecutionException If given command cannot be accepted for execution.
      */
-    public void submitTask(final Runnable command) throws InterruptedException {
+    public void submitTask(Runnable command) throws InterruptedException {
         if (null == command) {
             return;
         }
-        final Semaphore semaphore = this.semaphore;
+        Semaphore semaphore = this.semaphore;
         semaphore.acquire();
         try {
-            executor.execute(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        command.run();
-                    } finally {
-                        semaphore.release();
-                    }
-                }
-            });
+            executor.execute(new SemaphoredRunnable(semaphore, command));
         } catch (final RejectedExecutionException e) {
             semaphore.release();
             throw e;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------
+
+    private static final class SemaphoredRunnable implements Runnable {
+
+        private final Semaphore semaphore;
+        private final Runnable command;
+
+        SemaphoredRunnable(Semaphore semaphore, Runnable command) {
+            super();
+            this.semaphore = semaphore;
+            this.command = command;
+        }
+
+        @Override
+        public void run() {
+            try {
+                command.run();
+            } finally {
+                semaphore.release();
+            }
         }
     }
 
