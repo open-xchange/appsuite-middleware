@@ -108,12 +108,12 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
     @Override
     public boolean execute() throws SQLException {
         try {
-            LOG.debug("{} executes: {}", Thread.currentThread(), delegate.toString());
+            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
             boolean retval = delegate.execute();
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            LOG.error("Error in SQL syntax: {}", Databases.getSqlStatement(delegate, "<unknown>"));
+            LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             throw syntaxError;
         }
     }
@@ -121,10 +121,10 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
     @Override
     public ResultSet executeQuery() throws SQLException {
         try {
-            LOG.debug("{} executes: {}", Thread.currentThread(), delegate.toString());
+            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
             return new JDBC41ResultSetWrapper(delegate.executeQuery(), this);
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            LOG.error("Error in SQL syntax: {}", Databases.getSqlStatement(delegate, "<unknown>"));
+            LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             throw syntaxError;
         }
     }
@@ -132,12 +132,12 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
     @Override
     public int executeUpdate() throws SQLException {
         try {
-            LOG.debug("{} executes: {}", Thread.currentThread(), delegate.toString());
+            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
             int retval = delegate.executeUpdate();
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            LOG.error("Error in SQL syntax: {}", Databases.getSqlStatement(delegate, "<unknown>"));
+            LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             throw syntaxError;
         }
     }
