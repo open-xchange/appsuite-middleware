@@ -74,8 +74,8 @@ public class FilestoreLocationUpdaterCustomizer implements ServiceTrackerCustomi
     }
 
     @Override
-    public FilestoreLocationUpdater addingService(ServiceReference<FilestoreLocationUpdater> arg0) {
-        FilestoreLocationUpdater service = context.getService(arg0);
+    public FilestoreLocationUpdater addingService(ServiceReference<FilestoreLocationUpdater> reference) {
+        FilestoreLocationUpdater service = context.getService(reference);
         FilestoreLocationUpdaterRegistry.getInstance().addService(service);
         return service;
     }

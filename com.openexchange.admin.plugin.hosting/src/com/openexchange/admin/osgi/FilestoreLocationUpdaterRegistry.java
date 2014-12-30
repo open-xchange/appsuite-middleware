@@ -88,11 +88,11 @@ public class FilestoreLocationUpdaterRegistry {
     /**
      * Adds specified location handler.
      *
-     * @param locationhandler The location handler to add
+     * @param locationHandler The location handler to add
      */
-    public void addService(FilestoreLocationUpdater locationhandler) {
-        if (null != locationhandler) {
-            services.offer(locationhandler);
+    public void addService(FilestoreLocationUpdater locationHandler) {
+        if (null != locationHandler) {
+            services.offer(locationHandler);
         }
     }
 
@@ -103,6 +103,17 @@ public class FilestoreLocationUpdaterRegistry {
      */
     public Collection<FilestoreLocationUpdater> getServices() {
         return services;
+    }
+
+    /**
+     * Removes specified location handler.
+     *
+     * @param locationHandler The location handler to remove
+     */
+    public void removeService(FilestoreLocationUpdater locationHandler) {
+        if (null != locationHandler) {
+            services.remove(locationHandler);
+        }
     }
 
 }
