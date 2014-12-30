@@ -49,12 +49,15 @@
 
 package com.openexchange.filestore;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 
 /**
  * {@link FileStorageService} - Provides access to a file store.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface FileStorageService extends FileStorageProvider {
     // Marker
 }
