@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.osgi;
 
+import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
@@ -118,6 +119,7 @@ public class Activator extends HousekeepingActivator {
         track(CreateTableService.class, new CreateTableCustomizer(context));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(CapabilityService.class, new RegistryServiceTrackerCustomizer<CapabilityService>(context, AdminServiceRegistry.getInstance(), CapabilityService.class));
+        track(Remote.class, new OXContextInterfaceTracker(context));
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
 

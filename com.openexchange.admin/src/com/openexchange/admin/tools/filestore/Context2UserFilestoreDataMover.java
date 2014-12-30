@@ -114,8 +114,8 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
         int userId = user.getId().intValue();
         try {
             // Grab associated quota-aware file storages
-            FileStorage userStorage = getQuotaFileStorageService().getQuotaFileStorage(userId, contextId);
-            FileStorage srcStorage = getQuotaFileStorageService().getQuotaFileStorage(contextId);
+            FileStorage userStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, userId, contextId);
+            FileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, -1, contextId);
 
             // Determine the files to move
             Set<String> srcFiles = new LinkedHashSet<String>();

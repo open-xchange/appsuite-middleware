@@ -329,6 +329,26 @@ public interface OXUserInterface extends Remote {
     public int moveUserFilestoreFromMaster(Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
+     * Moves a user's files from a context to his own storage.
+     * <p>
+     * This operation is quota-aware and thus transfers current quota usage from context to user.
+     *
+     * @param ctx The context in which the user resides
+     * @param user The user
+     * @param dstFilestore The destination file storage to move to
+     * @param credentials The credentials
+     * @return The job identifier which can be used for retrieving progress information.
+     * @throws StorageException If an error in the subsystems occurred.
+     * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If no such context exists
+     * @throws NoSuchFilestoreException If no file storage context exists
+     * @throws InvalidDataException If passed data is invalid
+     * @throws DatabaseUpdateException If update operation fails
+     * @throws NoSuchUserException If no such user exists
+     */
+    public int moveUserFilestoreFromContext(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
      * Manipulate user data within the given context.
      *
      * @param context
