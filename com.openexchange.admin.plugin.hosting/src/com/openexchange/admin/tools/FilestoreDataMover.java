@@ -59,7 +59,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -193,8 +192,7 @@ public class FilestoreDataMover implements Callable<Void> {
             Connection con = null;
             try {
                 con = Database.getNoTimeout(ctx.getId(), true);
-                List<FilestoreLocationUpdater> services = FilestoreLocationUpdaterRegistry.getInstance().getServices();
-                for (FilestoreLocationUpdater updater : services) {
+                for (FilestoreLocationUpdater updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
                     updater.updateFilestoreLocation(fileMapping, ctx.getId(), con);
                 }
             } catch (OXException e) {
