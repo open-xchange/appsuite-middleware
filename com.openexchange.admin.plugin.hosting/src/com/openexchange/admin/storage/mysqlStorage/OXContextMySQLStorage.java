@@ -116,6 +116,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
@@ -908,7 +909,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         // Find filestore for context.
-        ctx.setFilestore_name(ctx.getIdAsString() + "_ctx_store");
+        ctx.setFilestore_name(FileStorages.getNameForContext(ctx.getId().intValue()));
         Integer storeId = ctx.getFilestoreId();
         if (null == storeId) {
             storeId = OXUtilStorageInterface.getInstance().findFilestoreForContext().getId();
