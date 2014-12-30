@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
  */
 public interface FileStorageProvider {
 
+    /** The default ranking for a file storage provider */
     public static final int DEFAULT_RANKING = 0;
 
     /**
