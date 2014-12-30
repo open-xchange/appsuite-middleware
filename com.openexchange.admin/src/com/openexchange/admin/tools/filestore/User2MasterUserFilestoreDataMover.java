@@ -117,8 +117,8 @@ public class User2MasterUserFilestoreDataMover extends FilestoreDataMover {
             }
 
             // Grab associated quota-aware file storages
-            FileStorage srcStorage = getQuotaFileStorageService().getQuotaFileStorage(srcUserId, contextId);
-            FileStorage dstStorage = getQuotaFileStorageService().getQuotaFileStorage(masterUserId, contextId);
+            FileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, srcUserId, contextId);
+            FileStorage dstStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, masterUserId, contextId);
 
             // Copy each file from source to destination
             Set<String> srcFiles = srcStorage.getFileList();
@@ -154,6 +154,8 @@ public class User2MasterUserFilestoreDataMover extends FilestoreDataMover {
             CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
+            Cache qfsCache = cacheService.getCache("QuotaFileStorages");
+            qfsCache.clear();
             Cache userCache = cacheService.getCache("User");
             userCache.remove(cacheService.newCacheKey(contextId, srcUserId));
             userCache.remove(cacheService.newCacheKey(contextId, masterUserId));
