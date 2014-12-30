@@ -49,8 +49,9 @@
 
 package com.openexchange.admin.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 
 
@@ -64,24 +65,43 @@ public class FilestoreLocationUpdaterRegistry {
 
     private static final FilestoreLocationUpdaterRegistry INSTANCE = new FilestoreLocationUpdaterRegistry();
 
-    private final List<FileLocationHandler> services;
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static FilestoreLocationUpdaterRegistry getInstance() {
+        return INSTANCE;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------
+
+    private final Queue<FileLocationHandler> services;
 
     /**
      * Initializes a new {@link FilestoreLocationUpdaterRegistry}.
      */
     private FilestoreLocationUpdaterRegistry() {
-        this.services = new ArrayList<FileLocationHandler>(4);
+        this.services = new ConcurrentLinkedQueue<FileLocationHandler>();
     }
 
-    public static FilestoreLocationUpdaterRegistry getInstance() {
-        return INSTANCE;
+    /**
+     * Adds specified location handler.
+     *
+     * @param locationhandler The location handler to add
+     */
+    public void addService(FileLocationHandler locationhandler) {
+        if (null != locationhandler) {
+            services.offer(locationhandler);
+        }
     }
 
-    public void addService(FileLocationHandler service) {
-        services.add(service);
-    }
-
-    public List<FileLocationHandler> getServices() {
+    /**
+     * Gets the currently available location handlers.
+     *
+     * @return The location handlers
+     */
+    public Collection<FileLocationHandler> getServices() {
         return services;
     }
 
