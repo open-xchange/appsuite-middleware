@@ -253,4 +253,36 @@ public final class FileStorages {
         return path.endsWith("/") ? path : new StringBuilder(path).append('/').toString();
     }
 
+    /**
+     * Appends given sub-part portion (<code>appendix</code>) to specified path component delimited by a slash <code>'/'</code> character.
+     * <pre>
+     *   [path-without-ending-slash] + "/" + [appendix-without-starting-slash]
+     * </pre>
+     *
+     * @param path The path component to append to
+     * @param appendix The sub-path to add
+     * @return The resulting path
+     */
+    public static String appendToPathComponent(String path, String appendix) {
+        if (null == path) {
+            return null == appendix ? null : (appendix.startsWith("/") ? appendix : new StringBuilder(appendix.length() + 1).append('/').append(appendix).toString());
+        }
+
+        if (null == appendix) {
+            return path;
+        }
+
+        StringBuilder sb = new StringBuilder(path);
+        if (path.endsWith("/")) {
+            sb.append(appendix.startsWith("/") ? appendix.substring(1) : appendix);
+        } else {
+            if (appendix.startsWith("/")) {
+                sb.append(appendix);
+            } else {
+                sb.append('/').append(appendix);
+            }
+        }
+        return sb.toString();
+    }
+
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore;
 
+import java.net.URI;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -59,6 +60,19 @@ import com.openexchange.osgi.annotation.SingletonService;
  */
 @SingletonService
 public interface QuotaFileStorageService {
+
+    /**
+     * Gets a usage-accounting, but unlimited {@link QuotaFileStorage} instance for specified arguments.
+     * <p>
+     * This methods is intended to be used by provisioning-related operations that do not honor possible quote-exceeding file operations.
+     *
+     * @param baseUri The base URI for the file storage
+     * @param optOwner The optional user identifier
+     * @param contextId The context identifier
+     * @return An appropriate {@code QuotaFileStorage} instance
+     * @throws OXException If an appropriate {@code QuotaFileStorage} instance cannot be returned
+     */
+    QuotaFileStorage getUnlimitedQuotaFileStorage(URI baseUri, int optOwner, int contextId) throws OXException;
 
     /**
      * Gets a {@link QuotaFileStorage} instance for specified context.
