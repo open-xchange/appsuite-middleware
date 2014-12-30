@@ -95,7 +95,7 @@ public class OXContextInterfaceTracker implements ServiceTrackerCustomizer<Remot
 
     @Override
     public void removedService(ServiceReference<Remote> reference, Remote service) {
-        if (null != service) {
+        if (service instanceof OXContextInterface) {
             AdminServiceRegistry.getInstance().removeService(OXContextInterface.class);
         }
         context.ungetService(reference);
