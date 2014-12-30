@@ -50,12 +50,14 @@
 package com.openexchange.filestore;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link QuotaFileStorageService} - The service to access {@link QuotaFileStorage}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
+@SingletonService
 public interface QuotaFileStorageService {
 
     /**
