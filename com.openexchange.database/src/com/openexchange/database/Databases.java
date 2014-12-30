@@ -156,26 +156,6 @@ public final class Databases {
     }
 
     /**
-     * Gets the SQL statement from given <code>PreparedStatement</code> instance.
-     *
-     * @param stmt The <code>PreparedStatement</code> instance
-     * @param query The optional query associated with given <code>PreparedStatement</code> instance
-     * @return The SQL statement
-     */
-    public static String getSqlStatement(PreparedStatement stmt, String query) {
-        if (stmt == null) {
-            return query;
-        }
-        try {
-            String sql = stmt.toString();
-            int pos = sql.indexOf(": ");
-            return pos < 0 ? sql : sql.substring(pos + 2);
-        } catch (Exception x) {
-            return query;
-        }
-    }
-
-    /**
      * Starts a transaction on the given connection. This implementation sets autocommit to false and even executes a START TRANSACTION
      * statement to ensure isolation levels for the current connection.
      * @param con connection to start the transaction on.
