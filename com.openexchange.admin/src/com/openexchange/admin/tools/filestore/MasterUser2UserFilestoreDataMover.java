@@ -172,7 +172,7 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
             Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-            qfsCache.clear();
+            qfsCache.invalidateGroup(Integer.toString(contextId));
             Cache userCache = cacheService.getCache("User");
             userCache.remove(cacheService.newCacheKey(contextId, dstUserId));
             userCache.remove(cacheService.newCacheKey(contextId, masterUserId));

@@ -110,21 +110,23 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
      */
     @Override
     protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
+        int contextId = ctx.getId().intValue();
+        int userId = user.getId().intValue();
         try {
             // Grab associated quota-aware file storages
-            FileStorage userStorage = getQuotaFileStorageService().getQuotaFileStorage(user.getId().intValue(), ctx.getId().intValue());
-            FileStorage srcStorage = getQuotaFileStorageService().getQuotaFileStorage(ctx.getId().intValue());
+            FileStorage userStorage = getQuotaFileStorageService().getQuotaFileStorage(userId, contextId);
+            FileStorage srcStorage = getQuotaFileStorageService().getQuotaFileStorage(contextId);
 
             // Determine the files to move
             Set<String> srcFiles = new LinkedHashSet<String>();
             {
-                Connection con = Database.getNoTimeout(ctx.getId().intValue(), true);
+                Connection con = Database.getNoTimeout(contextId, true);
                 try {
                     for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
-                        srcFiles.addAll(updater.determineFileLocationsFor(user.getId().intValue(), ctx.getId().intValue(), con));
+                        srcFiles.addAll(updater.determineFileLocationsFor(userId, contextId, con));
                     }
                 } finally {
-                    Database.backNoTimeout(ctx.getId().intValue(), true, con);
+                    Database.backNoTimeout(contextId, true, con);
                 }
             }
 
@@ -151,7 +153,7 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
         // Apply changes to context & clear caches
         try {
             user.setFilestoreId(dstFilestore.getId());
-            user.setFilestore_name(FileStorages.getNameForUser(user.getId().intValue(), ctx.getId().intValue()));
+            user.setFilestore_name(FileStorages.getNameForUser(userId, contextId));
             user.setFilestoreOwner(user.getId());
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
@@ -161,9 +163,9 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
             Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-            qfsCache.clear();
+            qfsCache.invalidateGroup(Integer.toString(contextId));
             Cache userCache = cacheService.getCache("User");
-            userCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+            userCache.remove(cacheService.newCacheKey(contextId, userId));
             Cache contextCache = cacheService.getCache("Context");
             contextCache.remove(ctx.getId());
         } catch (OXException e) {

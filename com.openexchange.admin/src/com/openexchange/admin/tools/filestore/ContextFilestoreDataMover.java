@@ -108,12 +108,14 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
      */
     @Override
     protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
+        int contextId = ctx.getId().intValue();
+
         // rsync can be used in case both file storages are disk-based storages
         boolean useRsync = "file".equalsIgnoreCase(srcBaseUri.getScheme()) && "file".equalsIgnoreCase(dstBaseUri.getScheme());
 
         if (useRsync) {
             // Invoke rsync process
-            URI srcFullUri = getFullyQualifyingUriForContext(ctx.getId().intValue(), srcBaseUri);
+            URI srcFullUri = getFullyQualifyingUriForContext(contextId, srcBaseUri);
             File fsDirectory = new File(srcFullUri);
             if (fsDirectory.exists()) {
                 ArrayOutput output = new ShellExecutor().executeprocargs(new String[] {
@@ -125,8 +127,8 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
             }
         } else {
             // Not possible to use rsync; e.g. move from HDD to S3
-            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(ctx.getId().intValue(), srcBaseUri));
-            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(ctx.getId().intValue(), dstBaseUri));
+            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, srcBaseUri));
+            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, dstBaseUri));
 
             try {
                 // Grab associated file storages
@@ -167,7 +169,7 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
             Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-            qfsCache.clear();
+            qfsCache.invalidateGroup(Integer.toString(contextId));
             Cache contextCache = cacheService.getCache("Context");
             contextCache.remove(ctx.getId());
         } catch (OXException e) {
