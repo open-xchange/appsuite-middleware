@@ -69,7 +69,7 @@ import com.openexchange.filestore.FileStorageService;
  */
 public class CompositeFileStorageService implements FileStorageService, ServiceTrackerCustomizer<FileStorageProvider, FileStorageProvider> {
 
-    /** The list of known factory candidates */
+    /** The list of known providers */
     private final List<FileStorageProvider> providers = new CopyOnWriteArrayList<FileStorageProvider>();
 
     /** The bundle context */
@@ -90,7 +90,7 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         }
 
         FileStorageProvider candidate = null;
-        for (final FileStorageProvider fac : providers) {
+        for (FileStorageProvider fac : providers) {
             if (fac.supports(uri) && (null == candidate || fac.getRanking() > candidate.getRanking())) {
                 candidate = fac;
             }
@@ -108,21 +108,20 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
 
     @Override
     public FileStorage getInternalFileStorage(URI uri) throws OXException {
-        if (null== uri) {
+        if (null == uri) {
             return null;
         }
 
         try {
-            final LocalFileStorage standardFS = new LocalFileStorage(uri);
-            final HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
-            final CompositingFileStorage cStorage = new CompositingFileStorage();
+            LocalFileStorage standardFS = new LocalFileStorage(uri);
+            HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
 
+            CompositingFileStorage cStorage = new CompositingFileStorage();
             cStorage.addStore(standardFS);
             cStorage.addStore("hashed", hashedFS);
             cStorage.setSavePrefix("hashed");
-
             return cStorage;
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". Wrong or missing FileStorage bundle for scheme " + uri.getScheme() + "?", e);
         }
     }
@@ -137,9 +136,11 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         return Integer.MAX_VALUE;
     }
 
+    // ---------------------------------------- ServiceTracker methods --------------------------------------------------
+
     @Override
     public FileStorageProvider addingService(ServiceReference<FileStorageProvider> reference) {
-        final FileStorageProvider provider = bundleContext.getService(reference);
+        FileStorageProvider provider = bundleContext.getService(reference);
         synchronized (this) {
             List<FileStorageProvider> providers = this.providers;
             if (!providers.contains(provider)) {
