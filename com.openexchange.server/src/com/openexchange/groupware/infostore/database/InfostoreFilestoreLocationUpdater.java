@@ -59,7 +59,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -132,17 +131,10 @@ public class InfostoreFilestoreLocationUpdater implements FileLocationHandler {
 
     @Override
     public Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) throws OXException, SQLException {
-        // Check associated user
-        User user = UserStorage.getInstance().getUser(userId, ContextStorage.getInstance().getContext(contextId));
-        if (user.getFilestoreId() <= 0) {
-            // No specific, but context-related file storage.
-            // Therefore NOT applicable
-            return Collections.emptySet();
-        }
-
         // Determine InfoStore folders
         TIntList folderIds = fetchFolders(userId, contextId, con);
 
+        // Get folders' files
         return getFileLocationsFor(folderIds, contextId, con);
     }
 
