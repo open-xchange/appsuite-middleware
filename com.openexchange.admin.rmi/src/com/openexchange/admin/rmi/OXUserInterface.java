@@ -305,7 +305,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveUserFilestore2Master(Context ctx, User user, User masterUser, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveFromUserFilestoreToMaster(Context ctx, User user, User masterUser, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from a master account to his own storage.
@@ -326,7 +326,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveUserFilestoreFromMaster(Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveFromMasterToUserFilestore(Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from a context to his own storage.
@@ -346,7 +346,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveUserFilestoreFromContext(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveFromContextToUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Manipulate user data within the given context.

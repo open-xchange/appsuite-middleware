@@ -96,7 +96,7 @@ public class MoveUserFilestore2Master extends UserAbstraction {
                 masterUser = oxusr.getContextAdmin(ctx, auth);
             }
 
-            int jobId = oxusr.moveUserFilestore2Master(ctx, usr, masterUser, auth);
+            int jobId = oxusr.moveFromUserFilestoreToMaster(ctx, usr, masterUser, auth);
 
             displayMovedMessage(successtext, null, "to master filestore " + masterUser.getFilestoreId() + " scheduled as job " + jobId, parser);
             sysexit(0);

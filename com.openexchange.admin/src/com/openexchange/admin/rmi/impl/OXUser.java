@@ -355,7 +355,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveUserFilestore2Master(final Context ctx, User user, User masterUser, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -469,7 +469,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveUserFilestoreFromMaster(final Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveFromMasterToUserFilestore(final Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -583,7 +583,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveUserFilestoreFromContext(final Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
