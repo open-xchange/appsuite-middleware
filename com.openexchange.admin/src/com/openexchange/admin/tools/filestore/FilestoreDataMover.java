@@ -51,15 +51,20 @@ package com.openexchange.admin.tools.filestore;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.io.FileUtils;
@@ -72,6 +77,7 @@ import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 
 /**
@@ -271,6 +277,31 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
+     * Copies specified files from source storage to destination storage
+     *
+     * @param files The files to copy
+     * @param srcStorage The source storage
+     * @param dstStorage The destination storage
+     * @return The old file name to new file name mapping
+     * @throws OXException If copy operation fails
+     */
+    protected Map<String, String> copyFiles(Set<String> files, FileStorage srcStorage, FileStorage dstStorage) throws OXException {
+        if (files.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> prevFileName2newFileName = new HashMap<String, String>(files.size());
+        for (String file : files) {
+            InputStream is = srcStorage.getFile(file);
+            String newFile = dstStorage.saveNewFile(is);
+            if (null != newFile) {
+                prevFileName2newFileName.put(file, newFile);
+                LOGGER.info("Copied file " + file + " to " + newFile);
+            }
+        }
+        return prevFileName2newFileName;
+    }
+
+    /**
      * Propagates new file locations throughout registered <code>FilestoreLocationUpdater</code> instances
      *
      * @param prevFileName2newFileName The previous file name to new file name mapping
@@ -297,6 +328,30 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         for (PostProcessTask task; (task = postProcessTasks.poll()) != null;) {
             task.perform();
         }
+    }
+
+    /**
+     * Determines the file locations for given user/context.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The associated file locations
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
+     */
+    protected Set<String> determineFileLocationsFor(int userId, int contextId) throws OXException, SQLException {
+        Set<String> srcFiles = new LinkedHashSet<String>();
+        {
+            Connection con = Database.getNoTimeout(contextId, true);
+            try {
+                for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
+                    srcFiles.addAll(updater.determineFileLocationsFor(userId, contextId, con));
+                }
+            } finally {
+                Database.backNoTimeout(contextId, true, con);
+            }
+        }
+        return srcFiles;
     }
 
     /**

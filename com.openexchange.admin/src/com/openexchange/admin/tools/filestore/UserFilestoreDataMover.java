@@ -54,10 +54,8 @@ import static com.openexchange.filestore.FileStorages.getFileStorageService;
 import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForUser;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
@@ -141,15 +139,7 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
 
                 // Copy each file from source to destination
                 Set<String> srcFiles = srcStorage.getFileList();
-                Map<String, String> prevFileName2newFileName = new HashMap<String, String>(srcFiles.size());
-                for (String file : srcFiles) {
-                    InputStream is = srcStorage.getFile(file);
-                    String newFile = dstStorage.saveNewFile(is);
-                    if (null != newFile) {
-                        prevFileName2newFileName.put(file, newFile);
-                        LOGGER.info("Copied file " + file + " to " + newFile);
-                    }
-                }
+                Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
 
                 // Propagate new file locations throughout registered FilestoreLocationUpdater instances
                 propagateNewLocations(prevFileName2newFileName);

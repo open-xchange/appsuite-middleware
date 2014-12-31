@@ -51,15 +51,10 @@ package com.openexchange.admin.tools.filestore;
 
 import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -69,11 +64,9 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
-import com.openexchange.groupware.filestore.FileLocationHandler;
 
 /**
  * {@link MasterUser2UserFilestoreDataMover} - The implementation to move files from master user's storage to a user's storage.
@@ -126,28 +119,10 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
             FileStorage dstStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, dstUserId, contextId);
 
             // Determine the files to move
-            Set<String> srcFiles = new LinkedHashSet<String>();
-            {
-                Connection con = Database.getNoTimeout(contextId, true);
-                try {
-                    for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
-                        srcFiles.addAll(updater.determineFileLocationsFor(dstUserId, contextId, con));
-                    }
-                } finally {
-                    Database.backNoTimeout(contextId, true, con);
-                }
-            }
+            Set<String> srcFiles = determineFileLocationsFor(dstUserId, contextId);
 
             // Copy each file from source to destination
-            Map<String, String> prevFileName2newFileName = new HashMap<String, String>(srcFiles.size());
-            for (String file : srcFiles) {
-                InputStream is = srcStorage.getFile(file);
-                String newFile = dstStorage.saveNewFile(is);
-                if (null != newFile) {
-                    prevFileName2newFileName.put(file, newFile);
-                    LOGGER.info("Copied file " + file + " to " + newFile);
-                }
-            }
+            Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
 
             // Propagate new file locations throughout registered FilestoreLocationUpdater instances
             propagateNewLocations(prevFileName2newFileName);
