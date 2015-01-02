@@ -68,6 +68,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1259,14 +1260,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (UpdateMailAccountBuilder.needsUpdate(attributes)) {
                     orderedAttributes = new ArrayList<Attribute>(attributes);
 
-                    final UpdateMailAccountBuilder sqlBuilder = new UpdateMailAccountBuilder();
-                    final GetSwitch getter = new GetSwitch(mailAccount);
+                    UpdateMailAccountBuilder sqlBuilder = new UpdateMailAccountBuilder();
+                    GetSwitch getter = new GetSwitch(mailAccount);
 
                     // Build SQL statement
-                    for (final Iterator<Attribute> iter = orderedAttributes.iterator(); iter.hasNext();) {
-                        final Attribute attribute = iter.next();
+                    for (Iterator<Attribute> iter = orderedAttributes.iterator(); iter.hasNext();) {
+                        Attribute attribute = iter.next();
                         if (Attribute.MAIL_URL_LITERAL == attribute) {
-                            final Object value = attribute.doSwitch(getter);
+                            Object value = attribute.doSwitch(getter);
                             if (null == value) {
                                 iter.remove();
                             } else {
@@ -1276,74 +1277,74 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             attribute.doSwitch(sqlBuilder);
                         }
                     }
-                    stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
 
-                    // Fill prepared statement
-                    int pos = 1;
-                    for (final Attribute attribute : orderedAttributes) {
-                        if (!sqlBuilder.handles(attribute)) {
-                            continue;
-                        }
-                        final Object value = attribute.doSwitch(getter);
-                        if (Attribute.PASSWORD_LITERAL == attribute) {
-                            encryptedPassword = encrypt(mailAccount.getPassword(), session);
-                            setOptionalString(stmt, pos++, encryptedPassword);
-                        } else if (Attribute.PERSONAL_LITERAL == attribute) {
-                            final String personal = mailAccount.getPersonal();
-                            if (isEmpty(personal)) {
-                                stmt.setNull(pos++, TYPE_VARCHAR);
-                            } else {
-                                stmt.setString(pos++, personal);
+                    if (sqlBuilder.isValid()) {
+                        stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+                        // Fill prepared statement
+                        int pos = 1;
+                        for (Attribute attribute : orderedAttributes) {
+                            if (!sqlBuilder.handles(attribute)) {
+                                continue;
                             }
-                        } else if (Attribute.REPLY_TO_LITERAL == attribute) {
-                            final String replyTo = mailAccount.getReplyTo();
-                            if (isEmpty(replyTo)) {
-                                stmt.setNull(pos++, TYPE_VARCHAR);
-                            } else {
-                                stmt.setString(pos++, replyTo);
-                            }
-                        } else if (Attribute.ARCHIVE_LITERAL == attribute) {
-                            final String s = mailAccount.getArchive();
-                            if (isEmpty(s)) {
-                                stmt.setString(pos++, "");
-                            } else {
-                                stmt.setString(pos++, s);
-                            }
-                        } else if (Attribute.ARCHIVE_FULLNAME_LITERAL == attribute) {
-                            final String s = mailAccount.getArchiveFullname();
-                            if (isEmpty(s)) {
-                                stmt.setString(pos++, "");
-                            } else {
-                                stmt.setString(pos++, MailFolderUtility.prepareMailFolderParam(s).getFullname());
-                            }
-                        } else if (DEFAULT.contains(attribute)) {
-                            if (DEFAULT_FULL_NAMES.contains(attribute)) {
-                                final String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
-                                stmt.setString(pos++, fullName);
-                            } else {
-                                if (null == value) {
-                                    stmt.setObject(pos++, "");
+                            Object value = attribute.doSwitch(getter);
+                            if (Attribute.PASSWORD_LITERAL == attribute) {
+                                encryptedPassword = encrypt(mailAccount.getPassword(), session);
+                                setOptionalString(stmt, pos++, encryptedPassword);
+                            } else if (Attribute.PERSONAL_LITERAL == attribute) {
+                                String personal = mailAccount.getPersonal();
+                                if (isEmpty(personal)) {
+                                    stmt.setNull(pos++, TYPE_VARCHAR);
                                 } else {
-                                    stmt.setObject(pos++, value);
+                                    stmt.setString(pos++, personal);
                                 }
+                            } else if (Attribute.REPLY_TO_LITERAL == attribute) {
+                                String replyTo = mailAccount.getReplyTo();
+                                if (isEmpty(replyTo)) {
+                                    stmt.setNull(pos++, TYPE_VARCHAR);
+                                } else {
+                                    stmt.setString(pos++, replyTo);
+                                }
+                            } else if (Attribute.ARCHIVE_LITERAL == attribute) {
+                                String s = mailAccount.getArchive();
+                                if (isEmpty(s)) {
+                                    stmt.setString(pos++, "");
+                                } else {
+                                    stmt.setString(pos++, s);
+                                }
+                            } else if (Attribute.ARCHIVE_FULLNAME_LITERAL == attribute) {
+                                String s = mailAccount.getArchiveFullname();
+                                if (isEmpty(s)) {
+                                    stmt.setString(pos++, "");
+                                } else {
+                                    stmt.setString(pos++, MailFolderUtility.prepareMailFolderParam(s).getFullname());
+                                }
+                            } else if (DEFAULT.contains(attribute)) {
+                                if (DEFAULT_FULL_NAMES.contains(attribute)) {
+                                    String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
+                                    stmt.setString(pos++, fullName);
+                                } else {
+                                    if (null == value) {
+                                        stmt.setObject(pos++, "");
+                                    } else {
+                                        stmt.setObject(pos++, value);
+                                    }
+                                }
+                            } else {
+                                stmt.setObject(pos++, value);
                             }
-                        } else {
-                            stmt.setObject(pos++, value);
                         }
+                        stmt.setLong(pos++, contextId);
+                        stmt.setLong(pos++, mailAccount.getId());
+                        stmt.setLong(pos++, userId);
+
+                        if (LOG.isDebugEnabled()) {
+                            final String query = stmt.toString();
+                            LOG.debug("Trying to perform SQL update query for attributes {} :\n{}", orderedAttributes, query.substring(query.indexOf(':') + 1));
+                        }
+
+                        stmt.executeUpdate();
+                        closeSQLStuff(stmt);
                     }
-
-                    stmt.setLong(pos++, contextId);
-                    stmt.setLong(pos++, mailAccount.getId());
-                    stmt.setLong(pos++, userId);
-
-                    if (LOG.isDebugEnabled()) {
-                        final String query = stmt.toString();
-                        LOG.debug("Trying to perform SQL update query for attributes {} :\n{}", orderedAttributes, query.substring(query.indexOf(':') + 1));
-                    }
-
-                    stmt.executeUpdate();
-                    closeSQLStuff(stmt);
-
                 }
 
                 if (UpdateTransportAccountBuilder.needsUpdate(attributes)) {
@@ -1363,14 +1364,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     closeSQLStuff(rs, stmt);
 
                     if (exists) {
-                        final UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
-                        final GetSwitch getter = new GetSwitch(mailAccount);
+                        UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
+                        GetSwitch getter = new GetSwitch(mailAccount);
 
                         // Compose SQL statement
-                        for (final Iterator<Attribute> iter = orderedAttributes.iterator(); iter.hasNext();) {
-                            final Attribute attribute = iter.next();
+                        for (Iterator<Attribute> iter = orderedAttributes.iterator(); iter.hasNext();) {
+                            Attribute attribute = iter.next();
                             if (Attribute.TRANSPORT_URL_LITERAL == attribute) {
-                                final Object value = attribute.doSwitch(getter);
+                                Object value = attribute.doSwitch(getter);
                                 if (null == value) {
                                     iter.remove();
                                 } else {
@@ -1380,62 +1381,65 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                                 attribute.doSwitch(sqlBuilder);
                             }
                         }
-                        stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
 
-                        // Fill prepared statement
-                        pos = 1;
-                        for (final Attribute attribute : orderedAttributes) {
-                            if (!sqlBuilder.handles(attribute)) {
-                                continue;
-                            }
-                            final Object value = attribute.doSwitch(getter);
-                            if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
-                                if (encryptedPassword == null) {
-                                    encryptedPassword = encrypt(mailAccount.getTransportPassword(), session);
+                        if (sqlBuilder.isValid()) {
+                            stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+
+                            // Fill prepared statement
+                            pos = 1;
+                            for (Attribute attribute : orderedAttributes) {
+                                if (!sqlBuilder.handles(attribute)) {
+                                    continue;
                                 }
-                                setOptionalString(stmt, pos++, encryptedPassword);
-                            } else if (Attribute.TRANSPORT_LOGIN_LITERAL == attribute) {
-                                setOptionalString(stmt, pos++, (String) value);
-                            } else if (Attribute.TRANSPORT_URL_LITERAL == attribute) {
-                                setOptionalString(stmt, pos++, (String) value);
-                            } else if (Attribute.PERSONAL_LITERAL == attribute) {
-                                final String personal = mailAccount.getPersonal();
-                                if (isEmpty(personal)) {
-                                    stmt.setNull(pos++, TYPE_VARCHAR);
+                                Object value = attribute.doSwitch(getter);
+                                if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
+                                    if (encryptedPassword == null) {
+                                        encryptedPassword = encrypt(mailAccount.getTransportPassword(), session);
+                                    }
+                                    setOptionalString(stmt, pos++, encryptedPassword);
+                                } else if (Attribute.TRANSPORT_LOGIN_LITERAL == attribute) {
+                                    setOptionalString(stmt, pos++, (String) value);
+                                } else if (Attribute.TRANSPORT_URL_LITERAL == attribute) {
+                                    setOptionalString(stmt, pos++, (String) value);
+                                } else if (Attribute.PERSONAL_LITERAL == attribute) {
+                                    final String personal = mailAccount.getPersonal();
+                                    if (isEmpty(personal)) {
+                                        stmt.setNull(pos++, TYPE_VARCHAR);
+                                    } else {
+                                        stmt.setString(pos++, personal);
+                                    }
+                                } else if (Attribute.REPLY_TO_LITERAL == attribute) {
+                                    final String replyTo = mailAccount.getReplyTo();
+                                    if (isEmpty(replyTo)) {
+                                        stmt.setNull(pos++, TYPE_VARCHAR);
+                                    } else {
+                                        stmt.setString(pos++, replyTo);
+                                    }
                                 } else {
-                                    stmt.setString(pos++, personal);
+                                    stmt.setObject(pos++, value);
                                 }
-                            } else if (Attribute.REPLY_TO_LITERAL == attribute) {
-                                final String replyTo = mailAccount.getReplyTo();
-                                if (isEmpty(replyTo)) {
-                                    stmt.setNull(pos++, TYPE_VARCHAR);
-                                } else {
-                                    stmt.setString(pos++, replyTo);
-                                }
-                            } else {
-                                stmt.setObject(pos++, value);
                             }
+
+                            stmt.setLong(pos++, contextId);
+                            stmt.setLong(pos++, mailAccount.getId());
+                            stmt.setLong(pos++, userId);
+
+                            if (LOG.isDebugEnabled()) {
+                                final String query = stmt.toString();
+                                LOG.debug("Trying to perform SQL update query for attributes {} :\n{}", orderedAttributes, query.substring(query.indexOf(':') + 1));
+                            }
+
+                            stmt.executeUpdate();
+                            closeSQLStuff(stmt);
                         }
-
-                        stmt.setLong(pos++, contextId);
-                        stmt.setLong(pos++, mailAccount.getId());
-                        stmt.setLong(pos++, userId);
-
-                        if (LOG.isDebugEnabled()) {
-                            final String query = stmt.toString();
-                            LOG.debug("Trying to perform SQL update query for attributes {} :\n{}", orderedAttributes, query.substring(query.indexOf(':') + 1));
-                        }
-
-                        stmt.executeUpdate();
-                        closeSQLStuff(stmt);
                     } else {
                         /*
-                         * Such an entry does not exist
+                         * Such an entry does not exist, yet
                          */
-                        final String transportURL = mailAccount.generateTransportServerURL();
+                        String transportURL = mailAccount.generateTransportServerURL();
                         if (null != transportURL) {
                             stmt.close();
-                            final String encryptedTransportPassword;
+                            String encryptedTransportPassword;
                             if (session == null) {
                                 encryptedTransportPassword = null;
                             } else {
@@ -1457,13 +1461,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             setOptionalString(stmt, pos++, encryptedTransportPassword);
                             setOptionalString(stmt, pos++, mailAccount.getPrimaryAddress());
                             stmt.setInt(pos++, 0); // default flag
-                            final String personal = mailAccount.getPersonal();
+                            String personal = mailAccount.getPersonal();
                             if (isEmpty(personal)) {
                                 stmt.setNull(pos++, TYPE_VARCHAR);
                             } else {
                                 stmt.setString(pos++, personal);
                             }
-                            final String replyTo = mailAccount.getReplyTo();
+                            String replyTo = mailAccount.getReplyTo();
                             if (isEmpty(replyTo)) {
                                 stmt.setNull(pos++, TYPE_VARCHAR);
                             } else {
@@ -1471,7 +1475,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             }
 
                             if (LOG.isDebugEnabled()) {
-                                final String query = stmt.toString();
+                                String query = stmt.toString();
                                 LOG.debug("Trying to perform SQL insert query for attributes {} :\n{}", orderedAttributes, query.substring(query.indexOf(':') + 1));
                             }
 
@@ -1501,11 +1505,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     TransportAuth transportAuth = mailAccount.getTransportAuth();
                     updateProperty(contextId, userId, mailAccount.getId(), "transport.auth", null == transportAuth ? null : transportAuth.getId(), true, con);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLSyntaxErrorException e) {
                 if (null != stmt) {
                     final String sql = stmt.toString();
                     LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() { @Override public String toString() { return sql.substring(sql.indexOf(": ") + 2);}});
                 }
+                throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(rs, stmt);

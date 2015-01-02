@@ -1,3 +1,7 @@
+* 2015-01-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35948: Check for a valid prepared SQL statement prior to attempting to execute it
+
 * 2014-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 35889: Consider parent folder identifier when retrieving a file for publication
