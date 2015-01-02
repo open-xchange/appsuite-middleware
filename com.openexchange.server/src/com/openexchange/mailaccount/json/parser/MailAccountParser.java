@@ -412,6 +412,7 @@ public class MailAccountParser extends DataParser {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(MailAccountFields.TRANSPORT_AUTH, sTransAuth);
             }
             props.put("transport.auth", tmp.getId());
+            account.setTransportAuth(tmp);
             attributes.add(Attribute.TRANSPORT_AUTH_LITERAL);
         }
         /*-
