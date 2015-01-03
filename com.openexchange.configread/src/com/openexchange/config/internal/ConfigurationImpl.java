@@ -102,8 +102,6 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
 
-    private final ConcurrentMap<String, Reloadable> reloadableServices;
-
     private static final class PropertyFileFilter implements FileFilter {
 
         private final String ext;
@@ -136,6 +134,8 @@ public final class ConfigurationImpl implements ConfigurationService {
     /*-
      * ------------- Member stuff -------------
      */
+
+    private final ConcurrentMap<String, Reloadable> reloadableServices;
 
     private final Map<String, String> texts;
 
