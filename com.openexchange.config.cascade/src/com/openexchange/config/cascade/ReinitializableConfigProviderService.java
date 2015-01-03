@@ -47,74 +47,23 @@
  *
  */
 
-package com.openexchange.configread.clt;
+package com.openexchange.config.cascade;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.config.mbean.ConfigReloadMBean;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ReloadConfigurationCLT}
+ * {@link ReinitializableConfigProviderService} - Marks a {@link ConfigProviderService} to be re-initializable and enhances it by {@link #reinit()} method.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class ReloadConfigurationCLT extends AbstractMBeanCLI<Void> {
+public interface ReinitializableConfigProviderService extends ConfigProviderService {
 
     /**
-     * Initializes a new {@link ReloadConfigurationCLT}.
+     * Re-initializes this configuration provider.
+     *
+     * @throws OXException If operation fails
      */
-    public ReloadConfigurationCLT() {
-        super();
-    }
-
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        new ReloadConfigurationCLT().execute(args);
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        // no more to check
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
-    }
-
-    @Override
-    protected String getFooter() {
-        return null;
-    }
-
-    @Override
-    protected String getName() {
-        return "reloadconfiguration";
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-        // no more to add
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        ConfigReloadMBean configReloadMBean = getMBean(mbsc, ConfigReloadMBean.class, ConfigReloadMBean.DOMAIN);
-        configReloadMBean.reloadConfiguration();
-        System.out.println("Configuration reloaded.");
-        return null;
-    }
+    void reinit() throws OXException;
 
 }

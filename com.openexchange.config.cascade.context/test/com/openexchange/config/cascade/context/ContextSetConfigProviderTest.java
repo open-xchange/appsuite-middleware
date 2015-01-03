@@ -70,6 +70,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.userconf.UserPermissionService;
 
 
@@ -109,7 +110,13 @@ public class ContextSetConfigProviderTest {
 
         when(config.getYamlInFolder(anyString())).thenReturn(yamlFiles);
         when(userPermissions.getUserPermissionBits(anyInt(), (Context) any())).thenReturn( new UserPermissionBits(UserPermissionBits.INFOSTORE, 1, 1));
-        configProvider = new ContextSetConfigProvider(contexts, config, userPermissions, configViews);
+
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(ContextService.class, contexts);
+        services.add(ConfigurationService.class, config);
+        services.add(UserPermissionService.class, userPermissions);
+        services.add(ConfigViewFactory.class, configViews);
+        configProvider = new ContextSetConfigProvider(services);
     }
 
     @Test

@@ -99,6 +99,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
             options.addOption("h", "help", false, "Prints a help text");
 
             // Option for JMX connect & authentication
+            options.addOption("t", "host", true, "The optional JMX host (default:localhost)");
             options.addOption("p", "port", true, "The optional JMX port (default:9999)");
             options.addOption("l", "login", true, "The optional JMX login (if JMX authentication is enabled)");
             options.addOption("s", "password", true, "The optional JMX password (if JMX authentication is enabled)");
@@ -123,6 +124,9 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
                 System.exit(0);
                 return null;
             }
+
+            // Check for JMX host
+            final String host = cmd.getOptionValue('t', "localhost");
 
             // Check for JMX port
             final int port = parsePort('p', 9999, cmd, options);
@@ -150,7 +154,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
             }
 
             // Invoke MBean
-            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
+            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
             final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
 
             R retval = null;
@@ -258,6 +262,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
      * Note following options are reserved:
      * <ul>
      * <li>-h / --help
+     * <li>-t / --host
      * <li>-p / --port
      * <li>-l / --login
      * <li>-s / --password

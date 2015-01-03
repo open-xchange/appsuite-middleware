@@ -83,6 +83,7 @@ import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.WildcardFilter;
+import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -139,44 +140,33 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private final File[] dirs;
 
-    /**
-     * Maps file paths of the .properties file to their properties.
-     */
+    /** Maps file paths of the .properties file to their properties. */
     private final Map<String, Properties> propertiesByFile;
 
-    /**
-     * Maps property names to their values.
-     */
+    /** Maps property names to their values. */
     private final Map<String, String> properties;
 
-    /**
-     * Maps property names to the file path of the .properties file containing the property.
-     */
+    /** Maps property names to the file path of the .properties file containing the property. */
     private final Map<String, String> propertiesFiles;
 
-    /**
-     * Maps objects to yaml filename, with a path
-     */
+    /** Maps objects to yaml filename, with a path */
+    private final Map<String, Object> yamlFiles;
 
-    final Map<String, Object> yamlFiles;
+    /** Maps filenames to whole file paths for yaml lookup */
+    private final Map<String, String> yamlPaths;
 
-    /**
-     * Maps filenames to whole file paths for yaml lookup
-     */
-    final Map<String, String> yamlPaths;
+    private final Map<String, byte[]> xmlFiles;
 
-    final Map<String, byte[]> xmlFiles;
-
-    /**
-     * The <code>ConfigProviderServiceImpl</code> reference.
-     */
+    /** The <code>ConfigProviderServiceImpl</code> reference. */
     private volatile ConfigProviderServiceImpl configProviderServiceImpl;
+
+    private final Collection<ReinitializableConfigProviderService> reinitQueue;
 
     /**
      * Initializes a new configuration. The properties directory is determined by system property "<code>openexchange.propdir</code>"
      */
-    public ConfigurationImpl() {
-        this(getDirectories());
+    public ConfigurationImpl(Collection<ReinitializableConfigProviderService> reinitQueue) {
+        this(getDirectories(), reinitQueue);
     }
 
     /**
@@ -184,8 +174,9 @@ public final class ConfigurationImpl implements ConfigurationService {
      *
      * @param directory The directory where property files are located
      */
-    public ConfigurationImpl(final String[] directories) {
+    public ConfigurationImpl(String[] directories, Collection<ReinitializableConfigProviderService> reinitQueue) {
         super();
+        this.reinitQueue = reinitQueue;
         reloadableServices = new ConcurrentHashMap<String, Reloadable>(128);
         propertiesByFile = new HashMap<String, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024);
@@ -773,27 +764,18 @@ public final class ConfigurationImpl implements ConfigurationService {
         // (Re-)load configuration
         loadConfiguration(getDirectories());
 
+        // Re-initialize config-cascade
+        reinitConfigCascade();
+
         // Check if properties have been changed, abort if not
         Set<String> changes = getChanges(oldPropertiesByFile, oldXml);
         if (changes.isEmpty()) {
-            LOG.info("No changes in configuration files detected, nothing to do");
+            LOG.info("No changes in configuration files detected");
             return;
         }
 
         // Continue to reload
         LOG.info("Detected changes in the following configuration files: {}", changes);
-
-        // Re-initialize config-cascade
-        {
-            ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
-            if (configProvider != null) {
-                try {
-                    configProvider.reinit();
-                } catch (Exception e) {
-                    LOG.warn("Failed to re-initialize configuration provider for scope \"server\"", e);
-                }
-            }
-        }
 
         // Propagate reloaded configuration among Reloadables
         for (Reloadable reloadable : reloadableServices.values()) {
@@ -840,6 +822,32 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
          *
          */
+    }
+
+    private void reinitConfigCascade() {
+        ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
+        boolean reinitMyProvider = false;
+
+        for (ReinitializableConfigProviderService reinit : reinitQueue) {
+            if (reinit == configProvider) {
+                reinitMyProvider = false;
+            }
+            try {
+                reinit.reinit();
+                LOG.info("Re-initialized configuration provider for scope \"{}\"", reinit.getScope());
+            } catch (Exception e) {
+                LOG.warn("Failed to re-initialize configuration provider for scope \"{}\"", reinit.getScope(), e);
+            }
+        }
+
+        if (reinitMyProvider && configProvider != null) {
+            try {
+                configProvider.reinit();
+                LOG.info("Re-initialized configuration provider for scope \"server\"");
+            } catch (Exception e) {
+                LOG.warn("Failed to re-initialize configuration provider for scope \"server\"", e);
+            }
+        }
     }
 
     /**

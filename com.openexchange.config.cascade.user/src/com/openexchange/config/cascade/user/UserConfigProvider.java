@@ -76,24 +76,27 @@ import com.openexchange.user.UserService;
  */
 public class UserConfigProvider implements ConfigProviderService {
 
+    /** The cache region name */
     private static final String REGION_NAME = "User";
 
     /** The attribute prefix */
     static final String DYNAMIC_ATTR_PREFIX = "config/";
 
+    // ------------------------------------------------------------------------------------------------------
+
     /** The service look-up */
-    final ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link UserConfigProvider}.
      *
      * @param services The service look-up
      */
-    public UserConfigProvider(final ServiceLookup services) {
+    public UserConfigProvider(ServiceLookup services) {
         super();
         this.services = services;
     }
-    
+
     @Override
     public String getScope() {
     	return "user";
@@ -107,44 +110,36 @@ public class UserConfigProvider implements ConfigProviderService {
      * @return The user
      * @throws OXException If obtaining user fails
      */
-    private User getUser(final int userId, final Context ctx) throws OXException {
+    private User getUser(int userId, Context ctx) throws OXException {
     	// Most often we will talk about the current user, so let's try to quickly retrieve that one.
-        /*
-         * No more needed due to property cache
-    	ThreadLocalSessionHolder sessionHolder = ThreadLocalSessionHolder.getInstance();
-    	if (sessionHolder != null && sessionHolder.getContext() != null && sessionHolder.getContext().getContextId() == ctx.getContextId() && sessionHolder.getUser() != null && sessionHolder.getUser().getId() == userId) {
-    		return sessionHolder.getUser();
-    	}
-    	*/
-
-        final CacheService cacheService = services.getService(CacheService.class);
+        CacheService cacheService = services.getService(CacheService.class);
         if (cacheService == null) {
             return services.getService(UserService.class).getUser(userId, ctx);
         }
-        final Cache cache = cacheService.getCache(REGION_NAME);
+
+        Cache cache = cacheService.getCache(REGION_NAME);
         if (cache == null) {
             return services.getService(UserService.class).getUser(userId, ctx);
         }
-        final Object obj = cache.get(cacheService.newCacheKey(ctx.getContextId(), userId));
+
+        Object obj = cache.get(cacheService.newCacheKey(ctx.getContextId(), userId));
         if (obj instanceof User) {
             return (User) obj;
         }
+
         return services.getService(UserService.class).getUser(userId, ctx);
     }
 
     @Override
-    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
+    public BasicProperty get(String property, int contextId, int userId) throws OXException {
         if (userId == NO_USER) {
             return NO_PROPERTY;
         }
-        final PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
+
+        PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
         BasicProperty basicProperty = propertyMap.get(property);
         if (null == basicProperty) {
-            final BasicProperty loaded = new BasicPropertyImpl(property, userId, contextId, services);
-
-            // System.out.println("UserConfigProvider.get() invoked: " + property + " -- " + userId + " -- " + contextId + " ==> " + loaded.get());
-            // new Throwable().printStackTrace(System.out);
-
+            BasicProperty loaded = new BasicPropertyImpl(property, userId, contextId, services);
             basicProperty = propertyMap.putIfAbsent(property, loaded);
             if (null == basicProperty) {
                 basicProperty = loaded;
@@ -154,20 +149,22 @@ public class UserConfigProvider implements ConfigProviderService {
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
+    public Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException {
         if (userId == NO_USER) {
             return Collections.emptyList();
         }
-        final User user = getUser(userId, services.getService(ContextService.class).getContext(contextId));
-        final Map<String, Set<String>> attributes = user.getAttributes();
-        final Set<String> allNames = new HashSet<String>();
-        final String dynamicAttrPrefix = DYNAMIC_ATTR_PREFIX;
-        final int snip = dynamicAttrPrefix.length();
-        for (final String name : attributes.keySet()) {
+        Map<String, Set<String>> attributes = getUser(userId, services.getService(ContextService.class).getContext(contextId)).getAttributes();
+        Set<String> allNames = new HashSet<String>(attributes.size());
+
+        String dynamicAttrPrefix = DYNAMIC_ATTR_PREFIX;
+        int snip = dynamicAttrPrefix.length();
+
+        for (String name : attributes.keySet()) {
             if (name.startsWith(dynamicAttrPrefix)) {
                 allNames.add(name.substring(snip));
             }
         }
+
         return allNames;
     }
 

@@ -86,6 +86,7 @@ import com.openexchange.cluster.timer.internal.ClusterTimerServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.config.cascade.impl.InMemoryConfigProvider;
 import com.openexchange.config.internal.ConfigurationImpl;
@@ -426,7 +427,7 @@ public final class Init {
         /*
          * This one is properly dropped in stopServer() method
          */
-        final ConfigurationService config = new ConfigurationImpl();
+        final ConfigurationService config = new ConfigurationImpl(Collections.<ReinitializableConfigProviderService> emptyList());
         services.put(ConfigurationService.class, config);
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
         com.openexchange.http.grizzly.osgi.Services.setServiceLookup(LOOKUP);
