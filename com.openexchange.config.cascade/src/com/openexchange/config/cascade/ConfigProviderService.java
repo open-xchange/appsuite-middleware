@@ -128,6 +128,15 @@ public interface ConfigProviderService {
 
 	/**
 	 * Gets the scope of this provider
+	 * <p>
+	 * Currently known scopes:
+	 * <ul>
+	 * <li><code>"server"</code></li>
+	 * <li><code>"contextSets"</code></li>
+	 * <li><code>"context"</code></li>
+	 * <li><code>"user"</code></li>
+	 * </ul>
+	 *
 	 * @return The scope of the provider
 	 */
 	String getScope();
