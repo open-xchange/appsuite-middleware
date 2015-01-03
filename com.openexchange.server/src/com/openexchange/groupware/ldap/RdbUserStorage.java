@@ -85,6 +85,8 @@ import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -894,8 +896,10 @@ public class RdbUserStorage extends UserStorage {
         int contextId = context.getContextId();
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        boolean rollback = false;
         try {
             Databases.startTransaction(con);
+            rollback = true;
             stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid=? AND id=? AND name=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
@@ -937,16 +941,15 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            Databases.rollback(con);
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (OXException e) {
-            Databases.rollback(con);
-            throw e;
         } catch (RuntimeException e) {
-            Databases.rollback(con);
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            throw OXExceptions.general(OXExceptionStrings.MESSAGE, e);
         } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
             Databases.closeSQLStuff(stmt);
             Databases.autocommit(con);
         }
@@ -1460,6 +1463,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
     public int[] listAllUser(Connection con, int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
         boolean closeCon = false;
         if (con == null) {
