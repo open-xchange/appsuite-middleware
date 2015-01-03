@@ -64,6 +64,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -176,7 +177,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public ConfigurationImpl(String[] directories, Collection<ReinitializableConfigProviderService> reinitQueue) {
         super();
-        this.reinitQueue = reinitQueue;
+        this.reinitQueue = null == reinitQueue ? Collections.<ReinitializableConfigProviderService> emptyList() : reinitQueue;
         reloadableServices = new ConcurrentHashMap<String, Reloadable>(128);
         propertiesByFile = new HashMap<String, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024);
