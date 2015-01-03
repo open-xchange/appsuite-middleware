@@ -827,7 +827,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private void reinitConfigCascade() {
         ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
-        boolean reinitMyProvider = false;
+        boolean reinitMyProvider = true;
 
         for (ReinitializableConfigProviderService reinit : reinitQueue) {
             if (reinit == configProvider) {
