@@ -80,19 +80,19 @@ public class UserConfigCascadeActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final UserConfigProvider provider = new UserConfigProvider(this);
-        final CacheInvalidator invalidator = new CacheInvalidator(context);
-
-        final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
+        // Register config provider for "user" scope
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
         properties.put("scope", "user");
-        registerService(ConfigProviderService.class, provider, properties);
+        registerService(ConfigProviderService.class, new UserConfigProvider(this), properties);
 
+        // Register event handler alongside with a cache invalidator
+        final CacheInvalidator invalidator = new CacheInvalidator(context);
         {
-            final EventHandler eventHandler = new EventHandler() {
+            EventHandler eventHandler = new EventHandler() {
 
                 @Override
                 public void handleEvent(final Event event) {
-                    final String topic = event.getTopic();
+                    String topic = event.getTopic();
                     if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
                         Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
                         if (null != contextId) {
@@ -110,9 +110,9 @@ public class UserConfigCascadeActivator extends HousekeepingActivator {
                 }
             };
 
-            Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-            dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, eventHandler, dict);
+            properties = new Hashtable<String, Object>(2);
+            properties.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_LAST_SESSION, SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT });
+            registerService(EventHandler.class, eventHandler, properties);
         }
 
         track(CacheEventService.class, invalidator);

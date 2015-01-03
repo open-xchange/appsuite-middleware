@@ -47,74 +47,69 @@
  *
  */
 
-package com.openexchange.configread.clt;
+package com.openexchange.config.osgi;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.config.mbean.ConfigReloadMBean;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ReinitializableConfigProviderService;
+
 
 /**
- * {@link ReloadConfigurationCLT}
+ * {@link ConfigProviderTracker}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class ReloadConfigurationCLT extends AbstractMBeanCLI<Void> {
+public class ConfigProviderTracker implements ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService> {
+
+    private final Queue<ReinitializableConfigProviderService> reinitQueue;
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link ReloadConfigurationCLT}.
+     * Initializes a new {@link ConfigProviderTracker}.
      */
-    public ReloadConfigurationCLT() {
+    public ConfigProviderTracker(BundleContext context) {
         super();
+        this.context = context;
+        reinitQueue = new ConcurrentLinkedQueue<ReinitializableConfigProviderService>();
+    }
+
+    @Override
+    public ConfigProviderService addingService(ServiceReference<ConfigProviderService> reference) {
+        ConfigProviderService providerService = context.getService(reference);
+        if (providerService instanceof ReinitializableConfigProviderService) {
+            reinitQueue.offer((ReinitializableConfigProviderService) providerService);
+            return providerService;
+        }
+
+        context.ungetService(reference);
+        return null;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
+        // Ignore
+    }
+
+    @Override
+    public void removedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
+        reinitQueue.remove(service);
+        context.ungetService(reference);
     }
 
     /**
-     * @param args
+     * Gets the re-initializable configuration provider services
+     *
+     * @return The re-initializable configuration provider services
      */
-    public static void main(String[] args) {
-        new ReloadConfigurationCLT().execute(args);
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        // no more to check
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
-    }
-
-    @Override
-    protected String getFooter() {
-        return null;
-    }
-
-    @Override
-    protected String getName() {
-        return "reloadconfiguration";
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-        // no more to add
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        ConfigReloadMBean configReloadMBean = getMBean(mbsc, ConfigReloadMBean.class, ConfigReloadMBean.DOMAIN);
-        configReloadMBean.reloadConfiguration();
-        System.out.println("Configuration reloaded.");
-        return null;
+    public Collection<ReinitializableConfigProviderService> getReinitQueue() {
+        return Collections.unmodifiableCollection(reinitQueue);
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.config.cascade.context.osgi;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
@@ -59,42 +60,31 @@ import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.userconf.UserPermissionService;
 
+/**
+ * {@link ContextConfigCascadeActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ ContextService.class, ConfigurationService.class, UserPermissionService.class, ConfigViewFactory.class};
+        return new Class[] { ContextService.class, ConfigurationService.class, UserPermissionService.class, ConfigViewFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        ContextService contexts = getService(ContextService.class);
-        ConfigurationService configuration = getService(ConfigurationService.class);
-        UserPermissionService userConfigs = getService(UserPermissionService.class);
-
         {
-            ContextConfigProvider provider = new ContextConfigProvider(contexts);
-
-            Hashtable<String, Object> properties = new Hashtable<String,Object>();
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put("scope", "context");
-
-            registerService(ConfigProviderService.class, provider, properties);
+            registerService(ConfigProviderService.class, new ContextConfigProvider(this), properties);
         }
 
         {
-            ConfigViewFactory configViews = getService(ConfigViewFactory.class);
-
-            ContextSetConfigProvider provider = new ContextSetConfigProvider(contexts, configuration, userConfigs, configViews);
-
-            Hashtable<String, Object> properties = new Hashtable<String,Object>();
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put("scope", "contextSets");
-
-            registerService(ConfigProviderService.class, provider, properties);
+            registerService(ConfigProviderService.class, new ContextSetConfigProvider(this), properties);
         }
-
-
-
     }
-
 
 }

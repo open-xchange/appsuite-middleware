@@ -56,8 +56,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.idn.IDNA;
 import org.osgi.framework.BundleContext;
@@ -2175,7 +2177,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             Collections.sort(userProperties, new OXUserPropertySorter());
 
             return userProperties;
-
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -2197,10 +2198,51 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /**
      *
      * {@inheritDoc}
+     * @throws InvalidDataException
      */
     @Override
-    public void getUserPermissionsSource(Context ctx, User user, Credentials auth) throws RemoteException {
-        // TODO Auto-generated method stub
+    public Map<String, Map<String, Set<String>>> getUserCapabilitiesSource(Context ctx, User user, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException {
+        if (user == null) {
+            throw new InvalidDataException("Invalid user id.");
+        }
+        if (ctx == null) {
+            throw new InvalidDataException("Invalid context id.");
+        }
 
+        Map<String, Map<String, Set<String>>> capabilitiesSource = new HashMap<String, Map<String, Set<String>>>();
+
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            contextcheck(ctx);
+            final int user_id = user.getId().intValue();
+            if (!tool.existsUser(ctx, user_id)) {
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
+            }
+
+            final CapabilityService capabilityService = AdminServiceRegistry.getInstance().getService(CapabilityService.class);
+            if (capabilityService == null) {
+                LOGGER.warn("CapabilityService absent. Unable to retrieve user configuration.");
+                return capabilitiesSource;
+            }
+            capabilitiesSource = capabilityService.getCapabilitiesSource(user_id, ctx.getId());
+
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (OXException e) {
+            LOGGER.error("Error retrieving configuration source for user {} in context {}.",user.getId().intValue(), ctx.getId(), e);
+        }
+        return capabilitiesSource;
     }
 }

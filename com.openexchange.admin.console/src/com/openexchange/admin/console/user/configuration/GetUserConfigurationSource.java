@@ -53,6 +53,9 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -76,10 +79,10 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
     private static final String OPT_USER_LONG = "user";
     private static final String OPT_CONTEXT_SHORT = "c";
     private static final String OPT_CONTEXT_LONG = "context";
-    private static final String OPT_CONFIGURATION_SHORT = "f";
+    private static final String OPT_CONFIGURATION_SHORT = "conf";
     private static final String OPT_CONFIGURATION_LONG = "user-configuration";
-    private static final String OPT_PERMISSION_SHORT = "m";
-    private static final String OPT_PERMISSION_LONG = "permissions";
+    private static final String OPT_CAPABILITIES_SHORT = "cap";
+    private static final String OPT_CAPABILITIES_LONG = "user-capabilities";
 
     public static void main(String[] args) {
         new GetUserConfigurationSource().execute(args);
@@ -100,8 +103,8 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
     protected void addOptions(Options options) {
         options.addOption(new Option(OPT_CONTEXT_SHORT, OPT_CONTEXT_LONG, true, "A valid context identifier"));
         options.addOption(new Option(OPT_USER_SHORT, OPT_USER_LONG, true, "A valid user identifier"));
-        options.addOption(new Option(OPT_CONFIGURATION_SHORT, OPT_CONFIGURATION_LONG, true, "Outputs the configuration associated with the given user. Filter by providing the start pattern of the property."));
-        options.addOption(new Option(OPT_PERMISSION_SHORT, OPT_PERMISSION_LONG, false, "Outputs the permissions and capabilities associated with the given user."));
+        options.addOption(new Option(OPT_CONFIGURATION_SHORT, OPT_CONFIGURATION_LONG, true, "Outputs the configuration associated with the given user. Filter by providing a pattern of the property."));
+        options.addOption(new Option(OPT_CAPABILITIES_SHORT, OPT_CAPABILITIES_LONG, false, "Outputs the capabilities associated with the given user."));
     }
 
     /**
@@ -121,8 +124,8 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
             return;
         }
 
-        if (!cmd.hasOption(OPT_PERMISSION_SHORT) && !cmd.hasOption(OPT_CONFIGURATION_SHORT)) {
-            System.out.println("Either permissions ('" + OPT_PERMISSION_SHORT + "') or user configuration ('" + OPT_CONFIGURATION_SHORT + "' <arg>) has to be added.");
+        if (!cmd.hasOption(OPT_CAPABILITIES_SHORT) && !cmd.hasOption(OPT_CONFIGURATION_SHORT)) {
+            System.out.println("Either user capabilities ('" + OPT_CAPABILITIES_SHORT + "') or user configuration ('" + OPT_CONFIGURATION_SHORT + "' <arg>) has to be added.");
             System.exit(-1);
             return;
         }
@@ -143,15 +146,31 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
             String searchPattern = cmd.getOptionValue(OPT_CONFIGURATION_LONG);
             List<UserProperty> userConfigurationSource = oxUserInterface.getUserConfigurationSource(ctx, user, searchPattern, credentials);
             if (userConfigurationSource.size() <= 0) {
-                System.out.println("No property with start pattern '" + searchPattern + "' found!");
+                System.out.println("No property with pattern '" + searchPattern + "' found!");
+                return null;
             }
 
+            System.out.println("Configuration found: ");
             for (UserProperty property : userConfigurationSource) {
                 System.out.println(property.toString());
             }
+            System.out.println();
         }
-        if (cmd.hasOption(OPT_PERMISSION_SHORT)) {
-            oxUserInterface.getUserPermissionsSource(ctx, user, credentials);
+        if (cmd.hasOption(OPT_CAPABILITIES_SHORT)) {
+            Map<String, Map<String, Set<String>>> userCapabilitiesSource = oxUserInterface.getUserCapabilitiesSource(ctx, user, credentials);
+            if (userCapabilitiesSource.size() <= 0) {
+                System.out.println("Not able to retrieve capabilities.");
+                return null;
+            }
+
+            System.out.println("Capabilities sources found: ");
+            for (Entry<String, Map<String, Set<String>>> capabilitiesSource : userCapabilitiesSource.entrySet()) {
+                System.out.println("Source: " + capabilitiesSource.getKey());
+                for (Entry<String, Set<String>> value : capabilitiesSource.getValue().entrySet()) {
+                    System.out.println("-- " + value.getKey() + ": " + value.getValue());
+                }
+            }
+            System.out.println();
         }
         return null;
     }

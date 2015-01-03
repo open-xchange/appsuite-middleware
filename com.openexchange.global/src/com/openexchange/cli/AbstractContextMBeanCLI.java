@@ -138,6 +138,7 @@ public abstract class AbstractContextMBeanCLI<R> extends AbstractMBeanCLI<R> {
      * Note following options are reserved:
      * <ul>
      * <li>-h / --help
+     * <li>-t / --host
      * <li>-p / --port
      * <li>-l / --login
      * <li>-s / --password

@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -764,8 +765,9 @@ public interface OXUserInterface extends Remote {
      * Retrieve user configuration (within {@link UserProperty}) and its source.
      * @param ctx Context object the user is associated to
      * @param user User object to retrieve the configuration for
-     * @param searchPattern Name the configuration property starts with
+     * @param searchPattern string with a pattern to search for a property
      * @param credentials Credentials for authenticating against server
+     * @return The found properties in a {@link List}
      * @throws InvalidDataException
      * @throws StorageException
      * @throws NoSuchUserException
@@ -774,7 +776,16 @@ public interface OXUserInterface extends Remote {
     public List<UserProperty> getUserConfigurationSource(final Context ctx, final User user, final String searchPattern, final Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException;
 
     /**
-     * TODO
+     * Gets the capabilities tree showing which capability comes from which source
+     *
+     * @param ctx Context object the user is associated to
+     * @param user User object to retrieve the configuration for
+     * @param credentials Credentials for authenticating against server
+     * @return The capabilities tree
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws NoSuchUserException
+     * @throws InvalidCredentialsException
      */
-    public void getUserPermissionsSource(Context ctx, User user, Credentials auth) throws RemoteException;
+    public Map<String, Map<String, Set<String>>> getUserCapabilitiesSource(Context ctx, User user, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException;
 }

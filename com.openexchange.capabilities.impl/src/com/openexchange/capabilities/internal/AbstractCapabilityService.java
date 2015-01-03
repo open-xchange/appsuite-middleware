@@ -682,7 +682,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
                 for (Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
                     String key = entry.getKey();
-                    if (!key.startsWith(searchPattern)) {
+                    if (!key.contains(searchPattern)) {
                         continue;
                     }
                     properties.add(new ConfigurationProperty(entry.getValue().getScope(), key, entry.getValue().get()));

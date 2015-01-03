@@ -55,26 +55,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ContextConfigProvider}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
     private static final String DYNAMIC_ATTR_PREFIX = "config/";
 
-    public ContextConfigProvider(final ContextService contexts) {
-        super(contexts);
+    public ContextConfigProvider(ServiceLookup services) {
+        super(services);
     }
-    
+
     @Override
     public String getScope() {
     	return "context";

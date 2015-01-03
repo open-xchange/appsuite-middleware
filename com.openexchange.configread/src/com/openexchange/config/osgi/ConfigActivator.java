@@ -50,6 +50,7 @@
 package com.openexchange.config.osgi;
 
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -64,13 +65,11 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link ConfigActivator} - Activator for <code>com.openexchange.config</code> bundle
+ * {@link ConfigActivator} - Activator for <code>com.openexchange.configread</code> bundle
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigActivator.class);
 
     private volatile ServiceReference<ManagedService> managedServiceReference;
 
@@ -88,13 +87,15 @@ public final class ConfigActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.configread");
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigActivator.class);
+        logger.info("starting bundle: com.openexchange.configread");
         try {
-            final ConfigurationImpl configService = new ConfigurationImpl();
+            ConfigProviderTracker configProviderServiceTracker = new ConfigProviderTracker(context);
+            ConfigurationImpl configService = new ConfigurationImpl(configProviderServiceTracker.getReinitQueue());
             registerService(ConfigurationService.class, configService, null);
 
             {
-                final Hashtable<String, Object> properties = new Hashtable<String, Object>(2);
+                Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
                 properties.put("scope", "server");
                 ConfigProviderServiceImpl configProviderServiceImpl = new ConfigProviderServiceImpl(configService);
                 configService.setConfigProviderServiceImpl(configProviderServiceImpl);
@@ -102,38 +103,42 @@ public final class ConfigActivator extends HousekeepingActivator {
             }
 
             // Web Console stuff
-            final Collection<ServiceReference<ManagedService>> serviceReferences = context.getServiceReferences(ManagedService.class, null);
-            boolean found = false;
-            for (final ServiceReference<ManagedService> reference : serviceReferences) {
-                if ("org.apache.felix.webconsole.internal.servlet.OsgiManager".equals(reference.getProperty(Constants.SERVICE_PID))) {
-                    found = true;
-                    final ManagedService managedService = context.getService(reference);
-                    ManagedServiceTracker.configureWebConsole(managedService, configService);
-                    managedServiceReference = reference;
-                    break;
+            {
+                Collection<ServiceReference<ManagedService>> serviceReferences = context.getServiceReferences(ManagedService.class, null);
+                boolean found = false;
+                for (ServiceReference<ManagedService> reference : serviceReferences) {
+                    if ("org.apache.felix.webconsole.internal.servlet.OsgiManager".equals(reference.getProperty(Constants.SERVICE_PID))) {
+                        found = true;
+                        ManagedService managedService = context.getService(reference);
+                        ManagedServiceTracker.configureWebConsole(managedService, configService);
+                        managedServiceReference = reference;
+                        break;
+                    }
                 }
-            }
 
-            if (!found) {
-                rememberTracker(new ManagedServiceTracker(context, configService));
+                if (!found) {
+                    rememberTracker(new ManagedServiceTracker(context, configService));
+                }
             }
 
             // Add & open service trackers
             track(Reloadable.class, new ReloadableServiceTracker(context, configService));
             track(ManagementService.class, new ManagementServiceTracker(context, configService));
+            track(ConfigProviderService.class, configProviderServiceTracker);
             openTrackers();
-        } catch (final Throwable t) {
-            LOG.error("", t);
+        } catch (Throwable t) {
+            logger.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
 
     @Override
-    public void stopBundle() {
-        LOG.info("stopping bundle: com.openexchange.configread");
+    public void stopBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigActivator.class);
+        logger.info("stopping bundle: com.openexchange.configread");
         try {
 
-            final ServiceReference<ManagedService> reference = managedServiceReference;
+            ServiceReference<ManagedService> reference = managedServiceReference;
             if (null != reference) {
                 context.ungetService(reference);
                 managedServiceReference = null;
@@ -141,8 +146,9 @@ public final class ConfigActivator extends HousekeepingActivator {
 
             cleanUp();
             FileWatcher.dropTimer();
-        } catch (final Throwable t) {
-            LOG.error("", t);
+        } catch (Throwable t) {
+            logger.error("", t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
 
