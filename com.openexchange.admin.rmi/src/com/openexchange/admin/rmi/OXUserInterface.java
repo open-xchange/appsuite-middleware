@@ -199,7 +199,7 @@ public interface OXUserInterface extends Remote {
      * Returns the module access rights of the context-admin
      *
      * @param context
-     *            Context
+     *            The context
      * @param auth
      *            Credentials for authenticating against server.
      *
@@ -222,8 +222,8 @@ public interface OXUserInterface extends Remote {
     /**
      * Returns the Context admin {@link User} object
      *
-     * @param ctx
-     * @param auth
+     * @param ctx The context from which to obtain the administrator
+     * @param auth The credentials
      * @return
      * @throws RemoteException
      * @throws InvalidCredentialsException

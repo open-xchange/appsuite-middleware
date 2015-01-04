@@ -111,7 +111,7 @@ public class MoveUserFilestore extends UserAbstraction {
     }
 
     protected Filestore parseAndSetFilestoreId(final AdminParser parser) {
-        filestoreid = Integer.parseInt((String) parser.getOptionValue(this.targetFilestoreIDOption));
+        filestoreid = Integer.valueOf((String) parser.getOptionValue(this.targetFilestoreIDOption));
         final Filestore fs = new Filestore(filestoreid);
         return fs;
     }

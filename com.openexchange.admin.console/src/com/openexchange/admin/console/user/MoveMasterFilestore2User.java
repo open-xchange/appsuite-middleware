@@ -54,25 +54,30 @@ import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 
-public class MoveUserFilestore2Master extends UserAbstraction {
+public class MoveMasterFilestore2User extends UserAbstraction {
 
     public static void main(String args[]) {
-        new MoveUserFilestore2Master(args);
+        new MoveMasterFilestore2User(args);
     }
 
     static final char OPT_MASTER_SHORT = 'm';
     static final String OPT_MASTER_LONG = "master";
+    static final char OPT_FILESTORE_SHORT = 'f';
+    static final String OPT_FILESTORE_LONG = "filestore";
 
     // -----------------------------------------------------------------------------------------------
 
+    protected Integer filestoreid = null;
+    protected CLIOption targetFilestoreIDOption = null;
     protected Integer masterId = null;
     protected CLIOption masterIdOption = null;
 
-    public MoveUserFilestore2Master(String[] args) {
+    public MoveMasterFilestore2User(String[] args) {
 
-        final AdminParser parser = new AdminParser("moveuserfilestore2master");
+        final AdminParser parser = new AdminParser("movemasterfilestore2user");
         setOptions(parser);
 
         String successtext = null;
@@ -87,6 +92,8 @@ public class MoveUserFilestore2Master extends UserAbstraction {
             Context ctx = contextparsing(parser);
             Credentials auth = credentialsparsing(parser);
 
+            Filestore filestore = parseAndSetFilestoreId(parser);
+
             User masterUser = parseAndSetMaster(parser);
 
             // get rmi ref
@@ -96,9 +103,9 @@ public class MoveUserFilestore2Master extends UserAbstraction {
                 masterUser = oxusr.getContextAdmin(ctx, auth);
             }
 
-            int jobId = oxusr.moveFromUserFilestoreToMaster(ctx, usr, masterUser, auth);
+            int jobId = oxusr.moveFromMasterToUserFilestore(ctx, usr, masterUser, filestore, auth);
 
-            displayMovedMessage(successtext, null, "to master filestore " + masterUser.getFilestoreId() + " scheduled as job " + jobId, parser);
+            displayMovedMessage(successtext, null, "to user filestore " + filestore.getId() + " scheduled as job " + jobId, parser);
             sysexit(0);
         } catch (final Exception e) {
             // In this special case the second parameter is not the context id but the filestore id
@@ -106,6 +113,16 @@ public class MoveUserFilestore2Master extends UserAbstraction {
             // see com.openexchange.admin.console.context.ContextHostingAbstraction.printFirstPartOfErrorText(Integer, Integer)
             printErrors(successtext, masterId, e, parser);
         }
+    }
+
+    protected void setFilestoreIdOption(final AdminParser parser) {
+        this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededQuadState.needed);
+    }
+
+    protected Filestore parseAndSetFilestoreId(final AdminParser parser) {
+        filestoreid = Integer.valueOf((String) parser.getOptionValue(this.targetFilestoreIDOption));
+        final Filestore fs = new Filestore(filestoreid);
+        return fs;
     }
 
     protected void setMasterOption(final AdminParser parser) {
@@ -136,5 +153,6 @@ public class MoveUserFilestore2Master extends UserAbstraction {
         setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
         setMasterOption(parser);
+        setFilestoreIdOption(parser);
     }
 }
