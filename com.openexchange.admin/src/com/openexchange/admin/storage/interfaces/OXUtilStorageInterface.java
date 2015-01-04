@@ -224,8 +224,22 @@ public abstract class OXUtilStorageInterface {
      */
     public abstract Filestore findFilestoreForContext() throws StorageException;
 
+    /**
+     * Checks if specified file storage offers enough space for a further context assignment.
+     *
+     * @param filestore The file storage to which a further context is supposed to be assigned
+     * @return <code>true</code> if enough space is available; otherwise <code>false</code>
+     * @throws StorageException If check for enough space fails
+     */
     public abstract boolean hasSpaceForAnotherContext(Filestore filestore) throws StorageException;
 
+    /**
+     * Checks if specified file storage offers enough space for a further user assignment.
+     *
+     * @param filestore The file storage to which a further user is supposed to be assigned
+     * @return <code>true</code> if enough space is available; otherwise <code>false</code>
+     * @throws StorageException If check for enough space fails
+     */
     public abstract boolean hasSpaceForAnotherUser(Filestore filestore) throws StorageException;
 
     /**
