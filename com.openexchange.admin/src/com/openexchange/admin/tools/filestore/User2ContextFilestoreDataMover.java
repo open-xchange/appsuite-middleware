@@ -49,23 +49,19 @@
 
 package com.openexchange.admin.tools.filestore;
 
-import static com.openexchange.filestore.FileStorages.ensureEndingSlash;
-import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForContext;
-import java.io.File;
+import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.io.FileUtils;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.admin.tools.ShellExecutor;
-import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -73,20 +69,21 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
 
 /**
- * {@link ContextFilestoreDataMover} - The implementation to move files from one storage to another for a single context.
- * <p>
- * E.g. Move a context's storage from HDD to S3.
+ * {@link User2ContextFilestoreDataMover} - The implementation to move files from a user's storage to context's storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class ContextFilestoreDataMover extends FilestoreDataMover {
+public class User2ContextFilestoreDataMover extends FilestoreDataMover {
+
+    private final User user;
 
     /**
-     * Initializes a new {@link ContextFilestoreDataMover}.
+     * Initializes a new {@link User2ContextFilestoreDataMover}.
      */
-    protected ContextFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, Context ctx) {
+    protected User2ContextFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
         super(srcFilestore, dstFilestore, ctx);
+        this.user = user;
     }
 
     /**
@@ -107,60 +104,47 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
     @Override
     protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
         int contextId = ctx.getId().intValue();
-
-        // rsync can be used in case both file storages are disk-based storages
-        boolean useRsync = "file".equalsIgnoreCase(srcBaseUri.getScheme()) && "file".equalsIgnoreCase(dstBaseUri.getScheme());
-
-        if (useRsync) {
-            // Invoke rsync process
-            URI srcFullUri = getFullyQualifyingUriForContext(contextId, srcBaseUri);
-            File fsDirectory = new File(srcFullUri);
-            if (fsDirectory.exists()) {
-                ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", srcFullUri.toString(), ensureEndingSlash(dstBaseUri).toString() });
-                if (0 != output.exitstatus) {
-                    throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
-                }
-                FileUtils.deleteDirectory(fsDirectory);
+        int userId = user.getId().intValue();
+        try {
+            // Check
+            if (user.getFilestoreOwner().intValue() != userId) {
+                throw new StorageException("User's file storage does not belong to user. Owner " + user.getFilestoreOwner() + " is not equal to " + user.getId());
             }
-        } else {
-            // Not possible to use rsync; e.g. move from disk to S3
-            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, srcBaseUri));
-            URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, dstBaseUri));
 
-            try {
-                // Grab associated file storages
-                FileStorage srcStorage = FileStorages.getFileStorageService().getFileStorage(srcFullUri);
-                FileStorage dstStorage = FileStorages.getFileStorageService().getFileStorage(dstFullUri);
+            // Grab associated quota-aware file storages
+            FileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, userId, contextId);
+            FileStorage dstStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, -1, contextId);
 
-                // Copy each file from source to destination
-                Set<String> srcFiles = srcStorage.getFileList();
-                Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
+            // Copy each file from source to destination
+            Set<String> srcFiles = srcStorage.getFileList();
+            Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
 
-                // Propagate new file locations throughout registered FilestoreLocationUpdater instances
-                propagateNewLocations(prevFileName2newFileName);
+            // Propagate new file locations throughout registered FilestoreLocationUpdater instances
+            propagateNewLocations(prevFileName2newFileName);
 
-                srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
-            } catch (OXException e) {
-                throw new StorageException(e);
-            } catch (SQLException e) {
-                throw new StorageException(e);
-            }
+            srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+        } catch (OXException e) {
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            throw new StorageException(e);
         }
 
         // Apply changes to context & clear caches
         try {
-            ctx.setFilestoreId(dstFilestore.getId());
+            user.setFilestoreId(Integer.valueOf(0));
+            user.setFilestore_name(FileStorages.getNameForContext(contextId));
+            user.setFilestoreOwner(Integer.valueOf(0));
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-            oxcox.changeFilestoreDataFor(ctx);
+            oxcox.changeFilestoreDataFor(user, ctx);
 
             CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
             Cache qfsCache = cacheService.getCache("QuotaFileStorages");
             qfsCache.invalidateGroup(Integer.toString(contextId));
-            Cache contextCache = cacheService.getCache("Context");
-            contextCache.remove(ctx.getId());
+            Cache userCache = cacheService.getCache("User");
+            userCache.remove(cacheService.newCacheKey(contextId, userId));
         } catch (OXException e) {
             throw new StorageException(e);
         }

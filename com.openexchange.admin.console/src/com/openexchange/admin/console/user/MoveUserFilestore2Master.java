@@ -72,7 +72,7 @@ public class MoveUserFilestore2Master extends UserAbstraction {
 
     public MoveUserFilestore2Master(String[] args) {
 
-        final AdminParser parser = new AdminParser("moveuserfilestore2master");
+        final AdminParser parser = new AdminParser("movefromuserfilestoretomaster");
         setOptions(parser);
 
         String successtext = null;

@@ -302,7 +302,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (srcStore_id <= 0) {
                 throw new InvalidDataException("Unable to get filestore " + srcStore_id);
             }
-            ctx.setFilestoreId(Integer.valueOf(srcStore_id));
             if (srcStore_id == dstFilestore.getId().intValue()) {
                 throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + dstFilestore);
             }
@@ -317,7 +316,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue());
             if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
-                throw new StorageException("Destination filestore does not have enough space for another context.");
+                throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
             // Initialize mover instance
@@ -334,7 +333,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Schedule task
             oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "moveuserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " to filestore " + dstFilestore.getId(), ctx.getId());
+            return TaskManager.getInstance().addJob(fsdm, "moveuserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " to another filestore " + dstFilestore.getId(), ctx.getId());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -414,7 +413,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (srcStore_id <= 0) {
                 throw new InvalidDataException("Unable to get filestore " + srcStore_id);
             }
-            ctx.setFilestoreId(Integer.valueOf(srcStore_id));
             if (srcStore_id == destFilestore.getId().intValue()) {
                 throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
             }
@@ -431,7 +429,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Check capacity
             if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
-                throw new StorageException("Destination filestore does not have enough space for another context.");
+                throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
             // Initialize mover instance
@@ -448,7 +446,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Schedule task
             oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "moveuserfilestore2master", "move user " + user_id + " from context " + ctx.getIdAsString() + " to filestore " + destFilestore.getId(), ctx.getId());
+            return TaskManager.getInstance().addJob(fsdm, "movefromuserfilestoretomaster", "move user " + user_id + " from context " + ctx.getIdAsString() + " from individual to master filestore " + destFilestore.getId(), ctx.getId());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -528,7 +526,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (srcStore_id <= 0) {
                 throw new InvalidDataException("Unable to get filestore " + srcStore_id);
             }
-            ctx.setFilestoreId(Integer.valueOf(srcStore_id));
             if (srcStore_id == destFilestore.getId().intValue()) {
                 throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
             }
@@ -545,7 +542,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Check capacity
             if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
-                throw new StorageException("Destination filestore does not have enough space for another context.");
+                throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
             // Initialize mover instance
@@ -562,7 +559,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Schedule task
             oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "moveuserfilestorefrommaster", "move user " + user_id + " from context " + ctx.getIdAsString() + " to filestore " + destFilestore.getId(), ctx.getId());
+            return TaskManager.getInstance().addJob(fsdm, "movefrommastertouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from master to individual filestore " + destFilestore.getId(), ctx.getId());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -644,11 +641,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Check capacity
             if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
-                throw new StorageException("Destination filestore does not have enough space for another context.");
+                throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
             // Initialize mover instance
-            FilestoreDataMover fsdm = FilestoreDataMover.newContext2UserMover(srcFilestore, dstFilestore, storageUser, storageContext);
+            FilestoreDataMover fsdm = FilestoreDataMover.newContext2UserMover(srcFilestore, destFilestore, storageUser, storageContext);
 
             // Enable user after processing
             fsdm.addPostProcessTask(new PostProcessTask() {
@@ -661,7 +658,119 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Schedule task
             oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "moveuserfilestorefromcontext", "move user " + user_id + " from context " + ctx.getIdAsString() + " to filestore " + destFilestore.getId(), ctx.getId());
+            return TaskManager.getInstance().addJob(fsdm, "movefromcontexttouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from context to individual filestore " + destFilestore.getId(), ctx.getId());
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final RemoteException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (final OXException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e2) {
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
+            LOGGER.error("", invalidDataException);
+            throw invalidDataException;
+        }
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkContextAndSchema(ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+
+            final int user_id = user.getId().intValue();
+            final OXUserStorageInterface oxuser = this.oxu;
+            final OXContextInterface oxctx = AdminServiceRegistry.getInstance().getService(OXContextInterface.class, true);
+
+            Context storageContext = oxctx.getData(ctx, auth);
+            User storageUser = oxuser.getData(ctx, new User[] { user })[0];
+
+            if (null == storageUser.getFilestoreId()) {
+                throw new StorageException("User " + storageUser.getId() + " has no file storage set.");
+            }
+            if (storageContext.getFilestoreId().intValue() == storageUser.getFilestoreId().intValue()) {
+                throw new StorageException("User " + storageUser.getId() + " already has a context file storage set.");
+            }
+
+            if (!tool.existsStore(storageContext.getFilestoreId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+            if (!tool.existsStore(storageUser.getFilestoreId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+
+            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore destFilestore = oxu.getFilestore(storageContext.getFilestoreId().intValue());
+            Filestore srcFilestore = oxu.getFilestore(storageUser.getFilestoreId().intValue());
+
+            // Check equality
+            int srcStore_id = storageUser.getFilestoreId().intValue();
+            if (srcStore_id <= 0) {
+                throw new InvalidDataException("Unable to get filestore " + srcStore_id);
+            }
+            ctx.setFilestoreId(destFilestore.getId());
+            if (srcStore_id == destFilestore.getId().intValue()) {
+                throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
+            }
+
+            // Check storage name
+            String name = storageUser.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for user " + user_id + " in " + ctx.getIdAsString());
+            }
+            name = storageContext.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for context " + storageContext.getId());
+            }
+
+            // Check capacity
+            if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
+                throw new StorageException("Destination filestore does not have enough space for another user.");
+            }
+
+            // Initialize mover instance
+            FilestoreDataMover fsdm = FilestoreDataMover.newUser2ContextMover(srcFilestore, destFilestore, storageUser, storageContext);
+
+            // Enable user after processing
+            fsdm.addPostProcessTask(new PostProcessTask() {
+
+                @Override
+                public void perform() throws StorageException {
+                    oxuser.enableUser(user_id, ctx);
+                }
+            });
+
+            // Schedule task
+            oxuser.disableUser(user_id, ctx);
+            return TaskManager.getInstance().addJob(fsdm, "movefromusertocontextfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from individual to context filestore " + destFilestore.getId(), ctx.getId());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;

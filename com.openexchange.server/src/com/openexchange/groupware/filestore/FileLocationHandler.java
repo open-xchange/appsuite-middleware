@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
  * {@link FileLocationHandler} - Performs various actions related to file locations.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Renamed & added more methods
  * @since 7.6.0
  */
 public interface FileLocationHandler {

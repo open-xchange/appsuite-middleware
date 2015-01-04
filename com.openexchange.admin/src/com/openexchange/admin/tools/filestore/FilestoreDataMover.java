@@ -106,7 +106,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     * Creates a new instance appropriate for moving the files for a single user.
+     * Creates a new instance appropriate for moving the files to another storage location for a single user.
      *
      * @param srcFilestore The source file storage
      * @param dstFilestore The destination file storage
@@ -119,7 +119,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     * Creates a new instance appropriate for moving the files for a single user into a master user' storage.
+     * Creates a new instance appropriate for moving the files for a single user from an individual to a master storage.
      * <p>
      * <img src="./drive-business.png" alt="OX Drive Stand-Alone">
      *
@@ -135,7 +135,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     * Creates a new instance appropriate for moving the files for a single user out off a master user' storage into its own one.
+     * Creates a new instance appropriate for moving the files for a single user from a master to an individual storage.
      * <p>
      * <img src="./drive-standalone.png" alt="OX Drive Stand-Alone">
      *
@@ -151,9 +151,9 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     * Creates a new instance appropriate for moving files from a context to a dedicated user storage
+     * Creates a new instance appropriate for moving files from a context to an individual user storage
      * <p>
-     * <img src="./drive-userstorage.png" alt="OX Drive Stand-Alone">
+     * <img src="./drive-userstorage.png" alt="OX Drive User Storage">
      *
      * @param srcFilestore The source file storage
      * @param dstFilestore The destination file storage
@@ -161,7 +161,22 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @param ctx The associated context
      * @return The new instance
      */
-    public static FilestoreDataMover newContext2UserMover(Filestore srcFilestore, Filestore dstFilestore, User user,Context ctx) {
+    public static FilestoreDataMover newContext2UserMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
+        return new Context2UserFilestoreDataMover(srcFilestore, dstFilestore, user, ctx);
+    }
+
+    /**
+     * Creates a new instance appropriate for moving files from an individual user to a context storage
+     * <p>
+     * <img src="./drive-userstorage.png" alt="OX Drive User Storage">
+     *
+     * @param srcFilestore The source file storage
+     * @param dstFilestore The destination file storage
+     * @param user The user
+     * @param ctx The associated context
+     * @return The new instance
+     */
+    public static FilestoreDataMover newUser2ContextMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
         return new Context2UserFilestoreDataMover(srcFilestore, dstFilestore, user, ctx);
     }
 
@@ -260,6 +275,10 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @throws ProgrammErrorException If a program error occurs
      */
     private void copy() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
+        // Pre-copy
+        preDoCopy();
+
+        Throwable thrown = null;
         boolean successful = false;
         try {
             // Do the copy
@@ -268,8 +287,17 @@ public abstract class FilestoreDataMover implements Callable<Void> {
             // Successfully performed
             successful = true;
         } catch (URISyntaxException e) {
-            throw new StorageException(e.getMessage(), e);
+            thrown = e; throw new StorageException(e.getMessage(), e);
+        } catch (RuntimeException e) {
+            thrown = e; throw new StorageException(e.getMessage(), e);
+        } catch (Error x) {
+            thrown = x; throw x;
+        } catch (Throwable t) {
+            thrown = t; throw t;
         } finally {
+            // Post-copy
+            postDoCopy(thrown);
+
             if (successful) {
                 executePostProcessTasks();
             }
@@ -277,12 +305,12 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     * Copies specified files from source storage to destination storage
+     * Copies specified files from source storage to destination storage.
      *
      * @param files The files to copy
      * @param srcStorage The source storage
      * @param dstStorage The destination storage
-     * @return The old file name to new file name mapping
+     * @return The old file name to new file name mapping; [src-file] --&gt; [dst-file]
      * @throws OXException If copy operation fails
      */
     protected Map<String, String> copyFiles(Set<String> files, FileStorage srcStorage, FileStorage dstStorage) throws OXException {
@@ -295,14 +323,14 @@ public abstract class FilestoreDataMover implements Callable<Void> {
             String newFile = dstStorage.saveNewFile(is);
             if (null != newFile) {
                 prevFileName2newFileName.put(file, newFile);
-                LOGGER.info("Copied file " + file + " to " + newFile);
+                LOGGER.info("Copied file {} to {}", file, newFile);
             }
         }
         return prevFileName2newFileName;
     }
 
     /**
-     * Propagates new file locations throughout registered <code>FilestoreLocationUpdater</code> instances
+     * Propagates new file locations throughout registered <code>FileLocationHandler</code> instances.
      *
      * @param prevFileName2newFileName The previous file name to new file name mapping
      * @throws OXException If an Open-Xchange error occurs
@@ -370,5 +398,23 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @throws ProgrammErrorException If a program error occurs
      */
     protected abstract void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException;
+
+    /**
+     * Implementation hook to perform pre-copy operations (prior to {@link #doCopy(URI, URI)} is called).
+     *
+     * @throws StorageException If pre-copy operations fails
+     */
+    protected void preDoCopy() throws StorageException {
+        // Initially empty
+    }
+
+    /**
+     * Implementation hook to perform post-copy operations (after {@link #doCopy(URI, URI)} was called).
+     *
+     * @param thrown The {@link Throwable} instance in case an error occurred; otherwise <code>null</code>
+     */
+    protected void postDoCopy(Throwable thrown) {
+        // Initially empty
+    }
 
 }
