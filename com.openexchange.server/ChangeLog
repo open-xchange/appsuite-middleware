@@ -44,6 +44,10 @@
  - Fix for bug 35979: Null guard for passed cache keys
  - Fix for bug 35937: Fixed number of placeholders in prepared statement
  - Fix for bug 35348: Drop weird attributes from start tags that break HTML parsing and added <center> tag to white-list
+ 
+* 2015-01-05 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 35696: Replace all reserved filename characters with '_'
 
 * 2015-01-02 - thorben.betten@open-xchange.com
 

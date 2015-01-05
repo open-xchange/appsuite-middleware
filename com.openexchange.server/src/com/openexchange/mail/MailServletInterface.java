@@ -141,19 +141,30 @@ public abstract class MailServletInterface implements Closeable {
                     prev = '_';
                     sb.append(prev);
                 }
-            } else if ('/' == c) {
-                if (prev != '_') {
-                    prev = '_';
-                    sb.append(prev);
-                }
-            } else if ('\\' == c) {
-                if (prev != '_') {
-                    prev = '_';
-                    sb.append(prev);
-                }
             } else {
-                prev = '\0';
-                sb.append(c);
+                switch (c) {
+                    case '/':
+                    case '\\':
+                    case ':':
+                    case '?':
+                    case '%':
+                    case '*':
+                    case '|':
+                    case '"':
+                    case '<':
+                    case '>':
+                    case '.':
+                        if (prev != '_') {
+                            prev = '_';
+                            sb.append(prev);
+                        }
+                        break;
+                    default:
+                        prev = '\0';
+                        sb.append(c);
+                        break;
+
+                }
             }
         }
         return sb.toString();
