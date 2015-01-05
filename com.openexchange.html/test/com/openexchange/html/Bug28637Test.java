@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,71 +49,25 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link Bug28637Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    Bug16800Test.class,
-    Bug16843Test.class,
-    Bug17195Test.class,
-    Bug17991VulTest.class,
-    Bug18911VulTest.class,
-    Bug19428Test.class,
-    Bug19466Test.class,
-    Bug19522Test.class,
-    Bug20968Test.class,
-    Bug21532Test.class,
-    Bug21668Test.class,
-    Bug21757Test.class,
-    Bug22284VulTest.class,
-    Bug22286VulTest.class,
-    Bug22304Test.class,
-    Bug23368Test.class,
-    Bug24899Test.class,
-    Bug25321VulTest.class,
-    Bug25923Test.class,
-    Bug26090VulTest.class,
-    Bug26237VulTest.class,
-    Bug26316Test.class,
-    Bug26611VulTest.class,
-    Bug26789Test.class,
-    Bug27708Test.class,
-    Bug27335Test.class,
-    Bug28094Test.class,
-    Bug28337Test.class,
-    Bug28637Test.class,
-    Bug28642VulTest.class,
-    Bug29229Test.class,
-    Bug29412VulTest.class,
-    Bug29695Test.class,
-    Bug29892Test.class,
-    Bug30114Test.class,
-    Bug30357VulTest.class,
-    Bug31826Test.class,
-    Bug35291Test.class,
-    Bug35546Test.class,
-    CSSMatcherTest.class,
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class,
-    OwaspTest.class,
-    com.openexchange.html.internal.SaneScriptTagsTest.class
-})
-public class UnitTests {
+public class Bug28637Test extends AbstractSanitizing {
 
-    private UnitTests() {
-        super();
+    /**
+     * Also covers test for Bug 28668
+     */
+    @Test
+    public void testHTML2Text() {
+        String txtContent = "test<br>test<br>test<br>test";
+        String actual = getHtmlService().html2text(txtContent, false);
+        String expected = "test\r\ntest\r\ntest\r\ntest";
+        assertEquals(expected, actual);
     }
+
 }
