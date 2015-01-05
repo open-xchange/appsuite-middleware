@@ -64,6 +64,10 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserProperty;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 
@@ -144,35 +148,68 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
 
         if (cmd.hasOption(OPT_CONFIGURATION_SHORT)) {
             String searchPattern = cmd.getOptionValue(OPT_CONFIGURATION_LONG);
-            List<UserProperty> userConfigurationSource = oxUserInterface.getUserConfigurationSource(ctx, user, searchPattern, credentials);
-            if (userConfigurationSource.size() <= 0) {
-                System.out.println("No property with pattern '" + searchPattern + "' found!");
-                return null;
-            }
-
-            System.out.println("Configuration found: ");
-            for (UserProperty property : userConfigurationSource) {
-                System.out.println(property.toString());
-            }
-            System.out.println();
+            handleConfigurationOption(oxUserInterface, ctx, user, credentials, searchPattern);
         }
         if (cmd.hasOption(OPT_CAPABILITIES_SHORT)) {
-            Map<String, Map<String, Set<String>>> userCapabilitiesSource = oxUserInterface.getUserCapabilitiesSource(ctx, user, credentials);
-            if (userCapabilitiesSource.size() <= 0) {
-                System.out.println("Not able to retrieve capabilities.");
-                return null;
-            }
-
-            System.out.println("Capabilities sources found: ");
-            for (Entry<String, Map<String, Set<String>>> capabilitiesSource : userCapabilitiesSource.entrySet()) {
-                System.out.println("Source: " + capabilitiesSource.getKey());
-                for (Entry<String, Set<String>> value : capabilitiesSource.getValue().entrySet()) {
-                    System.out.println("-- " + value.getKey() + ": " + value.getValue());
-                }
-            }
-            System.out.println();
+            handleCapabilitiesOption(oxUserInterface, ctx, user, credentials);
         }
         return null;
+    }
+
+    /**
+     * @param oxUserInterface
+     * @param ctx
+     * @param user
+     * @param credentials
+     * @param searchPattern
+     * @throws RemoteException
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchUserException
+     */
+    private void handleConfigurationOption(OXUserInterface oxUserInterface, final Context ctx, final User user, Credentials credentials, String searchPattern) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException {
+        List<UserProperty> userConfigurationSource = oxUserInterface.getUserConfigurationSource(ctx, user, searchPattern, credentials);
+        if (userConfigurationSource.size() <= 0) {
+            System.out.println("No property with pattern '" + searchPattern + "' found!");
+            System.out.println();
+            return;
+        }
+
+        System.out.println("Configuration found: ");
+        for (UserProperty property : userConfigurationSource) {
+            System.out.println(property.toString());
+        }
+        System.out.println();
+    }
+
+    /**
+     * @param oxUserInterface
+     * @param ctx
+     * @param user
+     * @param credentials
+     * @throws RemoteException
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchUserException
+     */
+    private void handleCapabilitiesOption(OXUserInterface oxUserInterface, final Context ctx, final User user, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException {
+        Map<String, Map<String, Set<String>>> userCapabilitiesSource = oxUserInterface.getUserCapabilitiesSource(ctx, user, credentials);
+        if (userCapabilitiesSource.size() <= 0) {
+            System.out.println("Not able to retrieve capabilities.");
+            System.out.println();
+            return;
+        }
+
+        System.out.println("Capabilities sources found: ");
+        for (Entry<String, Map<String, Set<String>>> capabilitiesSource : userCapabilitiesSource.entrySet()) {
+            System.out.println("Source: " + capabilitiesSource.getKey());
+            for (Entry<String, Set<String>> value : capabilitiesSource.getValue().entrySet()) {
+                System.out.println("-- " + value.getKey() + ": " + value.getValue());
+            }
+        }
+        System.out.println();
     }
 
     private final OXUserInterface getUserInterface() throws NotBoundException, MalformedURLException, RemoteException {

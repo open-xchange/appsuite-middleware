@@ -135,6 +135,10 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME);
         identifiers.add(FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_USER_PICTURES_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME);
     }
 
     /**

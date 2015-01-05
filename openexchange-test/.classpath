@@ -95,7 +95,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="lib/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.codec_1.6.0.v201305230611.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.0.1.v201105210651.jar"/>
 	<classpathentry kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contactcollector.impl"/>
@@ -133,5 +132,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.3.0.v20131023-1243.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessionstorage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
