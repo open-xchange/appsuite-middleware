@@ -70,6 +70,7 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
     Bug17991VulTest.class,
     Bug18911VulTest.class,
     Bug21532Test.class,
+    Bug21668Test.class,
     Bug22284VulTest.class,
     Bug22286VulTest.class,
     Bug22304Test.class,
