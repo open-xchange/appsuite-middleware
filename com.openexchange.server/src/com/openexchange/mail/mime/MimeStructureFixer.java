@@ -118,25 +118,19 @@ public final class MimeStructureFixer {
         super();
     }
 
-    /**
-     * Processes specified MIME message.
-     *
-     * @param message The message
-     * @return The message with fixed multipart structure
-     * @throws OXException If fix attempt fails
-     */
-    public MailMessage process(final MailMessage message) throws OXException {
+    public boolean isApplicableFor(MailMessage message) {
         if (null == message) {
-            return message;
+            return false;
         }
-        final ContentType contentType = message.getContentType();
+
+        ContentType contentType = message.getContentType();
         if (!contentType.startsWith("multipart/")) {
             // Nothing to filter
-            return message;
+            return false;
         }
         if (contentType.startsWith("multipart/signed")) {
             // Don't touch
-            return message;
+            return false;
         }
         // Check mailer/boundary for "Apple"
         {
@@ -144,18 +138,35 @@ public final class MimeStructureFixer {
             final boolean noAppleMailer;
             if (null == mailer || (noAppleMailer = (toLowerCase(mailer).indexOf("apple") < 0))) {
                 // Not composed by Apple mailer
-                return message;
+                return false;
             }
             final String boundary = contentType.getParameter("boundary");
             if (noAppleMailer && (null == boundary || toLowerCase(boundary).indexOf("apple") < 0)) {
                 // Not composed by Apple mailer
-                return message;
+                return false;
             }
         }
+
+        return true;
+    }
+
+    /**
+     * Processes specified MIME message.
+     *
+     * @param message The message
+     * @return The message with fixed multipart structure
+     * @throws OXException If fix attempt fails
+     */
+    public MailMessage process(MailMessage message) throws OXException {
+        if (false == isApplicableFor(message)) {
+            return message;
+        }
+
         // Fix it...
-        final MimeMessage mimeMessage = (MimeMessage) MimeMessageConverter.convertMailMessage(message);
-        final MimeMessage processed = process0(mimeMessage, contentType);
-        final MailMessage processedMessage = MimeMessageConverter.convertMessage(processed, true);
+        MimeMessage mimeMessage = (MimeMessage) MimeMessageConverter.convertMailMessage(message);
+        ContentType contentType = message.getContentType();
+        MimeMessage processed = process0(mimeMessage, contentType);
+        MailMessage processedMessage = MimeMessageConverter.convertMessage(processed, true);
         processedMessage.setMailId(message.getMailId());
         if (message.containsReceivedDate()) {
             processedMessage.setReceivedDate(message.getReceivedDate());

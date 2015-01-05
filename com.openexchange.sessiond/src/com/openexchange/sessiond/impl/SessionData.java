@@ -63,7 +63,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
@@ -201,11 +200,35 @@ final class SessionData {
      * Checks if given user in specified context has an active session kept in session container(s)
      *
      * @param userId The user ID
-     * @param context The user's context
+     * @param contextId The user's context ID
+     * @param includeLongTerm <code>true</code> to also lookup the long term sessions, <code>false</code>, otherwise
      * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
      */
-    boolean isUserActive(final int userId, final Context context) {
-        return isUserActive(userId, context.getContextId());
+    boolean isUserActive(int userId, int contextId, boolean includeLongTerm) {
+        // A read-only access to session list
+        rlock.lock();
+        try {
+            for (final SessionContainer container : sessionList) {
+                if (container.containsUser(userId, contextId)) {
+                    return true;
+                }
+            }
+        } finally {
+            rlock.unlock();
+        }
+
+        // No need to check long-term container
+        if (!includeLongTerm) {
+            return false;
+        }
+
+        // Check long-term container, too
+        rlongTermLock.lock();
+        try {
+            return hasLongTermSession(userId, contextId);
+        } finally {
+            rlongTermLock.unlock();
+        }
     }
 
     /**

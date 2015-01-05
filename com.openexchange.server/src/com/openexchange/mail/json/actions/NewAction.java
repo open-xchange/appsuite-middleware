@@ -224,7 +224,7 @@ public final class NewAction extends AbstractMailAction {
                 }
 
                 if (null != csid) {
-                    if (null != msgref) {
+                    if (null != msgref && ComposeType.DRAFT_EDIT.equals(sendType)) {
                         CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
                         space.addCleanUp(msgref);
                     }

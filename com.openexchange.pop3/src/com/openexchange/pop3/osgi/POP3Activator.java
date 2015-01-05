@@ -54,6 +54,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -92,7 +93,9 @@ public final class POP3Activator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class, TimerService.class, ConfigViewFactory.class  };
+            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class,
+            ContextService.class, TimerService.class, ConfigViewFactory.class, CapabilityService.class
+        };
     }
 
     @Override
@@ -124,9 +127,13 @@ public final class POP3Activator extends HousekeepingActivator {
                     }
                 }
             }
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
             dictionary.put("protocol", POP3Provider.PROTOCOL_POP3.toString());
             registerService(MailProvider.class, POP3Provider.getInstance(), dictionary);
+            /*
+             * Signal availability for POP3 provider
+             */
+            getService(CapabilityService.class).declareCapability("pop3");
             /*
              * Add built-in mail account POP3 storage provider
              */
@@ -162,6 +169,10 @@ public final class POP3Activator extends HousekeepingActivator {
                 // Customizer shut-down
                 customizer.dropAllRegistrations();
                 this.customizer = null;
+            }
+            CapabilityService capabilityService = getService(CapabilityService.class);
+            if (null != capabilityService) {
+                capabilityService.undeclareCapability("pop3");
             }
             cleanUp();
             /*

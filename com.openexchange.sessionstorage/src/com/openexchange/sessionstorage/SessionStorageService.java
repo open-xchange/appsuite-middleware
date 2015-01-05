@@ -63,13 +63,25 @@ import com.openexchange.session.Session;
 public interface SessionStorageService {
 
     /**
-     * Gets the session associated with given session Id
+     * Gets the session associated with given session identifier
      *
-     * @param sessionId The session Id
-     * @return The session associated with given session Id
+     * @param sessionId The session identifier
+     * @return The session associated with given session identifier
      * @throws OXException If no session with given session Id found
+     * @see SessionStorageExceptionCodes#NO_SESSION_FOUND
      */
     public Session lookupSession(String sessionId) throws OXException;
+
+    /**
+     * Gets the session associated with given session identifier
+     *
+     * @param sessionId The session identifier
+     * @param timeoutMillis The timeout in milliseconds to await the look-up to return; a timeout of less than equal to zero is similar to {@link #lookupSession(String)} semantic
+     * @return The session associated with given session identifier
+     * @throws OXException If no session with given session identifier found or timeout elapsed
+     * @see SessionStorageExceptionCodes#NO_SESSION_FOUND
+     */
+    public Session lookupSession(String sessionId, long timeoutMillis) throws OXException;
 
     /**
      * Adds a new session to session storage.

@@ -49,14 +49,18 @@
 
 package com.openexchange.imap.dataobjects;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import javax.activation.DataHandler;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.event.ConnectionEvent;
 import javax.mail.event.ConnectionListener;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
@@ -68,6 +72,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.sun.mail.iap.ByteArray;
@@ -169,7 +174,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 
@@ -182,7 +187,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
     public DataHandler getDataHandler() throws OXException {
         try {
             return new DataHandler(new MessageDataSource(getInputStream(), body.type + "/" + body.subtype));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -190,8 +195,21 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
     @Override
     public Object getContent() throws OXException {
         try {
-            return getDataHandler().getContent();
-        } catch (final IOException e) {
+            Object obj = getDataHandler().getContent();
+            if (obj instanceof MimeMessage) {
+                return MimeMessageConverter.convertMessage((MimeMessage) obj);
+            } else if (obj instanceof Part) {
+                return MimeMessageConverter.convertPart((Part) obj, false);
+            } else {
+                return obj;
+            }
+        } catch (UnsupportedEncodingException e) {
+            mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
