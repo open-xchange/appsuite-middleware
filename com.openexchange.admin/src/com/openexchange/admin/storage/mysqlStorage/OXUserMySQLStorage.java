@@ -2410,14 +2410,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             final String fieldvalue = rs.getString(fieldname);
                             method.invoke(newuser, fieldvalue);
                         } else if (paramtype.equalsIgnoreCase("java.lang.Integer")) {
-                            method.invoke(newuser, rs.getInt(fieldname));
+                            method.invoke(newuser, Integer.valueOf(rs.getInt(fieldname)));
                         } else if (paramtype.equalsIgnoreCase("java.lang.Boolean")) {
                             if (methodnamewithoutset.equals(Mapper.PASSWORD_EXPIRED)) {
-                                method.invoke(newuser, getboolfromint(rs.getInt(fieldname)));
+                                method.invoke(newuser, Boolean.valueOf(getboolfromint(rs.getInt(fieldname))));
                             } else {
-                                method.invoke(newuser, rs.getBoolean(fieldname));
+                                method.invoke(newuser, Boolean.valueOf(rs.getBoolean(fieldname)));
                             }
 
+                        } else if (paramtype.equalsIgnoreCase("java.lang.Long")) {
+                            method.invoke(newuser, Long.valueOf(rs.getLong(fieldname)));
                         } else if (paramtype.equalsIgnoreCase("java.util.Date")) {
                             final Date fieldvalue = rs.getTimestamp(fieldname);
                             method.invoke(newuser, fieldvalue);
@@ -3152,6 +3154,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final HashSet<String> returntypes = new HashSet<String>(4);
         returntypes.add("java.lang.String");
         returntypes.add("java.lang.Integer");
+        returntypes.add("java.lang.Long");
         returntypes.add("java.lang.Boolean");
         returntypes.add("java.util.Date");
 
