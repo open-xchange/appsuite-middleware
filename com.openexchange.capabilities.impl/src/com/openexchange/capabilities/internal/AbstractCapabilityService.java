@@ -69,6 +69,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
@@ -682,7 +683,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
                 for (Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
                     String key = entry.getKey();
-                    if (!key.contains(searchPattern)) {
+
+                    if (!StringUtils.containsIgnoreCase(key, searchPattern)) {
                         continue;
                     }
                     properties.add(new ConfigurationProperty(entry.getValue().getScope(), key, entry.getValue().get()));
