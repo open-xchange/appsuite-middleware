@@ -78,17 +78,11 @@ public class FileID {
     public FileID(String uniqueID) {
         List<String> unmangled = IDMangler.unmangle(uniqueID);
 
-        int size = unmangled.size();
-        if (size == 1) {
+        if (unmangled.size() == 1) {
             serviceId = "com.openexchange.infostore";
             accountId = "infostore";
             folderId = null;
             fileId = uniqueID;
-        } else if (size == 2) {
-            serviceId = "com.openexchange.infostore";
-            accountId = "infostore";
-            folderId = unmangled.get(0);
-            fileId = unmangled.get(1);
         } else {
             serviceId = unmangled.get(0);
             accountId = unmangled.get(1);

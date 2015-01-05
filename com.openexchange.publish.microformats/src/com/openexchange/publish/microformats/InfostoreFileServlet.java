@@ -57,10 +57,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -81,7 +79,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.tools.PublicationSession;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -165,12 +162,8 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     protected DocumentMetadata loadMetadata(final Publication publication, final int infoId) throws OXException {
         try {
-        	IDBasedFileAccessFactory factory = fileFactory;
-            if (null == factory) {
-                throw ServiceExceptionCode.absentService(IDBasedFileAccessFactory.class);
-            }
             Session session = new PublicationSession(publication);
-            IDBasedFileAccess fileAccess = factory.createAccess(session);
+            IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
             String id = publication.getEntityId() + '/' + infoId;
             return FileMetadata.getMetadata(fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION));
         } catch (final OXException e) {
