@@ -1583,6 +1583,7 @@ public final class OXFolderAdminHelper {
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             LOG.info("User's default INFOSTORE folder successfully created");
+            final int user_infostore_id = newFolderId;
             /*
              * Insert default infostore trash folder
              */
@@ -1592,6 +1593,39 @@ public final class OXFolderAdminHelper {
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             LOG.info("User's default INFOSTORE trash folder successfully created");
+
+            // Create default image folder
+            fo.setParentFolderID(user_infostore_id);
+            fo.setType(FolderObject.PICTURES);
+            fo.setFolderName(FolderStrings.SYSTEM_USER_PICTURES_FOLDER_NAME);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            LOG.info("User's default image folder successfully created");
+
+            // Create default document folder
+            fo.setParentFolderID(user_infostore_id);
+            fo.setType(FolderObject.DOCUMENTS);
+            fo.setFolderName(FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            LOG.info("User's default document folder successfully created");
+
+            // Create default music folder
+            fo.setParentFolderID(user_infostore_id);
+            fo.setType(FolderObject.MUSIC);
+            fo.setFolderName(FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            LOG.info("User's default music folder successfully created");
+
+            // Create default video folder
+            fo.setParentFolderID(user_infostore_id);
+            fo.setType(FolderObject.VIDEOS);
+            fo.setFolderName(FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            LOG.info("User's default video folder successfully created");
+
 
             LOG.info("All user default folders were successfully created");
             /*
