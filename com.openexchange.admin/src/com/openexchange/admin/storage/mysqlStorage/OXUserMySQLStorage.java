@@ -2471,6 +2471,22 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 rs.close();
 
+                {
+                    PreparedStatement ps = null;
+                    ResultSet result = null;
+                    try {
+                        ps = read_ox_con.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = ?");
+                        ps.setInt(1, cid);
+                        ps.setInt(2, user_id);
+                        result = ps.executeQuery();
+                        if (result.next()) {
+                            newuser.setUsedQuota(Long.valueOf(result.getLong(1)));
+                        }
+                    } finally {
+                        Databases.closeSQLStuff(result, ps);
+                    }
+                }
+
                 newuser.setContextadmin(newuser.getId().equals(adminForContext));
                 userlist.add(newuser);
             }
