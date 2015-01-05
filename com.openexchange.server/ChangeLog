@@ -2,6 +2,10 @@
 
  - Fix for bug 35889: Consider parent folder identifier when retrieving a file for publication
 
+* 2014-11-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35502: Apply max. file size and max. overall size when processing upload to abort uploading data once a threshold is exceeded
+
 * 2014-11-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 35470: Fixed check whether parent folder is a public PIM folder
