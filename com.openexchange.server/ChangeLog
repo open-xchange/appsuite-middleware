@@ -1,3 +1,7 @@
+* 2014-01-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35760: Introduced new certificates and keys for APN and GCM in "drive-restricted" package
+
 * 2015-01-05 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35696: Replace all reserved filename characters with '_'
