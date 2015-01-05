@@ -855,7 +855,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 oxdb_read = cache.getConnectionForContext(context_id);
                 long quota_used = 0;
                 try {
-                    stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                    stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0");
                     stmt2.setInt(1, context_id);
                     rs2 = stmt2.executeQuery();
 

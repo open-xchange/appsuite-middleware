@@ -51,15 +51,22 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 class FilestoreInfo {
 
-    public final int contextID, filestoreID, writeDBPoolID;
-
+    public final int contextID;
+    public final int userID;
+    public final int filestoreID;
+    public final int writeDBPoolID;
     public final String dbSchema;
 
     public long usage;
 
-    public FilestoreInfo(final int contextID, final int writeDBPoolID, final String dbSchema, final int filestoreID) {
+    public FilestoreInfo(int contextID, int writeDBPoolID, String dbSchema, int filestoreID) {
+        this(contextID, -1, writeDBPoolID, dbSchema, filestoreID);
+    }
+
+    public FilestoreInfo(int contextID, int userID, int writeDBPoolID, String dbSchema, int filestoreID) {
         super();
         this.contextID = contextID;
+        this.userID = userID;
         this.writeDBPoolID = writeDBPoolID;
         this.dbSchema = dbSchema;
         this.filestoreID = filestoreID;
@@ -67,6 +74,6 @@ class FilestoreInfo {
 
     @Override
     public String toString(){
-        return "cid: " + contextID + ", fid: " + filestoreID + ", db: " + dbSchema + ", writepoolID: " + writeDBPoolID + ", usage: " + usage;
+        return "cid: " + contextID + ", user: " + userID + ", fid: " + filestoreID + ", db: " + dbSchema + ", writepoolID: " + writeDBPoolID + ", usage: " + usage;
     }
 }

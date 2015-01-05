@@ -61,9 +61,53 @@ import java.util.Map;
  */
 class FilestoreContextBlock {
 
-    public final int writeDBPoolID, filestoreID;
+    private static final class IntPair {
 
-    public final Map<Integer, FilestoreInfo> filestores = new HashMap<Integer, FilestoreInfo>();
+        private final int i1;
+        private final int i2;
+        private final int hash;
+
+        IntPair(int i1, int i2) {
+            super();
+            this.i1 = i1;
+            this.i2 = i2;
+
+            int result = 31 * 1 + i1;
+            result = 31 * result + i2;
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof IntPair)) {
+                return false;
+            }
+            IntPair other = (IntPair) obj;
+            if (i1 != other.i1) {
+                return false;
+            }
+            if (i2 != other.i2) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    public final int writeDBPoolID;
+    public final int filestoreID;
+
+    public final Map<Integer, FilestoreInfo> contextFilestores = new HashMap<Integer, FilestoreInfo>();
+    public final Map<Integer, Map<Integer, FilestoreInfo>> userFilestores = new HashMap<Integer, Map<Integer, FilestoreInfo>>();
 
     public FilestoreContextBlock(int writeDBPoolID, int filestoreID) {
         super();
@@ -71,24 +115,52 @@ class FilestoreContextBlock {
         this.filestoreID = filestoreID;
     }
 
-    public int size() {
-        return filestores.size();
+    public boolean isEmpty() {
+        return contextFilestores.isEmpty() && userFilestores.isEmpty();
     }
 
-    public void add(final FilestoreInfo newInfo) {
-        filestores.put(I(newInfo.contextID), newInfo);
+    public int sizeForContext() {
+        return contextFilestores.size();
     }
 
-    public void update(final int contextID, final long usage) {
-        final FilestoreInfo info = filestores.get(I(contextID));
+    public void addForContext(FilestoreInfo newInfo) {
+        contextFilestores.put(I(newInfo.contextID), newInfo);
+    }
+
+    public void updateForContext(int contextID, final long usage) {
+        final FilestoreInfo info = contextFilestores.get(I(contextID));
         if (info != null) {
             info.usage = usage;
         }
         // The schema may contain contexts having the files stored in another file store.
     }
 
+    public int sizeFoUser() {
+        return userFilestores.size();
+    }
+
+    public void addForUser(FilestoreInfo newInfo) {
+        Map<Integer, FilestoreInfo> users = userFilestores.get(I(newInfo.contextID));
+        if (null == users) {
+            users = new HashMap<Integer, FilestoreInfo>();
+            userFilestores.put(I(newInfo.contextID), users);
+        }
+
+        users.put(I(newInfo.userID), newInfo);
+    }
+
+    public void updateForUser(int contextID, int userID, long usage) {
+        Map<Integer, FilestoreInfo> users = userFilestores.get(I(contextID));
+        if (null != users) {
+            FilestoreInfo info = users.get(I(userID));
+            if (info != null) {
+                info.usage = usage;
+            }
+        }
+    }
+
     @Override
     public String toString(){
-        return "["+filestoreID+"] Elements: " + size() + ", writepoolID: " + writeDBPoolID;
+        return "["+filestoreID+"] Elements: " + (sizeForContext() + sizeFoUser()) + ", writepoolID: " + writeDBPoolID;
     }
 }

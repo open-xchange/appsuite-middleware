@@ -53,39 +53,39 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * QuotaUsageDelete
+ * UserQuotaUsageDelete - Removes the "filestore_usage" entry for a deleted user.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class QuotaUsageDelete extends ContextDelete {
+public class UserQuotaUsageDelete implements DeleteListener {
 
     /**
-     * Initializes a new {@link QuotaUsageDelete}.
+     * Initializes a new {@link UserQuotaUsageDelete}.
      */
-    public QuotaUsageDelete() {
+    public UserQuotaUsageDelete() {
         super();
     }
 
     @Override
-    public void deletePerformed(DeleteEvent sqlDelEvent, Connection readCon, Connection writeCon) throws OXException {
-        if (!isContextDelete(sqlDelEvent)) {
-            return;
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = writeCon.prepareStatement("DELETE FROM filestore_usage WHERE cid=?");
-            stmt.setInt(1, sqlDelEvent.getContext().getContextId());
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (event.getType() == DeleteEvent.TYPE_USER) {
+            PreparedStatement stmt = null;
+            try {
+                stmt = writeCon.prepareStatement("DELETE FROM filestore_usage WHERE cid=? AND user=?");
+                stmt.setInt(1, event.getContext().getContextId());
+                stmt.setInt(2, event.getId());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
         }
     }
 }

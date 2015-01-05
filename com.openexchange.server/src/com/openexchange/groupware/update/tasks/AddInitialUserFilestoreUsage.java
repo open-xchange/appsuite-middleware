@@ -58,6 +58,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -66,18 +70,17 @@ import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.IntReference;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * Creates an initial empty filestore usage entry for every context that currently did not uploaded anything. The new quota counting
- * filestore implementation requires an existing entry for every context and it does not create it if it is missing. The has better
- * performance.
+ * Creates an initial empty "filestore_usage" entry for users.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
+public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
 
-    public AddInitialFilestoreUsage() {
+    public AddInitialUserFilestoreUsage() {
         super();
     }
 
@@ -95,34 +98,78 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         ProgressState state = params.getProgressState();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        final Connection con = dbService.getForUpdateTask(contextId);
-        int[] contextIDs = dbService.getContextsInSameSchema(contextId);
+
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        Connection con = dbService.getForUpdateTask(contextId);
+        boolean rollback = false;
         try {
+            IntReference count = new IntReference();
+            Map<Integer, List<Integer>> users = loadUsersInSchema(contextId, dbService, count, con);
+
             con.setAutoCommit(false);
-            state.setTotal(contextIDs.length);
-            for (int i = 0; i < contextIDs.length; i++) {
-                if (isFilestoreUsageMissing(con, contextIDs[i])) {
-                    addInitialFilestoreUsage(con, contextIDs[i]);
+            rollback = true;
+
+            state.setTotal(count.getValue());
+            int i = 0;
+            for (Map.Entry<Integer, List<Integer>> entry : users.entrySet()) {
+                int currentContextId = entry.getKey().intValue();
+                for (Integer userId : entry.getValue()) {
+                    if (isFilestoreUsageMissing(con, currentContextId, userId.intValue())) {
+                        addInitialFilestoreUsage(con, currentContextId, userId.intValue());
+                    }
+                    state.setState(i++);
                 }
-                state.setState(i);
             }
+
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
             dbService.backForUpdateTask(contextId, con);
         }
     }
 
-    private boolean isFilestoreUsageMissing(Connection con, int contextID) throws SQLException {
+    private Map<Integer, List<Integer>> loadUsersInSchema(int contextId, DatabaseService dbService, IntReference count, Connection con) throws OXException, SQLException {
+        int[] contextIds = dbService.getContextsInSameSchema(contextId);
+
+        int c = 0;
+        Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>(contextIds.length);
+        for (int cid : contextIds) {
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND u.filestore_id > 0");
+                stmt.setInt(1, cid);
+                result = stmt.executeQuery();
+
+                List<Integer> users = new LinkedList<Integer>();
+                while (result.next()) {
+                    users.add(Integer.valueOf(result.getInt(1)));
+                    c++;
+                }
+
+                map.put(Integer.valueOf(cid), users);
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
+        }
+
+        count.setValue(c);
+        return map;
+    }
+
+    private boolean isFilestoreUsageMissing(Connection con, int contextId, int userId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=0");
-            stmt.setInt(1, contextID);
+            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
             result = stmt.executeQuery();
             return !result.next();
         } finally {
@@ -130,11 +177,12 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
         }
     }
 
-    private void addInitialFilestoreUsage(Connection con, int contextID) throws SQLException {
+    private void addInitialFilestoreUsage(Connection con, int contextId, int userId) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO filestore_usage (cid,user,used) VALUES (?,0,0)");
-            stmt.setInt(1, contextID);
+            stmt = con.prepareStatement("INSERT INTO filestore_usage (cid,user,used) VALUES (?,?,0)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
             stmt.executeUpdate();
         } finally {
             closeSQLStuff(stmt);

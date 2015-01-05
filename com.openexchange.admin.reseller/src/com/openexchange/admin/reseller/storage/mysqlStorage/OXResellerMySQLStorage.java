@@ -887,7 +887,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             while (rs.next()) {
                 cid = rs.getInt("cid");
                 oxcon = cache.getConnectionForContext(cid);
-                prep2 = oxcon.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                prep2 = oxcon.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0");
                 prep2.setInt(1, cid);
                 rs2 = prep2.executeQuery();
                 if (rs2.next()) {
