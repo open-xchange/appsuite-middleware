@@ -2,6 +2,10 @@
 
  - Fix for bug 35889: Consider parent folder identifier when retrieving a file for publication
 
+* 2014-12-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35641: Do not perform check for duplicate transport account in case transport server credentials are supposed to be taken from the mail settings
+
 * 2014-11-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 35502: Apply max. file size and max. overall size when processing upload to abort uploading data once a threshold is exceeded
