@@ -50,6 +50,8 @@
 package com.openexchange.html;
 
 import static org.junit.Assert.assertEquals;
+import java.util.LinkedList;
+import java.util.Queue;
 import org.junit.Test;
 
 /**
@@ -61,61 +63,79 @@ public class Bug21584Test extends AbstractSanitizing {
 
     @Test
     public void testConvertHTMLBlockQuotesToTextQuotes() {
-        String htmlContent = "<html><head></head><body bgcolor=\"#FFFFFF\"><div>Foobar<br><br>(mobile)</div><div><br>On February 14, 2012 at 11:56 AM \"Foo Bar\" &lt;<a href=\"mailto:foo@bar.invalid\">foo@bar.invalid</a>&gt; wrote:<br><br></div><div></div><blockquote type=\"cite\"><div><meta http-equiv=\"Content-Type\" content=\"text/html; charset=us-ascii\"><meta name=\"Generator\" content=\"Microsoft Word 12 (filtered medium)\"><style><!--" +
-            "/* Font Definitions */" +
-            "@font-face" +
-            "{font-family:Calibri;" +
-            "panose-1:2 15 5 2 2 2 4 3 2 4;}" +
-            "/* Style Definitions */" +
-            "p.MsoNormal, li.MsoNormal, div.MsoNormal" +
-            "{margin:0in;" +
-            "margin-bottom:.0001pt;" +
-            "font-size:11.0pt;" +
-            "font-family:\"Calibri\",\"sans-serif\";}" +
-            "a:link, span.MsoHyperlink" +
-            "{mso-style-priority:99;" +
-            "color:blue;" +
-            "text-decoration:underline;}" +
-            "a:visited, span.MsoHyperlinkFollowed" +
-            "{mso-style-priority:99;" +
-            "color:purple;" +
-            "text-decoration:underline;}" +
-            "span.EmailStyle17" +
-            "{mso-style-type:personal-compose;" +
-            "font-family:\"Calibri\",\"sans-serif\";" +
-            "color:windowtext;}" +
-            ".MsoChpDefault" +
-            "{mso-style-type:export-only;}" +
-            "@page WordSection1" +
-            "{size:8.5in 11.0in;" +
-            "margin:1.0in 1.0in 1.0in 1.0in;}" +
-            "div.WordSection1" +
-            "{page:WordSection1;}" +
-            "--></style><!--[if gte mso 9]><xml>" +
-            "<o:shapedefaults v:ext=\"edit\" spidmax=\"1026\" />" +
-            "</xml><![endif]--><!--[if gte mso 9]><xml>" +
-            "<o:shapelayout v:ext=\"edit\">" +
-            "<o:idmap v:ext=\"edit\" data=\"1\" />" +
-            "</o:shapelayout></xml><![endif]--><div class=\"WordSection1\"><p class=\"MsoNormal\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.<o:p></o:p></p><p class=\"MsoNormal\"><o:p>&nbsp;</o:p></p><p class=\"MsoNormal\">Cheers<o:p></o:p></p><p class=\"MsoNormal\"><o:p>&nbsp;</o:p></p><p class=\"MsoNormal\">Foo bar<o:p></o:p></p><p class=\"MsoNormal\"><o:p>&nbsp;</o:p></p></div></div></blockquote></body></html>";
+        Queue<String> quotedText = new LinkedList<String>();
+        quotedText.add("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+        quotedText.add("Cheers");
+        quotedText.add("Foo bar");
+
+        StringBuilder htmlContentBuilder = new StringBuilder();
+        htmlContentBuilder.append("<html><head></head><body bgcolor=\"#FFFFFF\"><div>Foobar<br><br>(mobile)</div><div><br>On February 14, 2012 at 11:56 AM \"Foo Bar\" &lt;<a href=\"mailto:foo@bar.invalid\">foo@bar.invalid</a>&gt; wrote:<br><br></div><div></div><blockquote type=\"cite\"><div><meta http-equiv=\"Content-Type\" content=\"text/html; charset=us-ascii\"><meta name=\"Generator\" content=\"Microsoft Word 12 (filtered medium)\"><style><!--");
+        htmlContentBuilder.append("/* Font Definitions */");
+        htmlContentBuilder.append("@font-face");
+        htmlContentBuilder.append("{font-family:Calibri;");
+        htmlContentBuilder.append("panose-1:2 15 5 2 2 2 4 3 2 4;}");
+        htmlContentBuilder.append("/* Style Definitions */");
+        htmlContentBuilder.append("p.MsoNormal, li.MsoNormal, div.MsoNormal");
+        htmlContentBuilder.append("{margin:0in;");
+        htmlContentBuilder.append("margin-bottom:.0001pt;");
+        htmlContentBuilder.append("font-size:11.0pt;");
+        htmlContentBuilder.append("font-family:\"Calibri\",\"sans-serif\";}");
+        htmlContentBuilder.append("a:link, span.MsoHyperlink");
+        htmlContentBuilder.append("{mso-style-priority:99;");
+        htmlContentBuilder.append("color:blue;");
+        htmlContentBuilder.append("text-decoration:underline;}");
+        htmlContentBuilder.append("a:visited, span.MsoHyperlinkFollowed");
+        htmlContentBuilder.append("{mso-style-priority:99;");
+        htmlContentBuilder.append("color:purple;");
+        htmlContentBuilder.append("text-decoration:underline;}");
+        htmlContentBuilder.append("span.EmailStyle17");
+        htmlContentBuilder.append("{mso-style-type:personal-compose;");
+        htmlContentBuilder.append("font-family:\"Calibri\",\"sans-serif\";");
+        htmlContentBuilder.append("color:windowtext;}");
+        htmlContentBuilder.append(".MsoChpDefault");
+        htmlContentBuilder.append("{mso-style-type:export-only;}");
+        htmlContentBuilder.append("@page WordSection1");
+        htmlContentBuilder.append("{size:8.5in 11.0in;");
+        htmlContentBuilder.append("margin:1.0in 1.0in 1.0in 1.0in;}");
+        htmlContentBuilder.append("div.WordSection1");
+        htmlContentBuilder.append("{page:WordSection1;}");
+        htmlContentBuilder.append("--></style><!--[if gte mso 9]><xml>");
+        htmlContentBuilder.append("<o:shapedefaults v:ext=\"edit\" spidmax=\"1026\" />");
+        htmlContentBuilder.append("</xml><![endif]--><!--[if gte mso 9]><xml>");
+        htmlContentBuilder.append("<o:shapelayout v:ext=\"edit\">");
+        htmlContentBuilder.append("<o:idmap v:ext=\"edit\" data=\"1\" />");
+        htmlContentBuilder.append("</o:shapelayout></xml><![endif]--><div class=\"WordSection1\">");
+        htmlContentBuilder.append("<p class=\"MsoNormal\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.<o:p></o:p></p>");
+        htmlContentBuilder.append("<p class=\"MsoNormal\"><o:p>&nbsp;</o:p></p>");
+        htmlContentBuilder.append("<p class=\"MsoNormal\">Cheers<o:p></o:p></p>");
+        htmlContentBuilder.append("<p class=\"MsoNormal\"><o:p>&nbsp;</o:p></p>");
+        htmlContentBuilder.append("<p class=\"MsoNormal\">Foo bar<o:p></o:p></p>");
+        htmlContentBuilder.append("<p class=\"MsoNormal\"><o:p>&nbsp;</o:p></p></div></div></blockquote></body></html>");
+        String htmlContent = htmlContentBuilder.toString();
 
         String actual = getHtmlService().html2text(htmlContent, false);
-        String expected = "Foobar\r\n\r\n" +
-            "(mobile)\r\n\r\n" +
-            "On February 14, 2012 at 11:56 AM \"Foo Bar\" <foo@bar.invalid> wrote:\r\n\r\n\r\n" +
-            "> \r\n" +
-            ">     Lorem ipsum dolor sit amet, consectetur adipiscing elit.\r\n" +
-            "> \r\n" +
-            ">      \r\n" +
-            "> \r\n" +
-            ">     Cheers\r\n" +
-            "> \r\n" +
-            ">      \r\n" +
-            "> \r\n" +
-            ">     Foo bar\r\n" +
-            "> \r\n" +
-            ">      \r\n" +
-            "> \r\n";
+        StringBuilder expectedBuilder = new StringBuilder();
+        expectedBuilder.append("Foobar\r\n\r\n");
+        expectedBuilder.append("(mobile)\r\n\r\n");
+        expectedBuilder.append("On February 14, 2012 at 11:56 AM \"Foo Bar\" <foo@bar.invalid> wrote:\r\n\r\n\r\n");
+        expectedBuilder.append("> \r\n");
+        expectedBuilder.append(">     Lorem ipsum dolor sit amet, consectetur adipiscing elit.\r\n");
+        expectedBuilder.append("> \r\n");
+        expectedBuilder.append(">      \r\n");
+        expectedBuilder.append("> \r\n");
+        expectedBuilder.append(">     Cheers\r\n");
+        expectedBuilder.append("> \r\n");
+        expectedBuilder.append(">      \r\n");
+        expectedBuilder.append("> \r\n");
+        expectedBuilder.append(">     Foo bar\r\n");
+        expectedBuilder.append("> \r\n");
+        expectedBuilder.append(">      \r\n");
+        expectedBuilder.append("> \r\n");
 
-        assertEquals("The HTML <blockquote> tag is not converted correctly", expected, actual);
+        String expected = expectedBuilder.toString();
+        String[] lines = expected.split("\r\n");
+
+        AssertionHelper.assertBlockingQuote(quotedText, lines);
+        assertEquals("Unexpected value", expected, actual);
     }
 }

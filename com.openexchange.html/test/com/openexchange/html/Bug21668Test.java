@@ -50,6 +50,9 @@
 package com.openexchange.html;
 
 import static org.junit.Assert.assertEquals;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import org.junit.Test;
 
 /**
@@ -61,47 +64,51 @@ public class Bug21668Test extends AbstractSanitizing {
 
     @Test
     public void testPlainTextQuoting() {
-        String htmlContent = "<p style=\"margin: 0;\"><span><span>Foo bar</span></span></p>" +
-            "<div style=\"margin: 5px 0px 5px 0px;\">" +
-            "<br/>On April 1, 2015 at 11:20 AM &#34;Foo Bar&#34; &#60;foo@bar.invalid&#62; wrote:" +
-            "<br/>" +
-            "<br/> " +
-            "<div style=\"position: relative;\">" +
-            "<blockquote style=\"margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">" +
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent nisl diam, egestas " +
-            "<br/> vulputate bibendum at, ornare pulvinar odio." +
-            "<br/> Ut vulputate purus purus, ac congue ipsum mattis vel. Suspendisse potenti." +
-            "<br/> Duis nec nunc lectus. Suspendisse maximus fermentum egestas. Nulla sed mauris " +
-            "<br/> nec lorem blandit finibus quis vel velit. Cras lacinia non neque sed pellentesque. " +
-            "<br/> Nullam id eleifend ante. Integer vitae sagittis ante. Morbi egestas ligula sed " +
-            "<br/> consectetur ornare. Integer sit amet mauris nisl. In porttitor, ligula at tincidunt " +
-            "<br/> fermentum, sapien leo facilisis arcu, vel finibus ligula ex vitae neque. Sed finibus " +
-            "<br/> mollis ultrices." +
-            "</blockquote>" +
-            "</div>" +
-            "</div>" +
-            "<p style=\"margin: 0px;\">&#160;</p>" +
-            "<p style=\"margin: 0px;\">Morbi hendrerit aliquet laoreet. Nulla semper, diam ac ullamcorper rhoncus, felis lectus ullamcorper turpis, tincidunt euismod massa nibh sit amet dui. Nunc tristique ante a ex sollicitudin pulvinar.</p>" +
-            "<p style=\"margin: 0px;\">&#160;</p> " +
-            "<p style=\"margin: 0px;\">Cras aliquet laoreet ligula at laoreet. Sed facilisis viverra elit nec lobortis. Quisque et faucibus purus. Fusce efficitur est vel mi sodales gravida. Aenean hendrerit rutrum condimentum. </p>" +
-            "<p style=\"margin: 0px;\">&#160;</p>";
-        String actual = getHtmlService().html2text(htmlContent, false);
+        Queue<String> quotedText = new LinkedList<String>();
+        quotedText.add("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent nisl diam, egestas");
+        quotedText.add(" vulputate bibendum at, ornare pulvinar odio.");
+        quotedText.add(" Ut vulputate purus purus, ac congue ipsum mattis vel. Suspendisse potenti.");
+        quotedText.add(" Duis nec nunc lectus. Suspendisse maximus fermentum egestas. Nulla sed mauris");
+        quotedText.add(" nec lorem blandit finibus quis vel velit. Cras lacinia non neque sed pellentesque.");
 
-        String expected = "Foo bar\r\n\r\n\r\n" +
-            "On April 1, 2015 at 11:20 AM \"Foo Bar\" <foo@bar.invalid> wrote:\r\n\r\n\r\n" +
-            "> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent nisl diam, egestas\r\n" +
-            ">  vulputate bibendum at, ornare pulvinar odio.\r\n" +
-            ">  Ut vulputate purus purus, ac congue ipsum mattis vel. Suspendisse potenti.\r\n" +
-            ">  Duis nec nunc lectus. Suspendisse maximus fermentum egestas. Nulla sed mauris\r\n" +
-            ">  nec lorem blandit finibus quis vel velit. Cras lacinia non neque sed pellentesque.\r\n" +
-            ">  Nullam id eleifend ante. Integer vitae sagittis ante. Morbi egestas ligula sed\r\n" +
-            ">  consectetur ornare. Integer sit amet mauris nisl. In porttitor, ligula at tincidunt\r\n" +
-            ">  fermentum, sapien leo facilisis arcu, vel finibus ligula ex vitae neque. Sed finibus\r\n" +
-            ">  mollis ultrices.\r\n" +
-            "> \r\n\r\n \r\n" +
-            "Morbi hendrerit aliquet laoreet. Nulla semper, diam ac ullamcorper rhoncus, felis lectus ullamcorper turpis, tincidunt euismod massa nibh sit amet dui. Nunc tristique ante a ex sollicitudin pulvinar.\r\n \r\n" +
-            "Cras aliquet laoreet ligula at laoreet. Sed facilisis viverra elit nec lobortis. Quisque et faucibus purus. Fusce efficitur est vel mi sodales gravida. Aenean hendrerit rutrum condimentum.\r\n \r\n";
+        StringBuilder htmlContentBuilder = new StringBuilder();
+        htmlContentBuilder.append("<p style=\"margin: 0;\"><span><span>Foo bar</span></span></p>");
+        htmlContentBuilder.append("<div style=\"margin: 5px 0px 5px 0px;\">");
+        htmlContentBuilder.append("<br/>On April 1, 2015 at 11:20 AM &#34;Foo Bar&#34; &#60;foo@bar.invalid&#62; wrote:");
+        htmlContentBuilder.append("<br/>");
+        htmlContentBuilder.append("<br/> ");
+        htmlContentBuilder.append("<div style=\"position: relative;\">");
+        htmlContentBuilder.append("<blockquote style=\"margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">");
 
-        assertEquals("Quoted HTML text was not parsed to quoted plain-text correctly", expected, actual);
+        StringBuilder expectedBuilder = new StringBuilder();
+        expectedBuilder.append("Foo bar\r\n\r\n\r\n");
+        expectedBuilder.append("On April 1, 2015 at 11:20 AM \"Foo Bar\" <foo@bar.invalid> wrote:\r\n\r\n\r\n");
+
+        Iterator<String> iterator = quotedText.iterator();
+        while (iterator.hasNext()) {
+            String q = iterator.next();
+            htmlContentBuilder.append(q).append("<br/> ");
+            expectedBuilder.append("> ").append(q).append("\r\n");
+        }
+        htmlContentBuilder.setLength(htmlContentBuilder.length() - "<br/>".length() - 1);
+        htmlContentBuilder.append("</blockquote>");
+        htmlContentBuilder.append("</div>");
+        htmlContentBuilder.append("</div>");
+        htmlContentBuilder.append("<p style=\"margin: 0px;\">&#160;</p>");
+        htmlContentBuilder.append("<p style=\"margin: 0px;\">Morbi hendrerit aliquet laoreet. Nulla semper, diam ac ullamcorper rhoncus, felis lectus ullamcorper turpis, tincidunt euismod massa nibh sit amet dui. Nunc tristique ante a ex sollicitudin pulvinar.</p>");
+        htmlContentBuilder.append("<p style=\"margin: 0px;\">&#160;</p> ");
+        htmlContentBuilder.append("<p style=\"margin: 0px;\">Cras aliquet laoreet ligula at laoreet. Sed facilisis viverra elit nec lobortis. Quisque et faucibus purus. Fusce efficitur est vel mi sodales gravida. Aenean hendrerit rutrum condimentum. </p>");
+        htmlContentBuilder.append("<p style=\"margin: 0px;\">&#160;</p>");
+
+        expectedBuilder.append("> \r\n\r\n \r\n");
+        expectedBuilder.append("Morbi hendrerit aliquet laoreet. Nulla semper, diam ac ullamcorper rhoncus, felis lectus ullamcorper turpis, tincidunt euismod massa nibh sit amet dui. Nunc tristique ante a ex sollicitudin pulvinar.\r\n \r\n");
+        expectedBuilder.append("Cras aliquet laoreet ligula at laoreet. Sed facilisis viverra elit nec lobortis. Quisque et faucibus purus. Fusce efficitur est vel mi sodales gravida. Aenean hendrerit rutrum condimentum.\r\n \r\n");
+
+        String actual = getHtmlService().html2text(htmlContentBuilder.toString(), false);
+        String expected = expectedBuilder.toString();
+        String[] quotedLines = expected.split("\r\n");
+
+        AssertionHelper.assertBlockingQuote(quotedText, quotedLines);
+        assertEquals("Unexpected value", expected, actual);
     }
 }

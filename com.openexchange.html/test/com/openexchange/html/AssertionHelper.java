@@ -49,7 +49,9 @@
 
 package com.openexchange.html;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.util.Queue;
 import com.openexchange.java.Strings;
 
 /**
@@ -77,6 +79,20 @@ public class AssertionHelper {
             assertEquals(sanitized + " contains " + mailiciousParam, -1, index); //TODO
         } else if(AssertExpression.EMPTY.equals(ae)) {
             assertTrue("expected sanitized to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
+        }
+    }
+    
+    public static void assertBlockingQuote(final Queue<String> quotedText, String[] quotedLines) {
+        int line = 0;
+        while (!quotedText.isEmpty()) {
+            String qt = quotedText.poll();
+            for (int i = line; i < quotedLines.length; i++) {
+                if (quotedLines[i].contains(qt)) {
+                    assertTrue("The HTML <blockquote> tag is not properly converted to '>'", quotedLines[i].startsWith(">"));
+                    line = i;
+                    break;
+                }
+            }
         }
     }
 }
