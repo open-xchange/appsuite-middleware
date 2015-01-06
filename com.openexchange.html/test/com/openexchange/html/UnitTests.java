@@ -114,6 +114,7 @@ import com.openexchange.html.vulntests.Bug30357VulTest;
     Bug17195Test.class,
     Bug17991VulTest.class,
     Bug18911VulTest.class,
+    Bug19428Test.class,
     Bug19466Test.class,
     Bug19522Test.class,
     Bug20968Test.class,
