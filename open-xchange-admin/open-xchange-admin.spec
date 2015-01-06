@@ -181,6 +181,9 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property SENT_MAILFOLDER_EN_GB "Sent Mail" /opt/open-xchange/etc/AdminUser.properties
     fi
 
+    # SoftwareChange_Request-2197
+    ox_add_property SCHEMA_MOVE_MAINTENANCE_REASON 1431655765 /opt/open-xchange/etc/plugin/hosting.properties
+
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
 
