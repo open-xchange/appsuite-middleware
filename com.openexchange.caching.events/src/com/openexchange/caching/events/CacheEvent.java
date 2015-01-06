@@ -131,7 +131,7 @@ public class CacheEvent implements Serializable {
         super();
         this.operation = operation;
         this.region = region;
-        this.keys = keys;
+        this.keys = ((keys instanceof LinkedList) || (keys instanceof ArrayList) ? keys : new LinkedList<Serializable>(keys));
         this.groupName = groupName;
     }
 
