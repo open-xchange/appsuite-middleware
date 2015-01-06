@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.html;
+package com.openexchange.html.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 /**
  * {@link Bug22072Test}

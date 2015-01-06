@@ -51,6 +51,7 @@ package com.openexchange.html;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 
 /**

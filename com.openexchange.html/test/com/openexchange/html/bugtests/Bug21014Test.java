@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.html;
+package com.openexchange.html.bugtests;
 
 import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 /**
  * {@link Bug21014Test}
