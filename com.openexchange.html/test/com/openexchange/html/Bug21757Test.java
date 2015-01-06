@@ -50,6 +50,7 @@
 package com.openexchange.html;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -69,6 +70,8 @@ public class Bug21757Test extends AbstractSanitizing {
         expectedBuilder.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n");
         expectedBuilder.append(" </head><body><center>Lorem Ipsum Dolor<table><tbody><tr><td>cell</td></tr></tbody></table></center></body></html>");
         String expected = expectedBuilder.toString();
-        assertEquals("The <body> tag is missing", expected, actual);
+        assertTrue("The opening <body> tag is missing", actual.contains("<body>"));
+        assertTrue("The closing </body> tag is missing", actual.contains("</body>"));
+        assertEquals("Unexpected value", expected, actual);
     }
 }
