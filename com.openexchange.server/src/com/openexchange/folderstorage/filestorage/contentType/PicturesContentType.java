@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,38 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.folderstorage.filestorage.contentType;
 
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link PicturesContentType}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8
  */
-public enum FileStorageFolderType {
+public class PicturesContentType extends FileStorageContentType {
+
+    private static final PicturesContentType instance = new PicturesContentType();
 
     /**
-     * No special meaning associated with folder.
+     * Gets the {@link PicturesContentType} instance.
+     *
+     * @return The {@link PicturesContentType} instance
      */
-    NONE,
+    public static PicturesContentType getInstance() {
+        return instance;
+    }
+
     /**
-     * Folder is current user's home directory.
+     * Initializes a new {@link PicturesContentType}.
      */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
+    private PicturesContentType() {
+        super();
+    }
 
-    PICTURES_FOLDER,
+    @Override
+    public int getPriority() {
+        return 1;
+    }
 
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
 }
