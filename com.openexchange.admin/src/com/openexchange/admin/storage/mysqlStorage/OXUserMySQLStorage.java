@@ -73,6 +73,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -2150,18 +2151,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     private User[] listInternal(final Context ctx, final String search_pattern, final boolean ignoreCase, final boolean includeGuests, final boolean excludeUsers) throws StorageException {
-        Connection read_ox_con = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        int context_id = ctx.getId().intValue();
         String new_search_pattern = null;
         boolean pattern = false;
         if (null != search_pattern) {
             new_search_pattern = search_pattern.replace('*', '%');
             pattern = !"%".equals(new_search_pattern);
         }
-        final int context_id = ctx.getId().intValue();
+
+        Connection read_ox_con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            final ArrayList<User> retval = new ArrayList<User>();
             read_ox_con = cache.getConnectionForContext(context_id);
             String sql = buildQuery(new_search_pattern, ignoreCase, includeGuests, excludeUsers);
             stmt = read_ox_con.prepareStatement(sql);
@@ -2171,38 +2172,26 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setString(3, new_search_pattern);
             }
             rs = stmt.executeQuery();
+            List<User> retval = new LinkedList<User>();
             while (rs.next()) {
                 retval.add(new User(rs.getInt(1)));
             }
             return retval.toArray(new User[retval.size()]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
             throw e;
         } finally {
-            try {
-                if (null != rs) {
-                    rs.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error closing resultset!", e);
-            }
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error closing statement!", e);
-            }
+            Databases.closeSQLStuff(rs, stmt);
             if (read_ox_con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
-                } catch (final PoolException exp) {
+                } catch (PoolException exp) {
                     log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
             }
@@ -2335,7 +2324,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmtusername = null;
         PreparedStatement stmtuserattributes = null;
         PreparedStatement stmtstd = null;
-        final ArrayList<User> userlist = new ArrayList<User>();
+        List<User> userlist = new LinkedList<User>();
         try {
             read_ox_con = cache.getConnectionForContext(cid);
             final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
@@ -2492,28 +2481,28 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             return userlist.toArray(new User[userlist.size()]);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.error("Error", e);
             throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             log.error("Error", e);
             throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             log.error("Error", e);
             throw new StorageException(e);
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             log.error("Error", e);
             throw new StorageException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
             throw e;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log.error("GUI setting Error", e);
             throw new StorageException(e.toString());
         } finally {
