@@ -49,7 +49,9 @@
 
 package com.openexchange.html;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.util.Queue;
 import com.openexchange.java.Strings;
 
 /**
@@ -74,9 +76,32 @@ public class AssertionHelper {
         }
         if (AssertExpression.NOT_CONTAINED.equals(ae)) {
             int index = sanitized.indexOf(mailiciousParam);
-            assertEquals(sanitized + " contains " + mailiciousParam, -1, index); //TODO
+            assertEquals("sanitized output: " + sanitized + " contains " + mailiciousParam, -1, index);
         } else if(AssertExpression.EMPTY.equals(ae)) {
-            assertTrue("expected sanitized to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
+            assertTrue("expected html: " + html + " after sanitizing to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
+        }
+    }
+    
+    public static void assertBlockingQuote(final Queue<String> quotedText, String[] quotedLines) {
+        int line = 0;
+        while (!quotedText.isEmpty()) {
+            String qt = quotedText.poll();
+            for (int i = line; i < quotedLines.length; i++) {
+                if (quotedLines[i].contains(qt)) {
+                    assertTrue("The HTML <blockquote> tag is not properly converted to '>'", quotedLines[i].startsWith(">"));
+                    line = i;
+                    break;
+                }
+            }
+        }
+    }
+    
+    public static void assertTag(String tag, String actual, boolean closing) {
+        assertTrue(tag + " is missing", actual.contains(tag));
+        if (closing) {
+            String closingTag = tag.substring(1);
+            closingTag = "</" + closingTag;
+            assertTag(closingTag, actual, false);
         }
     }
 }

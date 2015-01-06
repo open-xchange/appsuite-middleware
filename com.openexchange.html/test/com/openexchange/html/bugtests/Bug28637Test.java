@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,28 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug28637Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum FileStorageFolderType {
+public class Bug28637Test extends AbstractSanitizing {
 
     /**
-     * No special meaning associated with folder.
+     * Also covers test for Bug 28668
      */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
+    @Test
+    public void testHTML2Text() {
+        String txtContent = "test<br>test<br>test<br>test";
+        String actual = getHtmlService().html2text(txtContent, false);
+        String expected = "test\r\ntest\r\ntest\r\ntest";
+        assertEquals(expected, actual);
+    }
 
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
 }

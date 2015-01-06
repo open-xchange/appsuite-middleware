@@ -47,39 +47,22 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
+
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug26316Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
-
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+public class Bug26316Test extends AbstractSanitizing {
+    @Test
+    public void testConvertNonBreakablesToWhitespaces() {
+        String content = getHtmlService().html2text("<br>\ntab<br>\nfoo<br>\nbar", false);
+        assertEquals("Unexpected return value ", "\r\ntab\r\nfoo\r\nbar", content);
+    }
 }

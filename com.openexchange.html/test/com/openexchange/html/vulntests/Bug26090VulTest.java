@@ -47,39 +47,30 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.vulntests;
+
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug26090VulTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
+public class Bug26090VulTest extends AbstractSanitizing {
+    @Test
+    public void testDoNotCreateLinkForUnsupportedProtocols() {
+        String content = getHtmlService().formatURLs("skype:097711178851337", "commentId");
+        String content2 = getHtmlService().formatURLs("javascript:alert(1)", "commentId");
+        String content3 = getHtmlService().formatURLs("about:config", "commentId");
+        //Create link for mailto
+        String content4 = getHtmlService().formatURLs("mailto://myname@bar.tld", "commentId");
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+        assertEquals("Expected content ", content, "skype:097711178851337");
+        assertEquals("Expected content ", content2, "javascript:alert(1)");
+        assertEquals("Expected content ", content3, "about:config");
+        assertEquals("Expected content ", content4, "<!--commentId <a href=\"mailto://myname@bar.tld\" target=\"_blank\">mailto://myname@bar.tld</a>-->");
+    }
 }

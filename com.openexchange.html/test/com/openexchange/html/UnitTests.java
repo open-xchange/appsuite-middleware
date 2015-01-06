@@ -52,11 +52,55 @@ package com.openexchange.html;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.html.bugtests.Bug16800Test;
+import com.openexchange.html.bugtests.Bug16843Test;
+import com.openexchange.html.bugtests.Bug17195Test;
+import com.openexchange.html.bugtests.Bug19428Test;
+import com.openexchange.html.bugtests.Bug19466Test;
+import com.openexchange.html.bugtests.Bug19522Test;
+import com.openexchange.html.bugtests.Bug20968Test;
+import com.openexchange.html.bugtests.Bug21014Test;
+import com.openexchange.html.bugtests.Bug21042Test;
+import com.openexchange.html.bugtests.Bug21055Test;
+import com.openexchange.html.bugtests.Bug21118Test;
+import com.openexchange.html.bugtests.Bug21532Test;
+import com.openexchange.html.bugtests.Bug21584Test;
+import com.openexchange.html.bugtests.Bug21668Test;
+import com.openexchange.html.bugtests.Bug21757Test;
+import com.openexchange.html.bugtests.Bug22072Test;
+import com.openexchange.html.bugtests.Bug22304Test;
+import com.openexchange.html.bugtests.Bug23368Test;
+import com.openexchange.html.bugtests.Bug24899Test;
+import com.openexchange.html.bugtests.Bug25923Test;
+import com.openexchange.html.bugtests.Bug26153Test;
+import com.openexchange.html.bugtests.Bug26316Test;
+import com.openexchange.html.bugtests.Bug26789Test;
+import com.openexchange.html.bugtests.Bug27335Test;
+import com.openexchange.html.bugtests.Bug28094Test;
+import com.openexchange.html.bugtests.Bug28337Test;
+import com.openexchange.html.bugtests.Bug28637Test;
+import com.openexchange.html.bugtests.Bug29229Test;
+import com.openexchange.html.bugtests.Bug29695Test;
+import com.openexchange.html.bugtests.Bug29892Test;
+import com.openexchange.html.bugtests.Bug31826Test;
+import com.openexchange.html.bugtests.Bug35291Test;
+import com.openexchange.html.bugtests.Bug35546Test;
 import com.openexchange.html.internal.Bug27708Test;
 import com.openexchange.html.internal.HtmlServiceImplTest;
 import com.openexchange.html.internal.css.Bug30114Test;
 import com.openexchange.html.internal.css.CSSMatcherTest;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
+import com.openexchange.html.vulntests.Bug17991VulTest;
+import com.openexchange.html.vulntests.Bug18911VulTest;
+import com.openexchange.html.vulntests.Bug22284VulTest;
+import com.openexchange.html.vulntests.Bug22286VulTest;
+import com.openexchange.html.vulntests.Bug25321VulTest;
+import com.openexchange.html.vulntests.Bug26090VulTest;
+import com.openexchange.html.vulntests.Bug26237VulTest;
+import com.openexchange.html.vulntests.Bug26611VulTest;
+import com.openexchange.html.vulntests.Bug28642VulTest;
+import com.openexchange.html.vulntests.Bug29412VulTest;
+import com.openexchange.html.vulntests.Bug30357VulTest;
 
 /**
  * Test suite for all integrated unit tests of the HTMLService implementation.
@@ -74,10 +118,15 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
     Bug19466Test.class,
     Bug19522Test.class,
     Bug20968Test.class,
+    Bug21014Test.class,
+    Bug21042Test.class,
+    Bug21055Test.class,
+    Bug21118Test.class,
     Bug21532Test.class,
     Bug21584Test.class,
     Bug21668Test.class,
     Bug21757Test.class,
+    Bug22072Test.class,
     Bug22284VulTest.class,
     Bug22286VulTest.class,
     Bug22304Test.class,
@@ -88,6 +137,7 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
     Bug26090VulTest.class,
     Bug26237VulTest.class,
     Bug26316Test.class,
+    Bug26153Test.class,
     Bug26611VulTest.class,
     Bug26789Test.class,
     Bug27708Test.class,

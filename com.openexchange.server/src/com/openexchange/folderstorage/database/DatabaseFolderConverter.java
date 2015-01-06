@@ -297,38 +297,54 @@ public final class DatabaseFolderConverter {
                 /*
                  * A default folder: set locale-sensitive name
                  */
-                final int module = fo.getModule();
-                if (module == FolderObject.TASK) {
-                    retval = new LocalizedDatabaseFolder(fo);
-                    retval.setName(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
-                } else if (module == FolderObject.CONTACT) {
-                    retval = new LocalizedDatabaseFolder(fo);
-                    retval.setName(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
-                } else if (module == FolderObject.CALENDAR) {
-                    retval = new LocalizedDatabaseFolder(fo);
-                    retval.setName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
-                } else if (module == FolderObject.INFOSTORE) {
-                    if (preferDisplayName()) {
-                        final int ownerId = fo.getCreatedBy();
-                        if (user.getId() == ownerId) {
-                            // Requestor is owner
-                            retval = new LocalizedDatabaseFolder(fo);
-                            retval.setName(user.getDisplayName());
-                        } else {
-                            DatabaseFolder tmp = null;
-                            try {
-                                final User owner = UserStorage.getInstance().getUser(ownerId, ctx);
-                                tmp = new LocalizedDatabaseFolder(fo);
-                                tmp.setName(owner.getDisplayName());
-                            } catch (final Exception ignore) {
-                                // Ignore
-                                tmp = new DatabaseFolder(fo);
-                            }
-                            retval = tmp;
+                String localizableName = null;
+                switch (fo.getModule()) {
+                    case FolderObject.TASK:
+                        localizableName = FolderStrings.DEFAULT_TASK_FOLDER_NAME;
+                        break;
+                    case FolderObject.CONTACT:
+                        localizableName = FolderStrings.DEFAULT_CONTACT_FOLDER_NAME;
+                        break;
+                    case FolderObject.CALENDAR:
+                        localizableName = FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME;
+                        break;
+                    case FolderObject.INFOSTORE:
+                        switch (fo.getType()) {
+                            case FolderObject.PUBLIC:
+                                if (preferDisplayName()) {
+                                    if (fo.getCreatedBy() == user.getId()) {
+                                        localizableName = user.getDisplayName();
+                                    } else {
+                                        try {
+                                            localizableName = UserStorage.getInstance().getUser(fo.getCreatedBy(), ctx).getDisplayName();
+                                        } catch (Exception e) {
+                                            org.slf4j.LoggerFactory.getLogger(DatabaseFolderConverter.class).error(
+                                                "error getting owner for folder {}", fo.getObjectID(), e);
+                                        }
+                                    }
+                                }
+                                break;
+                            case FolderObject.TRASH:
+                                localizableName = FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME;
+                                break;
+                            case FolderObject.DOCUMENTS:
+                                localizableName = FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME;
+                                break;
+                            case FolderObject.PICTURES:
+                                localizableName = FolderStrings.SYSTEM_USER_PICTURES_FOLDER_NAME;
+                                break;
+                            case FolderObject.VIDEOS:
+                                localizableName = FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME;
+                                break;
+                            case FolderObject.MUSIC:
+                                localizableName = FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME;
+                                break;
                         }
-                    } else {
-                        retval = new DatabaseFolder(fo);
-                    }
+                        break;
+                }
+                if (null != localizableName) {
+                    retval = new LocalizedDatabaseFolder(fo);
+                    retval.setName(localizableName);
                 } else {
                     retval = new DatabaseFolder(fo);
                 }

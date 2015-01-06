@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,39 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
 
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug21042Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum FileStorageFolderType {
+public class Bug21042Test extends AbstractSanitizing {
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
+    @Test
+    public void testPrettyPrinter() {
+        StringBuilder htmlContentBuilder = new StringBuilder();
+        htmlContentBuilder.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
+        htmlContentBuilder.append(" <head>\n");
+        htmlContentBuilder.append("    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n");
+        htmlContentBuilder.append(" </head>\n");
+        htmlContentBuilder.append(" <body>\n");
+        htmlContentBuilder.append("  <p style=\"margin: 0pt;\">\n");
+        htmlContentBuilder.append("   <span>\n");
+        htmlContentBuilder.append("    Lorem<span style=\"font-size: 18pt;\"><strong>ipsum</strong></span>dolor\n");
+        htmlContentBuilder.append("    <span></span>\n");
+        htmlContentBuilder.append("   </span>\n");
+        htmlContentBuilder.append("  </p>\n");
+        htmlContentBuilder.append("  <p style=\"margin: 0px; \"></p>\n");
+        htmlContentBuilder.append("  <p style=\"margin: 0px; \"></p>\n");
+        htmlContentBuilder.append(" </body>\n");
+        htmlContentBuilder.append("</html>");
+        String htmlContent = htmlContentBuilder.toString();
+        String actual = getHtmlService().html2text(htmlContent, false);
+        System.out.println(actual);
+    }
 
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
 }

@@ -47,39 +47,20 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
 
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug21014Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
-
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+public class Bug21014Test extends AbstractSanitizing {
+    @Test
+    public void testHtmlBlockquotesToPlaintext() {
+        String content = "<blockquote>Testmail<br />Test</blockquote>";
+        System.out.println(getHtmlService().html2text(content, false));
+    }
 }

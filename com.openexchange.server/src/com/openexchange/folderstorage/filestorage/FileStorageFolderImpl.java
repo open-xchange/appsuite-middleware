@@ -64,9 +64,13 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
+import com.openexchange.folderstorage.filestorage.contentType.DocumentsContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
+import com.openexchange.folderstorage.filestorage.contentType.MusicContentType;
+import com.openexchange.folderstorage.filestorage.contentType.PicturesContentType;
 import com.openexchange.folderstorage.filestorage.contentType.PublicContentType;
 import com.openexchange.folderstorage.filestorage.contentType.TrashContentType;
+import com.openexchange.folderstorage.filestorage.contentType.VideosContentType;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
@@ -106,7 +110,11 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         ROOT(SystemContentType.getInstance(), 0),
         HOME_DIRECTORY(FileStorageContentType.getInstance(), 8), // FolderObject.FILE
         PUBLIC_FOLDER(PublicContentType.getInstance(), 15),
-        TRASH(TrashContentType.getInstance(), 16);
+        TRASH(TrashContentType.getInstance(), 16),
+        PICTURES(PicturesContentType.getInstance(), 20),
+        DOCUMENTS(DocumentsContentType.getInstance(), 21),
+        MUSIC(MusicContentType.getInstance(), 22),
+        VIDEOS(VideosContentType.getInstance(), 23);
 
         private final ContentType contentType;
         private final int type;
@@ -174,7 +182,16 @@ public final class FileStorageFolderImpl extends AbstractFolder {
                     parentId = INFOSTORE_PUBLIC;
                 } else if (FileStorageFolderType.TRASH_FOLDER.equals(folderType)) {
                     defaultFolderType = FileStorageDefaultFolderType.TRASH;
-                } else {
+                } else if (FileStorageFolderType.PICTURES_FOLDER.equals(folderType)) {
+                    defaultFolderType = FileStorageDefaultFolderType.PICTURES;
+                } else if (FileStorageFolderType.DOCUMENTS_FOLDER.equals(folderType)) {
+                    defaultFolderType = FileStorageDefaultFolderType.DOCUMENTS;
+                } else if (FileStorageFolderType.MUSIC_FOLDER.equals(folderType)) {
+                    defaultFolderType = FileStorageDefaultFolderType.MUSIC;
+                } else if (FileStorageFolderType.VIDEOS_FOLDER.equals(folderType)) {
+                    defaultFolderType = FileStorageDefaultFolderType.VIDEOS;
+                }
+                else {
                     defaultFolderType = FileStorageDefaultFolderType.NONE;
                 }
             } else {

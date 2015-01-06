@@ -47,39 +47,38 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
+
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug29892Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
+public class Bug29892Test extends AbstractSanitizing {
+    @Test
+    public void testIgnoreHrefBaseTag() {
+        String content = getHtmlService().checkBaseTag("<html>\n" +
+            "<head>" +
+            "<base href=\"https://bugs.open-xchange.com/\" /> \n" +
+            "<style type=\"text/css\">\n" +
+            "table {\n" +
+            "font-size: 9pt;\n" +
+            "}\n" +
+            "</style>\n" +
+            "</head></html>", false);
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+        assertEquals("Base tag", "<html>\n" +
+            "<head> \n" +
+            "<style type=\"text/css\">\n" +
+            "table {\n" +
+            "font-size: 9pt;\n" +
+            "}\n" +
+            "</style>\n" +
+            "</head></html>",content);
+    }
 }

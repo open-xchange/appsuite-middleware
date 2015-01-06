@@ -47,39 +47,27 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
+
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug28337Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
+public class Bug28337Test extends AbstractSanitizing {
+    @Test
+    public void testGetConformHtml() {
+        String content = getHtmlService().getConformHTML("<strong>Very important information</strong><ul><li>Point 1</li><li>Oh forgot the /li</ul>", "UTF-8");
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+        assertEquals("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n" +
+            "\r\n" +
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
+            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
+            " </head><body><strong>Very important information</strong><ul><li>Point 1</li><li>Oh forgot the /li</li></ul></body></html>", content);
+    }
 }

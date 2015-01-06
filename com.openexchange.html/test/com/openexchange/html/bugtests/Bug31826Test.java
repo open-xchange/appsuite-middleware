@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,31 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
 
+import org.junit.Assert;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug31826Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum FileStorageFolderType {
+public class Bug31826Test extends AbstractSanitizing {
+    public Bug31826Test() {
+        super();
+    }
+    @Test
+    public void testKeepUnicode() {
+        String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
+        String test = getHtmlService().sanitize(content, null, true, null, null);
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
+        Assert.assertEquals("Unexpected retur value.", "dfg \u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 dfg", test);
 
-    PICTURES_FOLDER,
+        content = "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 <>";
+        test = getHtmlService().htmlFormat(content, true, "--==--");
 
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+        Assert.assertEquals("Unexpected retur value.", "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 &lt;&gt;", test);
+    }
 }

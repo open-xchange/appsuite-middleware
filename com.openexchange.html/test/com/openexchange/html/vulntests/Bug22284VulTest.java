@@ -47,39 +47,32 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.vulntests;
+
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.AssertionHelper;
 
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug22284VulTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
+public class Bug22284VulTest extends AbstractSanitizing {
+    @Test
+    public void testSanitize() {
+        String content = "<HTML><HEAD><STYLE " +
+            "id=\"styletagforeditor\">body{background-color:rgb(255,255,255);direction:ltr;font-family:times " +
+            "new " +
+            "roman;font-size:12pt;line-height:1.2;padding-top:0.787in;padding-right:0.787in;padding-bottom:0.787i " +
+            "n;padding-left:0.787in;margin:0in;} " +
+            "p{margin-top:0pt;margin-bottom:0pt;}</STYLE><STYLE " +
+            "id=\"styletagtwoforeditor\" type=\"text/css\">table { font-size: 12pt } " +
+            "table p, li p { margin : 0px; }</STYLE></HEAD><BODY><P><IMG  " +
+            "align=\"bottom\" alt=\"onerror=``alert(1)\"  " +
+            "src=\"http://localhost\"></P></BODY></HTML>";
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+         AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onerror=``alert(1)");
+    }
 }

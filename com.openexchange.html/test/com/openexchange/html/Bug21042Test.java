@@ -47,39 +47,26 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html;
+
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug21042Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
-
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+public class Bug21042Test extends AbstractSanitizing {
+    @Test
+    public void testNoEmptySpaceBetweenDifferentColors() {
+        /**
+         * There should be no whitespace between the span tags
+         */
+        String content = "<p><span style=\"color:red\">bla</span><span style=\"color:green\">fasel</span></p>";
+        assertEquals("Unexpected return value", "<html><head></head><body><p><span style=\"color:red\">bla</span><span style=\"color:green\">fasel</span></p></body></html>",
+            getHtmlService().prettyPrint(content));
+    }
 }

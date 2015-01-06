@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,25 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.HtmlService;
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug19522Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
+public class Bug19522Test extends AbstractSanitizing {
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+    @Test
+    public void testReplaceHtmlEntities() {
+        HtmlService html = getHtmlService();
+        assertEquals("Unexpected return value", "durchgef\u00fchrt" ,html.replaceHTMLEntities("durchgef&#xfc;hrt"));
+        assertEquals("Unexpected return value", "durchgef\u00fchrt" ,html.replaceHTMLEntities("durchgef&#252;hrt"));
+        assertEquals("Unexpected return value", "durchgef\u00fchrt" ,html.replaceHTMLEntities("durchgef&#x00FC;hrt"));
+    }
 }

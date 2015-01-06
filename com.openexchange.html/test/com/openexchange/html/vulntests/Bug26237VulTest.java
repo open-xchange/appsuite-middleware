@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,26 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.vulntests;
 
+import org.junit.Assert;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug26237VulTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum FileStorageFolderType {
-
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+public class Bug26237VulTest extends AbstractSanitizing {
+    @Test
+    public void testSanitize() {
+        String content = "foo <object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"></object> bar";
+        String test = getHtmlService().sanitize(content, null, false, null, null);
+        Assert.assertFalse("Sanitized content still contains object tag.", test.contains("<object"));
+        Assert.assertFalse("Sanitized content still contains object tag.", test.contains("</object>"));
+        Assert.assertFalse("Sanitized content still contains base64 string.", test.contains("PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg=="));
+        Assert.assertFalse("Sanitized content still contains data type.", test.contains("text/html"));
+        Assert.assertFalse("Sanitized content still contains base64 encoding description.", test.contains("base64"));
+    }
 }

@@ -51,6 +51,7 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
+import static com.openexchange.tools.arrays.Arrays.contains;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
@@ -586,26 +587,30 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         FolderObject originalFolder = getFolderFromMaster(fo.getObjectID());
         int oldParentId = originalFolder.getParentFolderID();
         FolderObject storageObject = originalFolder.clone();
-        if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
-            final int newParentFolderID = fo.getParentFolderID();
-            if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
-                move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
-                // Reload storage's folder for following update
-                storageObject = getFolderFromMaster(fo.getObjectID());
+        try {
+            if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
+                final int newParentFolderID = fo.getParentFolderID();
+                if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                    move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
+                    // Reload storage's folder for following update
+                    storageObject = getFolderFromMaster(fo.getObjectID());
+                }
+                update(fo, options, storageObject, lastModified, handDown);
+            } else if (fo.containsFolderName()) {
+                final int newParentFolderID = fo.getParentFolderID();
+                if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                    move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
+                } else {
+                    rename(fo, storageObject, lastModified);
+                }
+            } else if (performMove) {
+                /*
+                 * Perform move
+                 */
+                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, storageObject, lastModified);
             }
-            update(fo, options, storageObject, lastModified, handDown);
-        } else if (fo.containsFolderName()) {
-            final int newParentFolderID = fo.getParentFolderID();
-            if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
-                move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
-            } else {
-                rename(fo, storageObject, lastModified);
-            }
-        } else if (performMove) {
-            /*
-             * Perform move
-             */
-            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, storageObject, lastModified);
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
          * Finally update cache
@@ -1108,7 +1113,17 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         return Arrays.binarySearch(a, key) >= 0;
     }
 
-    private void move(final int folderId, final int targetFolderId, final int createdBy, String newName, final FolderObject storageSrc, final long lastModified) throws OXException {
+    /**
+     * Moves and/or renames a folder in the database.
+     *
+     * @param folderId The identifier of the folder to move and/or rename
+     * @param targetFolderId The identifier of the target folder
+     * @param createdBy The user who created the folder
+     * @param newName The new folder name, or <code>null</code> if unchanged
+     * @param storageSrc The folder being moved, reloaded from the storage
+     * @param lastModified The new timestamp to store as last modification date
+     */
+    private void move(final int folderId, final int targetFolderId, final int createdBy, String newName, final FolderObject storageSrc, final long lastModified) throws OXException, SQLException {
         /*
          * Folder is already in target folder and does not need to be renamed
          */
@@ -1129,50 +1144,46 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Check for a duplicate folder in target folder
          */
-        try {
-            final int parentFolderID = storageDest.getObjectID();
-            final String folderName = null == newName ? storageSrc.getFolderName() : newName;
-            boolean throwException = false;
+        final int parentFolderID = storageDest.getObjectID();
+        final String folderName = null == newName ? storageSrc.getFolderName() : newName;
+        boolean throwException = false;
 
+        /*
+         * When the private folder is parent, we have to check if folders with the same name in the same module can be seen by the user.
+         */
+        if (parentFolderID != 1) {
+            if (OXFolderSQL.lookUpFolderOnUpdate(folderId, parentFolderID, folderName, storageSrc.getModule(), readCon, ctx) != -1) {
+                /*
+                 * A duplicate folder exists
+                 */
+                throwException = true;
+            }
+        } else {
+            final TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageSrc.getModule(), readCon, ctx);
             /*
-             * When the private folder is parent, we have to check if folders with the same name in the same module can be seen by the user.
+             * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
              */
-            if (parentFolderID != 1) {
-                if (OXFolderSQL.lookUpFolderOnUpdate(folderId, parentFolderID, folderName, storageSrc.getModule(), readCon, ctx) != -1) {
+            for (final int fuid : folders.toArray()) {
+                final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
+                if (toCheck.getCreatedBy() == (createdBy > 0 ? createdBy : user.getId())) {
                     /*
-                     * A duplicate folder exists
+                     * User is already owner of a private folder with the same name located below system's private folder
                      */
                     throwException = true;
-                }
-            } else {
-                final TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageSrc.getModule(), readCon, ctx);
-                /*
-                 * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
-                 */
-                for (final int fuid : folders.toArray()) {
-                    final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
-                    if (toCheck.getCreatedBy() == (createdBy > 0 ? createdBy : user.getId())) {
-                        /*
-                         * User is already owner of a private folder with the same name located below system's private folder
-                         */
-                        throwException = true;
-                        break;
-                    }
+                    break;
                 }
             }
-
-            if (throwException) {
-                throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(storageDest),
-                    Integer.valueOf(ctx.getContextId()), folderName);
-            }
-
-            /*
-             * Check i18n strings, too
-             */
-            OXFolderUtility.checki18nString(targetFolderId, folderName, user.getLocale(), ctx);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
+
+        if (throwException) {
+            throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(storageDest),
+                Integer.valueOf(ctx.getContextId()), folderName);
+        }
+
+        /*
+         * Check i18n strings, too
+         */
+        OXFolderUtility.checki18nString(targetFolderId, folderName, user.getLocale(), ctx);
         /*
          * Check a bunch of possible errors
          */
@@ -1213,94 +1224,61 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Check if source folder has subfolders
          */
-        try {
-            if (storageSrc.hasSubfolders()) {
-                /*
-                 * Check if target is a descendant folder
-                 */
-                final TIntList parentIDList = new TIntArrayList(1);
-                parentIDList.add(storageSrc.getObjectID());
-                if (OXFolderUtility.isDescendentFolder(parentIDList, targetFolderId, readCon, ctx)) {
-                    throw OXFolderExceptionCode.NO_SUBFOLDER_MOVE.create(OXFolderUtility.getFolderName(storageSrc),
-                        Integer.valueOf(ctx.getContextId()));
-                }
-                /*
-                 * Count all moveable subfolders: TODO: Recursive check???
-                 */
-                final int numOfMoveableSubfolders = OXFolderSQL.getNumOfMoveableSubfolders(
-                    storageSrc.getObjectID(),
-                    user.getId(),
-                    user.getGroups(),
-                    readCon,
-                    ctx);
-                if (numOfMoveableSubfolders != storageSrc.getSubfolderIds(true, ctx).size()) {
-                    throw OXFolderExceptionCode.NO_SUBFOLDER_MOVE_ACCESS.create(OXFolderUtility.getUserName(session, user),
-                        OXFolderUtility.getFolderName(storageSrc),
-                        Integer.valueOf(ctx.getContextId()));
-                }
+        if (storageSrc.hasSubfolders()) {
+            /*
+             * Check if target is a descendant folder
+             */
+            final TIntList parentIDList = new TIntArrayList(1);
+            parentIDList.add(storageSrc.getObjectID());
+            if (OXFolderUtility.isDescendentFolder(parentIDList, targetFolderId, readCon, ctx)) {
+                throw OXFolderExceptionCode.NO_SUBFOLDER_MOVE.create(OXFolderUtility.getFolderName(storageSrc),
+                    Integer.valueOf(ctx.getContextId()));
             }
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            /*
+             * Count all moveable subfolders: TODO: Recursive check???
+             */
+            final int numOfMoveableSubfolders = OXFolderSQL.getNumOfMoveableSubfolders(
+                storageSrc.getObjectID(),
+                user.getId(),
+                user.getGroups(),
+                readCon,
+                ctx);
+            if (numOfMoveableSubfolders != storageSrc.getSubfolderIds(true, ctx).size()) {
+                throw OXFolderExceptionCode.NO_SUBFOLDER_MOVE_ACCESS.create(OXFolderUtility.getUserName(session, user),
+                    OXFolderUtility.getFolderName(storageSrc),
+                    Integer.valueOf(ctx.getContextId()));
+            }
         }
         /*
          * First treat as a delete prior to actual move
          */
-        try {
-            processDeletedFolderThroughMove(storageSrc, new CheckPermissionOnRemove(session, writeCon, ctx), lastModified);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
+        processDeletedFolderThroughMove(storageSrc, new CheckPermissionOnRemove(session, writeCon, ctx), lastModified);
         /*
          * Call SQL move
          */
         try {
             storageSrc.setFolderName(newName);
             OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, readCon, writeCon);
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw parseTruncated(e, storageSrc, TABLE_OXFOLDER_TREE);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
          * Now treat as an insert after actual move if not moved below trash
          */
         if (FolderObject.TRASH != storageDest.getType()) {
-            try {
-                processInsertedFolderThroughMove(
-                    getFolderFromMaster(folderId), new CheckPermissionOnInsert(session, writeCon, ctx), lastModified);
-            } catch (final SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            }
+            processInsertedFolderThroughMove(
+                getFolderFromMaster(folderId), new CheckPermissionOnInsert(session, writeCon, ctx), lastModified);
         }
         /*
-         * Inherit folder type recursively if move from or to trash folder
+         * Inherit folder type recursively if move from or to special folder
          */
-        if (FolderObject.TRASH == storageDest.getType() && FolderObject.TRASH != storageSrc.getType() ||
-            FolderObject.TRASH != storageDest.getType() && FolderObject.TRASH == storageSrc.getType()) {
-            try {
-                List<Integer> folderIDs;
-                if (false == storageSrc.hasSubfolders()) {
-                    folderIDs = Collections.singletonList(Integer.valueOf(folderId));
-                } else {
-                    folderIDs = new ArrayList<Integer>();
-                    folderIDs.add(Integer.valueOf(folderId));
-                    folderIDs.addAll(OXFolderSQL.getSubfolderIDs(folderId, readCon, ctx, true));
-                }
-                OXFolderSQL.updateFolderType(writeCon, ctx, storageDest.getType(), folderIDs);
-            } catch (SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            }
-        }
+        adjustFolderTypeOnMove(storageSrc, storageDest, true);
         /*
          * Update last-modified time stamps
          */
-        try {
-            OXFolderSQL.updateLastModified(storageSrc.getParentFolderID(), lastModified, user.getId(), writeCon, ctx);
-            OXFolderSQL.updateLastModified(storageSrc.getObjectID(), lastModified, user.getId(), writeCon, ctx);
-            OXFolderSQL.updateLastModified(storageDest.getObjectID(), lastModified, user.getId(), writeCon, ctx);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
+        OXFolderSQL.updateLastModified(storageSrc.getParentFolderID(), lastModified, user.getId(), writeCon, ctx);
+        OXFolderSQL.updateLastModified(storageSrc.getObjectID(), lastModified, user.getId(), writeCon, ctx);
+        OXFolderSQL.updateLastModified(storageDest.getObjectID(), lastModified, user.getId(), writeCon, ctx);
         /*
          * Update OLD parent in cache, cause this can only be done here
          */
@@ -1325,6 +1303,34 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
             }
         }
+    }
+
+    /**
+     * Adjusts the folder's type as needed after moving a folder to a new parent folder.
+     *
+     * @param sourceFolder The folder being moved
+     * @param destinationFolder The destination folder, i.e. the new parent folder
+     * @param recursive <code>true</code> to inherit the new folder type to any subfolders recursively, <code>false</code>, otherwise
+     * @return <code>true</code> if the folder type was adjusted, <code>false</code>, otherwise
+     */
+    private boolean adjustFolderTypeOnMove(FolderObject sourceFolder, FolderObject destinationFolder, boolean recursive) throws OXException, SQLException {
+        if (sourceFolder.getType() != destinationFolder.getType()) {
+            int[] inheritingTypes = {
+                FolderObject.TRASH, FolderObject.DOCUMENTS, FolderObject.PICTURES, FolderObject.MUSIC, FolderObject.VIDEOS
+            };
+            if (contains(inheritingTypes, destinationFolder.getType()) || contains(inheritingTypes, sourceFolder.getType())) {
+                List<Integer> folderIDs;
+                if (false == recursive || false == sourceFolder.hasSubfolders()) {
+                    folderIDs = Collections.singletonList(Integer.valueOf(sourceFolder.getObjectID()));
+                } else {
+                    folderIDs = new ArrayList<Integer>();
+                    folderIDs.add(Integer.valueOf(sourceFolder.getObjectID()));
+                    folderIDs.addAll(OXFolderSQL.getSubfolderIDs(sourceFolder.getObjectID(), readCon, ctx, true));
+                }
+                return 0 < OXFolderSQL.updateFolderType(writeCon, ctx, destinationFolder.getType(), folderIDs);
+            }
+        }
+        return false;
     }
 
     private void processDeletedFolderThroughMove(final FolderObject folder, final CheckPermissionOnRemove checker, final long lastModified) throws OXException, SQLException, OXException {

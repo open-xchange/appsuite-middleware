@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,33 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
+
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.HtmlService;
 
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug17195Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
+public class Bug17195Test extends AbstractSanitizing {
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
+    @Test
+    public void testContainsSigns() {
+        HtmlService htmlService = getHtmlService();
 
-    PICTURES_FOLDER,
+        String url = "https://ox6.local.com/ox6/#m=3Dinfostore&f=485D112&i=4D89719";
 
-    DOCUMENTS_FOLDER,
+        String expected = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n" +
+            "\r\n" +
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
+            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
+            " </head><body>https://ox6.local.com/ox6/#m=3Dinfostore&#38;f=485D112&#38;i=4D89719</body></html>";
 
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+        assertEquals("Unexpected return value", expected, htmlService.getConformHTML(url, "UTF-8"));
+    }
 }

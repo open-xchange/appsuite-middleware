@@ -47,39 +47,30 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.vulntests;
 
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.AssertionHelper;
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug28642VulTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
+public class Bug28642VulTest extends AbstractSanitizing {
+    @Test
+    public void testInsecureHref() {
+        String content = "<b>test</b>\n" +
+            "\n" +
+            "<script>alert(42)</script>\n" +
+            "\n" +
+            "<img onerror=\"alert(43)\">plaatje</img>\n" +
+            "\n" +
+            "<b>test</b>";
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+        //TODO: support multiple does not contain expressions
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "<script>alert(42)</script>");
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "alert(43)");
+    }
 }

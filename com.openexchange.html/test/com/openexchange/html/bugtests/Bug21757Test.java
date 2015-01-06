@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,32 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug21757Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum FileStorageFolderType {
+public class Bug21757Test extends AbstractSanitizing {
 
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+    @Test
+    public void testEnsureBodyTagPresence() {
+        String htmlContent = "<center>Lorem Ipsum Dolor<table<tr><td>cell</td></tr></table></center>";
+        String actual = getHtmlService().getConformHTML(htmlContent, "UTF-8");
+        StringBuilder expectedBuilder = new StringBuilder();
+        expectedBuilder.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n");
+        expectedBuilder.append("<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n");
+        expectedBuilder.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n");
+        expectedBuilder.append(" </head><body><center>Lorem Ipsum Dolor<table><tbody><tr><td>cell</td></tr></tbody></table></center></body></html>");
+        String expected = expectedBuilder.toString();
+        assertTrue("The opening <body> tag is missing", actual.contains("<body>"));
+        assertTrue("The closing </body> tag is missing", actual.contains("</body>"));
+        assertEquals("Unexpected value", expected, actual);
+    }
 }

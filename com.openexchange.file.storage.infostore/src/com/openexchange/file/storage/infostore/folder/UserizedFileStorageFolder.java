@@ -62,8 +62,12 @@ import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.TrashType;
+import com.openexchange.folderstorage.type.VideosType;
 
 /**
  * {@link UserizedFileStorageFolder}
@@ -176,6 +180,18 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         }
         if (PublicType.getInstance().equals(type)) {
             return FileStorageFolderType.PUBLIC_FOLDER;
+        }
+        if (PicturesType.getInstance().equals(type)) {
+            return FileStorageFolderType.PICTURES_FOLDER;
+        }
+        if (DocumentsType.getInstance().equals(type)) {
+            return FileStorageFolderType.DOCUMENTS_FOLDER;
+        }
+        if (MusicType.getInstance().equals(type)) {
+            return FileStorageFolderType.MUSIC_FOLDER;
+        }
+        if (VideosType.getInstance().equals(type)) {
+            return FileStorageFolderType.VIDEOS_FOLDER;
         }
         return FileStorageFolderType.NONE;
     }

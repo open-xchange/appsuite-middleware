@@ -59,16 +59,28 @@ import org.junit.Test;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class OwaspTest extends AbstractSanitizing {
+
     @Test
     public void test() {
         List<XSSHolder> xss = new LinkedList<XSSHolder>();
 
-        xss.add(new XSSHolder("<BR SIZE=\"&{alert('XSS')}\">", AssertExpression.NOT_CONTAINED, "size"));
-
+        /**
+         * XSS Locators
+         */
         xss.add(new XSSHolder("'';!--\"<XSS>=&{()}", AssertExpression.NOT_CONTAINED, "<XSS>"));
+
+        /**
+         * No filter evasion
+         */
+        xss.add(new XSSHolder("<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>"));
+
+        xss.add(new XSSHolder("<BR SIZE=\"&{alert('XSS')}\">", AssertExpression.NOT_CONTAINED, "size"));
 
         xss.add(new XSSHolder("<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>"));
 
+        /**
+         * Image XSS using the JavaScript directive
+         */
         xss.add(new XSSHolder("<IMG SRC=\"javascript:alert('XSS');\">", AssertExpression.NOT_CONTAINED, "SRC=\"javascript:alert('XSS');"));
 
         xss.add(new XSSHolder("<IMG SRC=javascript:alert('XSS')>", AssertExpression.NOT_CONTAINED, "SRC=\"javascript:alert('XSS');"));
@@ -79,13 +91,39 @@ public class OwaspTest extends AbstractSanitizing {
 
         xss.add(new XSSHolder("<IMG SRC=`javascript:alert(\"RSnake says, 'XSS'\")`>", AssertExpression.NOT_CONTAINED, "SRC=\"javascript:alert('XSS');"));
 
+        xss.add(new XSSHolder("<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>", AssertExpression.NOT_CONTAINED, "javascript:alert(String.fromCharCode(88,83,83))"));
+
+        xss.add(new XSSHolder("<IMG SRC=# onmouseover=\"alert('xxs')\">", AssertExpression.NOT_CONTAINED, "alert('xxs')"));
+
+        xss.add(new XSSHolder("<IMG SRC=\"\" onmouseover=\"alert('xxs')\">", AssertExpression.NOT_CONTAINED, "alert('xxs')"));
+
+        xss.add(new XSSHolder("<IMG onmouseover=\"alert('xxs')\">", AssertExpression.NOT_CONTAINED, "alert('xxs')"));
+
+        xss.add(new XSSHolder("<IMG SRC=/ onerror=\"alert(String.fromCharCode(88,83,83))\"></img>", AssertExpression.NOT_CONTAINED, "alert(String.fromCharCode(88,83,83))"));
+
+        xss.add(new XSSHolder("<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>", AssertExpression.NOT_CONTAINED,
+            "SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;"));
+
+        xss.add(new XSSHolder("<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#"
+            + "0000088&#0000083&#0000083&#0000039&#0000041>", AssertExpression.NOT_CONTAINED, "SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#"
+            + "0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041"));
+
+        xss.add(new XSSHolder("<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>", AssertExpression.NOT_CONTAINED,
+            "SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29"));
+
+        /**
+         * Malformed IMG tags
+         */
+        xss.add(new XSSHolder("<IMG \"\"\"><SCRIPT>alert(\"XSS\")</SCRIPT>\"", AssertExpression.NOT_CONTAINED, "<SCRIPT>alert(\"XSS\")</SCRIPT>"));
+
+        /**
+         * Malformed A tags
+         */
         xss.add(new XSSHolder("<a onmouseover=\"alert(document.cookie)\">xxs link</a>", AssertExpression.NOT_CONTAINED, "onmouseover=\"alert(document.cookie)\""));
 
         xss.add(new XSSHolder("<a onmouseover=alert(document.cookie)>xxs link</a>", AssertExpression.NOT_CONTAINED, "onmouseover=alert(document.cookie)"));
 
-        xss.add(new XSSHolder("<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>", AssertExpression.NOT_CONTAINED, "SRC=javascript:alert(String.fromCharCode(88,83,83))"));
-
-        for(XSSHolder xssE : xss) {
+        for (XSSHolder xssE : xss) {
             AssertionHelper.assertSanitized(getHtmlService(), xssE.getXssAttack(), xssE.getMalicious(), xssE.getAssertExpression());
         }
     }

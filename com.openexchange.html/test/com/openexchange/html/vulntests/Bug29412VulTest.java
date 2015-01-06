@@ -47,39 +47,22 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.html.vulntests;
+
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.AssertionHelper;
 
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link Bug29412VulTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum FileStorageFolderType {
-
-    /**
-     * No special meaning associated with folder.
-     */
-    NONE,
-    /**
-     * Folder is current user's home directory.
-     */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-
-    PICTURES_FOLDER,
-
-    DOCUMENTS_FOLDER,
-
-    MUSIC_FOLDER,
-
-    VIDEOS_FOLDER
-    ;
+public class Bug29412VulTest extends AbstractSanitizing {
+    @Test
+    public void testInsecureHref() {
+        String content = "http://www.ox.io/publications/infostore/141063539/%3Cscript%3Ealert%28%27Hello%27%29;%3C/script%3E?secret=49844a9e47566b68602e8cc88b50ebfa";
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "%3Cscript%3Ealert%28%27Hello%27%29;%3C/script%3E");
+    }
 }
