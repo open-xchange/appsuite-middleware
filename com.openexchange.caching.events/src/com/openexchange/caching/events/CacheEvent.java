@@ -50,8 +50,9 @@
 package com.openexchange.caching.events;
 
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -70,7 +71,9 @@ public class CacheEvent implements Serializable {
      * @return The cache event
      */
     public static CacheEvent INVALIDATE(String region, String groupName, Serializable key) {
-        return INVALIDATE(region, groupName, Collections.singletonList(key));
+        List<Serializable> keys = new LinkedList<Serializable>();
+        keys.add(key);
+        return INVALIDATE(region, groupName, keys);
     }
 
     /**
@@ -82,7 +85,8 @@ public class CacheEvent implements Serializable {
      * @return The cache event
      */
     public static CacheEvent INVALIDATE(String region, String groupName, List<Serializable> keys) {
-        return new CacheEvent(CacheOperation.INVALIDATE, region, keys, groupName);
+        List<Serializable> myKeys = ((keys instanceof LinkedList) || (keys instanceof ArrayList) ? keys : new LinkedList<Serializable>(keys));
+        return new CacheEvent(CacheOperation.INVALIDATE, region, myKeys, groupName);
     }
 
     /**
@@ -127,7 +131,7 @@ public class CacheEvent implements Serializable {
         super();
         this.operation = operation;
         this.region = region;
-        this.keys = keys;
+        this.keys = ((keys instanceof LinkedList) || (keys instanceof ArrayList) ? keys : new LinkedList<Serializable>(keys));
         this.groupName = groupName;
     }
 
