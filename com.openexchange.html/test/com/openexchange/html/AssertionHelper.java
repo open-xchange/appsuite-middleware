@@ -95,4 +95,13 @@ public class AssertionHelper {
             }
         }
     }
+    
+    public static void assertTag(String tag, String actual, boolean closing) {
+        assertTrue(tag + " is missing", actual.contains(tag));
+        if (closing) {
+            String closingTag = tag.substring(1);
+            closingTag = "</" + closingTag;
+            assertTag(closingTag, actual, false);
+        }
+    }
 }
