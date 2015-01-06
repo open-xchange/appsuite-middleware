@@ -49,77 +49,23 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link Bug21042Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    Bug16800Test.class,
-    Bug16843Test.class,
-    Bug17195Test.class,
-    Bug17991VulTest.class,
-    Bug18911VulTest.class,
-    Bug19466Test.class,
-    Bug19522Test.class,
-    Bug20968Test.class,
-    Bug21014Test.class,
-    Bug21042Test.class,
-    Bug21055Test.class,
-    Bug21118Test.class,
-    Bug21532Test.class,
-    Bug21584Test.class,
-    Bug21668Test.class,
-    Bug21757Test.class,
-    Bug22072Test.class,
-    Bug22284VulTest.class,
-    Bug22286VulTest.class,
-    Bug22304Test.class,
-    Bug23368Test.class,
-    Bug24899Test.class,
-    Bug25321VulTest.class,
-    Bug25923Test.class,
-    Bug26090VulTest.class,
-    Bug26237VulTest.class,
-    Bug26316Test.class,
-    Bug26153Test.class,
-    Bug26611VulTest.class,
-    Bug26789Test.class,
-    Bug27708Test.class,
-    Bug27335Test.class,
-    Bug28094Test.class,
-    Bug28337Test.class,
-    Bug28637Test.class,
-    Bug28642VulTest.class,
-    Bug29229Test.class,
-    Bug29412VulTest.class,
-    Bug29695Test.class,
-    Bug29892Test.class,
-    Bug30114Test.class,
-    Bug30357VulTest.class,
-    Bug31826Test.class,
-    Bug35291Test.class,
-    Bug35546Test.class,
-    CSSMatcherTest.class,
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class,
-    OwaspTest.class,
-    com.openexchange.html.internal.SaneScriptTagsTest.class
-})
-public class UnitTests {
-
-    private UnitTests() {
-        super();
+public class Bug21042Test extends AbstractSanitizing {
+    @Test
+    public void testNoEmptySpaceBetweenDifferentColors() {
+        /**
+         * There should be no whitespace between the span tags
+         */
+        String content = "<p><span style=\"color:red\">bla</span><span style=\"color:green\">fasel</span></p>";
+        assertEquals("Unexpected return value", "<html><head></head><body><p><span style=\"color:red\">bla</span><span style=\"color:green\">fasel</span></p></body></html>",
+            getHtmlService().prettyPrint(content));
     }
 }

@@ -76,9 +76,9 @@ public class AssertionHelper {
         }
         if (AssertExpression.NOT_CONTAINED.equals(ae)) {
             int index = sanitized.indexOf(mailiciousParam);
-            assertEquals(sanitized + " contains " + mailiciousParam, -1, index); //TODO
+            assertEquals("sanitized output: " + sanitized + " contains " + mailiciousParam, -1, index);
         } else if(AssertExpression.EMPTY.equals(ae)) {
-            assertTrue("expected sanitized to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
+            assertTrue("expected html: " + html + " after sanitizing to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
         }
     }
     
