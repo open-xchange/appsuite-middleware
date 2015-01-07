@@ -147,8 +147,9 @@ public class FileCopyOptimizer extends FileActionOptimizer {
     private static ServerFileVersion findByChecksum(String checksum, Collection<? extends FileVersion> versions) {
         if (null != versions && 0 < versions.size()) {
             for (FileVersion version : versions) {
-                if (ServerFileVersion.class.isInstance(version) && checksum.equals(version.getChecksum())) {
-                    return (ServerFileVersion)version;
+                if (ServerFileVersion.class.isInstance(version) && checksum.equals(version.getChecksum()) &&
+                    false == DriveConstants.METADATA_FILENAME.equals(version.getName())) {
+                    return (ServerFileVersion) version;
                 }
             }
         }
@@ -303,6 +304,9 @@ public class FileCopyOptimizer extends FileActionOptimizer {
         for (List<FileChecksum> storedChecksums : storedFileChecksums.values()) {
             File matchingFile = null;
             for (FileChecksum storedChecksum : storedChecksums) {
+                if (DriveConstants.METADATA_FILENAME.equals(storedChecksum.getFileID().getFileId())) {
+                    continue;
+                }
                 FileID fileID = storedChecksum.getFileID();
                 /*
                  * try to get parent folder permissions

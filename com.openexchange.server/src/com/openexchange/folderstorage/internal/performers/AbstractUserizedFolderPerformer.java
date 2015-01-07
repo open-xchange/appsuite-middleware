@@ -517,11 +517,18 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         UserizedFolder[] existingFolders = new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, targetFolderId, true, true);
         for (UserizedFolder existingFolder : existingFolders) {
             if (false == existingFolder.getID().equals(folderToSave.getID())) {
-                String conflictingName = existingFolder.getLocalizedName(getLocale()).toLowerCase(getLocale());
+                String conflictingName = existingFolder.getName().toLowerCase(getLocale());
                 if (false == autoRename && lowercaseTargetName.equals(conflictingName)) {
                     return existingFolder;
                 }
                 conflictingNames.add(conflictingName);
+                if (false == InfostoreContentType.getInstance().toString().equals(contentType.toString())) {
+                    String conflictingLocalizedName = existingFolder.getLocalizedName(getLocale()).toLowerCase(getLocale());
+                    if (false == autoRename && lowercaseTargetName.equals(conflictingLocalizedName)) {
+                        return existingFolder;
+                    }
+                    conflictingNames.add(conflictingLocalizedName);
+                }
             }
         }
         /*

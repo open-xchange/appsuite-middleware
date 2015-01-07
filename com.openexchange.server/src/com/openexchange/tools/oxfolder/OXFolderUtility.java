@@ -62,9 +62,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -81,7 +79,6 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -231,15 +228,11 @@ public final class OXFolderUtility {
                     /*
                      * also check for reserved names below user's infostore folder
                      */
-                    FolderI18nNamesService i18nNamesService = ServerServiceRegistry.getServize(FolderI18nNamesService.class);
-                    if (null != i18nNamesService) {
-                        Set<String> reservedNames = i18nNamesService.getI18nNamesFor(FolderObject.INFOSTORE,
-                            FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME, FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME,
-                            FolderStrings.SYSTEM_USER_PICTURES_FOLDER_NAME, FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME);
-                        for (String reservedName : reservedNames) {
-                            if (Strings.equalsNormalizedIgnoreCase(reservedName, folderName)) {
-                                throw OXFolderExceptionCode.NO_RESERVED_FOLDER.create(folderName);
-                            }
+                    String[] reservedNames = { FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME, FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME,
+                        FolderStrings.SYSTEM_USER_PICTURES_FOLDER_NAME, FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME };
+                    for (String reservedName : reservedNames) {
+                        if (Strings.equalsNormalizedIgnoreCase(reservedName, folderName)) {
+                            throw OXFolderExceptionCode.NO_RESERVED_FOLDER.create(folderName);
                         }
                     }
                 }

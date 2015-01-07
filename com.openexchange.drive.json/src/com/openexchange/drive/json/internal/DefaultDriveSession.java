@@ -192,7 +192,7 @@ public class DefaultDriveSession implements DriveSession {
 
     @Override
     public int getApiVersion() {
-        return apiVersion;
+        return 3;//apiVersion;
     }
 
     @Override
