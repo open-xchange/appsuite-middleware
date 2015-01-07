@@ -66,16 +66,15 @@ public class ParallelsMailMappingService implements MailResolver {
             prep.setString(1, mail + "||%");
             rs = prep.executeQuery();
 
-            if( ! rs.next() ) {
-                return null;
+            if (!rs.next()) {
+                return ResolvedMail.DENY();
             }
-            final Integer ctxId = rs.getInt("cid");
+            final int ctxId = rs.getInt("cid");
             final String linfo = rs.getString("login_info");
 
-
             final Context ctx = cservice.getContext(ctxId);
-            final String []udata = linfo.split("\\|\\|");
-            if( udata[0].equals(mail) ) {
+            final String[] udata = linfo.split("\\|\\|");
+            if (udata[0].equals(mail)) {
                 final int uid = uservice.getUserId(udata[1], ctx);
                 return new ResolvedMail(uid, ctx.getContextId());
             }
@@ -87,7 +86,7 @@ public class ParallelsMailMappingService implements MailResolver {
             dbservice.backReadOnly(con);
         }
 
-        return null;
+        return ResolvedMail.DENY();
     }
 
 }
