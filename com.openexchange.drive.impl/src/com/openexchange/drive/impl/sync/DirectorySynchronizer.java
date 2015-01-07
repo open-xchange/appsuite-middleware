@@ -398,7 +398,11 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
         if (DriveConstants.ROOT_PATH.equals(version.getPath())) {
             return false;
         }
-        FileStoragePermission ownPermission = session.getStorage().getOwnPermission(version.getPath());
+        FileStorageFolder folder = session.getStorage().getFolder(version.getPath());
+        if (folder.isDefaultFolder()) {
+            return false;
+        }
+        FileStoragePermission ownPermission = folder.getOwnPermission();
         if (false == ownPermission.isAdmin()) {
             return false;
         }
