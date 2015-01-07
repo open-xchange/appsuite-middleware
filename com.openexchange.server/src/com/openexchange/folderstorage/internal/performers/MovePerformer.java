@@ -524,34 +524,6 @@ final class MovePerformer extends AbstractPerformer {
         }
     }
 
-    private void checkOpenedStorage(final FolderStorage storage, final Collection<FolderStorage> openedStorages) throws OXException {
-        for (final FolderStorage openedStorage : openedStorages) {
-            if (openedStorage.equals(storage)) {
-                return;
-            }
-        }
-        if (storage.startTransaction(storageParameters, true)) {
-            openedStorages.add(storage);
-        }
-    }
-
-    private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {
-        final ListPerformer listPerformer;
-        if (null == session) {
-            listPerformer = new ListPerformer(user, context, null);
-        } else {
-            listPerformer = new ListPerformer(session, null);
-        }
-        listPerformer.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages, false);
-        for (final UserizedFolder userizedFolder : subfolders) {
-            if (name.equals(userizedFolder.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {
         final ListPerformer listPerformer;
         if (null == session) {

@@ -62,6 +62,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -82,6 +85,7 @@ import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.osgi.ShareServiceHolder;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -90,6 +94,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -106,13 +111,12 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer {
 
     private static final String DUMMY_ID = "dummyId";
+    private static final Pattern IS_NUMBERED_PARENTHESIS = Pattern.compile("\\(\\d+\\)$");
+    private static final Pattern IS_NUMBERED = Pattern.compile("\\d+$");
 
     private final FolderServiceDecorator decorator;
-
     private volatile TimeZone timeZone;
-
     private volatile Locale locale;
-
     private volatile java.util.List<ContentType> allowedContentTypes;
 
     /**
@@ -448,6 +452,110 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /**
+     * Checks a folder's name in the supplied target folder for conflicts with reserved folder names. Depending on the
+     * <code>autorename</code> decorator property, the folder name is either adjusted to no longer conflict, or the conflicting reserved
+     * name is returned for further processing.
+     *
+     * @param treeId The tree identifier
+     * @param targetFolderId The identifier of the parent folder where the folder should be saved in
+     * @param folderToSave The folder to be saved
+     * @param allowAutorename <code>true</code> to allow an automatic rename based on the <code>autorename</code> decorator property, <code>false</code>, otherwise
+     * @return <code>null</code> if the folder name does not or no longer conflict due to auto-rename, or the conflicting reserved folder name, otherwise
+     */
+    protected String checkForReservedName(String treeId, String targetFolderId, Folder folderToSave, boolean allowAutorename) throws OXException {
+        if (false == check4Duplicates || null == folderToSave.getName() ||
+            InfostoreContentType.getInstance().toString().equals(folderToSave.getContentType().toString())) {
+            return null;
+        }
+        boolean autoRename = allowAutorename ? AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename")) : false;
+        String lowercaseTargetName = folderToSave.getName().toLowerCase(getLocale());
+        /*
+         * check reserved names for outlook folders (non-infostore folders)
+         */
+        Set<String> reservedNames = new HashSet<String>();
+        Set<String> i18nNames = FolderI18nNamesServiceImpl.getInstance().getI18nNamesFor(Module.SYSTEM.getFolderConstant(),
+            Module.CALENDAR.getFolderConstant(), Module.CONTACTS.getFolderConstant(), Module.MAIL.getFolderConstant(), Module.TASK.getFolderConstant());
+        for (String i18nName : i18nNames) {
+            String reservedName = i18nName.toLowerCase(getLocale());
+            if (false == autoRename && lowercaseTargetName.equals(reservedName)) {
+                return i18nName;
+            }
+            reservedNames.add(reservedName);
+        }
+        /*
+         * auto-rename automatically as needed
+         */
+        if (autoRename) {
+            autoRename(reservedNames, folderToSave);
+        }
+        return null;
+    }
+
+    /**
+     * Checks a folder's name against equally named folders in the supplied target folder. Depending on the <code>autorename</code>
+     * decorator property, the folder name is either adjusted to no longer conflict, or the conflicting existing folder is returned for
+     * further processing.
+     *
+     * @param treeId The tree identifier
+     * @param targetFolderId The identifier of the parent folder where the folder should be saved in
+     * @param folderToSave The folder to be saved
+     * @param allowAutorename <code>true</code> to allow an automatic rename based on the <code>autorename</code> decorator property, <code>false</code>, otherwise
+     * @return <code>null</code> if the folder name does not or no longer conflict due to auto-rename, or the conflicting folder, otherwise
+     */
+    protected UserizedFolder checkForEqualName(String treeId, String targetFolderId, Folder folderToSave, boolean allowAutorename) throws OXException {
+        if (false == check4Duplicates || null == folderToSave.getName()) {
+            return null;
+        }
+        boolean autoRename = allowAutorename ? AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename")) : false;
+        String lowercaseTargetName = folderToSave.getName().toLowerCase(getLocale());
+        /*
+         * check for equally named folder on same level
+         */
+        Set<String> conflictingNames = new HashSet<String>();
+        UserizedFolder[] existingFolders = new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, targetFolderId, true, true);
+        for (UserizedFolder existingFolder : existingFolders) {
+            if (false == existingFolder.getID().equals(folderToSave.getID())) {
+                String conflictingName = existingFolder.getLocalizedName(getLocale()).toLowerCase(getLocale());
+                if (false == autoRename && lowercaseTargetName.equals(conflictingName)) {
+                    return existingFolder;
+                }
+                conflictingNames.add(conflictingName);
+            }
+        }
+        /*
+         * auto-rename automatically as needed
+         */
+        if (autoRename) {
+            autoRename(conflictingNames, folderToSave);
+        }
+        return null;
+    }
+
+    /**
+     * Automatically renames a folder until it no longer conflicts with other reserved names.
+     *
+     * @param conflictingNames The names to check against as <b>lowercase</b> strings for easy comparison
+     * @param folderToSave The folder to save
+     * @return <code>true</code> if the folder's name was adjusted, <code>false</code>, otherwise
+     */
+    private boolean autoRename(Set<String> conflictingNames, Folder folderToSave) {
+        if (null == conflictingNames || 0 == conflictingNames.size()) {
+            return false;
+        }
+        String targetName = folderToSave.getName();
+        if (conflictingNames.contains(targetName.toLowerCase(getLocale()).trim())) {
+            boolean useParenthesis = PARENTHESIS_CAPABLE.contains(folderToSave.getContentType().toString());
+            int counter = 0;
+            do {
+                targetName = enhance(targetName, ++counter, useParenthesis);
+            } while (conflictingNames.contains(targetName.toLowerCase(getLocale()).trim()));
+            folderToSave.setName(targetName);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Deletes shares that are no longer valid as a consequence of removed guest permission entities. This also includes deleting the
      * corresponding guest user.
      *
@@ -619,6 +727,36 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
         return (date + timeZone.getOffset(date));
+    }
+
+    /**
+     * Appends or modifies a counter in the supplied (folder-) name, optionally in parenthesis. <p/>
+     * For example, passing the name <code>test</code> and a counter of <code>2</code> will result in the string <code>test (2)</code>,
+     * while the name <code>test (1)</code> would be changed to <code>test (2)</code>.
+     *
+     * @param name The name to enhance
+     * @param counter The counter to append
+     * @return The enhanced name
+     */
+    private static String enhance(String name, int counter, boolean useParenthesis) {
+        if (null == name) {
+            return name;
+        }
+        if (useParenthesis) {
+            Matcher matcher = IS_NUMBERED_PARENTHESIS.matcher(name);
+            if (matcher.find()) {
+                return new StringBuilder(name).replace(matcher.start(), matcher.end(), '(' + String.valueOf(counter) + ')').toString();
+            } else {
+                return name + " (" + counter + ')';
+            }
+        } else {
+            Matcher matcher = IS_NUMBERED.matcher(name);
+            if (matcher.find()) {
+                return new StringBuilder(name).replace(matcher.start(), matcher.end(), String.valueOf(counter)).toString();
+            } else {
+                return name + ' ' + counter;
+            }
+        }
     }
 
 }
