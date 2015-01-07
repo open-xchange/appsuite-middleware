@@ -1,3 +1,7 @@
+* 2015-01-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35979: Null guard for passed cache keys
+
 * 2015-01-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 35948: Check for a valid prepared SQL statement prior to attempting to execute it
