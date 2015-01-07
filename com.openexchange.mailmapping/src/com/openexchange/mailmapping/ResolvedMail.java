@@ -57,6 +57,38 @@ package com.openexchange.mailmapping;
  */
 public class ResolvedMail {
 
+    /**
+     * Creates a new {@link ResolvedMail} instance indicating {@link ResolveReply#DENY DENY} result.
+     *
+     * @return A new {@link ResolvedMail} instance indicating {@link ResolveReply#DENY DENY} result
+     */
+    public static ResolvedMail DENY() {
+        return new ResolvedMail(-1, -1, ResolveReply.DENY);
+    }
+
+    /**
+     * Creates a new {@link ResolvedMail} instance indicating {@link ResolveReply#NEUTRAL NEUTRAL} result.
+     *
+     * @return A new {@link ResolvedMail} instance indicating {@link ResolveReply#NEUTRAL NEUTRAL} result
+     */
+    public static ResolvedMail NEUTRAL() {
+        return new ResolvedMail(-1, -1, ResolveReply.NEUTRAL);
+    }
+
+    /**
+     * Creates a new {@link ResolvedMail} instance for given user/context identifier; hence indicating {@link ResolveReply#ACCEPT ACCEPT} result.
+     *
+     * @param userID The user identifier
+     * @param contextID The context identifier
+     * @return A new {@link ResolvedMail} instance for given user/context identifier; hence indicating {@link ResolveReply#ACCEPT ACCEPT} result
+     */
+    public static ResolvedMail ACCEPT(int userID, int contextID) {
+        return new ResolvedMail(userID, contextID, ResolveReply.ACCEPT);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------
+
+    private final ResolveReply resolveReply;
     private final int userID;
     private final int contextID;
 
@@ -67,26 +99,55 @@ public class ResolvedMail {
      * @param contextID The context identifier
      */
     public ResolvedMail(int userID, int contextID) {
+        this(userID, contextID, ResolveReply.ACCEPT);
+    }
+
+    /**
+     * Initializes a new {@link ResolvedMail}.
+     *
+     * @param userID The user identifier
+     * @param contextID The context identifier
+     * @param resolveReply The resolve reply
+     */
+    public ResolvedMail(int userID, int contextID, ResolveReply resolveReply) {
         super();
         this.userID = userID;
         this.contextID = contextID;
+        this.resolveReply = null == resolveReply ? ResolveReply.ACCEPT : resolveReply;
     }
 
     /**
      * Gets the user identifier
      *
-     * @return The user identifier
+     * @return The user identifier or <code>-1</code> if unknown
+     *         (typically alongside with resolve type set to {@link ResolveReply#NEUTRAL} or {@link ResolveReply#DENY})
      */
     public int getUserID() {
         return userID;
     }
+
     /**
      * Gets the context identifier
      *
-     * @return The context identifier
+     * @return The context identifier or <code>-1</code> if unknown
+     *         (typically alongside with resolve type set to {@link ResolveReply#NEUTRAL} or {@link ResolveReply#DENY})
      */
     public int getContextID() {
         return contextID;
+    }
+
+    /**
+     * Gets the resolve reply
+     * <ul>
+     * <li>DENY - The {@code MailResolver} denies further processing of passed E-Mail address.
+     * <li>NEUTRAL - The {@code MailResolver} cannot handle passed E-Mail address, therefore delegates to the next one in chain.
+     * <li>ACCEPT - The {@code MailResolver} successfully handled passed E-Mail address.
+     * </ul>
+     *
+     * @return The resolve reply
+     */
+    public ResolveReply getResolveReply() {
+        return resolveReply;
     }
 
 }
