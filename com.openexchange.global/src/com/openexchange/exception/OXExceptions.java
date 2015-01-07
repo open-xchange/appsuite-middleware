@@ -72,6 +72,34 @@ public final class OXExceptions {
     }
 
     /**
+     * Checks if specified <code>OXException</code>'s (first) category matches {@link OXExceptionConstants#CATEGORY_USER_INPUT USER_INPUT category}.
+     *
+     * @param e The <code>OXException</code> instance to check
+     * @return <code>true</code> if category matches; otherwise <code>false</code>
+     */
+    public static boolean isUserInput(OXException e) {
+        return isCategory(CATEGORY_USER_INPUT, e);
+    }
+
+    /**
+     * Checks if specified <code>OXException</code>'s (first) category matches given category.
+     *
+     * @param category The category
+     * @param e The <code>OXException</code> instance to check
+     * @return <code>true</code> if category matches; otherwise <code>false</code>
+     */
+    public static boolean isCategory(Category category, OXException e) {
+        if (null == category || null == e) {
+            return false;
+        }
+
+        Category cat = e.getCategory();
+        return null != cat && category.getType().equals(cat.getType());
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    /**
      * Checks if given {@link OXException} instance contains either a socket or an I/O error in its cause chain.
      *
      * @param e The <tt>OXException</tt> instance to check

@@ -88,6 +88,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
@@ -291,11 +292,11 @@ public class AdminCache {
         while (predefined_access_combinations.hasMoreElements()) {
             String predefined_combination_name = (String) predefined_access_combinations.nextElement();
             String predefined_modules = (String) access_props.get(predefined_combination_name);
-            if (predefined_modules != null && predefined_modules.trim().length() > 0) {
+            if (predefined_modules != null) {
                 UserModuleAccess us = new UserModuleAccess();
                 us.disableAll();
                 us.setGlobalAddressBookDisabled(false); // by default this is enabled.
-                String[] modules = predefined_modules.split(" *, *");
+                String[] modules = Strings.isEmpty(predefined_modules) ? new String[0] : predefined_modules.split(" *, *");
                 for (String module : modules) {
                     module = module.trim();
                     Method meth = module_method_mapping.get(module);

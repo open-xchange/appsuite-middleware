@@ -65,8 +65,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
@@ -323,7 +326,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return A proper instance of <tt>MailAccess</tt>
      * @throws OXException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final Session session) throws OXException {
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(Session session) throws OXException {
         return getInstance(session, MailAccount.DEFAULT_ID);
     }
 
@@ -351,30 +354,24 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return A proper instance of <tt>MailAccess</tt>
      * @throws OXException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final Session session, final int accountId) throws OXException {
-        /*
-         * Check for proper initialization
-         */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(Session session, int accountId) throws OXException {
+        // Check for proper initialization
         if (!MailInitialization.getInstance().isInitialized()) {
             throw MailExceptionCode.INITIALIZATION_PROBLEM.create();
         }
-        if (MailAccount.DEFAULT_ID == accountId) {
-            /*
-             * No cached connection available, check for admin login
-             */
-            checkAdminLogin(session, accountId);
-        }
-        /*
-         * Occupy free slot
-         */
-        final Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
+
+        // Check login attempt
+        checkLogin(session, accountId);
+
+        // Occupy free slot
+        Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
         if (null == tmp || toBool(tmp)) {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
             }
         }
-        final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
+        MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
         return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
     }
 
@@ -420,15 +417,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If re-connect attempt fails
      * @see #getNewInstance(Session, int)
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> reconnect(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> reconnect(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         if (null == mailAccess) {
             return null;
         }
-        final Session session = mailAccess.getSession();
-        final int accountId = mailAccess.getAccountId();
+        Session session = mailAccess.getSession();
+        int accountId = mailAccess.getAccountId();
         mailAccess.close(true);
+
         // A new instance, freshly initialized
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newAccess = MailAccess.getNewInstance(session, accountId);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newAccess = MailAccess.getNewInstance(session, accountId);
         newAccess.connect();
         return newAccess;
     }
@@ -457,7 +455,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return An appropriate {@link MailAccess mail access}
      * @throws OXException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final int userId, final int contextId) throws OXException {
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(int userId, int contextId) throws OXException {
         return getInstance(userId, contextId, MailAccount.DEFAULT_ID);
     }
 
@@ -486,17 +484,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return An appropriate {@link MailAccess mail access}
      * @throws OXException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final int userId, final int contextId, final int accountId) throws OXException {
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(int userId, int contextId, int accountId) throws OXException {
+        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null != sessiondService) {
-            final Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
+            Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
             if (session != null) {
                 return getInstance(session, accountId);
             }
         }
-        /*
-         * No appropriate session found.
-         */
+
+        // No appropriate session found.
         throw MailExceptionCode.UNEXPECTED_ERROR.create("No appropriate session found.");
     }
 
@@ -1032,23 +1029,23 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Checks if session's user denotes the context admin user and whether admin user's try to login to mail system is permitted or not.
+     * Checks if user's attempt to login to mail system is permitted or not.
      *
      * @param session The session
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @throws OXException If session's user denotes the context admin user and admin user's try to login to mail system is not permitted
      */
-    private static final void checkAdminLogin(final Session session, final int accountId) throws OXException {
-        if (!MailProperties.getInstance().isAdminMailLoginEnabled()) {
-            /*
-             * Admin mail login is not permitted per configuration
-             */
-            final Context ctx;
-            if (session instanceof ServerSession) {
-                ctx = ((ServerSession) session).getContext();
-            } else {
-                ctx = ContextStorage.getStorageContext(session.getContextId());
-            }
+    private static final void checkLogin(Session session, int accountId) throws OXException {
+        // Check permission
+        UserPermissionBits permissionBits =  (session instanceof ServerSession) ? ((ServerSession) session).getUserPermissionBits() : UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContextId());
+        if (!permissionBits.hasWebMail()) {
+            throw OXExceptions.noPermissionForModule("mail");
+        }
+
+        // Check admin login
+        if (MailAccount.DEFAULT_ID == accountId && !MailProperties.getInstance().isAdminMailLoginEnabled()) {
+            // Admin mail login is not permitted per configuration
+            Context ctx = (session instanceof ServerSession) ? ((ServerSession) session).getContext() : ContextStorage.getStorageContext(session.getContextId());
             if (session.getUserId() == ctx.getMailadmin()) {
                 throw MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.create(Integer.valueOf(ctx.getContextId()));
             }
