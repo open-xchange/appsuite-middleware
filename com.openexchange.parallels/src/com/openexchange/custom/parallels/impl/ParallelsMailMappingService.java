@@ -46,10 +46,9 @@ public class ParallelsMailMappingService implements MailResolver {
         }
 
         DatabaseService dbservice = services.getService(DatabaseService.class);
-        final Connection con = dbservice.getReadOnly();
-        PreparedStatement prep = null;
-        ResultSet rs = null;
-
+        if (null == dbservice) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
         ContextService cservice = services.getService(ContextService.class);
         if (null == cservice) {
             throw ServiceExceptionCode.absentService(ContextService.class);
@@ -59,17 +58,20 @@ public class ParallelsMailMappingService implements MailResolver {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
 
+        Connection con = dbservice.getReadOnly();
+        PreparedStatement prep = null;
+        ResultSet rs = null;
         try {
             prep = con.prepareStatement("SELECT cid,login_info FROM login2context WHERE login_info LIKE ?");
             prep.setString(1, mail + "||%");
             rs = prep.executeQuery();
-        
+
             if( ! rs.next() ) {
                 return null;
             }
             final Integer ctxId = rs.getInt("cid");
             final String linfo = rs.getString("login_info");
-            
+
 
             final Context ctx = cservice.getContext(ctxId);
             final String []udata = linfo.split("\\|\\|");
@@ -84,7 +86,7 @@ public class ParallelsMailMappingService implements MailResolver {
             DBUtils.closeSQLStuff(rs, prep);
             dbservice.backReadOnly(con);
         }
-        
+
         return null;
     }
 
