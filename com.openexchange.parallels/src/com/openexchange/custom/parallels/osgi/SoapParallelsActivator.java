@@ -2,8 +2,11 @@
 package com.openexchange.custom.parallels.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -13,12 +16,15 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.custom.parallels.impl.ParallelsHostnameService;
+import com.openexchange.custom.parallels.impl.ParallelsMailMappingService;
 import com.openexchange.custom.parallels.impl.ParallelsOXAuthentication;
 import com.openexchange.custom.parallels.impl.ParallelsOptions;
 import com.openexchange.custom.parallels.soap.OXServerServicePortType;
 import com.openexchange.custom.parallels.soap.OXServerServicePortTypeImpl;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
@@ -33,7 +39,7 @@ public class SoapParallelsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, UserService.class, ConfigurationService.class, HttpService.class };
+        return new Class<?>[] { ContextService.class, UserService.class, ConfigurationService.class, HttpService.class, DatabaseService.class };
     }
 
     @Override
@@ -96,6 +102,10 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         LOG.debug("Trying to register POA hostname/directlinks plugin");
         registerService(HostnameService.class.getName(), new ParallelsHostnameService(), null);
         LOG.debug("Successfully registered POA hostname/directlinks plugin");
+        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+        props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+        registerService(MailResolver.class, new ParallelsMailMappingService(this), props);
+        LOG.debug("Successfully registered POA Mailmappings plugin");
         // Register SOAP service
         final OXServerServicePortTypeImpl soapService = new OXServerServicePortTypeImpl();
         registerService(OXServerServicePortType.class, soapService);
