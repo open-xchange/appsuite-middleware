@@ -173,6 +173,8 @@ public class AdminCache {
      */
     private boolean contextAuthenticationDisabled = false;
 
+    private boolean allowMasterOverride = false;
+    
     // master credentials for authenticating master admin
     private Credentials masterCredentials = null;
 
@@ -607,6 +609,9 @@ public class AdminCache {
 
         contextAuthenticationDisabled = Boolean.parseBoolean(context_auth_disabled);
         log.debug("ContextAuthentication mechanism disabled: {}", contextAuthenticationDisabled);
+        
+        allowMasterOverride = Boolean.parseBoolean(this.prop.getProp("MASTER_PASSWORD_OVERRIDE", "false"));
+        log.debug("Master override: {}", allowMasterOverride);
     }
 
     private void readMasterCredentials(final ConfigurationService service) throws OXGenericException {
@@ -734,5 +739,10 @@ public class AdminCache {
 
     public void reloadMasterCredentials(ConfigurationService configService) throws OXGenericException {
         readMasterCredentials(configService);
+    }
+
+    
+    public boolean isAllowMasterOverride() {
+        return allowMasterOverride;
     }
 }

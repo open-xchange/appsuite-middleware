@@ -149,6 +149,9 @@ public class BasicAuthenticator extends OXCommonImpl {
     }
 
     public boolean isMasterOfContext(final Credentials creds, final Context ctx) throws InvalidCredentialsException {
+        if( ! ClientAdminThread.cache.isAllowMasterOverride() ) {
+            return false;
+        }
         if( ClientAdminThread.cache.isMasterAdmin(creds) ) {
             return true;
         }
