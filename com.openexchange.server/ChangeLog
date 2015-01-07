@@ -1,3 +1,7 @@
+* 2015-01-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35979: Null guard for passed cache keys
+
 * 2014-01-05 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 35760: Introduced new certificates and keys for APN and GCM in "drive-restricted" package
@@ -5,7 +9,7 @@
 * 2015-01-05 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35696: Replace all reserved filename characters with '_'
- 
+
 * 2015-01-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 35948: Check for a valid prepared SQL statement prior to attempting to execute it
