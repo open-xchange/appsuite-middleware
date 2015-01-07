@@ -57,8 +57,8 @@ package com.openexchange.mailmapping;
  */
 public class ResolvedMail {
 
-    private int userID;
-    private int contextID;
+    private final int userID;
+    private final int contextID;
 
     /**
      * Initializes a new {@link ResolvedMail}.
@@ -80,16 +80,6 @@ public class ResolvedMail {
     public int getUserID() {
         return userID;
     }
-
-    /**
-     * Sets the user identifier
-     *
-     * @param userID The user identifier
-     */
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
-
     /**
      * Gets the context identifier
      *
@@ -97,15 +87,6 @@ public class ResolvedMail {
      */
     public int getContextID() {
         return contextID;
-    }
-
-    /**
-     * Sets the context identifier
-     *
-     * @param contextID The context identifier
-     */
-    public void setContextID(int contextID) {
-        this.contextID = contextID;
     }
 
 }
