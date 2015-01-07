@@ -1,3 +1,7 @@
+* 2015-01-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 35355: Fixed bad ressource conflict for series exceptions.
+
 * 2015-01-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 35979: Null guard for passed cache keys
