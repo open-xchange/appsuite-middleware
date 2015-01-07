@@ -459,12 +459,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param treeId The tree identifier
      * @param targetFolderId The identifier of the parent folder where the folder should be saved in
      * @param folderToSave The folder to be saved
+     * @param contentType The folder's content type
      * @param allowAutorename <code>true</code> to allow an automatic rename based on the <code>autorename</code> decorator property, <code>false</code>, otherwise
      * @return <code>null</code> if the folder name does not or no longer conflict due to auto-rename, or the conflicting reserved folder name, otherwise
      */
-    protected String checkForReservedName(String treeId, String targetFolderId, Folder folderToSave, boolean allowAutorename) throws OXException {
+    protected String checkForReservedName(String treeId, String targetFolderId, Folder folderToSave, ContentType contentType, boolean allowAutorename) throws OXException {
         if (false == check4Duplicates || null == folderToSave.getName() ||
-            InfostoreContentType.getInstance().toString().equals(folderToSave.getContentType().toString())) {
+            InfostoreContentType.getInstance().toString().equals(contentType.toString())) {
             return null;
         }
         boolean autoRename = allowAutorename ? AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename")) : false;
@@ -486,7 +487,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * auto-rename automatically as needed
          */
         if (autoRename) {
-            autoRename(reservedNames, folderToSave);
+            autoRename(reservedNames, folderToSave, contentType);
         }
         return null;
     }
@@ -499,10 +500,11 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param treeId The tree identifier
      * @param targetFolderId The identifier of the parent folder where the folder should be saved in
      * @param folderToSave The folder to be saved
+     * @param contentType The folder's content type
      * @param allowAutorename <code>true</code> to allow an automatic rename based on the <code>autorename</code> decorator property, <code>false</code>, otherwise
      * @return <code>null</code> if the folder name does not or no longer conflict due to auto-rename, or the conflicting folder, otherwise
      */
-    protected UserizedFolder checkForEqualName(String treeId, String targetFolderId, Folder folderToSave, boolean allowAutorename) throws OXException {
+    protected UserizedFolder checkForEqualName(String treeId, String targetFolderId, Folder folderToSave, ContentType contentType, boolean allowAutorename) throws OXException {
         if (false == check4Duplicates || null == folderToSave.getName()) {
             return null;
         }
@@ -526,7 +528,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * auto-rename automatically as needed
          */
         if (autoRename) {
-            autoRename(conflictingNames, folderToSave);
+            autoRename(conflictingNames, folderToSave, contentType);
         }
         return null;
     }
@@ -538,13 +540,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param folderToSave The folder to save
      * @return <code>true</code> if the folder's name was adjusted, <code>false</code>, otherwise
      */
-    private boolean autoRename(Set<String> conflictingNames, Folder folderToSave) {
+    private boolean autoRename(Set<String> conflictingNames, Folder folderToSave, ContentType contentType) {
         if (null == conflictingNames || 0 == conflictingNames.size()) {
             return false;
         }
         String targetName = folderToSave.getName();
         if (conflictingNames.contains(targetName.toLowerCase(getLocale()).trim())) {
-            boolean useParenthesis = PARENTHESIS_CAPABLE.contains(folderToSave.getContentType().toString());
+            boolean useParenthesis = PARENTHESIS_CAPABLE.contains(contentType.toString());
             int counter = 0;
             do {
                 targetName = enhance(targetName, ++counter, useParenthesis);

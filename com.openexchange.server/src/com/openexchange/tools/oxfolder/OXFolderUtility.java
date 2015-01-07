@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
@@ -61,12 +62,15 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
+import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -74,8 +78,10 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -137,7 +143,7 @@ public final class OXFolderUtility {
      * @param ctx The context
      * @throws OXException If a duplicate folder exists
      */
-    public static void checki18nString(final int parentFolderId, final String folderName, final Locale locale, final Context ctx) throws OXException {
+    private static void checki18nString(final int parentFolderId, final String folderName, final Locale locale, final Context ctx) throws OXException {
         if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderId) {
             if (FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale).equalsIgnoreCase(folderName)) {
                 final String parentFolderName =
@@ -159,6 +165,87 @@ public final class OXFolderUtility {
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName,
                     Integer.valueOf(ctx.getContextId()), folderName);
             }
+        }
+    }
+
+    /**
+     * Performs various checks against conflicting duplicate folders on the same level or reserved folder names before saving a folder in
+     * the target folder.
+     *
+     * @param connection A (readable) database connection
+     * @param context The context
+     * @param user The user
+     * @param folderID The identifier of the folder being saved (to avoid conflicts with the folder itself), or <code>-1</code> for new folders
+     * @param module The groupware module of the folder
+     * @param parentFolderID The identifier of the parent folder to perform the checks in
+     * @param folderName The target folder name
+     * @param createdBy The identifier of the user who created the folder
+     * @throws OXException If check fails
+     */
+    public static void checkTargetFolderName(Connection connection, Context context, User user, int folderID, int module, int parentFolderID, String folderName, int createdBy) throws OXException {
+        /*
+         * check folder name string for invalid data
+         */
+        String result = Check.containsInvalidChars(folderName);
+        if (null != result) {
+            throw OXFolderExceptionCode.INVALID_DATA.create(result);
+        }
+        try {
+            if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == parentFolderID) {
+                TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, module, connection, context);
+                /*
+                 * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
+                 */
+                OXFolderAccess folderAccess = new OXFolderAccess(connection, context);
+                for (int fuid : folders.toArray()) {
+                    if (folderID == fuid) {
+                        continue;
+                    }
+                    FolderObject toCheck = folderAccess.getFolderObject(fuid);
+                    if (toCheck.getCreatedBy() == createdBy) {
+                        /*
+                         * User is already owner of a private folder with the same name located below system's private folder
+                         */
+                        throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(getFolderName(parentFolderID, context), I(context.getContextId()), folderName);
+                    }
+                }
+            } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderID) {
+                /*
+                 * check localized names
+                 */
+                checki18nString(parentFolderID, folderName, user.getLocale(), context);
+            } else {
+                /*
+                 * check for equally named folder on same level
+                 */
+                if (-1 != OXFolderSQL.lookUpFolderOnUpdate(folderID, parentFolderID, folderName, module, connection, context)) {
+                    throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(getFolderName(parentFolderID, context), I(context.getContextId()), folderName);
+                }
+                if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderID) {
+                    /*
+                     * check localized name below public folder
+                     */
+                    checki18nString(parentFolderID, folderName, user.getLocale(), context);
+                } else if (FolderObject.INFOSTORE == module &&
+                    OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, connection, context) == parentFolderID) {
+                    /*
+                     * also check for reserved names below user's infostore folder
+                     */
+                    FolderI18nNamesService i18nNamesService = ServerServiceRegistry.getServize(FolderI18nNamesService.class);
+                    if (null != i18nNamesService) {
+                        Set<String> reservedNames = i18nNamesService.getI18nNamesFor(FolderObject.INFOSTORE,
+                            FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME, FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME,
+                            FolderStrings.SYSTEM_USER_PICTURES_FOLDER_NAME, FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME);
+                        for (String reservedName : reservedNames) {
+                            if (Strings.equalsNormalizedIgnoreCase(reservedName, folderName)) {
+                                throw OXFolderExceptionCode.NO_RESERVED_FOLDER.create(folderName);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -238,19 +325,6 @@ public final class OXFolderUtility {
         }
         if (!affectedUsers.isEmpty()) {
             throw OXFolderExceptionCode.SIMILAR_NAMED_SHARED_FOLDER.create(folderName);
-        }
-    }
-
-    /**
-     * Checks for invalid characters in folder name
-     *
-     * @param checkMe The folder whose name shall be checked
-     * @throws OXException If folder name contains invalid characters
-     */
-    public static void checkFolderStringData(final FolderObject checkMe) throws OXException {
-        final String result;
-        if (checkMe.containsFolderName() && (result = Check.containsInvalidChars(checkMe.getFolderName())) != null) {
-            throw OXFolderExceptionCode.INVALID_DATA.create(result);
         }
     }
 

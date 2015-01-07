@@ -196,14 +196,14 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * Check for duplicates for OLOX-covered folders
              */
-            UserizedFolder existingFolder = checkForEqualName(treeId, parentId, toCreate, true);
+            UserizedFolder existingFolder = checkForEqualName(treeId, parentId, toCreate, toCreate.getContentType(), true);
             if (null != existingFolder) {
                 if (null != session && "USM-JSON".equals(session.getClient())) {
                     return existingFolder.getID(); // taken over from fix for bug #21286 ...
                 }
                 throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(getLocale()), treeId);
             }
-            String reservedName = checkForReservedName(treeId, parentId, toCreate, false);
+            String reservedName = checkForReservedName(treeId, parentId, toCreate, toCreate.getContentType(), false);
             if (null != reservedName) {
                 throw FolderExceptionErrorMessage.RESERVED_NAME.create(toCreate.getName());
             }

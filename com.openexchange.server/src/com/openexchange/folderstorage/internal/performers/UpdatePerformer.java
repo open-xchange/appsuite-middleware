@@ -175,10 +175,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     if (null == folder.getName()) {
                         folder.setName(storageFolder.getName());
                     }
-                    if (null != checkForEqualName(treeId, newParentId, folder, true)) {
+                    if (null != checkForEqualName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, newParentId), treeId);
                     }
-                    if (null != checkForReservedName(treeId, newParentId, folder, true)) {
+                    if (null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
                     }
                 }
@@ -189,10 +189,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
                 if (rename && false == move) {
-                    if (null != checkForEqualName(treeId, storageFolder.getParentID(), folder, false)) {
+                    if (null != checkForEqualName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, storageFolder.getParentID()), treeId);
                     }
-                    if (null != checkForReservedName(treeId, storageFolder.getParentID(), folder, false)) {
+                    if (null != checkForReservedName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
                     }
                 }

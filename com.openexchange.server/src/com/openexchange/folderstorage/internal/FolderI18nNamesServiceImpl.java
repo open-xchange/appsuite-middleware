@@ -57,6 +57,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -193,6 +194,46 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
 
     @Override
     public Set<String> getI18nNamesFor(int...modules) {
+        Map<Integer, Set<String>> i18nNamesPerModule = getI18nNamesPerModule();
+        Set<String> i18nNames = new HashSet<String>();
+        if (null == modules || 0 == modules.length) {
+            for (Set<String> names : i18nNamesPerModule.values()) {
+                i18nNames.addAll(names);
+            }
+        } else {
+            for (Entry<Integer, Set<String>> entry : i18nNamesPerModule.entrySet()) {
+                if (Arrays.contains(modules, entry.getKey().intValue())) {
+                    i18nNames.addAll(entry.getValue());
+                }
+            }
+        }
+        return Collections.unmodifiableSet(i18nNames);
+    }
+
+    @Override
+    public Set<String> getI18nNamesFor(int module, String... folderStrings) throws OXException {
+        Set<String> knownIdentifiers = identifiersPerModule.get(Integer.valueOf(module));
+        if (null == knownIdentifiers || 0 == knownIdentifiers.size()) {
+            return Collections.emptySet();
+        }
+        Set<String> i18nNames = new HashSet<String>();
+        for (String folderString : folderStrings) {
+            if (knownIdentifiers.contains(folderString)) {
+                i18nNames.add(folderString);
+                for (I18nService service : services.values()) {
+                    i18nNames.add(service.getLocalized(folderString));
+                }
+            }
+        }
+        return i18nNames;
+    }
+
+    /**
+     * Gets the known i18n names per module, initializing the map as needed.
+     *
+     * @return The i18n names per module
+     */
+    private Map<Integer, Set<String>> getI18nNamesPerModule() {
         if (i18nNamesPerModule.isEmpty()) {
             synchronized (services) {
                 if (i18nNamesPerModule.isEmpty()) {
@@ -218,19 +259,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
                 }
             }
         }
-        Set<String> i18nNames = new HashSet<String>();
-        if (null == modules || 0 == modules.length) {
-            for (Set<String> names : i18nNamesPerModule.values()) {
-                i18nNames.addAll(names);
-            }
-        } else {
-            for (Entry<Integer, Set<String>> entry : i18nNamesPerModule.entrySet()) {
-                if (Arrays.contains(modules, entry.getKey().intValue())) {
-                    i18nNames.addAll(entry.getValue());
-                }
-            }
-        }
-        return Collections.unmodifiableSet(i18nNames);
+        return i18nNamesPerModule;
     }
 
     /**
@@ -259,19 +288,6 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         return reservedNames;
     }
 
-    private void handleText(final String text) {
-        if (null == text) {
-            return;
-        }
-        for (final String line : text.split("\r?\n")) {
-            if (!com.openexchange.java.Strings.isEmpty(line) && '#' != line.charAt(0)) {
-                for (final String value : line.split(" *, *")) {
-                    processValue(value);
-                }
-            }
-        }
-    }
-
     private static String processValue(final String value) {
         if (Strings.isEmpty(value)) {
             return null;
@@ -292,4 +308,5 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         }
         return val;
     }
+
 }
