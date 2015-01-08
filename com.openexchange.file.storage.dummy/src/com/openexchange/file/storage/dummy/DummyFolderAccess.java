@@ -88,36 +88,6 @@ public class DummyFolderAccess extends AbstractFileStorageFolderAccess {
     }
 
     @Override
-    public FileStorageFolder getPicturesFolder() throws OXException {
-        System.out.println("GET PICTURES FOLDER");
-        return getRootFolder();
-    }
-
-    @Override
-    public FileStorageFolder getDocumentsFolder() throws OXException {
-        System.out.println("GET DOCUMENTS FOLDER");
-        return getRootFolder();
-    }
-
-    @Override
-    public FileStorageFolder getTemplatesFolder() throws OXException {
-        System.out.println("GET TEMPLATES FOLDER");
-        return getRootFolder();
-    }
-
-    @Override
-    public FileStorageFolder getMusicFolder() throws OXException {
-        System.out.println("GET MUSIC FOLDER");
-        return getRootFolder();
-    }
-
-    @Override
-    public FileStorageFolder getVideosFolder() throws OXException {
-        System.out.println("GET VIDEOS FOLDER");
-        return getRootFolder();
-    }
-
-    @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
         System.out.println("GET PUBLIC FOLDERS");
         return new FileStorageFolder[0];

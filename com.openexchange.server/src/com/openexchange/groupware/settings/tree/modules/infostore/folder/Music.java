@@ -55,7 +55,9 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.MediaFolderAwareFolderAccess;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -138,9 +140,12 @@ public class Music implements PreferencesItemService {
                         FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(DEFAULT_ID, session);
                         accountAccess.connect();
                         try {
-                            FileStorageFolder musicFolder = accountAccess.getFolderAccess().getMusicFolder();
-                            setting.setSingleValue(new FolderID(
-                                fileStorageService.getId(), defaultAccount.getId(), musicFolder.getId()).toUniqueID());
+                            FileStorageFolderAccess fa = accountAccess.getFolderAccess();
+                            if (fa instanceof MediaFolderAwareFolderAccess) {
+                                FileStorageFolder musicFolder = ((MediaFolderAwareFolderAccess) fa).getMusicFolder();
+                                setting.setSingleValue(new FolderID(
+                                    fileStorageService.getId(), defaultAccount.getId(), musicFolder.getId()).toUniqueID());
+                            }
                             return;
                         } finally {
                             accountAccess.close();

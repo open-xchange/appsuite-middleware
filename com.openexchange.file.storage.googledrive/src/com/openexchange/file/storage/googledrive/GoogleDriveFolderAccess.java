@@ -152,31 +152,6 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
     }
 
     @Override
-    public FileStorageFolder getPicturesFolder() throws OXException {
-        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
-    }
-
-    @Override
-    public FileStorageFolder getDocumentsFolder() throws OXException {
-        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
-    }
-
-    @Override
-    public FileStorageFolder getTemplatesFolder() throws OXException {
-        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
-    }
-
-    @Override
-    public FileStorageFolder getMusicFolder() throws OXException {
-        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
-    }
-
-    @Override
-    public FileStorageFolder getVideosFolder() throws OXException {
-        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
-    }
-
-    @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
         return new FileStorageFolder[0];
     }
