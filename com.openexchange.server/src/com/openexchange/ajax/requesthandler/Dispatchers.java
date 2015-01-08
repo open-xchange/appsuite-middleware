@@ -85,8 +85,7 @@ public class Dispatchers {
      */
     public static DispatcherResult perform(AJAXRequestData requestData, Dispatcher dispatcher, ServerSession session) throws OXException {
         AJAXState ajaxState = dispatcher.begin();
-        AJAXRequestResult requestResult = dispatcher.perform(requestData, ajaxState, session);
-        return new DispatcherResult(requestData, requestResult, ajaxState, dispatcher);
+        return new DispatcherResult(requestData, dispatcher.perform(requestData, ajaxState, session), ajaxState, dispatcher);
     }
 
     /**
