@@ -92,4 +92,21 @@ public class Tags extends AbstractXSSVectors {
         xss.add(new XSSHolder("<DIV STYLE=\"width: expression(alert('XSS'));\">", AssertExpression.NOT_CONTAINED, "expression(alert('XSS'))"));
         assertVectors();
     }
+    
+    @Test
+    public void testTableTags() {
+        xss.add(new XSSHolder("<TABLE BACKGROUND=\"javascript:alert('XSS')\">", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
+        xss.add(new XSSHolder("<TABLE><TD BACKGROUND=\"javascript:alert('XSS')\">", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
+        
+        assertVectors();
+    }
+    
+    @Test
+    public void testFrameTags() {
+        xss.add(new XSSHolder("<IFRAME SRC=\"javascript:alert('XSS');\"></IFRAME>", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
+        xss.add(new XSSHolder("<IFRAME SRC=# onmouseover=\"alert(document.cookie)\"></IFRAME>", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
+        xss.add(new XSSHolder("<FRAMESET><FRAME SRC=\"javascript:alert('XSS');\"></FRAMESET>", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
+        
+        assertVectors();
+    }
 }
