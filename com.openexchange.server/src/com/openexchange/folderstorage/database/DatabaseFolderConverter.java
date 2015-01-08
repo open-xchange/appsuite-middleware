@@ -339,6 +339,9 @@ public final class DatabaseFolderConverter {
                             case FolderObject.MUSIC:
                                 localizableName = FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME;
                                 break;
+                            case FolderObject.TEMPLATES:
+                                localizableName = FolderStrings.SYSTEM_USER_TEMPLATES_FOLDER_NAME;
+                                break;
                         }
                         break;
                 }
