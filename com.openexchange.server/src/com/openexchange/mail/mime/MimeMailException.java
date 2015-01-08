@@ -609,7 +609,7 @@ public class MimeMailException extends OXException {
     /**
      * Checks for possible over-quota error.
      */
-    public static boolean isOverQuotaException(final String msg) {
+    public static boolean isOverQuotaException(String msg) {
         if (null == msg) {
             return false;
         }
@@ -620,7 +620,7 @@ public class MimeMailException extends OXException {
     /**
      * Checks for possible in-use error.
      */
-    public static boolean isInUseException(final MessagingException e) {
+    public static boolean isInUseException(MessagingException e) {
         if (null == e) {
             return false;
         }
