@@ -103,7 +103,6 @@ import com.openexchange.html.vulntests.Bug29412VulTest;
 import com.openexchange.html.vulntests.Bug30357VulTest;
 import com.openexchange.html.vulntests.xss.CookieManipulation;
 import com.openexchange.html.vulntests.xss.HTMLQuoteEncapsulation;
-import com.openexchange.html.vulntests.xss.HtmlTimeInXML;
 import com.openexchange.html.vulntests.xss.ImageManipulation;
 import com.openexchange.html.vulntests.xss.ImgEmbeddedCommands;
 import com.openexchange.html.vulntests.xss.MetaManipulation;
@@ -171,7 +170,6 @@ import com.openexchange.html.vulntests.xss.TagManipulation;
     com.openexchange.html.internal.SaneScriptTagsTest.class,
     CookieManipulation.class,
     HTMLQuoteEncapsulation.class,
-    HtmlTimeInXML.class,
     ImageManipulation.class,
     ImgEmbeddedCommands.class,
     MetaManipulation.class,
