@@ -208,22 +208,17 @@ public final class OXFolderUtility {
                 }
             } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderID) {
                 /*
-                 * check localized names
+                 * check localized names below public folder
                  */
                 checki18nString(parentFolderID, folderName, user.getLocale(), context);
             } else {
                 /*
-                 * check for equally named folder on same level
+                 * by default, check for equally named folder on same level
                  */
                 if (-1 != OXFolderSQL.lookUpFolderOnUpdate(folderID, parentFolderID, folderName, module, connection, context)) {
                     throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(getFolderName(parentFolderID, context), I(context.getContextId()), folderName);
                 }
-                if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderID) {
-                    /*
-                     * check localized name below public folder
-                     */
-                    checki18nString(parentFolderID, folderName, user.getLocale(), context);
-                } else if (FolderObject.INFOSTORE == module &&
+                if (FolderObject.INFOSTORE == module &&
                     OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, connection, context) == parentFolderID) {
                     /*
                      * also check for reserved names below user's infostore folder
