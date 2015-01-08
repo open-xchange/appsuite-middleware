@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -69,6 +70,21 @@ public class Dispatchers {
      */
     private Dispatchers() {
         super();
+    }
+
+    /**
+     * Triggers the given dispatcher to perform specified AJAX request data using given session.
+     *
+     * @param requestData The AJAX request data
+     * @param dispatcher The dispatcher to use
+     * @param session The associated session
+     * @return The result
+     * @throws OXException If operation fails
+     */
+    public static DispatcherResult perform(AJAXRequestData requestData, Dispatcher dispatcher, ServerSession session) throws OXException {
+        AJAXState ajaxState = dispatcher.begin();
+        AJAXRequestResult requestResult = dispatcher.perform(requestData, ajaxState, session);
+        return new DispatcherResult(requestResult, ajaxState, dispatcher);
     }
 
     /**
