@@ -81,7 +81,7 @@ public class AssertionHelper {
             assertTrue("expected html: " + html + " after sanitizing to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
         }
     }
-    
+
     public static void assertBlockingQuote(final Queue<String> quotedText, String[] quotedLines) {
         int line = 0;
         while (!quotedText.isEmpty()) {
@@ -95,7 +95,7 @@ public class AssertionHelper {
             }
         }
     }
-    
+
     public static void assertTag(String tag, String actual, boolean closing) {
         assertTrue(tag + " is missing", actual.contains(tag));
         if (closing) {
