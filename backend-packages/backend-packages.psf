@@ -60,6 +60,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mobile-config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-munin-scripts"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-munin-scripts-jolokia"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-rest"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-parallels"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-script"/>
@@ -74,7 +75,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-report-client"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-rest"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-sessionstorage-hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-smtp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-soap-cxf"/>

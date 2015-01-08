@@ -77,6 +77,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.ratelimit.Rate.Result;
@@ -805,6 +806,11 @@ public final class RateLimiter {
 
         // Remote address check
         if (lenientCheckForRemoteAddress(servletRequest.getRemoteAddr())) {
+            return true;
+        }
+
+        // A thumbnail request
+        if (ImageTransformationUtility.seemsLikeThumbnailRequest(servletRequest)) {
             return true;
         }
 

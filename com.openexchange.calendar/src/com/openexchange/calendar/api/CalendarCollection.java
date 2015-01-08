@@ -2954,6 +2954,12 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                 recColl.fillDAO(cdao);
                 clone.setRecurrence(cdao.getRecurrence());
             }
+            if (edao.containsChangeExceptions()) {
+                clone.setChangeExceptions(edao.getChangeException());
+            }
+            if (edao.containsDeleteExceptions()) {
+                clone.setDeleteExceptions(edao.getDeleteException());
+            }
         }
 
         if (!checkForConflictRelevantUpdate(cdao, edao)) {

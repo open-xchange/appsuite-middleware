@@ -49,23 +49,28 @@
 
 package com.openexchange.mailmapping;
 
-import com.openexchange.exception.OXException;
 
 /**
- * A {@link MailResolver} knows how to resolve mail addresses to a context and user identifier.
+ * This enum represents the possible replies that a {@link MailResolver} can return alongside with a {@link ResolvedMail} instance.
+ * <p>
+ * Based on the order that the ResolveReply values are declared,
+ * <code>ResolveReply.ACCEPT.compareTo(ResolveReply.DENY)</code> will return a positive value.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MailResolver {
+public enum ResolveReply {
 
     /**
-     * Resolves specified E-Mail address
-     *
-     * @param mail The E-Mail address to resolve
-     * @return The resolved E-Mail address or <code>null</code> if it could not be resolved
-     * @throws OXException If resolve operation fails
+     * The {@link MailResolver} denies further processing of passed E-Mail address.
      */
-    ResolvedMail resolve(String mail) throws OXException;
+    DENY,
+    /**
+     * The {@link MailResolver} cannot handle passed E-Mail address, therefore delegates to the next one in chain.
+     */
+    NEUTRAL,
+    /**
+     * The {@link MailResolver} successfully handled passed E-Mail address.
+     */
+    ACCEPT;
 
 }
