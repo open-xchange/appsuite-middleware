@@ -70,15 +70,15 @@ public final class SaneScriptTags {
         super();
     }
 
-//    public static void main(String[] args) {
-//        String s = "<scr<script><!--</script><script>--></script>ipt src=http://www.host.de/download/xss-neu/xss.js></script/><<<<   script   >boo<   /script   >";
-//        boolean[] a = new boolean[] { true };
-//        while (a[0]) {
-//            a[0] = false;
-//            s = saneScriptTags(s, a);
-//        }
-//        System.out.println("--> "+s);
-//    }
+    public static void main(String[] args) {
+        String s = "<<SCRIPT>alert(\\\"XSS\\\");//<</SCRIPT>script/xss>x=/xss/;alert(x.source)</script>";
+        boolean[] a = new boolean[] { true };
+        while (a[0]) {
+            a[0] = false;
+            s = saneScriptTags(s, a);
+        }
+        System.out.println("--> "+s);
+    }
 
     /**
      * Sanitizes specified HTML content by script tags
@@ -149,8 +149,8 @@ public final class SaneScriptTags {
     private static final Pattern PATTERN_SCRIPT_TAG_START;
     private static final Pattern PATTERN_SCRIPT_TAG_END;
     static {
-        String regexScriptStart = "<+[\\s]*script(?:>| [^>]*>)";
-        String regexScriptEnd = "<+[\\s]*/script(?:>| [^>]*>)";
+        String regexScriptStart = "<+[\\s]*script(?:>| [^>]*>|/[^>]*>)";
+        String regexScriptEnd = "<+[\\s]*/script(?:>| [^>]*>|/[^>]*>)";
         PATTERN_SCRIPT_TAG = Pattern.compile(regexScriptStart + ".*?" + regexScriptEnd, Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
         PATTERN_SCRIPT_TAG_START = Pattern.compile(regexScriptStart, Pattern.CASE_INSENSITIVE);
         PATTERN_SCRIPT_TAG_END = Pattern.compile(regexScriptEnd, Pattern.CASE_INSENSITIVE);
