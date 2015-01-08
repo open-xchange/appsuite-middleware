@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.type.DocumentsType;
 import com.openexchange.folderstorage.type.MusicType;
 import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
 
@@ -192,6 +193,9 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         }
         if (VideosType.getInstance().equals(type)) {
             return FileStorageFolderType.VIDEOS_FOLDER;
+        }
+        if (TemplatesType.getInstance().equals(type)) {
+            return FileStorageFolderType.TEMPLATES_FOLDER;
         }
         return FileStorageFolderType.NONE;
     }

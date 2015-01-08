@@ -273,6 +273,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     public static final int VIDEOS = 23;
 
+    public static final int TEMPLATES = 24;
+
     public static final int SYSTEM_TYPE = SYSTEM_MODULE; // Formerly 6;
 
     private static final int[] SORTED_TYPES = { PRIVATE, PUBLIC, SHARED };

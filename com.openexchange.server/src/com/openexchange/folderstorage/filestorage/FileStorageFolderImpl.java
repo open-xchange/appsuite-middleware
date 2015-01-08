@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.filestorage.contentType.MusicContentType;
 import com.openexchange.folderstorage.filestorage.contentType.PicturesContentType;
 import com.openexchange.folderstorage.filestorage.contentType.PublicContentType;
+import com.openexchange.folderstorage.filestorage.contentType.TemplatesContentType;
 import com.openexchange.folderstorage.filestorage.contentType.TrashContentType;
 import com.openexchange.folderstorage.filestorage.contentType.VideosContentType;
 import com.openexchange.folderstorage.type.FileStorageType;
@@ -114,7 +115,8 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         PICTURES(PicturesContentType.getInstance(), 20),
         DOCUMENTS(DocumentsContentType.getInstance(), 21),
         MUSIC(MusicContentType.getInstance(), 22),
-        VIDEOS(VideosContentType.getInstance(), 23);
+        VIDEOS(VideosContentType.getInstance(), 23),
+        TEMPLATES(TemplatesContentType.getInstance(), 24);
 
         private final ContentType contentType;
         private final int type;
@@ -190,6 +192,8 @@ public final class FileStorageFolderImpl extends AbstractFolder {
                     defaultFolderType = FileStorageDefaultFolderType.MUSIC;
                 } else if (FileStorageFolderType.VIDEOS_FOLDER.equals(folderType)) {
                     defaultFolderType = FileStorageDefaultFolderType.VIDEOS;
+                } else if (FileStorageFolderType.TEMPLATES_FOLDER.equals(folderType)) {
+                    defaultFolderType = FileStorageDefaultFolderType.TEMPLATES;
                 }
                 else {
                     defaultFolderType = FileStorageDefaultFolderType.NONE;

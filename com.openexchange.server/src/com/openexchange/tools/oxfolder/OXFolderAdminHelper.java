@@ -1610,6 +1610,14 @@ public final class OXFolderAdminHelper {
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             LOG.info("User's default document folder successfully created");
 
+            //Create default templates folder
+            fo.setParentFolderID(newFolderId);
+            fo.setType(FolderObject.TEMPLATES);
+            fo.setFolderName(FolderStrings.SYSTEM_USER_TEMPLATES_FOLDER_NAME);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            LOG.info("User's default template folder successfully created");
+
             // Create default music folder
             fo.setParentFolderID(user_infostore_id);
             fo.setType(FolderObject.MUSIC);

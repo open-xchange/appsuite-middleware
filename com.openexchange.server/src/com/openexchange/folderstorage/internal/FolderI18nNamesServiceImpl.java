@@ -159,6 +159,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_USER_TEMPLATES_FOLDER_NAME);
         identifiersPerModule.put(Integer.valueOf(Module.INFOSTORE.getFolderConstant()), identifiers);
         /*
          * system

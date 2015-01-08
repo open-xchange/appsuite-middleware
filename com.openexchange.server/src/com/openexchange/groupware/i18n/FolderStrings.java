@@ -119,4 +119,6 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String SYSTEM_USER_VIDEOS_FOLDER_NAME = "Videos";
 
+    public static final String SYSTEM_USER_TEMPLATES_FOLDER_NAME = "Templates";
+
 }
