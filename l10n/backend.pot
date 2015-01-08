@@ -5174,6 +5174,10 @@ msgstr ""
 msgid "Videos"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:122
+msgid "Templates"
+msgstr ""
+
 #. Display name of group with identifier 0. This group always contains all existing users of a context but no guests.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All users"
