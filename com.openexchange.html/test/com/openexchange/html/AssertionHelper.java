@@ -49,9 +49,10 @@
 
 package com.openexchange.html;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Queue;
+import org.apache.commons.lang.StringUtils;
 import com.openexchange.java.Strings;
 
 /**
@@ -69,15 +70,14 @@ public class AssertionHelper {
         assertSanitized(service, html, null, AssertExpression.EMPTY);
     }
 
-    public static void assertSanitized(HtmlService service, String html, String mailiciousParam, AssertExpression ae) {
+    public static void assertSanitized(HtmlService service, String html, String maliciousParam, AssertExpression ae) {
         String sanitized = service.sanitize(html, null, false, null, null);
-        if(!Strings.isEmpty(sanitized)) {
+        if (!Strings.isEmpty(sanitized)) {
             sanitized = sanitized.toLowerCase();
         }
         if (AssertExpression.NOT_CONTAINED.equals(ae)) {
-            int index = sanitized.indexOf(mailiciousParam);
-            assertEquals("sanitized output: " + sanitized + " contains " + mailiciousParam, -1, index);
-        } else if(AssertExpression.EMPTY.equals(ae)) {
+            assertFalse("sanitized output: " + sanitized + " contains " + maliciousParam, StringUtils.containsIgnoreCase(sanitized, maliciousParam));
+        } else if (AssertExpression.EMPTY.equals(ae)) {
             assertTrue("expected html: " + html + " after sanitizing to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
         }
     }
