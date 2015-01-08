@@ -70,6 +70,7 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.type.DocumentsType;
 import com.openexchange.folderstorage.type.MusicType;
 import com.openexchange.folderstorage.type.PicturesType;
+import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
 
@@ -122,6 +123,9 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
                 switch (((TypeAware) folder).getType()) {
                     case DOCUMENTS_FOLDER:
                         jsonObject.put("type", DocumentsType.getInstance().getType());
+                        break;
+                    case TEMPLATES_FOLDER:
+                        jsonObject.put("type", TemplatesType.getInstance().getType());
                         break;
                     case MUSIC_FOLDER:
                         jsonObject.put("type", MusicType.getInstance().getType());
