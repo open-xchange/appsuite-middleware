@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,22 +47,25 @@
  *
  */
 
-package com.openexchange.html.vulntests;
+package com.openexchange.html.vulntests.xss;
 
 import org.junit.Test;
-import com.openexchange.html.AbstractSanitizing;
-import com.openexchange.html.AssertionHelper;
+import com.openexchange.html.AssertExpression;
+import com.openexchange.html.XSSHolder;
 
 
 /**
- * {@link Bug25321VulTest}
+ * {@link LinkManipulation}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug25321VulTest extends AbstractSanitizing {
+public class LinkManipulation extends AbstractXSSVectors {
     @Test
-    public void testSanitize() {
-        String content = "http://google.de?q=<script>javascript:alert('XSS')</script>";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "<script>javascript:alert('XSS')</script>");
+    public void testLinkManipulation() {
+        xss.add(new XSSHolder("<a onmouseover=\"alert(document.cookie)\">xxs link</a>", AssertExpression.NOT_CONTAINED, "onmouseover=\"alert(document.cookie)\""));
+        xss.add(new XSSHolder("<a onmouseover=alert(document.cookie)>xxs link</a>", AssertExpression.NOT_CONTAINED, "onmouseover=alert(document.cookie)"));
+        xss.add(new XSSHolder("<a title=\"harmless  SCRIPT&#61;javascript:alert(1) ignored&#61;ignored\"></a>", AssertExpression.NOT_CONTAINED, "javascript:alert(1)"));
+
+        assertVectors();
     }
 }

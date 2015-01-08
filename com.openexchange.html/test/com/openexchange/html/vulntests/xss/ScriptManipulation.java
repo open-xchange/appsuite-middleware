@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,22 +47,34 @@
  *
  */
 
-package com.openexchange.html.vulntests;
+package com.openexchange.html.vulntests.xss;
 
 import org.junit.Test;
-import com.openexchange.html.AbstractSanitizing;
-import com.openexchange.html.AssertionHelper;
+import com.openexchange.html.AssertExpression;
+import com.openexchange.html.XSSHolder;
 
 
 /**
- * {@link Bug25321VulTest}
+ * {@link ScriptManipulation}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug25321VulTest extends AbstractSanitizing {
+public class ScriptManipulation extends AbstractXSSVectors {
     @Test
-    public void testSanitize() {
-        String content = "http://google.de?q=<script>javascript:alert('XSS')</script>";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "<script>javascript:alert('XSS')</script>");
+    public void testScriptManipulation() {
+        xss.add(new XSSHolder("<SCRIPT/XSS SRC=\"http://ha.ckers.org/xss.js\"></SCRIPT>"));
+        xss.add(new XSSHolder("<SCRIPT/SRC=\"http://ha.ckers.org/xss.js\"></SCRIPT>"));
+        xss.add(new XSSHolder("<SCRIPT/SRC=\"http://ha.ckers.org/xss.js\"></SCRIPT>"));
+        xss.add(new XSSHolder("<<SCRIPT>alert(\"XSS\");//<</SCRIPT>script>"));
+        xss.add(new XSSHolder("<SCRIPT SRC=//ha.ckers.org/.j>"));
+        xss.add(new XSSHolder("';alert(String.fromCharCode(88,83,83))//';alert(String.fromCharCode(88,83,83))//\";" +
+            "alert(String.fromCharCode(88,83,83))//\";alert(String.fromCharCode(88,83,83))//--" +
+            "></SCRIPT>\">'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>", AssertExpression.NOT_CONTAINED, "<SCRIPT>"));
+        xss.add(new XSSHolder("'';!--\"<XSS>=&{()}", AssertExpression.NOT_CONTAINED, "<XSS>"));
+        xss.add(new XSSHolder("<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>"));
+        xss.add(new XSSHolder("<IMG \"\"\"><SCRIPT>alert(\"XSS\")</SCRIPT>\"", AssertExpression.NOT_CONTAINED, "alert(\"XSS\")"));
+        xss.add(new XSSHolder("</TITLE><SCRIPT>alert(\"XSS\");</SCRIPT>", AssertExpression.NOT_CONTAINED, "<SCRIPT>alert(\"XSS\");</SCRIPT>"));
+
+        assertVectors();
     }
 }

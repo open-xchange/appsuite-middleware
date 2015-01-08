@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,22 +47,38 @@
  *
  */
 
-package com.openexchange.html.vulntests;
+package com.openexchange.html.vulntests.xss;
 
 import org.junit.Test;
-import com.openexchange.html.AbstractSanitizing;
-import com.openexchange.html.AssertionHelper;
+import com.openexchange.html.AssertExpression;
+import com.openexchange.html.XSSHolder;
 
 
 /**
- * {@link Bug25321VulTest}
+ * {@link StyleManipulation}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class Bug25321VulTest extends AbstractSanitizing {
+public class StyleManipulation extends AbstractXSSVectors {
     @Test
-    public void testSanitize() {
-        String content = "http://google.de?q=<script>javascript:alert('XSS')</script>";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "<script>javascript:alert('XSS')</script>");
+    public void testStyleManipulation() {
+        /**
+         * Style imports
+         */
+        xss.add(new XSSHolder("<STYLE>@im\\port'\\ja\\vasc\\ript:alert(\"XSS\")';</STYLE>", AssertExpression.NOT_CONTAINED, "alert('xss')"));
+        xss.add(new XSSHolder("<STYLE>@import'javas&#13;cript:alert('XSS');';</STYLE>", AssertExpression.NOT_CONTAINED, "alert('xss')"));
+        xss.add(new XSSHolder("<STYLE>@import 'javas&#13;cript:alert('XSS');';</STYLE>", AssertExpression.NOT_CONTAINED, "alert('xss')"));
+        xss.add(new XSSHolder("<STYLE>@import \"jav\tascript:alert('XSS');\"</STYLE>", AssertExpression.NOT_CONTAINED, "alert('xss')"));
+        xss.add(new XSSHolder("<STYLE>@import \"jav&#x09;ascript:alert('XSS');\"</STYLE>", AssertExpression.NOT_CONTAINED, "alert('xss')"));
+        xss.add(new XSSHolder("<STYLE>@import \"jav&#x0A;ascript:alert('XSS');\"</STYLE>", AssertExpression.NOT_CONTAINED, "alert('xss')"));
+        xss.add(new XSSHolder("<STYLE>@import \"jav&#x0D;ascript:alert('XSS');\"</STYLE>", AssertExpression.NOT_CONTAINED, "alert('xss')"));
+        /**
+         * Remote style sheet
+         */
+        xss.add(new XSSHolder("<LINK REL=\"stylesheet\" HREF=\"http://ha.ckers.org/xss.css\">", AssertExpression.NOT_CONTAINED, "http://ha.ckers.org/xss.css"));
+        xss.add(new XSSHolder("<STYLE>@import'http://ha.ckers.org/xss.css';</STYLE>", AssertExpression.NOT_CONTAINED, "http://ha.ckers.org/xss.css"));
+        xss.add(new XSSHolder("<LINK REL=\"stylesheet\" HREF=\"javascript:alert('XSS');\">", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
+
+        assertVectors();
     }
 }
