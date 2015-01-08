@@ -1,3 +1,7 @@
+* 2015-01-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35982: Improved recognition of <script> tags to also cover "... <script/xss>..." occurrences
+
 * 2015-02-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 35504: Backported software change request 2249 and 2250.
