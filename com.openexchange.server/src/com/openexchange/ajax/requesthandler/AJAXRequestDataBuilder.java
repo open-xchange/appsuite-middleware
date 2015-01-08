@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 
 /**
  * An {@link AJAXRequestDataBuilder} is a fluent interface for constructing AJAXRequestData for use with the {@link Dispatcher}.
@@ -56,18 +59,40 @@ package com.openexchange.ajax.requesthandler;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AJAXRequestDataBuilder {
-    
+
     /**
+     * Initializes a new {@code AJAXRequestDataBuilder} instance.
+     * <p>
      * Best used as a static import.
+     *
+     * @return A new {@code AJAXRequestDataBuilder} instance
      */
     public static AJAXRequestDataBuilder request() {
         return new AJAXRequestDataBuilder();
     }
-    
-    private AJAXRequestData data = new AJAXRequestData();
-    
+
+    // ------------------------------------------------------------------------------------------------------------------
+
+    private final AJAXRequestData data;
     private boolean formatSpecified = false;
-    
+
+    /**
+     * Initializes a new {@link AJAXRequestDataBuilder}.
+     */
+    private AJAXRequestDataBuilder() {
+        super();
+        data = new AJAXRequestData();
+    }
+
+    /**
+     * Specify HTTP resources.
+     */
+    public AJAXRequestDataBuilder httpResources(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        data.setHttpServletRequest(httpRequest);
+        data.setHttpServletResponse(httpResponse);
+        return this;
+    }
+
     /**
      * Specify the module
      */
@@ -75,7 +100,7 @@ public class AJAXRequestDataBuilder {
         data.setModule(module);
         return this;
     }
-    
+
     /**
      * Specify the action
      */
@@ -84,7 +109,7 @@ public class AJAXRequestDataBuilder {
         data.putParameter("action", action);
         return this;
     }
-    
+
     /**
      * Specify parameters. Alternate parameter names and values. E.g. builder.params('id', '12', 'folder', '13')
      */
@@ -100,7 +125,7 @@ public class AJAXRequestDataBuilder {
         }
         return this;
     }
-    
+
     /**
      * Specify the body. Usually as a JSON formatted String.
      */
@@ -108,7 +133,7 @@ public class AJAXRequestDataBuilder {
         data.setData(body, format);
         return this;
     }
-    
+
     /**
      * Request a certain format in the results. Defaults to 'native';
      */
@@ -117,12 +142,12 @@ public class AJAXRequestDataBuilder {
         data.setFormat(format);
         return this;
     }
-    
+
     public AJAXRequestDataBuilder pathInfo(String path) {
         data.setPathInfo(path);
         return this;
     }
-    
+
     public AJAXRequestData build() {
         if (!formatSpecified) {
             format("native");
@@ -134,5 +159,5 @@ public class AJAXRequestDataBuilder {
         data.setHostname(hostname);
         return this;
     }
-    
+
 }

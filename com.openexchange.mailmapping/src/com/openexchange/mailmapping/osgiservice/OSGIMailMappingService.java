@@ -82,13 +82,13 @@ public class OSGIMailMappingService implements MailResolver, SimpleRegistryListe
             ResolvedMail resolved = resolver.resolve(mail);
             if (resolved != null) {
                 ResolveReply reply = resolved.getResolveReply();
-                if (ResolveReply.DENY.equals(reply)) {
-                    // No further processing allowed
-                    return null;
-                }
                 if (ResolveReply.ACCEPT.equals(reply)) {
                     // Return resolved instance
                     return resolved;
+                }
+                if (ResolveReply.DENY.equals(reply)) {
+                    // No further processing allowed
+                    return null;
                 }
                 // Otherwise NEUTRAL reply; next in chain
             }

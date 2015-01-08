@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,70 @@
  *
  */
 
-package com.openexchange.snippet.osgi;
+package com.openexchange.ajax.requesthandler;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.conversion.DataSource;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.html.HtmlService;
-import com.openexchange.image.ImageActionFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.snippet.SnippetImageDataSource;
-import com.openexchange.snippet.internal.Services;
+import java.io.Closeable;
 
 /**
- * {@link SnippetActivator}
+ * {@link DispatcherResult} - A closeable dispatcher result.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SnippetActivator extends HousekeepingActivator {
+public class DispatcherResult implements Closeable {
+
+    private final AJAXRequestData requestData;
+    private final AJAXRequestResult requestResult;
+    private final AJAXState state;
+    private final Dispatcher dispatcher;
 
     /**
-     * Initializes a new {@link SnippetActivator}.
+     * Initializes a new {@link DispatcherResult}.
+     *
+     * @param requestData The AJAX request data
+     * @param requestResult The AJAX request result
+     * @param state The AJAX state
+     * @param dispatcher The dispatcher
      */
-    public SnippetActivator() {
+    public DispatcherResult(AJAXRequestData requestData, AJAXRequestResult requestResult, AJAXState state, Dispatcher dispatcher) {
         super();
+        this.requestData = requestData;
+        this.requestResult = requestResult;
+        this.state = state;
+        this.dispatcher = dispatcher;
+    }
+
+    /**
+     * Gets the requestData
+     *
+     * @return The requestData
+     */
+    public AJAXRequestData getRequestData() {
+        return requestData;
+    }
+
+    /**
+     * Gets the requestResult
+     *
+     * @return The requestResult
+     */
+    public AJAXRequestResult getRequestResult() {
+        return requestResult;
+    }
+
+    /**
+     * Gets the state
+     *
+     * @return The state or <code>null</code>
+     */
+    public AJAXState getState() {
+        return state;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class, ManagedFileManagement.class, ConfigViewFactory.class  };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        {
-            SnippetImageDataSource signImageDataSource = SnippetImageDataSource.getInstance();
-            Dictionary<String, Object> signImageProps = new Hashtable<String, Object>(1);
-            signImageProps.put("identifier", signImageDataSource.getRegistrationName());
-            registerService(DataSource.class, signImageDataSource, signImageProps);
-            ImageActionFactory.addMapping(signImageDataSource.getRegistrationName(), signImageDataSource.getAlias());
+    public void close() {
+        if (null != state) {
+            dispatcher.end(state);
         }
-    }
-
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
     }
 
 }
