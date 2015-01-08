@@ -68,7 +68,6 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
-import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -217,19 +215,6 @@ public final class OXFolderUtility {
                  */
                 if (-1 != OXFolderSQL.lookUpFolderOnUpdate(folderID, parentFolderID, folderName, module, connection, context)) {
                     throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(getFolderName(parentFolderID, context), I(context.getContextId()), folderName);
-                }
-                if (FolderObject.INFOSTORE == module &&
-                    OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, connection, context) == parentFolderID) {
-                    /*
-                     * also check for reserved names below user's infostore folder
-                     */
-                    String[] reservedNames = { FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME, FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME,
-                        FolderStrings.SYSTEM_USER_PICTURES_FOLDER_NAME, FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME };
-                    for (String reservedName : reservedNames) {
-                        if (Strings.equalsNormalizedIgnoreCase(reservedName, folderName)) {
-                            throw OXFolderExceptionCode.NO_RESERVED_FOLDER.create(folderName);
-                        }
-                    }
                 }
             }
         } catch (SQLException e) {
