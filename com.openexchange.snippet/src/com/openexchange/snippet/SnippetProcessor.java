@@ -52,8 +52,13 @@ package com.openexchange.snippet;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -125,30 +130,64 @@ public class SnippetProcessor {
             return;
         }
 
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
+
+        ConfigProperty<Integer> maxImageLimit = configView.property("com.openexchange.mail.signature.maxImageLimit", Integer.class);
+        if (!maxImageLimit.isDefined()) {
+            maxImageLimit.set(3);
+        }
+
+        final long maxImageSize;
+        {
+            ConfigProperty<Long> mis = configView.property("com.openexchange.mail.signature.maxImageSize", Long.class);
+            if (!mis.isDefined()) {
+                mis.set(1L);
+            }
+            maxImageSize = (long) (Math.pow(1024, 2) * mis.get());
+        }
+
+        Map<String, String> imageTags = new HashMap<String, String>(maxImageLimit.get());
+
+        final ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
         final ImageMatcher m = ImageMatcher.matcher(content);
+        int count = 0;
         while (m.find()) {
-            final ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
             final String imageTag = m.group();
             if (MimeMessageUtility.isValidImageUri(imageTag)) {
                 final String id = m.getManagedFileId();
-                final ManagedFile mf = mfm.getByID(id);
-
-                DefaultAttachment att = new DefaultAttachment();
-                att.setContentDisposition(mf.getContentDisposition());
-                att.setContentType(mf.getContentType());
-                att.setId(mf.getID());
-                att.setSize(mf.getSize());
-                att.setStreamProvider(new InputStreamProviderImpl(mf));
-                att.setFilename(mf.getFileName());
-
-                DefaultSnippet ds = (DefaultSnippet) snippet;
-                ds.addAttachment(att);
-
-                final String url = mf.constructURL(session);
-                String replacement = pattern.matcher(imageTag).replaceAll(Matcher.quoteReplacement("src=\"" + url + "\""));
-                content = content.replace(imageTag, replacement);
-                ds.setContent(content);
+                imageTags.put(id, imageTag);
+                count++;
             }
+        }
+
+        if (count > maxImageLimit.get()) {
+            throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(maxImageLimit.get());
+        }
+
+        for (String id : imageTags.keySet()) {
+            final ManagedFile mf = mfm.getByID(id);
+
+            if (mf.getSize() > maxImageSize) {
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(maxImageLimit.get());
+            }
+
+            DefaultAttachment att = new DefaultAttachment();
+            att.setContentDisposition(mf.getContentDisposition());
+            att.setContentType(mf.getContentType());
+            att.setId(mf.getID());
+            att.setSize(mf.getSize());
+            att.setStreamProvider(new InputStreamProviderImpl(mf));
+            att.setFilename(mf.getFileName());
+
+            DefaultSnippet ds = (DefaultSnippet) snippet;
+            ds.addAttachment(att);
+
+            final String url = mf.constructURL(session);
+            String imageTag = imageTags.get(id);
+            String replacement = pattern.matcher(imageTag).replaceAll(Matcher.quoteReplacement("src=\"" + url + "\""));
+            content = content.replace(imageTag, replacement);
+            ds.setContent(content);
         }
     }
 }
