@@ -58,18 +58,34 @@ import java.io.Closeable;
  */
 public class DispatcherResult implements Closeable {
 
+    private final AJAXRequestData requestData;
     private final AJAXRequestResult requestResult;
     private final AJAXState state;
     private final Dispatcher dispatcher;
 
     /**
      * Initializes a new {@link DispatcherResult}.
+     *
+     * @param requestData The AJAX request data
+     * @param requestResult The AJAX request result
+     * @param state The AJAX state
+     * @param dispatcher The dispatcher
      */
-    public DispatcherResult(AJAXRequestResult requestResult, AJAXState state, Dispatcher dispatcher) {
+    public DispatcherResult(AJAXRequestData requestData, AJAXRequestResult requestResult, AJAXState state, Dispatcher dispatcher) {
         super();
+        this.requestData = requestData;
         this.requestResult = requestResult;
         this.state = state;
         this.dispatcher = dispatcher;
+    }
+
+    /**
+     * Gets the requestData
+     *
+     * @return The requestData
+     */
+    public AJAXRequestData getRequestData() {
+        return requestData;
     }
 
     /**
