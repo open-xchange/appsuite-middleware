@@ -152,7 +152,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param fullName The mailbox full name
      * @throws MessagingException If such a fail-fast error exists and has not elapsed, yet
      */
-    public static void checkFailFast(final IMAPStore imapStore, final String fullName) throws MessagingException {
+    public static void checkFailFast(IMAPStore imapStore, String fullName) throws MessagingException {
         if (null == imapStore || null == fullName) {
             return;
         }
@@ -167,8 +167,19 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         FAIL_FAST.remove(key, failFastError);
     }
 
-    /*
-     * Fields
+    /**
+     * Marks specified folder for fail-fast error.
+     *
+     * @param imapStore The IMAP store
+     * @param fullName The mailbox full name
+     * @param e The associated error
+     */
+    public static void markForFailFast(IMAPStore imapStore, String fullName, MessagingException e) {
+        FAIL_FAST.put(new StringBuilder(fullName).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
+    }
+
+    /*-
+     * ----------------------------------------------- Fields ---------------------------------------------------------------------
      */
 
     protected final IMAPStore imapStore;
