@@ -115,11 +115,10 @@ public class Templates implements PreferencesItemService {
                 long start = System.currentTimeMillis();
                 if (InfostoreFacades.isInfoStoreAvailable()) {
                     LOG.debug("After InfostoreFacades.isInfoStoreAvailable(): {}ms", System.currentTimeMillis() - start);
-                    FolderObject templatesFolder = new OXFolderAccess(ctx).getDefaultFolder(
-                        user.getId(), FolderObject.INFOSTORE, FolderObject.TEMPLATES);
+                    int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE, FolderObject.TEMPLATES);
                     LOG.debug("After OXFolderAccess(ctx).getDefaultFolder(): {}ms", System.currentTimeMillis() - start);
-                    if (null != templatesFolder) {
-                        setting.setSingleValue(Integer.valueOf(templatesFolder.getObjectID()));
+                    if (-1 != folderID) {
+                        setting.setSingleValue(Integer.valueOf(folderID));
                     }
                     return;
                 }

@@ -115,11 +115,10 @@ public class Music implements PreferencesItemService {
                 long start = System.currentTimeMillis();
                 if (InfostoreFacades.isInfoStoreAvailable()) {
                     LOG.debug("After InfostoreFacades.isInfoStoreAvailable(): {}ms", System.currentTimeMillis() - start);
-                    FolderObject musicFolder = new OXFolderAccess(ctx).getDefaultFolder(
-                        user.getId(), FolderObject.INFOSTORE, FolderObject.MUSIC);
+                    int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE, FolderObject.MUSIC);
                     LOG.debug("After OXFolderAccess(ctx).getDefaultFolder(): {}ms", System.currentTimeMillis() - start);
-                    if (null != musicFolder) {
-                        setting.setSingleValue(Integer.valueOf(musicFolder.getObjectID()));
+                    if (-1 != folderID) {
+                        setting.setSingleValue(Integer.valueOf(folderID));
                     }
                     return;
                 }

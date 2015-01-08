@@ -115,11 +115,10 @@ public class Pictures implements PreferencesItemService {
                 long start = System.currentTimeMillis();
                 if (InfostoreFacades.isInfoStoreAvailable()) {
                     LOG.debug("After InfostoreFacades.isInfoStoreAvailable(): {}ms", System.currentTimeMillis() - start);
-                    FolderObject picturesFolder = new OXFolderAccess(ctx).getDefaultFolder(
-                        user.getId(), FolderObject.INFOSTORE, FolderObject.PICTURES);
+                    int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE, FolderObject.PICTURES);
                     LOG.debug("After OXFolderAccess(ctx).getDefaultFolder(): {}ms", System.currentTimeMillis() - start);
-                    if (null != picturesFolder) {
-                        setting.setSingleValue(Integer.valueOf(picturesFolder.getObjectID()));
+                    if (-1 != folderID) {
+                        setting.setSingleValue(Integer.valueOf(folderID));
                     }
                     return;
                 }

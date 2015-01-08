@@ -115,11 +115,10 @@ public class Documents implements PreferencesItemService {
                 long start = System.currentTimeMillis();
                 if (InfostoreFacades.isInfoStoreAvailable()) {
                     LOG.debug("After InfostoreFacades.isInfoStoreAvailable(): {}ms", System.currentTimeMillis() - start);
-                    FolderObject documentsFolder = new OXFolderAccess(ctx).getDefaultFolder(
-                        user.getId(), FolderObject.INFOSTORE, FolderObject.DOCUMENTS);
+                    int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE, FolderObject.DOCUMENTS);
                     LOG.debug("After OXFolderAccess(ctx).getDefaultFolder(): {}ms", System.currentTimeMillis() - start);
-                    if (null != documentsFolder) {
-                        setting.setSingleValue(Integer.valueOf(documentsFolder.getObjectID()));
+                    if (-1 != folderID) {
+                        setting.setSingleValue(Integer.valueOf(folderID));
                     }
                     return;
                 }

@@ -116,11 +116,10 @@ public class Trash implements PreferencesItemService {
                 long start = System.currentTimeMillis();
                 if (InfostoreFacades.isInfoStoreAvailable()) {
                     LOG.debug("After InfostoreFacades.isInfoStoreAvailable(): {}ms", System.currentTimeMillis() - start);
-                    FolderObject trashFolder = new OXFolderAccess(ctx).getDefaultFolder(
-                        user.getId(), FolderObject.INFOSTORE, FolderObject.TRASH);
+                    int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE, FolderObject.TRASH);
                     LOG.debug("After OXFolderAccess(ctx).getDefaultFolder(): {}ms", System.currentTimeMillis() - start);
-                    if (null != trashFolder) {
-                        setting.setSingleValue(Integer.valueOf(trashFolder.getObjectID()));
+                    if (-1 != folderID) {
+                        setting.setSingleValue(Integer.valueOf(folderID));
                     }
                     return;
                 }
