@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -99,6 +100,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -505,7 +507,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                     }
                 }
             } else {
-                ret = new ArrayList<String>();
+                ret = new LinkedList<String>();
                 while (searchIterator.hasNext()) {
                     final File file = searchIterator.next();
                     if (isOwner(userId, file.getCreatedBy()) && isElapsed(now, file.getCreated().getTime(), timeToLive)) {
@@ -515,11 +517,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
             }
             return ret;
         } finally {
-            try {
-                searchIterator.close();
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
+            SearchIterators.close(searchIterator);
         }
     }
 
