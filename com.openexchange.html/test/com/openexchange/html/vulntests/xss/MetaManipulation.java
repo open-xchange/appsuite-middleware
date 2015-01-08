@@ -61,7 +61,9 @@ import com.openexchange.html.XSSHolder;
 public class MetaManipulation extends AbstractXSSVectors {
     @Test
     public void testMetaXSSInjection() {
+        xss.add(new XSSHolder("<META HTTP-EQUIV=\"refresh\" CONTENT=\"0;url=javascript:alert('XSS');\">"));
         xss.add(new XSSHolder("<META HTTP-EQUIV=\"refresh\" CONTENT=\"0;url=data:text/html base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K\">"));
+        xss.add(new XSSHolder("<META HTTP-EQUIV=\"refresh\" CONTENT=\"0; URL=http://;URL=javascript:alert('XSS');\">"));
         assertVectors();
     }
 }
