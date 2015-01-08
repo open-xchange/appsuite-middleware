@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,38 +49,59 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link Bug35982Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    Bug26237Test.class,
-    Bug26611Test.class,
-    Bug27335Test.class,
-    Bug27708Test.class,
-    CSSMatcherTest.class,
-    Bug30114Test.class,
-    Bug31826Test.class,
-    Bug35982Test.class,
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class,
-    com.openexchange.html.internal.SaneScriptTagsTest.class
-})
-public class UnitTests {
+public class Bug35982Test {
 
-    private UnitTests() {
+    private HtmlService service;
+
+    public Bug35982Test() {
         super();
+    }
+
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
+    }
+
+    @After
+    public void tearDown() {
+        service = null;
+    }
+
+    @Test
+    public void testScriptTagSanitizing() {
+        String content = "<!DOCTYPE html>\n" +
+            "<html>\n" +
+            "<head>\n" +
+            "</head>\n" +
+            "<body>\n" +
+            "<<SCRIPT>alert(\\\"XSS\\\");//<</SCRIPT>script/xss>x=/xss/;alert(x.source)</script>\n" +
+            "</body>\n" +
+            "</html>";
+
+        String test = service.sanitize(content, null, true, null, null);
+
+        Assert.assertTrue("Script tag not properly sanitized: " + test, test.indexOf("<script") < 0);
     }
 }
