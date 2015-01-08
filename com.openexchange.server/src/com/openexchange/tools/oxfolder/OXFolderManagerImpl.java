@@ -1152,7 +1152,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private boolean adjustFolderTypeOnMove(FolderObject sourceFolder, FolderObject destinationFolder, boolean recursive) throws OXException, SQLException {
         if (sourceFolder.getType() != destinationFolder.getType()) {
             int[] inheritingTypes = {
-                FolderObject.TRASH, FolderObject.DOCUMENTS, FolderObject.PICTURES, FolderObject.MUSIC, FolderObject.VIDEOS
+                FolderObject.TRASH, FolderObject.DOCUMENTS, FolderObject.PICTURES, FolderObject.MUSIC, FolderObject.VIDEOS, FolderObject.TEMPLATES
             };
             if (contains(inheritingTypes, destinationFolder.getType()) || contains(inheritingTypes, sourceFolder.getType())) {
                 List<Integer> folderIDs;

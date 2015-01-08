@@ -84,13 +84,13 @@ public final class InfoStoreFolderAdminHelper {
      * @return The identifier of the created folder
      */
     public static void addDefaultFolders(Connection connection, int contextID, int userID) throws OXException {
-        int userFolderID = addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.TRASH);
-        int documentsFolderID = InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.DOCUMENTS);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, documentsFolderID, FolderObject.TEMPLATES);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.PICTURES);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS);
+        int userFolderID = addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC, false);
+        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.TRASH, false);
+        int documentsFolderID = InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.DOCUMENTS, false);
+        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, documentsFolderID, FolderObject.TEMPLATES, false);
+        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.PICTURES, false);
+        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC, false);
+        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS, false);
     }
 
     /**
@@ -117,7 +117,8 @@ public final class InfoStoreFolderAdminHelper {
     public static int addDefaultFolder(Connection connection, int contextID, int userID, int type) throws OXException {
         try {
             int parentFolderID = getParentDefaultFolderID(connection, contextID, userID, type);
-            return addDefaultFolder(connection, contextID, userID, parentFolderID, type);
+            boolean considerExisting = FolderObject.PUBLIC != type && FolderObject.TRASH != type;
+            return addDefaultFolder(connection, contextID, userID, parentFolderID, type, considerExisting);
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -142,17 +143,33 @@ public final class InfoStoreFolderAdminHelper {
      * @param userID The user identifier
      * @param parentFolderID The parent folder identifier
      * @param type The folder type
+     * @param considerExisting <code>true</code> to 'hijack' a possibly existing folder with the same name, <code>false</code>, otherwise
      * @return The identifier of the created folder
      */
-    public static int addDefaultFolder(Connection connection, int contextID, int userID, int parentFolderID, int type) throws OXException {
+    private static int addDefaultFolder(Connection connection, int contextID, int userID, int parentFolderID, int type, boolean considerExisting) throws OXException {
         try {
             String folderName = getDefaultFolderName(connection, contextID, userID, type);
             Context context = new ContextImpl(contextID);
+            if (considerExisting) {
+                /*
+                 * check for an equally named existing folder first
+                 */
+                int existingFolderID = OXFolderSQL.lookUpFolder(parentFolderID, folderName, FolderObject.INFOSTORE, connection, context);
+                if (-1 != existingFolderID) {
+                    OXFolderSQL.markAsDefaultFolder(connection, context, existingFolderID, type, folderName, System.currentTimeMillis());
+                    LOG.info("Marked existing infostore folder '{}' [type={}, id={}] as default folder for user {} in context {}.",
+                        folderName, I(type), I(existingFolderID), I(userID), I(contextID));
+                    return existingFolderID;
+                }
+            }
+            /*
+             * insert new default folder
+             */
             FolderObject folder = prepareDefaultFolder(userID, parentFolderID, type, folderName);
             int folderID = OXFolderSQL.getNextSerialForAdmin(context, connection);
             OXFolderSQL.insertDefaultFolderSQL(folderID, userID, folder, System.currentTimeMillis(), context, connection);
-            LOG.info("Default infostore folder '{}' (type {}) for user {} in context {} created successfully.",
-                folderName, I(type), I(userID), I(contextID));
+            LOG.info("Default infostore folder '{}' [type={}, id={}] for user {} in context {} created successfully.",
+                folderName, I(type), I(folderID), I(userID), I(contextID));
             return folderID;
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
