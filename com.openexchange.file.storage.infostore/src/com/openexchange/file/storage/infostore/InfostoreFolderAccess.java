@@ -66,7 +66,12 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
+import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
+import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.tools.session.ServerSession;
 
@@ -156,6 +161,76 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
         try {
             return FolderWriter.writeFolder(service.getDefaultFolder(
                 session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), TrashType.getInstance(), session, null));
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public FileStorageFolder getPicturesFolder() throws OXException {
+        FolderService service = Services.getService(FolderService.class);
+        try {
+            return FolderWriter.writeFolder(service.getDefaultFolder(
+                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), PicturesType.getInstance(), session, null));
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public FileStorageFolder getDocumentsFolder() throws OXException {
+        FolderService service = Services.getService(FolderService.class);
+        try {
+            return FolderWriter.writeFolder(service.getDefaultFolder(
+                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), DocumentsType.getInstance(), session, null));
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public FileStorageFolder getTemplatesFolder() throws OXException {
+        FolderService service = Services.getService(FolderService.class);
+        try {
+            return FolderWriter.writeFolder(service.getDefaultFolder(
+                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), TemplatesType.getInstance(), session, null));
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public FileStorageFolder getMusicFolder() throws OXException {
+        FolderService service = Services.getService(FolderService.class);
+        try {
+            return FolderWriter.writeFolder(service.getDefaultFolder(
+                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), MusicType.getInstance(), session, null));
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public FileStorageFolder getVideosFolder() throws OXException {
+        FolderService service = Services.getService(FolderService.class);
+        try {
+            return FolderWriter.writeFolder(service.getDefaultFolder(
+                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), VideosType.getInstance(), session, null));
         } catch (OXException e) {
             if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
                 throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
