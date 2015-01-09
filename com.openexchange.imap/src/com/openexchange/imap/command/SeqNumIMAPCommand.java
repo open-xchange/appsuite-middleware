@@ -49,8 +49,9 @@
 
 package com.openexchange.imap.command;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import javax.mail.MessagingException;
-import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -73,7 +74,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 
     private final String[] args;
 
-    private final SmartIntArray sia;
+    private final TIntList sia;
 
     private int fetchRespIndex;
 
@@ -87,7 +88,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
         length = this.uids.length;
         args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0]).append(':').append(
             this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(this.uids, true, -1));
-        sia = new SmartIntArray(length);
+        sia = new TIntArrayList(length);
     }
 
     @Override
@@ -136,7 +137,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
             LOG.warn("IMAPUtils.getSequenceNumbers(): UID mismatch");
             return false;
         }
-        sia.append(f.getNumber());
+        sia.add(f.getNumber());
         return true;
     }
 

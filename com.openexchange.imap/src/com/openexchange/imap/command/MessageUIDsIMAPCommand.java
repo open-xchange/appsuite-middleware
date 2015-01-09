@@ -49,9 +49,10 @@
 
 package com.openexchange.imap.command;
 
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import com.openexchange.tools.Collections.SmartLongArray;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -69,7 +70,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 
     private final int length;
 
-    private final SmartLongArray sla;
+    private final TLongList sla;
 
     private int index;
 
@@ -89,7 +90,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
         } else {
             args = IMAPNumArgSplitter.splitMessageArg(msgs, true, -1);
             length = msgs.length;
-            sla = new SmartLongArray(length);
+            sla = new TLongArrayList(length);
         }
     }
 
@@ -135,7 +136,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
         if (!(response instanceof FetchResponse)) {
             return false;
         }
-        sla.append(((UID) (((FetchResponse) response).getItem(0))).uid);
+        sla.add(((UID) (((FetchResponse) response).getItem(0))).uid);
         index++;
         return true;
     }

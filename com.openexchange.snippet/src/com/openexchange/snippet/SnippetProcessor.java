@@ -140,9 +140,9 @@ public class SnippetProcessor {
 
         final long maxImageSize;
         {
-            ConfigProperty<Long> mis = configView.property("com.openexchange.mail.signature.maxImageSize", Long.class);
+            ConfigProperty<Double> mis = configView.property("com.openexchange.mail.signature.maxImageSize", Double.class);
             if (!mis.isDefined()) {
-                mis.set(1L);
+                mis.set(1d);
             }
             maxImageSize = (long) (Math.pow(1024, 2) * mis.get());
         }
@@ -169,7 +169,7 @@ public class SnippetProcessor {
             final ManagedFile mf = mfm.getByID(id);
 
             if (mf.getSize() > maxImageSize) {
-                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(maxImageLimit.get());
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(maxImageSize);
             }
 
             DefaultAttachment att = new DefaultAttachment();

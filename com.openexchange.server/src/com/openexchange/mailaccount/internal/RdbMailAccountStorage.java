@@ -126,7 +126,6 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SetableSession;
 import com.openexchange.session.SetableSessionFactory;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -937,8 +936,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final Connection con = Database.get(contextId, false);
             PreparedStatement stmt = null;
             ResultSet result = null;
-            final SmartIntArray idsArr = new SmartIntArray(8);
-            final SmartIntArray usersArr = new SmartIntArray(8);
+            final TIntList idsArr = new TIntArrayList(8);
+            final TIntList usersArr = new TIntArrayList(8);
             try {
                 stmt = con.prepareStatement("SELECT id, user FROM user_mail_account WHERE cid = ? AND login = ?");
                 stmt.setLong(1, contextId);
@@ -948,8 +947,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     return new int[0][];
                 }
                 do {
-                    idsArr.append(result.getInt(1));
-                    usersArr.append(result.getInt(2));
+                    idsArr.add(result.getInt(1));
+                    usersArr.add(result.getInt(2));
                 } while (result.next());
             } catch (final SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -998,8 +997,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final Connection con = Database.get(contextId, false);
             PreparedStatement stmt = null;
             ResultSet result = null;
-            final SmartIntArray idsArr = new SmartIntArray(8);
-            final SmartIntArray usersArr = new SmartIntArray(8);
+            final TIntList idsArr = new TIntArrayList(8);
+            final TIntList usersArr = new TIntArrayList(8);
             try {
                 stmt = con.prepareStatement("SELECT id, user FROM user_mail_account WHERE cid = ? AND primary_addr = ?");
                 stmt.setLong(1, contextId);
@@ -1009,8 +1008,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     return new int[0][];
                 }
                 do {
-                    idsArr.append(result.getInt(1));
-                    usersArr.append(result.getInt(2));
+                    idsArr.add(result.getInt(1));
+                    usersArr.add(result.getInt(2));
                 } while (result.next());
             } catch (final SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
