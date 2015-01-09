@@ -1,3 +1,7 @@
+* 2015-01-09 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 36010: Repaired export of Task series.
+
 * 2015-01-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 36021: Use much faster Trove collection instead of slow data structure implementations
