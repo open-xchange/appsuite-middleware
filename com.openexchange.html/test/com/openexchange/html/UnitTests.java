@@ -101,17 +101,6 @@ import com.openexchange.html.vulntests.Bug26611VulTest;
 import com.openexchange.html.vulntests.Bug28642VulTest;
 import com.openexchange.html.vulntests.Bug29412VulTest;
 import com.openexchange.html.vulntests.Bug30357VulTest;
-import com.openexchange.html.vulntests.xss.CookieManipulation;
-import com.openexchange.html.vulntests.xss.HTMLQuoteEncapsulation;
-import com.openexchange.html.vulntests.xss.ImageManipulation;
-import com.openexchange.html.vulntests.xss.ImgEmbeddedCommands;
-import com.openexchange.html.vulntests.xss.LinkManipulation;
-import com.openexchange.html.vulntests.xss.MetaManipulation;
-import com.openexchange.html.vulntests.xss.ScriptManipulation;
-import com.openexchange.html.vulntests.xss.StyleManipulation;
-import com.openexchange.html.vulntests.xss.TagManipulation;
-import com.openexchange.html.vulntests.xss.Tags;
-import com.openexchange.html.vulntests.xss.XML;
 
 /**
  * Test suite for all integrated unit tests of the HTMLService implementation.
@@ -171,18 +160,7 @@ import com.openexchange.html.vulntests.xss.XML;
     ConformHtmlTest.class,
     HtmlServiceImplTest.class,
     FilterJerichoHandlerTest.class,
-    com.openexchange.html.internal.SaneScriptTagsTest.class,
-    CookieManipulation.class,
-    HTMLQuoteEncapsulation.class,
-    ImageManipulation.class,
-    ImgEmbeddedCommands.class,
-    MetaManipulation.class,
-    LinkManipulation.class,
-    ScriptManipulation.class,
-    StyleManipulation.class,
-    TagManipulation.class,
-    Tags.class,
-    XML.class
+    com.openexchange.html.internal.SaneScriptTagsTest.class
 })
 public class UnitTests {
 
