@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-11-25 14:33+0100\n"
+"PO-Revision-Date: 2015-01-09 13:37+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -8105,6 +8105,19 @@ msgstr "Server %1$s unterstützt keinen Zugriff über eine sichere Verbindung."
 msgid "Mail access is disabled for context administrator."
 msgstr "Der E-Mail-Zugang ist für den Kontext-Admin deaktiviert."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
+msgid ""
+"The maximum number of files that may be attached to an E-Mail is exceeded. "
+"Max. is %1$s."
+msgstr ""
+"Die maximal zulässige Anzahl an Dateien, die an eine E-Mail angehängt werden "
+"dürfen, wurde überschritten. Maximum ist %1$s."
+
+#. The client request is not permitted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:185
+msgid "The client request is not permitted."
+msgstr "Die Client-Anfrage ist nicht zulässig."
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -8882,6 +8895,14 @@ msgstr ""
 msgid "Missing the following field in JSON data: %1$s"
 msgstr "Folgendes Feld in JSON-Daten fehlt und wird benötigt: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:69
+msgid ""
+"The HTML content is too big and therefore cannot be safely displayed. Please "
+"select to download its content if you want to see it."
+msgstr ""
+"Der HTML-Inhalt ist zu groß und kann nicht sicher dargestellt werden. Bitte "
+"laden Sie den Inhalt herunter, um ihn anzusehen."
+
 #. *
 #. * The provided cookie is invalid. Please login.
 #.
@@ -9061,6 +9082,11 @@ msgstr ""
 "einigen Accounts vorkommen und kann nicht durch uns behoben werden. Es liegt "
 "in der alleinigen Verantwortung des Providers. Aus diesem Grund kann das "
 "Abonnement nicht abgeschlossen werden. "
+
+#. You already have such a subscription.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
+msgid "You already have such a subscription."
+msgstr "Sie haben bereits ein solches Abonnement."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."
