@@ -92,21 +92,60 @@ public class Tags extends AbstractXSSVectors {
         xss.add(new XSSHolder("<DIV STYLE=\"width: expression(alert('XSS'));\">", AssertExpression.NOT_CONTAINED, "expression(alert('XSS'))"));
         assertVectors();
     }
-    
+
     @Test
     public void testTableTags() {
         xss.add(new XSSHolder("<TABLE BACKGROUND=\"javascript:alert('XSS')\">", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
         xss.add(new XSSHolder("<TABLE><TD BACKGROUND=\"javascript:alert('XSS')\">", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
-        
+
         assertVectors();
     }
-    
+
+    @Test
+    public void testBreakTag() {
+        xss.add(new XSSHolder("<BR SIZE=\"&{alert('XSS')}\">", AssertExpression.NOT_CONTAINED, "alert('XSS')"));
+
+        assertVectors();
+    }
+
+    @Test
+    public void testInput() {
+        xss.add(new XSSHolder("<INPUT TYPE=\"IMAGE\" SRC=\"javascript:alert('XSS');\">", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS');"));
+
+        assertVectors();
+    }
+
     @Test
     public void testFrameTags() {
         xss.add(new XSSHolder("<IFRAME SRC=\"javascript:alert('XSS');\"></IFRAME>", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
         xss.add(new XSSHolder("<IFRAME SRC=# onmouseover=\"alert(document.cookie)\"></IFRAME>", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
         xss.add(new XSSHolder("<FRAMESET><FRAME SRC=\"javascript:alert('XSS');\"></FRAMESET>", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS')"));
-        
+        xss.add(new XSSHolder("<iframe src=http://ha.ckers.org/scriptlet.html <"));
+
+        assertVectors();
+    }
+
+    @Test
+    public void testBodyTag() {
+        xss.add(new XSSHolder("<BODY BACKGROUND=\"javascript:alert('XSS')\">", AssertExpression.NOT_CONTAINED, "javascript:alert('XSS');"));
+        xss.add(new XSSHolder("<BODY ONLOAD=alert('XSS')>", AssertExpression.NOT_CONTAINED, "alert('XSS')"));
+
+        assertVectors();
+    }
+
+    @Test
+    public void testBGSoundTag() {
+        xss.add(new XSSHolder("<BGSOUND SRC=\"javascript:alert('XSS');\">", AssertExpression.NOT_CONTAINED, "alert('XSS')"));
+
+        assertVectors();
+    }
+
+    @Test
+    public void testLinkManipulation() {
+        xss.add(new XSSHolder("<a onmouseover=\"alert(document.cookie)\">xxs link</a>", AssertExpression.NOT_CONTAINED, "onmouseover=\"alert(document.cookie)\""));
+        xss.add(new XSSHolder("<a onmouseover=alert(document.cookie)>xxs link</a>", AssertExpression.NOT_CONTAINED, "onmouseover=alert(document.cookie)"));
+        xss.add(new XSSHolder("<a title=\"harmless  SCRIPT&#61;javascript:alert(1) ignored&#61;ignored\"></a>", AssertExpression.NOT_CONTAINED, "javascript:alert(1)"));
+
         assertVectors();
     }
 }

@@ -64,11 +64,9 @@ import org.junit.runners.Suite.SuiteClasses;
     HTMLQuoteEncapsulation.class,
     ImageManipulation.class,
     ImgEmbeddedCommands.class,
-    LinkManipulation.class,
     MetaManipulation.class,
     ScriptManipulation.class,
     StyleManipulation.class,
-    TagManipulation.class,
     Tags.class,
     XML.class
 })
