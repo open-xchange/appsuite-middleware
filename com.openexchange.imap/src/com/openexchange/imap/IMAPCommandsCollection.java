@@ -1917,7 +1917,7 @@ public final class IMAPCommandsCollection {
                 String command = new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
                 Response[] r = performCommand(p, command);
                 Response response = r[r.length - 1];
-                TIntList sia = new TIntArrayList(r.length);
+                TIntList sia = new TIntArrayList(32);
                 if (response.isOK()) {
                     for (int i = 0, len = r.length; i < len; i++) {
                         if (!(r[i] instanceof IMAPResponse)) {
@@ -2070,7 +2070,7 @@ public final class IMAPCommandsCollection {
 
             private int[] handleSearchResponses(final Response[] r, final IMAPProtocol p) throws ProtocolException {
                 final Response response = r[r.length - 1];
-                final TIntList tmp = new TIntArrayList(r.length);
+                final TIntList tmp = new TIntArrayList(32);
                 if (response.isOK()) {
                     for (int i = 0, len = r.length - 1; i < len; i++) {
                         if (!(r[i] instanceof IMAPResponse)) {
