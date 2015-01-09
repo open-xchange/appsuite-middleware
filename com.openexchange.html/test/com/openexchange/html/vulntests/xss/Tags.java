@@ -74,7 +74,7 @@ public class Tags extends AbstractXSSVectors {
 
     @Test
     public void testEmbedFlash() {
-        xss.add(new XSSHolder("<EMBED SRC=\"http://ha.ckers.Using an EMBED tag you can embed a Flash movie that contains XSS. Click here for a demo. If you add the attributes allowScriptAccess=\"never\" and allownetworking=\"internal\" it can mitigate this risk (thank you to Jonathan Vanasco for the info).:org/xss.swf\" AllowScriptAccess=\"always\"></EMBED>"));
+        xss.add(new XSSHolder("<EMBED SRC=\"http://ha.ckers.org/xss.swf\" AllowScriptAccess=\"always\" ></EMBED>"));
         assertVectors();
     }
 
