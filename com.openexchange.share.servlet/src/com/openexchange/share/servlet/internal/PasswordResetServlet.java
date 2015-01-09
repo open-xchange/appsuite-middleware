@@ -56,12 +56,10 @@ import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
@@ -93,7 +91,7 @@ public class PasswordResetServlet extends HttpServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
-    private ShareLoginConfiguration loginConfig;
+    private final ShareLoginConfiguration loginConfig;
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -130,23 +128,26 @@ public class PasswordResetServlet extends HttpServlet {
                 return;
             }
 
-            int contextID = guestInfo.getContextID();
+//            int contextID = guestInfo.getContextID();
 
             UserService userService = ShareServiceLookup.getService(UserService.class, true);
-            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
-
-            int guestID = guestInfo.getGuestID();
-            User storageUser = userService.getUser(guestID, context);
+//            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
+//
+//            int guestID = guestInfo.getGuestID();
+//            User storageUser = userService.getUser(guestID, context);
 
             String password = PasswordUtility.generate();
             String encodedPassword = PasswordMech.BCRYPT.encode(password);
 
-            UserImpl updatedUser = new UserImpl(storageUser);
-            updatedUser.setUserPassword(encodedPassword);
+            ShareServiceLookup.getService(GuestService.class).setPassword(mailAddress, encodedPassword);
 
-            userService.updateUser(updatedUser, context);
-            // Invalidate
-            userService.invalidateUser(context, guestID);
+//            UserImpl updatedUser = new UserImpl(storageUser);
+//
+//            updatedUser.setUserPassword(encodedPassword);
+//
+//            userService.updateUser(updatedUser, context);
+//            // Invalidate
+//            userService.invalidateUser(context, guestID);
 
             GuestShare guestShare = shareService.resolveToken(token);
             User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());

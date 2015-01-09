@@ -39,4 +39,79 @@
 		</rollback>
 	</changeSet>
 
+	<!-- ******************************************************* -->
+	<!-- ************** Release 7.8.0 starts here ************** -->
+	<!-- ******************************************************* -->
+
+	<changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
+		<tagDatabase tag="7.8.0-milestone" />
+	</changeSet>
+
+<!-- Possible table names: guest, login_address, user_address -->
+
+	<changeSet id="7.8.0:guest:create" author="martin.schneider@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="guest" schemaName="configdb" />
+			</not>
+		</preConditions>
+		<comment>
+			Add table 'guest' to save known login addresses.
+		</comment>
+		<sql>
+			CREATE TABLE guest (
+				id INT4 UNSIGNED NOT NULL AUTO_INCREMENT,
+				mail_address VARCHAR(255) NOT NULL,
+				PRIMARY KEY (id),
+				INDEX (mail_address),
+				UNIQUE (mail_address)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+		</sql>
+		<!--
+		<createTable schemaName="configdb" tableName="guest">
+			<column name="id" type="int" autoIncrement="true" >
+           		<constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="mail_address" type="varchar(255)">
+           		<constraints nullable="false"/>
+            </column>
+		</createTable>
+		-->
+		<rollback>
+			<dropTable tableName="guest"/>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="7.8.0:guest2context:create" author="martin.schneider@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="guest2context" schemaName="configdb" />
+			</not>
+		</preConditions>
+		<comment>
+			Add table 'guest2context' to save known login addresses.
+		</comment>
+		<sql>
+			CREATE TABLE guest2context (
+			    guest_id INT4 UNSIGNED NOT NULL,
+			    cid INT4 UNSIGNED NOT NULL,
+			    uid INT4 UNSIGNED NOT NULL,
+			    PRIMARY KEY(`guest_id`, `cid`,`uid`),
+			    FOREIGN KEY(`cid`) REFERENCES context (`cid`),
+			    FOREIGN KEY(`guest_id`) REFERENCES guest (`id`),
+			    INDEX (guest_id)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+		</sql>
+		<!--
+		<createTable schemaName="configdb" tableName="guest2context">
+			<column name="id" type="int"/>
+            <column name="cid" type="int"/>
+            <column name="userid" type="int"/>
+		</createTable>
+		 -->
+		<rollback>
+			<dropTable tableName="guest2context"/>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

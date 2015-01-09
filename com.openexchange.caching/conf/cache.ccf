@@ -171,6 +171,24 @@ jcs.region.Filestore.elementattributes.IsSpool=false
 jcs.region.Filestore.elementattributes.IsRemote=false
 jcs.region.Filestore.elementattributes.IsLateral=false
 
+# Pre-defined region for guest data
+# TODO: check the settings
+jcs.region.Guest=LTCP
+jcs.region.Guest.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.Guest.cacheattributes.MaxObjects=40000
+jcs.region.Guest.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.Guest.cacheattributes.UseMemoryShrinker=true
+jcs.region.Guest.cacheattributes.MaxMemoryIdleTimeSeconds=360
+jcs.region.Guest.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.Guest.cacheattributes.MaxSpoolPerRun=500
+jcs.region.Guest.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.Guest.elementattributes.IsEternal=false
+jcs.region.Guest.elementattributes.MaxLifeSeconds=-1
+jcs.region.Guest.elementattributes.IdleTime=360
+jcs.region.Guest.elementattributes.IsSpool=false
+jcs.region.Guest.elementattributes.IsRemote=false
+jcs.region.Guest.elementattributes.IsLateral=false
+
 # Pre-defined region for metadata of database connections to save config db accesses
 jcs.region.OXDBPoolCache=LTCP
 jcs.region.OXDBPoolCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
