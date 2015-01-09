@@ -47,54 +47,58 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.osgi;
-
+package com.openexchange.file.storage.infostore.internal;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.infostore.Services;
-import com.openexchange.file.storage.infostore.internal.TrashCleanupHandler;
-import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.login.LoginHandlerService;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import com.openexchange.login.LoginResult;
+import com.openexchange.login.NonTransient;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+;
 
 /**
- * {@link InfostoreFileStorageActivator}
+ * {@link TrashCleanupHandler}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InfostoreFileStorageActivator extends HousekeepingActivator {
+public class TrashCleanupHandler implements LoginHandlerService, NonTransient {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class, ConfigViewFactory.class };
+    /**
+     * Initializes a new {@link TrashCleanupHandler}.
+     */
+    public TrashCleanupHandler() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(FileStorageService.class, new InfostoreFileStorageService() {
-            @Override
-            public InfostoreFacade getInfostore() {
-                return getService(InfostoreFacade.class);
+    public void handleLogin(LoginResult loginResult) throws OXException {
+        Session session = loginResult.getSession();
+        int retentionDays = getRetentionDays(session.getContextId(), session.getUserId());
+        if (0 < retentionDays) {
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session, loginResult.getContext(), loginResult.getUser());
+            if (false == serverSession.getUserConfiguration().hasInfostore()) {
+                return;
             }
-
-            @Override
-            public InfostoreSearchEngine getSearch() {
-                return getService(InfostoreSearchEngine.class);
-            }
-        }, null);
-        registerService(LoginHandlerService.class, new TrashCleanupHandler());
+            new TrashCleaner(serverSession, retentionDays).run();
+        }
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
+    public void handleLogout(LoginResult logout) throws OXException {
+        // nothing to do
     }
+
+    private static int getRetentionDays(int contextID, int userID) throws OXException {
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        if (null != configViewFactory) {
+            ConfigView configView = configViewFactory.getView(userID, contextID);
+            return configView.opt("com.openexchange.infostore.trash.retentionDays", Integer.class, Integer.valueOf(-1)).intValue();
+        }
+        return -1;
+    }
+
 }
