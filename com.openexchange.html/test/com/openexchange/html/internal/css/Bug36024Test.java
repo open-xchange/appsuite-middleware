@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,59 @@
  *
  */
 
-package com.openexchange.html;
+package com.openexchange.html.internal.css;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.HtmlServiceImplTest;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.Bug36024Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
-import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
+
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link Bug36024Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    Bug26237Test.class,
-    Bug26611Test.class,
-    Bug27335Test.class,
-    Bug27708Test.class,
-    CSSMatcherTest.class,
-    Bug30114Test.class,
-    Bug31826Test.class,
-    Bug35982Test.class,
-    Bug36024Test.class,
-    ConformHtmlTest.class,
-    HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class
-})
+public class Bug36024Test  {
+    private HtmlService service;
 
-public class UnitTests {
-
-    private UnitTests() {
+    public Bug36024Test() {
         super();
+    }
+
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
+    }
+
+    @After
+    public void tearDown() {
+        service = null;
+    }
+
+    @Test
+    public void testPositionFixedReplacedByDisplayBlock() {
+        String content2 = "<a href=\"http://example.com/attack.html\" style=\"position     :   fixed; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>";
+        String santized2 = service.sanitize(content2, null, true, null, null);
+        Assert.assertEquals("CSS style not ", "<a href=\"http://example.com/attack.html\" style=\"display: block; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>",
+            santized2);
+
+        String content = "<a href=\"http://example.com/attack.html\" style=\"position: fixed; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>";
+        String santized = service.sanitize(content, null, true, null, null);
+        Assert.assertEquals("CSS style not ", "<a href=\"http://example.com/attack.html\" style=\"display: block; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>",
+            santized);
     }
 }

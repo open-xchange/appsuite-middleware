@@ -793,6 +793,28 @@ public final class CSSMatcher {
         mr.appendTail(cssBuilder);
     }
 
+    private static final Pattern PATTERN_POSITION_FIXED = Pattern.compile("(position\\s*:\\s*fixed)");
+
+    /**
+     * Fix for 36024: Replaces all occurrences of position:fixed by display:fixed to prevent defacing the appsuite ui
+     */
+    private static boolean replacePositionFixedWithDisplayBlock(final Stringer cssBuilder) {
+        // search for position tag
+        if (cssBuilder.indexOf("position") < 0) {
+            return false;
+        }
+        final Matcher m = PATTERN_POSITION_FIXED.matcher(InterruptibleCharSequence.valueOf(cssBuilder.toString()));
+        final StringBuffer sb = new StringBuffer(cssBuilder.length());
+        final Thread thread = Thread.currentThread();
+        while (!thread.isInterrupted() && m.find()) {
+            m.appendReplacement(sb, "display: block");
+        }
+        m.appendTail(sb);
+        cssBuilder.setLength(0);
+        cssBuilder.append(sb);
+        return true;
+    }
+
     private static final Pattern PATTERN_INLINE_DATA = Pattern.compile("url\\(data:[^,]+,.+?\\)");
 
     private static boolean dropInlineData(final Stringer cssBuilder) {
@@ -877,6 +899,8 @@ public final class CSSMatcher {
         correctRGBFunc(cssBuilder);
         // replaceHtmlEntities(cssBuilder);
         modified = dropInlineData(cssBuilder);
+        modified = replacePositionFixedWithDisplayBlock(cssBuilder);
+
         /*
          * Feed matcher with buffer's content and reset
          */
