@@ -9,6 +9,7 @@
 * 2015-01-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 36021: Use much faster Trove collection instead of slow data structure implementations
+ - Fix for bug 36000: Consider an inline text part as (file) attachment in case mail body has already been detected
 
 * 2015-01-08 - thorben.betten@open-xchange.com
 
