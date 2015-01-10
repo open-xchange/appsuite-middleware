@@ -175,6 +175,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param e The associated error
      */
     public static void markForFailFast(IMAPStore imapStore, String fullName, MessagingException e) {
+        if (null == imapStore || null == fullName || null == e) {
+            return;
+        }
         FAIL_FAST.putIfAbsent(new StringBuilder(fullName).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
     }
 
