@@ -168,14 +168,14 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     /**
-     * Marks specified folder for fail-fast error.
+     * Marks specified folder for fail-fast error (if not already marked).
      *
      * @param imapStore The IMAP store
      * @param fullName The mailbox full name
      * @param e The associated error
      */
     public static void markForFailFast(IMAPStore imapStore, String fullName, MessagingException e) {
-        FAIL_FAST.put(new StringBuilder(fullName).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
+        FAIL_FAST.putIfAbsent(new StringBuilder(fullName).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
     }
 
     /*-
