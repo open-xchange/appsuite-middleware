@@ -2359,7 +2359,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean marked = setMarker(opKey);
             try {
                 imapFolderStorage.removeFromCache(fullName);
-                if (hardDelete || usm.isHardDeleteMsgs()) {
+                if (hardDelete || getUserSettingMail().isHardDeleteMsgs()) {
                     blockwiseDeletion(msgUIDs, false, null);
                     notifyIMAPFolderModification(fullName);
                     return;
@@ -3266,7 +3266,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Check for spam action
                  */
-                if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
+                if (getUserSettingMail().isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
                     handleSpamByUID(msgUIDs, set, true, fullName, READ_WRITE);
                 } else {
                     /*
@@ -3395,7 +3395,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Check for spam action
                  */
-                if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
+                if (getUserSettingMail().isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
                     final long[] uids = IMAPCommandsCollection.getUIDs(imapFolder);
                     handleSpamByUID(uids, set, true, fullName, READ_WRITE);
                 } else {
@@ -3807,7 +3807,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         /*
          * Check for spam handling
          */
-        if (usm.isSpamEnabled()) {
+        if (getUserSettingMail().isSpamEnabled()) {
             final boolean locatedInSpamFolder = imapAccess.getFolderStorage().getSpamFolder().equals(imapFolder.getFullName());
             if (isSpam) {
                 if (locatedInSpamFolder) {
