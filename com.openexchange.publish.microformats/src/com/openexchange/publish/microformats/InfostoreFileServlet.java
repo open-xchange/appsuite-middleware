@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -94,6 +95,8 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     private static final long serialVersionUID = -7725853828283398968L;
 
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(InfostoreFileServlet.class);
+
     private static final String CONTEXTID = "contextId";
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
@@ -117,6 +120,15 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     public static void setFileResponseRenderer(final FileResponseRenderer renderer) {
         fileResponseRenderer = renderer;
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link InfostoreFileServlet}.
+     */
+    public InfostoreFileServlet() {
+        super();
     }
 
     @Override
@@ -151,6 +163,21 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             startedWriting = true;
             writeFile(new PublicationSession(publication), metadata, fileData, req, resp);
 
+        } catch (OXException e) {
+            if (PublicationErrorMessage.NOT_FOUND_EXCEPTION.equals(e)) {
+                // Signal 404 - Not found
+                String queryString = req.getQueryString();
+                LOGGER.debug("No such file for request: {}{}", req.getRequestURI(), null == queryString ? "" : "?" + queryString);
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            // Signal internal server error
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            if(!startedWriting) {
+                e.printStackTrace(resp.getWriter());
+            }
+            LOG.error("", e);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             if(!startedWriting) {
