@@ -63,13 +63,13 @@ public class MoveContextFilestore2User extends UserAbstraction {
         new MoveContextFilestore2User(args);
     }
 
-    static final char OPT_FILESTORE_SHORT = 'f';
-    static final String OPT_FILESTORE_LONG = "filestore";
+    private static final char OPT_FILESTORE_SHORT = 'f';
+    private static final String OPT_FILESTORE_LONG = "filestore";
 
     // -----------------------------------------------------------------------------------------------
 
-    protected Integer filestoreid = null;
-    protected CLIOption targetFilestoreIDOption = null;
+    private Integer filestoreid = null;
+    private CLIOption targetFilestoreIDOption = null;
 
     public MoveContextFilestore2User(String[] args) {
 

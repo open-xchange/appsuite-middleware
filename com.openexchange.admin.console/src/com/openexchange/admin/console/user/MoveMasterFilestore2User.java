@@ -63,17 +63,17 @@ public class MoveMasterFilestore2User extends UserAbstraction {
         new MoveMasterFilestore2User(args);
     }
 
-    static final char OPT_MASTER_SHORT = 'm';
-    static final String OPT_MASTER_LONG = "master";
-    static final char OPT_FILESTORE_SHORT = 'f';
-    static final String OPT_FILESTORE_LONG = "filestore";
+    private static final char OPT_MASTER_SHORT = 'm';
+    private static final String OPT_MASTER_LONG = "master";
+    private static final char OPT_FILESTORE_SHORT = 'f';
+    private static final String OPT_FILESTORE_LONG = "filestore";
 
     // -----------------------------------------------------------------------------------------------
 
-    protected Integer filestoreid = null;
-    protected CLIOption targetFilestoreIDOption = null;
-    protected Integer masterId = null;
-    protected CLIOption masterIdOption = null;
+    private Integer filestoreid = null;
+    private CLIOption targetFilestoreIDOption = null;
+    private Integer masterId = null;
+    private CLIOption masterIdOption = null;
 
     public MoveMasterFilestore2User(String[] args) {
 
