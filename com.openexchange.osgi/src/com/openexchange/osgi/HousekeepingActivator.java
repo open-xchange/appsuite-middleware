@@ -168,8 +168,9 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         }
     }
 
-    private final List<ServiceTracker<?, ?>> serviceTrackers;
+    // ------------------------------------------------------------------------------------------------------------------------------- //
 
+    private final List<ServiceTracker<?, ?>> serviceTrackers;
     private final HashMultimap<Object,ServiceRegistration<?>> serviceRegistrations;
 
     /**
@@ -194,9 +195,8 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         super.start(context);
-        /*
-         * Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
-         */
+
+        // Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
         if (!serviceTrackers.isEmpty()) {
             openTrackers();
         }
