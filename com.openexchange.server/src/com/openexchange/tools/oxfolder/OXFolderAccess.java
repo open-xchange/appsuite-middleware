@@ -462,85 +462,101 @@ public class OXFolderAccess {
      * @return The user's default folder of given module
      * @throws OXException If operation fails
      */
-    public final FolderObject getDefaultFolder(final int userId, final int module) throws OXException {
+    public FolderObject getDefaultFolder(final int userId, final int module) throws OXException {
         return getDefaultFolder(userId, module, -1);
     }
 
     /**
-     * Determines user's default folder of given module.
+     * Determines user's default folder of given module and an optional folder type. Folders of module {@link FolderObject#INFOSTORE}
+     * are created implicitly if they not yet exist.
      *
      * @param userId The user ID
      * @param module The module
      * @param type The type, or <code>-1</code> if not applicable
-     * @return The user's default folder of given module
+     * @return The user's default folder of given module and type
      * @throws OXException If operation fails
      */
-    public final FolderObject getDefaultFolder(final int userId, final int module, final int type) throws OXException {
+    public FolderObject getDefaultFolder(final int userId, final int module, final int type) throws OXException {
+        return getFolderObject(getDefaultFolderID(userId, module, type));
+    }
+
+    /**
+     * Determines the identifier of a user's default folder of given module.
+     *
+     * @param userId The user ID
+     * @param module The module
+     * @return The identifier of the user's default folder of given module
+     * @throws OXException If operation fails
+     */
+    public int getDefaultFolderID(final int userId, final int module) throws OXException {
+        return getDefaultFolderID(userId, module, -1);
+    }
+
+    /**
+     * Determines a user's default folder identifier of given module and an optional folder type. Folders of module
+     * {@link FolderObject#INFOSTORE} are created implicitly if they not yet exist.
+     *
+     * @param userId The user ID
+     * @param module The module
+     * @param type The type, or <code>-1</code> if not applicable
+     * @return The identifier of the user's default folder of given module and type
+     * @throws OXException If operation fails
+     */
+    public int getDefaultFolderID(int userId, int module, int type) throws OXException {
         try {
             /*
              * Read out default folder
              */
             int folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx) :
                 OXFolderSQL.getUserDefaultFolder(userId, module, type, readCon, ctx);
-            if (-1 == folderId) {
-                if (FolderObject.INFOSTORE != module) {
-                    throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
-                        folderModule2String(module),
-                        getUserName(userId, ctx),
-                        Integer.valueOf(ctx.getContextId()));
-                }
+            if (-1 != folderId) {
+                return folderId;
+            }
+            if (FolderObject.INFOSTORE != module || UserStorage.getInstance().getUser(userId, ctx).isGuest()) {
+                throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
+                    folderModule2String(module), getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
+            }
+            /*
+             * (Re-)Create default infostore folder on demand
+             */
+            Connection wc = DBPool.pickupWriteable(ctx);
+            boolean rollback = false;
+            boolean created = false;
+            try {
+                wc.setAutoCommit(false);
+                rollback = true;
                 /*
-                 * (Re-)Create default infostore / infostore trash folder on demand
+                 * Check existence again within this transaction to avoid race conditions
                  */
-                User user = UserStorage.getInstance().getUser(userId, ctx);
-                if (user.isGuest()) {
-                    throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
-                        folderModule2String(module),
-                        getUserName(userId, ctx),
-                        Integer.valueOf(ctx.getContextId()));
-                }
-                final Connection wc = DBPool.pickupWriteable(ctx);
-                boolean rollback = false;
-                boolean created = false;
-                try {
-                    wc.setAutoCommit(false);
-                    rollback = true;
+                folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, wc, ctx) :
+                    OXFolderSQL.getUserDefaultFolder(userId, module, type, wc, ctx);
+                if (-1 == folderId) {
                     /*
-                     * Check existence again within this transaction to avoid race conditions
+                     * Not found, create default folder
                      */
-                    folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, wc, ctx) :
-                        OXFolderSQL.getUserDefaultFolder(userId, module, type, wc, ctx);
-                    if (-1 == folderId && !user.isGuest()) {
-                        /*
-                         * Not found, create default folder
-                         */
-                        if (FolderObject.TRASH == type) {
-                            folderId = new OXFolderAdminHelper().addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
-                        } else {
-                            folderId = new OXFolderAdminHelper().addUserToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
-                        }
-                        created = true;
-                    }
-                    wc.commit();
-                    rollback = false;
-                } finally {
-                    if (rollback) {
-                        DBUtils.rollback(wc);
-                    }
-                    DBUtils.autocommit(wc);
-                    if (created) {
-                        DBPool.closeWriterSilent(ctx, wc);
-                    } else {
-                        DBPool.closeWriterAfterReading(ctx, wc);
-                    }
+                    int folderType = -1 == type ? FolderObject.PUBLIC : type;
+                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, ctx.getContextId(), userId, folderType);
+                    created = true;
+                }
+                wc.commit();
+                rollback = false;
+            } finally {
+                if (rollback) {
+                    DBUtils.rollback(wc);
+                }
+                DBUtils.autocommit(wc);
+                if (created) {
+                    DBPool.closeWriterSilent(ctx, wc);
+                } else {
+                    DBPool.closeWriterAfterReading(ctx, wc);
                 }
             }
-            return getFolderObject(folderId);
-        } catch (final OXException e) {
+            return folderId;
+        } catch (OXException e) {
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }

@@ -52,9 +52,13 @@ package com.openexchange.snippet;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.json.JSONObject;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -115,42 +119,75 @@ public class SnippetProcessor {
     }
 
     /**
-     * Process the image in the snippet, extract it and convert it to an attachment
+     * Process the images in the snippet, extracts them and convert them to attachments
      *
      * @param snippet
      * @throws OXException
      */
-    public void processImage(final Snippet snippet) throws OXException {
+    public void processImages(final Snippet snippet) throws OXException {
         String content = snippet.getContent();
         if (isEmpty(content)) {
             return;
         }
 
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
+
+        ConfigProperty<Integer> maxImageLimit = configView.property("com.openexchange.mail.signature.maxImageLimit", Integer.class);
+        if (!maxImageLimit.isDefined()) {
+            maxImageLimit.set(3);
+        }
+
+        final long maxImageSize;
+        {
+            ConfigProperty<Double> mis = configView.property("com.openexchange.mail.signature.maxImageSize", Double.class);
+            if (!mis.isDefined()) {
+                mis.set(1d);
+            }
+            maxImageSize = (long) (Math.pow(1024, 2) * mis.get());
+        }
+
+        Map<String, String> imageTags = new HashMap<String, String>(maxImageLimit.get());
+
+        final ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
         final ImageMatcher m = ImageMatcher.matcher(content);
-        if (m.find()) {
-            final ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
+        int count = 0;
+        while (m.find()) {
             final String imageTag = m.group();
             if (MimeMessageUtility.isValidImageUri(imageTag)) {
                 final String id = m.getManagedFileId();
-                final ManagedFile mf = mfm.getByID(id);
-
-                DefaultAttachment att = new DefaultAttachment();
-                att.setContentDisposition(mf.getContentDisposition());
-                att.setContentType(mf.getContentType());
-                att.setId(mf.getID());
-                att.setSize(mf.getSize());
-                att.setStreamProvider(new InputStreamProviderImpl(mf));
-                att.setFilename(mf.getFileName());
-
-                DefaultSnippet ds = (DefaultSnippet) snippet;
-                ds.addAttachment(att);
-                
-                //final String url = SnippetImageDataSource.getInstance().generateUrl(new ImageLocation.Builder(id).id(snippet.getId()).build(), session);
-                final String url = mf.constructURL(session);
-                content = pattern.matcher(content).replaceAll(Matcher.quoteReplacement("src=\"" + url + "\""));
-                ds.setContent(content);
+                imageTags.put(id, imageTag);
+                count++;
             }
         }
-    }
 
+        if (count > maxImageLimit.get()) {
+            throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(maxImageLimit.get());
+        }
+
+        for (String id : imageTags.keySet()) {
+            final ManagedFile mf = mfm.getByID(id);
+
+            if (mf.getSize() > maxImageSize) {
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(maxImageSize);
+            }
+
+            DefaultAttachment att = new DefaultAttachment();
+            att.setContentDisposition(mf.getContentDisposition());
+            att.setContentType(mf.getContentType());
+            att.setId(mf.getID());
+            att.setSize(mf.getSize());
+            att.setStreamProvider(new InputStreamProviderImpl(mf));
+            att.setFilename(mf.getFileName());
+
+            DefaultSnippet ds = (DefaultSnippet) snippet;
+            ds.addAttachment(att);
+
+            final String url = mf.constructURL(session);
+            String imageTag = imageTags.get(id);
+            String replacement = pattern.matcher(imageTag).replaceAll(Matcher.quoteReplacement("src=\"" + url + "\""));
+            content = content.replace(imageTag, replacement);
+            ds.setContent(content);
+        }
+    }
 }

@@ -170,11 +170,25 @@ public final class MailFolderStorage implements FolderStorage {
         procedure = new TObjectProcedure<MailAccess<?, ?>>() {
 
             @Override
-            public boolean execute(final MailAccess<?, ?> mailAccess) {
+            public boolean execute(MailAccess<?, ?> mailAccess) {
                 closeMailAccess(mailAccess);
                 return true;
             }
         };
+    }
+
+    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccessFor(Session ses, int accountId) throws OXException {
+        /*-
+         *
+        UserPermissionBits bits =  (ses instanceof ServerSession) ? ((ServerSession) ses).getUserPermissionBits() :
+            UserPermissionBitsStorage.getInstance().getUserPermissionBits(ses.getUserId(), ses.getContextId());
+        if (!bits.hasWebMail()) {
+            throw OXExceptions.noPermissionForModule("mail");
+        }
+         *
+         */
+
+        return MailAccess.getInstance(ses, accountId);
     }
 
     private String optArchiveFullName(MailAccount mailAccount, MailAccess<?, ?> mailAccess) throws OXException {
@@ -241,7 +255,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess = mailAccessFor(session, accountId);
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
 
@@ -420,7 +434,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess = mailAccessFor(session, accountId);
             mailAccess.connect(false);
             /*
              * Restore if absent
@@ -444,7 +458,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess = mailAccessFor(session, accountId);
             mailAccess.connect(false);
             final MailFolderDescription mfd = new MailFolderDescription();
             mfd.setExists(false);
@@ -536,7 +550,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess = mailAccessFor(session, accountId);
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             final String fullname = arg.getFullname();
@@ -609,7 +623,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess = mailAccessFor(session, accountId);
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             final String fullName = arg.getFullname();
@@ -671,7 +685,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, 0);
+            mailAccess = mailAccessFor(session, 0);
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             // Return primary account's default folder
@@ -709,7 +723,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess = mailAccessFor(session, accountId);
             mailAccess.connect(false);
             if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !mailAccess.getFolderStorage().exists(fullname)) {
                 throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullname);
@@ -732,7 +746,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess = mailAccessFor(session, accountId);
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
                 return true;
             }
@@ -784,7 +798,7 @@ public final class MailFolderStorage implements FolderStorage {
                 int accountId = argument.getAccountId();
                 MailAccess<?, ?> mailAccess = accesses.get(accountId);
                 if (null == mailAccess) {
-                    mailAccess = MailAccess.getInstance(session, accountId);
+                    mailAccess = mailAccessFor(session, accountId);
                     accesses.put(accountId, mailAccess);
                 }
                 MailAccount mailAccount = accounts.get(argument.getAccountId());
@@ -823,7 +837,7 @@ public final class MailFolderStorage implements FolderStorage {
                 final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
                 mailAccount = storageService.getMailAccount(argument.getAccountId(), storageParameters.getUserId(), storageParameters.getContextId());
             }
-            mailAccess = MailAccess.getInstance(session, argument.getAccountId());
+            mailAccess = mailAccessFor(session, argument.getAccountId());
             return getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount);
         } finally {
             closeMailAccess(mailAccess);
@@ -1136,7 +1150,7 @@ public final class MailFolderStorage implements FolderStorage {
             final String fullname = argument.getFullname();
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             if (null == mailAccessArg) {
-                mailAccess = MailAccess.getInstance(session, accountId);
+                mailAccess = mailAccessFor(session, accountId);
                 mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             } else {
                 mailAccess = mailAccessArg;
@@ -1406,7 +1420,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, argument.getAccountId());
+            mailAccess = mailAccessFor(session, argument.getAccountId());
             mailAccess.connect(false);
             final boolean exists = mailAccess.getFolderStorage().exists(fullname);
             addWarnings(mailAccess, storageParameters);
@@ -1454,7 +1468,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess = mailAccessFor(session, accountId);
             mailAccess.connect(false);
 
             final MailFolderDescription mfd = new MailFolderDescription();
@@ -1553,7 +1567,7 @@ public final class MailFolderStorage implements FolderStorage {
                     // Move to another account
                     MailAccess<?, ?> otherAccess = null;
                     try {
-                        otherAccess = MailAccess.getInstance(session, parentAccountID);
+                        otherAccess = mailAccessFor(session, parentAccountID);
                         otherAccess.connect();
                         String newParent = mfd.getParentFullname();
                         // Check if parent mail folder exists

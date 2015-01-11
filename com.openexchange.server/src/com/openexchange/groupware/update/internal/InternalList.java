@@ -743,9 +743,6 @@ public final class InternalList {
         // Corrects values in the 'changing_date' column that are set to {@link Long#MAX_VALUE}.
         list.add(new com.openexchange.groupware.update.tasks.FolderCorrectChangingDateTask());
 
-        // Adds permissions to system- and root-folders for the virtual guest group.
-        list.add(new com.openexchange.groupware.update.tasks.FolderPermissionAddGuestGroup());
-
         // (Re-)adds indexes in prg_contacts for "auto-complete" queries
         list.add(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearchV2());
 
@@ -761,6 +758,9 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob());
 
         // +++++++++++++++++++++++++++++++++ Version 7.8.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Adds permissions to system- and root-folders for the virtual guest group.
+        list.add(new com.openexchange.groupware.update.tasks.FolderPermissionAddGuestGroup());
 
         // Adds the column 'guestCreatedBy' to the tables 'user' and 'del_user'
         list.add(new com.openexchange.groupware.update.tasks.UserAddGuestCreatedByTask());

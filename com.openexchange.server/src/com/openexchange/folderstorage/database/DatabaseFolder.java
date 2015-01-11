@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.database.contentType.UnboundContentType;
 import com.openexchange.folderstorage.filestorage.contentType.DocumentsContentType;
 import com.openexchange.folderstorage.filestorage.contentType.MusicContentType;
 import com.openexchange.folderstorage.filestorage.contentType.PicturesContentType;
+import com.openexchange.folderstorage.filestorage.contentType.TemplatesContentType;
 import com.openexchange.folderstorage.filestorage.contentType.VideosContentType;
 import com.openexchange.folderstorage.type.DocumentsType;
 import com.openexchange.folderstorage.type.MusicType;
@@ -73,6 +74,7 @@ import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.container.FolderObject;
@@ -202,6 +204,8 @@ public class DatabaseFolder extends AbstractFolder {
             return MusicType.getInstance();
         case FolderObject.VIDEOS:
             return VideosType.getInstance();
+        case FolderObject.TEMPLATES:
+            return TemplatesType.getInstance();
         default:
             return null;
         }
@@ -229,6 +233,8 @@ public class DatabaseFolder extends AbstractFolder {
             return MusicContentType.getInstance();
         case FolderObject.VIDEOS:
             return VideosContentType.getInstance();
+        case FolderObject.TEMPLATES:
+            return TemplatesContentType.getInstance();
         default:
             LOG.warn("Unknown database folder content type: {}", module);
             return SystemContentType.getInstance();

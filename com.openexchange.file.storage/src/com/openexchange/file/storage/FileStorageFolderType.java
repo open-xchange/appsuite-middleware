@@ -80,6 +80,8 @@ public enum FileStorageFolderType {
 
     MUSIC_FOLDER,
 
-    VIDEOS_FOLDER
+    VIDEOS_FOLDER,
+
+    TEMPLATES_FOLDER
     ;
 }

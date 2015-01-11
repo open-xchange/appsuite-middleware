@@ -116,6 +116,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(UpdateTest.class);
         tests.addTestSuite(VisibleFoldersTest.class);
         tests.addTestSuite(SubscribeTest.class);
+        tests.addTestSuite(DefaultMediaFoldersTest.class);
 
         // Test for object counts for database folder
         tests.addTest(new JUnit4TestAdapter(ContactObjectCountTest.class));

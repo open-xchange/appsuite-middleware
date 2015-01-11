@@ -561,6 +561,11 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      */
     CREATOR_STAYS_ADMIN("Owner %1$s of folder %2$s has been restored to keep the folder admin permission",
         OXFolderExceptionMessage.CREATOR_STAYS_ADMIN_MSG, Category.CATEGORY_WARNING, 91),
+    /**
+     * The folder name \"%1$s\" is reserved. Please choose another name.
+     */
+    NO_RESERVED_FOLDER("The folder name \"%1$s\" is reserved. Please choose another name.",
+        OXFolderExceptionMessage.NO_RESERVED_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 92),
 
     ;
 

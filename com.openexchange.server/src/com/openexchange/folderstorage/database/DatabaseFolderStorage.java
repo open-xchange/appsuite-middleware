@@ -114,11 +114,16 @@ import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
 import com.openexchange.folderstorage.internal.TransactionManager;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
+import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -702,10 +707,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.CONTACT, con, context);
             } else if (InfostoreContentType.getInstance().equals(contentType)) {
                 if (TrashType.getInstance().equals(type)) {
-                    folderId = OXFolderSQL.getUserDefaultFolder(
-                        session.getUserId(), FolderObject.INFOSTORE, getTypeByFolderType(type), con, context);
-                } else {
-                    folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.INFOSTORE, con, context);
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.TRASH, con, context);
+                } else if (DocumentsType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.DOCUMENTS, con, context);
+                } else if (TemplatesType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.TEMPLATES, con, context);
+                } else if (VideosType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.VIDEOS, con, context);
+                } else if (MusicType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.MUSIC, con, context);
+                } else if (PicturesType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.PICTURES, con, context);
+                } else  {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, con, context);
                 }
             }
             if (-1 == folderId) {
@@ -2004,23 +2018,29 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (TrashType.getInstance().equals(type)) {
             return FolderObject.TRASH;
         }
+        if (DocumentsType.getInstance().equals(type)) {
+            return FolderObject.DOCUMENTS;
+        }
+        if (TemplatesType.getInstance().equals(type)) {
+            return FolderObject.TEMPLATES;
+        }
+        if (MusicType.getInstance().equals(type)) {
+            return FolderObject.MUSIC;
+        }
+        if (PicturesType.getInstance().equals(type)) {
+            return FolderObject.PICTURES;
+        }
+        if (VideosType.getInstance().equals(type)) {
+            return FolderObject.VIDEOS;
+        }
         return FolderObject.SYSTEM_TYPE;
     }
 
     private static int getTypeByFolderTypeWithShared(final Type type) {
-        if (PrivateType.getInstance().equals(type)) {
-            return FolderObject.PRIVATE;
-        }
-        if (PublicType.getInstance().equals(type)) {
-            return FolderObject.PUBLIC;
-        }
         if (SharedType.getInstance().equals(type)) {
             return FolderObject.SHARED;
         }
-        if (TrashType.getInstance().equals(type)) {
-            return FolderObject.TRASH;
-        }
-        return FolderObject.SYSTEM_TYPE;
+        return getTypeByFolderType(type);
     }
 
     private static final class FolderObjectComparator implements Comparator<FolderObject> {

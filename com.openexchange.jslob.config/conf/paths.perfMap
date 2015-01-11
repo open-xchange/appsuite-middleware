@@ -69,3 +69,8 @@ minimumSearchCharacters > io.ox/contacts//search/minimumQueryLength
 
 # InfoStore/Files/Drive
 modules/infostore/folder/trash > io.ox/files//folder/trash
+modules/infostore/folder/pictures > io.ox/files//folder/pictures
+modules/infostore/folder/documents > io.ox/files//folder/documents
+modules/infostore/folder/templates > io.ox/files//folder/templates
+modules/infostore/folder/music > io.ox/files//folder/music
+modules/infostore/folder/videos > io.ox/files//folder/videos

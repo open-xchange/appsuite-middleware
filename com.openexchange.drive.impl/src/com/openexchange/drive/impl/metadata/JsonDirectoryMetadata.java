@@ -64,8 +64,15 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
+import com.openexchange.folderstorage.type.TemplatesType;
+import com.openexchange.folderstorage.type.TrashType;
+import com.openexchange.folderstorage.type.VideosType;
 
 /**
  * {@link JsonDirectoryMetadata}
@@ -111,6 +118,31 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             jsonObject.put("path", session.getStorage().getPath(folderID));
             jsonObject.put("created", folder.getCreationDate().getTime());
             jsonObject.put("modified", folder.getLastModifiedDate().getTime());
+            jsonObject.put("default", folder.isDefaultFolder());
+            if (TypeAware.class.isInstance(folder)) {
+                switch (((TypeAware) folder).getType()) {
+                    case DOCUMENTS_FOLDER:
+                        jsonObject.put("type", DocumentsType.getInstance().getType());
+                        break;
+                    case TEMPLATES_FOLDER:
+                        jsonObject.put("type", TemplatesType.getInstance().getType());
+                        break;
+                    case MUSIC_FOLDER:
+                        jsonObject.put("type", MusicType.getInstance().getType());
+                        break;
+                    case PICTURES_FOLDER:
+                        jsonObject.put("type", PicturesType.getInstance().getType());
+                        break;
+                    case TRASH_FOLDER:
+                        jsonObject.put("type", TrashType.getInstance().getType());
+                        break;
+                    case VIDEOS_FOLDER:
+                        jsonObject.put("type", VideosType.getInstance().getType());
+                        break;
+                    default:
+                        break;
+                }
+            }
             Set<String> capabilities = folder.getCapabilities();
             if (null != capabilities && capabilities.contains(FileStorageFolder.CAPABILITY_PERMISSIONS)) {
                 jsonObject.put("own_rights", createPermissionBits(folder.getOwnPermission()));

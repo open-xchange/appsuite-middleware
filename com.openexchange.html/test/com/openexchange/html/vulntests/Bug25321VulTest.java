@@ -62,7 +62,7 @@ import com.openexchange.html.AssertionHelper;
 public class Bug25321VulTest extends AbstractSanitizing {
     @Test
     public void testSanitize() {
-        String content = "http://google.de?q=<script>javascript:alert('XSS')<script>";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "<script>javascript:alert('XSS')<script>");
+        String content = "http://google.de?q=<script>javascript:alert('XSS')</script>";
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "<script>javascript:alert('XSS')</script>");
     }
 }

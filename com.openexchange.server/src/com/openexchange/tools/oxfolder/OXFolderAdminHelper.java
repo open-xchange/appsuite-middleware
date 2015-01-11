@@ -1210,15 +1210,16 @@ public final class OXFolderAdminHelper {
                 while (rs.next() && rs.getString(4).equals("TABLE")) {
                     oxfolderTables.add(rs.getString(3));
                 }
+            } finally {
+                closeSQLStuff(rs);
+            }
+            try {
                 rs = databaseMetaData.getTables(null, null, "del_oxfolder_%", null);
                 while (rs.next() && rs.getString(4).equals("TABLE")) {
                     delOxfolderTables.add(rs.getString(3));
                 }
             } finally {
-                if (rs != null) {
-                    rs.close();
-                    rs = null;
-                }
+                closeSQLStuff(rs);
             }
             /*
              * Remove root tables
@@ -1439,7 +1440,7 @@ public final class OXFolderAdminHelper {
      * @return The user's display name or <code>null</code> if no such user exists
      * @throws OXException If user's display name cannot be loaded
      */
-    private static String getUserDisplayName(final int userId, final int cid, final Connection con) throws OXException {
+    static String getUserDisplayName(final int userId, final int cid, final Connection con) throws OXException {
         final PreparedStatement stmt;
         try {
             stmt = con.prepareStatement(SQL_SELECT_DISPLAY_NAME);
@@ -1571,168 +1572,15 @@ public final class OXFolderAdminHelper {
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             LOG.info("User's default TASK folder successfully created");
             /*
-             * Insert default infostore folder
+             * Insert default infostore folders
              */
-            fo.reset();
-            fo.setPermissionsAsArray(new OCLPermission[] { defaultPerm });
-            fo.setDefaultFolder(true);
-            fo.setParentFolderID(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
-            fo.setType(FolderObject.PUBLIC);
-            fo.setFolderName(displayName);
-            fo.setModule(FolderObject.INFOSTORE);
-            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            LOG.info("User's default INFOSTORE folder successfully created");
-            final int user_infostore_id = newFolderId;
-            /*
-             * Insert default infostore trash folder
-             */
-            fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-            fo.setType(FolderObject.TRASH);
-            fo.setFolderName(defaultInfostoreTrashName);
-            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            LOG.info("User's default INFOSTORE trash folder successfully created");
-
-            // Create default image folder
-            fo.setParentFolderID(user_infostore_id);
-            fo.setType(FolderObject.PICTURES);
-            fo.setFolderName(FolderStrings.SYSTEM_USER_PICTURES_FOLDER_NAME);
-            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            LOG.info("User's default image folder successfully created");
-
-            // Create default document folder
-            fo.setParentFolderID(user_infostore_id);
-            fo.setType(FolderObject.DOCUMENTS);
-            fo.setFolderName(FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME);
-            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            LOG.info("User's default document folder successfully created");
-
-            // Create default music folder
-            fo.setParentFolderID(user_infostore_id);
-            fo.setType(FolderObject.MUSIC);
-            fo.setFolderName(FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME);
-            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            LOG.info("User's default music folder successfully created");
-
-            // Create default video folder
-            fo.setParentFolderID(user_infostore_id);
-            fo.setType(FolderObject.VIDEOS);
-            fo.setFolderName(FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME);
-            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            LOG.info("User's default video folder successfully created");
-
+            InfoStoreFolderAdminHelper.addDefaultFolders(writeCon, cid, userId);
 
             LOG.info("All user default folders were successfully created");
             /*
              * TODO: Set standard special folders (projects, ...) located beneath system user folder
              */
             LOG.info("User {} successfully created in context {}", userId, cid);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Creates default folders for infostore module for given user ID
-     *
-     * @param userId The user ID
-     * @param displayName The display name which is taken as folder name for user's default infostore folder
-     * @param cid The context ID
-     * @param writeCon A writable connection to (master) database
-     * @return THe folder identifier
-     * @throws OXException If user's default infostore folder could not be created successfully
-     */
-    public int addUserToInfoStore(final int userId, final String displayName, final int cid, final Connection writeCon) throws OXException {
-        try {
-            final Context ctx = new ContextImpl(cid);
-            /*
-             * Check infostore sibling
-             */
-            String folderName = displayName;
-            final int resetLen = folderName.length();
-            int count = 0;
-            while (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folderName, FolderObject.INFOSTORE, writeCon, ctx) != -1) {
-                folderName = folderName.substring(0, resetLen) + " (" + String.valueOf(++count) + ')';
-            }
-            /*
-             * Insert default infostore folder
-             */
-            final long creatingTime = System.currentTimeMillis();
-            final OCLPermission defaultPerm = new OCLPermission();
-            defaultPerm.setEntity(userId);
-            defaultPerm.setGroupPermission(false);
-            defaultPerm.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
-            defaultPerm.setFolderAdmin(true);
-            final FolderObject fo = new FolderObject();
-            fo.setPermissionsAsArray(new OCLPermission[] { defaultPerm });
-            fo.setDefaultFolder(true);
-            fo.setParentFolderID(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
-            fo.setType(FolderObject.PUBLIC);
-            fo.setFolderName(folderName);
-            fo.setModule(FolderObject.INFOSTORE);
-            final int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            LOG.info("User's default INFOSTORE folder successfully created");
-            return newFolderId;
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Creates default trash folder for infostore module for given user ID
-     *
-     * @param userId The user ID
-     * @param language The user's language to translate the folder name into
-     * @param cid The context ID
-     * @param writeCon A writable connection to (master) database
-     * @return THe folder identifier
-     * @throws OXException If user's default infostore folder could not be created successfully
-     */
-    public int addUserTrashToInfoStore(final int userId, final String language, final int cid, final Connection writeCon) throws OXException {
-        try {
-            final Context ctx = new ContextImpl(cid);
-            /*
-             * Get folder name
-             */
-            StringHelper strHelper = StringHelper.valueOf(LocaleTools.getLocale(language));
-            String folderName = strHelper.getString(FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME);
-            if (folderName == null || folderName.length() == 0) {
-                folderName = DEFAULT_INFOSTORE_TRASH_NAME;
-            }
-            /*
-             * Insert default infostore trash folder
-             */
-            final long creatingTime = System.currentTimeMillis();
-            final OCLPermission defaultPerm = new OCLPermission();
-            defaultPerm.setEntity(userId);
-            defaultPerm.setGroupPermission(false);
-            defaultPerm.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
-            defaultPerm.setFolderAdmin(true);
-            final FolderObject fo = new FolderObject();
-            fo.setPermissionsAsArray(new OCLPermission[] { defaultPerm });
-            fo.setDefaultFolder(true);
-            fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-            fo.setType(FolderObject.TRASH);
-            fo.setFolderName(folderName);
-            fo.setModule(FolderObject.INFOSTORE);
-            final int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            LOG.info("User's default INFOSTORE trash folder successfully created");
-            return newFolderId;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }

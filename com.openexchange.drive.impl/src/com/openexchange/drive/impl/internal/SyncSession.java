@@ -52,7 +52,6 @@ package com.openexchange.drive.impl.internal;
 import static com.openexchange.drive.impl.DriveConstants.TEMP_PATH;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
@@ -306,10 +305,6 @@ public class SyncSession {
      */
     public List<ServerFileVersion> getServerFiles(String path) throws OXException {
         FileStorageFolder folder = getStorage().getFolder(path);
-        if (null == folder || null == folder.getOwnPermission() ||
-            FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
-            return Collections.emptyList();
-        }
         List<File> files = getStorage().getFilesInFolder(folder.getId());
         List<FileChecksum> checksums = ChecksumProvider.getChecksums(this, folder.getId(), files);
         List<ServerFileVersion> serverFiles = new ArrayList<ServerFileVersion>(files.size());

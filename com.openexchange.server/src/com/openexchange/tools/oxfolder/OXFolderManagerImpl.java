@@ -51,6 +51,7 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
@@ -65,7 +66,6 @@ import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -135,6 +135,8 @@ import com.openexchange.tools.sql.DBUtils;
 final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderManagerImpl.class);
+
+    private static final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
     /**
      * No options.
@@ -279,7 +281,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 "",
                 Integer.valueOf(ctx.getContextId()));
         }
-        OXFolderUtility.checkFolderStringData(folderObj);
         final FolderObject parentFolder = getOXFolderAccess().getFolderObject(folderObj.getParentFolderID());
         if (checkPermissions) {
             /*
@@ -360,46 +361,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 createTime);
         }
         /*
-         * Check if duplicate folder exists
+         * Check against reserved / duplicate / invalid folder names in target folder
          */
-        try {
-            final int parentFolderID = folderObj.getParentFolderID();
-            final String folderName = folderObj.getFolderName();
-            boolean throwException = false;
-
-            if (parentFolderID != 1) {
-                if (OXFolderSQL.lookUpFolder(parentFolderID, folderName, folderObj.getModule(), readCon, ctx) != -1) {
-                    /*
-                     * A duplicate folder exists
-                     */
-                    throwException = true;
-                }
-            } else {
-                final TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, folderObj.getModule(), readCon, ctx);
-                /*
-                 * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
-                 */
-                for (final int fuid : folders.toArray()) {
-                    final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
-                    if (toCheck.getCreatedBy() == (folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : user.getId())) {
-                        /*
-                         * User is already owner of a private folder with the same name located below system's private folder
-                         */
-                        throwException = true;
-                        break;
-                    }
-                }
-            }
-
-            if (throwException) {
-                throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(parentFolder),
-                    Integer.valueOf(ctx.getContextId()), folderName);
-            }
-
-            OXFolderUtility.checki18nString(parentFolderID, folderName, user.getLocale(), ctx);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
+        OXFolderUtility.checkTargetFolderName(readCon, ctx, user, -1, folderObj.getModule(), folderObj.getParentFolderID(), folderObj.getFolderName(), user.getId());
         /*
          * This folder shall be shared to other users
          */
@@ -796,37 +760,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         if (fo.containsFolderName() && !storageObj.getFolderName().equals(fo.getFolderName())) {
             rename = true;
             /*
-             * Check for invalid characters
+             * Check against reserved / duplicate / invalid folder names in target folder
              */
-            OXFolderUtility.checkFolderStringData(fo);
-            /*
-             * Rename: Check if duplicate folder exists
-             */
-            try {
-                final String folderName = fo.getFolderName();
-                final int folderId = OXFolderSQL.lookUpFolderOnUpdate(
-                    fo.getObjectID(),
-                    storageObj.getParentFolderID(),
-                    folderName,
-                    fo.getModule(),
-                    readCon,
-                    ctx);
-                if (folderId != -1 && folderId != fo.getObjectID()) {
-                    /*
-                     * A duplicate folder exists
-                     */
-                    throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(new OXFolderAccess(
-                        readCon,
-                        ctx).getFolderObject(storageObj.getParentFolderID())), Integer.valueOf(ctx.getContextId()), folderName);
-                }
-                /*
-                 * Check i18n strings, too
-                 */
-                final int parentFolderId = storageObj.getParentFolderID();
-                OXFolderUtility.checki18nString(parentFolderId, folderName, user.getLocale(), ctx);
-            } catch (final SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            }
+            OXFolderUtility.checkTargetFolderName(readCon, ctx, user, fo.getObjectID(), fo.getModule(), storageObj.getParentFolderID(), fo.getFolderName(), storageObj.getCreatedBy());
         }
         /*
          * This folder shall be shared to other users
@@ -1000,68 +936,22 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     private void rename(final FolderObject folderObj, final FolderObject storageObj, final long lastModified) throws OXException {
         if (folderObj.getObjectID() <= 0) {
-            throw OXFolderExceptionCode.INVALID_OBJECT_ID.create(OXFolderUtility.getFolderName(folderObj));
+            throw OXFolderExceptionCode.INVALID_OBJECT_ID.create(getFolderName(folderObj));
         } else if (!folderObj.containsFolderName() || folderObj.getFolderName() == null || folderObj.getFolderName().trim().length() == 0) {
-            throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.TITLE, "", Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.TITLE, "", I(ctx.getContextId()));
         }
-        OXFolderUtility.checkFolderStringData(folderObj);
         /*
          * Check if rename can be avoided (cause new name equals old one) and prevent default folder rename
          */
         if (storageObj.getFolderName().equals(folderObj.getFolderName())) {
             return;
         } else if (storageObj.isDefaultFolder()) {
-            throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_RENAME.create(OXFolderUtility.getFolderName(folderObj),
-                Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_RENAME.create(getFolderName(folderObj), I(ctx.getContextId()));
         }
         /*
-         * Check for duplicate folder
+         * Check against reserved / duplicate / invalid folder names in target folder
          */
-        try {
-            final String folderName = folderObj.getFolderName();
-            final int parentFolderID = storageObj.getParentFolderID();
-            final int folderId = folderObj.getObjectID();
-            boolean throwException = false;
-
-            /*
-             * When the private folder is parent, we have to check if folders with the same name in the same module can be seen by the user.
-             */
-            if (parentFolderID != 1) {
-                if (OXFolderSQL.lookUpFolderOnUpdate(folderId, parentFolderID, folderName, storageObj.getModule(), readCon, ctx) != -1) {
-                    /*
-                     * A duplicate folder exists
-                     */
-                    throwException = true;
-                }
-            } else {
-                final TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageObj.getModule(), readCon, ctx);
-                /*
-                 * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
-                 */
-                for (final int fuid : folders.toArray()) {
-                    final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
-                    if (toCheck.getCreatedBy() == (folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : user.getId())) {
-                        /*
-                         * User is already owner of a private folder with the same name located below system's private folder
-                         */
-                        throwException = true;
-                        break;
-                    }
-                }
-            }
-
-            if (throwException) {
-                throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(new OXFolderAccess(readCon, ctx).getFolderObject(storageObj.getParentFolderID())),
-                    Integer.valueOf(ctx.getContextId()), folderName);
-            }
-
-            /*
-             * Check i18n strings, too
-             */
-            OXFolderUtility.checki18nString(parentFolderID, folderName, user.getLocale(), ctx);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
+        OXFolderUtility.checkTargetFolderName(readCon, ctx, user, folderObj.getObjectID(), storageObj.getModule(), storageObj.getParentFolderID(), folderObj.getFolderName(), storageObj.getCreatedBy());
         /*
          * This folder shall be shared to other users
          */
@@ -1106,13 +996,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    private final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
-
-    private static boolean isInArray(final int key, final int[] a) {
-        Arrays.sort(a);
-        return Arrays.binarySearch(a, key) >= 0;
-    }
-
     /**
      * Moves and/or renames a folder in the database.
      *
@@ -1134,77 +1017,32 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          * Default folder must not be moved
          */
         if (storageSrc.isDefaultFolder()) {
-            throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_MOVE.create(OXFolderUtility.getFolderName(storageSrc),
-                Integer.valueOf(ctx.getContextId()));
+            throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_MOVE.create(getFolderName(storageSrc), I(ctx.getContextId()));
         }
+        /*
+         * Check if duplicate / reserved folder exists in target folder
+         */
+        String folderName = null == newName ? storageSrc.getFolderName() : newName;
+        OXFolderUtility.checkTargetFolderName(readCon, ctx, user, folderId, storageSrc.getModule(), targetFolderId, folderName, createdBy);
         /*
          * For further checks we need to load destination folder
          */
         final FolderObject storageDest = getOXFolderAccess().getFolderObject(targetFolderId);
         /*
-         * Check for a duplicate folder in target folder
-         */
-        final int parentFolderID = storageDest.getObjectID();
-        final String folderName = null == newName ? storageSrc.getFolderName() : newName;
-        boolean throwException = false;
-
-        /*
-         * When the private folder is parent, we have to check if folders with the same name in the same module can be seen by the user.
-         */
-        if (parentFolderID != 1) {
-            if (OXFolderSQL.lookUpFolderOnUpdate(folderId, parentFolderID, folderName, storageSrc.getModule(), readCon, ctx) != -1) {
-                /*
-                 * A duplicate folder exists
-                 */
-                throwException = true;
-            }
-        } else {
-            final TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, storageSrc.getModule(), readCon, ctx);
-            /*
-             * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
-             */
-            for (final int fuid : folders.toArray()) {
-                final FolderObject toCheck = getOXFolderAccess().getFolderObject(fuid);
-                if (toCheck.getCreatedBy() == (createdBy > 0 ? createdBy : user.getId())) {
-                    /*
-                     * User is already owner of a private folder with the same name located below system's private folder
-                     */
-                    throwException = true;
-                    break;
-                }
-            }
-        }
-
-        if (throwException) {
-            throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(storageDest),
-                Integer.valueOf(ctx.getContextId()), folderName);
-        }
-
-        /*
-         * Check i18n strings, too
-         */
-        OXFolderUtility.checki18nString(targetFolderId, folderName, user.getLocale(), ctx);
-        /*
          * Check a bunch of possible errors
          */
         try {
             if (storageSrc.isShared(user.getId())) {
-                throw OXFolderExceptionCode.NO_SHARED_FOLDER_MOVE.create(OXFolderUtility.getFolderName(storageSrc),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_SHARED_FOLDER_MOVE.create(getFolderName(storageSrc), I(ctx.getContextId()));
             } else if (storageDest.isShared(user.getId())) {
-                throw OXFolderExceptionCode.NO_SHARED_FOLDER_TARGET.create(OXFolderUtility.getFolderName(storageDest),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_SHARED_FOLDER_TARGET.create(getFolderName(storageDest),I(ctx.getContextId()));
             } else if (storageSrc.getType() == FolderObject.SYSTEM_TYPE) {
-                throw OXFolderExceptionCode.NO_SYSTEM_FOLDER_MOVE.create(OXFolderUtility.getFolderName(storageSrc),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_SYSTEM_FOLDER_MOVE.create(getFolderName(storageSrc), I(ctx.getContextId()));
             } else if (storageSrc.getType() == FolderObject.PRIVATE && ((storageDest.getType() == FolderObject.PUBLIC || (storageDest.getType() == FolderObject.SYSTEM_TYPE && targetFolderId != FolderObject.SYSTEM_PRIVATE_FOLDER_ID)))) {
-                throw OXFolderExceptionCode.ONLY_PRIVATE_TO_PRIVATE_MOVE.create(OXFolderUtility.getFolderName(storageSrc),
-                    Integer.valueOf(ctx.getContextId()));
-            } else if (storageSrc.getType() == FolderObject.PUBLIC && ((storageDest.getType() == FolderObject.PRIVATE || (storageDest.getType() == FolderObject.SYSTEM_TYPE && !isInArray(
-                targetFolderId,
-                SYSTEM_PUBLIC_FOLDERS))))) {
-                throw OXFolderExceptionCode.ONLY_PUBLIC_TO_PUBLIC_MOVE.create(OXFolderUtility.getFolderName(storageSrc),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.ONLY_PRIVATE_TO_PRIVATE_MOVE.create(getFolderName(storageSrc), I(ctx.getContextId()));
+            } else if (storageSrc.getType() == FolderObject.PUBLIC && ((storageDest.getType() == FolderObject.PRIVATE ||
+                (storageDest.getType() == FolderObject.SYSTEM_TYPE && false == com.openexchange.tools.arrays.Arrays.contains(SYSTEM_PUBLIC_FOLDERS, targetFolderId))))) {
+                throw OXFolderExceptionCode.ONLY_PUBLIC_TO_PUBLIC_MOVE.create(getFolderName(storageSrc), I(ctx.getContextId()));
             } else if (storageSrc.getModule() == FolderObject.INFOSTORE && storageDest.getModule() != FolderObject.INFOSTORE && targetFolderId != FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                 throw OXFolderExceptionCode.INCOMPATIBLE_MODULES.create(OXFolderUtility.folderModule2String(storageSrc.getModule()),
                     OXFolderUtility.folderModule2String(storageDest.getModule()));
@@ -1212,14 +1050,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 throw OXFolderExceptionCode.INCOMPATIBLE_MODULES.create(OXFolderUtility.folderModule2String(storageSrc.getModule()),
                     OXFolderUtility.folderModule2String(storageDest.getModule()));
             } else if (storageDest.getEffectiveUserPermission(user.getId(), userPerms).getFolderPermission() < OCLPermission.CREATE_SUB_FOLDERS) {
-                throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(OXFolderUtility.getUserName(
-                    user.getId(),
-                    ctx), OXFolderUtility.getFolderName(storageDest), Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(getUserName(user.getId(), ctx), getFolderName(storageDest), I(ctx.getContextId()));
             } else if (folderId == targetFolderId) {
-                throw OXFolderExceptionCode.NO_EQUAL_MOVE.create(Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_EQUAL_MOVE.create(I(ctx.getContextId()));
             }
-        } catch (final RuntimeException e) {
-            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
+        } catch (RuntimeException e) {
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, I(ctx.getContextId()));
         }
         /*
          * Check if source folder has subfolders
@@ -1316,7 +1152,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private boolean adjustFolderTypeOnMove(FolderObject sourceFolder, FolderObject destinationFolder, boolean recursive) throws OXException, SQLException {
         if (sourceFolder.getType() != destinationFolder.getType()) {
             int[] inheritingTypes = {
-                FolderObject.TRASH, FolderObject.DOCUMENTS, FolderObject.PICTURES, FolderObject.MUSIC, FolderObject.VIDEOS
+                FolderObject.TRASH, FolderObject.DOCUMENTS, FolderObject.PICTURES, FolderObject.MUSIC, FolderObject.VIDEOS, FolderObject.TEMPLATES
             };
             if (contains(inheritingTypes, destinationFolder.getType()) || contains(inheritingTypes, sourceFolder.getType())) {
                 List<Integer> folderIDs;

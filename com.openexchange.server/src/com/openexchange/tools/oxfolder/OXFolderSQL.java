@@ -1405,6 +1405,56 @@ public final class OXFolderSQL {
         }
     }
 
+    /**
+     * Transforms an existing folder into a default folder of a certain type by setting the <code>default_flag</code> to <code>1</code>.
+     *
+     * @param connection A (writable) connection to the database, or <code>null</code> to fetch one on demand
+     * @param context The context
+     * @param folderID The identifier of the folder to mark as default folder
+     * @param type The type to apply for the folder
+     * @param folderName The name to apply for the folder
+     * @param lastModified The last modification timestamp to apply for the folder
+     */
+    static void markAsDefaultFolder(Connection connection, Context context, int folderID, int type, String folderName, long lastModified) throws SQLException, OXException {
+        Connection writeCon = connection;
+        boolean closeWriteCon = false;
+        PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean startedTransaction = false;
+        try {
+            if (writeCon == null) {
+                writeCon = DBPool.pickupWriteable(context);
+                closeWriteCon = true;
+            }
+            startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
+                writeCon.setAutoCommit(false);
+                rollback = true;
+            }
+            lock(folderID, context.getContextId(), writeCon);
+            stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET type=?,default_flag=1,fname=?,changing_date=? WHERE cid=? AND fuid=?;");
+            stmt.setInt(1, type);
+            stmt.setString(2, folderName);
+            stmt.setLong(3, lastModified);
+            stmt.setInt(4, context.getContextId());
+            stmt.setInt(5, folderID);
+            executeUpdate(stmt);
+            if (startedTransaction) {
+                writeCon.commit();
+                rollback = false;
+                writeCon.setAutoCommit(true);
+            }
+        } finally {
+            if (startedTransaction && rollback) {
+                if (null != writeCon) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+            }
+            closeResources(null, stmt, closeWriteCon ? writeCon : null, false, context);
+        }
+    }
+
     private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND system = 0";
 
     static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx, final Connection writeConArg) throws SQLException, OXException {

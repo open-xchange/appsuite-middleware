@@ -578,7 +578,7 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpRequest The associated HTTP Servlet request
      * @param httpResponse The associated HTTP Servlet response
      */
-    protected void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    protected static void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
         Iterator<ResponseRenderer> iter = responseRenderers.iterator();
         for (int i = responseRenderers.size(); i-- > 0;) {
