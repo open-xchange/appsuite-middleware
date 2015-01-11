@@ -169,7 +169,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     private final List<ServiceTracker<?, ?>> serviceTrackers;
-    
+
     private final HashMultimap<Object,ServiceRegistration<?>> serviceRegistrations;
 
     /**
@@ -302,8 +302,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * Creates and remembers a new {@link ServiceTracker}. The tracked service is automatically {@link #addService(Class, Object) added to}/
      * {@link #removeService(Class) removed} from tracked services and thus available/disappearing when using this activator as
      * {@link ServiceLookup service look-up}.
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
      * <p>
      * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
+     * </div>
      *
      * @param clazz The class of the tracked service
      * @return The newly created {@link ServiceTracker} instance
@@ -316,8 +318,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and remembers a new {@link ServiceTracker} instance parameterized with given customizer.
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
      * <p>
      * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
+     * </div>
      *
      * @param clazz The class of the tracked service
      * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
@@ -331,8 +335,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and remembers a new {@link ServiceTracker} instance parameterized with given customizer.
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
      * <p>
      * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
+     * </div>
      *
      * @param filter The tracker's filter
      * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
@@ -346,8 +352,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and remembers a new {@link ServiceTracker} instance for specified service's class.
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
      * <p>
      * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
+     * </div>
      *
      * @param clazz The service's class
      * @return The newly created {@link ServiceTracker} instance
@@ -373,8 +381,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and remembers a new {@link ServiceTracker} instance with given listener applied.
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
      * <p>
      * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
+     * </div>
      *
      * @param clazz The service's class
      * @param listener The service's listener triggered on {@link ServiceTracker#addingService(ServiceReference)} and so on
@@ -386,8 +396,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Creates and remembers a new {@link ServiceTracker} instance with given listener applied.
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
      * <p>
      * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
+     * </div>
      *
      * @param filter The service filter
      * @param listener The service's listener triggered on {@link ServiceTracker#addingService(ServiceReference)} and so on
