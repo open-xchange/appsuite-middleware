@@ -63,7 +63,7 @@ test -f $OXCONFIG && . $OXCONFIG
 ox_set_JAVA_BIN
 
 BNAME=$(basename $0)
-CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|exists\|changeaccessglobal\|getaccesscombinationnameforuser\|getusercapabilities\|list\|change\)\(.*\)/\1 \2/') )
+CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|exists\|moveuserfilestore\|movecontextfilestore2user\|moveuserfilestore2context\|movemasterfilestore2user\|moveuserfilestore2master\|changeaccessglobal\|getaccesscombinationnameforuser\|getusercapabilities\|list\|change\)\(.*\)/\1 \2/') )
 MODULE=${CMDARR[1]}
 
 case "${CMDARR[0]}" in
@@ -78,6 +78,26 @@ case "${CMDARR[0]}" in
     ;;
     "exists")
     ACTION="Exists"
+    ;;
+    "moveuserfilestore")
+    ACTION="MoveUserFilestore"
+    MODULE=user
+    ;;
+    "movecontextfilestore2user")
+    ACTION="MoveContextFilestore2User"
+    MODULE=user
+    ;;
+    "moveuserfilestore2context")
+    ACTION="MoveUserFilestore2Context"
+    MODULE=user
+    ;;
+    "movemasterfilestore2user")
+    ACTION="MoveMasterFilestore2User"
+    MODULE=user
+    ;;
+    "moveuserfilestore2master")
+    ACTION="MoveUserFilestore2Master"
+    MODULE=user
     ;;
     "getaccesscombinationnameforuser")
     ACTION="GetAccessCombinationName"
