@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon.isEmpty;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
@@ -124,6 +125,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -491,6 +493,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt.setInt(2, contextId);
             stmt.setInt(3, userId);
             stmt.executeUpdate();
+
+            // Invalidate associated sessions
+            {
+                SessiondService sessiondService = AdminServiceRegistry.getInstance().getService(SessiondService.class);
+                if (null != sessiondService) {
+                    try {
+                        sessiondService.removeUserSessions(userId, ContextStorage.getInstance().getContext(contextId));
+                    } catch (Exception e) {
+                        log.error("Failed to invalidate sessions for user {} in context {}", I(userId), I(contextId), e);
+                    }
+                }
+            }
 
             // JCS
             BundleContext context = AdminCache.getBundleContext();

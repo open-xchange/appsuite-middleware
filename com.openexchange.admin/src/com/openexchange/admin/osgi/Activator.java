@@ -94,6 +94,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -119,6 +120,7 @@ public class Activator extends HousekeepingActivator {
         track(CreateTableService.class, new CreateTableCustomizer(context));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(CapabilityService.class, new RegistryServiceTrackerCustomizer<CapabilityService>(context, AdminServiceRegistry.getInstance(), CapabilityService.class));
+        track(SessiondService.class, new RegistryServiceTrackerCustomizer<SessiondService>(context, AdminServiceRegistry.getInstance(), SessiondService.class));
         track(Remote.class, new OXContextInterfaceTracker(context));
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
@@ -149,9 +151,6 @@ public class Activator extends HousekeepingActivator {
 
         track(FileLocationHandler.class, new FilestoreLocationUpdaterCustomizer(context));
 
-        // Open trackers
-        openTrackers();
-
         log.info("Starting Admindaemon...");
         final AdminDaemon daemon = new AdminDaemon();
         this.daemon = daemon;
@@ -170,6 +169,8 @@ public class Activator extends HousekeepingActivator {
         track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
         daemon.initRMI(context);
 
+        // Open trackers
+        openTrackers();
 
         {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();
