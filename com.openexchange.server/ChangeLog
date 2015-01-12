@@ -51,6 +51,10 @@
 
  - Fix for bug 36072: Remove white spaces between encoded words as per RFC2047.
 
+* 2014-01-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31407: When evaluating the "has subfolders" flag, ignore subfolders that are no longer found
+
 * 2015-01-09 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 36024: Replace occurrences of position:fixed by display:block in inline styles to prevent defacing the web ui.
