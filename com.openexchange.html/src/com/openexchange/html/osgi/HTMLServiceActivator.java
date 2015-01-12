@@ -104,6 +104,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
+            Services.setServiceLookup(this);
             HTMLImageFilterHandler.PREFIX.set(getService(DispatcherPrefixService.class));
             /*
              * Configure
@@ -147,6 +148,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
              */
             restore();
             HTMLImageFilterHandler.PREFIX.set(null);
+            Services.setServiceLookup(null);
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;

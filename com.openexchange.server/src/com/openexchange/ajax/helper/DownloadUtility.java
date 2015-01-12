@@ -61,10 +61,11 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
@@ -78,6 +79,7 @@ import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.encoding.URLCoder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DownloadUtility} - Utility class for download.
@@ -87,27 +89,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public final class DownloadUtility {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DownloadUtility.class);
-
-    private static volatile Integer maxLength;
-    private static int htmlThreshold() {
-        Integer i = maxLength;
-        if (null == maxLength) {
-            synchronized (DownloadUtility.class) {
-                i = maxLength;
-                if (null == maxLength) {
-                    // Default is 1MB
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final int defaultMaxLength = 1048576;
-                    if (null == service) {
-                        return defaultMaxLength;
-                    }
-                    i = Integer.valueOf(service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
-                    maxLength = i;
-                }
-            }
-        }
-        return i.intValue();
-    }
 
     /**
      * Initializes a new {@link DownloadUtility}.
@@ -123,11 +104,12 @@ public final class DownloadUtility {
      * @param fileName The file name
      * @param contentTypeStr The content-type string
      * @param userAgent The user agent
+     * @param session The associated session
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String userAgent) throws OXException {
-        return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
+    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String contentTypeStr, String userAgent, ServerSession session) throws OXException {
+        return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent, session);
     }
 
     /**
@@ -138,11 +120,12 @@ public final class DownloadUtility {
      * @param sContentType The <i>Content-Type</i> string
      * @param overridingDisposition Optionally overrides the <i>Content-Disposition</i> header
      * @param userAgent The <i>User-Agent</i>
+     * @param session The associated session
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String sContentType, final String overridingDisposition, final String userAgent) throws OXException {
-        return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent);
+    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, final String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
+        return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent, session);
     }
 
 
@@ -157,10 +140,11 @@ public final class DownloadUtility {
      * @param sContentType The <i>Content-Type</i> string
      * @param overridingDisposition Optionally overrides the <i>Content-Disposition</i> header
      * @param userAgent The <i>User-Agent</i>
+     * @param session The associated session
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final long sizer, final String fileName, final String sContentType, final String overridingDisposition, final String userAgent) throws OXException {
+    public static CheckedDownload checkInlineDownload(InputStream inputStream, long sizer, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             /*
@@ -206,14 +190,18 @@ public final class DownloadUtility {
                         }
                     }
                     // Check size
-                    if (sink.getLength() > htmlThreshold()) {
-                        // HTML cannot be sanitized as it exceeds threshold for HTML parsing
-                        throw AjaxExceptionCodes.BAD_REQUEST.create();
+                    String htmlContent;
+                    if (sink.getLength() > HtmlServices.htmlThreshold()) {
+                        // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
+                        OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
+                        Locale locale = session.getUser().getLocale();
+                        htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                    } else {
+                        htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                        htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     }
-                    String htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
                     sink.close();
                     sink = null; // Null'ify as not needed anymore
-                    htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     final byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
                     contentType.setCharsetParameter("UTF-8");
                     sz = tmp.length;
@@ -449,14 +437,18 @@ public final class DownloadUtility {
                         }
                     }
                     // Check size
-                    if (sink.getLength() > htmlThreshold()) {
-                        // HTML cannot be sanitized as it exceeds threshold for HTML parsing
-                        throw AjaxExceptionCodes.BAD_REQUEST.create();
+                    String htmlContent;
+                    if (sink.getLength() > HtmlServices.htmlThreshold()) {
+                        // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
+                        OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
+                        Locale locale = session.getUser().getLocale();
+                        htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                    } else {
+                        htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                        htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     }
-                    String htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
                     sink.close();
                     sink = null; // Null'ify as not needed anymore
-                    htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     final byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
                     contentType.setCharsetParameter("UTF-8");
                     sz = tmp.length;

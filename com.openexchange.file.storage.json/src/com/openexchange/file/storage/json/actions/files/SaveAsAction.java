@@ -87,19 +87,19 @@ responseDescription = "Object ID of the newly created infoitem.")
 public class SaveAsAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.FOLDER_ID, Param.ATTACHED_ID, Param.MODULE, Param.ATTACHMENT).requireFileMetadata();
 
-        final int folderId = Integer.parseInt(request.getFolderId());
-        final int attachedId = request.getAttachedId();
-        final int moduleId = request.getModule();
-        final int attachment = request.getAttachment();
+        int folderId = Integer.parseInt(request.getFolderId());
+        int attachedId = request.getAttachedId();
+        int moduleId = request.getModule();
+        int attachment = request.getAttachment();
 
         final File file = request.getFile();
         final List<Field> sentColumns = request.getSentColumns();
 
-        final AttachmentBase attachments = request.getAttachmentBase();
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        AttachmentBase attachments = request.getAttachmentBase();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
         final ServerSession session = request.getSession();
 

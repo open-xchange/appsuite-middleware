@@ -142,7 +142,16 @@ public final class NewAction extends AbstractMailAction {
         final AJAXRequestData request = req.getRequest();
         final List<OXException> warnings = new ArrayList<OXException>();
         try {
-            if (request.hasUploads() || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
+            UserSettingMail usm = req.getSession().getUserSettingMail();
+            long maxFileSize = usm.getUploadQuotaPerFile();
+            if (maxFileSize <= 0) {
+                maxFileSize = -1L;
+            }
+            long maxSize = usm.getUploadQuota();
+            if (maxSize <= 0) {
+                maxSize = -1L;
+            }
+            if (request.hasUploads(maxFileSize, maxSize) || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
                 return performWithUploads(req, request, warnings);
             }
             return performWithoutUploads(req, warnings);

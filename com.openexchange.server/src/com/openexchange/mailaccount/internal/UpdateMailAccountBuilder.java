@@ -84,12 +84,45 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         return false;
     }
 
+    // ----------------------------------------------------------------------------------------------------------
+
+    private final StringBuilder bob;
+    private boolean valid;
+
+    /**
+     * Initializes a new {@link UpdateMailAccountBuilder}.
+     */
+    public UpdateMailAccountBuilder() {
+        super();
+        bob = new StringBuilder("UPDATE user_mail_account SET ");
+        valid = false;
+    }
+
+    /**
+     * Checks if this SQL builder has valid content
+     *
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    public boolean isValid() {
+        return valid;
+    }
+
+    /**
+     * Checks if this SQL builder handles given attribute.
+     *
+     * @param attribute The attribute to check
+     * @return <code>true</code> if able to handle; otherwise <code>false</code>
+     */
     public boolean handles(final Attribute attribute) {
         return KNOWN_ATTRIBUTES.contains(attribute) && !PROPERTY_ATTRIBUTES.contains(attribute);
     }
 
-    private final StringBuilder bob = new StringBuilder("UPDATE user_mail_account SET ");
-
+    /**
+     * Gets the prepared SQL statement.
+     *
+     * @return The prepared SQL statement
+     * @see #isValid()
+     */
     public String getUpdateQuery() {
         bob.setLength(bob.length() - 1);
         bob.append(" WHERE cid = ? AND id = ? AND user = ?");
@@ -104,18 +137,21 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     @Override
     public Object confirmedHam() {
         bob.append("confirmed_ham = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object confirmedSpam() {
         bob.append("confirmed_spam = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object drafts() {
         bob.append("drafts = ?,");
+        valid = true;
         return null;
     }
 
@@ -127,60 +163,70 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     @Override
     public Object login() {
         bob.append("login = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object mailURL() {
         bob.append("url = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object name() {
         bob.append("name = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object password() {
         bob.append("password = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object primaryAddress() {
         bob.append("primary_addr = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object personal() {
         bob.append("personal = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object replyTo() {
         bob.append("replyTo = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object sent() {
         bob.append("sent = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object spam() {
         bob.append("spam = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object spamHandler() {
         bob.append("spam_handler = ?,");
+        valid = true;
         return null;
     }
 
@@ -192,12 +238,14 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     @Override
     public Object trash() {
         bob.append("trash = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object archive() {
         bob.append("archive = ?,");
+        valid = true;
         return null;
     }
 
@@ -254,48 +302,56 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     @Override
     public Object unifiedINBOXEnabled() {
         bob.append("unified_inbox = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object confirmedHamFullname() {
         bob.append("confirmed_ham_fullname = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object confirmedSpamFullname() {
         bob.append("confirmed_spam_fullname = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object draftsFullname() {
         bob.append("drafts_fullname = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object sentFullname() {
         bob.append("sent_fullname = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object spamFullname() {
         bob.append("spam_fullname = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object trashFullname() {
         bob.append("trash_fullname = ?,");
+        valid = true;
         return null;
     }
 
     @Override
     public Object archiveFullname() {
         bob.append("archive_fullname = ?,");
+        valid = true;
         return null;
     }
 

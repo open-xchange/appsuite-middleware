@@ -61,6 +61,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -124,7 +125,8 @@ public final class AttachAction extends SnippetAction {
 
         final DefaultSnippet snippet = new DefaultSnippet().setId(id);
         final AJAXRequestData requestData = snippetRequest.getRequestData();
-        if (!requestData.hasUploads()) {
+        long maxSize = sysconfMaxUpload();
+        if (!requestData.hasUploads(-1L, maxSize > 0 ? maxSize : -1L)) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Not an upload request.");
         }
         final UploadEvent upload = requestData.getUploadEvent();
@@ -184,6 +186,14 @@ public final class AttachAction extends SnippetAction {
         }
         attachment.setId(UUID.randomUUID().toString());
         return attachment;
+    }
+
+    private static long sysconfMaxUpload() {
+        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+        if(null == sizeS) {
+            return 0;
+        }
+        return Long.parseLong(sizeS);
     }
 
     private static final String FILE_TYPE_ALL = "file";

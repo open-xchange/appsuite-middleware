@@ -78,30 +78,30 @@ responseDescription = "")
 public class RevertAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.ID);
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        final TimedResult<File> versions = fileAccess.getVersions(request.getId());
-        final List<String> versionIdentifiers = new ArrayList<String>(10);
+        TimedResult<File> versions = fileAccess.getVersions(request.getId());
+        List<String> versionIdentifiers = new ArrayList<String>(10);
 
         final SearchIterator<File> results = versions.results();
         while (results.hasNext()) {
-            final String version = results.next().getVersion();
+            String version = results.next().getVersion();
             if (version != null && !version.equals("0")) {
                 versionIdentifiers.add(version);
             }
         }
 
-        final String[] toDelete = new String[versionIdentifiers.size()];
+        String[] toDelete = new String[versionIdentifiers.size()];
         for(int i = 0; i < toDelete.length; i++) {
             toDelete[i] = versionIdentifiers.get(i);
         }
 
         fileAccess.removeVersion(request.getId(), toDelete);
 
-        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
+        File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
 
         return success(fileMetadata.getSequenceNumber());
     }
