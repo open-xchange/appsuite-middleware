@@ -129,14 +129,14 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public SearchResult doSearch(final SearchRequest searchRequest, final ServerSession session) throws OXException {
-        final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
+    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
+        IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
 
         // Create file access
-        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
 
         // Yield search term from search request
         SearchTerm<?> term = prepareSearchTerm(searchRequest);
@@ -145,7 +145,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         }
 
         // Folder identifiers
-        final String folderId = searchRequest.getFolderId();
+        String folderId = searchRequest.getFolderId();
         List<String> folderIds;
         if (folderId == null) {
             folderIds = Collections.emptyList();
@@ -163,9 +163,9 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // Search...
         SearchIterator<File> it = null;
         try {
-            final int start = searchRequest.getStart();
+            int start = searchRequest.getStart();
             it = fileAccess.search(folderIds, term, fields, File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
-            final List<Document> results = new LinkedList<Document>();
+            List<Document> results = new LinkedList<Document>();
             while (it.hasNext()) {
                 final File file = it.next();
                 results.add(new FileDocument(file));
@@ -173,6 +173,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
         } finally {
             SearchIterators.close(it);
+            fileAccess.finish();
         }
     }
 
@@ -241,7 +242,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     private List<FacetValue> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
-        final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
+        IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
@@ -271,6 +272,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             return facets;
         } finally {
             SearchIterators.close(it);
+            access.finish();
         }
     }
 

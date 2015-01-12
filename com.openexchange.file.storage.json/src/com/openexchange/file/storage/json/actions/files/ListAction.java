@@ -79,7 +79,7 @@ public class ListAction extends AbstractFileAction {
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireBody();
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
         List<Field> columns = request.getColumns();
         boolean copy = false;

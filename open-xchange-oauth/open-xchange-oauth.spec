@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 13
+%define        ox_release 14
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -111,8 +111,6 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/boxcomoauth.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/dropboxoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
@@ -126,6 +124,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Wed Jan 07 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-01-12
 * Mon Dec 08 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-12-15
 * Tue Dec 02 2014 Steffen Templin <marcus.klein@open-xchange.com>

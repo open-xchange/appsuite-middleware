@@ -75,7 +75,7 @@ public class DocumentDeltaAction extends AbstractFileAction {
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(AbstractFileAction.Param.ID);
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
         InputStream documentStream = null;
         InputStream requestStream = null;

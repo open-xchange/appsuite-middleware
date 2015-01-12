@@ -6766,6 +6766,20 @@ msgstr ""
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr ""
 
+#. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+msgid ""
+"Request rejected because file size (%1$s) exceeds the maximum configured "
+"file size of %2$s."
+msgstr ""
+
+#. Request rejected because file size exceeds the maximum configured file size of %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+msgid ""
+"Request rejected because file size exceeds the maximum configured file size "
+"of %1$s."
+msgstr ""
+
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
@@ -7676,6 +7690,12 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:68
 msgid "Missing the following field in JSON data: %1$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:69
+msgid ""
+"The HTML content is too big and therefore cannot be safely displayed. Please "
+"select to download its content if you want to see it."
 msgstr ""
 
 #. *

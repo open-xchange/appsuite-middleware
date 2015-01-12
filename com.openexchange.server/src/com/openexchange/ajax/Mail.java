@@ -2258,7 +2258,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                         attachmentInputStream,
                         fileName,
                         mailPart.getContentType().toString(),
-                        req.getHeader(STR_USER_AGENT));
+                        req.getHeader(STR_USER_AGENT),
+                        session);
                     resp.setContentType(checkedDownload.getContentType());
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     attachmentInputStream = checkedDownload.getInputStream();
@@ -3967,7 +3968,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 task = new AppenderTask(mailInterface, folder, force, flags, queue);
                 try {
-                    final FileItemIterator iter = newFileUploadBase().getItemIterator(req);
+                    UserSettingMail usm = session.getUserSettingMail();
+                    long maxFileSize = usm.getUploadQuotaPerFile();
+                    if (maxFileSize <= 0) {
+                        maxFileSize = -1L;
+                    }
+                    long maxSize = usm.getUploadQuota();
+                    if (maxSize <= 0) {
+                        maxSize = -1L;
+                    }
+                    final FileItemIterator iter = newFileUploadBase(maxFileSize, maxSize).getItemIterator(req);
                     if (iter.hasNext()) {
                         future = service.submit(task);
                     }
@@ -4548,14 +4558,14 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         jsonWriter.array();
         try {
-            final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
-            final String sequenceId = paramContainer.checkStringParam(PARAMETER_MAILATTCHMENT);
-            final String destFolderIdentifier = paramContainer.checkStringParam(PARAMETER_DESTINATION_FOLDER);
+            String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
+            String uid = paramContainer.checkStringParam(PARAMETER_ID);
+            String sequenceId = paramContainer.checkStringParam(PARAMETER_MAILATTCHMENT);
+            String destFolderIdentifier = paramContainer.checkStringParam(PARAMETER_DESTINATION_FOLDER);
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
-            final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
-            final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
+            ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
+            IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
             boolean performRollback = false;
             try {
                 if (!session.getUserPermissionBits().hasInfostore()) {
@@ -4758,7 +4768,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Create and fire upload event
                  */
-                final UploadEvent uploadEvent = processUpload(req);
+                UserSettingMail usm = session.getUserSettingMail();
+                long maxFileSize = usm.getUploadQuotaPerFile();
+                long maxSize = usm.getUploadQuota();
+                final UploadEvent uploadEvent = processUpload(req, maxFileSize > 0 ? maxFileSize : -1L, maxSize > 0 ? maxSize : -1L);
                 uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
                 uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
                 uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);

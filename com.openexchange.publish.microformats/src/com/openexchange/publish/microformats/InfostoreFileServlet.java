@@ -65,6 +65,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -168,9 +169,10 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             }
             Session session = new PublicationSession(publication);
             IDBasedFileAccess fileAccess = factory.createAccess(session);
-            return FileMetadata.getMetadata(fileAccess.getFileMetadata(String.valueOf(infoId), FileStorageFileAccess.CURRENT_VERSION));
+            String id = publication.getEntityId() + '/' + infoId;
+            return FileMetadata.getMetadata(fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION));
         } catch (final OXException e) {
-            if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
+            if (InfostoreExceptionCodes.NOT_EXIST.equals(e) || FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e)) {
                 throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create(e, new Object[0]);
             }
             throw e;

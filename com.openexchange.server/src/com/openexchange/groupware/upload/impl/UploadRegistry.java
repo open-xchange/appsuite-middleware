@@ -66,16 +66,27 @@ public interface UploadRegistry {
      *
      * @param uploadEvent The upload event
      * @param uploadListeners The upload listeners for current upload event
-     * @throws OXException if an error like over quota occurs
+     * @throws OXException If an error like over quota occurs
      */
-    public void fireUploadEvent(UploadEvent uploadEvent, Collection<UploadListener> uploadListeners) throws OXException;
+    void fireUploadEvent(UploadEvent uploadEvent, Collection<UploadListener> uploadListeners) throws OXException;
 
     /**
      * Create an <code>UpdateEvent</code> object from incoming multipart form data
      *
      * @param req The corresponding instance of <code>HttpServletRequest</code>
      * @return An <code>UpdateEvent</code> object from incoming multipart form data
-     * @throws OXException if an error like over quota occurs
+     * @throws OXException If an error like over quota occurs
      */
-    public UploadEvent processUpload(HttpServletRequest req) throws OXException;
+    UploadEvent processUpload(HttpServletRequest req) throws OXException;
+
+    /**
+     * Create an <code>UpdateEvent</code> object from incoming multipart form data
+     *
+     * @param req The corresponding instance of <code>HttpServletRequest</code>
+     * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @return An <code>UpdateEvent</code> object from incoming multipart form data
+     * @throws OXException If an error like over quota occurs
+     */
+    UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException;
 }

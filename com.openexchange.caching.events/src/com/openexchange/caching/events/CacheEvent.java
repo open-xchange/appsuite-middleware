@@ -50,7 +50,9 @@
 package com.openexchange.caching.events;
 
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -69,7 +71,9 @@ public class CacheEvent implements Serializable {
      * @return The cache event
      */
     public static CacheEvent INVALIDATE(String region, String groupName, Serializable key) {
-        return INVALIDATE(region, groupName, Collections.singletonList(key));
+        List<Serializable> keys = new LinkedList<Serializable>();
+        keys.add(key);
+        return INVALIDATE(region, groupName, keys);
     }
 
     /**
@@ -81,7 +85,8 @@ public class CacheEvent implements Serializable {
      * @return The cache event
      */
     public static CacheEvent INVALIDATE(String region, String groupName, List<Serializable> keys) {
-        return new CacheEvent(CacheOperation.INVALIDATE, region, keys, groupName);
+        List<Serializable> myKeys = ((keys instanceof LinkedList) || (keys instanceof ArrayList) ? keys : new LinkedList<Serializable>(keys));
+        return new CacheEvent(CacheOperation.INVALIDATE, region, myKeys, groupName);
     }
 
     /**
@@ -126,8 +131,67 @@ public class CacheEvent implements Serializable {
         super();
         this.operation = operation;
         this.region = region;
-        this.keys = keys;
+        this.keys = null == keys ? null : (((keys instanceof LinkedList) || (keys instanceof ArrayList) ? keys : new LinkedList<Serializable>(keys)));
         this.groupName = groupName;
+    }
+
+    /**
+     * Checks if given cache event could be aggregated to this cache event.
+     *
+     * @param event The cache vent to aggregate
+     * @return <code>true</code> if aggregated; otherwise <code>false</code>
+     */
+    public boolean aggregate(CacheEvent event) {
+        // Check operation
+        if (this.operation != event.operation) {
+            return false;
+        }
+
+        // Check region name
+        {
+            String thisRegion = this.region;
+            if (null == thisRegion) {
+                if (null != event.region) {
+                    return false;
+                }
+            } else if (!thisRegion.equals(event.region)) {
+                return false;
+            }
+        }
+
+        // Check group name
+        {
+            String thisGroupName = this.groupName;
+            if (null == thisGroupName) {
+                if (null != event.groupName) {
+                    return false;
+                }
+            } else if (!thisGroupName.equals(event.groupName)) {
+                return false;
+            }
+        }
+
+        // Check keys
+        List<Serializable> thisKeys = this.keys;
+        if (null == thisKeys) {
+            return null == event.keys;
+        }
+        if (null == event.keys) {
+            return false;
+        }
+
+        // Add keys if absent
+        for (Serializable keyToAdd : event.keys) {
+            boolean contained = false;
+            for (Iterator<Serializable> it = thisKeys.iterator(); !contained && it.hasNext();) {
+                contained = keyToAdd.equals(it.next());
+            }
+            if (!contained) {
+                thisKeys.add(keyToAdd);
+            }
+        }
+
+        return true;
     }
 
     /**

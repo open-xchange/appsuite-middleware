@@ -148,19 +148,19 @@ public class FileMetadataWriter {
             }
 
             switch (field) {
-            case CATEGORIES:
-                return handleCategories((String) value);
-            case META:
-                try {
-                    if (value == null) {
+                case CATEGORIES:
+                    return handleCategories((String) value);
+                case META:
+                    try {
+                        if (value == null) {
+                            return null;
+                        }
+                        return JSONCoercion.coerceToJSON(value);
+                    } catch (JSONException e) {
+                        LOG.error("", e);
                         return null;
                     }
-                    return JSONCoercion.coerceToJSON(value);
-                } catch (JSONException e) {
-                    LOG.error("", e);
-                    return null;
-                }
-            default: // do nothing;
+                default: // do nothing;
             }
 
             return value;
