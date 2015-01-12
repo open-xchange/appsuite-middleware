@@ -278,6 +278,7 @@ public interface OXUserInterface extends Remote {
      * @param dstFilestore The destination file storage
      * @param credentials The credentials
      * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
      * @throws StorageException If an error in the subsystems occurred.
      * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If no such context exists
@@ -286,7 +287,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from his own storage to the storage of specified master.
@@ -298,6 +299,7 @@ public interface OXUserInterface extends Remote {
      * @param masterUser The master user account
      * @param credentials The credentials
      * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
      * @throws StorageException If an error in the subsystems occurred.
      * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If no such context exists
@@ -306,7 +308,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromUserFilestoreToMaster(Context ctx, User user, User masterUser, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveFromUserFilestoreToMaster(Context ctx, User user, User masterUser, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from a master account to his own storage.
@@ -319,6 +321,7 @@ public interface OXUserInterface extends Remote {
      * @param dstFilestore The destination file storage to move to
      * @param credentials The credentials
      * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
      * @throws StorageException If an error in the subsystems occurred.
      * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If no such context exists
@@ -327,7 +330,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromMasterToUserFilestore(Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveFromMasterToUserFilestore(Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from a context to his own storage.
@@ -339,6 +342,7 @@ public interface OXUserInterface extends Remote {
      * @param dstFilestore The destination file storage to move to
      * @param credentials The credentials
      * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
      * @throws StorageException If an error in the subsystems occurred.
      * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If no such context exists
@@ -347,7 +351,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromContextToUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveFromContextToUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from his own to a context storage.
@@ -358,6 +362,7 @@ public interface OXUserInterface extends Remote {
      * @param user The user
      * @param credentials The credentials
      * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
      * @throws StorageException If an error in the subsystems occurred.
      * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If no such context exists
@@ -366,7 +371,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromUserToContextFilestore(Context ctx, User user, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveFromUserToContextFilestore(Context ctx, User user, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Manipulate user data within the given context.

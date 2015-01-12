@@ -263,7 +263,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveUserFilestore(final Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveUserFilestore(final Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -353,7 +353,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -466,7 +466,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveFromMasterToUserFilestore(final Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveFromMasterToUserFilestore(final Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -579,7 +579,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -684,7 +684,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
