@@ -159,5 +159,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,org.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,org.xmlpull"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,oxscripts"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.mailmapping"/>
 </provider>
 </psf>
