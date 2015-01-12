@@ -128,6 +128,7 @@ import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.sort.IMAPSort;
+import com.openexchange.imap.sort.IMAPSort.ImapSortResult;
 import com.openexchange.imap.threader.Threadable;
 import com.openexchange.imap.threader.Threadables;
 import com.openexchange.imap.threader.references.Conversation;
@@ -1493,10 +1494,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Use SORT command as it allows searching and sorting at once (https://tools.ietf.org/html/rfc5256)
              */
-            int[] msgIds = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, imapConfig);
-            msgIds = applyIndexRange(msgIds, indexRange);
-            if (msgIds.length == 0) {
-                return EMPTY_RETVAL;
+            int[] msgIds;
+            {
+                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, imapConfig);
+                msgIds = result.msgIds;
+                if (false == result.rangeApplied) {
+                    msgIds = applyIndexRange(msgIds, indexRange);
+                }
+                if (msgIds.length == 0) {
+                    return EMPTY_RETVAL;
+                }
             }
 
             /*

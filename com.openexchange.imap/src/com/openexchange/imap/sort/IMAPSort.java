@@ -54,7 +54,10 @@ import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfil
 import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Locale;
 import javax.mail.FetchProfile;
 import javax.mail.FolderClosedException;
@@ -71,11 +74,15 @@ import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.imap.util.WrappingProtocolException;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.config.MailProperties;
+import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -85,6 +92,7 @@ import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
+import com.sun.mail.imap.protocol.SearchSequence;
 
 /**
  * {@link IMAPSort} - Perform the IMAP sort.
@@ -94,7 +102,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
 public final class IMAPSort {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPSort.class);
-    
+
     private static final EnumMap<MailSortField, SortTerm> SORT_FIELDS = new EnumMap<MailSortField, SortTerm>(MailSortField.class);
     static {
         SORT_FIELDS.put(MailSortField.FROM, SortTerm.FROM);
@@ -297,7 +305,7 @@ public final class IMAPSort {
         }
         return msgs;
     }
-    
+
     /**
      * Attempts to perform a IMAP-based sort with a given search term.
      *
@@ -308,9 +316,9 @@ public final class IMAPSort {
      * @param imapConfig The IMAP configuration; not <code>null</code>
      * @return The IMAP-sorted sequence number
      * @throws MessagingException
-     * @throws OXException 
+     * @throws OXException
      */
-    public static int[] sortMessages(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, IMAPConfig imapConfig) throws MessagingException, OXException {
+    public static ImapSortResult sortMessages(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, IMAPConfig imapConfig) throws MessagingException, OXException {
         final SortTerm[] sortTerms = IMAPSort.getSortTermsForIMAPCommand(sortField, order == OrderDirection.DESC);
         if (sortTerms == null) {
             throw IMAPException.create(Code.UNSUPPORTED_SORT_FIELD, sortField.toString());
@@ -327,16 +335,125 @@ public final class IMAPSort {
             }
         }
 
-        int[] seqNums = (int[]) imapFolder.doCommand(new ProtocolCommand() {
-            @Override
-            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
-                try {
-                    return protocol.sort(sortTerms, jmsSearchTerm);
-                } catch (SearchException e) {
-                    throw new ProtocolException(e.getMessage(), e);
+        boolean rangeApplied = false;
+        int[] seqNums;
+        if (null != indexRange && imapConfig.asMap().containsKey("ESORT")) {
+            try {
+                final String atom = new StringBuilder(16).append(indexRange.start + 1).append(':').append(indexRange.end).toString();
+                seqNums = (int[]) imapFolder.doCommand(new ProtocolCommand() {
+
+                    @Override
+                    public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                        Argument args = new Argument();
+
+                        args.writeAtom("RETURN");    // context extension according to https://tools.ietf.org/html/rfc5267
+
+                        {
+                            Argument sargs = new Argument();
+                            sargs.writeAtom("PARTIAL");
+                            sargs.writeAtom(atom);
+                            args.writeArgument(sargs);  // PARTIAL argument
+                        }
+
+                        {
+                            Argument sargs = new Argument();
+                            for (int i = 0; i < sortTerms.length; i++) {
+                                sargs.writeAtom(sortTerms[i].toString());
+                            }
+                            args.writeArgument(sargs);  // sort criteria
+                        }
+
+                        args.writeAtom("UTF-8");    // charset specification
+                        if (jmsSearchTerm != null) {
+                            try {
+                                args.append(new SearchSequence().generateSequence(jmsSearchTerm, "UTF-8"));
+                            } catch (final IOException ioex) {
+                                // should never happen
+                                throw new WrappingProtocolException("", new SearchException(ioex.toString()));
+                            } catch (MessagingException e) {
+                                throw new WrappingProtocolException("", e);
+                            }
+                        } else {
+                            args.writeAtom("ALL");
+                        }
+
+                        Response[] r = protocol.command("SORT", args);
+                        Response response = r[r.length-1];
+                        int[] matches = null;
+
+                        // Grab all SORT responses
+                        if (response.isOK()) { // command successful
+                            List<Integer> v = new ArrayList<Integer>(r.length);
+
+                            for (int i = 0, len = r.length; i < len; i++) {
+                                if (!(r[i] instanceof IMAPResponse)) {
+                                    continue;
+                                }
+
+                                IMAPResponse ir = (IMAPResponse) r[i];
+                                if (ir.keyEquals("ESEARCH")) {
+                                    // E.g. " * ESEARCH (TAG "s") PARTIAL (1:10 972,485,971,484,970,483,969,482,968,481)"
+                                    ir.readAtomStringList();
+                                    ir.readAtom();
+
+                                    String[] partialResults = ir.readAtomStringList();
+                                    if ("NIL".equalsIgnoreCase(partialResults[1])) {
+                                        return new int[0];
+                                    }
+                                    for (String snum : Strings.splitByComma(partialResults[1])) {
+                                        int pos = snum.indexOf(':');
+                                        if (pos > 0) {
+                                            int start = Integer.parseInt(snum.substring(0, pos));
+                                            int end = Integer.parseInt(snum.substring(pos+1));
+                                            for (int num = start; num <= end; num++) {
+                                                v.add(Integer.valueOf(num));
+                                            }
+                                        } else {
+                                            v.add(Integer.valueOf(snum));
+                                        }
+                                    }
+
+                                    r[i] = null;
+                                }
+                            }
+
+                            // Copy the vector into 'matches'
+                            int vsize = v.size();
+                            matches = new int[vsize];
+                            for (int i = 0; i < vsize; i++) {
+                                matches[i] = v.get(i).intValue();
+                            }
+                        }
+
+                        // dispatch remaining untagged responses
+                        protocol.notifyResponseHandlers(r);
+                        protocol.handleResult(response);
+                        return matches;
+                    }
+                });
+            } catch (MessagingException e) {
+                Exception cause = e.getNextException();
+                if (cause instanceof WrappingProtocolException) {
+                    throw ((WrappingProtocolException) cause).getMessagingException();
                 }
+
+                // Re-throw as is
+                throw e;
             }
-        });
+            rangeApplied = true;
+        } else {
+            seqNums = (int[]) imapFolder.doCommand(new ProtocolCommand() {
+
+                @Override
+                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                    try {
+                        return protocol.sort(sortTerms, jmsSearchTerm);
+                    } catch (SearchException e) {
+                        throw new ProtocolException(e.getMessage(), e);
+                    }
+                }
+            });
+        }
 
         final int umlautFilterThreshold = IMAPSearch.umlautFilterThreshold();
         if (searchTerm != null && umlautFilterThreshold > 0 && seqNums.length <= umlautFilterThreshold && !searchTerm.isAscii()) {
@@ -346,7 +463,7 @@ public final class IMAPSort {
             seqNums = IMAPSearch.searchWithUmlautSupport(searchTerm, seqNums, imapFolder);
         }
 
-        return seqNums;
+        return new ImapSortResult(seqNums, rangeApplied);
     }
 
     /**
@@ -507,5 +624,25 @@ public final class IMAPSort {
             return list.toArray();
         }
     } // End of SORTProtocolCommand
+
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * The result object for IMAP SORT.
+     */
+    public static final class ImapSortResult {
+
+        /** The sorted message sequence numbers */
+        public final int[] msgIds;
+
+        /** Whether index range has already been applied */
+        public final boolean rangeApplied;
+
+        ImapSortResult(int[] msgIds, boolean rangeApplied) {
+            super();
+            this.msgIds = msgIds;
+            this.rangeApplied = rangeApplied;
+        }
+    }
 
 }
