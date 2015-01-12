@@ -1138,7 +1138,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             // Determine file storage user/context counts
             Map<Integer, Integer> filestoreUserCounts = getFilestoreUserCounts(pools);
-            Map<Integer, Integer> filestoreContextCounts = getFilestoreContextCounts(con);
 
             // Find a suitable one from ordered list of candidates
             boolean loadRealUsage = false;
@@ -1148,11 +1147,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     Integer count = filestoreUserCounts.get(Integer.valueOf(candidate.id));
                     FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.intValue(), 0L);
 
-                    count = filestoreContextCounts.get(Integer.valueOf(candidate.id));
-                    FilestoreUsage contextFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.intValue(), 0L);
-
                     // Get filestore
-                    Filestore filestore = getFilestore(candidate.id, loadRealUsage, pools, contextFilestoreUsage, userFilestoreUsage, con);
+                    Filestore filestore = getFilestore(candidate.id, loadRealUsage, pools, null, userFilestoreUsage, con);
                     if (enoughSpaceForContext(filestore)) {
                         return filestore;
                     }
