@@ -71,6 +71,8 @@ ox_add_property com.openexchange.custom.spamexperts.trainhamfolder "Not Spam" /o
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Mon Jan 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-12
 * Tue Dec 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-10
 * Fri Dec 12 2014 Marcus Klein <marcus.klein@open-xchange.com>
