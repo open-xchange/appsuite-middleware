@@ -398,7 +398,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         String id = (String) session.getParameter(paramName);
         if (null == id) {
             try {
-                id = Integer.toString(new OXFolderAccess(getContext(session)).getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID());
+                id = Integer.toString(new OXFolderAccess(getContext(session)).getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE));
             } catch (final OXException e) {
                 if (OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.equals(e)) {
                     id = "-1";

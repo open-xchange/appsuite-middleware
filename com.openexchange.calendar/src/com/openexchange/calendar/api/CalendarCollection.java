@@ -2292,7 +2292,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             int folderId = oldAppointment.getEffectiveFolderId();
             if (folderId == 0) {
                 final OXFolderAccess folderAccess = new OXFolderAccess(oldAppointment.getContext());
-                folderId = folderAccess.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR).getObjectID();
+                folderId = folderAccess.getDefaultFolderID(session.getUserId(), FolderObject.CALENDAR);
             }
             final FolderObject sourceFolder = getFolder(session, folderId);
             eventclient.modify(oldAppointment, newAppointment, sourceFolder); // TODO

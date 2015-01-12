@@ -168,7 +168,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
         int collectFolderID = 0;
         {
-            final int parent = folderAccess.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
+            final int parent = folderAccess.getDefaultFolderID(userId, FolderObject.CONTACT);
             try {
                 final FolderObject folder = createNewContactFolder(userId, folderName, parent);
                 final OXFolderManager folderManager = OXFolderManager.getInstance(session, folderAccess, con, con);
