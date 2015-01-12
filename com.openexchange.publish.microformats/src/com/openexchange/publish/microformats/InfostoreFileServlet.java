@@ -197,7 +197,8 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             }
             Session session = new PublicationSession(publication);
             IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
-            File metadata = fileAccess.getFileMetadata(String.valueOf(infoId), FileStorageFileAccess.CURRENT_VERSION);
+            String id = publication.getEntityId() + '/' + infoId;
+            File metadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
             if (null == metadata || null != publication.getEntityId() && false == publication.getEntityId().equals(metadata.getFolderId())) {
                 throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create();
             }
