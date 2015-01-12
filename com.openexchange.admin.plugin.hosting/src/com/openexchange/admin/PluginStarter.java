@@ -56,7 +56,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class PluginStarter {
 
@@ -70,7 +69,7 @@ public class PluginStarter {
         super();
     }
 
-    public void start(BundleContext context) throws StorageException {
+    public void start(BundleContext context) {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PluginStarter.class);
         try {
             this.context = context;
@@ -82,7 +81,7 @@ public class PluginStarter {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXContextInterface.RMI_NAME);
             services.add(context.registerService(Remote.class, oxctx_v2, properties));;
-        } catch (StorageException e) {
+        } catch (Exception e) {
             logger.error("Error while creating one instance for RMI interface", e);
             throw e;
         }

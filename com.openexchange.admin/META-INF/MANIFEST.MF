@@ -92,7 +92,8 @@ Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.storage.mysqlStorage,
  com.openexchange.admin.storage.sqlStorage,
  com.openexchange.admin.taskmanagement,
- com.openexchange.admin.tools
+ com.openexchange.admin.tools,
+ com.openexchange.admin.tools.filestore
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .
 Require-Bundle: com.openexchange.admin.rmi

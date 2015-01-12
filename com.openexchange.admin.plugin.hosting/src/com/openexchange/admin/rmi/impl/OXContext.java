@@ -108,7 +108,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private final OXAdminPoolDBPoolExtension pool;
 
-    public OXContext(final BundleContext context) throws StorageException {
+    public OXContext(final BundleContext context) {
         super(context);
         this.pool = new OXAdminPoolDBPoolExtension();
         LOGGER.debug("Class loaded: {}", this.getClass().getName());
