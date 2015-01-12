@@ -2,6 +2,7 @@
 
  - Fix for bug 34617: Signal ENABLE_INTERNAL_USER_EDIT setting via io.ox/core//user/internalUserEdit
  - Fix for bug 31407: When evaluating the "has subfolders" flag, ignore subfolders that are no longer found 
+ - Fix for bug 33278: Added "context_id" URL parameter to the redirect location of the form login response    
 
 * 2015-01-10 - thorben.betten@open-xchange.com
 
