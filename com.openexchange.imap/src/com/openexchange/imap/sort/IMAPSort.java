@@ -396,11 +396,11 @@ public final class IMAPSort {
                                     ir.readAtomStringList();
                                     ir.readAtom();
 
-                                    String[] partialResults = ir.readAtomStringList();
-                                    if ("NIL".equalsIgnoreCase(partialResults[1])) {
+                                    String partialResults = ir.readAtomStringList()[1];
+                                    if ("NIL".equalsIgnoreCase(partialResults)) {
                                         return new int[0];
                                     }
-                                    for (String snum : Strings.splitByComma(partialResults[1])) {
+                                    for (String snum : Strings.splitByComma(partialResults)) {
                                         int pos = snum.indexOf(':');
                                         if (pos > 0) {
                                             int start = Integer.parseInt(snum.substring(0, pos));
