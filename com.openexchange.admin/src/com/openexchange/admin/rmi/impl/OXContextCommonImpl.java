@@ -73,7 +73,12 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     /** The bundle context */
     protected final BundleContext context;
 
-    protected OXContextCommonImpl(final BundleContext context) throws StorageException {
+    /**
+     * Initializes a new {@link OXContextCommonImpl}.
+     *
+     * @param context The bundle context
+     */
+    protected OXContextCommonImpl(final BundleContext context) {
         super();
         this.context = context;
     }

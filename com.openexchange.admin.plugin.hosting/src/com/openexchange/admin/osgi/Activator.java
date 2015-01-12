@@ -51,7 +51,6 @@ package com.openexchange.admin.osgi;
 
 import com.openexchange.admin.PluginStarter;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
@@ -120,10 +119,11 @@ public class Activator extends HousekeepingActivator {
 
         this.starter = new PluginStarter();
         try {
-            this.starter.start(context, configurationService);
+            this.starter.start(context);
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
-        } catch (final OXGenericException e) {
+        } catch (final Exception e) {
             LOG.error("", e);
+            throw e;
         }
     }
 

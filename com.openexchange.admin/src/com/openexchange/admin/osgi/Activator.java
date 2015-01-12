@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.mysql.CreateAttachmentTables;
 import com.openexchange.admin.mysql.CreateCalendarTables;
@@ -79,6 +80,8 @@ import com.openexchange.admin.plugins.UserServiceInterceptorBridge;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
@@ -103,6 +106,18 @@ import com.openexchange.version.Version;
 public class Activator extends HousekeepingActivator {
 
     private volatile AdminDaemon daemon;
+
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
+    }
 
     @Override
     public void startBundle() throws Exception {
@@ -166,6 +181,16 @@ public class Activator extends HousekeepingActivator {
             log.error("", e);
             throw e;
         }
+
+        {
+            AdminCache.compareAndSetBundleContext(null, context);
+            AdminCache.compareAndSetConfigurationService(null, configurationService);
+
+            PropertyHandlerExtended prop = initCache(configurationService, log);
+            log.debug("Loading context implementation: {}", prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
+            log.debug("Loading util implementation: {}", prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
+        }
+
         track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
         daemon.initRMI(context);
 
@@ -242,8 +267,14 @@ public class Activator extends HousekeepingActivator {
         }
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    private PropertyHandlerExtended initCache(ConfigurationService service, org.slf4j.Logger logger) throws OXGenericException {
+        AdminCacheExtended cache = new AdminCacheExtended();
+        cache.initCache(service);
+        cache.initCacheExtended();
+        ClientAdminThreadExtended.cache = cache;
+        PropertyHandlerExtended prop = cache.getProperties();
+        logger.info("Cache and Pools initialized!");
+        return prop;
     }
+
 }

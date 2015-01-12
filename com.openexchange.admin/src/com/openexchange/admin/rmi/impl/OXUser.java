@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.idn.IDNA;
-import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
@@ -123,11 +122,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private final BasicAuthenticator basicauth;
     private final AdminCache cache;
     private final PropertyHandler prop;
-    private final BundleContext context;
 
-    public OXUser(final BundleContext context) throws StorageException {
+    public OXUser() throws StorageException {
         super();
-        this.context = context;
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         LOGGER.info("Class loaded: {}", this.getClass().getName());

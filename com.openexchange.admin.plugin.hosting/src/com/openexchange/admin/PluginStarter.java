@@ -56,13 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.admin.tools.AdminCacheExtended;
-import com.openexchange.admin.tools.PropertyHandlerExtended;
-import com.openexchange.config.ConfigurationService;
 
 public class PluginStarter {
 
@@ -76,13 +70,10 @@ public class PluginStarter {
         super();
     }
 
-    public void start(BundleContext context, ConfigurationService service) throws StorageException, OXGenericException {
+    public void start(BundleContext context) throws StorageException {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PluginStarter.class);
         try {
-            AdminCache.compareAndSetBundleContext(null, context);
-            AdminCache.compareAndSetConfigurationService(null, service);
             this.context = context;
-            PropertyHandlerExtended prop = initCache(service, logger);
 
             // Create all OLD Objects and bind export them
             com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext(context);
@@ -90,12 +81,7 @@ public class PluginStarter {
             // bind all NEW Objects to registry
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXContextInterface.RMI_NAME);
-            services.add(context.registerService(Remote.class, oxctx_v2, properties));
-
-            // startJMX();
-
-            logger.debug("Loading context implementation: {}", prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
-            logger.debug("Loading util implementation: {}", prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
+            services.add(context.registerService(Remote.class, oxctx_v2, properties));;
         } catch (StorageException e) {
             logger.error("Error while creating one instance for RMI interface", e);
             throw e;
@@ -108,13 +94,4 @@ public class PluginStarter {
         }
     }
 
-    private PropertyHandlerExtended initCache(ConfigurationService service, org.slf4j.Logger logger) throws OXGenericException {
-        AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache(service);
-        cache.initCacheExtended();
-        ClientAdminThreadExtended.cache = cache;
-        PropertyHandlerExtended prop = cache.getProperties();
-        logger.info("Cache and Pools initialized!");
-        return prop;
-    }
 }

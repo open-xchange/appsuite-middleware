@@ -79,7 +79,6 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUtil.class);
 
     private final BasicAuthenticator basicauth;
-
     private final OXUtilStorageInterface oxutil;
 
     public OXUtil() throws StorageException {

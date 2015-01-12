@@ -54,7 +54,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
@@ -98,11 +97,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     private final AdminCache cache;
     private final PropertyHandler prop;
-    private final BundleContext context;
     private final BasicAuthenticator basicauth;
     private final OXGroupStorageInterface oxGroup;
 
-    public OXGroup(final BundleContext context) throws RemoteException, StorageException {
+    public OXGroup() throws StorageException {
         super();
         try {
             oxGroup = OXGroupStorageInterface.getInstance();
@@ -110,7 +108,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             LOGGER.error("", e);
             throw e;
         }
-        this.context = context;
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
         basicauth = new BasicAuthenticator();
