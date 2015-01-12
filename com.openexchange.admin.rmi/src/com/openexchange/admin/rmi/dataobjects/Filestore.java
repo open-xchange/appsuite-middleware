@@ -280,6 +280,7 @@ public class Filestore implements Serializable {
      */
     public final void setReserved(Long reserved) {
         this.reserved = reserved;
+        reservedset = true;
     }
 
     /**
