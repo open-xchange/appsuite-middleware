@@ -507,8 +507,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             // JCS
-            BundleContext context = AdminCache.getBundleContext();
-            if (null != context) {
+            {
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 if (null != cacheService) {
                     try {
