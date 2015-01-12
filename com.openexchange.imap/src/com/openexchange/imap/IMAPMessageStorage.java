@@ -1543,7 +1543,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             return mailMessages;
         } else {
-            int[] msgIds = IMAPSearch.issueIMAPSearch(imapFolder, searchTerm);
+            int[] msgIds = null == searchTerm ? null : IMAPSearch.issueIMAPSearch(imapFolder, searchTerm);
             /*
              * Do application sort
              */
