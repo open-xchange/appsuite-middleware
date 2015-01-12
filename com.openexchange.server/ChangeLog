@@ -1,3 +1,7 @@
+* 2014-01-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34617: Signal ENABLE_INTERNAL_USER_EDIT setting via io.ox/core//user/internalUserEdit
+
 * 2015-01-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 35965: Signal 404 - Not Found in case requested published file is no more available
