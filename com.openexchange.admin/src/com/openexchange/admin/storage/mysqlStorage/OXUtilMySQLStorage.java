@@ -1136,8 +1136,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
             }
 
-            // Determine file storage user counts
+            // Determine file storage user/context counts
             Map<Integer, Integer> filestoreUserCounts = getFilestoreUserCounts(pools);
+            Map<Integer, Integer> filestoreContextCounts = getFilestoreContextCounts(con);
 
             // Find a suitable one from ordered list of candidates
             boolean loadRealUsage = false;
@@ -1147,8 +1148,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     Integer count = filestoreUserCounts.get(Integer.valueOf(candidate.id));
                     FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.intValue(), 0L);
 
+                    count = filestoreContextCounts.get(Integer.valueOf(candidate.id));
+                    FilestoreUsage contextFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.intValue(), 0L);
+
                     // Get filestore
-                    Filestore filestore = getFilestore(candidate.id, loadRealUsage, pools, userFilestoreUsage, con);
+                    Filestore filestore = getFilestore(candidate.id, loadRealUsage, pools, contextFilestoreUsage, userFilestoreUsage, con);
                     if (enoughSpaceForContext(filestore)) {
                         return filestore;
                     }
@@ -1598,7 +1602,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         Connection con = null;
         try {
             con = cache.getConnectionForConfigDB();
-            return getFilestore(id, loadRealUsage, null, null, con);
+            return getFilestore(id, loadRealUsage, con);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -1620,12 +1624,27 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      *
      * @param id The unique identifier of the filestore.
      * @param loadRealUsage <code>true</code> to load the real file store usage of that filestore.
+     * @return All filestore information
+     * @throws StorageException if loading the filestore information fails.
+     */
+    private Filestore getFilestore(int id, boolean loadRealUsage, Connection configdbCon) throws StorageException {
+        return getFilestore(id, loadRealUsage, null, null, null, configdbCon);
+    }
+
+    /**
+     * Loads all filestore information. BEWARE! If loadRealUsage is set to <code>true</code> this operation may be very expensive because
+     * the filestore usage for all contexts stored in that filestore must be loaded. Setting this parameter to <code>false</code> will set
+     * the real usage of the filestore to 0.
+     *
+     * @param id The unique identifier of the filestore.
+     * @param loadRealUsage <code>true</code> to load the real file store usage of that filestore.
      * @param pools Available database pools (<i>optional</i>)
+     * @param contextFilestoreUsage The context filestore usage (<i>optional</i>)
      * @param userFilestoreUsage The user filestore usage (<i>optional</i>)
      * @return All filestore information
      * @throws StorageException if loading the filestore information fails.
      */
-    private Filestore getFilestore(int id, boolean loadRealUsage, Collection<PoolAndSchema> pools, FilestoreUsage userFilestoreUsage, Connection configdbCon) throws StorageException {
+    private Filestore getFilestore(int id, boolean loadRealUsage, Collection<PoolAndSchema> pools, FilestoreUsage contextFilestoreUsage, FilestoreUsage userFilestoreUsage, Connection configdbCon) throws StorageException {
         Filestore fs;
 
         // Load data from database
@@ -1655,7 +1674,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         // Load usage information
         FilestoreUsage usrCounts = null == userFilestoreUsage ? getUserUsage(id, loadRealUsage, pools, configdbCon) : userFilestoreUsage;
-        FilestoreUsage ctxCounts = getContextUsage(id, loadRealUsage, configdbCon);
+        FilestoreUsage ctxCounts = null == contextFilestoreUsage ? getContextUsage(id, loadRealUsage, configdbCon) : contextFilestoreUsage;
         fs.setUsed(L(toMB(ctxCounts.usage + usrCounts.usage)));
         fs.setCurrentContexts(I(ctxCounts.entityCount + usrCounts.entityCount));
         fs.setReserved(L((getAverageFilestoreSpaceForContext() * ctxCounts.entityCount) + (getAverageFilestoreSpaceForUser() * usrCounts.entityCount)));
@@ -2273,6 +2292,39 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             used += fu.usage;
         }
         return new FilestoreUsage(numUsers, used);
+    }
+
+    /**
+     * Gets the file storage context counts for given configDb connection
+     *
+     * @param con The configDb connection
+     * @return The context counts (as a file storage to count mapping)
+     * @throws StorageException If operation fails
+     */
+    private Map<Integer, Integer> getFilestoreContextCounts(Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT filestore_id, cid FROM context WHERE filestore_id>0");
+            result = stmt.executeQuery();
+
+            if (false == result.next()) {
+                return Collections.emptyMap();
+            }
+
+            Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+            do {
+                Integer fsId = Integer.valueOf(result.getInt(1));
+                Integer count = map.get(fsId);
+                map.put(fsId, null == count ? Integer.valueOf(1) : Integer.valueOf(count.intValue() + 1));
+            } while (result.next());
+            return map;
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
     }
 
     /**
