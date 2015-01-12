@@ -1453,7 +1453,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         try {
             MailMessage[] mailMessages;
             if (searchViaIMAP(searchTerm == null ? new MailFields() : new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm)))) {
-                mailMessages = performIMAPSearch(fullName, effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames);
+                mailMessages = performIMAPSearch(effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames);
             } else {
                 mailMessages = performInAppSearch(fullName, effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames);
             }
@@ -1467,7 +1467,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (ImapUtility.isInvalidMessageset(e)) {
                 return new MailMessage[0];
             }
-            throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -1488,8 +1488,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return false;
     }
 
-    private MailMessage[] performIMAPSearch(String fullName, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailFields fields, IndexRange indexRange, String[] headerNames) throws MessagingException, OXException {
-        boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
+    private MailMessage[] performIMAPSearch(MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailFields fields, IndexRange indexRange, String[] headerNames) throws MessagingException, OXException {
         if (imapConfig.getCapabilities().hasSort() && IMAPSort.isValidSortField(sortField)) {
             /*
              * Use SORT command as it allows searching and sorting at once (https://tools.ietf.org/html/rfc5256)
@@ -1503,6 +1502,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Fetch (possibly) filtered and sorted sequence numbers
              */
+            boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
             MailMessage[] mailMessages;
             if (fetchBody) {
                 FetchProfile fetchProfile = new FetchProfile();
@@ -1602,22 +1602,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @param fetchProfile
      * @return
      * @throws MessagingException
-     * @throws OXException 
+     * @throws OXException
      */
     private List<MailMessage> fetchMessages(int[] msgIds, FetchProfile fetchProfile) throws MessagingException, OXException {
-        Message[] msgs;
-        long start = System.currentTimeMillis();
+        Message[] msgs = msgIds == null ? imapFolder.getMessages() : imapFolder.getMessages(msgIds);
 
-        if (msgIds == null) {
-            msgs = imapFolder.getMessages();
-        } else {
-            msgs = imapFolder.getMessages(msgIds);
+        {
+            long start = System.currentTimeMillis();
+            imapFolder.fetch(msgs, fetchProfile);
+            long time = System.currentTimeMillis() - start;
+            mailInterfaceMonitor.addUseTime(time);
+            LOG.debug("IMAP fetch for {} messages took {}msec", msgs.length, time);
         }
-
-        imapFolder.fetch(msgs, fetchProfile);
-        long time = System.currentTimeMillis() - start;
-        mailInterfaceMonitor.addUseTime(time);
-        LOG.debug("IMAP fetch for {} messages took {}msec", msgs.length, time);
 
         if (msgs.length == 0) {
             return Collections.emptyList();
@@ -1642,17 +1638,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return sortSeqNums;
         }
 
-        final int fromIndex = indexRange.start;
-        int toIndex = indexRange.end;
         if (sortSeqNums.length == 0) {
             return new int[0];
         }
+
+        int fromIndex = indexRange.start;
         if ((fromIndex) > sortSeqNums.length) {
             /*
              * Return empty iterator if start is out of range
              */
             return new int[0];
         }
+
+        int toIndex = indexRange.end;
         /*
          * Reset end index if out of range
          */
@@ -1660,8 +1658,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             toIndex = sortSeqNums.length;
         }
 
-        final int retvalLength = toIndex - fromIndex;
-        final int[] retval = new int[retvalLength];
+        int retvalLength = toIndex - fromIndex;
+        int[] retval = new int[retvalLength];
         System.arraycopy(sortSeqNums, fromIndex, retval, 0, retvalLength);
         return retval;
     }
@@ -1670,12 +1668,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (indexRange == null) {
             return mails;
         }
-
-        final int fromIndex = indexRange.start;
-        int toIndex = indexRange.end;
         if ((mails == null) || (mails.length == 0)) {
             return EMPTY_RETVAL;
         }
+
+        final int fromIndex = indexRange.start;
+        int toIndex = indexRange.end;
         if ((fromIndex) > mails.length) {
             /*
              * Return empty iterator if start is out of range
