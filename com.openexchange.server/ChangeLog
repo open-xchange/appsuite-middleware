@@ -173,6 +173,7 @@
 
  - Fix for bug 35471: Set NULL if Unified Mail is absent when serving 'io.ox/mail/unifiedInboxIdentifier' setting
  - Fix for bug 35445: Ignore concurrent modification when writing last login time stamp
+ - Fix for bug 35502: Apply max. file size and max. overall size when processing upload to abort uploading data once a threshold is exceeded
 
 * 2014-11-14 - thorben.betten@open-xchange.com
 

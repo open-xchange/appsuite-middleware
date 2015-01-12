@@ -2324,7 +2324,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
 
         String login = mailAccount.getTransportLogin();
-        if (isEmpty(login) && isMailTransportAuth(mailAccount, userId, contextId, con)) {
+        if (Strings.isEmpty(login) && isMailTransportAuth(mailAccount, userId, contextId, con)) {
             // Impossible to check as login not given, hence preceding duplicate check for mail account is sufficient here
             return;
         }
