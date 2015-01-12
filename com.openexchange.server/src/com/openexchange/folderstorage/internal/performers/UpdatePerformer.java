@@ -49,21 +49,18 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -178,8 +175,12 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     if (null == folder.getName()) {
                         folder.setName(storageFolder.getName());
                     }
-
-                    checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
+                    if (null != checkForEqualName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
+                        throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, newParentId), treeId);
+                    }
+                    if (null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
+                        throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
+                    }
                 }
             }
 
@@ -188,7 +189,12 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
                 if (rename && false == move) {
-                    checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
+                    if (null != checkForEqualName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
+                        throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, storageFolder.getParentID()), treeId);
+                    }
+                    if (null != checkForReservedName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
+                        throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
+                    }
                 }
             }
             boolean changeSubscription = false;
@@ -244,16 +250,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                  * Check for a folder with the same name below parent
                  */
                 if (equallyNamedSibling(folder.getName(), treeId, newParentId, openedStorages)) {
-                    String parentName = newParentId;
-                    try {
-                        Folder parentFolder = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
-                        if (null != parentFolder) {
-                            parentName = parentFolder.getName();
-                        }
-                    } catch (OXException e) {
-                        // swallow
-                    }
-                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), parentName, treeId);
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(newRealParentStorage, newParentId), treeId);
                 }
                 /*
                  * Check for forbidden public mail folder
@@ -417,60 +414,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
     } // End of doUpdate()
 
-    private void checkForDuplicateOnMove(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newParentId) throws OXException {
-        /*
-         * Check for duplicate
-         */
-        CheckForDuplicateResult result = getCheckForDuplicateResult(folder.getName(), treeId, newParentId, openedStorages);
-        if (null != result) {
-            final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-            if (!autoRename) {
-                throw result.error;
-            }
-            final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(storageFolder.getContentType().toString());
-            int count = 2;
-            final StringBuilder nameBuilder = new StringBuilder(folder.getName());
-            final int resetLen = nameBuilder.length();
-            do {
-                nameBuilder.setLength(resetLen);
-                if (useParenthesis) {
-                    nameBuilder.append(" (").append(count++).append(')');
-                } else {
-                    nameBuilder.append(" ").append(count++);
-                }
-                result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, newParentId, openedStorages);
-            } while (null != result);
-            folder.setName(nameBuilder.toString());
-        }
-    }
-
-    private void checkForDuplicateOnRename(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newName, final boolean allowAutoRename) throws OXException {
-        CheckForDuplicateResult result = getCheckForDuplicateResult(newName, treeId, storageFolder.getParentID(), storageFolder.getID(), openedStorages);
-        if (null != result) {
-            if (!allowAutoRename) {
-                throw result.error;
-            }
-            final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-            if (!autoRename) {
-                throw result.error;
-            }
-            final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(storageFolder.getContentType().toString());
-            int count = 2;
-            final StringBuilder nameBuilder = new StringBuilder(folder.getName());
-            final int resetLen = nameBuilder.length();
-            do {
-                nameBuilder.setLength(resetLen);
-                if (useParenthesis) {
-                    nameBuilder.append(" (").append(count++).append(')');
-                } else {
-                    nameBuilder.append(" ").append(count++);
-                }
-                result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, storageFolder.getParentID(), openedStorages);
-            } while (null != result);
-            folder.setName(nameBuilder.toString());
-        }
-    }
-
     private MovePerformer newMovePerformer() throws OXException {
         if (null == session) {
             return new MovePerformer(user, context, folderStorageDiscoverer);
@@ -558,19 +501,21 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         return nonExistingName;
     }
 
-    private static Permission[] stripSystemPermissions(final Permission[] permissions) {
-        if (null == permissions) {
-            return null;
+    /**
+     * Tries to get a folder's name, ignoring any exceptions that might occur. Useful for exception messages.
+     *
+     * @param storage The storage
+     * @param folderId The folder identifier
+     * @return The folder name, falling back to the identifier
+     */
+    private String getFolderNameSave(FolderStorage storage, String folderId) {
+        try {
+            Folder folder = storage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+            return folder.getName();
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(UpdatePerformer.class).debug("Error getting name for folder '{}'", folderId, e);
+            return folderId;
         }
-        final int len = permissions.length;
-        final List<Permission> list = new ArrayList<Permission>(len);
-        for (int i = 0; i < len; i++) {
-            final Permission permission = permissions[i];
-            if (0 == permission.getSystem()) {
-                list.add(permission);
-            }
-        }
-        return list.toArray(new Permission[list.size()]);
     }
 
 }

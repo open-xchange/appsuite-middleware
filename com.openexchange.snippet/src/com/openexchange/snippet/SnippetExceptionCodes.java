@@ -90,6 +90,14 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
      * No such snippet attachment found for identifier %1$s in snippet %2$s
      */
     ATTACHMENT_NOT_FOUND("No such snippet attachment found for identifier %1$s in snippet %2$s", CATEGORY_ERROR, 7),
+    /**
+     * Maximum number of '%1$s' for signature images reached.
+     */
+    MAXIMUM_IMAGES_COUNT("Maximum number of '%1$s' for signature images reached.", "The maximum allowed number of '%1$s' images in the signature is reached.", CATEGORY_ERROR, 8),
+    /**
+     * Maximum size of '%1$s' for signature image is reached.
+     */
+    MAXIMUM_IMAGE_SIZE("Maximum size of '%1$s' for signature image is reached.", "The maximum allowed size of '%1$s' for an image in the signature is reached.", CATEGORY_ERROR, 9),
 
     ;
 

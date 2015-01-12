@@ -357,6 +357,7 @@ public interface UserService {
      * @param email The email address of the user.
      * @param considerAliases <code>true</code> to consider a user's aliases, <code>false</code>, otherwise
      * @param context The context.
+     * @param considerAliases Whether to consider alias E-Mail addresses when searching for an appropriate user
      * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
      * @throws OXException If an error occurs.
      */

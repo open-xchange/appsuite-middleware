@@ -53,22 +53,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.lang.Validate;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.StorageParameters;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
@@ -217,81 +212,7 @@ public abstract class AbstractPerformer {
         this.check4Duplicates = check4Duplicates;
     }
 
-    /**
-     * Checks for duplicate folder through a LIST request.
-     *
-     * @param name The name to check for
-     * @param treeId The tree identifier
-     * @param parentId The parent identifier
-     * @param openedStorages The list containing already opened folder storages
-     * @throws OXException If name look-up fails
-     */
-    protected void checkForDuplicate(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
-        final CheckForDuplicateResult result = getCheckForDuplicateResult(name, treeId, parentId, openedStorages);
-        if (null != result) {
-            throw result.error;
-        }
-    }
-
-    /**
-     * Checks for duplicate folder through a LIST request.
-     *
-     * @param name The name to check for
-     * @param treeId The tree identifier
-     * @param parentId The parent identifier
-     * @param openedStorages The list containing already opened folder storages
-     * @return The check result or <code>null</code> if no duplicate/conflict found
-     * @throws OXException If name look-up fails
-     */
-    protected CheckForDuplicateResult getCheckForDuplicateResult(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
-        return getCheckForDuplicateResult(name, treeId, parentId, null, openedStorages);
-    }
-
-    /**
-     * Checks for duplicate folder through a LIST request.
-     *
-     * @param name The name to check for
-     * @param treeId The tree identifier
-     * @param parentId The parent identifier
-     * @param excludee The identifier of the folder to exclude
-     * @param openedStorages The list containing already opened folder storages
-     * @return The check result or <code>null</code> if no duplicate/conflict found
-     * @throws OXException If name look-up fails
-     */
-    protected CheckForDuplicateResult getCheckForDuplicateResult(final String name, final String treeId, final String parentId, final String excludee, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
-        if (!check4Duplicates || null == name) {
-            return null;
-        }
-        /*
-         * Check for duplicate
-         */
-        final Locale locale = storageParameters.getUser().getLocale();
-        final String lcName = name.toLowerCase(locale).trim();
-        for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
-            final String localizedName = userizedFolder.getLocalizedName(locale);
-            if (localizedName.toLowerCase(locale).equals(lcName) && (null == excludee || !excludee.equals(userizedFolder.getID()))) {
-                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
-                checkOpenedStorage(realStorage, openedStorages);
-                final OXException e = FolderExceptionErrorMessage.EQUAL_NAME.create(
-                    name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);
-                return new CheckForDuplicateResult(userizedFolder.getID(), e);
-            }
-        }
-        /*
-         * Check against possible i18n conflicts
-         */
-        final FolderI18nNamesService namesService = FolderI18nNamesServiceImpl.getInstance();
-        final Set<String> i18nNames = namesService.getI18nNamesFor();
-        for (final String reservedName : i18nNames) {
-            if (reservedName.toLowerCase(locale).equals(lcName)) {
-                final OXException e = FolderExceptionErrorMessage.RESERVED_NAME.create(name);
-                return new CheckForDuplicateResult(null, e);
-            }
-        }
-        return null;
-    }
-
-    private void checkOpenedStorage(final FolderStorage storage, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+    protected void checkOpenedStorage(final FolderStorage storage, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         for (final FolderStorage openedStorage : openedStorages) {
             if (openedStorage.equals(storage)) {
                 return;
@@ -513,23 +434,5 @@ public abstract class AbstractPerformer {
     public FolderStorageDiscoverer getFolderStorageDiscoverer() {
         return folderStorageDiscoverer;
     }
-
-    /**
-     * A check-for-duplicate result.
-     */
-    protected static final class CheckForDuplicateResult {
-
-        protected final OXException error;
-        protected final String optFolderId;
-
-        protected CheckForDuplicateResult(final String optFolderId, final OXException error) {
-            super();
-            Validate.notNull(error, "OXException must not be null!");
-
-            this.optFolderId = optFolderId;
-            this.error = error;
-        }
-
-    } // End of class CheckForDuplicateResult
 
 }

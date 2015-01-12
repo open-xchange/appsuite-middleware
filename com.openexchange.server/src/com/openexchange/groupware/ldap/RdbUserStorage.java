@@ -101,7 +101,6 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
@@ -1535,10 +1534,10 @@ public class RdbUserStorage extends UserStorage {
             stmt.setInt(1, cid);
             stmt.setString(2, imapLogin);
             result = stmt.executeQuery();
-            final SmartIntArray sia = new SmartIntArray(4);
+            final TIntList sia = new TIntArrayList(4);
             if (result.next()) {
                 do {
-                    sia.append(result.getInt(1));
+                    sia.add(result.getInt(1));
                 } while (result.next());
             } else {
                 throw UserExceptionCode.USER_NOT_FOUND.create(imapLogin, I(cid));

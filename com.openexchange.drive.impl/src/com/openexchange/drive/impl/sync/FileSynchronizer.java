@@ -64,6 +64,8 @@ import com.openexchange.drive.impl.actions.EditFileAction;
 import com.openexchange.drive.impl.actions.ErrorFileAction;
 import com.openexchange.drive.impl.actions.RemoveFileAction;
 import com.openexchange.drive.impl.actions.UploadFileAction;
+import com.openexchange.drive.impl.checksum.ChecksumProvider;
+import com.openexchange.drive.impl.checksum.FileChecksum;
 import com.openexchange.drive.impl.comparison.Change;
 import com.openexchange.drive.impl.comparison.ServerFileVersion;
 import com.openexchange.drive.impl.comparison.ThreeWayComparison;
@@ -75,6 +77,7 @@ import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.composition.FolderID;
 
 
 /**
@@ -249,14 +252,30 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 }
             } else if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(comparison.getServerVersion().getName())) {
                 /*
+                 * checksum mismatch for .drive-meta file, enforce server-side re-calculation of .drive-meta file's checksum to be safe
+                 */
+                ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session);
+                session.getChecksumStore().removeFileChecksum(serverFileVersion.getFileChecksum());
+                FileChecksum recalculatedChecksum = ChecksumProvider.getChecksum(session, serverFileVersion.getFile());
+                if (false == recalculatedChecksum.getChecksum().equals(serverFileVersion.getChecksum())) {
+                    LOG.debug("Using re-calculated checksum for .drive-meta file: {}", recalculatedChecksum);
+                    session.getChecksumStore().removeDirectoryChecksum(new FolderID(serverFileVersion.getFile().getFolderId()));
+                    serverFileVersion = new ServerFileVersion(serverFileVersion.getFile(), recalculatedChecksum);
+                    if (serverFileVersion.getChecksum().equals(comparison.getClientVersion().getChecksum())) {
+                        /*
+                         * client version matches, send acknowledge
+                         */
+                        result.addActionForClient(new AcknowledgeFileAction(session, comparison.getClientVersion(), serverFileVersion, comparison, path));
+                        return 1;
+                    }
+                }
+                /*
                  * not allowed, let client re-download the file, indicate as error without quarantine flag
                  */
                 OXException e = DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
                 LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
-                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
-                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
-                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
-                    path, e, false));
+                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(), serverFileVersion, comparison, path));
+                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), serverFileVersion, comparison, path, e, false));
                 return 2;
             } else if (mayCreate()) {
                 /*

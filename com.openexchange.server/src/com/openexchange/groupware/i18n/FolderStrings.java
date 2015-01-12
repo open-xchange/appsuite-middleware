@@ -111,4 +111,14 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String VIRTUAL_LIST_FILES_FOLDER_NAME = "Other files";
 
+    public static final String SYSTEM_USER_PICTURES_FOLDER_NAME = "Pictures";
+
+    public static final String SYSTEM_USER_DOCUMENTS_FOLDER_NAME = "Documents";
+
+    public static final String SYSTEM_USER_MUSIC_FOLDER_NAME = "Music";
+
+    public static final String SYSTEM_USER_VIDEOS_FOLDER_NAME = "Videos";
+
+    public static final String SYSTEM_USER_TEMPLATES_FOLDER_NAME = "Templates";
+
 }

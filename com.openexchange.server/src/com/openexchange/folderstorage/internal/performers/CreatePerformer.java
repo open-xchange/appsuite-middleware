@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -65,8 +64,8 @@ import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
-import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -78,7 +77,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -90,8 +88,6 @@ import com.openexchange.tools.session.ServerSession;
 public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
     private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
-
-    private static final String CONTENT_TYPE_INFOSTORE = InfostoreContentType.getInstance().toString();
 
     /**
      * Initializes a new {@link CreatePerformer}.
@@ -200,77 +196,16 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * Check for duplicates for OLOX-covered folders
              */
-            if (!CONTENT_TYPE_INFOSTORE.equals(cts)) {
-                final Session session = storageParameters.getSession();
-                if (null == session) {
-                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
-                    if (null != result) {
-                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-                        if (!autoRename) {
-                            throw result.error;
-                        }
-                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(cts);
-                        int count = 2;
-                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
-                        final int resetLen = nameBuilder.length();
-                        do {
-                            nameBuilder.setLength(resetLen);
-                            if (useParenthesis) {
-                                nameBuilder.append(" (").append(count++).append(')');
-                            } else {
-                                nameBuilder.append(" ").append(count++);
-                            }
-                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
-                        } while (null != result);
-                        toCreate.setName(nameBuilder.toString());
-                    }
-                } else {
-                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
-                    if (null != result) {
-                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-                        if (!autoRename || result.error.similarTo(FolderExceptionErrorMessage.RESERVED_NAME)) {
-                            if (null != result.optFolderId && "USM-JSON".equals(session.getClient())) {
-                                return result.optFolderId;
-                            }
-                            throw result.error;
-                        }
-                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(cts);
-                        int count = 2;
-                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
-                        final int resetLen = nameBuilder.length();
-                        do {
-                            nameBuilder.setLength(resetLen);
-                            if (useParenthesis) {
-                                nameBuilder.append(" (").append(count++).append(')');
-                            } else {
-                                nameBuilder.append(" ").append(count++);
-                            }
-                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
-                        } while (null != result);
-                        toCreate.setName(nameBuilder.toString());
-                    }
+            UserizedFolder existingFolder = checkForEqualName(treeId, parentId, toCreate, toCreate.getContentType(), true);
+            if (null != existingFolder) {
+                if (null != session && "USM-JSON".equals(session.getClient())) {
+                    return existingFolder.getID(); // taken over from fix for bug #21286 ...
                 }
-            } else {
-                final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-                if (autoRename) {
-                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
-                    if (null != result) {
-                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(cts);
-                        int count = 2;
-                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
-                        final int resetLen = nameBuilder.length();
-                        do {
-                            nameBuilder.setLength(resetLen);
-                            if (useParenthesis) {
-                                nameBuilder.append(" (").append(count++).append(')');
-                            } else {
-                                nameBuilder.append(" ").append(count++);
-                            }
-                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
-                        } while (null != result);
-                        toCreate.setName(nameBuilder.toString());
-                    }
-                }
+                throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(getLocale()), treeId);
+            }
+            String reservedName = checkForReservedName(treeId, parentId, toCreate, toCreate.getContentType(), false);
+            if (null != reservedName) {
+                throw FolderExceptionErrorMessage.RESERVED_NAME.create(toCreate.getName());
             }
             /*
              * Create folder dependent on folder is virtual or not
@@ -289,7 +224,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             if (!FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
                 final String duplicateId = DuplicateCleaner.cleanDuplicates(treeId, storageParameters, newId);
                 if (null != duplicateId) {
-                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(storageParameters.getUser().getLocale()), treeId);
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(getLocale()), treeId);
                     // return duplicateId;
                 }
             }
@@ -310,6 +245,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
+
 
     private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage, final TransactionManager transactionManager) throws OXException {
         final ContentType[] contentTypes = parentStorage.getSupportedContentTypes();

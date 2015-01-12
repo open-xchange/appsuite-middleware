@@ -120,7 +120,7 @@ public class DefaultMailMappingService implements MailResolver {
             return null;
         }
 
-        return new ResolvedMail(found.getId(), context.getContextId());
+        return ResolvedMail.ACCEPT(found.getId(), context.getContextId());
     }
 
 }

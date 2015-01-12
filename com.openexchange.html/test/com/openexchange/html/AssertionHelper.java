@@ -49,7 +49,10 @@
 
 package com.openexchange.html;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import java.util.Queue;
+import org.apache.commons.lang.StringUtils;
 import com.openexchange.java.Strings;
 
 /**
@@ -67,16 +70,38 @@ public class AssertionHelper {
         assertSanitized(service, html, null, AssertExpression.EMPTY);
     }
 
-    public static void assertSanitized(HtmlService service, String html, String mailiciousParam, AssertExpression ae) {
+    public static void assertSanitized(HtmlService service, String html, String maliciousParam, AssertExpression ae) {
         String sanitized = service.sanitize(html, null, false, null, null);
-        if(!Strings.isEmpty(sanitized)) {
+        if (!Strings.isEmpty(sanitized)) {
             sanitized = sanitized.toLowerCase();
         }
         if (AssertExpression.NOT_CONTAINED.equals(ae)) {
-            int index = sanitized.indexOf(mailiciousParam);
-            assertEquals(sanitized + " contains " + mailiciousParam, -1, index); //TODO
-        } else if(AssertExpression.EMPTY.equals(ae)) {
-            assertTrue("expected sanitized to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
+            assertFalse("sanitized output: " + sanitized + " contains " + maliciousParam, StringUtils.containsIgnoreCase(sanitized, maliciousParam));
+        } else if (AssertExpression.EMPTY.equals(ae)) {
+            assertTrue("expected html: " + html + " after sanitizing to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
+        }
+    }
+
+    public static void assertBlockingQuote(final Queue<String> quotedText, String[] quotedLines) {
+        int line = 0;
+        while (!quotedText.isEmpty()) {
+            String qt = quotedText.poll();
+            for (int i = line; i < quotedLines.length; i++) {
+                if (quotedLines[i].contains(qt)) {
+                    assertTrue("The HTML <blockquote> tag is not properly converted to '>'", quotedLines[i].startsWith(">"));
+                    line = i;
+                    break;
+                }
+            }
+        }
+    }
+
+    public static void assertTag(String tag, String actual, boolean closing) {
+        assertTrue(tag + " is missing", actual.contains(tag));
+        if (closing) {
+            String closingTag = tag.substring(1);
+            closingTag = "</" + closingTag;
+            assertTag(closingTag, actual, false);
         }
     }
 }

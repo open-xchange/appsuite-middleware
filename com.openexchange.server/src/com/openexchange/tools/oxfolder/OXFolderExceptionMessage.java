@@ -117,5 +117,6 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     public static final String DELETE_DENIED_MSG = "The folder \"%1$s\" cannot be deleted.";
     public static final String CREATOR_STAYS_ADMIN_MSG = "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were restored.";
     public static final String NO_FOLDER_NAME_MSG = "You must enter a folder name.";
+    public final static String NO_RESERVED_FOLDER_MSG = "The folder name \"%1$s\" is reserved. Please choose another name.";
 
 }

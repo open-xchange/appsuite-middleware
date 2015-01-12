@@ -121,7 +121,7 @@ public final class UpdateAction extends SnippetAction {
         final String contentSubType = getContentSubType(snippet);
         final SnippetProcessor snippetProcessor = new SnippetProcessor(snippetRequest.getSession());
         if (contentSubType.equals("html")) {
-            snippetProcessor.processImage(snippet);
+            snippetProcessor.processImages(snippet);
         }
 
         // Update

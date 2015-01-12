@@ -131,6 +131,8 @@ import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
 import com.openexchange.folder.internal.FolderServiceImpl;
+import com.openexchange.folderstorage.FolderI18nNamesService;
+import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
@@ -755,6 +757,11 @@ public final class ServerActivator extends HousekeepingActivator {
         final FolderService folderService = new FolderServiceImpl();
         registerService(FolderService.class, folderService);
         ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
+
+        // Register folder i18n name service
+        FolderI18nNamesServiceImpl folderI18nNamesService = FolderI18nNamesServiceImpl.getInstance();
+        registerService(FolderI18nNamesService.class, folderI18nNamesService);
+        ServerServiceRegistry.getInstance().addService(FolderI18nNamesService.class, folderI18nNamesService);
 
         // Register SessionHolder
         registerService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
