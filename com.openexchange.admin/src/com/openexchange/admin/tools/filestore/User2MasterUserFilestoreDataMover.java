@@ -110,7 +110,7 @@ public class User2MasterUserFilestoreDataMover extends FilestoreDataMover {
         int masterUserId = masterUser.getId().intValue();
         try {
             // Check
-            if (srcUser.getFilestoreOwner().intValue() != srcUserId) {
+            if (srcUser.getFilestoreOwner().intValue() > 0 && srcUser.getFilestoreOwner().intValue() != srcUserId) {
                 throw new StorageException("User's file storage does not belong to user. Owner " + srcUser.getFilestoreOwner() + " is not equal to " + srcUser.getId());
             }
 
