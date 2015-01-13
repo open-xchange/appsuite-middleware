@@ -71,9 +71,16 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
 public class PluginHostingActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PluginHostingActivator.class);
 
     private PluginStarter starter = null;
+
+    /**
+     * Initializes a new {@link PluginHostingActivator}.
+     */
+    public PluginHostingActivator() {
+        super();
+    }
 
     @Override
     public void startBundle() throws Exception {
