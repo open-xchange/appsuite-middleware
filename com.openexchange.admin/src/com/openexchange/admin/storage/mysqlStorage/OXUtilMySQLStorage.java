@@ -467,37 +467,54 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     @Override
     public void changeFilestoreDataFor(User user, Context ctx, Connection con) throws StorageException {
         if (user.getFilestoreId() != null) {
-            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-            final Filestore filestore = oxutil.getFilestore(user.getFilestoreId().intValue(), false);
+            OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            Filestore filestore = oxutil.getFilestore(user.getFilestoreId().intValue(), false);
+            int contextId = ctx.getId().intValue();
+            int userId = user.getId().intValue();
+
             PreparedStatement prep = null;
-            final int context_id = ctx.getId().intValue();
             try {
                 boolean changed = false;
                 Integer fsId = filestore.getId();
                 if (fsId != null && -1 != fsId.intValue()) {
                     prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ? AND filestore_id <> ?");
                     prep.setInt(1, fsId.intValue());
-                    prep.setInt(2, context_id);
-                    prep.setInt(3, user.getId().intValue());
+                    prep.setInt(2, contextId);
+                    prep.setInt(3, userId);
                     prep.setInt(4, fsId.intValue());
                     changed = prep.executeUpdate() > 0;
                     prep.close();
                 }
 
                 if (changed) {
+                    prep = con.prepareStatement("SELECT 1 FROM filestore_usage WHERE cid=? AND user=?");
+                    prep.setInt(1, contextId);
+                    prep.setInt(2, userId);
+                    boolean usageEntryExists = prep.executeQuery().next();
+                    Databases.closeSQLStuff(prep);
+
+                    if (false == usageEntryExists) {
+                        prep = con.prepareStatement("INSERT INTO filestore_usage (cid, user, used) VALUES (?, ?, ?)");
+                        prep.setInt(1, contextId);
+                        prep.setInt(2, userId);
+                        prep.setLong(3, 0L);
+                        prep.executeUpdate();
+                        Databases.closeSQLStuff(prep);
+                    }
+
                     Integer fsOwner = user.getFilestoreOwner();
                     if (fsOwner != null && -1 != fsOwner.intValue()) {
                         prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
                         prep.setInt(1, fsOwner.intValue());
-                        prep.setInt(2, context_id);
-                        prep.setInt(3, user.getId().intValue());
+                        prep.setInt(2, contextId);
+                        prep.setInt(3, userId);
                         prep.executeUpdate();
                         prep.close();
                     } else {
                         prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
                         prep.setInt(1, 0);
-                        prep.setInt(2, context_id);
-                        prep.setInt(3, user.getId().intValue());
+                        prep.setInt(2, contextId);
+                        prep.setInt(3, userId);
                         prep.executeUpdate();
                         prep.close();
                     }
@@ -506,15 +523,15 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     if (null != filestore_name) {
                         prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
                         prep.setString(1, filestore_name);
-                        prep.setInt(2, context_id);
-                        prep.setInt(3, user.getId().intValue());
+                        prep.setInt(2, contextId);
+                        prep.setInt(3, userId);
                         prep.executeUpdate();
                         prep.close();
                     } else {
                         prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
-                        prep.setString(1, FileStorages.getNameForUser(user.getId().intValue(), context_id));
-                        prep.setInt(2, context_id);
-                        prep.setInt(3, user.getId().intValue());
+                        prep.setString(1, FileStorages.getNameForUser(userId, contextId));
+                        prep.setInt(2, contextId);
+                        prep.setInt(3, userId);
                         prep.executeUpdate();
                         prep.close();
                     }

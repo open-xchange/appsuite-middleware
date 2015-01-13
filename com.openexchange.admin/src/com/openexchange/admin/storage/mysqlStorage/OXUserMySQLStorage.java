@@ -1540,6 +1540,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.setNull(17, java.sql.Types.VARCHAR);
                 }
 
+                boolean fileStorageSet = false;
                 {
                     Integer fsId = usrdata.getFilestoreId();
                     if (fsId != null && -1 != fsId.intValue()) {
@@ -1559,6 +1560,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.setString(20, FileStorages.getNameForUser(userId, contextId));
                         }
 
+                        fileStorageSet = true;
                     } else {
                         // No file storage information
                         stmt.setInt(18, 0);
@@ -1582,6 +1584,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 stmt.executeUpdate();
                 stmt.close();
+
+                if (fileStorageSet) {
+                    stmt = con.prepareStatement("INSERT INTO filestore_usage (cid, user, used) VALUES (?, ?, ?)");
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, userId);
+                    stmt.setLong(3, 0L);
+                    stmt.executeUpdate();
+                    stmt.close();
+                }
 
                 // fill up statement for prg_contacts update
 
@@ -2459,7 +2470,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         newuser.setGui_spam_filter_enabled(Boolean.FALSE);
                     }
                     newuser.setDefaultSenderAddress(rs.getString("send_addr"));
-                    newuser.setUploadFileSizeLimit(Integer.valueOf(rs.getInt("upload_quota)")));
+                    newuser.setUploadFileSizeLimit(Integer.valueOf(rs.getInt("upload_quota")));
                     newuser.setUploadFileSizeLimitPerFile(Integer.valueOf(rs.getInt("upload_quota_per_file")));
                 }
                 rs.close();
