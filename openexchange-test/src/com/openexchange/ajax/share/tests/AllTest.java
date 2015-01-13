@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.AllResponse;
@@ -144,6 +146,19 @@ public class AllTest extends ShareTest {
         for (ParsedShare share : allShares) {
             assertEquals("Wrong target module.", moduleId, share.getTarget().getModule());
         }
+    }
+
+    public void testListOtherUser() throws Exception {
+        int module = randomModule();
+        int parent = getDefaultFolder(module);
+        OCLGuestPermission guestPerm = randomGuestPermission();
+        insertSharedFolder(randomFolderAPI(), module, parent, guestPerm);
+
+        AllRequest request = new AllRequest(String.valueOf(module), false);
+        AJAXClient client2 = new AJAXClient(User.User2);
+        AllResponse response = client2.execute(request);
+        List<ParsedShare> shares = response.getParsedShares();
+        assertTrue("Shares created by another user found.", shares.isEmpty());
     }
 
 }
