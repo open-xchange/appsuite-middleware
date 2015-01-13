@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.junit.Test;
+import com.openexchange.admin.hosting.storage.mysqlStorage.DBWeightComparator;
+import com.openexchange.admin.hosting.storage.mysqlStorage.DatabaseHandle;
 
 
 /**
