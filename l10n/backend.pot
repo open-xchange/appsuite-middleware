@@ -3111,6 +3111,10 @@ msgstr ""
 msgid "The session is no longer available. Please try again."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guest/src/com/openexchange/guest/GuestExceptionMessage.java:63
+msgid "Could not connect to the guest storage."
+msgstr ""
+
 #. No Linked-In account available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
 msgid "No Linked-In account available."
