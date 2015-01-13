@@ -431,6 +431,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
+    @Override
     public void prepareFilestoreUsageFor(User user, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
         Connection con = null;
@@ -463,6 +464,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
+    @Override
     public void prepareFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException {
         int contextId = ctx.getId().intValue();
         int userId = user.getId().intValue();
@@ -595,7 +597,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     Integer fsOwner = user.getFilestoreOwner();
                     if (fsOwner != null && -1 != fsOwner.intValue()) {
                         prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
-                        prep.setInt(1, fsOwner.intValue());
+                        prep.setInt(1, fsOwner.intValue() == userId ? 0 : fsOwner.intValue());
                         prep.setInt(2, contextId);
                         prep.setInt(3, userId);
                         prep.executeUpdate();
