@@ -55,6 +55,7 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -154,6 +155,9 @@ public class User2MasterUserFilestoreDataMover extends FilestoreDataMover {
         } catch (OXException e) {
             throw new StorageException(e);
         }
+
+        Logger logger = org.slf4j.LoggerFactory.getLogger(MasterUser2UserFilestoreDataMover.class);
+        logger.info("Successfully moved files from individual file storage to master file storage for user {}", srcUser.getId());
     }
 
 }
