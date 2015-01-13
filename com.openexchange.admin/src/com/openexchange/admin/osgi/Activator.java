@@ -194,10 +194,11 @@ public class Activator extends HousekeepingActivator {
         }
 
         track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
-        daemon.initRMI(context);
 
         // Open trackers
         openTrackers();
+
+        daemon.initRMI(context);
 
         {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();
