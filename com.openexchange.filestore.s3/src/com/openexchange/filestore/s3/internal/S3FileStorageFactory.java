@@ -98,11 +98,18 @@ public class S3FileStorageFactory implements FileStorageProvider {
     private static final String S3_SCHEME = "s3";
 
     /**
-     * The expected pattern for file store names - hard-coded at
-     * com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage.create(Context, User, UserModuleAccess) ,
-     * so expect nothing else.
+     * The expected pattern for file store names associated with a context - defined by
+     * com.openexchange.filestore.FileStorages.getNameForContext(int) ,
+     * so expect nothing else; e.g. <code>"57462_ctx_store"</code>
      */
     private static final Pattern CTX_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_store");
+
+    /**
+     * The expected pattern for file store names associated with a user - defined by
+     * com.openexchange.filestore.FileStorages.getNameForUser(int, int) ,
+     * so expect nothing else; e.g. <code>"57462_ctx_5_user_store"</code>
+     */
+    private static final Pattern USER_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_(\\d+)_user_store");
 
     /**
      * The file storage's ranking compared to other sharing the same URL scheme.
@@ -325,16 +332,25 @@ public class S3FileStorageFactory implements FileStorageProvider {
         if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
-        Matcher matcher = CTX_STORE_PATTERN.matcher(path);
-        if (false == matcher.matches()) {
-            throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
-        }
         /*
          * Remove underscore characters to be conform to bucket name & prefix restrictions
          * http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html /
          * http://docs.aws.amazon.com/AmazonS3/latest/dev/ListingKeysHierarchy.html
          */
-        return matcher.group(1) + "ctxstore";
+        if (path.endsWith("ctx_store")) {
+            Matcher matcher = CTX_STORE_PATTERN.matcher(path);
+            if (false == matcher.matches()) {
+                throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
+            }
+            return new StringBuilder(16).append(matcher.group(1)).append("ctxstore").toString();
+        }
+
+        // Expect user store identifier
+        Matcher matcher = USER_STORE_PATTERN.matcher(path);
+        if (false == matcher.matches()) {
+            throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\"");
+        }
+        return new StringBuilder(24).append(matcher.group(1)).append("ctx").append(matcher.group(2)).append("userstore").toString();
     }
 
     /**
