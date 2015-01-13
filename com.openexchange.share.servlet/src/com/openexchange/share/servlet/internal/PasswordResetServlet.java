@@ -97,7 +97,7 @@ public class PasswordResetServlet extends HttpServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
     private final ShareLoginConfiguration loginConfig;
-    private final Map<String, User> usersToUpdate;
+    private final Map<String, UserImpl> usersToUpdate;
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -109,7 +109,7 @@ public class PasswordResetServlet extends HttpServlet {
     public PasswordResetServlet(ShareLoginConfiguration loginConfig) {
         super();
         this.loginConfig = loginConfig;
-        usersToUpdate = new ConcurrentHashMap<String, User>();
+        usersToUpdate = new ConcurrentHashMap<String, UserImpl>();
     }
 
     @Override
@@ -149,10 +149,9 @@ public class PasswordResetServlet extends HttpServlet {
             if (null == confirm) {
                 // Generate new password and send link to confirm
                 String password = PasswordUtility.generate();
-                String encodedPassword = PasswordMech.BCRYPT.encode(password);
 
                 UserImpl updatedUser = new UserImpl(storageUser);
-                updatedUser.setUserPassword(encodedPassword);
+                updatedUser.setUserPassword(password);
                 UUID uuid = UUID.randomUUID();
                 usersToUpdate.put(uuid.toString(), updatedUser);
 
@@ -176,9 +175,12 @@ public class PasswordResetServlet extends HttpServlet {
 
             } else {
                 // Try to set new password
-                User updatedUser = usersToUpdate.get(confirm);
+                UserImpl updatedUser = usersToUpdate.get(confirm);
                 if (null != updatedUser && updatedUser.getId() == guestID) { //TODO: Check for context Id
                     // update user
+                    String password = updatedUser.getUserPassword();
+                    String encodedPassword = PasswordMech.BCRYPT.encode(password);
+                    updatedUser.setUserPassword(encodedPassword);
                     userService.updateUser(updatedUser, context);
                     // Invalidate
                     userService.invalidateUser(context, guestID);
@@ -196,7 +198,7 @@ public class PasswordResetServlet extends HttpServlet {
                         .setContext(guestInfo.getContextID())
                         .setLocale(guest.getLocale())
                         .setUsername(guestInfo.getEmailAddress())
-                        .setPassword(updatedUser.getUserPassword())
+                        .setPassword(password)
                         .build();
                     notificationService.send(notification);
 
