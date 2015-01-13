@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -61,14 +62,22 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.SetterAwareFolder;
+import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.osgi.UserServiceHolder;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
+import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -331,6 +340,17 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         if (null == realStorage) {
                             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
                         }
+                        /*
+                         * Cascade folder permissions
+                         */
+                        if (storageParameters.getDecorator().getBoolProperty("inheritPermissions")) {
+                            // Switch back to false due to the recursive nature of FolderStorage.updateFolder in some implementations
+                            storageParameters.getDecorator().put("inheritPermissions", false);
+                            checkOpenedStorage(realStorage, openedStorages);
+                            List<String> ids = new ArrayList<String>();
+                            gatherSubfolders(folder, realStorage, treeId, ids);
+                            cascadeFolderPermissions(folder, realStorage, treeId, ids);
+                        }
                         if (storage.equals(realStorage)) {
                             storage.updateFolder(folder, storageParameters);
                         } else {
@@ -413,6 +433,44 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     } // End of doUpdate()
+
+    /**
+     * Gather all sub-folders that the current user has administrative rights.
+     * 
+     * @param folder The folder
+     * @param storage The folder storage
+     * @param treeId The tree identifier
+     * @param ids The already gathered sub-folders
+     * @throws OXException if the current user does not have administrative rights.
+     */
+    private void gatherSubfolders(Folder folder, FolderStorage storage, String treeId, List<String> ids) throws OXException {
+        SortableId[] sortableIds = storage.getSubfolders(treeId, folder.getID(), storageParameters);
+        for (SortableId id : sortableIds) {
+            Folder f = storage.getFolder(treeId, id.getId(), storageParameters);
+            Permission permission = CalculatePermission.calculate(f, this, ALL_ALLOWED);
+            if (!permission.isAdmin()) {
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(session.getUserId(), context), f.getName(), Integer.valueOf(context.getContextId()));
+            }
+            ids.add(f.getID());
+            gatherSubfolders(f, storage, treeId, ids);
+        }
+    }
+
+    /**
+     * Cascade folder permissions
+     * 
+     * @param folder The folder
+     * @param storage The folder storage
+     * @param treeId The tree identifier
+     * @throws OXException If applying the permissions fails.
+     */
+    private void cascadeFolderPermissions(Folder folder, FolderStorage storage, String treeId, List<String> ids) throws OXException {
+        for (String id : ids) {
+            Folder f = storage.getFolder(treeId, id, storageParameters);
+            f.setPermissions(folder.getPermissions());
+            storage.updateFolder(f, storageParameters);
+        }
+    }
 
     private MovePerformer newMovePerformer() throws OXException {
         if (null == session) {
