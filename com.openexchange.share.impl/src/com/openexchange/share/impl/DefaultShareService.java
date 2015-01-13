@@ -211,7 +211,7 @@ public class DefaultShareService implements ShareService {
     @Override
     public List<ShareInfo> getAllShares(Session session, String module) throws OXException {
         int moduleId = ShareModuleMapping.moduleMapping2int(module);
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForModule(session.getContextId(), moduleId, StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForModule(session.getContextId(), session.getUserId(), moduleId, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         return ShareTool.toShareInfos(services, session.getContextId(), shares);
     }

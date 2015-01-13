@@ -209,10 +209,11 @@ public interface ShareStorage {
     /**
      * Loads all shares stored for a specific module.
      *
-     * @param contextID The context ID
+     * @param contextId The context ID
+     * @param userId The user ID
      * @param module The module Id
      * @param parameters The storage parameters
      * @return The shares, or an empty list if none were found
      */
-    List<Share> loadSharesForModule(int contextId, int module, StorageParameters parameters) throws OXException;
+    List<Share> loadSharesForModule(int contextId, int userId, int module, StorageParameters parameters) throws OXException;
 }

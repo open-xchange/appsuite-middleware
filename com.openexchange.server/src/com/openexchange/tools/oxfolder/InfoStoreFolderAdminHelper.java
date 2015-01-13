@@ -85,7 +85,7 @@ public final class InfoStoreFolderAdminHelper {
      */
     public static void addDefaultFolders(Connection connection, int contextID, int userID) throws OXException {
         int userFolderID = addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC, false);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.TRASH, false);
+        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.TRASH, false);
         int documentsFolderID = InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.DOCUMENTS, false);
         InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, documentsFolderID, FolderObject.TEMPLATES, false);
         InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.PICTURES, false);
@@ -216,7 +216,7 @@ public final class InfoStoreFolderAdminHelper {
     private static int getParentDefaultFolderID(Connection connection, int contextID, int userID, int type) throws OXException, SQLException {
         switch (type) {
             case FolderObject.PUBLIC:
-                return FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
+                return FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
             case FolderObject.TRASH:
                 return FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
             case FolderObject.DOCUMENTS:
