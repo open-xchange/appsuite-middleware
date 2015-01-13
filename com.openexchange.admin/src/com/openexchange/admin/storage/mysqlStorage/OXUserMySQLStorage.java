@@ -2609,6 +2609,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
+                stmt = write_ox_con.prepareStatement("DELETE FROM filestore_usage WHERE cid = ? AND user = ?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.executeUpdate();
+                stmt.close();
+
                 // when table ready, enable this
                 createRecoveryData(ctx, userId, write_ox_con);
                 log.debug("Delete user {}({}) from user ...", user.getId(), ctx.getId());
