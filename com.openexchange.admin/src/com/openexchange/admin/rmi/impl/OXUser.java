@@ -311,7 +311,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Check capacity
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue());
+            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
             if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
                 throw new StorageException("Destination filestore does not have enough space for another user.");
             }
@@ -402,8 +402,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore destFilestore = oxu.getFilestore(storageMasterUser.getFilestoreId().intValue());
-            Filestore srcFilestore = oxu.getFilestore(storageUser.getFilestoreId().intValue());
+            Filestore destFilestore = oxu.getFilestore(storageMasterUser.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
 
             // Check equality
             int srcStore_id = storageUser.getFilestoreId().intValue();
@@ -515,8 +515,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue());
-            Filestore srcFilestore = oxu.getFilestore(storageMasterUser.getFilestoreId().intValue());
+            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
+            Filestore srcFilestore = oxu.getFilestore(storageMasterUser.getFilestoreId().intValue(), false);
 
             // Check equality
             int srcStore_id = storageMasterUser.getFilestoreId().intValue();
@@ -617,8 +617,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue());
-            Filestore srcFilestore = oxu.getFilestore(storageContext.getFilestoreId().intValue());
+            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
+            Filestore srcFilestore = oxu.getFilestore(storageContext.getFilestoreId().intValue(), false);
 
             // Check equality
             int srcStore_id = storageContext.getFilestoreId().intValue();
@@ -725,8 +725,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore destFilestore = oxu.getFilestore(storageContext.getFilestoreId().intValue());
-            Filestore srcFilestore = oxu.getFilestore(storageUser.getFilestoreId().intValue());
+            Filestore destFilestore = oxu.getFilestore(storageContext.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
 
             // Check equality
             int srcStore_id = storageUser.getFilestoreId().intValue();
