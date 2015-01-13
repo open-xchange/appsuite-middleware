@@ -106,6 +106,10 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
         int contextId = ctx.getId().intValue();
         int userId = user.getId().intValue();
         try {
+            // Ensure "filestore_usage" entry exists for user
+            OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
+            oxcox.prepareFilestoreUsageFor(user, ctx);
+
             // Grab associated quota-aware file storages
             FileStorage userStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, userId, contextId);
             FileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, -1, contextId);

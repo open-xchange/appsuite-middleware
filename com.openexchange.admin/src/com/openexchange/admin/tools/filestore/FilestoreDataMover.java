@@ -337,13 +337,14 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @throws SQLException If an SQL error occurs
      */
     protected void propagateNewLocations(Map<String, String> prevFileName2newFileName) throws OXException, SQLException {
-        Connection con = Database.getNoTimeout(ctx.getId().intValue(), true);
+        int contextId = ctx.getId().intValue();
+        Connection con = Database.getNoTimeout(contextId, true);
         try {
             for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
-                updater.updateFileLocations(prevFileName2newFileName, ctx.getId().intValue(), con);
+                updater.updateFileLocations(prevFileName2newFileName, contextId, con);
             }
         } finally {
-            Database.backNoTimeout(ctx.getId().intValue(), true, con);
+            Database.backNoTimeout(contextId, true, con);
         }
     }
 

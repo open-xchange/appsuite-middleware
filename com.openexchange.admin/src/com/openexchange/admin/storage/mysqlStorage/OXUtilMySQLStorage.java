@@ -431,6 +431,67 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
+    public void prepareFilestoreUsageFor(User user, Context ctx) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            con.setAutoCommit(false);
+            rollback = true;
+
+            prepareFilestoreUsageFor(user, ctx, con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    // Ignroe
+                }
+            }
+        }
+    }
+
+    public void prepareFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        int userId = user.getId().intValue();
+
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            prep = con.prepareStatement("SELECT 1 FROM filestore_usage WHERE cid=? AND user=?");
+            prep.setInt(1, contextId);
+            prep.setInt(2, userId);
+            rs = prep.executeQuery();
+
+            boolean exists = rs.next();
+            Databases.closeSQLStuff(rs, prep);
+
+            if (false == exists) {
+                prep = con.prepareStatement("INSERT INTO filestore_usage (cid, user, used) VALUES (?, ?, ?)");
+                prep.setInt(1, contextId);
+                prep.setInt(2, userId);
+                prep.setLong(3, 0L);
+                prep.executeUpdate();
+            }
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } finally {
+            Databases.closeSQLStuff(rs, prep);
+        }
+    }
+
     @Override
     public void changeFilestoreDataFor(User user, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
