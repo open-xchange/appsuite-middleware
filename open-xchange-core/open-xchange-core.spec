@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1124,6 +1124,12 @@ fi
 # SoftwareChange_Request-2245
 ox_add_property com.openexchange.sessiond.useDistributedTokenSessions false /opt/open-xchange/etc/sessiond.properties
 
+# SoftwareChange_Request-2110
+ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+
+# SoftwareChange_Request-2224
+ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
+
 # SoftwareChange_Request-2249
 ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt/open-xchange/etc/requestwatcher.properties
 
@@ -1173,6 +1179,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Jan 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-12
 * Mon Jan 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-12
 * Tue Dec 30 2014 Marcus Klein <marcus.klein@open-xchange.com>

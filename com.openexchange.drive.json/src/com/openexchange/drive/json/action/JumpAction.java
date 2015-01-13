@@ -106,10 +106,18 @@ public class JumpAction extends AbstractDriveAction {
             if (Strings.isEmpty(path)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
             }
+            String name = requestData.getParameter("name");
             String method = requestData.getParameter("method");
             if (Strings.isEmpty(method)) {
                 method = "preview";
             }
+            /*
+             * obtain redirect URL from drive service, implicitly checking the existence of the target
+             */
+            String link = driveService.getJumpRedirectUrl(session, path, name, method);
+            /*
+             * perform token based login & obtain corresponding server token
+             */
             HttpServletRequest request = requestData.optHttpServletRequest();
             if (null == request) {
                 throw DriveExceptionCodes.IO_ERROR.create("Request must not be null");
@@ -122,14 +130,11 @@ public class JumpAction extends AbstractDriveAction {
             req.setClientToken(clientToken);
             LoginResult res = LoginPerformer.getInstance().doLogin(req);
             String serverToken = res.getServerToken();
-            String name = requestData.getParameter("name");
-            String link = driveService.getJumpRedirectUrl(session, path, name, method);
-            StringBuilder sb = new StringBuilder(link).append("&serverToken=").append(serverToken);
             /*
-             * get & return metadata as json
+             * return jump response holding the redirect URL as JSON
              */
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("redirectUrl", sb.toString());
+            jsonObject.put("redirectUrl", new StringBuilder(link).append("&serverToken=").append(serverToken).toString());
             return new AJAXRequestResult(jsonObject, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

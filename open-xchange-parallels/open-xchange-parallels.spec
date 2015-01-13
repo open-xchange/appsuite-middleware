@@ -8,7 +8,6 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 %endif
 BuildRequires:  open-xchange-admin
-BuildRequires:  open-xchange-rest
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires:  java7-devel
 %else
@@ -85,6 +84,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Wed Jan 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-12
 * Mon Jan 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-12
 * Tue Dec 30 2014 Marcus Klein <marcus.klein@open-xchange.com>

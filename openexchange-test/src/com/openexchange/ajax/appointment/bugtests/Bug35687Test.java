@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.Calendar;
 import java.util.List;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -90,10 +91,12 @@ public class Bug35687Test extends AbstractAJAXSession {
 
         ctm.setClient(client2);
 
+        int nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
+
         app = new Appointment();
         app.setTitle("Bug 35687 Test");
-        app.setStartDate(D("16.12.2014 08:00"));
-        app.setEndDate(D("16.12.2014 09:00"));
+        app.setStartDate(D("16.12." + nextYear + " 08:00"));
+        app.setEndDate(D("16.12." + nextYear + " 09:00"));
         app.setParentFolderID(folder.getObjectID());
         app.setAlarm(15);
         app.setIgnoreConflicts(true);

@@ -2021,6 +2021,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 // if any of those is missing, update the alias list like OXToolMySQLStorage.checkCreateUserData does
                 newuser.setAliases(useraliases);
                 newuser.addAlias(check_primary_mail);
+                newuser.addAlias(check_email1);
                 newuser.addAlias(check_default_sender_address);
 
                 // retest to see if the added values are now present inside the aliasList
@@ -2030,7 +2031,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     found_email1 = newUseraliases.contains(check_email1);
                     found_default_sender_address = newUseraliases.contains(check_default_sender_address);
                     if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
-                        throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.").append("\n");
+                        if (!found_primary_mail) {
+                            sb.append("primaryMail: ").append(check_primary_mail).append(" is missing.").append("\n");
+                        } else if (!found_email1) {
+                            sb.append("Email1: ").append(check_email1).append(" is missing").append("\n");
+                        } else if (!found_default_sender_address) {
+                            sb.append("defaultSenderAddress: ").append(check_default_sender_address).append(" is missing").append("\n");
+                        }
+                        sb.append("Currently provided aliases:").append("\n");
+                        for (String s : newUseraliases) {
+                            sb.append(s).append(" ");
+                        }
+                        throw new InvalidDataException(sb.toString());
                     }
                 }
 

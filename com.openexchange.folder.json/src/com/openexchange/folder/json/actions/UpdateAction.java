@@ -82,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
     @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
 }, requestBody = "Folder object as described in Common folder data and Detailed folder data. Only modified fields are present.",
-responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated folder, and maybe errors.")
+    responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated folder, and maybe errors.")
 public final class UpdateAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
@@ -123,6 +123,15 @@ public final class UpdateAction extends AbstractFolderAction {
                 }
             }
         }
+        final boolean inheritPermissions;
+        {
+            final String inherit = request.getParameter("inheritPermissions");
+            if (inherit == null) {
+                inheritPermissions = false;
+            } else {
+                inheritPermissions = Boolean.parseBoolean(inherit);
+            }
+        }
         /*
          * Parse folder object
          */
@@ -150,9 +159,9 @@ public final class UpdateAction extends AbstractFolderAction {
          * Update
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-       final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions"))
+        final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions"))
             .put("altNames", request.getParameter("altNames")).put("autorename", request.getParameter("autorename")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
-            .put("inheritPermissions", request.getParameter("inheritPermissions")).put(id, folderService));
+            .put("inheritPermissions", inheritPermissions).put(id, folderService));
 
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier

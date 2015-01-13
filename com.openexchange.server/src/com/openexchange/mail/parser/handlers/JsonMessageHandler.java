@@ -1010,9 +1010,29 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                     textWasEmpty = (null == content.getContent() || 0 == content.getContent().length());
                 } else {
-                    /*
-                     * A plain text message body has already been detected
-                     */
+                    if (usm.isDisplayHtmlInlineContent()) {
+                        // Assume HTML content has been appended before
+                        if (DisplayMode.DISPLAY.equals(displayMode)) {
+                            /*
+                             * Add alternative part as attachment
+                             */
+                             if(plainTextContentArg.length() > 0) {
+                                asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                             }
+                            return true;
+                        } else if (DisplayMode.RAW.equals(displayMode)) {
+                            /*
+                             * Return plain-text content as-is
+                             */
+                            asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(plainTextContentArg));
+                        }
+                        /*
+                         * Discard
+                         */
+                        return true;
+                    }
+
+                    // A plain text message body has already been detected
                     final HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
                     final MultipartInfo mpInfo = multiparts.peek();
                     if (null != mpInfo && (DisplayMode.RAW.getMode() < displayMode.getMode()) && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
@@ -1188,6 +1208,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+        if (null != altId && altId.equals(id)) {
+            // Leaving multipart/alternative part
+            altId = null;
+            isAlternative = false;
+        }
         multiparts.pop();
         return true;
     }

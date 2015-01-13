@@ -170,20 +170,10 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
-    public List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException {
+    public List<Share> loadSharesCreatedBy(int contextID, int createdBy, int module, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
-            return new ShareSelector(contextID).createdBy(createdBy).select(provider.get());
-        } finally {
-            provider.close();
-        }
-    }
-
-    @Override
-    public List<Share> loadSharesForModule(int contextID, int userId, int moduleId, StorageParameters parameters) throws OXException {
-        ConnectionProvider provider = getReadProvider(contextID, parameters);
-        try {
-            return new ShareSelector(contextID).forModule(userId, moduleId).select(provider.get());
+            return new ShareSelector(contextID).createdBy(createdBy).module(module).select(provider.get());
         } finally {
             provider.close();
         }
