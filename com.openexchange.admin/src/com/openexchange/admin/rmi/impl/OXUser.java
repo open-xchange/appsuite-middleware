@@ -420,9 +420,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (srcStore_id <= 0) {
                 throw new InvalidDataException("Unable to get filestore " + srcStore_id);
             }
-            if (srcStore_id == destFilestore.getId().intValue()) {
-                throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
-            }
 
             // Check storage name
             String name = storageUser.getFilestore_name();
