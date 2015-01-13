@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,59 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.osgi;
+package com.openexchange.html.internal.css;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
-import com.openexchange.file.storage.infostore.Services;
-import com.openexchange.file.storage.infostore.internal.TrashCleanupHandler;
-import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
 
 
 /**
- * {@link InfostoreFileStorageActivator}
+ * {@link Bug36024Test}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class InfostoreFileStorageActivator extends HousekeepingActivator {
+public class Bug36024Test  {
+    private HtmlService service;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class, ContextService.class, ConfigViewFactory.class };
+    public Bug36024Test() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(FileStorageService.class, new InfostoreFileStorageService() {
-            @Override
-            public InfostoreFacade getInfostore() {
-                return getService(InfostoreFacade.class);
-            }
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
 
-            @Override
-            public InfostoreSearchEngine getSearch() {
-                return getService(InfostoreSearchEngine.class);
-            }
-        }, null);
-        registerService(LoginHandlerService.class, new TrashCleanupHandler());
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
+    @After
+    public void tearDown() {
+        service = null;
+    }
+
+    @Test
+    public void testPositionFixedReplacedByDisplayBlock() {
+        String content2 = "<a href=\"http://example.com/attack.html\" style=\"position     :   fixed; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>";
+        String santized2 = service.sanitize(content2, null, true, null, null);
+        Assert.assertEquals("CSS style not ", "<a href=\"http://example.com/attack.html\" style=\"display: block; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>",
+            santized2);
+
+        String content = "<a href=\"http://example.com/attack.html\" style=\"position: fixed; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>";
+        String santized = service.sanitize(content, null, true, null, null);
+        Assert.assertEquals("CSS style not ", "<a href=\"http://example.com/attack.html\" style=\"display: block; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>",
+            santized);
     }
 }

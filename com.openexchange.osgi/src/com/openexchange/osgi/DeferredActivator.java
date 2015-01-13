@@ -109,7 +109,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         private static final String SERVICE_RANKING = Constants.SERVICE_RANKING;
 
         private final Class<? extends S> clazz;
-
         private final int index;
 
         /**
@@ -119,62 +118,68 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
          * @param clazz The service's clazz
          * @param index The index
          */
-        protected DeferredServiceTracker(final BundleContext context, final Class<S> clazz, final int index) {
+        protected DeferredServiceTracker(BundleContext context, Class<S> clazz, int index) {
             super(context, clazz, null);
             this.clazz = clazz;
             this.index = index;
         }
 
         @Override
-        public S addingService(final ServiceReference<S> reference) {
-            final S service = super.addingService(reference);
-            // Get provider
-            ServiceProvider<S> serviceProvider = (ServiceProvider<S>) services.get(clazz);
-            if (null == serviceProvider) {
-                ServiceProvider<S> newProvider = new DefaultServiceProvider<S>();
-                serviceProvider = (ServiceProvider<S>) services.putIfAbsent(clazz, newProvider);
+        public S addingService(ServiceReference<S> reference) {
+            S service = super.addingService(reference);
+            try {
+                // Get provider
+                ServiceProvider<S> serviceProvider = (ServiceProvider<S>) services.get(clazz);
                 if (null == serviceProvider) {
-                    serviceProvider = newProvider;
-                }
-            }
-            // Add service to provider
-            int ranking = 0;
-            {
-                Object oRanking = reference.getProperty(SERVICE_RANKING);
-                if (null != oRanking) {
-                    try {
-                        ranking = Integer.parseInt(oRanking.toString().trim());
-                    } catch (NumberFormatException e) {
-                        ranking = 0;
+                    ServiceProvider<S> newProvider = new DefaultServiceProvider<S>();
+                    serviceProvider = (ServiceProvider<S>) services.putIfAbsent(clazz, newProvider);
+                    if (null == serviceProvider) {
+                        serviceProvider = newProvider;
                     }
                 }
+
+                // Add service to provider
+                int ranking = 0;
+                {
+                    Object oRanking = reference.getProperty(SERVICE_RANKING);
+                    if (null != oRanking) {
+                        try {
+                            ranking = Integer.parseInt(oRanking.toString().trim());
+                        } catch (NumberFormatException e) {
+                            ranking = 0;
+                        }
+                    }
+                }
+                serviceProvider.addService(service, ranking);
+
+                // Signal availability
+                signalAvailability(index, clazz);
+                updateServiceState();
+                return service;
+            } catch (Exception e) {
+                LOG.error("Failed to add service {}", service.getClass().getName(), e);
+                context.ungetService(reference);
+                return null;
             }
-            serviceProvider.addService(service, ranking);
-            /*
-             * Signal availability
-             */
-            signalAvailability(index, clazz);
-            updateServiceState();
-            return service;
         }
 
         @Override
-        public void removedService(final org.osgi.framework.ServiceReference<S> reference, final S service) {
-            /*
-             * Signal unavailability
-             */
+        public void removedService(org.osgi.framework.ServiceReference<S> reference, S service) {
+            // Signal unavailability
             signalUnavailability(index, clazz);
-            /*
-             * ... and remove from services
-             */
+
+            // ... and remove from services
             if (services != null) {
                 services.remove(clazz);
             }
+
             updateServiceState();
             super.removedService(reference, service);
         }
 
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------ //
 
     /**
      * An atomic boolean to keep track of started/stopped status.

@@ -80,6 +80,7 @@ import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights.Right;
@@ -168,14 +169,17 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     /**
-     * Marks specified folder for fail-fast error.
+     * Marks specified folder for fail-fast error (if not already marked).
      *
      * @param imapStore The IMAP store
      * @param fullName The mailbox full name
      * @param e The associated error
      */
     public static void markForFailFast(IMAPStore imapStore, String fullName, MessagingException e) {
-        FAIL_FAST.put(new StringBuilder(fullName).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
+        if (null == imapStore || null == fullName || null == e) {
+            return;
+        }
+        FAIL_FAST.putIfAbsent(new StringBuilder(fullName).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
     }
 
     /*-
@@ -187,7 +191,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected final int accountId;
     protected final Context ctx;
     protected final IMAPAccess imapAccess;
-    protected final UserSettingMail usm;
+    private UserSettingMail userSettingMail;
     protected final IMAPConfig imapConfig;
     protected final ACLExtension aclExtension;
     protected IMAPFolder imapFolder;
@@ -202,14 +206,13 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param session The session providing needed user data
      * @throws OXException If context lading fails
      */
-    public IMAPFolderWorker(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
+    protected IMAPFolderWorker(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
         accountId = imapAccess.getAccountId();
         this.session = session;
-        ctx = ContextStorage.getStorageContext(session.getContextId());
-        usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+        ctx = session instanceof ServerSession ? ((ServerSession) session).getContext() : ContextStorage.getStorageContext(session.getContextId());
         imapConfig = imapAccess.getIMAPConfig();
         aclExtension = imapConfig.getACLExtension();
         otherFolders = new HashSet<IMAPFolder>(4);
@@ -224,6 +227,20 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             }
             throw e;
         }
+    }
+
+    /**
+     * Gets the associated {@link UserSettingMail} instance
+     *
+     * @return The associated {@link UserSettingMail} instance
+     */
+    protected UserSettingMail getUserSettingMail() {
+        UserSettingMail usm = userSettingMail;
+        if (null == usm) {
+            usm = session instanceof ServerSession ? ((ServerSession) session).getUserSettingMail() : UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+            userSettingMail = usm;
+        }
+        return usm;
     }
 
     @Override

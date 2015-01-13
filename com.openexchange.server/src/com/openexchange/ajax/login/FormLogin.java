@@ -251,6 +251,7 @@ public class FormLogin implements LoginRequestHandler {
         // App Suite UI requires some additional values.
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
+        retval = LoginTools.addFragmentParameter(retval, "context_id", String.valueOf(session.getContextId()));
         retval = LoginTools.addFragmentParameter(retval, "language", language);
         if (shouldStore != null) {
             retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);

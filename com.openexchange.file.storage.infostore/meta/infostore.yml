@@ -1,0 +1,5 @@
+com.openexchange.infostore.trash.retentionDays:
+    preferencePath: io.ox/files//trashRetentionDays
+
+io.ox/files//trashRetentionDays:
+    protected: false

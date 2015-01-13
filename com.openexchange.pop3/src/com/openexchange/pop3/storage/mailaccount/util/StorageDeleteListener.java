@@ -65,6 +65,7 @@ import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageProperties;
 import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageTrashContainer;
 import com.openexchange.pop3.storage.mailaccount.RdbPOP3StorageUIDLMap;
+import com.openexchange.pop3.storage.mailaccount.SessionParameterNames;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.sql.DBUtils;
@@ -126,13 +127,19 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
             /*
              * Delete storage content for user if a valid session can be found
              */
-            final SessiondService sessiondService = POP3ServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            SessiondService sessiondService = POP3ServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null != sessiondService) {
-                final Session session = sessiondService.getAnyActiveSessionForUser(user, cid);
-                if (session != null) {
+                for (Session session : sessiondService.getSessions(user, cid)) {
                     final POP3Access pop3Access = POP3Access.newInstance(session, id);
                     final POP3Storage pop3Storage = pop3Access.getPOP3Storage();
                     pop3Storage.drop();
+
+                    String key = SessionParameterNames.getStorageProperties(id);
+                    session.setParameter(key, null);
+                    key = SessionParameterNames.getTrashContainer(id);
+                    session.setParameter(key, null);
+                    key = SessionParameterNames.getUIDLMap(cid);
+                    session.setParameter(key, null);
                 }
             }
             /*
