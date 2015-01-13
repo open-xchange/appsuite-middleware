@@ -6,7 +6,6 @@ Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
- lib/commons-validator-1.4.0.jar,
  lib/jTidy.jar
 Import-Package: com.openexchange.config,
  com.openexchange.dispatcher,
