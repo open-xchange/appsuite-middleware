@@ -466,40 +466,69 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public void changeFilestoreDataFor(User user, Context ctx, Connection con) throws StorageException {
-        if (user.getFilestoreId() != null) {
-            OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-            Filestore filestore = oxutil.getFilestore(user.getFilestoreId().intValue(), false);
+        if (user.getFilestoreId() != null && -1 != user.getFilestoreId().intValue()) {
+            int filestoreId = user.getFilestoreId().intValue();
+
+            // Check existence if greater than zero
+            if (filestoreId > 0) {
+                OXUtilStorageInterface.getInstance().getFilestore(filestoreId, false);
+            }
+
             int contextId = ctx.getId().intValue();
             int userId = user.getId().intValue();
-
             PreparedStatement prep = null;
             try {
                 boolean changed = false;
-                Integer fsId = filestore.getId();
-                if (fsId != null && -1 != fsId.intValue()) {
+                if (filestoreId >= 0) {
                     prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ? AND filestore_id <> ?");
-                    prep.setInt(1, fsId.intValue());
+                    prep.setInt(1, filestoreId);
                     prep.setInt(2, contextId);
                     prep.setInt(3, userId);
-                    prep.setInt(4, fsId.intValue());
+                    prep.setInt(4, filestoreId);
                     changed = prep.executeUpdate() > 0;
                     prep.close();
                 }
 
                 if (changed) {
-                    prep = con.prepareStatement("SELECT 1 FROM filestore_usage WHERE cid=? AND user=?");
-                    prep.setInt(1, contextId);
-                    prep.setInt(2, userId);
-                    boolean usageEntryExists = prep.executeQuery().next();
-                    Databases.closeSQLStuff(prep);
+                    long used = -1L;
+                    {
+                        ResultSet rs = null;
+                        try {
+                            prep = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
+                            prep.setInt(1, contextId);
+                            prep.setInt(2, userId);
+                            rs = prep.executeQuery();
+                            if (rs.next()) {
+                                used = rs.getLong(1);
+                            }
+                        } finally {
+                            Databases.closeSQLStuff(rs, prep);
+                        }
+                    }
 
-                    if (false == usageEntryExists) {
-                        prep = con.prepareStatement("INSERT INTO filestore_usage (cid, user, used) VALUES (?, ?, ?)");
-                        prep.setInt(1, contextId);
-                        prep.setInt(2, userId);
-                        prep.setLong(3, 0L);
-                        prep.executeUpdate();
-                        Databases.closeSQLStuff(prep);
+                    if (used >= 0) {
+                        if (filestoreId <= 0) {
+                            if (used > 0) {
+                                throw new StorageException("File storage " + filestoreId + " is supposed to be cleansed from user " + userId + " in context " + contextId + ", but user still occupies usage of " + used);
+                            }
+                            prep = con.prepareStatement("DELETE FROM filestore_usage WHERE cid=? AND user=?");
+                            prep.setInt(1, contextId);
+                            prep.setInt(2, userId);
+                            prep.executeUpdate();
+                            Databases.closeSQLStuff(prep);
+                        }
+                    } else {
+                        if (filestoreId > 0) {
+                            if (used > 0) {
+                                throw new StorageException("File storage " + filestoreId + " is supposed to be set for user " + userId + " in context " + contextId + ", but user still occupies usage of " + used + " for another file storage");
+                            }
+                            prep = con.prepareStatement("INSERT INTO filestore_usage (cid, user, used) VALUES (?, ?, ?)");
+                            prep.setInt(1, contextId);
+                            prep.setInt(2, userId);
+                            prep.setLong(3, 0L);
+                            prep.executeUpdate();
+                            Databases.closeSQLStuff(prep);
+                        }
                     }
 
                     Integer fsOwner = user.getFilestoreOwner();

@@ -194,19 +194,21 @@ public abstract class OXUtilStorageInterface {
     public abstract Filestore[] listFilestores(String pattern, boolean omitUsage) throws StorageException;
 
     /**
-     * get filestore by ID
-     * @param id
-     * @return Filestore
-     * @throws StorageException
+     * Gets the filestore associated with given identifier
+     *
+     * @param id The filestore identifier
+     * @return The filestore instance
+     * @throws StorageException If filestore instance cannot be returned
      */
     public abstract Filestore getFilestore(final int id) throws StorageException;
 
     /**
      * Load a filestore. Specify whether the file store usage should be calculated by summing up all filestore usages.
-     * @param filestoreId
-     * @param loadUsage - Whether the usage must be determined. Note: This is very slow.
-     * @return
-     * @throws StorageException
+     *
+     * @param filestoreId The filestore identifier
+     * @param loadUsage Whether the usage must be determined. Note: This is very slow.
+     * @return The filestore instance
+     * @throws StorageException If filestore instance cannot be returned
      */
     public abstract Filestore getFilestore(int filestoreId, boolean loadUsage) throws StorageException;
 

@@ -177,7 +177,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @return The new instance
      */
     public static FilestoreDataMover newUser2ContextMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
-        return new Context2UserFilestoreDataMover(srcFilestore, dstFilestore, user, ctx);
+        return new User2ContextFilestoreDataMover(srcFilestore, dstFilestore, user, ctx);
     }
 
     // ------------------------------------------------------------------------------------------------------------------
