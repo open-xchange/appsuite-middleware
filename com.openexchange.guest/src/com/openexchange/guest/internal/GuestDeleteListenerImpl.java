@@ -50,21 +50,34 @@
 package com.openexchange.guest.internal;
 
 import java.sql.Connection;
+import org.apache.commons.lang.Validate;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.guest.storage.GuestStorage;
+import com.openexchange.guest.GuestService;
 
 /**
  *
- * {@link GuestDeleteListenerImpl}
+ * This class handles clean deletion of guests from the mapping tables in case a guest user was deleted.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
 public class GuestDeleteListenerImpl implements DeleteListener {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GuestDeleteListenerImpl.class);
+    private final GuestService guestService;
+
+    /**
+     *
+     * Initializes a new {@link GuestDeleteListenerImpl}.
+     *
+     * @param guestService - to delete the guest
+     */
+    public GuestDeleteListenerImpl(DefaultGuestService guestService) {
+        Validate.notNull(guestService, "Required service GuestService is absent. Removing guests from mapping table not possible.");
+
+        this.guestService = guestService;
+    }
 
     /**
      * {@inheritDoc}
@@ -75,7 +88,7 @@ public class GuestDeleteListenerImpl implements DeleteListener {
             final int contextId = event.getContext().getContextId();
             final int userId = event.getId();
 
-            GuestStorage.getInstance().removeGuest(contextId, userId);
+            this.guestService.removeGuest(contextId, userId);
         }
     }
 }

@@ -52,9 +52,7 @@ package com.openexchange.guest;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link GuestService}
- *
- * TODO is it necessary to put this interface into c.o.global bundle?
+ * {@link GuestService} defines methods to handle guests across context boundaries so, for instance, it is possible to set a password for a guest only once even it is a guest within multiple contexts.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
@@ -63,6 +61,7 @@ public interface GuestService {
 
     /**
      * Adds a new guest or creates a new assignment for the guest if the provided mail address is already registered because the user was added from another context.
+     *
      * @param mailAddress - mail address of the guest to add
      * @param contextId - context id the guest should be assigned to
      * @param userId - user id of the guest to add in the given context
@@ -78,13 +77,15 @@ public interface GuestService {
      * @param userId - user id in the given context the guest is assigned to
      * @throws OXException
      */
-//    void removeGuest(String mailAddress, int contextId, int userId) throws OXException;
     void removeGuest(int contextId, int userId) throws OXException;
 
     /**
-     * Sets the password for all occurrences of the guest which means for all internal users over all contexts the provided mail address is registered.
+     * Sets the password for all occurrences of the guest which means for all internal users over all contexts the provided mail address is registered for. After updating the user he will also removed from the cache if caching is used.<br>
+     * <br>
+     * <b>Important notice:</b> You have to provide the unencoded password as the implementation will try to encode it before saving.
+     *
      * @param mailAddress - mail address to identify the guest and to find associated users
-     * @param password - new password to set
+     * @param password - new (unencoded) password to set.
      * @throws OXException
      */
     void setPassword(String mailAddress, String password) throws OXException;

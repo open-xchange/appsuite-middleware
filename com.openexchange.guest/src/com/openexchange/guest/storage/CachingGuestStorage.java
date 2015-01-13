@@ -116,18 +116,9 @@ public class CachingGuestStorage extends GuestStorage {
         return guestAssignments;
     }
 
-
-    @Override
-    public void removeGuest(int contextId, int userId) throws OXException {
-        final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
-        if (cacheService == null) {
-            persistantImpl.removeGuest(contextId, userId);
-        }
-        //TODO -handle appropriate if service is available
-        persistantImpl.removeGuest(contextId, userId);
-    }
-
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void startUp() throws OXException {
         if (started) {
@@ -138,6 +129,9 @@ public class CachingGuestStorage extends GuestStorage {
         started = true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void shutDown() throws OXException {
         if (!started) {
@@ -156,6 +150,9 @@ public class CachingGuestStorage extends GuestStorage {
         started = false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isAssignmentExisting(String mailAddress, int contextId, int userId) throws OXException {
         final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
@@ -166,16 +163,9 @@ public class CachingGuestStorage extends GuestStorage {
         return persistantImpl.isAssignmentExisting(mailAddress, contextId, userId);
     }
 
-    @Override
-    public boolean isGuestExisting(String mailAddress) throws OXException {
-        final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
-        if (cacheService == null) {
-            return persistantImpl.isGuestExisting(mailAddress);
-        }
-        //TODO -handle appropriate if service is available
-        return persistantImpl.isGuestExisting(mailAddress);
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getGuestId(String mailAddress) throws OXException {
         final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
@@ -186,6 +176,9 @@ public class CachingGuestStorage extends GuestStorage {
         return persistantImpl.getGuestId(mailAddress);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int addGuest(String mailAddress) throws OXException {
         final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
@@ -196,6 +189,9 @@ public class CachingGuestStorage extends GuestStorage {
         return persistantImpl.addGuest(mailAddress);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addGuestAssignment(int guestId, int contextId, int userId) throws OXException {
         final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
@@ -207,37 +203,36 @@ public class CachingGuestStorage extends GuestStorage {
         persistantImpl.addGuestAssignment(guestId, contextId, userId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void removeGuestAssignment(int contextId, int userId) throws OXException {
+    public void removeGuestAssignment(int guestId, int contextId, int userId) throws OXException {
         final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
         if (cacheService == null) {
-            persistantImpl.removeGuestAssignment(contextId, userId);
+            persistantImpl.removeGuestAssignment(guestId, contextId, userId);
             return;
         }
         //TODO -handle appropriate if service is available
-        persistantImpl.removeGuestAssignment(contextId, userId);
+        persistantImpl.removeGuestAssignment(guestId, contextId, userId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getNumberOfAssignments(String mailAddress) throws OXException {
+    public int getNumberOfAssignments(int guestId) throws OXException {
         final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
         if (cacheService == null) {
-            return persistantImpl.getNumberOfAssignments(mailAddress);
+            return persistantImpl.getNumberOfAssignments(guestId);
         }
         //TODO -handle appropriate if service is available
-        return persistantImpl.getNumberOfAssignments(mailAddress);
+        return persistantImpl.getNumberOfAssignments(guestId);
     }
 
-    @Override
-    public int getNumberOfAssignments(int contextId, int userId) throws OXException {
-        final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
-        if (cacheService == null) {
-            return persistantImpl.getNumberOfAssignments(contextId, userId);
-        }
-        //TODO -handle appropriate if service is available
-        return persistantImpl.getNumberOfAssignments(contextId, userId);
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getGuestId(int contextId, int userId) throws OXException {
         final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
@@ -248,6 +243,9 @@ public class CachingGuestStorage extends GuestStorage {
         return persistantImpl.getGuestId(contextId, userId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int addGuest(String mailAddress, Connection connection) throws OXException {
         final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
@@ -258,6 +256,9 @@ public class CachingGuestStorage extends GuestStorage {
         return persistantImpl.addGuest(mailAddress, connection);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException {
         final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
@@ -269,4 +270,17 @@ public class CachingGuestStorage extends GuestStorage {
         persistantImpl.addGuestAssignment(guestId, contextId, userId, connection);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeGuest(int guestId) throws OXException {
+        final CacheService cacheService = GuestStorageServiceLookup.getService(CacheService.class);
+        if (cacheService == null) {
+            persistantImpl.removeGuest(guestId);
+            return;
+        }
+        //TODO -handle appropriate if service is available
+        persistantImpl.removeGuest(guestId);
+    }
 }

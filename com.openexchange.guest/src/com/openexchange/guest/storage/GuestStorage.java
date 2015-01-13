@@ -58,7 +58,7 @@ import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.internal.GuestStorageServiceLookup;
 
 /**
- * This class defines the methods for accessing the storage of guests. {@link GuestStorage}
+ * This class defines the methods for accessing the storage of guests.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
@@ -108,57 +108,109 @@ public abstract class GuestStorage {
     /**
      * Tries to create a completely new guest entry. Please make sure to create related assignment for the returned guest id.
      *
-     * @see com.openexchange.guest.storage.GuestStorage.addAssignment(int, int, int)
-     * @param mailAddress
-     * @return the id of the guest
+     * @see com.openexchange.guest.storage.GuestStorage.addGuestAssignment(int, int, int)
+     * @param mailAddress - mail address to add a new guest for
+     * @return the internal id of the guest
      * @throws OXException
      */
     public abstract int addGuest(String mailAddress) throws OXException;
 
+    /**
+     * Tries to create a completely new guest entry. Please make sure to create related assignment for the returned guest id.
+     *
+     * @see com.openexchange.guest.storage.GuestStorage.addGuestAssignment(int, int, int)
+     * @param mailAddress - mail address to add a new guest for
+     * @param Connection - existing connection that should be used to create the guest.
+     * @return the internal id of the guest
+     * @throws OXException
+     */
     public abstract int addGuest(String mailAddress, Connection connection) throws OXException;
 
     /**
      * Adds a new assignment for an already existing guest.
      *
-     * @param guestId
-     * @param contextId
-     * @param userId
+     * @param guestId - the internal id of the guest to add a new assignment for (e. g. retrieved via com.openexchange.guest.storage.GuestStorage.getGuestId(String))
+     * @param contextId - the context the guest is assigned to
+     * @param userId - the id of the guest within the provided context
      * @throws OXException
      */
     public abstract void addGuestAssignment(int guestId, int contextId, int userId) throws OXException;
 
+    /**
+     * Adds a new assignment for an already existing guest.
+     *
+     * @param guestId - the internal id of the guest to add a new assignment for (e. g. retrieved via com.openexchange.guest.storage.GuestStorage.getGuestId(String))
+     * @param contextId - the context the guest is assigned to
+     * @param userId - the id of the guest within the provided context
+     * @param Connection - existing connection that should be used to create the guest.
+     * @throws OXException
+     */
     public abstract void addGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException;
 
-    public abstract void removeGuest(int contextId, int userId) throws OXException;
-
-    public abstract void removeGuestAssignment(int contextId, int userId) throws OXException;
+    /**
+     * Removes the guest with the given internal id
+     *
+     * @param guestId - the internal id of the guest (e. g. retrieved via com.openexchange.guest.storage.GuestStorage.getGuestId(String))
+     * @throws OXException
+     */
+    public abstract void removeGuest(int guestId) throws OXException;
 
     /**
-     * Returns the {@link GuestAssignment}s the user with the given mail address is currently registered in different contexts
+     * Removes the assignment of the guest based on the given internal guestId, context and user id
      *
-     * @param mailAddress
-     * @return
+     * @param guestId - the internal id of the guest to remove an assignment for (e. g. retrieved via com.openexchange.guest.storage.GuestStorage.getGuestId(String))
+     * @param contextId - the context the guest is assigned to
+     * @param userId - the id of the guest within the provided context
+     * @throws OXException
+     */
+    public abstract void removeGuestAssignment(int guestId, int contextId, int userId) throws OXException;
+
+    /**
+     * Returns the {@link GuestAssignment}s the guest (with the given mail address) is currently registered for.
+     *
+     * @param mailAddress - mail address to lookup assignments
+     * @return List with {@link GuestAssignment}s
      * @throws OXException
      */
     public abstract List<Serializable> getGuestAssignments(final String mailAddress) throws OXException;
 
-    public abstract boolean isGuestExisting(String mailAddress) throws OXException;
-
     /**
+     * Checks if exactly this mapping (user with mail address to context and user) is already existing
      *
-     * @param contextId
-     * @param userid
-     * @return
+     * @param mailAddress - mail address to check for
+     * @param contextId - the context to check for
+     * @param userId - the id of the guest user to check for
+     * @return <code>true</code> if existing, otherwise <code>false</code>
      * @throws OXException
      */
     public abstract boolean isAssignmentExisting(String mailAddress, int contextId, int userId) throws OXException;
 
-    public abstract int getNumberOfAssignments(String mailAddress) throws OXException;
+    /**
+     * Returns the number of currently available context/user assignments to the given internal guest id.
+     *
+     * @param guestId - internal guest id of the user
+     * @return int with the number of assignments
+     * @throws OXException
+     */
+    public abstract int getNumberOfAssignments(int guestId) throws OXException;
 
-    public abstract int getNumberOfAssignments(int contextId, int userId) throws OXException;
-
+    /**
+     * Returns the internally used guest id associated to the given mail address
+     *
+     * @param mailAddress - mail address to get the id for
+     * @return int with the internal id for further processing
+     * @throws OXException
+     */
     public abstract int getGuestId(String mailAddress) throws OXException;
 
+    /**
+     * Returns the internally used guest id associated to the given context id/user id tuple.
+     *
+     * @param contextId - the context to check for
+     * @param userId - the id of the guest user to check for
+     * @return int with the internal id for further processing
+     * @throws OXException
+     */
     public abstract int getGuestId(int contextId, int userId) throws OXException;
 
     /**

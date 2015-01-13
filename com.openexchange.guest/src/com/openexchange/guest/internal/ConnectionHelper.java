@@ -59,7 +59,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  *
- * {@link ConnectionHelper}
+ * Used to handle connections transactionally.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
@@ -83,8 +83,8 @@ public class ConnectionHelper {
         super();
         this.services = services;
         DatabaseService dbService = services.getService(DatabaseService.class);
-        connection = needsWritable ? dbService.getWritable() : dbService.getReadOnly();
-        ownsConnection = true;
+        this.connection = needsWritable ? dbService.getWritable() : dbService.getReadOnly();
+        this.ownsConnection = true;
     }
 
     /**

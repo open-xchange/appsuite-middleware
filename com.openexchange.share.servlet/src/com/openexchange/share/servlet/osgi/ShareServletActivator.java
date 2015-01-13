@@ -57,6 +57,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.guest.GuestService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.sessiond.SessiondService;
@@ -84,7 +85,7 @@ public class ShareServletActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ShareService.class, UserService.class, ContextService.class, SessiondService.class, ShareCryptoService.class,
-            ConfigurationService.class, ModuleSupport.class };
+            ConfigurationService.class, ModuleSupport.class, GuestService.class };
     }
 
     @Override

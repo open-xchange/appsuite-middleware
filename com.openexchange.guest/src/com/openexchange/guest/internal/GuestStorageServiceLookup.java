@@ -51,12 +51,13 @@ package com.openexchange.guest.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.guest.storage.GuestStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link GuestStorageServiceLookup}
+ * ServiceLookup for the {@link GuestStorage}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0

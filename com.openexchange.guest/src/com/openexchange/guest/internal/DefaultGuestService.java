@@ -67,7 +67,7 @@ import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.user.UserService;
 
 /**
- * {@link DefaultGuestService}
+ * Default implementation of {@link GuestService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
@@ -99,29 +99,29 @@ public class DefaultGuestService implements GuestService {
         check(mailAddress);
 
         if (GuestStorage.getInstance().isAssignmentExisting(mailAddress, contextId, userId)) {
-            LOG.info("User with mail address '{}' in context {} with id {} allready existing. Will not add him to mapping as a new guest.", mailAddress, contextId, userId);
+            LOG.info("User with mail address '{}' in context {} with id {} already existing. Will not add him to mapping as a new guest.", mailAddress, contextId, userId);
             return;
         }
 
         int guestId = GuestStorage.getInstance().getGuestId(mailAddress);
-        if (guestId != GuestStorage.NOT_FOUND) {
+        if (guestId != GuestStorage.NOT_FOUND) { // already existing, only add assignment
             GuestStorage.getInstance().addGuestAssignment(guestId, contextId, userId);
-        } else {
-            ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
-            try {
-                connectionHelper.start();
+            return;
+        }
 
-                int newGuest = GuestStorage.getInstance().addGuest(mailAddress, connectionHelper.getConnection());
-                if (newGuest == GuestStorage.NOT_FOUND) {
-                    //TODO
-                    throw GuestExceptionCodes.SQL_ERROR.create();
-                }
-                GuestStorage.getInstance().addGuestAssignment(newGuest, contextId, userId, connectionHelper.getConnection());
+        ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
+        try {
+            connectionHelper.start();
 
-                connectionHelper.commit();
-            } finally {
-                connectionHelper.finish();
+            int newGuest = GuestStorage.getInstance().addGuest(mailAddress, connectionHelper.getConnection());
+            if (newGuest == GuestStorage.NOT_FOUND) {
+                throw GuestExceptionCodes.GUEST_CREATION_ERROR.create();
             }
+            GuestStorage.getInstance().addGuestAssignment(newGuest, contextId, userId, connectionHelper.getConnection());
+
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
         }
     }
 
@@ -130,11 +130,13 @@ public class DefaultGuestService implements GuestService {
      */
     @Override
     public void removeGuest(int contextId, int userId) throws OXException {
-        GuestStorage.getInstance().removeGuestAssignment(contextId, userId);
+        final int relatedGuestId = GuestStorage.getInstance().getGuestId(contextId, userId); // this has to happen before guest assignment is removed!
 
-        int numberOfAssignments = GuestStorage.getInstance().getNumberOfAssignments(contextId, userId);
-        if (numberOfAssignments == 0) {
-            GuestStorage.getInstance().removeGuest(contextId, userId);
+        GuestStorage.getInstance().removeGuestAssignment(relatedGuestId, contextId, userId);
+
+        int numberOfAssignments = GuestStorage.getInstance().getNumberOfAssignments(relatedGuestId);
+        if ((numberOfAssignments == 0) && (relatedGuestId != GuestStorage.NOT_FOUND)) {
+            GuestStorage.getInstance().removeGuest(relatedGuestId);
         }
     }
 
@@ -147,31 +149,33 @@ public class DefaultGuestService implements GuestService {
 
         List<Serializable> guestAssignments = GuestStorage.getInstance().getGuestAssignments(mailAddress);
 
-        for (Serializable assignment : guestAssignments) {
-            if (assignment instanceof GuestAssignment) {
-                GuestAssignment guestAssignment = (GuestAssignment) assignment;
+        String encodedPassword = null;
+        try {
+            encodedPassword = PasswordMech.BCRYPT.encode(password);
 
-                int contextId = guestAssignment.getContextId();
-                int userId = guestAssignment.getUserId();
-                User storageUser = userService.getUser(userId, contextId);
-                UserImpl updatedUser = new UserImpl(storageUser);
+            for (Serializable assignment : guestAssignments) {
+                if (assignment instanceof GuestAssignment) {
+                    GuestAssignment guestAssignment = (GuestAssignment) assignment;
 
-                String encodedPassword;
-                try {
-                    encodedPassword = PasswordMech.BCRYPT.encode(password);
+                    int contextId = guestAssignment.getContextId();
+                    int userId = guestAssignment.getUserId();
+                    User storageUser = userService.getUser(userId, contextId);
+                    UserImpl updatedUser = new UserImpl(storageUser);
+
                     updatedUser.setUserPassword(encodedPassword);
                     Context context = contextService.getContext(contextId);
                     userService.updateUser(updatedUser, context);
                     userService.invalidateUser(context, userId);
-                } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-                    LOG.error("Error processing setting password for user {} in context {}: {}", updatedUser.getId(), contextId, e.getMessage(), e);
                 }
             }
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+            throw GuestExceptionCodes.PASSWORD_RESET_ERROR.create(e);
         }
     }
 
     /**
      * Checks if the provided mail address is valid.
+     *
      * @param mailAddress - address to validate
      * @throws OXException thrown if mail address is not valid
      */

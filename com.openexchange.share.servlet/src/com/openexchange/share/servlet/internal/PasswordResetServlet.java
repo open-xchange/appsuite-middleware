@@ -50,7 +50,6 @@
 package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServlet;
@@ -61,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
@@ -128,26 +126,8 @@ public class PasswordResetServlet extends HttpServlet {
                 return;
             }
 
-//            int contextID = guestInfo.getContextID();
-
             UserService userService = ShareServiceLookup.getService(UserService.class, true);
-//            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
-//
-//            int guestID = guestInfo.getGuestID();
-//            User storageUser = userService.getUser(guestID, context);
-
             String password = PasswordUtility.generate();
-            String encodedPassword = PasswordMech.BCRYPT.encode(password);
-
-            ShareServiceLookup.getService(GuestService.class).setPassword(mailAddress, encodedPassword);
-
-//            UserImpl updatedUser = new UserImpl(storageUser);
-//
-//            updatedUser.setUserPassword(encodedPassword);
-//
-//            userService.updateUser(updatedUser, context);
-//            // Invalidate
-//            userService.invalidateUser(context, guestID);
 
             GuestShare guestShare = shareService.resolveToken(token);
             User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
@@ -162,9 +142,11 @@ public class PasswordResetServlet extends HttpServlet {
                 .setUsername(guestInfo.getEmailAddress())
                 .setPassword(password)
                 .build();
-             notificationService.send(notification);
+            notificationService.send(notification);
 
-             setRedirect(guestShare, null, response);
+            ShareServiceLookup.getService(GuestService.class).setPassword(mailAddress, password);
+
+            setRedirect(guestShare, null, response);
         } catch (RateLimitedException e) {
             response.setContentType("text/plain; charset=UTF-8");
             if (e.getRetryAfter() > 0) {
@@ -172,9 +154,6 @@ public class PasswordResetServlet extends HttpServlet {
             }
             response.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (OXException e) {
-            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (AddressException e) {

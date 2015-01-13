@@ -65,7 +65,7 @@ import com.openexchange.guest.GuestExceptionCodes;
 
 /**
  *
- * TODO {@link RdbGuestStorage}
+ * Database storage implementation for guests
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
@@ -75,30 +75,53 @@ public class RdbGuestStorage extends GuestStorage {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbGuestStorage.class);
 
     /**
-     * SQL select statement for resolving the mail address to the to unique id
+     * SQL statement for resolving the internal unique id based on the mail address
      */
-    private static final String RESOLVE_GUEST_BY_MAIL = "SELECT id FROM guest WHERE mail_address=?";
-
-    private static final String RESOLVE_GUEST_BY_CONTEXT_AND_USER = "SELECT guest_id FROM guest2context WHERE cid=? AND uid=?";
+    private static final String RESOLVE_GUEST_ID_BY_MAIL = "SELECT id FROM guest WHERE mail_address=?";
 
     /**
-     * SQL select statement for resolving the mail address to the to unique id
+     * SQL statement for resolving the internal unique id based on context and user id
      */
-    private static final String RESOLVE_GUEST_ASSIGNMENT = "SELECT * FROM guest2context WHERE cid=? AND uid=? AND guest_id=(" + RESOLVE_GUEST_BY_MAIL + ")";
+    private static final String RESOLVE_GUEST_ID_BY_CONTEXT_AND_USER = "SELECT guest_id FROM guest2context WHERE cid=? AND uid=?";
 
-    private static final String RESOLVE_GUEST_ASSIGNMENT_NESTED = "SELECT cid,uid FROM guest2context WHERE guest_id=(" + RESOLVE_GUEST_BY_MAIL + ")";
+    /**
+     * SQL statement for getting one assignment made for a user (resolved by mail address, context and user id)<br>
+     * <br>
+     * Checks if exactly the same user is existing.
+     */
+    private static final String RESOLVE_GUEST_ASSIGNMENT = "SELECT * FROM guest2context WHERE cid=? AND uid=? AND guest_id=(" + RESOLVE_GUEST_ID_BY_MAIL + ")";
 
-    private static final String RESOLVE_NUMBER_OF_GUEST_ASSIGNMENT_BY_MAIL = "SELECT COUNT(*) FROM guest2context WHERE guest_id=(" + RESOLVE_GUEST_BY_MAIL + ")";
+    /**
+     * SQL statement for getting assignments made for a user based on the mail address<br>
+     * <br>
+     * Checks if the given user has assignments.
+     */
+    private static final String RESOLVE_GUEST_ASSIGNMENTS_BY_MAIL = "SELECT cid,uid FROM guest2context WHERE guest_id=(" + RESOLVE_GUEST_ID_BY_MAIL + ")";
 
-    private static final String RESOLVE_NUMBER_OF_GUEST_ASSIGNMENT_BY_CONTEXT_AND_USER = "SELECT COUNT(*) FROM guest2context WHERE guest_id=(" + RESOLVE_GUEST_BY_CONTEXT_AND_USER + ")";
+    /**
+     * SQL statement to count assignments that currently exist.
+     */
+    private static final String RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID = "SELECT COUNT(*) FROM guest2context WHERE guest_id=?";
 
+    /**
+     * SQL statement to insert a new assignment for an existing guest
+     */
     private static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid) VALUES (?, ?, ?)";
 
+    /**
+     * SQL statement to insert a new guest for an unkown mail address
+     */
     private static final String INSERT_GUEST = "INSERT INTO guest (mail_address) VALUES (?)";
 
-    private static final String REMOVE_GUEST_ASSIGNMENT = "DELETE FROM guest2context where cid=? AND uid=?";
+    /**
+     * SQL statement for deleting a guest assignment based on the context and user id.
+     */
+    private static final String DELETE_GUEST_ASSIGNMENT = "DELETE FROM guest2context where guest_id=? cid=? AND uid=?";
 
-    private static final String REMOVE_GUEST = "DELETE FROM guest where id=(" + RESOLVE_GUEST_BY_CONTEXT_AND_USER + ")";
+    /**
+     * SQL statement for deleting a guest based on its internal guest id.
+     */
+    private static final String DELETE_GUEST = "DELETE FROM guest where id=?";
 
     private final DatabaseService databaseService;
 
@@ -194,16 +217,18 @@ public class RdbGuestStorage extends GuestStorage {
             statement.setInt(1, guestId);
             statement.setInt(2, contextId);
             statement.setInt(3, userId);
-            int result = statement.executeUpdate();
-            ResultSet resultSet = statement.getResultSet();
 
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows != 1) {
+                LOG.error("There have been " + affectedRows + " changes for adding guest assignment but there should only be 1. Executed SQL: " + statement.toString());
+            }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(statement);
         }
     }
-
 
     /**
      * {@inheritDoc}
@@ -220,13 +245,12 @@ public class RdbGuestStorage extends GuestStorage {
         ResultSet result = null;
         int guestId = NOT_FOUND;
         try {
-            statement = connection.prepareStatement(RESOLVE_GUEST_BY_MAIL);
+            statement = connection.prepareStatement(RESOLVE_GUEST_ID_BY_MAIL);
             statement.setString(1, mailAddress);
             result = statement.executeQuery();
             if (result.next()) {
                 guestId = result.getInt(1);
             }
-
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -252,14 +276,13 @@ public class RdbGuestStorage extends GuestStorage {
         ResultSet result = null;
         int guestId = NOT_FOUND;
         try {
-            statement = connection.prepareStatement(RESOLVE_GUEST_BY_CONTEXT_AND_USER);
+            statement = connection.prepareStatement(RESOLVE_GUEST_ID_BY_CONTEXT_AND_USER);
             statement.setInt(1, contextId);
             statement.setInt(2, userId);
             result = statement.executeQuery();
             if (result.next()) {
                 guestId = result.getInt(1);
             }
-
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -274,22 +297,25 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public void removeGuestAssignment(int contextId, int userId) throws OXException {
+    public void removeGuestAssignment(int guestId, int contextId, int userId) throws OXException {
         final Connection connection;
         try {
             connection = this.databaseService.getWritable();
         } catch (final OXException e) {
             throw GuestExceptionCodes.NO_CONNECTION.create(e);
         }
+
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement(REMOVE_GUEST_ASSIGNMENT);
-            statement.setInt(1, contextId);
-            statement.setInt(2, userId);
-            int result = statement.executeUpdate();
-            ResultSet resultSet = statement.getResultSet();
-            System.out.println();
+            statement = connection.prepareStatement(DELETE_GUEST_ASSIGNMENT);
+            statement.setInt(1, guestId);
+            statement.setInt(2, contextId);
+            statement.setInt(3, userId);
+            int affectedRows = statement.executeUpdate();
 
+            if (affectedRows != 1) {
+                LOG.error("There have been " + affectedRows + " changes for removing a guest assignment but there should only be 1. Executed SQL: " + statement.toString());
+            }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -303,7 +329,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public void removeGuest(int contextId, int userId) throws OXException {
+    public void removeGuest(int guestId) throws OXException {
         final Connection connection;
         try {
             connection = this.databaseService.getWritable();
@@ -312,13 +338,13 @@ public class RdbGuestStorage extends GuestStorage {
         }
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement(REMOVE_GUEST);
-            statement.setInt(1, contextId);
-            statement.setInt(2, userId);
-            int result = statement.executeUpdate();
-            ResultSet resultSet = statement.getResultSet();
-            System.out.println();
+            statement = connection.prepareStatement(DELETE_GUEST);
+            statement.setInt(1, guestId);
+            int affectedRows = statement.executeUpdate();
 
+            if (affectedRows != 1) {
+                LOG.error("There have been " + affectedRows + " changes for removing a guest but there should only be 1. Executed SQL: " + statement.toString());
+            }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -328,20 +354,10 @@ public class RdbGuestStorage extends GuestStorage {
     }
 
     /**
-     *
      * {@inheritDoc}
      */
     @Override
-    public boolean isGuestExisting(String mailAddress) throws OXException {
-        return getGuestId(mailAddress) != NOT_FOUND;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getNumberOfAssignments(String mailAddress) throws OXException {
-
+    public int getNumberOfAssignments(int guestId) throws OXException {
         final Connection connection;
         try {
             connection = this.databaseService.getReadOnly();
@@ -353,8 +369,8 @@ public class RdbGuestStorage extends GuestStorage {
         PreparedStatement statement = null;
         ResultSet result = null;
         try {
-            statement = connection.prepareStatement(RESOLVE_NUMBER_OF_GUEST_ASSIGNMENT_BY_MAIL);
-            statement.setString(1, mailAddress);
+            statement = connection.prepareStatement(RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID);
+            statement.setInt(1, guestId);
             result = statement.executeQuery();
             if (result.next()) {
                 guestAssignments = result.getInt(1);
@@ -371,46 +387,6 @@ public class RdbGuestStorage extends GuestStorage {
 
     /**
      * {@inheritDoc}
-     */
-    @Override
-    public int getNumberOfAssignments(int contextId, int userId) throws OXException {
-
-        final Connection connection;
-        try {
-            connection = this.databaseService.getReadOnly();
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        }
-
-        int guestAssignments = 0;
-        PreparedStatement statement = null;
-        ResultSet result = null;
-        try {
-            statement = connection.prepareStatement(RESOLVE_NUMBER_OF_GUEST_ASSIGNMENT_BY_CONTEXT_AND_USER);
-            statement.setInt(1, contextId);
-            statement.setInt(2, userId);
-            result = statement.executeQuery();
-            if (result.next()) {
-                guestAssignments = result.getInt(1);
-            }
-        } catch (final SQLException e) {
-            throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, statement);
-            databaseService.backReadOnly(connection);
-        }
-
-        return guestAssignments;
-    }
-
-    /**
-     * Checks if exactly the same guest (based on mail address, context, user) is existing.
-     *
-     * @param mailAddress - mail address to check for
-     * @param contextId - context id to check for
-     * @param userId - user id to check for
-     * @return <code>true</code>, if mapping is available, otherwise <code>false</code>
-     * @throws OXException
      */
     @Override
     public boolean isAssignmentExisting(String mailAddress, int contextId, int userId) throws OXException {
@@ -458,10 +434,10 @@ public class RdbGuestStorage extends GuestStorage {
         PreparedStatement statement = null;
         ResultSet result = null;
         try {
-            statement = connection.prepareStatement(RESOLVE_GUEST_ASSIGNMENT_NESTED);
+            statement = connection.prepareStatement(RESOLVE_GUEST_ASSIGNMENTS_BY_MAIL);
             statement.setString(1, mailAddress);
             result = statement.executeQuery();
-            if (result.next()) {
+            while (result.next()) {
                 int cid = result.getInt(1);
                 int uid = result.getInt(2);
                 guestAssignments.add(new GuestAssignment(mailAddress, cid, uid));

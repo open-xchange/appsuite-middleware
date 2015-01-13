@@ -762,6 +762,12 @@ public class DefaultShareService implements ShareService {
     private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient) throws OXException {
         UserService userService = services.getService(UserService.class);
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
+        GuestService guestService = services.getService(GuestService.class);
+        if (guestService == null) {
+            LOG.error("Required service GuestService absent");
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("GuestService");
+        }
+
         if (GuestRecipient.class.isInstance(recipient)) {
             /*
              * re-use existing, non-anonymous guest user if possible
@@ -787,6 +793,9 @@ public class DefaultShareService implements ShareService {
                  * messages
                  */
                 guestRecipient.setPassword(null);
+
+//                not required as it will be filtered out as 'already existing mapping'
+                guestService.addGuest(existingGuestUser.getMail(), context.getContextId(), existingGuestUser.getId());
                 return existingGuestUser;
             }
         }
@@ -813,8 +822,6 @@ public class DefaultShareService implements ShareService {
             LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), permissionBits, context.getContextId(), guestID);
         }
 
-        //TODO
-        GuestService guestService = services.getService(GuestService.class);
         guestService.addGuest(guestUser.getMail(), context.getContextId(), guestID);
 
         return guestUser;

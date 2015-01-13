@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.guest;
 
 import static com.openexchange.exception.OXExceptionStrings.SQL_ERROR_MSG;
@@ -78,10 +77,13 @@ public enum GuestExceptionCodes implements DisplayableOXExceptionCode {
      */
     SQL_ERROR("SQL problem: %1$s.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 3),
 
-    INVALID_EMAIL_ADDRESS(GuestExceptionCodes.INVALID_EMAIL_ADDRESS_MSG, GuestExceptionCodes.INVALID_EMAIL_ADDRESS_MSG, Category.CATEGORY_ERROR, 4)
-    ;
+    INVALID_EMAIL_ADDRESS(GuestExceptionMessage.INVALID_EMAIL_ADDRESS_MSG, GuestExceptionMessage.INVALID_EMAIL_ADDRESS_MSG, Category.CATEGORY_ERROR, 4),
 
-    private final static String INVALID_EMAIL_ADDRESS_MSG = "The provided mail address %1$s is invalid! It cannot be added to guest administration.";
+    GUEST_CREATION_ERROR("Error while creating a new guest: %1$s.", GuestExceptionMessage.GUEST_CREATION_ERROR_MSG, Category.CATEGORY_ERROR, 5),
+
+    PASSWORD_RESET_ERROR("Error while resetting password for user with mail address: %1$s.", GuestExceptionMessage.PASSWORD_RESET_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+
+    ;
 
     /**
      * (Log) Message of the exception.

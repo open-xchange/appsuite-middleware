@@ -49,6 +49,7 @@
 
 package com.openexchange.guest.osgi;
 
+import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -74,7 +75,7 @@ public class GuestActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            UserService.class, ContextService.class, DatabaseService.class
+            UserService.class, ContextService.class, DatabaseService.class, CacheService.class
         };
     }
 
@@ -88,9 +89,10 @@ public class GuestActivator extends HousekeepingActivator {
 
         GuestStorageServiceLookup.set(this);
 
-        registerService(DeleteListener.class, new GuestDeleteListenerImpl());
+        DefaultGuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContextService.class));
+        registerService(GuestService.class, guestService);
 
-        registerService(GuestService.class, new DefaultGuestService(getService(UserService.class), getService(ContextService.class)));
+        registerService(DeleteListener.class, new GuestDeleteListenerImpl(guestService));
     }
 
     @Override

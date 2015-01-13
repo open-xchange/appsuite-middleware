@@ -62,6 +62,12 @@ public class GuestExceptionMessage implements LocalizableStrings {
 
     public final static String NO_CONNECTION_TO_GUEST_STORAGE_MSG = "Could not connect to the guest storage.";
 
+    public final static String INVALID_EMAIL_ADDRESS_MSG = "The provided mail address %1$s is invalid! It cannot be added to guest administration.";
+
+    public final static String GUEST_CREATION_ERROR_MSG = "The guest cannot be created due to an internal server error.";
+
+    public final static String PASSWORD_RESET_ERROR_MSG = "Error while resetting password for user with mail address: %1$s.";
+
     /**
      * Initializes a new {@link GuestExceptionMessage}.
      */
