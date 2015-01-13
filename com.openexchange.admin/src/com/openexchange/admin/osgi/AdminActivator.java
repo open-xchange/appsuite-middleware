@@ -104,14 +104,14 @@ import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
 import com.openexchange.version.Version;
 
-public class Activator extends HousekeepingActivator {
+public class AdminActivator extends HousekeepingActivator {
 
     private volatile AdminDaemon daemon;
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link AdminActivator}.
      */
-    public Activator() {
+    public AdminActivator() {
         super();
     }
 
@@ -122,7 +122,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
 
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
@@ -262,7 +262,7 @@ public class Activator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         cleanUp();
         PluginInterfaces.setInstance(null);
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         log.info("Stopping RMI...");
         final AdminDaemon daemon = this.daemon;
         if (null != daemon) {
