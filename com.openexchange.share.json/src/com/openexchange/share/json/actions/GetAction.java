@@ -47,63 +47,52 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.json.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.InviteAction;
-import com.openexchange.share.json.actions.NotifyAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
-
+import com.openexchange.share.ShareInfo;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ShareActionFactory}
+ * {@link GetAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public class GetAction extends AbstractShareAction {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
+     * Initializes a new {@link GetAction}.
+     *
+     * @param services A service lookup reference
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("get", new GetAction(services));
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("invite", new InviteAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
+    public GetAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        /*
+         * extract token & path to get the share for
+         */
+        String token = requestData.requireParameter("token");
+        String path;
+        String[] tokenAndPath = token.split("/");
+        if (2 == tokenAndPath.length && false == Strings.isEmpty(tokenAndPath[0]) && false == Strings.isEmpty(tokenAndPath[1])) {
+            token = tokenAndPath[0];
+            path = tokenAndPath[1];
+        } else {
+            path = requestData.requireParameter("path");
+        }
+        /*
+         * get token from service & return appropriate result
+         */
+        ShareInfo shareInfo = getShareService().getShare(session, token, path);
+        return new AJAXRequestResult(shareInfo, shareInfo.getShare().getModified(), "shareinfo");
     }
 
 }

@@ -491,7 +491,8 @@ public class ShareTool {
     }
 
     /**
-     * Creates a list of extended share info objects for the supplied shares.
+     * Creates a list of extended share info objects for the supplied shares. The underlying share targets are used in their original from
+     * (i.e. not personalized for the guest user).
      *
      * @param services A service lookup reference
      * @param contextID The context ID
@@ -500,6 +501,20 @@ public class ShareTool {
      * @throws OXException
      */
     public static List<ShareInfo> toShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
+        return toShareInfos(services, contextID, shares, false);
+    }
+
+    /**
+     * Creates a list of extended share info objects for the supplied shares.
+     *
+     * @param services A service lookup reference
+     * @param contextID The context ID
+     * @param shares The shares
+     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
+     * @return The share infos
+     * @throws OXException
+     */
+    public static List<ShareInfo> toShareInfos(ServiceLookup services, int contextID, List<Share> shares, boolean adjustTargets) throws OXException {
         if (null == shares || 0 == shares.size()) {
             return Collections.emptyList();
         }
@@ -521,7 +536,7 @@ public class ShareTool {
          */
         List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
         for (Share share : shares) {
-            shareInfos.add(new DefaultShareInfo(services, contextID, guestUsers.get(I(share.getGuest())), share));
+            shareInfos.add(new DefaultShareInfo(services, contextID, guestUsers.get(I(share.getGuest())), share, adjustTargets));
         }
         return shareInfos;
     }

@@ -119,7 +119,7 @@ public final class VersitUtility {
             final VersitObject vo = def.parse(r);
             if (vo != null) {
                 final Contact contactObj = oxc.convertContact(vo);
-                contactObj.setParentFolderID(new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.CONTACT).getObjectID());
+                contactObj.setParentFolderID(new OXFolderAccess(ctx).getDefaultFolderID(session.getUserId(), FolderObject.CONTACT));
                 contactObj.setContextId(ctx.getContextId());
                 final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                 contactService.createContact(session, Integer.toString(contactObj.getParentFolderID()), contactObj);
@@ -181,7 +181,7 @@ public final class VersitUtility {
                     final CalendarDataObject appointmentObj = oxc.convertAppointment(vo);
                     appointmentObj.setContext(ctx);
                     if (defaultCalendarFolder == -1) {
-                        defaultCalendarFolder = access.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR).getObjectID();
+                        defaultCalendarFolder = access.getDefaultFolderID(session.getUserId(), FolderObject.CALENDAR);
                     }
                     appointmentObj.setParentFolderID(defaultCalendarFolder);
                     /*
@@ -201,7 +201,7 @@ public final class VersitUtility {
                      */
                     final Task taskObj = oxc.convertTask(vo);
                     if (defaultTaskFolder == -1) {
-                        defaultTaskFolder = access.getDefaultFolder(session.getUserId(), FolderObject.TASK).getObjectID();
+                        defaultTaskFolder = access.getDefaultFolderID(session.getUserId(), FolderObject.TASK);
                     }
                     taskObj.setParentFolderID(defaultTaskFolder);
                     /*

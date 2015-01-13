@@ -159,7 +159,7 @@ public final class Tools {
      * @throws OXException if no database connection can be obtained or an error occurs while reading the folder.
      */
     static int getUserTaskStandardFolder(final Context ctx, final int userId) throws OXException {
-        return new OXFolderAccess(ctx).getDefaultFolder(userId, FolderObject.TASK).getObjectID();
+        return new OXFolderAccess(ctx).getDefaultFolderID(userId, FolderObject.TASK);
     }
 
     /**

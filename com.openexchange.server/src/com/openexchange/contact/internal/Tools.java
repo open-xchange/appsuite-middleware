@@ -435,21 +435,20 @@ public final class Tools {
 	/**
 	 * Gets a default set of folders used for searches of an user.
 	 *
-	 * @param contextID the context ID
-	 * @param userID the user ID
-	 * @return the folder IDs
+	 * @param contextID The context ID
+	 * @param userID The user ID
+	 * @return The folder IDs
 	 * @throws OXException
 	 */
-	private static List<String> getBasicFolders(final int contextID, final int userID) throws OXException {
-		final List<String> folderIDs = new ArrayList<String>();
-		folderIDs.add(Integer.toString(
-				new OXFolderAccess(Tools.getContext(contextID)).getDefaultFolder(userID, FolderObject.CONTACT).getObjectID()));
+	private static List<String> getBasicFolders(int contextID, int userID) throws OXException {
+		List<String> folderIDs = new ArrayList<String>();
+		folderIDs.add(String.valueOf(new OXFolderAccess(getContext(contextID)).getDefaultFolderID(userID, FolderObject.CONTACT)));
 		if (Tools.getPermission(contextID, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), userID).canReadAllObjects()) {
-			folderIDs.add(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+			folderIDs.add(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
 		}
-		final Integer collectedContactFolderID = ServerUserSetting.getInstance().getContactCollectionFolder(contextID, userID);
+		Integer collectedContactFolderID = ServerUserSetting.getInstance().getContactCollectionFolder(contextID, userID);
 		if (null != collectedContactFolderID) {
-			folderIDs.add(Integer.toString(collectedContactFolderID));
+			folderIDs.add(String.valueOf(collectedContactFolderID));
 		}
 		return folderIDs;
 	}

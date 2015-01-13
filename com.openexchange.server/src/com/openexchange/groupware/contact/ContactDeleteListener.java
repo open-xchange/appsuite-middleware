@@ -457,8 +457,7 @@ public final class ContactDeleteListener implements DeleteListener {
      * @throws OXException
      */
     private static int moveToAdminsFolder(Connection writeConnection, Context context, List<Contact> contacts) throws OXException {
-        FolderObject targetFolder = new OXFolderAccess(writeConnection, context).getDefaultFolder(
-            context.getMailadmin(), FolderObject.CONTACT);
+        int targetFolderID = new OXFolderAccess(writeConnection, context).getDefaultFolderID(context.getMailadmin(), FolderObject.CONTACT);
         StringBuilder stringBuilder = new StringBuilder()
             .append("UPDATE prg_contacts ")
             .append("SET fid=?,created_from=?,changed_from=?,changing_date=? ")
@@ -477,7 +476,7 @@ public final class ContactDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             stmt = writeConnection.prepareStatement(sql);
-            stmt.setInt(1, targetFolder.getObjectID());
+            stmt.setInt(1, targetFolderID);
             stmt.setInt(2, context.getMailadmin());
             stmt.setInt(3, context.getMailadmin());
             stmt.setLong(4, System.currentTimeMillis());

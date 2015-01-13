@@ -65,6 +65,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -168,9 +169,13 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
                 throw ServiceExceptionCode.absentService(IDBasedFileAccessFactory.class);
             }
             Session session = new PublicationSession(publication);
-            IDBasedFileAccess fileAccess = factory.createAccess(session);
+            IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
             String id = publication.getEntityId() + '/' + infoId;
-            return FileMetadata.getMetadata(fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION));
+            File metadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+            if (null == metadata || null != publication.getEntityId() && false == publication.getEntityId().equals(metadata.getFolderId())) {
+                throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create();
+            }
+            return FileMetadata.getMetadata(metadata);
         } catch (final OXException e) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(e) || FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e)) {
                 throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create(e, new Object[0]);

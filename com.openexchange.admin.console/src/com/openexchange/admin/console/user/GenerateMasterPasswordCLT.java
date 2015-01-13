@@ -75,19 +75,15 @@ import com.openexchange.passwordmechs.PasswordMech;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GenerateMasterPasswordCLT {
+    
+    private enum Parameter {adminuser, adminpass, encryption, mpasswdfile}
 
     private static final Options options = new Options();
     static {
         options.addOption(createOption("A", "adminuser", true, false, "Account name of superadmin (Default: oxadminmaster)", false));
         options.addOption(createOption("P", "adminpass", true, false, "Password of superadmin", false));
         options.addOption(createOption("f", "mpasswdfile", true, false, "Path to mpasswd (Default: /opt/open-xchange/etc/mpasswd)", false));
-        options.addOption(createOption(
-            "e",
-            "encryption",
-            true,
-            false,
-            "Encryption algorithm to use for the password (Default: bcrypt)",
-            false));
+        options.addOption(createOption("e", "encryption", true, false, "Encryption algorithm to use for the password (Default: bcrypt)", false));
         options.addOption(createOption("h", "help", false, false, "Prints this help text", false));
     }
 
@@ -112,7 +108,8 @@ public class GenerateMasterPasswordCLT {
      */
     public static void main(String[] args) {
         CommandLineParser parser = new PosixParser();
-        Map<String, String> parameters = new HashMap<String, String>();
+        StringBuilder builder = new StringBuilder();
+        Map<Parameter, String> parameters = new HashMap<Parameter, String>();
         initParameters(parameters);
 
         try {
@@ -121,30 +118,39 @@ public class GenerateMasterPasswordCLT {
                 printUsage(0);
             }
             if (cl.hasOption("A")) {
-                parameters.put("adminuser", cl.getOptionValue("A"));
+                parameters.put(Parameter.adminuser, cl.getOptionValue("A"));
             }
             if (cl.hasOption("e")) {
-                parameters.put("encryption", cl.getOptionValue("e"));
+                parameters.put(Parameter.encryption, cl.getOptionValue("e"));
             }
             String clearPassword;
             if (cl.hasOption("P")) {
                 clearPassword = cl.getOptionValue("P");
             } else {
-                System.out.print("Enter password for user " + parameters.get("adminuser") + ": ");
+                builder.append("Enter password for user ").append(parameters.get("adminuser")).append(": ");
+                System.out.print(builder.toString());
                 BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                 clearPassword = bufferRead.readLine();
             }
             final String encPassword = encryptPassword(parameters.get("encryption"), clearPassword);
             clearPassword = null;
-            parameters.put("adminpass", encPassword);
+            parameters.put(Parameter.adminpass, encPassword);
             if (cl.hasOption("f")) {
-                parameters.put("mpasswdfile", cl.getOptionValue("f"));
+                parameters.put(Parameter.mpasswdfile, cl.getOptionValue("f"));
             }
             invoke(parameters);
-            System.out.println("saved password for user " + parameters.get("adminuser") + " in " + parameters.get("mpasswdfile"));
-        } catch (ParseException | NoSuchAlgorithmException | IOException e) {
+            builder.setLength(0);
+            builder.append("Saved password for user '").append(parameters.get(Parameter.adminuser)).append("' and encryption '").append(parameters.get(Parameter.encryption)).append("' in '").append(parameters.get(Parameter.mpasswdfile)).append("'.");
+            System.out.println(builder.toString());
+        } catch (ParseException | NoSuchAlgorithmException | IllegalArgumentException e) {
             System.out.println(e.getMessage());
+            System.out.println();
             printUsage(-1);
+        } catch (IOException e) {
+            builder.setLength(0);
+            builder.append("Unable to save password for user '").append(parameters.get(Parameter.adminuser)).append("' and encryption '").append(parameters.get(Parameter.encryption)).append("' in '").append(parameters.get(Parameter.mpasswdfile)).append("'.");
+            System.out.println(builder.toString());
+            System.out.println(e.getMessage());
         }
     }
 
@@ -154,10 +160,9 @@ public class GenerateMasterPasswordCLT {
      * @param parameters
      * @throws FileNotFoundException
      */
-    private static void invoke(Map<String, String> parameters) throws FileNotFoundException {
+    private static void invoke(Map<Parameter, String> parameters) throws FileNotFoundException {
         StringBuilder builder = new StringBuilder();
-        builder.append(parameters.get("adminuser")).append(":").append(parameters.get("encryption")).append(":").append(
-            parameters.get("adminpass"));
+        builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass));
         PrintWriter writer = new PrintWriter(parameters.get("mpasswdfile"));
         writer.println(builder.toString());
         writer.close();
@@ -173,11 +178,11 @@ public class GenerateMasterPasswordCLT {
      * 
      * @param parameters
      */
-    private static void initParameters(Map<String, String> parameters) {
-        parameters.put("adminuser", "oxadminmaster");
-        parameters.put("adminpass", null);
-        parameters.put("encryption", "bcrypt");
-        parameters.put("mpasswdfile", "/opt/open-xchange/etc/mpasswd");
+    private static void initParameters(Map<Parameter, String> parameters) {
+        parameters.put(Parameter.adminuser, "oxadminmaster");
+        parameters.put(Parameter.adminpass, null);
+        parameters.put(Parameter.encryption, "bcrypt");
+        parameters.put(Parameter.mpasswdfile, "/opt/open-xchange/etc/mpasswd");
     }
 
     /**

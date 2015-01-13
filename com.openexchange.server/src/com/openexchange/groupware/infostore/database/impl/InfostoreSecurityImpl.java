@@ -256,7 +256,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
                 EffectivePermission folderPermission = folderPermissions.get(folderId);
                 if (folderPermission == null) {
                     FolderObject folder = oxFolderAccess.getFolderObject((int) folderId);
-                    folderPermission = folder.getEffectiveUserPermission(user.getId(), userPermissions, oxFolderAccess.getReadCon());
+                    folderPermission = folder.getEffectiveUserPermission(user.getId(), userPermissions, con);
                     folderPermissions.put(folderId, folderPermission);
                     folders.put(folderId, folder);
                 }

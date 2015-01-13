@@ -117,7 +117,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
         try {
             final File file = new DefaultFile();
             file.setId(FileStorageFileAccess.NEW);
-            file.setFolderId(String.valueOf(new OXFolderAccess(getContextFrom(session)).getDefaultFolder(
+            file.setFolderId(String.valueOf(new OXFolderAccess(getContextFrom(session)).getDefaultFolderID(
                 session.getUserId(),
                 FolderObject.INFOSTORE)));
             final String name = dataSource.getName();

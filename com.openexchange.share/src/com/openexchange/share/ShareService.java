@@ -75,17 +75,22 @@ public interface ShareService {
     GuestShare resolveToken(String token) throws OXException;
 
     /**
-     * Resolves the supplied base token to a list of shares, holding all accessible share targets in their original from (i.e. not
-     * personalized for the guest user).
+     * Resolves the supplied base token to a list of shares. If the session's user is the guest user behind the base token himself, the
+     * share targets are adjusted implicitly for the guest user's point of view. Otherwise, the share targets are kept in their original
+     * form (i.e. not personalized for the guest user).
      *
+     * @param session The session
      * @param token The token to resolve
      * @return A list of shares the guest user behind the token has access to, or <code>null</code> if no valid share could be looked up
      */
     List<ShareInfo> getShares(Session session, String token) throws OXException;
 
     /**
-     * Resolves the supplied token and path to a single share in its original from (i.e. not personalized for the guest user).
+     * Resolves the supplied token and path to a single share. If the session's user is the guest user behind the base token himself, the
+     * share target is adjusted implicitly for the guest user's point of view. Otherwise, the share target is kept in its original form
+     * (i.e. not personalized for the guest user).
      *
+     * @param session The session
      * @param token The token to resolve
      * @param path The path to the share target
      * @return The share info, or <code>null</code> if no valid share could be looked up

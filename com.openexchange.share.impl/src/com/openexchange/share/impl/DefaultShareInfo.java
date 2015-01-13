@@ -73,11 +73,16 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
      * @param contextID The context ID
      * @param guestUser The guest user
      * @param share The share
+     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
      * @throws OXException
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share) throws OXException {
-        super(services, contextID, guestUser, Collections.singletonList(share));
+    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share, boolean adjustTargets) throws OXException {
+        super(services, contextID, guestUser, Collections.singletonList(share), adjustTargets);
         this.share = share;
+        if (adjustTargets) {
+            // take over adjusted target
+            share.setTarget(super.getSingleTarget());
+        }
     }
 
     @Override
