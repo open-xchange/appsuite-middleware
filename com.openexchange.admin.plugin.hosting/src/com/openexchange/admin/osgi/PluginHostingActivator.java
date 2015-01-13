@@ -50,7 +50,6 @@
 package com.openexchange.admin.osgi;
 
 import com.openexchange.admin.PluginStarter;
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
@@ -62,7 +61,6 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -71,7 +69,7 @@ import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
-public class Activator extends HousekeepingActivator {
+public class PluginHostingActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
@@ -120,7 +118,6 @@ public class Activator extends HousekeepingActivator {
         this.starter = new PluginStarter();
         try {
             this.starter.start(context);
-            track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;

@@ -194,6 +194,7 @@ public class Activator extends HousekeepingActivator {
         }
 
         track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
+        track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
 
         // Open trackers
         openTrackers();
