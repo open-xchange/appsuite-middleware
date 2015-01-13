@@ -137,9 +137,11 @@ public class User2MasterUserFilestoreDataMover extends FilestoreDataMover {
             srcUser.setFilestoreId(dstFilestore.getId());
             srcUser.setFilestore_name(FileStorages.getNameForUser(masterUserId, contextId));
             srcUser.setFilestoreOwner(masterUser.getId());
+            srcUser.setMaxQuota(Long.valueOf(0));
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(srcUser, ctx);
+            oxcox.cleanseFilestoreUsageFor(srcUser, ctx);
 
             CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             Cache cache = cacheService.getCache("Filestore");

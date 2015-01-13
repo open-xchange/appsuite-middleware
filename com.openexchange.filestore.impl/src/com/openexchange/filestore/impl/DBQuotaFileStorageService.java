@@ -211,9 +211,21 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         }
 
         // A user-specific file storage; determine its owner
-        int owner = user.getFileStorageOwner();
-        fsOwner.setValue(owner > 0 ? owner : userId);
-        return user;
+        int ownerId = user.getFileStorageOwner();
+        if (ownerId <= 0) {
+            // User is the owner
+            fsOwner.setValue(userId);
+            return user;
+        }
+
+        // Separate owner
+        User owner = userService.getUser(ownerId, context);
+        if (owner.getFilestoreId() <= 0) {
+            // Owner has no file storage set
+            throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
+        }
+        fsOwner.setValue(ownerId);
+        return owner;
     }
 
 }

@@ -77,13 +77,15 @@ import com.openexchange.filestore.FileStorages;
 public class Context2UserFilestoreDataMover extends FilestoreDataMover {
 
     private final User user;
+    private final long maxQuota;
 
     /**
      * Initializes a new {@link Context2UserFilestoreDataMover}.
      */
-    protected Context2UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
+    protected Context2UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, long maxQuota, User user, Context ctx) {
         super(srcFilestore, dstFilestore, ctx);
         this.user = user;
+        this.maxQuota = maxQuota;
     }
 
     /**
@@ -135,6 +137,7 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
             user.setFilestoreId(dstFilestore.getId());
             user.setFilestore_name(FileStorages.getNameForUser(userId, contextId));
             user.setFilestoreOwner(user.getId());
+            user.setMaxQuota(maxQuota);
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(user, ctx);

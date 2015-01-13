@@ -495,6 +495,57 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
+    public void cleanseFilestoreUsageFor(User user, Context ctx) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            con.setAutoCommit(false);
+            rollback = true;
+
+            cleanseFilestoreUsageFor(user, ctx, con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    // Ignroe
+                }
+            }
+        }
+    }
+
+    @Override
+    public void cleanseFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        int userId = user.getId().intValue();
+
+        PreparedStatement prep = null;
+        try {
+            prep = con.prepareStatement("DELETE FROM filestore_usage WHERE cid=? AND user=?");
+            prep.setInt(1, contextId);
+            prep.setInt(2, userId);
+            prep.executeUpdate();
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } finally {
+            Databases.closeSQLStuff(prep);
+        }
+    }
+
+    @Override
     public void changeFilestoreDataFor(User user, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
         Connection con = null;
@@ -541,6 +592,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             int userId = user.getId().intValue();
             PreparedStatement prep = null;
             try {
+                String filestoreName = user.getFilestore_name();
+                if (null == filestoreName) {
+                    filestoreName = FileStorages.getNameForUser(userId, contextId);
+                }
+
                 boolean changed = false;
                 if (filestoreId >= 0) {
                     prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ? AND filestore_id <> ?");
@@ -549,39 +605,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     prep.setInt(3, userId);
                     prep.setInt(4, filestoreId);
                     changed = prep.executeUpdate() > 0;
-                    prep.close();
+                    Databases.closeSQLStuff(prep);
+                }
+
+                {
+                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? where cid=? and id=? and filestore_name != ?");
+                    prep.setString(1, filestoreName);
+                    prep.setInt(2, contextId);
+                    prep.setInt(3, userId);
+                    prep.setString(4, filestoreName);
+                    changed |= prep.executeUpdate() > 0;
+                    Databases.closeSQLStuff(prep);
                 }
 
                 if (changed) {
-                    long used = -1L;
-                    {
-                        ResultSet rs = null;
-                        try {
-                            prep = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
-                            prep.setInt(1, contextId);
-                            prep.setInt(2, userId);
-                            rs = prep.executeQuery();
-                            if (rs.next()) {
-                                used = rs.getLong(1);
-                            }
-                        } finally {
-                            Databases.closeSQLStuff(rs, prep);
-                        }
-                    }
-
-                    if (used >= 0) {
-                        if (filestoreId <= 0) {
-                            if (used > 0) {
-                                throw new StorageException("File storage " + filestoreId + " is supposed to be cleansed from user " + userId + " in context " + contextId + ", but user still occupies usage of " + used);
-                            }
-                            prep = con.prepareStatement("DELETE FROM filestore_usage WHERE cid=? AND user=?");
-                            prep.setInt(1, contextId);
-                            prep.setInt(2, userId);
-                            prep.executeUpdate();
-                            Databases.closeSQLStuff(prep);
-                        }
-                    }
-
                     Integer fsOwner = user.getFilestoreOwner();
                     if (fsOwner != null && -1 != fsOwner.intValue()) {
                         prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
@@ -589,31 +626,28 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         prep.setInt(2, contextId);
                         prep.setInt(3, userId);
                         prep.executeUpdate();
-                        prep.close();
+                        Databases.closeSQLStuff(prep);
                     } else {
                         prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
                         prep.setInt(1, 0);
                         prep.setInt(2, contextId);
                         prep.setInt(3, userId);
                         prep.executeUpdate();
-                        prep.close();
+                        Databases.closeSQLStuff(prep);
                     }
 
-                    final String filestore_name = user.getFilestore_name();
-                    if (null != filestore_name) {
-                        prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
-                        prep.setString(1, filestore_name);
+                    Long maxQuota = user.getMaxQuota();
+                    if (null != maxQuota) {
+                        long quota_max_temp = maxQuota.longValue();
+                        if (quota_max_temp != -1) {
+                            quota_max_temp *= Math.pow(2, 20);
+                        }
+                        prep = con.prepareStatement("UPDATE user SET quota_max = ? WHERE cid = ? AND id = ?");
+                        prep.setLong(1, quota_max_temp);
                         prep.setInt(2, contextId);
                         prep.setInt(3, userId);
                         prep.executeUpdate();
-                        prep.close();
-                    } else {
-                        prep = con.prepareStatement("UPDATE user SET filestore_name = ? WHERE cid = ? AND id = ?");
-                        prep.setString(1, FileStorages.getNameForUser(userId, contextId));
-                        prep.setInt(2, contextId);
-                        prep.setInt(3, userId);
-                        prep.executeUpdate();
-                        prep.close();
+                        Databases.closeSQLStuff(prep);
                     }
                 }
             } catch (SQLException exp) {

@@ -205,6 +205,25 @@ public abstract class OXUtilStorageInterface {
     public abstract void prepareFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException;
 
     /**
+     * Cleans filestore usage for given user
+     *
+     * @param user The user
+     * @param ctx The context
+     * @throws StorageException If operation fails
+     */
+    public abstract void cleanseFilestoreUsageFor(User user, Context ctx) throws StorageException;
+
+    /**
+     * Cleans filestore usage for given user
+     *
+     * @param user The user
+     * @param ctx The context
+     * @param con The connection to use
+     * @throws StorageException If operation fails
+     */
+    public abstract void cleanseFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException;
+
+    /**
      * List all registered file stores.
      * @param pattern a pattern to search for
      * @return an array of file store objects

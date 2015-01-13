@@ -65,11 +65,14 @@ public class MoveContextFilestore2User extends UserAbstraction {
 
     private static final char OPT_FILESTORE_SHORT = 'f';
     private static final String OPT_FILESTORE_LONG = "filestore";
+    private static final char OPT_QUOTA_SHORT = 'q';
+    private static final String OPT_QUOTA_LONG = "quota";
 
     // -----------------------------------------------------------------------------------------------
 
     private Integer filestoreid = null;
     private CLIOption targetFilestoreIDOption = null;
+    private CLIOption contextQuotaOption = null;
 
     public MoveContextFilestore2User(String[] args) {
 
@@ -90,10 +93,12 @@ public class MoveContextFilestore2User extends UserAbstraction {
 
             Filestore filestore = parseAndSetFilestoreId(parser);
 
+            long maxQuota = parseAndGetUserQuota(parser);
+
             // get rmi ref
             OXUserInterface oxusr = getUserInterface();
 
-            int jobId = oxusr.moveFromContextToUserFilestore(ctx, usr, filestore, auth);
+            int jobId = oxusr.moveFromContextToUserFilestore(ctx, usr, filestore, maxQuota, auth);
 
             displayMovedMessage(successtext, null, "to user filestore " + filestore.getId() + " scheduled as job " + jobId, parser);
             sysexit(0);
@@ -115,6 +120,28 @@ public class MoveContextFilestore2User extends UserAbstraction {
         return fs;
     }
 
+    /**
+     * Initializes the quota option <code>'q'</code>/<code>"quota"</code>.
+     * <p>
+     * Invoke this method in <code>setFurtherOptions(AdminParser)</code> method to add that option to the command-line tool.
+     *
+     * @param parser The parser to add the option to
+     * @param required Whether that option is required or not
+     */
+    protected void setUserQuotaOption(AdminParser parser, boolean required){
+        this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT, OPT_QUOTA_LONG, "The file storage quota in MB for associated user.", true, required ? NeededQuadState.needed : NeededQuadState.notneeded);
+    }
+
+    /**
+     * Parses and sets the value for the quota option <code>'q'</code>/<code>"quota"</code>.
+     *
+     * @param parser The parser to get the value from
+     */
+    protected long parseAndGetUserQuota(AdminParser parser) {
+        String contextQuota = (String) parser.getOptionValue(this.contextQuotaOption);
+        return null == contextQuota ? -1L : Long.parseLong(contextQuota);
+    }
+
     protected final void displayMovedMessage(final String id, final Integer ctxid, final String text, final AdminParser parser) {
         createMessageForStdout(id, ctxid, text, parser);
     }
@@ -128,5 +155,6 @@ public class MoveContextFilestore2User extends UserAbstraction {
         setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
         setFilestoreIdOption(parser);
+        setUserQuotaOption(parser, true);
     }
 }

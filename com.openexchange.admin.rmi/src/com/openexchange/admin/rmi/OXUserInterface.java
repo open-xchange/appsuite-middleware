@@ -319,6 +319,7 @@ public interface OXUserInterface extends Remote {
      * @param user The user
      * @param masterUser The master user account
      * @param dstFilestore The destination file storage to move to
+     * @param maxQuota TODO
      * @param credentials The credentials
      * @return The job identifier which can be used for retrieving progress information.
      * @throws RemoteException General RMI Exception
@@ -330,7 +331,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromMasterToUserFilestore(Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveFromMasterToUserFilestore(Context ctx, User user, User masterUser, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from a context to his own storage.
@@ -340,6 +341,7 @@ public interface OXUserInterface extends Remote {
      * @param ctx The context in which the user resides
      * @param user The user
      * @param dstFilestore The destination file storage to move to
+     * @param maxQuota TODO
      * @param credentials The credentials
      * @return The job identifier which can be used for retrieving progress information.
      * @throws RemoteException General RMI Exception
@@ -351,7 +353,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException If update operation fails
      * @throws NoSuchUserException If no such user exists
      */
-    public int moveFromContextToUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public int moveFromContextToUserFilestore(Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Moves a user's files from his own to a context storage.

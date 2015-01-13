@@ -78,14 +78,16 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
 
     private final User masterUser;
     private final User dstUser;
+    private final long maxQuota;
 
     /**
      * Initializes a new {@link MasterUser2UserFilestoreDataMover}.
      */
-    protected MasterUser2UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, User masterUser, User dstUser, Context ctx) {
+    protected MasterUser2UserFilestoreDataMover(Filestore srcFilestore, Filestore dstFilestore, long maxQuota, User masterUser, User dstUser, Context ctx) {
         super(srcFilestore, dstFilestore, ctx);
         this.masterUser = masterUser;
         this.dstUser = dstUser;
+        this.maxQuota = maxQuota;
     }
 
     /**
@@ -114,6 +116,9 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
                 throw new StorageException("User's file storage does not belong to master user. Owner " + dstUser.getFilestoreOwner() + " is not equal to " + masterUser.getId());
             }
 
+            OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
+            oxcox.prepareFilestoreUsageFor(dstUser, ctx);
+
             // Grab associated quota-aware file storages
             FileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, masterUserId, contextId);
             FileStorage dstStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, dstUserId, contextId);
@@ -139,6 +144,7 @@ public class MasterUser2UserFilestoreDataMover extends FilestoreDataMover {
             dstUser.setFilestoreId(dstFilestore.getId());
             dstUser.setFilestore_name(FileStorages.getNameForUser(dstUserId, contextId));
             dstUser.setFilestoreOwner(dstUser.getId());
+            dstUser.setMaxQuota(maxQuota);
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(dstUser, ctx);

@@ -407,13 +407,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (!tool.existsStore(storageMasterUser.getFilestoreId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
-            if (!tool.existsStore(storageUser.getFilestoreId().intValue())) {
+            boolean equal = storageMasterUser.getFilestoreId().intValue() == storageUser.getFilestoreId().intValue();
+
+            if (!equal && !tool.existsStore(storageUser.getFilestoreId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(storageMasterUser.getFilestoreId().intValue(), false);
-            Filestore srcFilestore = oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
 
             // Check equality
             int srcStore_id = storageUser.getFilestoreId().intValue();
@@ -432,7 +434,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             // Check capacity
-            if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
+            if (!equal && !oxu.hasSpaceForAnotherUser(destFilestore)) {
                 throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
@@ -473,7 +475,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveFromMasterToUserFilestore(final Context ctx, User user, User masterUser, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveFromMasterToUserFilestore(final Context ctx, User user, User masterUser, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -530,21 +532,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (!tool.existsStore(dstFilestore.getId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
-            if (!tool.existsStore(storageMasterUser.getFilestoreId().intValue())) {
+            boolean equal = dstFilestore.getId().intValue() == storageMasterUser.getFilestoreId().intValue();
+
+            if (!equal && !tool.existsStore(storageMasterUser.getFilestoreId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
-            Filestore srcFilestore = oxu.getFilestore(storageMasterUser.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageMasterUser.getFilestoreId().intValue(), false);
 
             // Check equality
             int srcStore_id = storageMasterUser.getFilestoreId().intValue();
             if (srcStore_id <= 0) {
                 throw new InvalidDataException("Unable to get filestore " + srcStore_id);
-            }
-            if (srcStore_id == destFilestore.getId().intValue()) {
-                throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
             }
 
             // Check storage name
@@ -558,12 +559,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             // Check capacity
-            if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
+            if (!equal && !oxu.hasSpaceForAnotherUser(destFilestore)) {
                 throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
             // Initialize mover instance
-            FilestoreDataMover fsdm = FilestoreDataMover.newUserFromMasterMover(srcFilestore, destFilestore, storageUser, storageMasterUser, ctx);
+            FilestoreDataMover fsdm = FilestoreDataMover.newUserFromMasterMover(srcFilestore, destFilestore, maxQuota, storageUser, storageMasterUser, ctx);
 
             // Enable user after processing
             fsdm.addPostProcessTask(new PostProcessTask() {
@@ -599,7 +600,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -632,13 +633,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (!tool.existsStore(dstFilestore.getId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
-            if (!tool.existsStore(storageContext.getFilestoreId().intValue())) {
+            boolean equal = dstFilestore.getId().intValue() == storageContext.getFilestoreId().intValue();
+
+            if (!equal && !tool.existsStore(storageContext.getFilestoreId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
-            Filestore srcFilestore = oxu.getFilestore(storageContext.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageContext.getFilestoreId().intValue(), false);
 
             // Check equality
             int srcStore_id = storageContext.getFilestoreId().intValue();
@@ -657,12 +660,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             // Check capacity
-            if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
+            if (!equal && !oxu.hasSpaceForAnotherUser(destFilestore)) {
                 throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
             // Initialize mover instance
-            FilestoreDataMover fsdm = FilestoreDataMover.newContext2UserMover(srcFilestore, destFilestore, storageUser, storageContext);
+            FilestoreDataMover fsdm = FilestoreDataMover.newContext2UserMover(srcFilestore, destFilestore, maxQuota, storageUser, storageContext);
 
             // Enable user after processing
             fsdm.addPostProcessTask(new PostProcessTask() {
@@ -750,13 +753,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (!tool.existsStore(storageContext.getFilestoreId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
-            if (!tool.existsStore(storageUser.getFilestoreId().intValue())) {
+            boolean equal = storageContext.getFilestoreId().intValue() == storageUser.getFilestoreId().intValue();
+
+            if (!equal && !tool.existsStore(storageUser.getFilestoreId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(storageContext.getFilestoreId().intValue(), false);
-            Filestore srcFilestore = oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
 
             // Check equality
             int srcStore_id = storageUser.getFilestoreId().intValue();
@@ -779,7 +784,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             // Check capacity
-            if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
+            if (!equal && !oxu.hasSpaceForAnotherUser(destFilestore)) {
                 throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 

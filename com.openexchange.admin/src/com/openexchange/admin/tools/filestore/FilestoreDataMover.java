@@ -141,13 +141,14 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      *
      * @param srcFilestore The source file storage
      * @param dstFilestore The destination file storage
+     * @param maxQuota The max. quota to apply
      * @param user The user
      * @param masterUser The master user
      * @param ctx The associated context
      * @return The new instance
      */
-    public static FilestoreDataMover newUserFromMasterMover(Filestore srcFilestore, Filestore dstFilestore, User user, User masterUser, Context ctx) {
-        return new MasterUser2UserFilestoreDataMover(srcFilestore, dstFilestore, masterUser, user, ctx);
+    public static FilestoreDataMover newUserFromMasterMover(Filestore srcFilestore, Filestore dstFilestore, long maxQuota, User user, User masterUser, Context ctx) {
+        return new MasterUser2UserFilestoreDataMover(srcFilestore, dstFilestore, maxQuota, masterUser, user, ctx);
     }
 
     /**
@@ -157,12 +158,13 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      *
      * @param srcFilestore The source file storage
      * @param dstFilestore The destination file storage
+     * @param maxQuota The max. quota to apply
      * @param user The user
      * @param ctx The associated context
      * @return The new instance
      */
-    public static FilestoreDataMover newContext2UserMover(Filestore srcFilestore, Filestore dstFilestore, User user, Context ctx) {
-        return new Context2UserFilestoreDataMover(srcFilestore, dstFilestore, user, ctx);
+    public static FilestoreDataMover newContext2UserMover(Filestore srcFilestore, Filestore dstFilestore, long maxQuota, User user, Context ctx) {
+        return new Context2UserFilestoreDataMover(srcFilestore, dstFilestore, maxQuota, user, ctx);
     }
 
     /**
