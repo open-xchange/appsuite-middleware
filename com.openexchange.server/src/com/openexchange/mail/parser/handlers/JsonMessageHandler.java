@@ -1016,7 +1016,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             /*
                              * Add alternative part as attachment
                              */
-                            asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                             if(plainTextContentArg.length() > 0) {
+                                asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                             }
                             return true;
                         } else if (DisplayMode.RAW.equals(displayMode)) {
                             /*
