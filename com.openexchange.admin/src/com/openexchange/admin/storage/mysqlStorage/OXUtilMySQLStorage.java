@@ -583,11 +583,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         if (user.getFilestoreId() != null && -1 != user.getFilestoreId().intValue()) {
             int filestoreId = user.getFilestoreId().intValue();
 
-            // Check existence if greater than zero
-            if (filestoreId > 0) {
-                OXUtilStorageInterface.getInstance().getFilestore(filestoreId, false);
-            }
-
             int contextId = ctx.getId().intValue();
             int userId = user.getId().intValue();
             PreparedStatement prep = null;
