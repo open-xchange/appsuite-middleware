@@ -138,7 +138,7 @@ public class AdminActivator extends HousekeepingActivator {
         track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(CapabilityService.class, new RegistryServiceTrackerCustomizer<CapabilityService>(context, AdminServiceRegistry.getInstance(), CapabilityService.class));
         track(SessiondService.class, new RegistryServiceTrackerCustomizer<SessiondService>(context, AdminServiceRegistry.getInstance(), SessiondService.class));
-        track(Remote.class, new OXContextInterfaceTracker(context));
+        track(Remote.class, new OXContextInterfaceTracker(context)).open();
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
 
