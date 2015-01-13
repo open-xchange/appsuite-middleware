@@ -580,18 +580,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             prep.executeUpdate();
                             Databases.closeSQLStuff(prep);
                         }
-                    } else {
-                        if (filestoreId > 0) {
-                            if (used > 0) {
-                                throw new StorageException("File storage " + filestoreId + " is supposed to be set for user " + userId + " in context " + contextId + ", but user still occupies usage of " + used + " for another file storage");
-                            }
-                            prep = con.prepareStatement("INSERT INTO filestore_usage (cid, user, used) VALUES (?, ?, ?)");
-                            prep.setInt(1, contextId);
-                            prep.setInt(2, userId);
-                            prep.setLong(3, 0L);
-                            prep.executeUpdate();
-                            Databases.closeSQLStuff(prep);
-                        }
                     }
 
                     Integer fsOwner = user.getFilestoreOwner();
