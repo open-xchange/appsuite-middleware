@@ -379,7 +379,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
                     srcFiles.addAll(updater.determineFileLocationsFor(userId, contextId, con));
                 }
             } finally {
-                Database.backNoTimeout(contextId, true, con);
+                Database.backNoTimeout(contextId, false, con);
             }
         }
         return srcFiles;
