@@ -3732,6 +3732,27 @@ msgstr ""
 msgid "There was a problem while creating a connection to the remote service."
 msgstr ""
 
+#. You need to grant additional %1$s permissions to access the resource.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
+msgid "You need to grant additional %1$s permissions to access the resource."
+msgstr ""
+
+#. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
+msgid ""
+"Your '%1$s' access was rejected. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+
+#. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
+msgid ""
+"Your '%1$s' access was revoked. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+
 #. *
 #. * New password too short.
 #.
