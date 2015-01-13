@@ -78,6 +78,7 @@ public interface ShareService {
      * Resolves the supplied base token to a list of shares, holding all accessible share targets in their original from (i.e. not
      * personalized for the guest user).
      *
+     * @param session The session
      * @param token The token to resolve
      * @return A list of shares the guest user behind the token has access to, or <code>null</code> if no valid share could be looked up
      */
@@ -86,6 +87,7 @@ public interface ShareService {
     /**
      * Resolves the supplied token and path to a single share in its original from (i.e. not personalized for the guest user).
      *
+     * @param session The session
      * @param token The token to resolve
      * @param path The path to the share target
      * @return The share info, or <code>null</code> if no valid share could be looked up
