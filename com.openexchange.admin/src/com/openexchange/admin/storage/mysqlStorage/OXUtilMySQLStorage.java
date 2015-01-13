@@ -2268,8 +2268,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         Collection<PoolAndSchema> retval = pools;
 
         if (null == retval) {
-            retval = new LinkedHashSet<PoolAndSchema>();
-
             Connection con = configdbCon;
             boolean push = false;
             PreparedStatement stmt = null;
@@ -2282,6 +2280,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id, db_schema FROM context_server2db_pool WHERE server_id=?");
                 stmt.setInt(1, cache.getServerId());
                 result = stmt.executeQuery();
+                retval = new LinkedHashSet<PoolAndSchema>();
                 while (result.next()) {
                     retval.add(new PoolAndSchema(result.getInt(1), result.getString(2)));
                 }
@@ -2319,12 +2318,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         ResultSet result = null;
                         try {
                             con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
-                            stmt = con.prepareStatement("SELECT u.id FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id=?");
+                            stmt = con.prepareStatement("SELECT COUNT(u.id) FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id=?");
                             stmt.setInt(1, filestoreId);
                             result = stmt.executeQuery();
                             int numUsers = 0;
-                            while (result.next()) {
-                                numUsers++;
+                            if (result.next()) {
+                                numUsers = result.getInt(1);
                             }
                             return Integer.valueOf(numUsers);
                         } catch (PoolException e) {
