@@ -523,7 +523,7 @@ public class DatabaseImpl extends DBService {
         Connection writeCon = null;
         try {
             startDBTransaction();
-            final int folder_id = new OXFolderAccess(ctx).getDefaultFolder(user.getId(), FolderObject.INFOSTORE).getObjectID();
+            final int folder_id = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE);
             writeCon = getWriteConnection(ctx);
 
             final int infostore_id = IDGenerator.getId(ctx, Types.INFOSTORE, writeCon);

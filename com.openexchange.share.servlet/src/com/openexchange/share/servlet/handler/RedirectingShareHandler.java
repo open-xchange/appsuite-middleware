@@ -154,6 +154,7 @@ public class RedirectingShareHandler extends HttpAuthShareHandler {
     private static final Pattern P_SESSION = Pattern.compile("[session]", Pattern.LITERAL);
     private static final Pattern P_USER = Pattern.compile("[user]", Pattern.LITERAL);
     private static final Pattern P_USER_ID = Pattern.compile("[user_id]", Pattern.LITERAL);
+    private static final Pattern P_CONTEXT_ID = Pattern.compile("[context_id]", Pattern.LITERAL);
     private static final Pattern P_LANGUAGE = Pattern.compile("[language]", Pattern.LITERAL);
     private static final Pattern P_MODULE = Pattern.compile("[module]", Pattern.LITERAL);
     private static final Pattern P_FOLDER = Pattern.compile("[folder]", Pattern.LITERAL);
@@ -174,7 +175,7 @@ public class RedirectingShareHandler extends HttpAuthShareHandler {
         /*
          * prepare url
          */
-        StringBuilder stringBuilder = new StringBuilder("/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]");
+        StringBuilder stringBuilder = new StringBuilder("/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&context_id=[context_id]");
         int module = share.getCommonModule();
         String folder = share.getCommonFolder();
         String item = null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
@@ -197,6 +198,7 @@ public class RedirectingShareHandler extends HttpAuthShareHandler {
         redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
         redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
         redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
+        redirectLink = P_CONTEXT_ID.matcher(redirectLink).replaceAll(String.valueOf(session.getContextId()));
         redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
         if (0 != module) {
             String name = ShareServiceLookup.getService(ModuleSupport.class).getShareModule(module);

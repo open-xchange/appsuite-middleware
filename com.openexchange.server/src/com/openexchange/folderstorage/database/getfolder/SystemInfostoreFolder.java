@@ -246,7 +246,7 @@ public final class SystemInfostoreFolder {
             return Integer.parseInt(tmp);
         }
         try {
-            final int id = new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
+            final int id = new OXFolderAccess(ctx).getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE);
             if (session instanceof PutIfAbsent) {
                 ((PutIfAbsent) session).setParameterIfAbsent(paramName, Integer.toString(id));
             } else {

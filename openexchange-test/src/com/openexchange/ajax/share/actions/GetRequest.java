@@ -47,63 +47,73 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.ajax.share.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.InviteAction;
-import com.openexchange.share.json.actions.NotifyAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
-
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
 
 /**
- * {@link ShareActionFactory}
+ * {@link GetRequest}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public class GetRequest implements AJAXRequest<GetResponse>{
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    private final boolean failOnError;
+    private final String token;
+    private final String path;
 
-    /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
-     */
-    public ShareActionFactory(ServiceLookup services) {
+    public GetRequest(String token, String path) {
+        this(token, path, true);
+    }
+
+    public GetRequest(String token, String path, boolean failOnError) {
         super();
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("get", new GetAction(services));
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("invite", new InviteAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
+        this.token = token;
+        this.path = path;
+        this.failOnError = failOnError;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public Method getMethod() {
+        return Method.GET;
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
+    public String getServletPath() {
+        return "/ajax/share/management";
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        Params params = new Params(
+            AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET,
+            "token", token
+        );
+        if (null != path) {
+            params.add("path", path);
+        }
+        return params.toArray();
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends GetResponse> getParser() {
+        return new GetParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
         return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return new Header[0];
     }
 
 }

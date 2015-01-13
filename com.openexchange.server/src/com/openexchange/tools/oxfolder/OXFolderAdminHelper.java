@@ -875,7 +875,7 @@ public final class OXFolderAdminHelper {
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
         guestPermission.setAllPermission(
-            OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         createSinglePermission(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, guestPermission, cid, writeCon);
 
     }
@@ -956,7 +956,7 @@ public final class OXFolderAdminHelper {
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
         guestPermission.setAllPermission(
-            OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         createSinglePermission(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
     }
 

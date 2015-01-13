@@ -2039,7 +2039,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
                         if (FolderObject.PRIVATE == folderType) {
                             if (cdao.getEffectiveFolderId() == 0) {
-                                final int pfid = access.getDefaultFolder(user.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                final int pfid = access.getDefaultFolderID(user.getIdentifier(), FolderObject.CALENDAR);
                                 stmt.setInt(3, pfid);
                                 user.setPersonalFolderId(pfid);
                                 if (user.getIdentifier() == uid) {
@@ -2055,9 +2055,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 } else {
                                     // Prefer the personal folder ID if present in UserParticipant instance
                                     final int personalFolderId = user.getPersonalFolderId();
-                                    final int pfid = personalFolderId > 0 ? personalFolderId : access.getDefaultFolder(
+                                    final int pfid = personalFolderId > 0 ? personalFolderId : access.getDefaultFolderID(
                                         user.getIdentifier(),
-                                        FolderObject.CALENDAR).getObjectID();
+                                        FolderObject.CALENDAR);
                                     stmt.setInt(3, pfid);
                                     user.setPersonalFolderId(pfid);
                                 }
@@ -2070,7 +2070,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             }
                             if (user.getIdentifier() == cdao.getSharedFolderOwner()) {
                                 if (cdao.getGlobalFolderID() == 0) {
-                                    final int pfid = access.getDefaultFolder(cdao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
+                                    final int pfid = access.getDefaultFolderID(cdao.getSharedFolderOwner(), FolderObject.CALENDAR);
                                     stmt.setInt(3, pfid);
                                     user.setPersonalFolderId(pfid);
                                     if (user.getIdentifier() == uid) {
@@ -2081,7 +2081,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     user.setPersonalFolderId(cdao.getGlobalFolderID());
                                 }
                             } else {
-                                final int pfid = access.getDefaultFolder(user.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                final int pfid = access.getDefaultFolderID(user.getIdentifier(), FolderObject.CALENDAR);
                                 stmt.setInt(3, pfid);
                                 user.setPersonalFolderId(pfid);
                             }
@@ -3080,7 +3080,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         reminder.setFolder(cdao.getActionFolder());
                     } else {
                         final OXFolderAccess access = new OXFolderAccess(cdao.getContext());
-                        reminder.setFolder(access.getDefaultFolder(reminder.getUser(), FolderObject.CALENDAR).getObjectID());
+                        reminder.setFolder(access.getDefaultFolderID(reminder.getUser(), FolderObject.CALENDAR));
                     }
                 } else {
                     reminder.setFolder(cdao.getParentFolderID());
@@ -3432,7 +3432,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             if (new_userparticipant.getIdentifier() == uid) {
                                 if (cdao.getGlobalFolderID() == 0) {
                                     try {
-                                        final int pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                        final int pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                         pi.setInt(5, pfid);
                                         new_userparticipant.setPersonalFolderId(pfid);
                                     } catch (final Exception fe) {
@@ -3458,15 +3458,15 @@ public class CalendarMySQL implements CalendarSqlImp {
                                                 pfid = cdao.getActionFolder();
                                             } else {
                                                 // Non-folder-owner
-                                                pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                                pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                             }
                                         } else {
                                             // A move into another private folder: Set to default folder ID for non-folder-owner
-                                            pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                            pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                         }
                                     } else {
                                         // always set the folder to the private folder of the user participant in private calendar folders.
-                                        pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                        pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                     }
                                     if (pfid == 0) {
                                         pi.setInt(5, -2);
@@ -3483,9 +3483,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             if (cdao.getFolderMove()) {
                                 if (FolderObject.PRIVATE == cdao.getFolderType()) {
                                     // move public -> private
-                                    final int defaultId = access.getDefaultFolder(
-                                        new_userparticipant.getIdentifier(),
-                                        FolderObject.CALENDAR).getObjectID();
+                                    final int defaultId = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                     if (new_userparticipant.getIdentifier() == uid && cdao.getActionFolder() != defaultId) {
                                         pfid = cdao.getActionFolder();
                                     } else {
@@ -3512,7 +3510,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             if (edao.getSharedFolderOwner() == new_userparticipant.getIdentifier()) {
                                 if (cdao.getGlobalFolderID() == 0) {
                                     try {
-                                        final int pfid = access.getDefaultFolder(edao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
+                                        final int pfid = access.getDefaultFolderID(edao.getSharedFolderOwner(), FolderObject.CALENDAR);
                                         pi.setInt(5, pfid);
                                         new_userparticipant.setPersonalFolderId(pfid);
                                     } catch (final Exception fe) {
@@ -3538,7 +3536,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                                 pfid = cdao.getActionFolder();
                                             } else {
                                                 // Non-folder-owner
-                                                pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                                pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                             }
                                         } else {
                                             /*
@@ -3549,12 +3547,12 @@ public class CalendarMySQL implements CalendarSqlImp {
                                             if(new_userparticipant.getIdentifier() == access.getFolderOwner(cdao.getParentFolderID())) {
                                                 pfid = cdao.getParentFolderID();
                                             } else {
-                                                pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                                pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                             }
                                         }
                                     } else {
                                         // always set the folder to the private folder of the user participant in private calendar folders.
-                                        pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                        pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                     }
                                     if (pfid == 0) {
                                         pi.setInt(5, -2);

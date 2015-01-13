@@ -47,63 +47,40 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.ajax.share.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.InviteAction;
-import com.openexchange.share.json.actions.NotifyAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
-
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link ShareActionFactory}
+ * {@link GetResponse}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public class GetResponse extends AbstractAJAXResponse {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    private final ParsedShare parsedShare;
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
+     * Initializes a new {@link GetResponse}.
+     *
+     * @param response The response
+     * @throws JSONException
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("get", new GetAction(services));
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("invite", new InviteAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
-    }
+	protected GetResponse(Response response) throws JSONException {
+		super(response);
+		this.parsedShare = new ParsedShare((JSONObject) response.getData());
+	}
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    /**
+     * Gets the parsedShare
+     *
+     * @return The parsedShare
+     */
+    public ParsedShare getParsedShare() {
+        return parsedShare;
     }
 
 }

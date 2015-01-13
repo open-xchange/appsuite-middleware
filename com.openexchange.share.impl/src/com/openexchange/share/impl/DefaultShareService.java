@@ -172,14 +172,22 @@ public class DefaultShareService implements ShareService {
          */
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
-        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken);
-        if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
+        if (guest.getId() == session.getUserId()) {
+            /*
+             * implicitly adjust share targets if the sesssion's user is the guest himself
+             */
+            return ShareTool.toShareInfos(services, contextID, shares, true);
+
+        } else {
             /*
              * filter share targets not accessible for the session's user before returning results
              */
-            shares = removeInaccessible(session, shares);
+            DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken);
+            if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
+                shares = removeInaccessible(session, shares);
+            }
+            return ShareTool.toShareInfos(services, contextID, shares, false);
         }
-        return ShareTool.toShareInfos(services, contextID, shares);
     }
 
     @Override
@@ -204,7 +212,7 @@ public class DefaultShareService implements ShareService {
     @Override
     public List<ShareInfo> getAllShares(Session session, String module) throws OXException {
         int moduleId = ShareModuleMapping.moduleMapping2int(module);
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForModule(session.getContextId(), moduleId, StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForModule(session.getContextId(), session.getUserId(), moduleId, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         return ShareTool.toShareInfos(services, session.getContextId(), shares);
     }
@@ -259,7 +267,7 @@ public class DefaultShareService implements ShareService {
                 List<ShareInfo> sharesForGuest = new ArrayList<ShareInfo>(targets.size());
                 for (ShareTarget target : targets) {
                     Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target);
-                    sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share));
+                    sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share, false));
                     sharesToStore.add(share);
                 }
                 sharesPerRecipient.put(recipient, sharesForGuest);

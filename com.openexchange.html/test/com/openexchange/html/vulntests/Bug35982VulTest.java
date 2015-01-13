@@ -47,46 +47,21 @@
  *
  */
 
-package com.openexchange.html;
+package com.openexchange.html.vulntests;
 
-import java.util.Map;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.AssertionHelper;
 
 /**
- * {@link Bug35982Test}
+ * {@link Bug35982VulTest}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug35982Test {
+public class Bug35982VulTest extends AbstractSanitizing {
 
-    private HtmlService service;
-
-    public Bug35982Test() {
+    public Bug35982VulTest() {
         super();
-    }
-
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown() {
-        service = null;
     }
 
     @Test
@@ -96,12 +71,10 @@ public class Bug35982Test {
             "<head>\n" +
             "</head>\n" +
             "<body>\n" +
-            "<<SCRIPT>alert(\\\"XSS\\\");//<</SCRIPT>script/xss>x=/xss/;alert(x.source)</script>\n" +
+            "<<SCRIPT>alert(\"XSS\");//<</SCRIPT>script/xss>x=/xss/;alert(x.source)</script>\n" +
             "</body>\n" +
             "</html>";
 
-        String test = service.sanitize(content, null, true, null, null);
-
-        Assert.assertTrue("Script tag not properly sanitized: " + test, test.indexOf("<script") < 0);
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "x=/xss/;alert(x.source)");
     }
 }

@@ -174,7 +174,7 @@ public final class vcard extends PermissionServlet {
             int contactfolder_id = getContactFolderID(req);
 
             if (contactfolder_id == 0) {
-                contactfolder_id = new OXFolderAccess(context).getDefaultFolder(sessionObj.getUserId(), FolderObject.CONTACT).getObjectID();
+                contactfolder_id = new OXFolderAccess(context).getDefaultFolderID(sessionObj.getUserId(), FolderObject.CONTACT);
             }
 
             int db_contactfolder_id = 0;
@@ -347,7 +347,7 @@ public final class vcard extends PermissionServlet {
             int contactfolder_id = getContactFolderID(req);
 
             if (contactfolder_id == 0) {
-                contactfolder_id = new OXFolderAccess(context).getDefaultFolder(session.getUserId(), FolderObject.CONTACT).getObjectID();
+                contactfolder_id = new OXFolderAccess(context).getDefaultFolderID(session.getUserId(), FolderObject.CONTACT);
             }
 
             if (contactfolder_id == FolderObject.SYSTEM_LDAP_FOLDER_ID) {

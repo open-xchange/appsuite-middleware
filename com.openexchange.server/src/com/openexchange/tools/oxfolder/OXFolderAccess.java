@@ -71,20 +71,17 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -128,15 +125,6 @@ public class OXFolderAccess {
         super();
         this.readCon = readCon;
         this.ctx = ctx;
-    }
-
-    /**
-     * Gets the connection with "read-only" capability
-     *
-     * @return The connection with "read-only" capability or <code>null</code> if this {@link OXFolderAccess} instance was created w/o a connection
-     */
-    public Connection getReadCon() {
-        return readCon;
     }
 
     /**
@@ -756,24 +744,6 @@ public class OXFolderAccess {
         } catch (final RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
-    }
-
-    private UserPermissionBits getUserPermissions(final Session session, final Context ctx, final int userId, final User user) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUserPermissionBits();
-        }
-        final UserPermissionBits bits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
-        if (null != user) {
-            bits.setGroups(user.getGroups());
-        }
-        return bits;
-    }
-
-    private User getUser(final Session session, final Context ctx, final int userId) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser();
-        }
-        return UserStorage.getInstance().getUser(userId, ctx);
     }
 
 }
