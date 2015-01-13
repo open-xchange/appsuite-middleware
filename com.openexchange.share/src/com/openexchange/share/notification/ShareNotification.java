@@ -81,6 +81,12 @@ public interface ShareNotification<T> {
         PASSWORD_RESET,
 
         /**
+         * Notification type for a password-reset that needs to be confirmed.
+         * Use to send a request to confirm the password-reset to the share's recipient.
+         */
+        PASSWORD_CONFIRM,
+
+        /**
          * Notification type for a password-reminder message.
          * Use to re-send the password for a secured anonymous share
          * to one or more recipients.
