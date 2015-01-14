@@ -114,6 +114,17 @@ public class ShareSelector {
     }
 
     /**
+     * Adds the module ID of the share to restrict the results to.
+     *
+     * @param module The ID of the module for which the share was created, or <code>0</code> to not filter by the module
+     * @return The builder
+     */
+    public ShareSelector module(int module) {
+        builder.module(module);
+        return this;
+    }
+
+    /**
      * Adds one or more guest user IDs to restrict the results to.
      *
      * @param guests The IDs of the guests assigned to the shares, or <code>null</code> to not filter by the guest users
@@ -213,19 +224,6 @@ public class ShareSelector {
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-    }
-
-    /**
-     * Adds the module ID of the share to restrict the results to.
-     *
-     * @param userId The ID of the user who created the share
-     * @param moduleId The ID of the module for which the share was created, or <code>0</code> to not filter by the module
-     * @return The builder
-     */
-    public ShareSelector forModule(int userId, int moduleId) {
-        builder.createdBy(userId);
-        builder.forModule(moduleId);
-        return this;
     }
 
 }

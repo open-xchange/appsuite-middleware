@@ -201,19 +201,15 @@ public interface ShareStorage {
      */
     int countShares(int contextID, int userId, StorageParameters parameters) throws OXException;
 
-    //TODO: ownedBy and/or createdBy?
-    List<Share> loadSharesCreatedBy(int contextID, int createdBy, StorageParameters parameters) throws OXException;
-
-    //    int deleteShares(int contextID, List<ShareTarget> targets, int[] guests, StorageParameters parameters) throws OXException;
-
     /**
-     * Loads all shares stored for a specific module.
+     * Loads all shares that were created by a specific user, optionally restricted for a single module.
      *
-     * @param contextId The context ID
-     * @param userId The user ID
-     * @param module The module Id
+     * @param contextID The context ID
+     * @param createdBy The user to get the created shares for
      * @param parameters The storage parameters
+     * @param module The module to use for filtering, or <code>-1</code> to ignore
      * @return The shares, or an empty list if none were found
      */
-    List<Share> loadSharesForModule(int contextId, int userId, int module, StorageParameters parameters) throws OXException;
+    List<Share> loadSharesCreatedBy(int contextID, int createdBy, int module, StorageParameters parameters) throws OXException;
+
 }

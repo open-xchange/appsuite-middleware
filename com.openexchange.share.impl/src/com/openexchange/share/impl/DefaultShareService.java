@@ -204,7 +204,7 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public List<ShareInfo> getAllShares(Session session) throws OXException {
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), -1, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         return ShareTool.toShareInfos(services, session.getContextId(), shares);
     }
@@ -212,7 +212,7 @@ public class DefaultShareService implements ShareService {
     @Override
     public List<ShareInfo> getAllShares(Session session, String module) throws OXException {
         int moduleId = ShareModuleMapping.moduleMapping2int(module);
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForModule(session.getContextId(), session.getUserId(), moduleId, StorageParameters.NO_PARAMETERS);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), moduleId, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         return ShareTool.toShareInfos(services, session.getContextId(), shares);
     }
@@ -434,7 +434,7 @@ public class DefaultShareService implements ShareService {
      * @return The shares, or an empty list if there are none
      */
     public List<ShareInfo> getAllShares(int contextID, int userID) throws OXException {
-        return ShareTool.toShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, StorageParameters.NO_PARAMETERS));
+        return ShareTool.toShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, -1, StorageParameters.NO_PARAMETERS));
     }
 
     /**
@@ -496,7 +496,7 @@ public class DefaultShareService implements ShareService {
             /*
              * load & delete all shares in the context, removing associated target permissions
              */
-            shares = shareStorage.loadSharesCreatedBy(contextID, userID, connectionHelper.getParameters());
+            shares = shareStorage.loadSharesCreatedBy(contextID, userID, -1, connectionHelper.getParameters());
             if (0 < shares.size()) {
                 shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
                 removeTargetPermissions(null, connectionHelper, shares);

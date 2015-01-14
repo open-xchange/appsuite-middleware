@@ -90,6 +90,43 @@ public class MailNotifications {
         return new PasswordResetBuilder();
     }
 
+    public static PasswordResetConfirmBuilder passwordConfirm() {
+        return new PasswordResetConfirmBuilder();
+    }
+
+    public static class PasswordResetConfirmBuilder extends AbstractNotificationBuilder<PasswordResetConfirmBuilder, PasswordResetNotification<InternetAddress>, InternetAddress> {
+
+        private String shareToken;
+        private String confirm;
+
+        protected PasswordResetConfirmBuilder() {
+            super(NotificationType.PASSWORD_CONFIRM);
+        }
+
+        public PasswordResetConfirmBuilder setShareToken(String shareToken) {
+            this.shareToken = shareToken;
+            return this;
+        }
+
+        public PasswordResetConfirmBuilder setConfirm(String confirm) {
+            this.confirm = confirm;
+            return this;
+        }
+
+        @Override
+        protected PasswordResetNotification<InternetAddress> doBuild() {
+            checkNotNull(shareToken, "shareToken");
+            checkNotNull(confirm, "config");
+
+//            DefaultPasswordResetNotification<InternetAddress> notification = new DefaultPasswordResetNotification<InternetAddress>(Transport.MAIL);
+//            notification.apply(this);
+//            notification.setUsername(username);
+//            notification.setPassword(password);
+//            return notification;
+            return null;
+        }
+    }
+
     public static class PasswordResetBuilder extends AbstractNotificationBuilder<PasswordResetBuilder, PasswordResetNotification<InternetAddress>, InternetAddress> {
 
         private String username;
@@ -146,7 +183,7 @@ public class MailNotifications {
 
         private String message;
 
-        private List<ShareTarget> targets = new ArrayList<ShareTarget>();
+        private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
 
         private ShareCreatedBuilder() {
             super(NotificationType.SHARE_CREATED);

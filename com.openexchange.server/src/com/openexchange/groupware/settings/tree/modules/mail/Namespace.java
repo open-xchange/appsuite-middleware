@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,65 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.osgi;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
-import com.openexchange.file.storage.infostore.Services;
-import com.openexchange.file.storage.infostore.internal.TrashCleanupHandler;
-import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.AbstractWarningAwareReadOnlyValue;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link InfostoreFileStorageActivator}
+ * {@link Namespace}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class InfostoreFileStorageActivator extends HousekeepingActivator {
+public class Namespace extends AbstractWarningAwareReadOnlyValue implements PreferencesItemService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class, ContextService.class, ConfigViewFactory.class };
+    /**
+     * Initializes a new {@link Namespace}.
+     */
+    public Namespace() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(FileStorageService.class, new InfostoreFileStorageService() {
-            @Override
-            public InfostoreFacade getInfostore() {
-                return getService(InfostoreFacade.class);
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "namespace" };
+    }
+
+    @Override
+    public IValueHandler getSharedValue() {
+        return this;
+    }
+
+    @Override
+    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
+
+            String namespace = mailAccess.getFolderStorage().getDefaultFolderPrefix();
+            setting.setSingleValue(namespace);
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close();
             }
-
-            @Override
-            public InfostoreSearchEngine getSearch() {
-                return getService(InfostoreSearchEngine.class);
-            }
-        }, null);
-        registerService(LoginHandlerService.class, new TrashCleanupHandler());
+        }
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
+    public boolean isAvailable(UserConfiguration userConfig) {
+        return userConfig.hasWebMail();
     }
+
 }

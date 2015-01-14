@@ -296,11 +296,23 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     }
 
     private MailMessage[] getNestedMailsAndHandleOthersAsPlain(final UnwrapParameter paramObject, final String confirmedHamFullname, final String[] nestedMessages, final SpamdSettings spamdSettings, final int accountId, final Session session) throws OXException {
+        MailAccess<?, ?> mailAccess = paramObject.getMailAccess();
+        String spamFullname = paramObject.getSpamFullname();
+
         int nestedmessagelength = nestedMessages.length;
         List<MailMessage> nestedMails = new ArrayList<MailMessage>(nestedmessagelength);
         String[] exc = new String[1];
         for (int i = 0; i < nestedmessagelength; i++) {
-            MailPart wrapped = paramObject.getMailAccess().getMessageStorage().getAttachment(paramObject.getSpamFullname(), nestedMessages[i], "2");
+            MailPart wrapped;
+            try {
+                wrapped = mailAccess.getMessageStorage().getAttachment(spamFullname, nestedMessages[i], "2");
+            } catch (OXException e) {
+                if (false == MailExceptionCode.ATTACHMENT_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                // The original message seems not to be nested
+                wrapped = mailAccess.getMessageStorage().getMessage(spamFullname, nestedMessages[i], false);
+            }
             wrapped.loadContent();
 
             MailMessage tmp = null;
@@ -341,6 +353,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                 nestedMails.add(tmp);
             }
         }
+
         return nestedMails.toArray(new MailMessage[nestedMails.size()]);
     }
 

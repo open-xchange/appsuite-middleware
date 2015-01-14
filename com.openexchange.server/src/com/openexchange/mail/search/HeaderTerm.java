@@ -123,8 +123,12 @@ public final class HeaderTerm extends SearchTerm<String[]> {
             org.slf4j.LoggerFactory.getLogger(HeaderTerm.class).warn("Error during search.", e);
             return false;
         }
-        if ((val == null || val.length == 0) && (hdr[1] == null)) {
-            return true;
+        if (val == null || val.length == 0) {
+            if (hdr[1] == null) {
+                return true;
+            }
+
+            return false;
         }
         if (containsWildcard()) {
             final Pattern p = toRegex(hdr[1]);

@@ -50,14 +50,20 @@
 package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
@@ -90,6 +96,7 @@ public class PasswordResetServlet extends HttpServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
     private final ShareLoginConfiguration loginConfig;
+    private final Map<String, UserImpl> usersToUpdate;
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -101,6 +108,7 @@ public class PasswordResetServlet extends HttpServlet {
     public PasswordResetServlet(ShareLoginConfiguration loginConfig) {
         super();
         this.loginConfig = loginConfig;
+        usersToUpdate = new ConcurrentHashMap<String, UserImpl>();
     }
 
     @Override
@@ -117,6 +125,9 @@ public class PasswordResetServlet extends HttpServlet {
                 return;
             }
 
+            // Get UUID to confirm
+            String confirm = request.getParameter("confirm");
+
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
             GuestInfo guestInfo = shareService.resolveGuest(token);
 
@@ -126,27 +137,74 @@ public class PasswordResetServlet extends HttpServlet {
                 return;
             }
 
+            int contextID = guestInfo.getContextID();
+
             UserService userService = ShareServiceLookup.getService(UserService.class, true);
-            String password = PasswordUtility.generate();
+            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
 
-            GuestShare guestShare = shareService.resolveToken(token);
-            User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-            ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-            LinkProvider linkProvider = new DefaultLinkProvider(Tools.getProtocol(request), request.getServerName(), DispatcherPrefixService.DEFAULT_PREFIX, token); // FIXME
-            mailAddress = guestShare.getGuest().getEmailAddress();
-            ShareNotification<InternetAddress> notification = MailNotifications.passwordReset()
-                .setTransportInfo(new InternetAddress(mailAddress, true))
-                .setLinkProvider(linkProvider)
-                .setContext(guestInfo.getContextID())
-                .setLocale(guest.getLocale())
-                .setUsername(guestInfo.getEmailAddress())
-                .setPassword(password)
-                .build();
-            notificationService.send(notification);
+            int guestID = guestInfo.getGuestID();
+            User storageUser = userService.getUser(guestID, context);
 
-            ShareServiceLookup.getService(GuestService.class).setPassword(mailAddress, password);
+            if (null == confirm) {
+                // Generate new password and send link to confirm
+                String password = PasswordUtility.generate();
 
-            setRedirect(guestShare, null, response);
+                UserImpl updatedUser = new UserImpl(storageUser);
+                updatedUser.setUserPassword(password);
+                UUID uuid = UUID.randomUUID();
+                usersToUpdate.put(uuid.toString(), updatedUser);
+
+                //TODO: Send mail
+                GuestShare guestShare = shareService.resolveToken(token);
+                User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
+                ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
+                LinkProvider linkProvider = new DefaultLinkProvider(Tools.getProtocol(request), request.getServerName(), DispatcherPrefixService.DEFAULT_PREFIX, token); // FIXME
+                mailAddress = guestShare.getGuest().getEmailAddress();
+                ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm()
+                    .setTransportInfo(new InternetAddress(mailAddress, true))
+                    .setLinkProvider(linkProvider)
+                    .setContext(guestInfo.getContextID())
+                    .setLocale(guest.getLocale())
+                    .setShareToken(token)
+                    .setConfirm(uuid.toString())
+                    .build();
+                notificationService.send(notification);
+
+                setRedirect(guestShare, null, response);
+
+            } else {
+                // Try to set new password
+                UserImpl updatedUser = usersToUpdate.get(confirm);
+                if (null != updatedUser && updatedUser.getId() == guestID) { //TODO: Check for context Id
+                    String password = PasswordUtility.generate();
+
+                    //remove user from map
+                    usersToUpdate.remove(confirm);
+
+                    GuestShare guestShare = shareService.resolveToken(token);
+                    User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
+                    ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
+                    LinkProvider linkProvider = new DefaultLinkProvider(Tools.getProtocol(request), request.getServerName(), DispatcherPrefixService.DEFAULT_PREFIX, token); // FIXME
+                    mailAddress = guestShare.getGuest().getEmailAddress();
+                    ShareNotification<InternetAddress> notification = MailNotifications.passwordReset()
+                        .setTransportInfo(new InternetAddress(mailAddress, true))
+                        .setLinkProvider(linkProvider)
+                        .setContext(guestInfo.getContextID())
+                        .setLocale(guest.getLocale())
+                        .setUsername(guestInfo.getEmailAddress())
+                        .setPassword(password)
+                        .build();
+                    notificationService.send(notification);
+
+                    ShareServiceLookup.getService(GuestService.class).setPassword(mailAddress, password);
+
+                    setRedirect(guestShare, null, response);
+                } else {
+                    LOG.debug("Bad attempt to reset password for share '{}'", token);
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+            }
         } catch (RateLimitedException e) {
             response.setContentType("text/plain; charset=UTF-8");
             if (e.getRetryAfter() > 0) {

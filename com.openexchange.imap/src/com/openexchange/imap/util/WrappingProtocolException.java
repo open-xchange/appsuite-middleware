@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,46 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.osgi;
+package com.openexchange.imap.util;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
-import com.openexchange.file.storage.infostore.Services;
-import com.openexchange.file.storage.infostore.internal.TrashCleanupHandler;
-import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.osgi.HousekeepingActivator;
+import javax.mail.MessagingException;
+import com.sun.mail.iap.ProtocolException;
 
 
 /**
- * {@link InfostoreFileStorageActivator}
+ * {@link WrappingProtocolException} - A {@link ProtocolException} wrapping a {@link MessagingException} instance.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class InfostoreFileStorageActivator extends HousekeepingActivator {
+public class WrappingProtocolException extends ProtocolException {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class, ContextService.class, ConfigViewFactory.class };
+    private static final long serialVersionUID = 9034219079379775615L;
+
+    private final MessagingException messagingException;
+
+    /**
+     * Initializes a new {@link WrappingProtocolException}.
+     *
+     * @param message The message
+     * @param cause The wrapped {@code MessagingException} instance
+     */
+    public WrappingProtocolException(String message, MessagingException cause) {
+        super(message, cause);
+        this.messagingException = cause;
+    }
+
+    /**
+     * Gets the {@code MessagingException} instance
+     *
+     * @return The {@code MessagingException} instance
+     */
+    public MessagingException getMessagingException() {
+        return messagingException;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(FileStorageService.class, new InfostoreFileStorageService() {
-            @Override
-            public InfostoreFacade getInfostore() {
-                return getService(InfostoreFacade.class);
-            }
-
-            @Override
-            public InfostoreSearchEngine getSearch() {
-                return getService(InfostoreSearchEngine.class);
-            }
-        }, null);
-        registerService(LoginHandlerService.class, new TrashCleanupHandler());
+    public synchronized Throwable fillInStackTrace() {
+        return this;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
-    }
 }

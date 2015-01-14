@@ -104,7 +104,7 @@ public class SelectShareBuilder {
      * @param module The ID of the module for which the share was created
      * @return The builder
      */
-    public SelectShareBuilder forModule(int module) {
+    public SelectShareBuilder module(int module) {
         this.module = module;
         return this;
     }
