@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,51 +49,39 @@
 
 package com.openexchange.ajax.share.actions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
-import com.openexchange.ajax.framework.AbstractRedirectParser;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
+
 
 /**
  * {@link PasswordResetServletRequest}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8
  */
-public final class PasswordResetServletRequest extends AbstractResetPasswordServletRequest<PasswordResetServletResponse> {
+public class PasswordResetServletRequest extends AbstractResetPasswordServletRequest<PasswordResetServletResponse> {
 
     private final boolean failOnError;
-
     private final String token;
 
-    /**
-     * Initializes a new {@link PasswordResetServletRequest}.
-     *
-     * @param mailAddress
-     * @param token
-     * @param failOnError
-     */
-    public PasswordResetServletRequest(final String token, final boolean failOnError) {
+    public PasswordResetServletRequest(String token) {
+        this(token, true);
+    }
+
+    public PasswordResetServletRequest(String token, boolean failOnError) {
         super();
-        this.failOnError = failOnError;
         this.token = token;
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
+        this.failOnError = failOnError;
     }
 
     @Override
     public Method getMethod() {
-        return Method.PUT;
+        return Method.GET;
     }
 
     @Override
@@ -103,15 +91,22 @@ public final class PasswordResetServletRequest extends AbstractResetPasswordServ
         return params.toArray(new Parameter[params.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public PasswordResetParser getParser() {
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends PasswordResetServletResponse> getParser() {
         return new PasswordResetParser(failOnError);
     }
 
-    private static final class PasswordResetParser extends AbstractRedirectParser<PasswordResetServletResponse> {
+    @Override
+    public Object getBody() {
+        return null;
+    }
+
+    private static final class PasswordResetParser extends AbstractAJAXParser<PasswordResetServletResponse> {
 
         /**
          * Default constructor.
@@ -121,8 +116,17 @@ public final class PasswordResetServletRequest extends AbstractResetPasswordServ
         }
 
         @Override
-        protected PasswordResetServletResponse createResponse(String myLocation) throws JSONException {
-            return new PasswordResetServletResponse(myLocation);
+        protected PasswordResetServletResponse createResponse(Response response) {
+            return new PasswordResetServletResponse(response);
+        }
+
+        @Override
+        protected Response getResponse(String body) throws JSONException {
+            if (Strings.isNullOrEmpty(body)) {
+                body = "{}";
+            }
+            return super.getResponse(body);
         }
     }
+
 }

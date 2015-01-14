@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,24 +49,25 @@
 
 package com.openexchange.ajax.share.actions;
 
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
- * {@link PasswordResetServletResponse}
+ * {@link PasswordResetConfirmServletResponse}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class PasswordResetServletResponse extends AbstractAJAXResponse {
+public final class PasswordResetConfirmServletResponse extends AbstractAJAXResponse {
 
-    /**
-     * Initializes a new {@link PasswordResetServletResponse}.
-     * @param response
-     */
-    public PasswordResetServletResponse(Response response) {
-        super(response);
+    private final String location;
+
+    PasswordResetConfirmServletResponse(final String location) {
+        super(null);
+        this.location = location;
+    }
+
+    public String getLocation() {
+        return location;
     }
 
 }
