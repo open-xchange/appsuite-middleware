@@ -68,20 +68,9 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SpecialUseDefaultFolderChecker.class);
 
-    private static final String[] SPECIAL_USES;
-    static {
-        final String[] sa = new String[4];
-        sa[StorageUtility.INDEX_DRAFTS] = "\\Drafts";
-        sa[StorageUtility.INDEX_SENT] = "\\Sent";
-        sa[StorageUtility.INDEX_SPAM] = "\\Junk";
-        sa[StorageUtility.INDEX_TRASH] = "\\Trash";
-        SPECIAL_USES = sa;
-    }
-
     // -------------------------------------------------------------------------------------------------------------------------------- //
 
     private final boolean hasCreateSpecialUse;
-    private final boolean hasMetadata;
 
     /**
      * Initializes a new {@link SpecialUseDefaultFolderChecker}.
@@ -94,14 +83,13 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
      * @param hasCreateSpecialUse Whether the IMAP server advertises "CREATE-SPECIAL-USE" capability string
      * @param hasMetadata Whether the IMAP server advertises "METADATA" capability string
      */
-    public SpecialUseDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final IMAPStore imapStore, final IMAPAccess imapAccess, boolean hasCreateSpecialUse, boolean hasMetadata) {
-        super(accountId, session, ctx, imapStore, imapAccess);
+    public SpecialUseDefaultFolderChecker(int accountId, Session session, Context ctx, IMAPStore imapStore, IMAPAccess imapAccess, boolean hasCreateSpecialUse, boolean hasMetadata) {
+        super(accountId, session, ctx, imapStore, imapAccess, hasMetadata);
         this.hasCreateSpecialUse = hasCreateSpecialUse;
-        this.hasMetadata = hasMetadata;
     }
 
     @Override
-    protected void createIfNonExisting(final IMAPFolder f, final int type, final char sep, final String detectedPrefix, final int index) throws MessagingException {
+    protected void createIfNonExisting(IMAPFolder f, int type, char sep, String namespace, int index) throws MessagingException {
         if (!f.exists()) {
             try {
                 if (hasCreateSpecialUse) {
@@ -113,20 +101,30 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                     if (index < StorageUtility.INDEX_CONFIRMED_SPAM) {
                         if (hasMetadata) {
                             // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
-                            IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(SPECIAL_USES[index]));
+                            String flag = SPECIAL_USES[index];
+                            try {
+                                IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(flag));
+                            } catch (Exception e) {
+                                LOG.info("Failed to set {} flag for new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                            }
                         }
                     }
                 }
-                LOG.info("Created new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), detectedPrefix, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                LOG.info("Created new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             } catch (final MessagingException e) {
-                LOG.warn("Failed to create new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), detectedPrefix, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                LOG.warn("Failed to create new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 throw e;
             }
         } else {
             if (index < StorageUtility.INDEX_CONFIRMED_SPAM) {
                 if (hasMetadata) {
                     // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
-                    IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(SPECIAL_USES[index]));
+                    String flag = SPECIAL_USES[index];
+                    try {
+                        IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(flag));
+                    } catch (Exception e) {
+                        LOG.info("Failed to set {} flag for new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                    }
                 }
             }
         }

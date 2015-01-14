@@ -364,13 +364,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private IMAPDefaultFolderChecker getChecker() {
         if (null == checker) {
             Map<String, String> caps = imapConfig.asMap();
+            boolean hasMetadata = caps.containsKey("METADATA"); // http://tools.ietf.org/html/rfc5464#section-1
             if (caps.containsKey("SPECIAL-USE")) {
                 // Supports SPECIAL-USE capability
                 boolean hasCreateSpecialUse = caps.containsKey("CREATE-SPECIAL-USE"); // http://tools.ietf.org/html/rfc6154#section-3
-                boolean hasMetadata = caps.containsKey("METADATA"); // http://tools.ietf.org/html/rfc5464#section-1
                 checker = new SpecialUseDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess, hasCreateSpecialUse, hasMetadata);
             } else {
-                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess);
+                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess, hasMetadata);
             }
         }
         return checker;
