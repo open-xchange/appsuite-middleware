@@ -144,6 +144,32 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
+    public boolean exists(ShareTarget target, Session session) throws OXException {
+        if (null == target) {
+            return false;
+        }
+        if (target.isFolder()) {
+            if (null != Module.getForFolderConstant(target.getModule())) {
+                try {
+                    return (null != requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null));
+                } catch (OXException e) {
+                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+                        return true;
+                    }
+                    if (FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                        return false;
+                    }
+                    throw e;
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return handlers.get(target.getModule()).isVisible(target, session);
+        }
+    }
+
+    @Override
     public TargetProxy loadAsAdmin(int contextID, ShareTarget target) throws OXException {
         if (null == target) {
             return null;

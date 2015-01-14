@@ -152,6 +152,15 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
+    public boolean exists(ShareTarget target, Session session) throws OXException {
+        FileID fileID = new FileID(target.getItem());
+        if (null == fileID.getFolderId()) {
+            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+        }
+        return getFileAccess(session).exists(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+    }
+
+    @Override
     public TargetProxy loadTarget(ShareTarget target, Context context) throws OXException {
         FileID fileID = new FileID(target.getItem());
         if (fileID.getFolderId() == null) {
