@@ -89,14 +89,14 @@ public class RdbGuestStorage extends GuestStorage {
      * <br>
      * Checks if exactly the same user is existing.
      */
-    private static final String RESOLVE_GUEST_ASSIGNMENT = "SELECT * FROM guest2context WHERE cid=? AND uid=? AND guest_id=(" + RESOLVE_GUEST_ID_BY_MAIL + ")";
+    private static final String RESOLVE_GUEST_ASSIGNMENT = "SELECT * FROM guest2context WHERE cid=? AND uid=? AND guest_id=?";
 
     /**
      * SQL statement for getting assignments made for a user based on the mail address<br>
      * <br>
      * Checks if the given user has assignments.
      */
-    private static final String RESOLVE_GUEST_ASSIGNMENTS_BY_MAIL = "SELECT cid,uid FROM guest2context WHERE guest_id=(" + RESOLVE_GUEST_ID_BY_MAIL + ")";
+    private static final String RESOLVE_GUEST_ASSIGNMENTS = "SELECT cid,uid FROM guest2context WHERE guest_id=?";
 
     /**
      * SQL statement to count assignments that currently exist.
@@ -109,14 +109,14 @@ public class RdbGuestStorage extends GuestStorage {
     private static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid) VALUES (?, ?, ?)";
 
     /**
-     * SQL statement to insert a new guest for an unkown mail address
+     * SQL statement to insert a new guest for an unknown mail address
      */
     private static final String INSERT_GUEST = "INSERT INTO guest (mail_address) VALUES (?)";
 
     /**
      * SQL statement for deleting a guest assignment based on the context and user id.
      */
-    private static final String DELETE_GUEST_ASSIGNMENT = "DELETE FROM guest2context where guest_id=? cid=? AND uid=?";
+    private static final String DELETE_GUEST_ASSIGNMENT = "DELETE FROM guest2context where guest_id=? AND cid=? AND uid=?";
 
     /**
      * SQL statement for deleting a guest based on its internal guest id.
@@ -389,7 +389,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public boolean isAssignmentExisting(String mailAddress, int contextId, int userId) throws OXException {
+    public boolean isAssignmentExisting(int guestId, int contextId, int userId) throws OXException {
         final Connection connection;
         try {
             connection = this.databaseService.getReadOnly();
@@ -402,7 +402,7 @@ public class RdbGuestStorage extends GuestStorage {
             statement = connection.prepareStatement(RESOLVE_GUEST_ASSIGNMENT);
             statement.setInt(1, contextId);
             statement.setInt(2, userId);
-            statement.setString(3, mailAddress);
+            statement.setInt(3, guestId);
             result = statement.executeQuery();
             if (result.next()) {
                 // already existing guest in this context
@@ -422,7 +422,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public List<Serializable> getGuestAssignments(String mailAddress) throws OXException {
+    public List<Serializable> getGuestAssignments(int guestId) throws OXException {
         final Connection connection;
         try {
             connection = this.databaseService.getReadOnly();
@@ -434,13 +434,13 @@ public class RdbGuestStorage extends GuestStorage {
         PreparedStatement statement = null;
         ResultSet result = null;
         try {
-            statement = connection.prepareStatement(RESOLVE_GUEST_ASSIGNMENTS_BY_MAIL);
-            statement.setString(1, mailAddress);
+            statement = connection.prepareStatement(RESOLVE_GUEST_ASSIGNMENTS);
+            statement.setInt(1, guestId);
             result = statement.executeQuery();
             while (result.next()) {
                 int cid = result.getInt(1);
                 int uid = result.getInt(2);
-                guestAssignments.add(new GuestAssignment(mailAddress, cid, uid));
+                guestAssignments.add(new GuestAssignment(guestId, cid, uid));
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());

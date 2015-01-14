@@ -168,22 +168,22 @@ public abstract class GuestStorage {
     /**
      * Returns the {@link GuestAssignment}s the guest (with the given mail address) is currently registered for.
      *
-     * @param mailAddress - mail address to lookup assignments
+     * @param guestId - internal guest id of the user
      * @return List with {@link GuestAssignment}s
      * @throws OXException
      */
-    public abstract List<Serializable> getGuestAssignments(final String mailAddress) throws OXException;
+    public abstract List<Serializable> getGuestAssignments(final int guestId) throws OXException;
 
     /**
      * Checks if exactly this mapping (user with mail address to context and user) is already existing
      *
-     * @param mailAddress - mail address to check for
+     * @param guestId - internal guest id of the user
      * @param contextId - the context to check for
      * @param userId - the id of the guest user to check for
      * @return <code>true</code> if existing, otherwise <code>false</code>
      * @throws OXException
      */
-    public abstract boolean isAssignmentExisting(String mailAddress, int contextId, int userId) throws OXException;
+    public abstract boolean isAssignmentExisting(int guestId, int contextId, int userId) throws OXException;
 
     /**
      * Returns the number of currently available context/user assignments to the given internal guest id.
@@ -195,20 +195,20 @@ public abstract class GuestStorage {
     public abstract int getNumberOfAssignments(int guestId) throws OXException;
 
     /**
-     * Returns the internally used guest id associated to the given mail address
+     * Returns the internally used guest id associated to the given mail address or -1 if the guest does not exist
      *
      * @param mailAddress - mail address to get the id for
-     * @return int with the internal id for further processing
+     * @return int with the internal guest id or -1 if the guest does currently not exist
      * @throws OXException
      */
     public abstract int getGuestId(String mailAddress) throws OXException;
 
     /**
-     * Returns the internally used guest id associated to the given context id/user id tuple.
+     * Returns the internally used guest id associated to the given context id/user id tuple or -1 if the guest does not exist.
      *
      * @param contextId - the context to check for
      * @param userId - the id of the guest user to check for
-     * @return int with the internal id for further processing
+     * @return int with the internal guest id or -1 if the guest does currently not exist
      * @throws OXException
      */
     public abstract int getGuestId(int contextId, int userId) throws OXException;

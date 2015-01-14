@@ -98,12 +98,13 @@ public class DefaultGuestService implements GuestService {
     public void addGuest(String mailAddress, int contextId, int userId) throws OXException {
         check(mailAddress);
 
-        if (GuestStorage.getInstance().isAssignmentExisting(mailAddress, contextId, userId)) {
+        int guestId = GuestStorage.getInstance().getGuestId(mailAddress);
+
+        if (GuestStorage.getInstance().isAssignmentExisting(guestId, contextId, userId)) {
             LOG.info("User with mail address '{}' in context {} with id {} already existing. Will not add him to mapping as a new guest.", mailAddress, contextId, userId);
             return;
         }
 
-        int guestId = GuestStorage.getInstance().getGuestId(mailAddress);
         if (guestId != GuestStorage.NOT_FOUND) { // already existing, only add assignment
             GuestStorage.getInstance().addGuestAssignment(guestId, contextId, userId);
             return;
@@ -147,7 +148,9 @@ public class DefaultGuestService implements GuestService {
     public void setPassword(String mailAddress, String password) throws OXException {
         check(mailAddress);
 
-        List<Serializable> guestAssignments = GuestStorage.getInstance().getGuestAssignments(mailAddress);
+        final int guestId = GuestStorage.getInstance().getGuestId(mailAddress);
+
+        List<Serializable> guestAssignments = GuestStorage.getInstance().getGuestAssignments(guestId);
 
         String encodedPassword = null;
         try {
@@ -156,6 +159,9 @@ public class DefaultGuestService implements GuestService {
             for (Serializable assignment : guestAssignments) {
                 if (assignment instanceof GuestAssignment) {
                     GuestAssignment guestAssignment = (GuestAssignment) assignment;
+                    if (guestId != guestAssignment.getGuestId()) {
+                        continue;
+                    }
 
                     int contextId = guestAssignment.getContextId();
                     int userId = guestAssignment.getUserId();
@@ -169,7 +175,7 @@ public class DefaultGuestService implements GuestService {
                 }
             }
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-            throw GuestExceptionCodes.PASSWORD_RESET_ERROR.create(e);
+            throw GuestExceptionCodes.PASSWORD_RESET_ERROR.create(e, mailAddress);
         }
     }
 
