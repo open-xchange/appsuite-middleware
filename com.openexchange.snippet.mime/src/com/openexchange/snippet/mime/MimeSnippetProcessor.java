@@ -131,7 +131,7 @@ public class MimeSnippetProcessor {
         if (m.find()) {
             final ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
             final String imageTag = m.group();
-            if (MimeMessageUtility.isValidImageUri(imageTag)) {
+            if (MimeMessageUtility.isValidImageUri(imageTag) && !imageTag.contains("picture?uid")) {
                 final String id = m.getManagedFileId();
                 final ManagedFile mf = mfm.getByID(id);
 

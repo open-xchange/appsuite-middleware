@@ -155,8 +155,10 @@ public class SnippetProcessor {
         while (m.find()) {
             final String imageTag = m.group();
             if (MimeMessageUtility.isValidImageUri(imageTag)) {
-                final String id = m.getManagedFileId();
-                imageTags.put(id, imageTag);
+                if (!imageTag.contains("picture?uid")) {
+                    final String id = m.getManagedFileId();
+                    imageTags.put(id, imageTag);
+                }
                 count++;
             }
         }
