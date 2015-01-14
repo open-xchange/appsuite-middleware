@@ -11,7 +11,10 @@ Import-Package: com.openexchange.exception,
  javax.servlet.http,
  javax.servlet.resources
 Bundle-ClassPath: .,
- lib/oauth-googlecode.jar
+ lib/oauth-googlecode.jar,
+ lib/org.apache.oltu.oauth2.authzserver-1.0.0.jar,
+ lib/org.apache.oltu.oauth2.common-1.0.0.jar,
+ lib/org.apache.oltu.oauth2.resourceserver-1.0.0.jar
 Export-Package: com.openexchange.oauth.provider,
  com.openexchange.oauth.provider.v2,
  net.oauth,
