@@ -1,3 +1,7 @@
+* 2015-01-14 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 36072: Remove white spaces between encoded words as per RFC2047.
+
 * 2015-01-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 35979: Null guard for passed cache keys
