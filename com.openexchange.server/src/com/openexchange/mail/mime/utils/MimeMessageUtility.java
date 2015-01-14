@@ -1567,9 +1567,12 @@ public final class MimeMessageUtility {
         if (null == headerLine) {
             return null;
         }
+
+        String s = headerLine.replaceAll("(\\?=)(\\s*)(=\\?)", "$1$3");
+
         int i;
         if ((i = headerLine.indexOf('\r')) < 0 && (i = headerLine.indexOf('\n')) < 0) {
-            return headerLine;
+            return s;
         }
         /*-
          * Check folded encoded-words as per RFC 2047:
@@ -1583,7 +1586,6 @@ public final class MimeMessageUtility {
          * In this case the SPACE character is not part of the header and should
          * be discarded.
          */
-        String s;
         if (headerLine.indexOf("=?") < 0) {
             s = headerLine;
         } else {

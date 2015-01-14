@@ -1,3 +1,7 @@
+* 2015-01-14 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 36072: Remove white spaces between encoded words as per RFC2047.
+
 * 2015-01-14 - martin.herfurth@open-xchange.com
 
  - Fix for bug 36035: External updates override internal confirmation status.
