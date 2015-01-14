@@ -112,7 +112,7 @@ public class ModuleSupportImpl implements ModuleSupport {
                 UserizedFolder userizedFolder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
                 return new FolderTargetProxy(userizedFolder, user);
             } else {
-                return new VirtualTargetProxy(user, target.getFolder(), target.getItem(), target.getMeta().get("title").toString());
+                return new VirtualTargetProxy(user, target);
             }
         } else {
             return handlers.get(target.getModule()).loadTarget(target, session);
@@ -125,7 +125,6 @@ public class ModuleSupportImpl implements ModuleSupport {
             return false;
         }
         if (target.isFolder()) {
-            User user = requireService(UserService.class, services).getUser(session.getUserId(), session.getContextId());
             if (null != Module.getForFolderConstant(target.getModule())) {
                 try {
                     requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
@@ -137,7 +136,6 @@ public class ModuleSupportImpl implements ModuleSupport {
                     throw e;
                 }
             } else {
-                new VirtualTargetProxy(user, target.getFolder(), target.getItem(), String.valueOf(target.getMeta().get("title")));
                 return true;
             }
         } else {
