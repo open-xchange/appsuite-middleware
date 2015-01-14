@@ -442,15 +442,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public void enableUser(int userId, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
-        Connection con;
+        Connection con = null;
         try {
             con = cache.getConnectionForContext(contextId);
+            setUserEnabled(userId, contextId, true, con);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        }
-        try {
-            setUserEnabled(userId, contextId, true, con);
         } finally {
             if (con != null) {
                 try {
@@ -465,15 +463,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public void disableUser(int userId, Context ctx) throws StorageException {
         int contextId = ctx.getId().intValue();
-        Connection con;
+        Connection con = null;
         try {
             con = cache.getConnectionForContext(contextId);
+            setUserEnabled(userId, contextId, false, con);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        }
-        try {
-            setUserEnabled(userId, contextId, false, con);
         } finally {
             if (con != null) {
                 try {
@@ -489,38 +485,42 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public void setUserEnabled(int userId, int contextId, boolean value, Connection con) throws StorageException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE user SET mailEnabled = ? WHERE cid = ? AND id = ?");
+            stmt = con.prepareStatement("UPDATE user SET mailEnabled = ? WHERE cid = ? AND id = ? AND mailEnabled != ?");
             stmt.setBoolean(1, value);
             stmt.setInt(2, contextId);
             stmt.setInt(3, userId);
-            stmt.executeUpdate();
+            stmt.setBoolean(4, value);
+            boolean changed = stmt.executeUpdate() > 0;
 
-            // Invalidate associated sessions
-            {
-                SessiondService sessiondService = AdminServiceRegistry.getInstance().getService(SessiondService.class);
-                if (null != sessiondService) {
-                    try {
-                        sessiondService.removeUserSessions(userId, ContextStorage.getInstance().getContext(contextId));
-                    } catch (Exception e) {
-                        log.error("Failed to invalidate sessions for user {} in context {}", I(userId), I(contextId), e);
+            if (changed) {
+
+                // Invalidate associated sessions in case user has been disabled
+                if (false == value) {
+                    SessiondService sessiondService = AdminServiceRegistry.getInstance().getService(SessiondService.class);
+                    if (null != sessiondService) {
+                        try {
+                            sessiondService.removeUserSessions(userId, ContextStorage.getInstance().getContext(contextId));
+                        } catch (Exception e) {
+                            log.error("Failed to invalidate sessions for user {} in context {}", I(userId), I(contextId), e);
+                        }
                     }
                 }
-            }
 
-            // JCS
-            {
-                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                if (null != cacheService) {
-                    try {
-                        CacheKey key = cacheService.newCacheKey(contextId, userId);
-                        Cache cache = cacheService.getCache("User");
-                        cache.remove(key);
-                    } catch (OXException e) {
-                        log.error("", e);
+                // JCS
+                {
+                    CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
+                        try {
+                            CacheKey key = cacheService.newCacheKey(contextId, userId);
+                            Cache cache = cacheService.getCache("User");
+                            cache.remove(key);
+                        } catch (OXException e) {
+                            log.error("", e);
+                        }
                     }
                 }
+                // End of JCS
             }
-            // End of JCS
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);

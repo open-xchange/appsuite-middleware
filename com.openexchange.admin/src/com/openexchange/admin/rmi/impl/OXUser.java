@@ -377,8 +377,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException(e);
             }
 
-            final int user_id = user.getId().intValue();
+            final int userId = user.getId().intValue();
             final OXUserStorageInterface oxuser = this.oxu;
+            if (userId == masterUser.getId().intValue()) {
+                throw new StorageException("User and master user identifiers are equal.");
+            }
 
             User[] data = oxuser.getData(ctx, new User[] { user, masterUser });
             User storageUser = data[0];
@@ -397,7 +400,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
                 String userFsName = storageUser.getFilestore_name();
                 if (null == userFsName) {
-                    throw new InvalidDataException("Unable to get filestore directory for user " + user_id + " in " + ctx.getIdAsString());
+                    throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
                 }
                 if (masterFsName.equals(userFsName)) {
                     throw new StorageException("User " + storageUser.getId() + " already has a master file storage set.");
@@ -426,7 +429,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Check storage name
             String name = storageUser.getFilestore_name();
             if (name == null) {
-                throw new InvalidDataException("Unable to get filestore directory for user " + user_id + " in " + ctx.getIdAsString());
+                throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
             }
             name = storageMasterUser.getFilestore_name();
             if (name == null) {
@@ -446,13 +449,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
                 @Override
                 public void perform() throws StorageException {
-                    oxuser.enableUser(user_id, ctx);
+                    oxuser.enableUser(userId, ctx);
                 }
             });
 
             // Schedule task
-            oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "movefromuserfilestoretomaster", "move user " + user_id + " from context " + ctx.getIdAsString() + " from individual to master filestore " + destFilestore.getId(), ctx.getId());
+            oxuser.disableUser(userId, ctx);
+            return TaskManager.getInstance().addJob(fsdm, "movefromuserfilestoretomaster", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to master filestore " + destFilestore.getId(), ctx.getId());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -499,8 +502,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException(e);
             }
 
-            final int user_id = user.getId().intValue();
+            final int userId = user.getId().intValue();
             final OXUserStorageInterface oxuser = this.oxu;
+            if (userId == masterUser.getId().intValue()) {
+                throw new StorageException("User and master user identifiers are equal.");
+            }
 
             User[] data = oxuser.getData(ctx, new User[] { user, masterUser });
             User storageUser = data[0];
@@ -522,7 +528,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
                 String userFsName = storageUser.getFilestore_name();
                 if (null == userFsName) {
-                    throw new InvalidDataException("Unable to get filestore directory for user " + user_id + " in " + ctx.getIdAsString());
+                    throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
                 }
                 if (!masterFsName.equals(userFsName)) {
                     throw new StorageException("User " + storageUser.getId() + " has no master file storage set.");
@@ -551,7 +557,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Check storage name
             String name = storageUser.getFilestore_name();
             if (name == null) {
-                throw new InvalidDataException("Unable to get filestore directory for user " + user_id + " in " + ctx.getIdAsString());
+                throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
             }
             name = storageMasterUser.getFilestore_name();
             if (name == null) {
@@ -571,13 +577,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
                 @Override
                 public void perform() throws StorageException {
-                    oxuser.enableUser(user_id, ctx);
+                    oxuser.enableUser(userId, ctx);
                 }
             });
 
             // Schedule task
-            oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "movefrommastertouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from master to individual filestore " + destFilestore.getId(), ctx.getId());
+            oxuser.disableUser(userId, ctx);
+            return TaskManager.getInstance().addJob(fsdm, "movefrommastertouserfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from master to individual filestore " + destFilestore.getId(), ctx.getId());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
