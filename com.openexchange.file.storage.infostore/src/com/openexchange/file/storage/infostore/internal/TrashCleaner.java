@@ -50,12 +50,12 @@
 package com.openexchange.file.storage.infostore.internal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.infostore.Services;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
@@ -73,7 +73,6 @@ import com.openexchange.groupware.infostore.search.ComparisonType;
 import com.openexchange.groupware.infostore.search.LastModifiedUtcTerm;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -144,7 +143,7 @@ public class TrashCleaner implements Runnable {
             return 0;
         }
         FolderServiceDecorator decorator = new FolderServiceDecorator().put("hardDelete", Boolean.TRUE.toString());
-        for (UserizedFolder deletableFolder: deletableFolders) {
+        for (UserizedFolder deletableFolder : deletableFolders) {
             getFolderService().deleteFolder(FolderStorage.REAL_TREE_ID, deletableFolder.getID(), folder.getLastModifiedUTC(), session, decorator);
         }
         return deletableFolders.size();
@@ -176,13 +175,13 @@ public class TrashCleaner implements Runnable {
          */
         SearchIterator<DocumentMetadata> searchIterator = null;
         long sequenceNumber = 0;
-        List<Integer> deletableDocuments = new ArrayList<Integer>();
+        List<IDTuple> deletableDocuments = new ArrayList<IDTuple>();
         try {
             searchIterator = searchDeletableFiles(folder);
             while (searchIterator.hasNext()) {
                 DocumentMetadata document = searchIterator.next();
                 if (null != document.getLastModified() && maxLastModified.after(document.getLastModified())) {
-                    deletableDocuments.add(Integer.valueOf(document.getId()));
+                    deletableDocuments.add(new IDTuple(folder.getID(), String.valueOf(document.getId())));
                     sequenceNumber = Math.max(sequenceNumber, document.getSequenceNumber());
                 }
             }
@@ -193,15 +192,14 @@ public class TrashCleaner implements Runnable {
          * permanently delete them
          */
         if (0 < deletableDocuments.size()) {
-            int[] ids = Autoboxing.I2i(deletableDocuments);
             InfostoreFacade infostore = Services.getService(InfostoreFacade.class);
-            int[] notRemoved = infostore.removeDocument(ids, sequenceNumber, session);
-            if (null != notRemoved && 0 < notRemoved.length) {
+            List<IDTuple> notRemoved = infostore.removeDocument(deletableDocuments, sequenceNumber, session);
+            if (null != notRemoved && 0 < notRemoved.size()) {
                 LOG.debug("Failed to cleanup the following files for user {} in context {}: {}",
-                    session.getUserId(), session.getContext(), Arrays.toString(notRemoved));
-                return ids.length - notRemoved.length;
+                    session.getUserId(), session.getContext(), notRemoved);
+                return deletableDocuments.size() - notRemoved.size();
             }
-            return ids.length;
+            return deletableDocuments.size();
         }
         return 0;
     }
