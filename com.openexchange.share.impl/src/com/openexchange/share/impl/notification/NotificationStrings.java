@@ -99,4 +99,10 @@ public class NotificationStrings implements LocalizableStrings {
     // Your password for http://ox.io/share/af12cb769 has been reset.
     public static final String RESET_PASSWORD_INTRO = "Your password for %1$s has been reset.";
 
+    // You requested to reset your password
+    public static final String SUBJECT_RESET_PASSWORD_CONFIRM = "You requested to reset your password";
+
+    // Click here to confirm to reset your password
+    public static final String RESET_PASSWORD_CONFIRM_INTRO = "Click here to confirm to reset your password";
+
 }

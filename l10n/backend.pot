@@ -5131,8 +5131,15 @@ msgstr ""
 msgid "Public infostore"
 msgstr ""
 
+#. The internationalized name for the trash mail folder
+#. The name for trash folder
+#. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:82
-msgid "Trash infostore"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:157
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
+msgid "Trash"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:84
@@ -5175,10 +5182,6 @@ msgstr ""
 msgid "Public files"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:110
-msgid "Deleted files"
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:112
 msgid "Other files"
 msgstr ""
@@ -5219,15 +5222,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:62
 msgid "Inbox"
-msgstr ""
-
-#. The internationalized name for the trash mail folder
-#. The name for trash folder
-#. The name for the trash folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:157
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
-msgid "Trash"
 msgstr ""
 
 #. The internationalized name for the drafts mail folder
@@ -7919,6 +7913,16 @@ msgstr ""
 #. Your password for http://ox.io/share/af12cb769 has been reset.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:100
 msgid "Your password for %1$s has been reset."
+msgstr ""
+
+#. You requested to reset your password
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:103
+msgid "You requested to reset your password"
+msgstr ""
+
+#. Click here to confirm to reset your password
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:106
+msgid "Click here to confirm to reset your password"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:64

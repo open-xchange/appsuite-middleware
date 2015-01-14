@@ -203,18 +203,6 @@ public class GuestContactTest extends ShareTest {
         assertEquals(ContactExceptionCodes.NO_CHANGE_PERMISSION.getNumber(), updateResponse2.getException().getCode());
     }
 
-    public void testDeleteGuestContact() throws Exception {
-        assertTrue("Guest id must not be -1", guestId > -1);
-        DeleteRequest deleteRequest = new DeleteRequest(shares, System.currentTimeMillis());
-        CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
-        assertFalse(deleteResponse.getErrorMessage(), deleteResponse.hasError());
-        checkGuestUserDeleted(guestId);
-        GetRequest getRequest = new GetRequest(guestId, client.getValues().getTimeZone(), false);
-        GetResponse getResponse = client.execute(getRequest);
-        assertTrue("Contact was not deleted.", getResponse.hasError());
-        assertEquals(ContactExceptionCodes.CONTACT_NOT_FOUND.getNumber(), getResponse.getException().getCode());
-    }
-
     public void testOtherUser() throws Exception {
         assertTrue("Guest id must not be -1", guestId > -1);
         AJAXClient secondClient = new AJAXClient(AJAXClient.User.User2);
