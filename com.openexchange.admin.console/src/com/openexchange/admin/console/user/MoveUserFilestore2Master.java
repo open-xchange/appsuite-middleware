@@ -50,25 +50,18 @@ package com.openexchange.admin.console.user;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 
-public class MoveUserFilestore2Master extends UserAbstraction {
+public class MoveUserFilestore2Master extends UserFilestoreAbstraction {
 
     public static void main(String args[]) {
         new MoveUserFilestore2Master(args);
     }
 
-    private static final char OPT_MASTER_SHORT = 'm';
-    private static final String OPT_MASTER_LONG = "master";
-
     // -----------------------------------------------------------------------------------------------
-
-    private Integer masterId = null;
-    private CLIOption masterIdOption = null;
 
     public MoveUserFilestore2Master(String[] args) {
 
@@ -108,21 +101,6 @@ public class MoveUserFilestore2Master extends UserAbstraction {
         }
     }
 
-    protected void setMasterOption(final AdminParser parser) {
-        this.masterIdOption = setShortLongOpt(parser, OPT_MASTER_SHORT, OPT_MASTER_LONG, "Master user id. If not set, the context administrator is assumed to be the master user.", true, NeededQuadState.notneeded);
-    }
-
-    protected User parseAndSetMaster(final AdminParser parser) {
-        Object optionValue = parser.getOptionValue(this.masterIdOption);
-        if (null == optionValue) {
-            return null;
-        }
-
-        masterId = Integer.valueOf((String) optionValue);
-        User masterUser = new User(masterId.intValue());
-        return masterUser;
-    }
-
     protected final void displayMovedMessage(final String id, final Integer ctxid, final String text, final AdminParser parser) {
         createMessageForStdout(id, ctxid, text, parser);
     }
@@ -135,6 +113,6 @@ public class MoveUserFilestore2Master extends UserAbstraction {
 
         setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
-        setMasterOption(parser);
+        setMasterOption(parser, false);
     }
 }

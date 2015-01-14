@@ -52,6 +52,7 @@ package com.openexchange.admin.console.user;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 
 
@@ -72,13 +73,24 @@ public abstract class UserFilestoreAbstraction extends UserAbstraction {
     private static final char OPT_FILESTORE_OWNER_SHORT = 'o';
     private static final String OPT_FILESTORE_OWNER_LONG = "owner";
 
+    private static final char OPT_MASTER_SHORT = 'm';
+    private static final String OPT_MASTER_LONG = "master";
+
     // ----------------------------------------------------------------------------------------------------------------------------
 
     private CLIOption contextQuotaOption;
     private CLIOption filestoreIdOption;
     private CLIOption filestoreOwnerOption;
-    private Integer filestoreId;
-    private Integer filestoreOwner;
+    private CLIOption masterIdOption;
+
+    /** The file storage identifier */
+    protected Integer filestoreId;
+
+    /** The identifier for the file storage owner */
+    protected Integer filestoreOwner;
+
+    /** The master identifier */
+    protected Integer masterId;
 
     /**
      * Initializes a new {@link UserFilestoreAbstraction}.
@@ -114,6 +126,23 @@ public abstract class UserFilestoreAbstraction extends UserAbstraction {
     // ----------------------------------------------------------------------------------------------------------------------------
 
     /**
+     * Parses and sets the value for the quota option <code>'m'</code>/<code>"master"</code>.
+     *
+     * @param parser The parser to get the value from
+     * @return A new {@code User} instance having the master identifier set
+     */
+    protected User parseAndSetMaster(final AdminParser parser) {
+        Object optionValue = parser.getOptionValue(this.masterIdOption);
+        if (null == optionValue) {
+            return null;
+        }
+
+        masterId = Integer.valueOf((String) optionValue);
+        User masterUser = new User(masterId.intValue());
+        return masterUser;
+    }
+
+    /**
      * Parses and sets the value for the quota option <code>'q'</code>/<code>"quota"</code>.
      *
      * @param parser The parser to get the value from
@@ -127,24 +156,51 @@ public abstract class UserFilestoreAbstraction extends UserAbstraction {
     }
 
     /**
+     * Parses and gets the value for the quota option <code>'q'</code>/<code>"quota"</code>.
+     *
+     * @param parser The parser to get the value from
+     * @return The quota value or <code>-1</code> if absent
+     */
+    protected long parseAndGetUserQuota(AdminParser parser) {
+        String contextQuota = (String) parser.getOptionValue(this.contextQuotaOption);
+        return null == contextQuota ? -1L : Long.parseLong(contextQuota);
+    }
+
+    /**
      * Parses and sets the value for the file storage identifier option <code>'f'</code>/<code>"filestore"</code>.
      * <p>
      * The parsed value is accessible via {@link #getFilestoreId()} method.
      *
      * @param parser The parser to get the value from
-     * @param user The user to apply the value to
      */
-    protected void parseAndSetFilestoreId(AdminParser parser, User user) {
+    protected Filestore parseAndSetFilestoreId(AdminParser parser) {
+        return parseAndSetFilestoreId(parser, null);
+    }
+
+    /**
+     * Parses and sets the value for the file storage identifier option <code>'f'</code>/<code>"filestore"</code>.
+     * <p>
+     * The parsed value is accessible via {@link #getFilestoreId()} method.
+     *
+     * @param parser The parser to get the value from
+     * @param optUser The optional user to apply the value to
+     */
+    protected Filestore parseAndSetFilestoreId(AdminParser parser, User optUser) {
         CLIOption option = filestoreIdOption;
         if (null == option) {
-            return;
+            return null;
         }
         String sFilestoreId = (String) parser.getOptionValue(option);
-        if (null != sFilestoreId) {
-            Integer fsId = Integer.valueOf(sFilestoreId.trim());
-            user.setFilestoreId(fsId);
-            filestoreId = fsId;
+        if (null == sFilestoreId) {
+            return null;
         }
+
+        Integer fsId = Integer.valueOf(sFilestoreId.trim());
+        if (null != optUser) {
+            optUser.setFilestoreId(fsId);
+        }
+        filestoreId = fsId;
+        return new Filestore(fsId);
     }
 
     /**
@@ -169,6 +225,16 @@ public abstract class UserFilestoreAbstraction extends UserAbstraction {
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Sets the master option <code>'m'</code>/<code>"master"</code>.
+     *
+     * @param parser The parser to add the option to
+     * @param required Whether that option is required or not
+     */
+    protected void setMasterOption(AdminParser parser, boolean required) {
+        this.masterIdOption = setShortLongOpt(parser, OPT_MASTER_SHORT, OPT_MASTER_LONG, "Master user id. If not set, the context administrator is assumed to be the master user.", true, required ? NeededQuadState.needed : NeededQuadState.notneeded);
+    }
 
     /**
      * Initializes the quota option <code>'q'</code>/<code>"quota"</code>.

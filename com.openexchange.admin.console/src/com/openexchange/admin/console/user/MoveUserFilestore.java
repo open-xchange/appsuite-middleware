@@ -50,26 +50,19 @@ package com.openexchange.admin.console.user;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 
-public class MoveUserFilestore extends UserAbstraction {
+public class MoveUserFilestore extends UserFilestoreAbstraction {
 
     public static void main(String args[]) {
         new MoveUserFilestore(args);
     }
 
-    private static final char OPT_FILESTORE_SHORT = 'f';
-    private static final String OPT_FILESTORE_LONG = "filestore";
-
     // -----------------------------------------------------------------------------------------------
-
-    private Integer filestoreid = null;
-    private CLIOption targetFilestoreIDOption = null;
 
     public MoveUserFilestore(String[] args) {
 
@@ -96,32 +89,18 @@ public class MoveUserFilestore extends UserAbstraction {
 
             int jobId = oxusr.moveUserFilestore(ctx, usr, filestore, auth);
 
-            displayMovedMessage(successtext, null, "to filestore " + getFilestoreid() + " scheduled as job " + jobId, parser);
+            displayMovedMessage(successtext, null, "to filestore " + filestoreId + " scheduled as job " + jobId, parser);
             sysexit(0);
         } catch (final Exception e) {
             // In this special case the second parameter is not the context id but the filestore id
             // this also applies to all following error outputting methods
             // see com.openexchange.admin.console.context.ContextHostingAbstraction.printFirstPartOfErrorText(Integer, Integer)
-            printErrors(successtext, getFilestoreid(), e, parser);
+            printErrors(successtext, filestoreId, e, parser);
         }
-    }
-
-    protected void setFilestoreIdOption(final AdminParser parser) {
-        this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededQuadState.needed);
-    }
-
-    protected Filestore parseAndSetFilestoreId(final AdminParser parser) {
-        filestoreid = Integer.valueOf((String) parser.getOptionValue(this.targetFilestoreIDOption));
-        final Filestore fs = new Filestore(filestoreid);
-        return fs;
     }
 
     protected final void displayMovedMessage(final String id, final Integer ctxid, final String text, final AdminParser parser) {
         createMessageForStdout(id, ctxid, text, parser);
-    }
-
-    public final Integer getFilestoreid() {
-        return filestoreid;
     }
 
     private void setOptions(final AdminParser parser) {
@@ -134,6 +113,6 @@ public class MoveUserFilestore extends UserAbstraction {
         setContextNameOption(parser, NeededQuadState.eitheror);
 
         //setMaintenanceReasodIDOption(parser, true);
-        setFilestoreIdOption(parser);
+        setFilestoreIdOption(parser, true);
     }
 }
