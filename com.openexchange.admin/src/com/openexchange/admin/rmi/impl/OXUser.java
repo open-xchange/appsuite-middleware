@@ -726,7 +726,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException(e);
             }
 
-            final int user_id = user.getId().intValue();
+            final int userId = user.getId().intValue();
             final OXUserStorageInterface oxuser = this.oxu;
             final OXContextInterface oxctx = AdminServiceRegistry.getInstance().getService(OXContextInterface.class, true);
 
@@ -736,6 +736,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (null == storageUser.getFilestoreId() || storageUser.getFilestoreId().intValue() <= 0) {
                 throw new StorageException("User " + storageUser.getId() + " has no file storage set.");
             }
+            if (storageUser.getFilestoreOwner() != null) {
+                int ownerId = storageUser.getFilestoreOwner().intValue();
+                if (ownerId > 0 && ownerId != userId) {
+                    throw new StorageException("User " + storageUser.getId() + " does not have his own file storage set, but is currently using the file storage from user " + ownerId);
+                }
+            }
             if (storageContext.getFilestoreId().intValue() == storageUser.getFilestoreId().intValue()) {
                 String contextFsName = storageContext.getFilestore_name();
                 if (null == contextFsName) {
@@ -743,7 +749,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
                 String userFsName = storageUser.getFilestore_name();
                 if (null == userFsName) {
-                    throw new InvalidDataException("Unable to get filestore directory for user " + user_id + " in " + ctx.getIdAsString());
+                    throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
                 }
                 if (contextFsName.equals(userFsName)) {
                     throw new StorageException("User " + storageUser.getId() + " already has a context file storage set.");
@@ -776,7 +782,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Check storage name
             String name = storageUser.getFilestore_name();
             if (name == null) {
-                throw new InvalidDataException("Unable to get filestore directory for user " + user_id + " in " + ctx.getIdAsString());
+                throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
             }
             name = storageContext.getFilestore_name();
             if (name == null) {
@@ -796,13 +802,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
                 @Override
                 public void perform() throws StorageException {
-                    oxuser.enableUser(user_id, ctx);
+                    oxuser.enableUser(userId, ctx);
                 }
             });
 
             // Schedule task
-            oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "movefromusertocontextfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from individual to context filestore " + destFilestore.getId(), ctx.getId());
+            oxuser.disableUser(userId, ctx);
+            return TaskManager.getInstance().addJob(fsdm, "movefromusertocontextfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to context filestore " + destFilestore.getId(), ctx.getId());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
