@@ -2019,4 +2019,13 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     }
 
+    @Override
+    public MailMessage[] getMessagesByMessageIDByFolder(String fullName, String... messageIDs) throws OXException {
+        if (null == messageIDs || messageIDs.length <= 0) {
+            return new MailMessage[0];
+        }
+
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
 }
