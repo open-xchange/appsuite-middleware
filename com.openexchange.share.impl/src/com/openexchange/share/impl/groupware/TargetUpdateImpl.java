@@ -112,7 +112,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         FolderService folderService = getFolderService();
         for (TargetProxy proxy : proxies) {
             UserizedFolder folder = ((FolderTargetProxy) proxy).getFolder();
-            folderService.updateFolder(folder, folder.getLastModified(), parameters.getSession(), parameters.getFolderServiceDecorator());
+            folderService.updateFolder(folder, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
         }
     }
 
