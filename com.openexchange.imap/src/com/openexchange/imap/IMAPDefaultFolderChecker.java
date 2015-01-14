@@ -425,16 +425,13 @@ public class IMAPDefaultFolderChecker {
                 TIntObjectMap<String> toSet = new TIntObjectHashMap<String>(6);
                 boolean added = false;
                 for (int i = 0; i < fullNames.length; i++) {
-                    String fullName = fullNames[i];
-                    if (isEmpty(fullName)) {
-                        String expectedFullName = checkedIndexes.get(i);
-                        if (null != expectedFullName) {
+                    String expectedFullName = checkedIndexes.get(i);
+                    if (null != expectedFullName) {
+                        String fullName = fullNames[i];
+                        if (isEmpty(fullName)) {
                             toSet.put(i, expectedFullName);
                             added = true;
-                        }
-                    } else {
-                        String expectedFullName = checkedIndexes.get(i);
-                        if (null != expectedFullName && !expectedFullName.equals(fullName)) {
+                        } else if (!expectedFullName.equals(fullName)) {
                             fullNames[i] = null;
                             toSet.put(i, expectedFullName);
                             added = true;
