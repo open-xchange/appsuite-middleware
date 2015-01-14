@@ -166,6 +166,8 @@ public class PasswordResetServlet extends HttpServlet {
                     .setConfirm(uuid.toString())
                     .build();
                 notificationService.send(notification);
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.flushBuffer();
             } else {
                 // Try to set new password
                 User user = usersToUpdate.get(confirm);
