@@ -131,6 +131,154 @@ public final class OAuthConstants {
      */
     public static final String URLPARAM_OAUTH_CALLBACK = "oauth_callback";
 
+    /**
+     * The URL parameter is a brief string identifying a problem. Permitted values are listed as OAUTH_PROBLEM_* constants below.
+     */
+    public static final String URLPARAM_OAUTH_PROBLEM = "oauth_problem";
+
+    /**
+     * The URL parameter consists of a set of parameter names, percent-encoded and then separated by '&'. Note that this string will be
+     * percent-encoded again, because it's the value of oauth_parameters_absent. For example, a response body may contain:
+     * oauth_problem=parameter_absent&oauth_parameters_absent=oauth_token%26oauth_nonce
+     */
+    public static final String URLPARAM_OAUTH_PARAMETERS_ABSENT = "oauth_parameters_absent";
+
+    /**
+     * The URL parameter consists of a set of parameters, encoded as they would be in a URL query string. These are parameters that the
+     * sender recently received but didn't expect. Note that these parameters will be percent-encoded twice: once to form a query string and
+     * again because the query string is the value of oauth_parameters_rejected.
+     */
+    public static final String URLPARAM_OAUTH_PARAMETERS_REJECTED = "oauth_parameters_rejected";
+
+    /**
+     * The URL parameter consists of two version numbers separated by '-' (hyphen). It's the range of versions acceptable to the sender.
+     * That is, it means the sender will currently accept an oauth_version that's not less than the first number and not greater than the
+     * second number. A version A.B is considered greater than C.D if either A > C, or A = C and B > D.
+     */
+    public static final String URLPARAM_OAUTH_ACCEPTABLE_VERSIONS = "oauth_acceptable_versions";
+
+    /**
+     * The URL parameter consists of two numbers in decimal notation, separated by '-' (hyphen). It's the range of timestamps acceptable to
+     * the sender. That is, it means the sender will currently accept an oauth_timestamp that's not less than the first number and not
+     * greater than the second number.
+     */
+    public static final String URLPARAM_OAUTH_ACCEPTABLE_TIMESTAMPS = "oauth_acceptable_timestamps";
+
+
+    /*-
+     * ------------------- Problem constants -------------------
+     * see http://wiki.oauth.net/w/page/12238543/ProblemReporting
+     */
+
+    /**
+     * The oauth_version isn't supported by the Service Provider. In this case, the response SHOULD also contain an
+     * oauth_acceptable_versions parameter
+     */
+    public static final String OAUTH_PROBLEM_VERSION_REJECTED = "version_rejected";
+
+    /**
+     * A required parameter wasn't received. In this case, the response SHOULD also contain an oauth_parameters_absent parameter.
+     */
+    public static final String OAUTH_PROBLEM_PARAMETER_ABSENT = "parameter_absent";
+
+    /**
+     * An unexpected parameter was received. In this case, the response SHOULD also contain an oauth_parameters_rejected parameter.
+     */
+    public static final String OAUTH_PROBLEM_PARAMETER_REJECTED = "parameter_rejected";
+
+    /**
+     * The oauth_timestamp value is unacceptable to the Service Provider. In this case, the response SHOULD also contain an
+     * oauth_acceptable_timestamps parameter
+     */
+    public static final String OAUTH_PROBLEM_TIMESTAMP_REFUSED = "timestamp_refused";
+
+    /**
+     * The oauth_nonce value was used in a previous request, and consequently can't be used now.
+     */
+    public static final String OAUTH_PROBLEM_NONCE_USED = "nonce_used";
+
+    /**
+     * The oauth_signature_method is unacceptable to the Service Provider.
+     */
+    public static final String OAUTH_PROBLEM_SIGNATURE_METHOD_REJECTED = "signature_method_rejected";
+
+    /**
+     * The oauth_signature is invalid. That is, it doesn't match the signature computed by the Service Provider.
+     */
+    public static final String OAUTH_PROBLEM_SIGNATURE_INVALID = "signature_invalid";
+
+    /**
+     * The oauth_consumer_key is unknown to the Service Provider.
+     */
+    public static final String OAUTH_PROBLEM_CONSUMER_KEY_UNKNOWN = "consumer_key_unknown";
+
+    /**
+     * The oauth_consumer_key is permanently unacceptable to the Service Provider. For example, the Consumer may be black listed.
+     */
+    public static final String OAUTH_PROBLEM_CONSUMER_KEY_REJECTED = "consumer_key_rejected";
+
+    /**
+     * The oauth_consumer_key is temporarily unacceptable to the Service Provider. For example, the Service Provider may be throttling the
+     * Consumer.
+     */
+    public static final String OAUTH_PROBLEM_CONSUMER_KEY_REFUSED = "consumer_key_refused";
+
+    /**
+     * The oauth_token has been consumed. That is, it can't be used any more because it has already been used in a previous request or
+     * requests.
+     */
+    public static final String OAUTH_PROBLEM_TOKEN_USED = "token_used";
+
+    /**
+     * The oauth_token has expired. That is, it was issued too long ago to be used now. If the ScalableOAuth extensions are supported by the
+     * Consumer, it can pass on the oauth_session_handle it received in the previous Access Token request to obtain
+     * a renewed Access token and secret.
+     */
+    public static final String OAUTH_PROBLEM_TOKEN_EXPIRED = "token_expired";
+
+    /**
+     * The oauth_token has been revoked. That is, the Service Provider has unilaterally decided it will never accept this token.
+     */
+    public static final String OAUTH_PROBLEM_TOKEN_REVOKED = "token_revoked";
+
+    /**
+     * The oauth_token is unacceptable to the Service Provider. The reason is unspecified. It might mean that the token was never issued,
+     * or consumed or expired and then subsequently forgotten by the Service Provider.
+     */
+    public static final String OAUTH_PROBLEM_TOKEN_REJECTED = "token_rejected";
+
+    /**
+     * The oauth_verifier is incorrect.
+     */
+    public static final String OAUTH_PROBLEM_VERIFIER_INVALID = "verifier_invalid";
+
+    /**
+     * The user needs to give additional permissions before the Consumer is allowed access to the resource. If the ScalableOAuth extensions
+     * are supported by the Consumer, it can use the oauth_token (access token) it already has as the request token to initiate the
+     * authorization process again, in which case it must use the oauth_token_secret (access token secret) to sign the request for a new
+     * access token once the user finishes giving authorization.
+     */
+    public static final String OAUTH_PROBLEM_ADDITIONAL_AUTHORIZATION_REQUIRED = "additional_authorization_required";
+
+    /**
+     * The User hasn't decided whether to permit this Consumer to access Protected Resources. Usually happens when the Consumer requests
+     * Access Token before the user completes authorization process.
+     */
+    public static final String OAUTH_PROBLEM_PERMISSION_UNKNOWN = "permission_unknown";
+
+    /**
+     * The User refused to permit this Consumer to access Protected Resources.
+     */
+    public static final String OAUTH_PROBLEM_PERMISSION_DENIED = "permission_denied";
+
+    /**
+     * The User (in most cases it's just user's IP) is temporarily unacceptable to the Service Provider. For example, the Service Provider
+     * may be rate limiting the IP based on number of requests. This error condition applies to the Authorization process where the user
+     * interacts with Service Provider directly. The Service Provider might return this error in the authorization response or in the Access
+     * Token request response.
+     */
+    public static final String OAUTH_PROBLEM_USER_REFUSED = "user_refused";
+
     /*-
      * ------------------- Session parameters -------------------
      */
