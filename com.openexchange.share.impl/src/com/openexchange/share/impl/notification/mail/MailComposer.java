@@ -216,9 +216,6 @@ public class MailComposer {
         String subject = translator.translate(NotificationStrings.SUBJECT_RESET_PASSWORD_CONFIRM);
         Map<String, Object> vars = preparePasswordResetConfirmVars(notification, translator);
         MimeMessage mail = prepareEnvelope(subject, null, notification.getTransportInfo());
-        mail.addHeader("X-Open-Xchange-Share-Type", "password-reset-confirm");
-        mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
-//        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(AuthenticationMode.GUEST_PASSWORD, notification.getUsername(), notification.getPassword()));
         mail.setContent(prepareContent(
             "notify.share.pwreset.confirm.mail.txt.tmpl",
             vars,
