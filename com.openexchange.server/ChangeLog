@@ -1,3 +1,7 @@
+* 2015-01-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 36035: External updates override internal confirmation status.
+
 * 2014-01-14 - marcus.klein@open-xchange.com
 
  - Fix for bug 36088: Removed post install script remnants of box.com and dropbox OAuth integration.
