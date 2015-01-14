@@ -430,9 +430,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             if (rampUpServices != null) {
                 try {
                     String client = session.getClient();
-                    String clientOverride = req.getParameter("rampUpFor");
-                    if (clientOverride != null) {
-                    	client = clientOverride;
+                    {
+                        String clientOverride = req.getParameter("rampUpFor");
+                        if (clientOverride != null) {
+                        	client = clientOverride;
+                        }
                     }
                     for (LoginRampUpService rampUpService : rampUpServices) {
                         if (rampUpService.contributesTo(client)) {

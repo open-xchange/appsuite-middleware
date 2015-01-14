@@ -127,12 +127,12 @@ public class GenerateMasterPasswordCLT {
             if (cl.hasOption("P")) {
                 clearPassword = cl.getOptionValue("P");
             } else {
-                builder.append("Enter password for user ").append(parameters.get("adminuser")).append(": ");
+                builder.append("Enter password for user ").append(parameters.get(Parameter.adminuser)).append(": ");
                 System.out.print(builder.toString());
                 BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                 clearPassword = bufferRead.readLine();
             }
-            final String encPassword = encryptPassword(parameters.get("encryption"), clearPassword);
+            final String encPassword = encryptPassword(parameters.get(Parameter.encryption), clearPassword);
             clearPassword = null;
             parameters.put(Parameter.adminpass, encPassword);
             if (cl.hasOption("f")) {
@@ -163,7 +163,7 @@ public class GenerateMasterPasswordCLT {
     private static void invoke(Map<Parameter, String> parameters) throws FileNotFoundException {
         StringBuilder builder = new StringBuilder();
         builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass));
-        PrintWriter writer = new PrintWriter(parameters.get("mpasswdfile"));
+        PrintWriter writer = new PrintWriter(parameters.get(Parameter.mpasswdfile));
         writer.println(builder.toString());
         writer.close();
     }

@@ -56,8 +56,10 @@ import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.AbstractNotificationBuilder;
+import com.openexchange.share.notification.DefaultPasswordResetConfirmNotification;
 import com.openexchange.share.notification.DefaultPasswordResetNotification;
 import com.openexchange.share.notification.DefaultShareCreatedNotification;
+import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.PasswordResetNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
@@ -94,7 +96,7 @@ public class MailNotifications {
         return new PasswordResetConfirmBuilder();
     }
 
-    public static class PasswordResetConfirmBuilder extends AbstractNotificationBuilder<PasswordResetConfirmBuilder, PasswordResetNotification<InternetAddress>, InternetAddress> {
+    public static class PasswordResetConfirmBuilder extends AbstractNotificationBuilder<PasswordResetConfirmBuilder, PasswordResetConfirmNotification<InternetAddress>, InternetAddress> {
 
         private String shareToken;
         private String confirm;
@@ -114,16 +116,15 @@ public class MailNotifications {
         }
 
         @Override
-        protected PasswordResetNotification<InternetAddress> doBuild() {
+        protected PasswordResetConfirmNotification<InternetAddress> doBuild() {
             checkNotNull(shareToken, "shareToken");
             checkNotNull(confirm, "config");
 
-//            DefaultPasswordResetNotification<InternetAddress> notification = new DefaultPasswordResetNotification<InternetAddress>(Transport.MAIL);
-//            notification.apply(this);
-//            notification.setUsername(username);
-//            notification.setPassword(password);
-//            return notification;
-            return null;
+            DefaultPasswordResetConfirmNotification<InternetAddress> notification = new DefaultPasswordResetConfirmNotification<InternetAddress>(Transport.MAIL);
+            notification.apply(this);
+            notification.setToken(shareToken);
+            notification.setConfirm(confirm);
+            return notification;
         }
     }
 
