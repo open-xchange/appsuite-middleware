@@ -151,7 +151,6 @@ public class PasswordResetServlet extends HttpServlet {
                 UUID uuid = UUID.randomUUID();
                 usersToUpdate.put(uuid.toString(), storageUser);
 
-                //TODO: Send mail
                 GuestShare guestShare = shareService.resolveToken(token);
                 User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
                 ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
@@ -171,7 +170,7 @@ public class PasswordResetServlet extends HttpServlet {
             } else {
                 // Try to set new password
                 User user = usersToUpdate.get(confirm);
-                if (null != user && user.getId() == guestID) { //TODO: Check for context Id
+                if (null != user && user.getId() == guestID) {
                     // update user
                     UserImpl updatedUser = new UserImpl(storageUser);
                     String password = PasswordUtility.generate();
