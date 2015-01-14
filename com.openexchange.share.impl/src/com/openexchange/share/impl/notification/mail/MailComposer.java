@@ -94,6 +94,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.impl.notification.NotificationStrings;
 import com.openexchange.share.notification.LinkProvider;
+import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.PasswordResetNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.templating.OXTemplate;
@@ -135,6 +136,10 @@ public class MailComposer {
 
     private static final String FIELD_MESSAGE_INTRO = "message_intro";
 
+    private static final String FIELD_PW_RESET_CONFIRM_INTRO = "pw_reset_confirm_intro";
+
+    private static final String FIELD_PW_RESET_CONFIRM_LINK = "pw_reset_confirm_link";
+
     private static final Set<String> SHARE_CREATED_FIELDS = new HashSet<String>();
     static {
         SHARE_CREATED_FIELDS.add(FIELD_MESSAGE_INTRO);
@@ -159,6 +164,12 @@ public class MailComposer {
         PASSWORD_RESET_FIELDS.add(FIELD_USERNAME);
         PASSWORD_RESET_FIELDS.add(FIELD_PASSWORD_FIELD);
         PASSWORD_RESET_FIELDS.add(FIELD_PASSWORD);
+    }
+
+    private static final Set<String> PASSWORD_RESET_CONFIRM_FIELDS = new HashSet<String>();
+    {
+        PASSWORD_RESET_CONFIRM_FIELDS.add(FIELD_PW_RESET_CONFIRM_INTRO);
+        PASSWORD_RESET_CONFIRM_FIELDS.add(FIELD_PW_RESET_CONFIRM_LINK);
     }
 
     private final ServiceLookup services;
@@ -197,6 +208,32 @@ public class MailComposer {
         vars.put(FIELD_PASSWORD_FIELD, translator.translate(NotificationStrings.PASSWORD_FIELD));
         vars.put(FIELD_PASSWORD, notification.getPassword());
 
+        return vars;
+    }
+
+    public ComposedMailMessage buildPasswordResetConfirmMail(PasswordResetConfirmNotification<InternetAddress> notification) throws OXException, MessagingException, UnsupportedEncodingException {
+        Translator translator = getTranslator(notification.getLocale());
+        String subject = translator.translate(NotificationStrings.SUBJECT_RESET_PASSWORD_CONFIRM);
+        Map<String, Object> vars = preparePasswordResetConfirmVars(notification, translator);
+        MimeMessage mail = prepareEnvelope(subject, null, notification.getTransportInfo());
+        mail.addHeader("X-Open-Xchange-Share-Type", "password-reset-confirm");
+        mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
+//        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(AuthenticationMode.GUEST_PASSWORD, notification.getUsername(), notification.getPassword()));
+        mail.setContent(prepareContent(
+            "notify.share.pwreset.confirm.mail.txt.tmpl",
+            vars,
+            "notify.share.pwreset.confirm.mail.html.tmpl",
+            vars));
+        mail.saveChanges();
+        return new ContentAwareComposedMailMessage(mail, notification.getContextID());
+    }
+
+    private Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmNotification<InternetAddress> notification, Translator translator) throws OXException {
+        Map<String, Object> vars = new HashMap<String, Object>();
+        LinkProvider linkProvider = notification.getLinkProvider();
+        String confirmLink = linkProvider.getPasswordResetConfirmUrl(notification.getConfirm());
+        vars.put(FIELD_PW_RESET_CONFIRM_INTRO, translator.translate(NotificationStrings.RESET_PASSWORD_CONFIRM_INTRO));
+        vars.put(FIELD_PW_RESET_CONFIRM_LINK, confirmLink);
         return vars;
     }
 

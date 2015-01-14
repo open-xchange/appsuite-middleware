@@ -73,4 +73,6 @@ public interface LinkProvider {
      */
     String getPasswordResetUrl();
 
+    String getPasswordResetConfirmUrl(String confirm);
+
 }

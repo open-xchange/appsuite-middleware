@@ -97,7 +97,7 @@ public class PasswordResetServlet extends HttpServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
     private final ShareLoginConfiguration loginConfig;
-    private final Map<String, UserImpl> usersToUpdate;
+    private final Map<String, User> usersToUpdate;
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -109,7 +109,7 @@ public class PasswordResetServlet extends HttpServlet {
     public PasswordResetServlet(ShareLoginConfiguration loginConfig) {
         super();
         this.loginConfig = loginConfig;
-        usersToUpdate = new ConcurrentHashMap<String, UserImpl>();
+        usersToUpdate = new ConcurrentHashMap<String, User>();
     }
 
     @Override
@@ -147,13 +147,9 @@ public class PasswordResetServlet extends HttpServlet {
             User storageUser = userService.getUser(guestID, context);
 
             if (null == confirm) {
-                // Generate new password and send link to confirm
-                String password = PasswordUtility.generate();
-
-                UserImpl updatedUser = new UserImpl(storageUser);
-                updatedUser.setUserPassword(password);
+                // Generate UUID and send link to confirm
                 UUID uuid = UUID.randomUUID();
-                usersToUpdate.put(uuid.toString(), updatedUser);
+                usersToUpdate.put(uuid.toString(), storageUser);
 
                 //TODO: Send mail
                 GuestShare guestShare = shareService.resolveToken(token);
@@ -175,10 +171,11 @@ public class PasswordResetServlet extends HttpServlet {
 
             } else {
                 // Try to set new password
-                UserImpl updatedUser = usersToUpdate.get(confirm);
-                if (null != updatedUser && updatedUser.getId() == guestID) { //TODO: Check for context Id
+                User user = usersToUpdate.get(confirm);
+                if (null != user && user.getId() == guestID) { //TODO: Check for context Id
                     // update user
-                    String password = updatedUser.getUserPassword();
+                    UserImpl updatedUser = new UserImpl(storageUser);
+                    String password = PasswordUtility.generate();
                     String encodedPassword = PasswordMech.BCRYPT.encode(password);
                     updatedUser.setUserPassword(encodedPassword);
                     userService.updateUser(updatedUser, context);

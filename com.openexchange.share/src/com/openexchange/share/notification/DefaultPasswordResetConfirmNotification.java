@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,58 +49,40 @@
 
 package com.openexchange.share.notification;
 
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
 /**
- * A default implementation of {@link LinkProvider}. All necessary data has to be
- * set via the constructor.
+ * {@link DefaultPasswordResetConfirmNotification}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8
  */
-public class DefaultLinkProvider implements LinkProvider {
+public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {
 
-    private final String protocol;
+    private String token;
+    private String confirm;
 
-    private final String domain;
-
-    private final String servletPrefix;
-
-    private final String shareToken;
-
-    /**
-     * Initializes a new {@link DefaultLinkProvider}.
-     *
-     * @param protocol The protocol to use for the URLs, i.e. "http" or "https"
-     * @param domain The domain to use within the URLs
-     * @param servletPrefix The servlet prefix, i.e. "/ajax/" or "/appsuite/api/". Leading and trailing slashes must be contained!
-     * @param shareToken The share token, can be a base token or a concrete one
-     */
-    public DefaultLinkProvider(String protocol, String domain, String servletPrefix, String shareToken) {
-        super();
-        this.protocol = protocol;
-        this.domain = domain;
-        this.servletPrefix = servletPrefix;
-        this.shareToken = shareToken;
+    public DefaultPasswordResetConfirmNotification(Transport transport) {
+        super(transport, NotificationType.PASSWORD_CONFIRM);
     }
 
     @Override
-    public String getShareUrl() {
-        return baseUrl() + "share" + '/' + shareToken;
+    public String getToken() {
+        return token;
     }
 
     @Override
-    public String getPasswordResetUrl() {
-        return baseUrl() + "share/reset/password?share=" + shareToken;
+    public String getConfirm() {
+        return confirm;
     }
 
-    @Override
-    public String getPasswordResetConfirmUrl(String confirm) {
-        return getPasswordResetUrl() + "&confirm=" + confirm;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    private String baseUrl() {
-        return protocol + domain + servletPrefix;
+    public void setConfirm(String confirm) {
+        this.confirm = confirm;
     }
 
 }

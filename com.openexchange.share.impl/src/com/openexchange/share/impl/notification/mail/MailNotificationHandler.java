@@ -60,6 +60,7 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.PasswordResetNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification;
@@ -105,6 +106,10 @@ public class MailNotificationHandler implements ShareNotificationHandler {
                     sendPasswordReset(notification);
                     break;
 
+                case PASSWORD_CONFIRM:
+                    sendPasswordResetConfirm(notification);
+                    break;
+
                 default:
                     throw new OXException(new IllegalArgumentException("MailNotificationHandler cannot handle notifications of type " + notification.getType().toString()));
             }
@@ -124,6 +129,12 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     private void sendPasswordReset(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
         PasswordResetNotification<InternetAddress> casted = (PasswordResetNotification<InternetAddress>) notification;
         ComposedMailMessage mail = composer.buildPasswordResetMail(casted);
+        sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
+    }
+
+    private void sendPasswordResetConfirm(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
+        PasswordResetConfirmNotification<InternetAddress> casted = (PasswordResetConfirmNotification<InternetAddress>) notification;
+        ComposedMailMessage mail = composer.buildPasswordResetConfirmMail(casted);
         sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
     }
 

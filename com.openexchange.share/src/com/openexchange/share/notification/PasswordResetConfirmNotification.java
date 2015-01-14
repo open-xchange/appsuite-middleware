@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,58 +49,29 @@
 
 package com.openexchange.share.notification;
 
-
+import com.openexchange.share.AuthenticationMode;
 
 /**
- * A default implementation of {@link LinkProvider}. All necessary data has to be
- * set via the constructor.
+ * A notification to send a link to confirm a password reset to a guest user who made use of the password reset mechanism. Such notifications must only be used
+ * for shares with {@link AuthenticationMode#GUEST_PASSWORD}.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8
  */
-public class DefaultLinkProvider implements LinkProvider {
-
-    private final String protocol;
-
-    private final String domain;
-
-    private final String servletPrefix;
-
-    private final String shareToken;
+public interface PasswordResetConfirmNotification<T> extends ShareNotification<T> {
 
     /**
-     * Initializes a new {@link DefaultLinkProvider}.
+     * Get the share token
      *
-     * @param protocol The protocol to use for the URLs, i.e. "http" or "https"
-     * @param domain The domain to use within the URLs
-     * @param servletPrefix The servlet prefix, i.e. "/ajax/" or "/appsuite/api/". Leading and trailing slashes must be contained!
-     * @param shareToken The share token, can be a base token or a concrete one
+     * @return The share token
      */
-    public DefaultLinkProvider(String protocol, String domain, String servletPrefix, String shareToken) {
-        super();
-        this.protocol = protocol;
-        this.domain = domain;
-        this.servletPrefix = servletPrefix;
-        this.shareToken = shareToken;
-    }
+    String getToken();
 
-    @Override
-    public String getShareUrl() {
-        return baseUrl() + "share" + '/' + shareToken;
-    }
-
-    @Override
-    public String getPasswordResetUrl() {
-        return baseUrl() + "share/reset/password?share=" + shareToken;
-    }
-
-    @Override
-    public String getPasswordResetConfirmUrl(String confirm) {
-        return getPasswordResetUrl() + "&confirm=" + confirm;
-    }
-
-    private String baseUrl() {
-        return protocol + domain + servletPrefix;
-    }
+    /**
+     * Get the uuid to confirm the password reset
+     *
+     * @return The uuid to confirm the password reset
+     */
+    String getConfirm();
 
 }
