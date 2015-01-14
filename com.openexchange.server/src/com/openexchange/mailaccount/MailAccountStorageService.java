@@ -69,258 +69,270 @@ public interface MailAccountStorageService {
     /**
      * Invalidates specified mail account.
      *
-     * @param id The account ID
-     * @param user The user ID
-     * @param cid The context ID
+     * @param id The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws OXException If invalidation fails
      */
-    void invalidateMailAccount(int id, int user, int cid) throws OXException;
+    void invalidateMailAccount(int id, int userId, int contextId) throws OXException;
 
     /**
      * Invalidates user mail accounts.
      *
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws OXException If invalidation fails
      */
-    void invalidateMailAccounts(int user, int cid) throws OXException;
+    void invalidateMailAccounts(int userId, int contextId) throws OXException;
 
     /**
      * Clears full names for specified mail account.
      *
-     * @param id The account ID
-     * @param user The user ID
-     * @param cid The context ID
+     * @param id The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws OXException If invalidation fails
      */
-    void clearFullNamesForMailAccount(int id, int user, int cid) throws OXException;
+    void clearFullNamesForMailAccount(int id, int userId, int contextId) throws OXException;
 
     /**
      * Clears specified full names for specified mail account.
      *
-     * @param id The account ID
+     * @param id The account identifier
      * @param indexes The indexes of the full names to clear
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws OXException If invalidation fails
      */
-    void clearFullNamesForMailAccount(int id, int[] indexes, int user, int cid) throws OXException;
+    void clearFullNamesForMailAccount(int id, int[] indexes, int userId, int contextId) throws OXException;
 
     /**
-     * Gets the mail account identified by specified ID.
+     * Sets specified full names for specified mail account.
      *
-     * @param id The mail account ID
-     * @param user The user ID
-     * @param cid The context ID
+     * @param id The account identifier
+     * @param indexes The indexes of the full names to set
+     * @param fullNames The full names to set
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If invalidation fails
+     */
+    void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the mail account identified by specified identifier.
+     *
+     * @param id The mail account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The mail account
      * @throws OXException If the mail account cannot be returned
      */
-    MailAccount getMailAccount(int id, int user, int cid) throws OXException;
+    MailAccount getMailAccount(int id, int userId, int contextId) throws OXException;
 
     /**
-     * Gets the mail account identified by specified ID.
+     * Gets the mail account identified by specified identifier.
      *
-     * @param id The mail account ID
-     * @param user The user ID
-     * @param cid The context ID
+     * @param id The mail account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param con The connection to use
      * @return The mail account
      * @throws OXException If the mail account cannot be returned
      */
-    MailAccount getMailAccount(int id, int user, int cid, Connection con) throws OXException;
+    MailAccount getMailAccount(int id, int userId, int cid, Connection con) throws OXException;
 
     /**
      * Gets the mail accounts belonging to specified user in given context.
      *
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The user's mail accounts
      * @throws OXException If the mail accounts cannot be returned
      */
-    MailAccount[] getUserMailAccounts(int user, int cid) throws OXException;
+    MailAccount[] getUserMailAccounts(int userId, int contextId) throws OXException;
 
     /**
      * Gets the mail accounts belonging to specified user in given context.
      *
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param con The connection to use
      * @return The user's mail accounts
      * @throws OXException If the mail accounts cannot be returned
      */
-    MailAccount[] getUserMailAccounts(int user, int cid, Connection con) throws OXException;
+    MailAccount[] getUserMailAccounts(int userId, int cid, Connection con) throws OXException;
 
     /**
      * Gets the default mail account belonging to specified user in given context.
      *
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The user's default mail account
      * @throws OXException If the default mail account cannot be returned
      */
-    MailAccount getDefaultMailAccount(int user, int cid) throws OXException;
+    MailAccount getDefaultMailAccount(int userId, int contextId) throws OXException;
 
     /**
      * Updates mail account's value taken from specified mail account.
      *
      * @param mailAccount The mail account containing the values to update.
      * @param attributes The attributes to update
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param session The session
      * @throws OXException If the mail account cannot be updated
      */
-    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int user, int cid, Session session) throws OXException;
+    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int cid, Session session) throws OXException;
 
     /**
      * Updates mail account's value taken from specified mail account.
      *
      * @param mailAccount The mail account containing the values to update.
      * @param attributes The attributes to update
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param session The session
      * @param con writable database connection.
      * @param changePrimary <code>true</code> to change primary account, too.
      * @throws OXException If the mail account cannot be updated
      */
-    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int user, int cid, Session session, Connection con, boolean changePrimary) throws OXException;
+    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int cid, Session session, Connection con, boolean changePrimary) throws OXException;
 
     /**
      * Updates mail account's value taken from specified mail account.
      *
      * @param mailAccount The mail account containing the values to update.
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param session The session
      * @throws OXException If the mail account cannot be updated
      */
-    void updateMailAccount(MailAccountDescription mailAccount, int user, int cid, Session session) throws OXException;
+    void updateMailAccount(MailAccountDescription mailAccount, int userId, int cid, Session session) throws OXException;
 
     /**
      * Inserts mail account's value taken from specified mail account.
      *
      * @param mailAccount The mail account containing the values to update.
-     * @param user The user ID
+     * @param userId The user identifier
      * @param ctx The context
      * @param session The session; set to <code>null</code> to insert mail account with an empty password
-     * @return The ID of the newly created mail account
+     * @return The identifier of the newly created mail account
      * @throws OXException If the mail account cannot be updated
      */
-    int insertMailAccount(MailAccountDescription mailAccount, int user, Context ctx, Session session) throws OXException;
+    int insertMailAccount(MailAccountDescription mailAccount, int userId, Context ctx, Session session) throws OXException;
 
     /**
      * Inserts mail account's value taken from specified mail account.
      *
      * @param mailAccount The mail account containing the values to update.
-     * @param user The user ID
+     * @param userId The user identifier
      * @param ctx The context
      * @param session The session; set to <code>null</code> to insert mail account with an empty password
      * @param con writable database connection
-     * @return The ID of the newly created mail account
+     * @return The identifier of the newly created mail account
      * @throws OXException If the mail account cannot be updated
      */
-    int insertMailAccount(MailAccountDescription mailAccount, int user, Context ctx, Session session, Connection con) throws OXException;
+    int insertMailAccount(MailAccountDescription mailAccount, int userId, Context ctx, Session session, Connection con) throws OXException;
 
     /**
-     * Deletes the mail account identified by specified ID.
+     * Deletes the mail account identified by specified identifier.
      *
-     * @param id The mail account ID
+     * @param id The mail account identifier
      * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @throws OXException If the mail account cannot be deleted
      */
-    void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid) throws OXException;
+    void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId) throws OXException;
 
     /**
-     * Deletes the mail account identified by specified ID.
+     * Deletes the mail account identified by specified identifier.
      *
-     * @param id The mail account ID
+     * @param id The mail account identifier
      * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param deletePrimary <code>true</code> to delete also the primary mail account if the user is deleted.
      * @throws OXException If the mail account cannot be deleted
      */
-    void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid, boolean deletePrimary) throws OXException;
+    void deleteMailAccount(int id, Map<String, Object> properties, int userId, int cid, boolean deletePrimary) throws OXException;
 
     /**
-     * Deletes the mail account identified by specified ID.
+     * Deletes the mail account identified by specified identifier.
      *
-     * @param id The mail account ID
+     * @param id The mail account identifier
      * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param deletePrimary <code>true</code> to delete also the primary mail account if the user is deleted.
      * @param con The connection to use
      * @throws OXException If the mail account cannot be deleted
      */
-    void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid, boolean deletePrimary, Connection con) throws OXException;
+    void deleteMailAccount(int id, Map<String, Object> properties, int userId, int cid, boolean deletePrimary, Connection con) throws OXException;
 
     /**
      * Gets the mail accounts of the users whose login matches specified login.
      *
      * @param login The login
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @return The mail accounts of the users whose login matches specified login
      * @throws OXException If resolving the login fails
      */
-    MailAccount[] resolveLogin(String login, int cid) throws OXException;
+    MailAccount[] resolveLogin(String login, int contextId) throws OXException;
 
     /**
      * Gets the mail accounts of the users whose login matches specified login on specified server.
      *
      * @param login The login
      * @param serverUrl The server URL; e.g. <code>"mail.company.org:143"</code>
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @return The mail accounts of the users whose login matches specified login on specified server
      * @throws OXException If resolving the login fails
      */
-    MailAccount[] resolveLogin(String login, String serverUrl, int cid) throws OXException;
+    MailAccount[] resolveLogin(String login, String serverUrl, int contextId) throws OXException;
 
     /**
      * Gets the mail accounts of the users whose primary email address matches specified email on specified server.
      *
      * @param primaryAddress The primary email address
-     * @param cid The context ID
+     * @param contextId The context identifier
      * @return The mail accounts of the users whose login matches specified login on specified server
      * @throws OXException If resolving the primary address fails
      */
-    MailAccount[] resolvePrimaryAddr(String primaryAddress, int cid) throws OXException;
+    MailAccount[] resolvePrimaryAddr(String primaryAddress, int contextId) throws OXException;
 
     /**
      * Gets the mail account matching specified primary email address of given user in given context.
      *
      * @param primaryAddress The primary address to look for
-     * @param user The user ID
-     * @param cid The context ID
-     * @return The ID of the mail account matching specified primary email address or <code>-1</code> if none found
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The identifier of the mail account matching specified primary email address or <code>-1</code> if none found
      * @throws OXException If look-up by primary address caused a conflict
      */
-    int getByPrimaryAddress(String primaryAddress, int user, int cid) throws OXException;
+    int getByPrimaryAddress(String primaryAddress, int userId, int contextId) throws OXException;
 
     /**
      * Gets those mail accounts of given user in given context whose host name occurs in specified collection of host names.
      *
      * @param hostNames The host names
-     * @param user The user identifier
-     * @param cid The context identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The binary-sorted identifiers of matching mail accounts
      * @throws OXException If look-up by host names caused an error
      */
-    int[] getByHostNames(Collection<String> hostNames, int user, int cid) throws OXException;
+    int[] getByHostNames(Collection<String> hostNames, int userId, int contextId) throws OXException;
 
     /**
-     * Gets the transport account for specified account ID.
+     * Gets the transport account for specified account identifier.
      *
-     * @param id The account ID
-     * @param user The user ID
-     * @param cid The context ID
+     * @param id The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The mail account providing the information for the appropriate transport account.
      * @throws OXException If transport look-up fails
      */
-    MailAccount getTransportAccountForID(int id, int user, int cid) throws OXException;
+    MailAccount getTransportAccountForID(int id, int userId, int contextId) throws OXException;
 
     /**
      * Decodes stored encrypted strings using the old secret and encode them again using the new secret.

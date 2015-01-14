@@ -498,7 +498,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void clearFullNamesForMailAccount(final int id, final int[] indexes, final int userId, final int contextId) throws OXException {
-        final Connection con = Database.get(contextId, true);
+        Connection con = Database.get(contextId, true);
         boolean rollback = false;
         try {
             con.setAutoCommit(false);
@@ -585,6 +585,104 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setLong(num++, id);
                 stmt.setLong(num++, userId);
             }
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+            setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId, con);
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    /**
+     * Sets specified full names for specified mail account using given connection.
+     *
+     * @param id The account ID
+     * @param indexes The indexes of the full names to set
+     * @param fullNames The full names to set
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param con The connection
+     * @throws OXException If invalidation fails
+     */
+    public void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId, Connection con) throws OXException {
+        if (null == con) {
+            setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId);
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            StringBuilder sqlBuilder = new StringBuilder("UPDATE user_mail_account SET ");
+            List<String> strings = new ArrayList<String>(fullNames.length);
+
+            boolean somethingAdded = false;
+            for (int i = indexes.length; i-- > 0;) {
+                int index = indexes[i];
+                switch (index) {
+                    case StorageUtility.INDEX_DRAFTS:
+                        sqlBuilder.append("drafts_fullname=?, ");
+                        strings.add(fullNames[i]);
+                        somethingAdded = true;
+                        break;
+                    case StorageUtility.INDEX_SENT:
+                        sqlBuilder.append("sent_fullname=?, ");
+                        strings.add(fullNames[i]);
+                        somethingAdded = true;
+                        break;
+                    case StorageUtility.INDEX_SPAM:
+                        sqlBuilder.append("spam_fullname=?, ");
+                        strings.add(fullNames[i]);
+                        somethingAdded = true;
+                        break;
+                    case StorageUtility.INDEX_TRASH:
+                        sqlBuilder.append("trash_fullname=?, ");
+                        strings.add(fullNames[i]);
+                        somethingAdded = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (!somethingAdded) {
+                return;
+            }
+
+            sqlBuilder.setLength(sqlBuilder.length() - 2);
+            sqlBuilder.append(" WHERE cid=? AND id=? AND user=?");
+
+            stmt = con.prepareStatement(sqlBuilder.toString());
+            int num = 1;
+            for (String string : strings) {
+                stmt.setString(num++, string);
+            }
+            stmt.setLong(num++, contextId);
+            stmt.setLong(num++, id);
+            stmt.setLong(num++, userId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());

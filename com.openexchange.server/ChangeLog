@@ -1,3 +1,7 @@
+* 2015-01-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36090: Support SPECIAL-USE marked standard folders
+
 * 2015-01-14 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 36072: Remove white spaces between encoded words as per RFC2047.

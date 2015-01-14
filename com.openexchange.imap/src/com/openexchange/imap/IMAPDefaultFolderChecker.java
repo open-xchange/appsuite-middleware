@@ -51,7 +51,10 @@ package com.openexchange.imap;
 
 import static com.openexchange.java.Strings.isEmpty;
 import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -318,18 +321,66 @@ public class IMAPDefaultFolderChecker {
      * @throws OXException If check fails
      */
     protected void sequentiallyCheckFolders(final String namespace, final char sep, final int type, final MailSessionCache cache) throws OXException {
+        // The flag to track possible modifications
+        AtomicBoolean modified = new AtomicBoolean(false);
+
+        // Check for marked default folders
+        TIntObjectMap<String> checkedIndexes = new TIntObjectHashMap<String>(6);
+        try {
+            final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
+            ListLsubEntry entry = ListLsubCache.getDraftsEntry(accountId, imapFolder, session);
+            if (null != entry) {
+                setDefaultMailFolder(StorageUtility.INDEX_DRAFTS, entry.getFullName(), cache);
+                checkedIndexes.put(StorageUtility.INDEX_DRAFTS, entry.getFullName());
+                if (!entry.isSubscribed()) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                    modified.set(true);
+                }
+            }
+            entry = ListLsubCache.getJunkEntry(accountId, imapFolder, session);
+            if (null != entry) {
+                setDefaultMailFolder(StorageUtility.INDEX_SPAM, entry.getFullName(), cache);
+                checkedIndexes.put(StorageUtility.INDEX_SPAM, entry.getFullName());
+                if (!entry.isSubscribed()) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                    modified.set(true);
+                }
+            }
+            entry = ListLsubCache.getSentEntry(accountId, imapFolder, session);
+            if (null != entry) {
+                setDefaultMailFolder(StorageUtility.INDEX_SENT, entry.getFullName(), cache);
+                checkedIndexes.put(StorageUtility.INDEX_SENT, entry.getFullName());
+                if (!entry.isSubscribed()) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                    modified.set(true);
+                }
+            }
+            entry = ListLsubCache.getTrashEntry(accountId, imapFolder, session);
+            if (null != entry) {
+                setDefaultMailFolder(StorageUtility.INDEX_TRASH, entry.getFullName(), cache);
+                checkedIndexes.put(StorageUtility.INDEX_TRASH, entry.getFullName());
+                if (!entry.isSubscribed()) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                    modified.set(true);
+                }
+            }
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+        }
+
         // Detect if spam option is enabled
-        final boolean isSpamOptionEnabled;
+        boolean isSpamOptionEnabled;
         {
             final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
             isSpamOptionEnabled = usm.isSpamOptionEnabled();
         }
+
         // Get default folders names and full names
-        final String[] fullNames;
-        final String[] names;
-        final SpamHandler spamHandler;
+        String[] fullNames;
+        String[] names;
+        SpamHandler spamHandler;
         {
-            final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
+            DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
             if (isSpamOptionEnabled) {
                 fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(imapConfig, true);
                 names = defaultFolderNamesProvider.getDefaultFolderNames(imapConfig, true);
@@ -340,6 +391,7 @@ public class IMAPDefaultFolderChecker {
                 spamHandler = NoSpamHandler.getInstance();
             }
         }
+
         // Special handling for full names in case of primary mail account
         if (MailAccount.DEFAULT_ID == accountId) {
             /*-
@@ -348,15 +400,15 @@ public class IMAPDefaultFolderChecker {
              * Null'ify full name if not on root level OR not equal to name; meaning not intended to create default folders next to INBOX
              * In that case create them with respect to determined prefix
              */
-            final TIntList indexes = new TIntLinkedList();
+            TIntList indexes = new TIntLinkedList();
             for (int i = 0; i < fullNames.length; i++) {
-                final String fullName = fullNames[i];
+                String fullName = fullNames[i];
                 if (isEmpty(fullName)) {
                     fullNames[i] = null;
                 } else {
                     if (fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
                         // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Zent
-                        final String expectedFullName = namespace + names[i];
+                        String expectedFullName = namespace + names[i];
                         if (!expectedFullName.equals(fullName)) {
                             LOG.warn("Found invalid full name in settings of account {}. Should be \"{}\", but is \"{}\" (user={}, context={})", Integer.valueOf(accountId), expectedFullName, fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                             indexes.add(i);
@@ -369,44 +421,69 @@ public class IMAPDefaultFolderChecker {
                 clearAccountFullNames(indexes.toArray());
             }
         } else {
-            LOG.debug("Checking standard folder for account {} (user={}, context={})", Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-        }
-        // Check folders
-        final AtomicBoolean modified = new AtomicBoolean(false);
-        for (int index = 0; index < names.length; index++) {
-            String checkedFullName = null;
-
-            // Determine the checked full name
-            {
-                // Get desired name and full name --> full name dominates name
-                final String name = names[index];
-                final String fullName = fullNames[index];
-                LOG.debug("Standard folder check for {} with name={} and fullName={} for account {} (user={}, context={})", getFallbackName(index), null == name ? "null" : name, null == fullName ? "null" : fullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-
-                // Check folder & return its full name
-                if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
-                    if (spamHandler.isCreateConfirmedHam()) {
-                        checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified);
+            if (!checkedIndexes.isEmpty()) {
+                TIntObjectMap<String> toSet = new TIntObjectHashMap<String>(6);
+                boolean added = false;
+                for (int i = 0; i < fullNames.length; i++) {
+                    String fullName = fullNames[i];
+                    if (isEmpty(fullName)) {
+                        String expectedFullName = checkedIndexes.get(i);
+                        if (null != expectedFullName) {
+                            toSet.put(i, expectedFullName);
+                            added = true;
+                        }
                     } else {
-                        LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", name);
+                        String expectedFullName = checkedIndexes.get(i);
+                        if (null != expectedFullName && !expectedFullName.equals(fullName)) {
+                            fullNames[i] = null;
+                            toSet.put(i, expectedFullName);
+                            added = true;
+                        }
                     }
-                } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
-                    if (spamHandler.isCreateConfirmedSpam()) {
-                        checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified);
-                    } else {
-                        LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", name);
-                    }
-                } else {
-                    checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, 1, modified);
+                }
+                if (added) {
+                    setAccountFullNames(toSet);
                 }
             }
-
-            // Set the checked full name
-            setDefaultMailFolder(index, checkedFullName, cache);
+            LOG.debug("Checking standard folder for account {} (user={}, context={})", Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
-        /*
-         * Check for modifications
-         */
+
+        // Check folders
+        for (int index = 0; index < names.length; index++) {
+            if (!checkedIndexes.containsKey(index)) {
+                String checkedFullName = null;
+
+                // Determine the checked full name
+                {
+                    // Get desired name and full name --> full name dominates name
+                    String name = names[index];
+                    String fullName = fullNames[index];
+                    LOG.debug("Standard folder check for {} with name={} and fullName={} for account {} (user={}, context={})", getFallbackName(index), null == name ? "null" : name, null == fullName ? "null" : fullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+
+                    // Check folder & return its full name
+                    if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
+                        if (spamHandler.isCreateConfirmedHam()) {
+                            checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified);
+                        } else {
+                            LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", name);
+                        }
+                    } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
+                        if (spamHandler.isCreateConfirmedSpam()) {
+                            checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified);
+                        } else {
+                            LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", name);
+                        }
+                    } else {
+                        checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, 1, modified);
+                    }
+                }
+
+                // Set the checked full name
+                setDefaultMailFolder(index, checkedFullName, cache);
+            }
+        }
+
+        // Check for modifications
         if (modified.get()) {
             ListLsubCache.clearCache(accountId, session);
         }
@@ -720,6 +797,29 @@ public class IMAPDefaultFolderChecker {
                 }
             } catch (final Exception x) {
                 LOG.warn("Failed to clear full names for mail account {}", Integer.valueOf(accountId), x);
+            }
+        }
+    }
+
+    /**
+     * Sets the specified full names in settings of associated account
+     */
+    protected void setAccountFullNames(TIntObjectMap<String> map) {
+        // Invalidate mail account settings as obviously wrong
+        final MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
+        if (null != mass) {
+            try {
+                TIntList indexes = new TIntArrayList(map.size());
+                List<String> fullNames = new ArrayList<String>(map.size());
+
+                for (int index : map.keys()) {
+                    indexes.add(index);
+                    fullNames.add(map.get(index));
+                }
+
+                mass.setFullNamesForMailAccount(accountId, indexes.toArray(), fullNames.toArray(new String[fullNames.size()]), session.getUserId(), session.getContextId());
+            } catch (final Exception x) {
+                LOG.warn("Failed to set full names for mail account {}", Integer.valueOf(accountId), x);
             }
         }
     }
