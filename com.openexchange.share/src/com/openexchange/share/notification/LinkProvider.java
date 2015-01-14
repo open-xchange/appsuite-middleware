@@ -73,6 +73,12 @@ public interface LinkProvider {
      */
     String getPasswordResetUrl();
 
+    /**
+     * Gets the URL to confirm to reset a guest's password
+     *
+     * @param confirm The uuid to confirm
+     * @return The URL
+     */
     String getPasswordResetConfirmUrl(String confirm);
 
 }
