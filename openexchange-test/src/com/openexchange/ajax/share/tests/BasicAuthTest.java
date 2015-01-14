@@ -142,7 +142,7 @@ public class BasicAuthTest extends ShareTest {
 
         // Discover & check share
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
 
         // Create some appointments for that folder
         {

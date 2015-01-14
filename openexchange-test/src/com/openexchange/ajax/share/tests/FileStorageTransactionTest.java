@@ -153,11 +153,13 @@ public class FileStorageTransactionTest extends ShareTest {
 
         assertEquals("Wrong number of shares", sharedFiles.size(), fileShares.size());
 
-        for (ParsedShare share : fileShares) {
+        for (int i = 0; i < fileShares.size(); i++) {
+            ParsedShare share = fileShares.get(i);
+            DefaultFile file = sharedFiles.get(i);
             /*
              * check access to share
              */
-            checkShare(permission, share);
+            checkShare(permission, file, share);
             GuestClient guestClient =  resolveShare(share, permission.getRecipient());
             guestClient.checkShareModuleAvailable();
             guestClient.checkShareAccessible(permission);

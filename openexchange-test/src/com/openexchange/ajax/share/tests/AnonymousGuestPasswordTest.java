@@ -100,7 +100,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * discover & check share
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
         assertNull("Password is set", ((AnonymousRecipient) share.getRecipient()).getPassword());
         /*
@@ -111,11 +111,12 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         recipient.setBits(Permissions.createPermissionBits(guestPermission.getFolderPermission(), guestPermission.getReadPermission(),
             guestPermission.getWritePermission(), guestPermission.getDeletePermission(), guestPermission.isFolderAdmin()));
         getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
+        guestPermission.setRecipient(recipient);
         /*
          * discover & check share
          */
         share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
         assertNotNull("Password not set", ((AnonymousRecipient) share.getRecipient()).getPassword());
         assertEquals("Password wrong", recipient.getPassword(), ((AnonymousRecipient) share.getRecipient()).getPassword());
@@ -128,7 +129,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * discover & check share
          */
         share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
         assertNotNull("Password not set", ((AnonymousRecipient) share.getRecipient()).getPassword());
         assertEquals("Password wrong", recipient.getPassword(), ((AnonymousRecipient) share.getRecipient()).getPassword());
@@ -141,7 +142,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * discover & check share
          */
         share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
         assertNull("Password is set", ((AnonymousRecipient) share.getRecipient()).getPassword());
     }
@@ -169,7 +170,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * discover & check share
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         /*
          * check access to share
          */

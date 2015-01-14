@@ -597,40 +597,47 @@ public abstract class ShareTest extends AbstractAJAXSession {
     /**
      * Checks the supplied share against the expected guest permissions.
      *
-     * @param expected The expected permissions
+     * @param expectedPermission The expected permissions
+     * @param expectedFile The expected file
      * @param actual The actual share
      */
-    protected static void checkShare(FileStorageGuestObjectPermission expected, ParsedShare actual) {
+    protected static void checkShare(FileStorageGuestObjectPermission expectedPermission, File expectedFile, ParsedShare actual) {
         assertNotNull("No share", actual);
 //        assertEquals("Expiry date wrong", expected.getExpiryDate(), actual.getTarget().getExpiryDate());
-        if (RecipientType.ANONYMOUS.equals(expected.getRecipient().getType())) {
-            if (null == ((AnonymousRecipient) expected.getRecipient()).getPassword()) {
-                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS, actual.getAuthentication());
-            } else {
-                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS_PASSWORD, actual.getAuthentication());
-            }
-        } else if (RecipientType.GUEST.equals(expected.getRecipient().getType())) {
-            assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
-        }
-        checkRecipient(expected.getRecipient(), actual.getRecipient());
+        checkAuthentication(expectedPermission.getRecipient(), actual);
+        checkRecipient(expectedPermission.getRecipient(), actual.getRecipient());
+        assertNotNull("No share target", actual.getTarget());
+        assertEquals("Target module wrong", FolderObject.INFOSTORE, actual.getTarget().getModule());
+        assertEquals("Target folder wrong", expectedFile.getFolderId(), actual.getTarget().getFolder());
+        assertEquals("Target item wrong", expectedFile.getId(), actual.getTarget().getItem());
     }
 
     /**
      * Checks the supplied share against the expected guest permissions.
      *
-     * @param expected The expected permissions
+     * @param expectedPermission The expected permissions
+     * @param expectedFolder The expected folder
      * @param actual The actual share
      */
-    protected static void checkShare(OCLGuestPermission expected, ParsedShare actual) {
+    protected static void checkShare(OCLGuestPermission expectedPermission, FolderObject expectedFolder, ParsedShare actual) {
         assertNotNull("No share", actual);
-//        assertEquals("Expiry date wrong", expected.getExpires(), actual.getTarget().getExpiryDate());
+        checkAuthentication(expectedPermission.getRecipient(), actual);
+        checkRecipient(expectedPermission.getRecipient(), actual.getRecipient());
+        assertNotNull("No share target", actual.getTarget());
+        assertEquals("Target module wrong", expectedFolder.getModule(), actual.getTarget().getModule());
+        assertEquals("Target folder wrong", String.valueOf(expectedFolder.getObjectID()), actual.getTarget().getFolder());
+    }
 
-//        assertEquals("Authentication mode wrong", expected.getAuthenticationMode(), actual.getAuthentication());
-//        if (AuthenticationMode.ANONYMOUS != expected.getAuthenticationMode()) {
-//            assertEquals("E-Mail address wrong", expected.getEmailAddress(), actual.getGuestMailAddress());
-////TODO            assertEquals("Display name wrong", guestPermission.getDisplayName(), share.getGuestDisplayName());
-//            assertEquals("Password wrong", expected.getPassword(), actual.getGuestPassword());
-//        }
+    private static void checkAuthentication(ShareRecipient expected, ParsedShare actual) {
+        if (RecipientType.ANONYMOUS.equals(expected.getType())) {
+            if (null == ((AnonymousRecipient) expected).getPassword()) {
+                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS, actual.getAuthentication());
+            } else {
+                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS_PASSWORD, actual.getAuthentication());
+            }
+        } else if (RecipientType.GUEST.equals(expected.getType())) {
+            assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
+        }
     }
 
     private static void checkRecipient(ShareRecipient expected, ShareRecipient actual) {

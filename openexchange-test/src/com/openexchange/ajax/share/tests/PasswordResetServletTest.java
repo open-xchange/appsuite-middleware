@@ -120,7 +120,7 @@ public final class PasswordResetServletTest extends ShareTest {
          * discover & check share
          */
         ParsedShare lShare = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(lGuestPermission, lShare);
+        checkShare(lGuestPermission, folder, lShare);
         /*
          * check access to share
          */
