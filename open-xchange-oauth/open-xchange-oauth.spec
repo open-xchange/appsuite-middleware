@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 14
+%define        ox_release 15
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -99,6 +99,13 @@ if [ ${1:-0} -eq 2 ]; then
     if [ "$VALUE" = "false" ]; then
         ox_set_property com.openexchange.oauth.xing true $PFILE
     fi
+
+    # SoftwareChange_Request-2275
+    ox_set_property com.openexchange.oauth.boxcom false /opt/open-xchange/etc/boxcomoauth.properties
+    ox_set_property com.openexchange.oauth.dropbox false /opt/open-xchange/etc/dropboxoauth.properties
+    ox_set_property com.openexchange.oauth.google false /opt/open-xchange/etc/googleoauth.properties
+    ox_set_property com.openexchange.oauth.msliveconnect false /opt/open-xchange/etc/msliveconnectoauth.properties
+    ox_set_property com.openexchange.oauth.xing false /opt/open-xchange/etc/xingoauth.properties
 fi
 
 %clean
@@ -124,6 +131,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Mon Jan 12 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-01-09
 * Wed Jan 07 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-01-12
 * Mon Dec 08 2014 Steffen Templin <marcus.klein@open-xchange.com>
