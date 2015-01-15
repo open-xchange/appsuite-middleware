@@ -3112,21 +3112,13 @@ msgid "The session is no longer available. Please try again."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guest/src/com/openexchange/guest/GuestExceptionMessage.java:63
-msgid "Could not connect to the guest storage."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guest/src/com/openexchange/guest/GuestExceptionMessage.java:65
 msgid ""
 "The provided mail address %1$s is invalid! It cannot be added to guest "
 "administration."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guest/src/com/openexchange/guest/GuestExceptionMessage.java:67
-msgid "The guest cannot be created due to an internal server error."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guest/src/com/openexchange/guest/GuestExceptionMessage.java:69
-msgid "Error while resetting password for user with mail address: %1$s."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guest/src/com/openexchange/guest/GuestExceptionMessage.java:65
+msgid "The new password might not be empty! Please provide a password."
 msgstr ""
 
 #. No Linked-In account available.
