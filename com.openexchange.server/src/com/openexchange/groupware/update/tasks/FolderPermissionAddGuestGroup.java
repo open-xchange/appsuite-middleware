@@ -147,7 +147,8 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
         try {
             stmt = connection.prepareStatement(
                 "INSERT INTO oxfolder_permissions (cid,fuid,permission_id,fp,orp,owp,odp,admin_flag,group_flag,system) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?);"
+                "VALUES (?,?,?,?,?,?,?,?,?,?) " +
+                "ON DUPLICATE KEY UPDATE fp=?,orp=?,owp=?,odp=?,admin_flag=?,group_flag=?,system=?;"
             );
             stmt.setInt(1, contextID);
             stmt.setInt(3, OCLPermission.ALL_GUESTS);
@@ -158,6 +159,13 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
             stmt.setInt(8, 0);
             stmt.setInt(9, 1);
             stmt.setInt(10, 0);
+            stmt.setInt(11, OCLPermission.READ_FOLDER);
+            stmt.setInt(12, OCLPermission.NO_PERMISSIONS);
+            stmt.setInt(13, OCLPermission.NO_PERMISSIONS);
+            stmt.setInt(14, OCLPermission.NO_PERMISSIONS);
+            stmt.setInt(15, 0);
+            stmt.setInt(16, 1);
+            stmt.setInt(17, 0);
             /*
              * add permissions to system folders with "read_folder" folder access
              */
