@@ -281,6 +281,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return b.booleanValue();
     }
 
+    private static volatile Boolean allowESORT;
+    /** Whether ESORT is allowed to be utilized */
+    static boolean allowESORT() {
+        Boolean b = allowESORT;
+        if (null == b) {
+            synchronized (IMAPMessageStorage.class) {
+                b = allowESORT;
+                if (null == b) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.allowESORT", true));
+                    allowESORT = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
@@ -288,6 +305,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             public void reloadConfiguration(final ConfigurationService configService) {
                 byEnvelope = null;
                 useImapThreaderIfSupported = null;
+                allowESORT = null;
             }
 
             @Override
@@ -1496,7 +1514,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             int[] msgIds;
             {
-                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, imapConfig);
+                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, allowESORT(), imapConfig);
                 msgIds = result.msgIds;
                 if (false == result.rangeApplied) {
                     msgIds = applyIndexRange(msgIds, indexRange);
