@@ -3127,7 +3127,30 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return new long[0];
                 }
                 final String hash = randomUUID();
-                filteredMsgs.get(0).setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
+                try {
+                    Message message = filteredMsgs.get(0);
+                    /*
+                     * Check for empty content
+                     */
+                    AppendEmptyMessageTracer.checkForEmptyMessage(message, destFullName, imapConfig);
+                    /*
+                     * Set marker
+                     */
+                    message.setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
+                } catch (final Exception e) {
+                    // Is read-only -- create a copy from first message
+                    final MimeMessage newMessage;
+                    final Message removed = filteredMsgs.remove(0);
+                    if (removed instanceof ReadableMime) {
+                        newMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), ((ReadableMime) removed).getMimeStream());
+                        newMessage.setFlags(removed.getFlags(), true);
+                    } else {
+                        newMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), MimeMessageUtility.getStreamFromPart(removed));
+                        newMessage.setFlags(removed.getFlags(), true);
+                    }
+                    newMessage.setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
+                    filteredMsgs.add(0, newMessage);
+                }
                 /*
                  * ... and append them to folder
                  */
@@ -3224,6 +3247,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             throw handleMessagingException(destFullName, e);
+        } catch (final MessageRemovedIOException e) {
+            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {

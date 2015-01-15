@@ -1,3 +1,7 @@
+* 2015-01-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36128: Deal with possible "javax.mail.IllegalWriteException: IMAPMessage is read-only" error
+
 * 2015-01-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 36090: Support SPECIAL-USE marked standard folders
