@@ -281,7 +281,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
     }
 
     private String getCurrentMessage(Appointment currentAppointment, int userId) {
-        if (currentAppointment.getUsers() == null || currentAppointment.getUsers().length == 0) {
+        if (currentAppointment == null || currentAppointment.getUsers() == null || currentAppointment.getUsers().length == 0) {
             return null;
         }
 
@@ -296,7 +296,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
     }
 
     private int getCurrentConfirmation(Appointment currentAppointment, int userId) {
-        if (currentAppointment.getUsers() == null || currentAppointment.getUsers().length == 0) {
+        if (currentAppointment == null || currentAppointment.getUsers() == null || currentAppointment.getUsers().length == 0) {
             return -1;
         }
 
