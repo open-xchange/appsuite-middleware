@@ -301,6 +301,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 byEnvelope = null;
