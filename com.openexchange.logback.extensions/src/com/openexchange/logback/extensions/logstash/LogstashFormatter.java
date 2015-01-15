@@ -58,6 +58,7 @@ import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.spi.LifeCycle;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
 
 /**
  * {@link LogstashFormatter}. Formats {@link ILoggingEvent} objects as JSON objects.
@@ -99,13 +100,14 @@ public class LogstashFormatter implements LifeCycle {
 
     /**
      * Write the event as a JSON object to the stream
-     * 
+     *
      * @param event The logging event
      * @param outputStream The output stream
      * @throws IOException
      */
     public void writeToStream(ILoggingEvent event, OutputStream outputStream) throws IOException {
         JsonGenerator generator = new JsonFactory().createGenerator(outputStream);
+        generator.configure(Feature.FLUSH_PASSED_TO_STREAM, false);
         generator.writeStartObject();
 
         generator.writeStringField(LogstashFieldName.timestamp.getLogstashName(), LOGSTASH_TIMEFORMAT.format(event.getTimeStamp()));
