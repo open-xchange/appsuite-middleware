@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.command;
 
+import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import java.io.IOException;
@@ -154,7 +155,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         command = getFetchCommand(isRev1, fp, false);
         uid = false;
         length = seqNums.length;
-        seqNum2index = new TIntIntHashMap(length);
+        seqNum2index = new TIntIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
         uid2index = null;
         for (int i = 0; i < length; i++) {
             seqNum2index.put(seqNums[i], i);
@@ -187,7 +188,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
         length = uids.length;
-        uid2index = new TLongIntHashMap(length);
+        uid2index = new TLongIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
         seqNum2index = null;
         for (int i = 0; i < length; i++) {
             uid2index.put(uids[i], i);
@@ -382,18 +383,20 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         final FetchResponse fetchResponse = (FetchResponse) currentReponse;
         final int seqNum = fetchResponse.getNumber();
-        final int pos;
+        int pos;
         if (null == seqNum2index) {
-            final UID uidItem = getItemOf(UID.class, fetchResponse);
-            if (null != uidItem && uid2index.containsKey(uidItem.uid)) {
+            UID uidItem = getItemOf(UID.class, fetchResponse);
+            if (null != uidItem) {
                 pos = uid2index.remove(uidItem.uid);
+                if (pos < 0) {
+                    pos = index;
+                }
             } else {
                 pos = index;
             }
         } else {
-            if (seqNum2index.containsKey(seqNum)) {
-                pos = seqNum2index.remove(seqNum);
-            } else {
+            pos = seqNum2index.remove(seqNum);
+            if (pos < 0) {
                 pos = index;
             }
         }
