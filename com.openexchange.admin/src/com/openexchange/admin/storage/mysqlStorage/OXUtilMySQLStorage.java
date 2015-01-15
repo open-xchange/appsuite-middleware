@@ -64,27 +64,38 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.collections.keyvalue.MultiKey;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.database.Databases;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -93,7 +104,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
-    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorage.class);
+    /** The logger */
+    final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorage.class);
 
     private static final ThreadPools.ExpectedExceptionFactory<StorageException> EXCEPTION_FACTORY = new ThreadPools.ExpectedExceptionFactory<StorageException>() {
 
@@ -350,6 +362,294 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             prep.executeUpdate();
         } finally {
             DBUtils.closeSQLStuff(prep);
+        }
+    }
+
+    @Override
+    public void changeFilestoreDataFor(Context ctx) throws StorageException {
+        Connection configDbCon = null;
+        boolean rollback = false;
+        try {
+            configDbCon = cache.getConnectionForConfigDB();
+            configDbCon.setAutoCommit(false);
+            rollback = true;
+
+            changeFilestoreDataFor(ctx, configDbCon);
+
+            configDbCon.commit();
+            rollback = false;
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != configDbCon) {
+                if (rollback) {
+                    Databases.rollback(configDbCon);
+                }
+                Databases.autocommit(configDbCon);
+                try {
+                    cache.pushConnectionForConfigDB(configDbCon);
+                } catch (PoolException e) {
+                    // Ignroe
+                }
+            }
+        }
+    }
+
+    @Override
+    public void changeFilestoreDataFor(Context ctx, Connection configDbCon) throws StorageException {
+        if (ctx.getFilestoreId() != null) {
+            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            final Filestore filestore = oxutil.getFilestore(ctx.getFilestoreId().intValue(), false);
+            PreparedStatement prep = null;
+            final int context_id = ctx.getId().intValue();
+            try {
+
+                if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
+                    prep = configDbCon.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
+                    prep.setInt(1, filestore.getId().intValue());
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+                final String filestore_name = ctx.getFilestore_name();
+                if (null != filestore_name) {
+                    prep = configDbCon.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
+                    prep.setString(1, filestore_name);
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+            } catch (SQLException exp) {
+                throw new StorageException(exp);
+            } finally {
+                Databases.closeSQLStuff(prep);
+            }
+        }
+    }
+
+    @Override
+    public void prepareFilestoreUsageFor(User user, Context ctx) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            con.setAutoCommit(false);
+            rollback = true;
+
+            prepareFilestoreUsageFor(user, ctx, con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    // Ignroe
+                }
+            }
+        }
+    }
+
+    @Override
+    public void prepareFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        int userId = user.getId().intValue();
+
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            prep = con.prepareStatement("SELECT 1 FROM filestore_usage WHERE cid=? AND user=?");
+            prep.setInt(1, contextId);
+            prep.setInt(2, userId);
+            rs = prep.executeQuery();
+
+            boolean exists = rs.next();
+            Databases.closeSQLStuff(rs, prep);
+
+            if (false == exists) {
+                prep = con.prepareStatement("INSERT INTO filestore_usage (cid, user, used) VALUES (?, ?, ?)");
+                prep.setInt(1, contextId);
+                prep.setInt(2, userId);
+                prep.setLong(3, 0L);
+                prep.executeUpdate();
+            }
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } finally {
+            Databases.closeSQLStuff(rs, prep);
+        }
+    }
+
+    @Override
+    public void cleanseFilestoreUsageFor(User user, Context ctx) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            con.setAutoCommit(false);
+            rollback = true;
+
+            cleanseFilestoreUsageFor(user, ctx, con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    // Ignroe
+                }
+            }
+        }
+    }
+
+    @Override
+    public void cleanseFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        int userId = user.getId().intValue();
+
+        PreparedStatement prep = null;
+        try {
+            prep = con.prepareStatement("DELETE FROM filestore_usage WHERE cid=? AND user=?");
+            prep.setInt(1, contextId);
+            prep.setInt(2, userId);
+            prep.executeUpdate();
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } finally {
+            Databases.closeSQLStuff(prep);
+        }
+    }
+
+    @Override
+    public void changeFilestoreDataFor(User user, Context ctx) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            con.setAutoCommit(false);
+            rollback = true;
+
+            changeFilestoreDataFor(user, ctx, con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException exp) {
+            throw new StorageException(exp);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    // Ignroe
+                }
+            }
+        }
+    }
+
+    @Override
+    public void changeFilestoreDataFor(User user, Context ctx, Connection con) throws StorageException {
+        if (user.getFilestoreId() != null && -1 != user.getFilestoreId().intValue()) {
+            int filestoreId = user.getFilestoreId().intValue();
+
+            int contextId = ctx.getId().intValue();
+            int userId = user.getId().intValue();
+            PreparedStatement prep = null;
+            try {
+                String filestoreName = user.getFilestore_name();
+                if (null == filestoreName) {
+                    filestoreName = FileStorages.getNameForUser(userId, contextId);
+                }
+
+                boolean changed = false;
+                if (filestoreId >= 0) {
+                    prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ? AND filestore_id <> ?");
+                    prep.setInt(1, filestoreId);
+                    prep.setInt(2, contextId);
+                    prep.setInt(3, userId);
+                    prep.setInt(4, filestoreId);
+                    changed = prep.executeUpdate() > 0;
+                    Databases.closeSQLStuff(prep);
+                }
+
+                {
+                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? where cid=? and id=? and filestore_name != ?");
+                    prep.setString(1, filestoreName);
+                    prep.setInt(2, contextId);
+                    prep.setInt(3, userId);
+                    prep.setString(4, filestoreName);
+                    changed |= prep.executeUpdate() > 0;
+                    Databases.closeSQLStuff(prep);
+                }
+
+                if (changed) {
+                    Integer fsOwner = user.getFilestoreOwner();
+                    if (fsOwner != null && -1 != fsOwner.intValue()) {
+                        prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
+                        prep.setInt(1, fsOwner.intValue() == userId ? 0 : fsOwner.intValue());
+                        prep.setInt(2, contextId);
+                        prep.setInt(3, userId);
+                        prep.executeUpdate();
+                        Databases.closeSQLStuff(prep);
+                    } else {
+                        prep = con.prepareStatement("UPDATE user SET filestore_owner = ? WHERE cid = ? AND id = ?");
+                        prep.setInt(1, 0);
+                        prep.setInt(2, contextId);
+                        prep.setInt(3, userId);
+                        prep.executeUpdate();
+                        Databases.closeSQLStuff(prep);
+                    }
+
+                    Long maxQuota = user.getMaxQuota();
+                    if (null != maxQuota) {
+                        long quota_max_temp = maxQuota.longValue();
+                        if (quota_max_temp != -1) {
+                            quota_max_temp *= Math.pow(2, 20);
+                        }
+                        prep = con.prepareStatement("UPDATE user SET quota_max = ? WHERE cid = ? AND id = ?");
+                        prep.setLong(1, quota_max_temp);
+                        prep.setInt(2, contextId);
+                        prep.setInt(3, userId);
+                        prep.executeUpdate();
+                        Databases.closeSQLStuff(prep);
+                    }
+                }
+            } catch (SQLException exp) {
+                throw new StorageException(exp);
+            } finally {
+                Databases.closeSQLStuff(prep);
+            }
         }
     }
 
@@ -903,15 +1203,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         ResultSet rs = null;
         try {
             con = cache.getConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
-            rs = stmt.executeQuery();
 
-            if (!rs.next()) {
-                // None found
-                throw new StorageException("No filestore found");
-            }
-
-            // Load potential candidates
+            // Define candidate class
             class Candidate {
                 final int id;
                 final int maxNumberOfContexts;
@@ -925,21 +1218,63 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
             }
 
-            final List<Candidate> candidates = new LinkedList<Candidate>();
-            do {
-                candidates.add(new Candidate(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
-            } while (rs.next());
+            // Load potential candidates
+            List<Candidate> candidates = new LinkedList<Candidate>();
+            {
+                stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+                rs = stmt.executeQuery();
 
-            // Close resources as no more needed
-            DBUtils.closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
+                if (!rs.next()) {
+                    // None found
+                    throw new StorageException("No filestore found");
+                }
+
+                do {
+                    candidates.add(new Candidate(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
+                } while (rs.next());
+
+                // Close resources
+                closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+            // Determine available pools/schemas
+            Set<PoolAndSchema> pools = new LinkedHashSet<PoolAndSchema>();
+            {
+                try {
+                    stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id, db_schema FROM context_server2db_pool WHERE server_id=?");
+                    stmt.setInt(1, cache.getServerId());
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        pools.add(new PoolAndSchema(rs.getInt(1), rs.getString(2)));
+                    }
+                } catch (PoolException e) {
+                    LOG.error("SQL Error", e);
+                    throw new StorageException(e);
+                } catch (SQLException e) {
+                    LOG.error("SQL Error", e);
+                    throw new StorageException(e);
+                } finally {
+                    closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+                }
+            }
+
+            // Determine file storage user/context counts
+            Map<Integer, Integer> filestoreUserCounts = getFilestoreUserCounts(pools);
 
             // Find a suitable one from ordered list of candidates
-            for (final Candidate candidate : candidates) {
+            boolean loadRealUsage = false;
+            for (Candidate candidate : candidates) {
                 if (candidate.maxNumberOfContexts > 0 && candidate.numberOfContexts < candidate.maxNumberOfContexts) {
+                    // Get user count information
+                    Integer count = filestoreUserCounts.get(Integer.valueOf(candidate.id));
+                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.intValue(), 0L);
+
                     // Get filestore
-                    final Filestore filestore = getFilestore(candidate.id, false, con);
+                    Filestore filestore = getFilestore(candidate.id, loadRealUsage, pools, null, userFilestoreUsage, con);
                     if (enoughSpaceForContext(filestore)) {
                         return filestore;
                     }
@@ -970,18 +1305,28 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public boolean hasSpaceForAnotherContext(final Filestore filestore) throws StorageException {
-        return !isContextLimitReached(filestore) && enoughSpaceForContext(filestore);
+    public boolean hasSpaceForAnotherUser(Filestore filestore) throws StorageException {
+        return !isEntityLimitReached(filestore) && enoughSpaceForUser(filestore);
     }
 
-    private boolean isContextLimitReached(final Filestore filestore) {
+    @Override
+    public boolean hasSpaceForAnotherContext(Filestore filestore) throws StorageException {
+        return !isEntityLimitReached(filestore) && enoughSpaceForContext(filestore);
+    }
+
+    private boolean isEntityLimitReached(Filestore filestore) {
         // 0 is the special value for not adding contexts to this filestore.
         // and check if the current contexts stored in the filestore reach the maximum context value for the filestore.
         return 0 == filestore.getMaxContexts().intValue() || filestore.getCurrentContexts().intValue() >= filestore.getMaxContexts().intValue();
     }
 
-    private boolean enoughSpaceForContext(final Filestore filestore) throws StorageException {
-        final long averageSize = getAverageFilestoreSpace();
+    private boolean enoughSpaceForContext(Filestore filestore) throws StorageException {
+        long averageSize = getAverageFilestoreSpaceForContext();
+        return filestore.getReserved().longValue() + averageSize <= filestore.getSize().longValue();
+    }
+
+    private boolean enoughSpaceForUser(Filestore filestore) throws StorageException {
+        long averageSize = getAverageFilestoreSpaceForUser();
         return filestore.getReserved().longValue() + averageSize <= filestore.getSize().longValue();
     }
 
@@ -989,16 +1334,28 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @return the configured average file store space per context in mega bytes (MB).
      * @throws StorageException if parsing the configuration option fails.
      */
-    private long getAverageFilestoreSpace() throws StorageException {
-        final String value = prop.getProp("AVERAGE_CONTEXT_SIZE", "100");
-        long average_size;
+    private long getAverageFilestoreSpaceForContext() throws StorageException {
+        final String value = prop.getProp("AVERAGE_CONTEXT_SIZE", "200");
         try {
-            average_size = Long.parseLong(value);
+            return Long.parseLong(value);
         } catch (final NumberFormatException e) {
             LOG.error("Unable to parse average context filestore space from configuration file.", e);
             throw new StorageException("Unable to parse average context filestore space from configuration file.", e);
         }
-        return average_size;
+    }
+
+    /**
+     * @return the configured average file store space per user in mega bytes (MB).
+     * @throws StorageException if parsing the configuration option fails.
+     */
+    private long getAverageFilestoreSpaceForUser() throws StorageException {
+        final String value = prop.getProp("AVERAGE_USER_SIZE", "100");
+        try {
+            return Long.parseLong(value);
+        } catch (final NumberFormatException e) {
+            LOG.error("Unable to parse average user filestore space from configuration file.", e);
+            throw new StorageException("Unable to parse average user filestore space from configuration file.", e);
+        }
     }
 
     @Override
@@ -1343,8 +1700,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
-    private static final long toMB(final long value) {
-        return value / 0x100000;
+    private static long toMB(long value) {
+        return 0 == value ? 0 : value / 0x100000;
     }
 
     @Override
@@ -1363,19 +1720,19 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @throws StorageException if loading the filestore information fails.
      */
     @Override
-    public Filestore getFilestore(final int id, final boolean loadRealUsage) throws StorageException {
+    public Filestore getFilestore(int id, boolean loadRealUsage) throws StorageException {
         Connection con = null;
         try {
             con = cache.getConnectionForConfigDB();
             return getFilestore(id, loadRealUsage, con);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
             if (null != con) {
                 try {
                     cache.pushConnectionForConfigDB(con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
             }
@@ -1387,43 +1744,68 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * the filestore usage for all contexts stored in that filestore must be loaded. Setting this parameter to <code>false</code> will set
      * the real usage of the filestore to 0.
      *
-     * @param id unique identifier of the filestore.
+     * @param id The unique identifier of the filestore.
      * @param loadRealUsage <code>true</code> to load the real file store usage of that filestore.
-     * @return all filestore information
+     * @return All filestore information
      * @throws StorageException if loading the filestore information fails.
      */
-    private Filestore getFilestore(final int id, final boolean loadRealUsage, final Connection con) throws StorageException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        final Filestore fs;
-        try {
-            stmt = con.prepareStatement("SELECT uri,size,max_context FROM filestore WHERE id=?");
-            stmt.setInt(1, id);
-            result = stmt.executeQuery();
-            if (!result.next()) {
-                throw new StorageException("unable to get filestore data");
+    private Filestore getFilestore(int id, boolean loadRealUsage, Connection configdbCon) throws StorageException {
+        return getFilestore(id, loadRealUsage, null, null, null, configdbCon);
+    }
+
+    /**
+     * Loads all filestore information. BEWARE! If loadRealUsage is set to <code>true</code> this operation may be very expensive because
+     * the filestore usage for all contexts stored in that filestore must be loaded. Setting this parameter to <code>false</code> will set
+     * the real usage of the filestore to 0.
+     *
+     * @param id The unique identifier of the filestore.
+     * @param loadRealUsage <code>true</code> to load the real file store usage of that filestore.
+     * @param pools Available database pools (<i>optional</i>)
+     * @param contextFilestoreUsage The context filestore usage (<i>optional</i>)
+     * @param userFilestoreUsage The user filestore usage (<i>optional</i>)
+     * @return All filestore information
+     * @throws StorageException if loading the filestore information fails.
+     */
+    private Filestore getFilestore(int id, boolean loadRealUsage, Collection<PoolAndSchema> pools, FilestoreUsage contextFilestoreUsage, FilestoreUsage userFilestoreUsage, Connection configdbCon) throws StorageException {
+        Filestore fs;
+
+        // Load data from database
+        {
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                stmt = configdbCon.prepareStatement("SELECT uri, size, max_context FROM filestore WHERE id=?");
+                stmt.setInt(1, id);
+                result = stmt.executeQuery();
+                if (!result.next()) {
+                    throw new StorageException("No such file storage for identifier " + id);
+                }
+                fs = new Filestore();
+                int pos = 1;
+                fs.setId(I(id));
+                fs.setUrl(result.getString(pos++));
+                fs.setSize(L(toMB(result.getLong(pos++))));
+                fs.setMaxContexts(I(result.getInt(pos++)));
+            } catch (final SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } finally {
+                closeSQLStuff(result, stmt);
             }
-            fs = new Filestore();
-            int pos = 1;
-            fs.setId(I(id));
-            fs.setUrl(result.getString(pos++));
-            fs.setSize(L(toMB(result.getLong(pos++))));
-            fs.setMaxContexts(I(result.getInt(pos++)));
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } finally {
-            closeSQLStuff(result, stmt);
         }
-        final FilestoreUsage usage = getUsage(id, loadRealUsage);
-        fs.setUsed(L(toMB(usage.getUsage())));
-        fs.setCurrentContexts(I(usage.getCtxCount()));
-        fs.setReserved(L(getAverageFilestoreSpace() * usage.getCtxCount()));
+
+        // Load usage information
+        FilestoreUsage usrCounts = null == userFilestoreUsage ? getUserUsage(id, loadRealUsage, pools, configdbCon) : userFilestoreUsage;
+        FilestoreUsage ctxCounts = null == contextFilestoreUsage ? getContextUsage(id, loadRealUsage, configdbCon) : contextFilestoreUsage;
+        fs.setUsed(L(toMB(ctxCounts.usage + usrCounts.usage)));
+        fs.setCurrentContexts(I(ctxCounts.entityCount + usrCounts.entityCount));
+        fs.setReserved(L((getAverageFilestoreSpaceForContext() * ctxCounts.entityCount) + (getAverageFilestoreSpaceForUser() * usrCounts.entityCount)));
         return fs;
     }
 
     private void updateFilestoresWithRealUsage(final List<Filestore> stores) throws StorageException {
-        final Collection<FilestoreContextBlock> blocks = makeBlocksFromFilestoreContexts();
+        Collection<FilestoreContextBlock> blocks = makeBlocksFromFilestoreContexts();
+
         // Sort by database.
         Map<Integer, Collection<FilestoreContextBlock>> dbMap = new HashMap<Integer, Collection<FilestoreContextBlock>>();
         for (FilestoreContextBlock block : blocks) {
@@ -1434,6 +1816,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
             dbBlock.add(block);
         }
+
         // Create callables for every database server and submit them to the completion service.
         final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
         int taskCount = 0;
@@ -1447,10 +1830,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             });
             taskCount++;
         }
+
         // Await completion
         ThreadPools.<Void, StorageException> takeCompletionService(completionService, taskCount, EXCEPTION_FACTORY);
+
         // Combine the information from the blocks into the stores collection.
         updateFilestoresWithUsageFromBlocks(stores, blocks);
+
         // We read bytes from the database but the RMI client wants to see mega bytes.
         for (final Filestore store: stores){
             store.setSize(L(toMB(l(store.getSize()))));
@@ -1459,42 +1845,112 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     private static Collection<FilestoreContextBlock> makeBlocksFromFilestoreContexts() throws StorageException {
-        final Connection con;
-        try {
-            con = cache.getConnectionForConfigDB();
-        } catch (final PoolException e) {
-            throw new StorageException(e);
-        }
+        final ConcurrentMap<MultiKey, FilestoreContextBlock> blocks = new ConcurrentHashMap<MultiKey, FilestoreContextBlock>();
+
+        Connection con = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
+            int serverId = cache.getServerId();
+
+            con = cache.getConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT d.cid,d.write_db_pool_id,d.db_schema,c.filestore_id FROM context_server2db_pool d JOIN context c ON d.cid=c.cid WHERE d.server_id=?");
-            stmt.setInt(1, cache.getServerId());
+            stmt.setInt(1, serverId);
             result = stmt.executeQuery();
-            final Map<MultiKey, FilestoreContextBlock> blocks = new HashMap<MultiKey, FilestoreContextBlock>();
             while (result.next()) {
-                final FilestoreInfo temp = new FilestoreInfo(result.getInt(1), result.getInt(2), result.getString(3), result.getInt(4));
-                final MultiKey key = new MultiKey(I(temp.writeDBPoolID), temp.dbSchema, I(temp.filestoreID));
+                FilestoreInfo temp = new FilestoreInfo(result.getInt(1), result.getInt(2), result.getString(3), result.getInt(4));
+                MultiKey key = new MultiKey(I(temp.writeDBPoolID), temp.dbSchema, I(temp.filestoreID));
                 FilestoreContextBlock block = blocks.get(key);
                 if (null == block) {
                     block = new FilestoreContextBlock(temp.writeDBPoolID, temp.filestoreID);
                     blocks.put(key, block);
                 }
-                block.add(temp);
+                block.addForContext(temp);
             }
-            return blocks.values();
+
+            closeSQLStuff(result, stmt);
+
+            Set<PoolAndSchema> retval = new LinkedHashSet<PoolAndSchema>();
+
+            stmt = con.prepareStatement("SELECT write_db_pool_id, db_schema FROM context_server2db_pool WHERE server_id=?");
+            stmt.setInt(1, serverId);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                retval.add(new PoolAndSchema(result.getInt(1), result.getString(2)));
+            }
+
+            CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+            int taskCount = 0;
+
+            for (final PoolAndSchema poolAndSchema : retval) {
+                final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
+                completionService.submit(new Callable<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        Connection con = null;
+                        PreparedStatement stmt = null;
+                        ResultSet result = null;
+                        try {
+                            con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
+                            stmt = con.prepareStatement("SELECT cid, id, filestore_id FROM user WHERE filestore_id > 0");
+                            result = stmt.executeQuery();
+
+                            FilestoreInfo temp = new FilestoreInfo(result.getInt(1), result.getInt(2), poolAndSchema.poolId, poolAndSchema.dbSchema, result.getInt(3));
+                            MultiKey key = new MultiKey(I(temp.writeDBPoolID), temp.dbSchema, I(temp.filestoreID));
+
+                            FilestoreContextBlock block = blocks.get(key);
+                            if (null == block) {
+                                FilestoreContextBlock newBlock = new FilestoreContextBlock(poolAndSchema.poolId, temp.filestoreID);
+                                block = blocks.putIfAbsent(key, newBlock);
+                                if (null == block) {
+                                    block = newBlock;
+                                }
+                            }
+
+                            block.addForUser(temp);
+
+                            return null;
+                        } catch (PoolException e) {
+                            LOG.error("Pool Error", e);
+                            throw new StorageException(e);
+                        } catch (SQLException e) {
+                            LOG.error("SQL Error", e);
+                            throw new StorageException(e);
+                        } finally {
+                            closeSQLStuff(result, stmt);
+                            if (null != con) {
+                                try {
+                                    cache.pushWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, con);
+                                } catch (PoolException e) {
+                                    LOG.error("Error pushing connection to pool!", e);
+                                }
+                            }
+                        }
+                    }
+                });
+                taskCount++;
+            }
+
+            // Await completion
+            ThreadPools.<Void, StorageException> takeCompletionService(completionService, taskCount, EXCEPTION_FACTORY);
         } catch (final PoolException e) {
             throw new StorageException(e);
         } catch (final SQLException e) {
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
-            try {
-                cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException e) {
-                throw new StorageException(e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    throw new StorageException(e);
+                }
             }
         }
+
+
+        return blocks.values();
     }
 
     protected static void updateBlocksInSameDBWithFilestoreUsage(Collection<FilestoreContextBlock> blocks) throws StorageException {
@@ -1504,162 +1960,646 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     private static void updateBlockWithFilestoreUsage(final FilestoreContextBlock block) throws StorageException {
-        if (block.size() == 0) {
+        if (block.isEmpty()) {
             return;
         }
         Connection con = null;
-        int representativeContextID = Integer.MIN_VALUE;
-        for (Integer cid : block.filestores.keySet()) {
-            // Try to get a database connection with all context identifier from the FilestoreContextBlock.
-            try {
-                con = cache.getConnectionForContext(i(cid));
-                representativeContextID = i(cid);
-                break;
-            } catch (final PoolException e) {
-                LOG.error(e.getMessage(), e);
+
+        {
+            int representativeContextID = Integer.MIN_VALUE;
+            for (Integer cid : block.contextFilestores.keySet()) {
+                // Try to get a database connection with all context identifier from the FilestoreContextBlock.
+                try {
+                    con = cache.getConnectionForContext(i(cid));
+                    representativeContextID = i(cid);
+                    break;
+                } catch (final PoolException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
-        }
-        if (null == con) {
-            // If none is available anymore, we can not add any usage data and we should just return.
-            return;
-        }
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement("SELECT cid,used FROM filestore_usage");
-            result = stmt.executeQuery();
-            while (result.next()) {
-                final int cid = result.getInt(1);
-                final long usage = result.getLong(2);
-                block.update(cid, usage);
+            if (null == con) {
+                for (Integer cid : block.userFilestores.keySet()) {
+                    // Try to get a database connection.
+                    try {
+                        con = cache.getConnectionForContext(i(cid));
+                        representativeContextID = i(cid);
+                        break;
+                    } catch (final PoolException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
             }
-        } catch (final SQLException e) {
-            throw new StorageException(e);
-        } finally {
-            closeSQLStuff(result, stmt);
+
+            if (null == con) {
+                // If none is available anymore, we can not add any usage data and we should just return.
+                return;
+            }
+
+            PreparedStatement stmt = null;
+            ResultSet result = null;
             try {
-                cache.pushConnectionForContext(representativeContextID, con);
-            } catch (final PoolException e) {
+                stmt = con.prepareStatement("SELECT cid, used FROM filestore_usage WHERE user = 0");
+                result = stmt.executeQuery();
+                while (result.next()) {
+                    int cid = result.getInt(1);
+                    long usage = result.getLong(2);
+                    block.updateForContext(cid, usage);
+                }
+
+                closeSQLStuff(result, stmt);
+
+                stmt = con.prepareStatement("SELECT cid, user, used FROM filestore_usage WHERE user > 0");
+                result = stmt.executeQuery();
+                while (result.next()) {
+                    int cid = result.getInt(1);
+                    int userId = result.getInt(2);
+                    long usage = result.getLong(3);
+                    block.updateForUser(cid, userId, usage);
+                }
+            } catch (final SQLException e) {
                 throw new StorageException(e);
+            } finally {
+                closeSQLStuff(result, stmt);
+                try {
+                    cache.pushConnectionForContext(representativeContextID, con);
+                } catch (final PoolException e) {
+                    throw new StorageException(e);
+                }
             }
         }
     }
 
     private void updateFilestoresWithUsageFromBlocks(final List<Filestore> stores, final Collection<FilestoreContextBlock> blocks) throws StorageException {
-        final Map<Integer, Long> filestore2usage = new HashMap<Integer, Long>();
-        final Map<Integer, Integer> filestore2ctxUsage = new HashMap<Integer, Integer>();
-        for (final FilestoreContextBlock block : blocks) {
-            final Collection<FilestoreInfo> infos = block.filestores.values();
-            for (final FilestoreInfo info : infos) {
-                final Integer fid = I(info.filestoreID);
-                final long usage = filestore2usage.containsKey(fid) ? l(filestore2usage.get(fid)) : 0;
-                filestore2usage.put(fid, L(usage + info.usage));
-                filestore2ctxUsage.put(fid, I(filestore2ctxUsage.containsKey(fid) ? i(filestore2ctxUsage.get(fid)) + 1 : 1));
-            }
-        }
+        Map<Integer, Long> filestore2ctxUsage = new HashMap<Integer, Long>();
+        Map<Integer, Integer> filestore2ctxCount = new HashMap<Integer, Integer>();
 
-        for (final Filestore store : stores) {
-            Long usedBytes = filestore2usage.get(store.getId());
-            if (null == usedBytes) {
-                usedBytes = L(0);
-            }
-            store.setUsed(usedBytes);
-            Integer numContexts = filestore2ctxUsage.get(store.getId());
-            if (null == numContexts) {
-                numContexts = I(0);
-            }
-            store.setCurrentContexts(numContexts);
-            store.setReserved(L(getAverageFilestoreSpace() * i(numContexts)));
-        }
-    }
+        Map<Integer, Long> filestore2usrUsage = new HashMap<Integer, Long>();
+        Map<Integer, Integer> filestore2usrCount = new HashMap<Integer, Integer>();
 
-    /* ----------------------- */
-
-    private final long getContextUsedQuota(final int cid) throws StorageException {
-        final Connection con;
-        try {
-            con = cache.getConnectionForContext(cid);
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        }
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        long quotaUsed = 0;
-        try {
-            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=?");
-            stmt.setInt(1, cid);
-            result = stmt.executeQuery();
-            // One line per context in that table. cid is PRIMARY KEY.
-            if (result.next()) {
-                quotaUsed = result.getLong(1);
+        for (FilestoreContextBlock block : blocks) {
+            for (FilestoreInfo info : block.contextFilestores.values()) {
+                Integer fid = I(info.filestoreID);
+                long usage = filestore2ctxUsage.containsKey(fid) ? l(filestore2ctxUsage.get(fid)) : 0;
+                filestore2ctxUsage.put(fid, L(usage + info.usage));
+                filestore2ctxCount.put(fid, I(filestore2ctxCount.containsKey(fid) ? i(filestore2ctxCount.get(fid)) + 1 : 1));
             }
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } finally {
-            closeSQLStuff(result, stmt);
-            if (null != con) {
-                try {
-                    cache.pushConnectionForContextAfterReading(cid, con);
-                } catch (final PoolException e) {
-                    LOG.error("Error pushing ox connection to pool!", e);
+
+            for (Map<Integer, FilestoreInfo> usersInfo : block.userFilestores.values()) {
+                for (FilestoreInfo info : usersInfo.values()) {
+                    Integer fid = I(info.filestoreID);
+                    long usage = filestore2usrUsage.containsKey(fid) ? l(filestore2usrUsage.get(fid)) : 0;
+                    filestore2usrUsage.put(fid, L(usage + info.usage));
+                    filestore2usrCount.put(fid, I(filestore2usrCount.containsKey(fid) ? i(filestore2usrCount.get(fid)) + 1 : 1));
                 }
             }
         }
-        return quotaUsed;
+
+        for (Filestore store : stores) {
+            Long usedBytesCtx = filestore2ctxUsage.get(store.getId());
+            if (null == usedBytesCtx) {
+                usedBytesCtx = L(0);
+            }
+            Integer numContexts = filestore2ctxCount.get(store.getId());
+            if (null == numContexts) {
+                numContexts = I(0);
+            }
+
+            Long usedBytesUsr = filestore2usrUsage.get(store.getId());
+            if (null == usedBytesUsr) {
+                usedBytesUsr = L(0);
+            }
+            Integer numUsers = filestore2usrCount.get(store.getId());
+            if (null == numUsers) {
+                numUsers = I(0);
+            }
+
+
+            store.setUsed(Long.valueOf(usedBytesCtx.longValue() + usedBytesUsr.longValue()));
+            store.setCurrentContexts(Integer.valueOf(numContexts.intValue() + numUsers.intValue()));
+            store.setReserved(L((getAverageFilestoreSpaceForContext() * i(numContexts)) + (getAverageFilestoreSpaceForUser() * i(numUsers))));
+        }
+    }
+
+    /* -------------------------------------------------------------------------------------------------------------------- */
+
+    /**
+     * Loads the context usage information for a file storage.
+     *
+     * @param filestoreId the unique identifier of the file storage.
+     * @param loadRealUsage <code>true</code> to load the file storage usage from every context in it. BEWARE! This is a slow operation.
+     * @return The {@link FilestoreUsage} object for the file storage.
+     * @throws StorageException if some problem occurs loading the information.
+     */
+    private FilestoreUsage getContextUsage(int filestoreId, boolean loadRealUsage) throws StorageException {
+        return getContextUsage(filestoreId, loadRealUsage, null);
     }
 
     /**
-     * @param filestoreId
-     * @return
-     * @throws StorageException
+     * Loads the context usage information for a file storage.
+     *
+     * @param filestoreId the unique identifier of the file storage.
+     * @param loadRealUsage <code>true</code> to load the file storage usage from every context in it. BEWARE! This is a slow operation.
+     * @return The {@link FilestoreUsage} object for the file storage.
+     * @throws StorageException if some problem occurs loading the information.
      */
-    private int[] getContextsInFilestore(final int filestoreId) throws StorageException {
-        final Connection con;
-        try {
-            con = cache.getConnectionForConfigDB();
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
+    private FilestoreUsage getContextUsage(int filestoreId, boolean loadRealUsage, Connection configdbCon) throws StorageException {
+        if (false == loadRealUsage) {
+            // Only load context count for given file storage
+            Connection con = configdbCon;
+            boolean push = false;
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                if (null == con) {
+                    con = cache.getConnectionForConfigDB();
+                    push = true;
+                }
+                stmt = con.prepareStatement("SELECT COUNT(cid) FROM context WHERE filestore_id=?");
+                stmt.setInt(1, filestoreId);
+                result = stmt.executeQuery();
+                if (false == result.next()) {
+                    return new FilestoreUsage(0, 0L);
+                }
+
+                return new FilestoreUsage(result.getInt(1), 0L);
+            } catch (PoolException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } catch (SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } finally {
+                closeSQLStuff(result, stmt);
+                if (push && null != con) {
+                    try {
+                        cache.pushConnectionForConfigDB(con);
+                    } catch (final PoolException e) {
+                        LOG.error("Error pushing configdb connection to pool!", e);
+                    }
+                }
+            }
         }
+
+        // Get count and usage for given file storage
+        Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<PoolAndSchema, List<Integer>>();
+        int count = 0;
+
+        {
+            Connection con = configdbCon;
+            boolean push = false;
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                if (null == con) {
+                    con = cache.getConnectionForConfigDB();
+                    push = true;
+                }
+                stmt = con.prepareStatement("SELECT c.cid, s.write_db_pool_id, s.db_schema FROM context AS c JOIN context_server2db_pool AS s ON c.cid=s.cid WHERE c.filestore_id=? AND s.server_id=?");
+                stmt.setInt(1, filestoreId);
+                stmt.setInt(2, cache.getServerId());
+                result = stmt.executeQuery();
+                while (result.next()) {
+                    count++;
+
+                    PoolAndSchema poolAndSchema = new PoolAndSchema(result.getInt(2), result.getString(3));
+                    List<Integer> cids = map.get(poolAndSchema);
+                    if (null == cids) {
+                        cids = new LinkedList<Integer>();
+                        map.put(poolAndSchema, cids);
+                    }
+                    cids.add(Integer.valueOf(result.getInt(1)));
+                }
+            } catch (PoolException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } catch (SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } finally {
+                closeSQLStuff(result, stmt);
+                if (push && null != con) {
+                    try {
+                        cache.pushConnectionForConfigDB(con);
+                    } catch (final PoolException e) {
+                        LOG.error("Error pushing configdb connection to pool!", e);
+                    }
+                }
+            }
+        }
+
+        CompletionService<Long> completionService = new ThreadPoolCompletionService<Long>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+        int taskCount = 0;
+
+        for (Map.Entry<PoolAndSchema, List<Integer>> entry : map.entrySet()) {
+            final PoolAndSchema poolAndSchema = entry.getKey();
+            final List<Integer> cids = entry.getValue();
+            final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
+
+            completionService.submit(new Callable<Long>() {
+
+                @Override
+                public Long call() throws StorageException {
+                    Connection con = null;
+                    PreparedStatement stmt = null;
+                    ResultSet result = null;
+                    try {
+                        con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
+                        stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE user=0 AND cid IN " + getSqlInString(cids));
+                        result = stmt.executeQuery();
+                        long used = 0L;
+                        while (result.next()) {
+                            used += result.getLong(1);
+                        }
+                        return Long.valueOf(used);
+                    } catch (PoolException e) {
+                        LOG.error("SQL Error", e);
+                        throw new StorageException(e);
+                    } catch (SQLException e) {
+                        LOG.error("SQL Error", e);
+                        throw new StorageException(e);
+                    } finally {
+                        closeSQLStuff(result, stmt);
+                        if (null != con) {
+                            try {
+                                cache.pushWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, con);
+                            } catch (PoolException e) {
+                                LOG.error("Error pushing connection to pool!", e);
+                            }
+                        }
+                    }
+
+                }
+            });
+            taskCount++;
+        }
+
+        // Await completion
+        List<Long> usages = ThreadPools.<Long, StorageException> takeCompletionService(completionService, taskCount, EXCEPTION_FACTORY);
+
+        long used = 0L;
+        for (Long usg : usages) {
+            used += usg.longValue();
+        }
+        return new FilestoreUsage(count, used);
+    }
+
+    /**
+     * Loads the user usage information for a file storage.
+     *
+     * @param filestoreId the unique identifier of the file storage.
+     * @param loadRealUsage <code>true</code> to load the file storage usage from every context in it. BEWARE! This is a slow operation.
+     * @return The {@link FilestoreUsage} object for the file storage.
+     * @throws StorageException if some problem occurs loading the information.
+     */
+    private FilestoreUsage getUserUsage(final int filestoreId, boolean loadRealUsage) throws StorageException {
+        return getUserUsage(filestoreId, loadRealUsage, null, null);
+    }
+
+    /**
+     * Loads the user usage information for a file storage.
+     *
+     * @param filestoreId the unique identifier of the file storage.
+     * @param loadRealUsage <code>true</code> to load the file storage usage from every context in it. BEWARE! This is a slow operation.
+     * @param pools Available database pools
+     * @return The {@link FilestoreUsage} object for the file storage.
+     * @throws StorageException if some problem occurs loading the information.
+     */
+    private FilestoreUsage getUserUsage(final int filestoreId, boolean loadRealUsage, Collection<PoolAndSchema> pools, Connection configdbCon) throws StorageException {
+        Collection<PoolAndSchema> retval = pools;
+
+        if (null == retval) {
+            Connection con = configdbCon;
+            boolean push = false;
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                if (null == con) {
+                    con = cache.getConnectionForConfigDB();
+                    push = true;
+                }
+                stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id, db_schema FROM context_server2db_pool WHERE server_id=?");
+                stmt.setInt(1, cache.getServerId());
+                result = stmt.executeQuery();
+                retval = new LinkedHashSet<PoolAndSchema>();
+                while (result.next()) {
+                    retval.add(new PoolAndSchema(result.getInt(1), result.getString(2)));
+                }
+            } catch (PoolException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } catch (SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } finally {
+                closeSQLStuff(result, stmt);
+                if (push && null != con) {
+                    try {
+                        cache.pushConnectionForConfigDB(con);
+                    } catch (final PoolException e) {
+                        LOG.error("Error pushing configdb connection to pool!", e);
+                    }
+                }
+            }
+        }
+
+        if (false == loadRealUsage) {
+
+            CompletionService<Integer> completionService = new ThreadPoolCompletionService<Integer>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+            int taskCount = 0;
+
+            for (final PoolAndSchema poolAndSchema : retval) {
+                final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
+                completionService.submit(new Callable<Integer>() {
+
+                    @Override
+                    public Integer call() throws StorageException {
+                        Connection con = null;
+                        PreparedStatement stmt = null;
+                        ResultSet result = null;
+                        try {
+                            con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
+                            stmt = con.prepareStatement("SELECT COUNT(u.id) FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id=?");
+                            stmt.setInt(1, filestoreId);
+                            result = stmt.executeQuery();
+                            int numUsers = 0;
+                            if (result.next()) {
+                                numUsers = result.getInt(1);
+                            }
+                            return Integer.valueOf(numUsers);
+                        } catch (PoolException e) {
+                            LOG.error("SQL Error", e);
+                            throw new StorageException(e);
+                        } catch (SQLException e) {
+                            LOG.error("SQL Error", e);
+                            throw new StorageException(e);
+                        } finally {
+                            closeSQLStuff(result, stmt);
+                            if (null != con) {
+                                try {
+                                    cache.pushWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, con);
+                                } catch (PoolException e) {
+                                    LOG.error("Error pushing connection to pool!", e);
+                                }
+                            }
+                        }
+                    }
+                });
+                taskCount++;
+            }
+
+            // Await completion
+            List<Integer> counts = ThreadPools.<Integer, StorageException> takeCompletionService(completionService, taskCount, EXCEPTION_FACTORY);
+
+            int numUsers = 0;
+            for (Integer count : counts) {
+                numUsers += count.intValue();
+            }
+            return new FilestoreUsage(numUsers, 0L);
+        }
+
+        CompletionService<FilestoreUsage> completionService = new ThreadPoolCompletionService<FilestoreUsage>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+        int taskCount = 0;
+
+        for (final PoolAndSchema poolAndSchema : retval) {
+            final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
+            completionService.submit(new Callable<FilestoreUsage>() {
+
+                @Override
+                public FilestoreUsage call() throws Exception {
+                    Connection con = null;
+                    PreparedStatement stmt = null;
+                    ResultSet result = null;
+                    try {
+                        con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
+                        stmt = con.prepareStatement("SELECT u.cid, u.id, fu.used FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id=?");
+                        stmt.setInt(1, filestoreId);
+                        result = stmt.executeQuery();
+
+                        long used = 0L;
+                        int numUsers = 0;
+                        while (result.next()) {
+                            used += result.getLong(3);
+                            numUsers++;
+                        }
+
+                        return new FilestoreUsage(numUsers, used);
+                    } catch (PoolException e) {
+                        LOG.error("Pool Error", e);
+                        throw new StorageException(e);
+                    } catch (SQLException e) {
+                        LOG.error("SQL Error", e);
+                        throw new StorageException(e);
+                    } finally {
+                        closeSQLStuff(result, stmt);
+                        if (null != con) {
+                            try {
+                                cache.pushWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, con);
+                            } catch (PoolException e) {
+                                LOG.error("Error pushing connection to pool!", e);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Await completion
+        List<FilestoreUsage> counts = ThreadPools.<FilestoreUsage, StorageException> takeCompletionService(completionService, taskCount, EXCEPTION_FACTORY);
+
+        long used = 0L;
+        int numUsers = 0;
+        for (FilestoreUsage fu : counts) {
+            numUsers += fu.entityCount;
+            used += fu.usage;
+        }
+        return new FilestoreUsage(numUsers, used);
+    }
+
+    /**
+     * Gets the file storage context counts for given configDb connection
+     *
+     * @param con The configDb connection
+     * @return The context counts (as a file storage to count mapping)
+     * @throws StorageException If operation fails
+     */
+    private Map<Integer, Integer> getFilestoreContextCounts(Connection con) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final List<Integer> retval = new ArrayList<Integer>();
         try {
-            stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id=?");
-            stmt.setInt(1, filestoreId);
+            stmt = con.prepareStatement("SELECT filestore_id, cid FROM context WHERE filestore_id>0");
             result = stmt.executeQuery();
-            while (result.next()) {
-                retval.add(I(result.getInt(1)));
+
+            if (false == result.next()) {
+                return Collections.emptyMap();
             }
-        } catch (final SQLException e) {
+
+            Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+            do {
+                Integer fsId = Integer.valueOf(result.getInt(1));
+                Integer count = map.get(fsId);
+                map.put(fsId, null == count ? Integer.valueOf(1) : Integer.valueOf(count.intValue() + 1));
+            } while (result.next());
+            return map;
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
-            try {
-                cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException e) {
-                LOG.error("Error pushing configdb connection to pool!", e);
-            }
         }
-        return Collections.toArray(retval);
     }
 
     /**
-     * Loads the usage information for a filestore.
+     * Gets the file storage user counts for given database pools
      *
-     * @param filestoreId the unique identifier of the filestore.
-     * @param loadRealUsage <code>true</code> to load the filestore usage from every context in it. BEWARE! This is a slow operation.
-     * @return The {@link FilestoreUsage} object for the filestore.
-     * @throws StorageException if some problem occurs loading the information.
+     * @param pools The database pools
+     * @return The user counts (as a file storage to count mapping)
+     * @throws StorageException If operation fails
      */
-    private final FilestoreUsage getUsage(final int filestoreId, final boolean loadRealUsage) throws StorageException {
-        final FilestoreUsage usage = new FilestoreUsage();
-        for (final int cid : getContextsInFilestore(filestoreId)) {
-            usage.addContextUsage(loadRealUsage ? getContextUsedQuota(cid) : 0);
+    private Map<Integer, Integer> getFilestoreUserCounts(Collection<PoolAndSchema> pools) throws StorageException {
+        CompletionService<Map<Integer, Integer>> completionService = new ThreadPoolCompletionService<Map<Integer, Integer>>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+        int taskCount = 0;
+
+        for (final PoolAndSchema poolAndSchema : pools) {
+            final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
+            completionService.submit(new Callable<Map<Integer, Integer>>() {
+
+                @Override
+                public Map<Integer, Integer> call() throws StorageException {
+                    Connection con = null;
+                    PreparedStatement stmt = null;
+                    ResultSet result = null;
+                    try {
+                        con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
+                        stmt = con.prepareStatement("SELECT u.filestore_id, u.id FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id>0");
+                        result = stmt.executeQuery();
+
+                        if (false == result.next()) {
+                            return Collections.emptyMap();
+                        }
+
+                        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+                        do {
+                            Integer fsId = Integer.valueOf(result.getInt(1));
+                            Integer count = map.get(fsId);
+                            map.put(fsId, null == count ? Integer.valueOf(1) : Integer.valueOf(count.intValue() + 1));
+                        } while (result.next());
+                        return map;
+                    } catch (PoolException e) {
+                        LOG.error("SQL Error", e);
+                        throw new StorageException(e);
+                    } catch (SQLException e) {
+                        LOG.error("SQL Error", e);
+                        throw new StorageException(e);
+                    } finally {
+                        closeSQLStuff(result, stmt);
+                        if (null != con) {
+                            try {
+                                cache.pushWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, con);
+                            } catch (PoolException e) {
+                                LOG.error("Error pushing connection to pool!", e);
+                            }
+                        }
+                    }
+                }
+            });
+            taskCount++;
         }
-        return usage;
+
+        // Await completion
+        List<Map<Integer, Integer>> counts = ThreadPools.<Map<Integer, Integer>, StorageException> takeCompletionService(completionService, taskCount, EXCEPTION_FACTORY);
+
+        Map<Integer, Integer> mainMap = new HashMap<Integer, Integer>();
+        for (Map<Integer, Integer> map : counts) {
+            if (false == map.isEmpty()) {
+                for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+                    Integer fsId = entry.getKey();
+                    Integer count = entry.getValue();
+
+                    Integer prevCount = mainMap.get(fsId);
+                    mainMap.put(fsId, null == prevCount ? count : Integer.valueOf(prevCount.intValue() + count.intValue()));
+                }
+            }
+        }
+
+        return mainMap;
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
+    private static class PoolAndSchema {
+
+        final int poolId;
+        final String dbSchema;
+        private final int hash;
+
+        PoolAndSchema(int poolId, String dbSchema) {
+            super();
+            this.poolId = poolId;
+            this.dbSchema = dbSchema;
+
+            int result = 31 * 1 + poolId;
+            result = 31 * result + ((dbSchema == null) ? 0 : dbSchema.hashCode());
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof PoolAndSchema)) {
+                return false;
+            }
+            PoolAndSchema other = (PoolAndSchema) obj;
+            if (poolId != other.poolId) {
+                return false;
+            }
+            if (dbSchema == null) {
+                if (other.dbSchema != null) {
+                    return false;
+                }
+            } else if (!dbSchema.equals(other.dbSchema)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static class CountAndUsage {
+
+        final int count;
+        final long usage;
+
+        CountAndUsage(int count, long usage) {
+            super();
+            this.count = count;
+            this.usage = usage;
+        }
+    }
+
+    static String getSqlInString(Collection<Integer> col) {
+        if (col == null || col.isEmpty()) {
+            return null;
+        }
+        int size = col.size();
+        StringBuilder sb = new StringBuilder(size << 4);
+        Integer[] values = col.toArray(new Integer[col.size()]);
+        sb.append('(');
+        for (int i = 0; i < size; i++) {
+            if (i > 0) {
+                sb.append(',');
+                sb.append(values[i]);
+            } else {
+                sb.append(values[i]);
+            }
+        }
+        sb.append(')');
+        return sb.toString();
+    }
+
 }

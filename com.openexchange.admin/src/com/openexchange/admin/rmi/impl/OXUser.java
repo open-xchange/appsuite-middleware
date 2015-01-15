@@ -62,15 +62,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.idn.IDNA;
-import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.dataobjects.UserProperty;
@@ -79,6 +80,7 @@ import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -86,11 +88,15 @@ import com.openexchange.admin.rmi.impl.util.OXUserPropertySorter;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
+import com.openexchange.admin.tools.filestore.FilestoreDataMover;
+import com.openexchange.admin.tools.filestore.PostProcessTask;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -116,11 +122,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private final BasicAuthenticator basicauth;
     private final AdminCache cache;
     private final PropertyHandler prop;
-    private final BundleContext context;
 
-    public OXUser(final BundleContext context) throws StorageException {
+    public OXUser() throws StorageException {
         super();
-        this.context = context;
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         LOGGER.info("Class loaded: {}", this.getClass().getName());
@@ -259,6 +263,586 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
+    public int moveUserFilestore(final Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e2) {
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
+            LOGGER.error("", invalidDataException);
+            throw invalidDataException;
+        }
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkContextAndSchema(ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+
+            final int user_id = user.getId().intValue();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            } else if (!tool.existsUser(ctx, user_id)) {
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
+            } else if (!tool.existsStore(dstFilestore.getId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+
+            final OXUserStorageInterface oxuser = this.oxu;
+            User storageUser = oxuser.getData(ctx, new User[] { user })[0];
+
+            // Check equality
+            int srcStore_id = storageUser.getFilestoreId().intValue();
+            if (srcStore_id <= 0) {
+                throw new InvalidDataException("Unable to get filestore " + srcStore_id);
+            }
+            if (srcStore_id == dstFilestore.getId().intValue()) {
+                throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + dstFilestore);
+            }
+
+            // Check storage name
+            String name = storageUser.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for user " + user_id + " in " + ctx.getIdAsString());
+            }
+
+            // Check capacity
+            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
+            if (!oxu.hasSpaceForAnotherUser(destFilestore)) {
+                throw new StorageException("Destination filestore does not have enough space for another user.");
+            }
+
+            // Initialize mover instance
+            FilestoreDataMover fsdm = FilestoreDataMover.newUserMover(oxu.getFilestore(srcStore_id), dstFilestore, storageUser, ctx);
+
+            // Enable user after processing
+            fsdm.addPostProcessTask(new PostProcessTask() {
+
+                @Override
+                public void perform() throws StorageException {
+                    oxuser.enableUser(user_id, ctx);
+                }
+            });
+
+            // Schedule task
+            oxuser.disableUser(user_id, ctx);
+            return TaskManager.getInstance().addJob(fsdm, "moveuserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " to another filestore " + dstFilestore.getId(), ctx.getId());
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public int moveFromUserFilestoreToMaster(final Context ctx, User user, User masterUser, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e2) {
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
+            LOGGER.error("", invalidDataException);
+            throw invalidDataException;
+        }
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkContextAndSchema(ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, masterUser);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+
+            final int userId = user.getId().intValue();
+            final OXUserStorageInterface oxuser = this.oxu;
+            if (userId == masterUser.getId().intValue()) {
+                throw new StorageException("User and master user identifiers are equal.");
+            }
+
+            User[] data = oxuser.getData(ctx, new User[] { user, masterUser });
+            User storageUser = data[0];
+            User storageMasterUser = data[1];
+
+            if (null == storageMasterUser.getFilestoreId() || storageMasterUser.getFilestoreId().intValue() <= 0) {
+                throw new StorageException("Master user " + storageMasterUser.getId() + " has no file storage set.");
+            }
+            if (null == storageUser.getFilestoreId() || storageUser.getFilestoreId().intValue() <= 0) {
+                throw new StorageException("User " + storageUser.getId() + " has no file storage set.");
+            }
+            if (storageMasterUser.getFilestoreId().intValue() == storageUser.getFilestoreId().intValue()) {
+                String masterFsName = storageMasterUser.getFilestore_name();
+                if (null == masterFsName) {
+                    throw new InvalidDataException("Unable to get filestore directory for master user " + masterUser.getId() + " in " + ctx.getIdAsString());
+                }
+                String userFsName = storageUser.getFilestore_name();
+                if (null == userFsName) {
+                    throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
+                }
+                if (masterFsName.equals(userFsName)) {
+                    throw new StorageException("User " + storageUser.getId() + " already has a master file storage set.");
+                }
+            }
+
+            if (!tool.existsStore(storageMasterUser.getFilestoreId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+            boolean equal = storageMasterUser.getFilestoreId().intValue() == storageUser.getFilestoreId().intValue();
+
+            if (!equal && !tool.existsStore(storageUser.getFilestoreId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+
+            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore destFilestore = oxu.getFilestore(storageMasterUser.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
+
+            // Check equality
+            int srcStore_id = storageUser.getFilestoreId().intValue();
+            if (srcStore_id <= 0) {
+                throw new InvalidDataException("Unable to get filestore " + srcStore_id);
+            }
+
+            // Check storage name
+            String name = storageUser.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
+            }
+            name = storageMasterUser.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for user " + storageMasterUser.getId() + " in " + ctx.getIdAsString());
+            }
+
+            // Check capacity
+            if (!equal && !oxu.hasSpaceForAnotherUser(destFilestore)) {
+                throw new StorageException("Destination filestore does not have enough space for another user.");
+            }
+
+            // Initialize mover instance
+            FilestoreDataMover fsdm = FilestoreDataMover.newUser2MasterMover(srcFilestore, destFilestore, storageUser, storageMasterUser, ctx);
+
+            // Enable user after processing
+            fsdm.addPostProcessTask(new PostProcessTask() {
+
+                @Override
+                public void perform() throws StorageException {
+                    oxuser.enableUser(userId, ctx);
+                }
+            });
+
+            // Schedule task
+            oxuser.disableUser(userId, ctx);
+            return TaskManager.getInstance().addJob(fsdm, "movefromuserfilestoretomaster", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to master filestore " + destFilestore.getId(), ctx.getId());
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public int moveFromMasterToUserFilestore(final Context ctx, User user, User masterUser, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e2) {
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
+            LOGGER.error("", invalidDataException);
+            throw invalidDataException;
+        }
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkContextAndSchema(ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, masterUser);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+
+            final int userId = user.getId().intValue();
+            final OXUserStorageInterface oxuser = this.oxu;
+            if (userId == masterUser.getId().intValue()) {
+                throw new StorageException("User and master user identifiers are equal.");
+            }
+
+            User[] data = oxuser.getData(ctx, new User[] { user, masterUser });
+            User storageUser = data[0];
+            User storageMasterUser = data[1];
+
+            if (null == storageMasterUser.getFilestoreId() || storageMasterUser.getFilestoreId().intValue() <= 0) {
+                throw new StorageException("Master user " + storageMasterUser.getId() + " has no file storage set.");
+            }
+            if (null == storageUser.getFilestoreId() || storageUser.getFilestoreId().intValue() <= 0) {
+                throw new StorageException("User " + storageUser.getId() + " has no file storage set.");
+            }
+            if (storageMasterUser.getFilestoreId().intValue() != storageUser.getFilestoreId().intValue()) {
+                throw new StorageException("User " + storageUser.getId() + " has no master file storage set.");
+            }
+            {
+                String masterFsName = storageMasterUser.getFilestore_name();
+                if (null == masterFsName) {
+                    throw new InvalidDataException("Unable to get filestore directory for master user " + masterUser.getId() + " in " + ctx.getIdAsString());
+                }
+                String userFsName = storageUser.getFilestore_name();
+                if (null == userFsName) {
+                    throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
+                }
+                if (!masterFsName.equals(userFsName)) {
+                    throw new StorageException("User " + storageUser.getId() + " has no master file storage set.");
+                }
+            }
+
+            if (!tool.existsStore(dstFilestore.getId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+            boolean equal = dstFilestore.getId().intValue() == storageMasterUser.getFilestoreId().intValue();
+
+            if (!equal && !tool.existsStore(storageMasterUser.getFilestoreId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+
+            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageMasterUser.getFilestoreId().intValue(), false);
+
+            // Check equality
+            int srcStore_id = storageMasterUser.getFilestoreId().intValue();
+            if (srcStore_id <= 0) {
+                throw new InvalidDataException("Unable to get filestore " + srcStore_id);
+            }
+
+            // Check storage name
+            String name = storageUser.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
+            }
+            name = storageMasterUser.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for user " + storageMasterUser.getId() + " in " + ctx.getIdAsString());
+            }
+
+            // Check capacity
+            if (!equal && !oxu.hasSpaceForAnotherUser(destFilestore)) {
+                throw new StorageException("Destination filestore does not have enough space for another user.");
+            }
+
+            // Initialize mover instance
+            FilestoreDataMover fsdm = FilestoreDataMover.newUserFromMasterMover(srcFilestore, destFilestore, maxQuota, storageUser, storageMasterUser, ctx);
+
+            // Enable user after processing
+            fsdm.addPostProcessTask(new PostProcessTask() {
+
+                @Override
+                public void perform() throws StorageException {
+                    oxuser.enableUser(userId, ctx);
+                }
+            });
+
+            // Schedule task
+            oxuser.disableUser(userId, ctx);
+            return TaskManager.getInstance().addJob(fsdm, "movefrommastertouserfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from master to individual filestore " + destFilestore.getId(), ctx.getId());
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e2) {
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
+            LOGGER.error("", invalidDataException);
+            throw invalidDataException;
+        }
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkContextAndSchema(ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+
+            final int user_id = user.getId().intValue();
+            final OXUserStorageInterface oxuser = this.oxu;
+            final OXContextInterface oxctx = AdminServiceRegistry.getInstance().getService(OXContextInterface.class, true);
+
+            Context storageContext = oxctx.getData(ctx, auth);
+            User storageUser = oxuser.getData(ctx, new User[] { user })[0];
+
+            if (null != storageUser.getFilestoreId() && storageUser.getFilestoreId().intValue() > 0) {
+                throw new StorageException("User " + storageUser.getId() + " already has a dedicate file storage set.");
+            }
+
+            if (!tool.existsStore(dstFilestore.getId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+            boolean equal = dstFilestore.getId().intValue() == storageContext.getFilestoreId().intValue();
+
+            if (!equal && !tool.existsStore(storageContext.getFilestoreId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+
+            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageContext.getFilestoreId().intValue(), false);
+
+            // Check equality
+            int srcStore_id = storageContext.getFilestoreId().intValue();
+            if (srcStore_id <= 0) {
+                throw new InvalidDataException("Unable to get filestore " + srcStore_id);
+            }
+            ctx.setFilestoreId(Integer.valueOf(srcStore_id));
+            if (srcStore_id == destFilestore.getId().intValue()) {
+                throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
+            }
+
+            // Check storage name
+            String name = storageContext.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for context " + ctx.getIdAsString());
+            }
+
+            // Check capacity
+            if (!equal && !oxu.hasSpaceForAnotherUser(destFilestore)) {
+                throw new StorageException("Destination filestore does not have enough space for another user.");
+            }
+
+            // Initialize mover instance
+            FilestoreDataMover fsdm = FilestoreDataMover.newContext2UserMover(srcFilestore, destFilestore, maxQuota, storageUser, storageContext);
+
+            // Enable user after processing
+            fsdm.addPostProcessTask(new PostProcessTask() {
+
+                @Override
+                public void perform() throws StorageException {
+                    oxuser.enableUser(user_id, ctx);
+                }
+            });
+
+            // Schedule task
+            oxuser.disableUser(user_id, ctx);
+            return TaskManager.getInstance().addJob(fsdm, "movefromcontexttouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from context to individual filestore " + destFilestore.getId(), ctx.getId());
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final RemoteException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (final OXException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e2) {
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for moving file storage data is null");
+            LOGGER.error("", invalidDataException);
+            throw invalidDataException;
+        }
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkContextAndSchema(ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+
+            final int userId = user.getId().intValue();
+            final OXUserStorageInterface oxuser = this.oxu;
+            final OXContextInterface oxctx = AdminServiceRegistry.getInstance().getService(OXContextInterface.class, true);
+
+            Context storageContext = oxctx.getData(ctx, auth);
+            User storageUser = oxuser.getData(ctx, new User[] { user })[0];
+
+            if (null == storageUser.getFilestoreId() || storageUser.getFilestoreId().intValue() <= 0) {
+                throw new StorageException("User " + storageUser.getId() + " has no file storage set.");
+            }
+            if (storageUser.getFilestoreOwner() != null) {
+                int ownerId = storageUser.getFilestoreOwner().intValue();
+                if (ownerId > 0 && ownerId != userId) {
+                    throw new StorageException("User " + storageUser.getId() + " does not have his own file storage set, but is currently using the file storage from user " + ownerId);
+                }
+            }
+            if (storageContext.getFilestoreId().intValue() == storageUser.getFilestoreId().intValue()) {
+                String contextFsName = storageContext.getFilestore_name();
+                if (null == contextFsName) {
+                    throw new InvalidDataException("Unable to get filestore directory for context " + ctx.getIdAsString());
+                }
+                String userFsName = storageUser.getFilestore_name();
+                if (null == userFsName) {
+                    throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
+                }
+                if (contextFsName.equals(userFsName)) {
+                    throw new StorageException("User " + storageUser.getId() + " already has a context file storage set.");
+                }
+            }
+
+            if (!tool.existsStore(storageContext.getFilestoreId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+            boolean equal = storageContext.getFilestoreId().intValue() == storageUser.getFilestoreId().intValue();
+
+            if (!equal && !tool.existsStore(storageUser.getFilestoreId().intValue())) {
+                throw new NoSuchFilestoreException();
+            }
+
+            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore destFilestore = oxu.getFilestore(storageContext.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
+
+            // Check equality
+            int srcStore_id = storageUser.getFilestoreId().intValue();
+            if (srcStore_id <= 0) {
+                throw new InvalidDataException("Unable to get filestore " + srcStore_id);
+            }
+            ctx.setFilestoreId(destFilestore.getId());
+            if (srcStore_id == destFilestore.getId().intValue()) {
+                throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
+            }
+
+            // Check storage name
+            String name = storageUser.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for user " + userId + " in " + ctx.getIdAsString());
+            }
+            name = storageContext.getFilestore_name();
+            if (name == null) {
+                throw new InvalidDataException("Unable to get filestore directory for context " + storageContext.getId());
+            }
+
+            // Check capacity
+            if (!equal && !oxu.hasSpaceForAnotherUser(destFilestore)) {
+                throw new StorageException("Destination filestore does not have enough space for another user.");
+            }
+
+            // Initialize mover instance
+            FilestoreDataMover fsdm = FilestoreDataMover.newUser2ContextMover(srcFilestore, destFilestore, storageUser, storageContext);
+
+            // Enable user after processing
+            fsdm.addPostProcessTask(new PostProcessTask() {
+
+                @Override
+                public void perform() throws StorageException {
+                    oxuser.enableUser(userId, ctx);
+                }
+            });
+
+            // Schedule task
+            oxuser.disableUser(userId, ctx);
+            return TaskManager.getInstance().addJob(fsdm, "movefromusertocontextfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to context filestore " + destFilestore.getId(), ctx.getId());
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final RemoteException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (final OXException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
     public void change(final Context ctx, final User usrdata, Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
@@ -321,6 +905,18 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final StorageException e1) {
             LOGGER.error("", e1);
             throw e1;
+        }
+
+        // check if he wants to change the filestore id, if yes, make sure filestore with this id exists in the system
+        {
+            Integer filestoreId = usrdata.getFilestoreId();
+            if (filestoreId != null) {
+                if (!tool.existsStore(filestoreId.intValue())) {
+                    final InvalidDataException inde = new InvalidDataException("No such filestore with id " + ctx.getFilestoreId());
+                    LOGGER.error("", inde);
+                    throw inde;
+                }
+            }
         }
 
         final boolean isContextAdmin = tool.isContextAdmin(ctx, userid.intValue());

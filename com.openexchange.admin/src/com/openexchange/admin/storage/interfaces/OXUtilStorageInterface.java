@@ -51,15 +51,15 @@ package com.openexchange.admin.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
-
+import java.sql.Connection;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.Database;
-
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
@@ -157,6 +157,73 @@ public abstract class OXUtilStorageInterface {
     public abstract void changeFilestore(final Filestore fstore) throws StorageException;
 
     /**
+     * @param ctx Context with Filestore data set!
+     * @throws StorageException
+     */
+    public abstract void changeFilestoreDataFor(Context ctx) throws StorageException;
+
+    /**
+     * @param ctx Context with Filestore data set!
+     * @param configDbCon The connection to use
+     * @throws StorageException
+     */
+    public abstract void changeFilestoreDataFor(Context ctx, Connection configDbCon) throws StorageException;
+
+    /**
+     * @param user The associated user
+     * @param ctx Context with Filestore data set!
+     * @param con The connection to use
+     * @throws StorageException
+     */
+    public abstract void changeFilestoreDataFor(User user, Context ctx) throws StorageException;
+
+    /**
+     * @param user The associated user
+     * @param ctx Context with Filestore data set!
+     * @param con The connection to use
+     * @throws StorageException
+     */
+    public abstract void changeFilestoreDataFor(User user, Context ctx, Connection con) throws StorageException;
+
+    /**
+     * Prepares filestore usage for given user
+     *
+     * @param user The user
+     * @param ctx The context
+     * @throws StorageException If operation fails
+     */
+    public abstract void prepareFilestoreUsageFor(User user, Context ctx) throws StorageException;
+
+    /**
+     * Prepares filestore usage for given user
+     *
+     * @param user The user
+     * @param ctx The context
+     * @param con The connection to use
+     * @throws StorageException If operation fails
+     */
+    public abstract void prepareFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException;
+
+    /**
+     * Cleans filestore usage for given user
+     *
+     * @param user The user
+     * @param ctx The context
+     * @throws StorageException If operation fails
+     */
+    public abstract void cleanseFilestoreUsageFor(User user, Context ctx) throws StorageException;
+
+    /**
+     * Cleans filestore usage for given user
+     *
+     * @param user The user
+     * @param ctx The context
+     * @param con The connection to use
+     * @throws StorageException If operation fails
+     */
+    public abstract void cleanseFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException;
+
+    /**
      * List all registered file stores.
      * @param pattern a pattern to search for
      * @return an array of file store objects
@@ -165,19 +232,21 @@ public abstract class OXUtilStorageInterface {
     public abstract Filestore[] listFilestores(String pattern, boolean omitUsage) throws StorageException;
 
     /**
-     * get filestore by ID
-     * @param id
-     * @return Filestore
-     * @throws StorageException
+     * Gets the filestore associated with given identifier
+     *
+     * @param id The filestore identifier
+     * @return The filestore instance
+     * @throws StorageException If filestore instance cannot be returned
      */
     public abstract Filestore getFilestore(final int id) throws StorageException;
 
     /**
      * Load a filestore. Specify whether the file store usage should be calculated by summing up all filestore usages.
-     * @param filestoreId
-     * @param loadUsage - Whether the usage must be determined. Note: This is very slow.
-     * @return
-     * @throws StorageException
+     *
+     * @param filestoreId The filestore identifier
+     * @param loadUsage Whether the usage must be determined. Note: This is very slow.
+     * @return The filestore instance
+     * @throws StorageException If filestore instance cannot be returned
      */
     public abstract Filestore getFilestore(int filestoreId, boolean loadUsage) throws StorageException;
 
@@ -195,7 +264,23 @@ public abstract class OXUtilStorageInterface {
      */
     public abstract Filestore findFilestoreForContext() throws StorageException;
 
+    /**
+     * Checks if specified file storage offers enough space for a further context assignment.
+     *
+     * @param filestore The file storage to which a further context is supposed to be assigned
+     * @return <code>true</code> if enough space is available; otherwise <code>false</code>
+     * @throws StorageException If check for enough space fails
+     */
     public abstract boolean hasSpaceForAnotherContext(Filestore filestore) throws StorageException;
+
+    /**
+     * Checks if specified file storage offers enough space for a further user assignment.
+     *
+     * @param filestore The file storage to which a further user is supposed to be assigned
+     * @return <code>true</code> if enough space is available; otherwise <code>false</code>
+     * @throws StorageException If check for enough space fails
+     */
+    public abstract boolean hasSpaceForAnotherUser(Filestore filestore) throws StorageException;
 
     /**
      * Create a new maintenance reason in configdb.They are needed to disable a

@@ -127,7 +127,7 @@ public class GetTest extends ShareTest {
          * discover & check share
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         /*
          * get share by token as sharing user & check target
          */
@@ -171,7 +171,7 @@ public class GetTest extends ShareTest {
          * discover & check share
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), file.getId());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, file, share);
         /*
          * get share by token as sharing user & check target
          */

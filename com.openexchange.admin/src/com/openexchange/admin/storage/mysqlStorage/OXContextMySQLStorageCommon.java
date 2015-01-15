@@ -180,7 +180,7 @@ public class OXContextMySQLStorageCommon {
 
             oxdb_read = cache.getConnectionForContext(context_id);
 
-            prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+            prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0");
             prep.setInt(1, context_id);
             rs = prep.executeQuery();
 

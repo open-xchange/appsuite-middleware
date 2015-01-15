@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,58 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage;
+package com.openexchange.admin.osgi;
 
-class FilestoreInfo {
+import java.rmi.Remote;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.services.AdminServiceRegistry;
 
-    public final int contextID, filestoreID, writeDBPoolID;
+/**
+ * {@link OXContextInterfaceTracker}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.8.0
+ */
+public class OXContextInterfaceTracker implements ServiceTrackerCustomizer<Remote, Remote> {
 
-    public final String dbSchema;
+    private final BundleContext context;
 
-    public long usage;
-
-    public FilestoreInfo(final int contextID, final int writeDBPoolID, final String dbSchema, final int filestoreID) {
+    /**
+     * Initializes a new {@link OXContextInterfaceTracker}.
+     */
+    public OXContextInterfaceTracker(BundleContext context) {
         super();
-        this.contextID = contextID;
-        this.writeDBPoolID = writeDBPoolID;
-        this.dbSchema = dbSchema;
-        this.filestoreID = filestoreID;
+        this.context = context;
     }
 
     @Override
-    public String toString(){
-        return "cid: " + contextID + ", fid: " + filestoreID + ", db: " + dbSchema + ", writepoolID: " + writeDBPoolID + ", usage: " + usage;
+    public OXContextInterface addingService(ServiceReference<Remote> reference) {
+        Remote remote = context.getService(reference);
+        if (remote instanceof OXContextInterface) {
+            OXContextInterface oxContextInterface = (OXContextInterface) remote;
+            AdminServiceRegistry.getInstance().addService(OXContextInterface.class, oxContextInterface);
+            return oxContextInterface;
+        }
+
+        // Discard
+        context.ungetService(reference);
+        return null;
     }
+
+    @Override
+    public void modifiedService(ServiceReference<Remote> reference, Remote service) {
+        // Ignore
+    }
+
+    @Override
+    public void removedService(ServiceReference<Remote> reference, Remote service) {
+        if (service instanceof OXContextInterface) {
+            AdminServiceRegistry.getInstance().removeService(OXContextInterface.class);
+        }
+        context.ungetService(reference);
+    }
+
 }

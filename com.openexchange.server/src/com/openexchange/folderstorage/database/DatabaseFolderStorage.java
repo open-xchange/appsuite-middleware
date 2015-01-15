@@ -307,6 +307,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 }
                 con = databaseService.getWritable(contextId);
                 mode = Mode.WRITE_AFTER_READ;
+                close = true;
                 // Query again...
                 nonExistingParents = OXFolderSQL.getNonExistingParents(context, con);
                 if (null == nonExistingParents || 0 == nonExistingParents.length) {

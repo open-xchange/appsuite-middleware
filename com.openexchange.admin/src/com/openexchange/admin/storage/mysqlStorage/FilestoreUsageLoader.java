@@ -120,7 +120,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         return retval.toArray(new Context[retval.size()]);
     }
 
-    private static final String SQL = "SELECT cid,used FROM filestore_usage";
+    private static final String SQL = "SELECT cid,used FROM filestore_usage WHERE user=0";
 
     private Collection<Context> loadUsage(int poolId, String schema, Map<Integer, Context> contexts) throws StorageException {
         final Connection con;

@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.json.ShareInfoResultConverter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -108,7 +109,7 @@ public class AllAction extends AbstractShareAction {
         /*
          * return appropriate result
          */
-        return new AJAXRequestResult(shares, lastModified, "shareinfo");
+        return new AJAXRequestResult(shares, lastModified, ShareInfoResultConverter.INPUT_FORMAT);
     }
 
 }

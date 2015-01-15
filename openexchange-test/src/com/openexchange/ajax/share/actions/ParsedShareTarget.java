@@ -65,6 +65,8 @@ import com.openexchange.share.ShareTarget;
  */
 public class ParsedShareTarget extends ShareTarget {
 
+    private static final long serialVersionUID = -7321092542211626595L;
+
     /**
      * Initializes a new {@link ParsedShareTarget}.
      */

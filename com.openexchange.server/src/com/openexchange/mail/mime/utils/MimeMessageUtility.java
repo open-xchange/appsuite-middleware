@@ -783,15 +783,18 @@ public final class MimeMessageUtility {
          * Passes possibly encoded-word is greater than 75 characters and contains no CR?LF
          */
         if ((value.indexOf('\r') < 0) && (value.indexOf('\n') < 0)) {
-            final StringBuilder sb = new StringBuilder(length).append(value);
-            final String pattern = "?= =?";
-            int i;
-            while ((i = sb.indexOf(pattern)) >= 0) {
-                sb.deleteCharAt(i + 2);
-            }
-            return decodeMultiEncodedHeader0(sb.toString(), false);
+            return decodeMultiEncodedHeader0(removeWhitespacesBetweenEncodedWords(value), false);
         }
         return decodeMultiEncodedHeader0(value, true);
+    }
+
+    private static String removeWhitespacesBetweenEncodedWords(String value) {
+        StringBuilder sb = new StringBuilder(value);
+        String pattern = "?= =?";
+        for (int i; (i = sb.indexOf(pattern)) >= 0;) {
+            sb.deleteCharAt(i + 2);
+        }
+        return sb.toString();
     }
 
     private static final Pattern ENC_PATTERN = Pattern.compile("=\\?(\\S+?)\\?(\\S+?)\\?(.+?)\\?=");
@@ -1557,6 +1560,8 @@ public final class MimeMessageUtility {
         return sb.toString();
     }
 
+    private static final Pattern PATTERN_UNFOLD = Pattern.compile("(\\?=)(\\s*)(=\\?)");
+
     /**
      * Unfolds a folded header. Any line breaks that aren't escaped and are followed by whitespace are removed.
      *
@@ -1567,9 +1572,12 @@ public final class MimeMessageUtility {
         if (null == headerLine) {
             return null;
         }
+
+        String s = PATTERN_UNFOLD.matcher(headerLine).replaceAll("$1$3");
+
         int i;
         if ((i = headerLine.indexOf('\r')) < 0 && (i = headerLine.indexOf('\n')) < 0) {
-            return headerLine;
+            return s;
         }
         /*-
          * Check folded encoded-words as per RFC 2047:
@@ -1583,7 +1591,6 @@ public final class MimeMessageUtility {
          * In this case the SPACE character is not part of the header and should
          * be discarded.
          */
-        String s;
         if (headerLine.indexOf("=?") < 0) {
             s = headerLine;
         } else {

@@ -219,7 +219,36 @@ public abstract class OXUserStorageInterface {
      * @param usrdata User containing user data.
      * @throws StorageException
      */
-    public abstract void change(final Context ctx,final User usrdata) throws StorageException;
+    public abstract void change(Context ctx, User usrdata) throws StorageException;
+
+    /**
+     * Enables denoted user.
+     *
+     * @param userId The user identifier
+     * @param context The context
+     * @throws StorageException If operation fails
+     */
+    public abstract void enableUser(int userId, Context ctx) throws StorageException;
+
+    /**
+     * Disables denoted user.
+     *
+     * @param userId The user identifier
+     * @param context The context
+     * @throws StorageException If operation fails
+     */
+    public abstract void disableUser(int userId, Context ctx) throws StorageException;
+
+    /**
+     * Switches user's <code>mailenabled</code> flag.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param value The value
+     * @param con The connection to use
+     * @throws StorageException If operation fails
+     */
+    public abstract void setUserEnabled(int userId, int contextId, boolean value, Connection con) throws StorageException;
 
     /**
      * Changes last modified data in database

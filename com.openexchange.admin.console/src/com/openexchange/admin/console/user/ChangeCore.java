@@ -51,7 +51,6 @@ package com.openexchange.admin.console.user;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -67,7 +66,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public abstract class ChangeCore extends UserAbstraction {
+public abstract class ChangeCore extends UserFilestoreAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
 

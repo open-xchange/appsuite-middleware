@@ -121,7 +121,7 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=?");
+            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=0");
             stmt.setInt(1, contextID);
             result = stmt.executeQuery();
             return !result.next();
@@ -133,7 +133,7 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
     private void addInitialFilestoreUsage(Connection con, int contextID) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO filestore_usage (cid,used) VALUES (?,0)");
+            stmt = con.prepareStatement("INSERT INTO filestore_usage (cid,user,used) VALUES (?,0,0)");
             stmt.setInt(1, contextID);
             stmt.executeUpdate();
         } finally {

@@ -47,28 +47,27 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage;
+package com.openexchange.ajax.share.actions;
 
-final class FilestoreUsage {
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-    private int ctxCount;
+/**
+ * {@link PasswordResetConfirmServletResponse}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
+ */
+public final class PasswordResetConfirmServletResponse extends AbstractAJAXResponse {
 
-    private long usage;
+    private final String location;
 
-    FilestoreUsage() {
-        super();
+    PasswordResetConfirmServletResponse(final String location) {
+        super(null);
+        this.location = location;
     }
 
-    final void addContextUsage(final long ctxUsage) {
-        ctxCount++;
-        usage += ctxUsage;
+    public String getLocation() {
+        return location;
     }
 
-    final int getCtxCount() {
-        return ctxCount;
-    }
-
-    final long getUsage() {
-        return usage;
-    }
 }

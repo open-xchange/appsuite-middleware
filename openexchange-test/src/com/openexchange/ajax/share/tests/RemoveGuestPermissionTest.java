@@ -130,7 +130,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          * discover & check share
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         /*
          * check access to share
          */
@@ -200,7 +200,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
          * discover & check share
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), file.getId());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, file, share);
         /*
          * check access to share
          */

@@ -47,73 +47,85 @@
  *
  */
 
-package com.openexchange.admin.osgi;
+package com.openexchange.ajax.share.actions;
 
-import java.util.Collection;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
-
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AbstractRedirectParser;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link FilestoreLocationUpdaterRegistry}
+ * {@link PasswordResetConfirmServletRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class FilestoreLocationUpdaterRegistry {
+public final class PasswordResetConfirmServletRequest extends AbstractResetPasswordServletRequest<PasswordResetConfirmServletResponse> {
 
-    private static final FilestoreLocationUpdaterRegistry INSTANCE = new FilestoreLocationUpdaterRegistry();
+    private final boolean failOnError;
+
+    private final String token;
+    private final String confirm;
 
     /**
-     * Gets the instance
+     * Initializes a new {@link PasswordResetConfirmServletRequest}.
      *
-     * @return The instance
+     * @param mailAddress
+     * @param token
+     * @param failOnError
      */
-    public static FilestoreLocationUpdaterRegistry getInstance() {
-        return INSTANCE;
+    public PasswordResetConfirmServletRequest(final String token, String confirm, final boolean failOnError) {
+        super();
+        this.failOnError = failOnError;
+        this.token = token;
+        this.confirm = confirm;
     }
 
-    // ---------------------------------------------------------------------------------------------------------
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
 
-    private final Queue<FilestoreLocationUpdater> services;
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
 
-    /**
-     * Initializes a new {@link FilestoreLocationUpdaterRegistry}.
-     */
-    private FilestoreLocationUpdaterRegistry() {
-        this.services = new ConcurrentLinkedQueue<FilestoreLocationUpdater>();
+    @Override
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    @Override
+    public Parameter[] getParameters() {
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter("share", token));
+        params.add(new Parameter("confirm", confirm));
+        return params.toArray(new Parameter[params.size()]);
     }
 
     /**
-     * Adds specified location handler.
-     *
-     * @param locationHandler The location handler to add
+     * {@inheritDoc}
      */
-    public void addService(FilestoreLocationUpdater locationHandler) {
-        if (null != locationHandler) {
-            services.offer(locationHandler);
+    @Override
+    public PasswordResetConfirmParser getParser() {
+        return new PasswordResetConfirmParser(failOnError);
+    }
+
+    private static final class PasswordResetConfirmParser extends AbstractRedirectParser<PasswordResetConfirmServletResponse> {
+
+        /**
+         * Default constructor.
+         */
+        PasswordResetConfirmParser(final boolean failOnError) {
+            super(failOnError);
+        }
+
+        @Override
+        protected PasswordResetConfirmServletResponse createResponse(String myLocation) throws JSONException {
+            return new PasswordResetConfirmServletResponse(myLocation);
         }
     }
-
-    /**
-     * Gets the currently available location handlers.
-     *
-     * @return The location handlers
-     */
-    public Collection<FilestoreLocationUpdater> getServices() {
-        return services;
-    }
-
-    /**
-     * Removes specified location handler.
-     *
-     * @param locationHandler The location handler to remove
-     */
-    public void removeService(FilestoreLocationUpdater locationHandler) {
-        if (null != locationHandler) {
-            services.remove(locationHandler);
-        }
-    }
-
 }

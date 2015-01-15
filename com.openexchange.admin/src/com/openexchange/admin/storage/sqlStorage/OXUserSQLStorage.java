@@ -90,6 +90,10 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             notallowed.add("SmtpServer");
             notallowed.add(PASSWORD_EXPIRED);
             notallowed.add("Language");
+            notallowed.add("MaxQuota");
+            notallowed.add("Filestore_name");
+            notallowed.add("FilestoreOwner");
+            notallowed.add("FilestoreId");
 
             // For the user table
             method2field.put("Id", "id");
@@ -102,6 +106,10 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             method2field.put("ImapLogin", "imapLogin");
             method2field.put("SmtpServer", "smtpserver");
             method2field.put("PasswordMech", "passwordMech");
+            method2field.put("MaxQuota", "quota_max");
+            method2field.put("Filestore_name", "filestore_name");
+            method2field.put("FilestoreOwner", "filestore_owner");
+            method2field.put("FilestoreId", "filestore_id");
 
             method2field.put("Display_name", "field01");
             method2field.put("Sur_name", "field02");

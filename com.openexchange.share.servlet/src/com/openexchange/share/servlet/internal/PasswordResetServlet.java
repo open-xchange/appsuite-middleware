@@ -50,9 +50,9 @@
 package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServlet;
@@ -95,7 +95,7 @@ public class PasswordResetServlet extends HttpServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
     private final ShareLoginConfiguration loginConfig;
-    private final Map<String, User> usersToUpdate;
+    private final byte[] salt;
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -104,10 +104,10 @@ public class PasswordResetServlet extends HttpServlet {
      *
      * @param loginConfig
      */
-    public PasswordResetServlet(ShareLoginConfiguration loginConfig) {
+    public PasswordResetServlet(ShareLoginConfiguration loginConfig, byte[] salt) {
         super();
         this.loginConfig = loginConfig;
-        usersToUpdate = new ConcurrentHashMap<String, User>();
+        this.salt = salt;
     }
 
     @Override
@@ -144,12 +144,9 @@ public class PasswordResetServlet extends HttpServlet {
             int guestID = guestInfo.getGuestID();
             User storageUser = userService.getUser(guestID, context);
 
+            String hash = getHash(storageUser.getUserPassword());
             if (null == confirm) {
-                // Generate UUID and send link to confirm
-                UUID uuid = UUID.randomUUID();
-                usersToUpdate.put(uuid.toString(), storageUser);
-
-                //TODO: Send mail
+                // Generate hash and send link to confirm
                 GuestShare guestShare = shareService.resolveToken(token);
                 User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
                 ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
@@ -161,21 +158,15 @@ public class PasswordResetServlet extends HttpServlet {
                     .setContext(guestInfo.getContextID())
                     .setLocale(guest.getLocale())
                     .setShareToken(token)
-                    .setConfirm(uuid.toString())
+                    .setConfirm(hash)
                     .build();
                 notificationService.send(notification);
-
-                setRedirect(guestShare, null, response);
-
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.flushBuffer();
             } else {
                 // Try to set new password
-
-                User user = usersToUpdate.get(confirm);
-                if (null != user && user.getId() == guestID) { //TODO: Check for context Id
+                if (confirm.equals(hash)) {
                     String password = PasswordUtility.generate();
-
-                    //remove user from map
-                    usersToUpdate.remove(confirm);
 
                     GuestShare guestShare = shareService.resolveToken(token);
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
@@ -210,6 +201,9 @@ public class PasswordResetServlet extends HttpServlet {
         } catch (OXException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (AddressException e) {
             OXException oxe = ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress);
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), oxe.getMessage(), oxe);
@@ -235,5 +229,14 @@ public class PasswordResetServlet extends HttpServlet {
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private String getHash(String toHash) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        md.reset();
+        md.update(toHash.getBytes("UTF-8"));
+        md.update(salt);
+        byte[] hash = md.digest();
+        return com.openexchange.tools.encoding.Base64.encode(hash);
     }
 }

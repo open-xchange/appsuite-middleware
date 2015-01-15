@@ -673,4 +673,26 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         return builder;
     }
 
+    @Override
+    public MailMessage[] getMessagesByMessageIDByFolder(String fullName, String... messageIDs) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
+        if (messageStorage instanceof IMailMessageStorageExt) {
+            final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
+            return messageStorageExt.getMessagesByMessageID(messageIDs);
+        }
+        final SearchTerm<?> searchTerm;
+        if (1 == messageIDs.length) {
+            searchTerm = new com.openexchange.mail.search.HeaderTerm("Message-ID", messageIDs[0]);
+        } else {
+            return EMPTY_RETVAL;
+        }
+        return messageStorage.searchMessages(
+            fullName,
+            IndexRange.NULL,
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.ASC,
+            searchTerm,
+            FIELDS_ID_AND_FOLDER);
+    }
+
 }

@@ -54,6 +54,8 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Jan 12 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-01-09
 * Wed Jan 07 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2015-01-12
 * Fri Dec 12 2014 Marc Arens <marc.arens@open-xchange.com>

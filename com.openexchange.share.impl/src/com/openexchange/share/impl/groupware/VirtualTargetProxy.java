@@ -50,7 +50,9 @@
 package com.openexchange.share.impl.groupware;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 
 
@@ -73,6 +75,16 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
         this.folderId = folderId;
         this.item = item;
         this.title = title;
+    }
+
+    /**
+     * Initializes a new {@link VirtualTargetProxy}.
+     *
+     * @param user The current session's user
+     * @param target The target
+     */
+    public VirtualTargetProxy(User user, ShareTarget target) {
+        this(user, target.getFolder(), target.getItem(), getTitle(target));
     }
 
     @Override
@@ -105,4 +117,11 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
         //
     }
 
+    private static String getTitle(ShareTarget target) {
+        Map<String, Object> meta = target.getMeta();
+        if (null != meta && meta.containsKey("title")) {
+            return String.valueOf(meta.get("title"));
+        }
+        return target.toString();
+    }
 }

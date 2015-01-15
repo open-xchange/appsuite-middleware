@@ -61,8 +61,9 @@ import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.GetMailsRequest;
 import com.openexchange.ajax.share.actions.GetMailsResponse.Message;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.PasswordResetConfirmServletRequest;
+import com.openexchange.ajax.share.actions.PasswordResetConfirmServletResponse;
 import com.openexchange.ajax.share.actions.PasswordResetServletRequest;
-import com.openexchange.ajax.share.actions.PasswordResetServletResponse;
 import com.openexchange.ajax.share.actions.StartSMTPRequest;
 import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -120,7 +121,7 @@ public final class PasswordResetServletTest extends ShareTest {
          * discover & check share
          */
         ParsedShare lShare = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(lGuestPermission, lShare);
+        checkShare(lGuestPermission, folder, lShare);
         /*
          * check access to share
          */
@@ -132,9 +133,14 @@ public final class PasswordResetServletTest extends ShareTest {
         /*
          * start dummy smtp to catch password-reset mail
          */
-        StartSMTPRequest startSMTPReqeuest = new StartSMTPRequest(false);
-        startSMTPReqeuest.setUpdateNoReplyForContext(client.getValues().getContextId());
-        client.execute(startSMTPReqeuest);
+        try {
+            StartSMTPRequest startSMTPReqeuest = new StartSMTPRequest(false);
+            startSMTPReqeuest.setUpdateNoReplyForContext(client.getValues().getContextId());
+            client.execute(startSMTPReqeuest);
+        } catch (Exception e) {
+            tearDown();
+            throw e;
+        }
     }
 
     @Override
@@ -144,7 +150,8 @@ public final class PasswordResetServletTest extends ShareTest {
     }
 
     public void testResetPassword_retrievedRedirectLocation() throws Exception {
-        PasswordResetServletResponse response = Executor.execute(getSession(), new PasswordResetServletRequest(share.getToken(), false));
+        String confirm = getConfirmationToken();
+        PasswordResetConfirmServletResponse response = Executor.execute(getSession(), new PasswordResetConfirmServletRequest(share.getToken(), confirm, false));
         String location = response.getLocation();
 
         Assert.assertNotNull("Redirect URL cannot be null", location);
@@ -155,7 +162,8 @@ public final class PasswordResetServletTest extends ShareTest {
     }
 
     public void testResetPassword_loginNotPossibleAnyMore() throws Exception {
-        Executor.execute(getSession(), new PasswordResetServletRequest(share.getToken(), false));
+        String confirm = getConfirmationToken();
+        Executor.execute(getSession(), new PasswordResetConfirmServletRequest(share.getToken(), confirm, false));
 
         // Try to get share with obsolete password
         GuestClient guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) guestPermission.getRecipient()).getPassword());
@@ -196,6 +204,24 @@ public final class PasswordResetServletTest extends ShareTest {
         guestClient = new GuestClient(url, username, password);
         guestClient.checkFolderAccessible(Integer.toString(folder.getObjectID()), guestPermission);
         guestClient.logout();
+    }
+
+    private String getConfirmationToken() throws Exception {
+        PasswordResetServletRequest request = new PasswordResetServletRequest(share.getToken());
+        Executor.execute(getSession(), request);
+
+        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+        assertEquals(1, messages.size());
+        Message message = messages.get(0);
+        String plainText = message.getPlainText();
+        assertTrue("Mail has incorrect content.", plainText.contains("Click here to confirm to reset your password"));
+        assertTrue("Mail does not contain a link.", plainText.contains("/share/reset/password?share="));
+        assertTrue("Mail does not contain a confirmation token.", plainText.contains("&confirm="));
+
+        String[] split = plainText.split("&confirm=");
+        assertEquals(2, split.length);
+        assertNotNull("Confirmation token was not set.", split[1]);
+        return split[1].trim();
     }
 
 }

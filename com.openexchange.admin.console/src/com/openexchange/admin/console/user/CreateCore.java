@@ -71,7 +71,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public abstract class CreateCore extends UserAbstraction {
+public abstract class CreateCore extends UserFilestoreAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
 

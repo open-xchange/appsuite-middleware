@@ -68,6 +68,10 @@ public class GetRequest implements AJAXRequest<GetResponse>{
     private final String token;
     private final String path;
 
+    public GetRequest(String token) {
+        this(token, null, true);
+    }
+
     public GetRequest(String token, String path) {
         this(token, path, true);
     }

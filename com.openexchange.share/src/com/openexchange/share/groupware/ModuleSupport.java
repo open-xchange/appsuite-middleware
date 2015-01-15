@@ -151,4 +151,14 @@ public interface ModuleSupport {
      */
     boolean isVisible(ShareTarget target, Session session) throws OXException;
 
+    /**
+     * Gets a value indicating whether a share target (still) exists.
+     *
+     * @param target The share target to check
+     * @param session The session of the user trying to access the share target
+     * @return <code>true</code> if the share target exists, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    boolean exists(ShareTarget target, Session session) throws OXException;
+
 }

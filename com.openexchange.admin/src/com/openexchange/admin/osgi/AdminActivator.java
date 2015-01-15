@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.osgi;
 
+import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
@@ -57,6 +58,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.mysql.CreateAttachmentTables;
 import com.openexchange.admin.mysql.CreateCalendarTables;
@@ -78,6 +80,8 @@ import com.openexchange.admin.plugins.UserServiceInterceptorBridge;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
@@ -87,26 +91,42 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
 import com.openexchange.version.Version;
 
-public class Activator extends HousekeepingActivator {
+public class AdminActivator extends HousekeepingActivator {
 
     private volatile AdminDaemon daemon;
 
+    /**
+     * Initializes a new {@link AdminActivator}.
+     */
+    public AdminActivator() {
+        super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
+    }
+
     @Override
     public void startBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
 
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
+        track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
         track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, AdminServiceRegistry.getInstance(), PublicationTargetDiscoveryService.class));
         track(ConfigViewFactory.class, new RegistryServiceTrackerCustomizer<ConfigViewFactory>(context, AdminServiceRegistry.getInstance(), ConfigViewFactory.class));
@@ -117,6 +137,8 @@ public class Activator extends HousekeepingActivator {
         track(CreateTableService.class, new CreateTableCustomizer(context));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(CapabilityService.class, new RegistryServiceTrackerCustomizer<CapabilityService>(context, AdminServiceRegistry.getInstance(), CapabilityService.class));
+        track(SessiondService.class, new RegistryServiceTrackerCustomizer<SessiondService>(context, AdminServiceRegistry.getInstance(), SessiondService.class));
+        track(Remote.class, new OXContextInterfaceTracker(context)).open();
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
 
@@ -144,8 +166,7 @@ public class Activator extends HousekeepingActivator {
             PluginInterfaces.setInstance(builder.build());
         }
 
-        // Open trackers
-        openTrackers();
+        track(FileLocationHandler.class, new FilestoreLocationUpdaterCustomizer(context));
 
         log.info("Starting Admindaemon...");
         final AdminDaemon daemon = new AdminDaemon();
@@ -162,9 +183,23 @@ public class Activator extends HousekeepingActivator {
             log.error("", e);
             throw e;
         }
-        track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
-        daemon.initRMI(context);
 
+        {
+            AdminCache.compareAndSetBundleContext(null, context);
+            AdminCache.compareAndSetConfigurationService(null, configurationService);
+
+            PropertyHandlerExtended prop = initCache(configurationService, log);
+            log.debug("Loading context implementation: {}", prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
+            log.debug("Loading util implementation: {}", prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
+        }
+
+        track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
+        track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
+
+        // Open trackers
+        openTrackers();
+
+        daemon.initRMI(context);
 
         {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();
@@ -227,7 +262,7 @@ public class Activator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         cleanUp();
         PluginInterfaces.setInstance(null);
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         log.info("Stopping RMI...");
         final AdminDaemon daemon = this.daemon;
         if (null != daemon) {
@@ -236,8 +271,14 @@ public class Activator extends HousekeepingActivator {
         }
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    private PropertyHandlerExtended initCache(ConfigurationService service, org.slf4j.Logger logger) throws OXGenericException {
+        AdminCacheExtended cache = new AdminCacheExtended();
+        cache.initCache(service);
+        cache.initCacheExtended();
+        ClientAdminThreadExtended.cache = cache;
+        PropertyHandlerExtended prop = cache.getProperties();
+        logger.info("Cache and Pools initialized!");
+        return prop;
     }
+
 }

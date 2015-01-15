@@ -125,7 +125,7 @@ public class DownloadHandlerTest extends ShareTest {
          * discover & check share
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), file.getId());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, file, share);
         /*
          * check access to share (via guest client)
          */

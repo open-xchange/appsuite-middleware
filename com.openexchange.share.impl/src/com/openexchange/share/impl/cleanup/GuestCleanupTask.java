@@ -194,7 +194,7 @@ public class GuestCleanupTask extends AbstractTask<Void> {
                      * guest user not touched for configured interval, proceed with deletion
                      */
                     LOG.debug("No shares for {} remaining and not touched for {} days, deleting guest user.",
-                        guestInfo, TimeUnit.DAYS.toDays(guestExpiry));
+                        guestInfo, TimeUnit.MILLISECONDS.toDays(guestExpiry));
                     deleteGuest(connectionHelper.getConnection(), context, guestUser.getId());
                 }
             } else {

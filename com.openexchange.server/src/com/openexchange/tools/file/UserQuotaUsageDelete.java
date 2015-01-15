@@ -47,48 +47,45 @@
  *
  */
 
-package com.openexchange.admin.osgi;
+package com.openexchange.tools.file;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link FilestoreLocationUpdaterCustomizer}
+ * UserQuotaUsageDelete - Removes the "filestore_usage" entry for a deleted user.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FilestoreLocationUpdaterCustomizer implements ServiceTrackerCustomizer<FilestoreLocationUpdater, FilestoreLocationUpdater> {
-
-    private final BundleContext context;
+public class UserQuotaUsageDelete implements DeleteListener {
 
     /**
-     * Initializes a new {@link FilestoreLocationUpdaterCustomizer}.
+     * Initializes a new {@link UserQuotaUsageDelete}.
      */
-    public FilestoreLocationUpdaterCustomizer(BundleContext context) {
+    public UserQuotaUsageDelete() {
         super();
-        this.context = context;
     }
 
     @Override
-    public FilestoreLocationUpdater addingService(ServiceReference<FilestoreLocationUpdater> reference) {
-        FilestoreLocationUpdater service = context.getService(reference);
-        FilestoreLocationUpdaterRegistry.getInstance().addService(service);
-        return service;
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (event.getType() == DeleteEvent.TYPE_USER) {
+            PreparedStatement stmt = null;
+            try {
+                stmt = writeCon.prepareStatement("DELETE FROM filestore_usage WHERE cid=? AND user=?");
+                stmt.setInt(1, event.getContext().getContextId());
+                stmt.setInt(2, event.getId());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        }
     }
-
-    @Override
-    public void modifiedService(ServiceReference<FilestoreLocationUpdater> reference, FilestoreLocationUpdater service) {
-        // nothing to do
-    }
-
-    @Override
-    public void removedService(ServiceReference<FilestoreLocationUpdater> reference, FilestoreLocationUpdater service) {
-        FilestoreLocationUpdaterRegistry.getInstance().removeService(service);
-        context.ungetService(reference);
-    }
-
 }

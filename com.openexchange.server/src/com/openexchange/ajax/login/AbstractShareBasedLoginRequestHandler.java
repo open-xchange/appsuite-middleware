@@ -248,6 +248,10 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                             int module = null != target ? target.getModule() : share.getCommonModule();
                             if (0 != module) {
                                 String folderModule = ServerServiceRegistry.getInstance().getService(ModuleSupport.class).getShareModule(module);
+                                if ("infostore".equals(folderModule)) {
+                                    //TODO: check
+                                    folderModule = "files";
+                                }
                                 jLoginResult.put("module", folderModule);
                             }
                             String folder = null != target ? target.getFolder() : share.getCommonFolder();

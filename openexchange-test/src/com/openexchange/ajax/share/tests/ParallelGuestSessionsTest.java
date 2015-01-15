@@ -110,7 +110,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
          * discover & check share
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         /*
          * check access to share, using the same ajax session as the sharing user
          */
@@ -129,7 +129,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
          * re-discover share, using the sharing user's session, thus verifying the old session is still alive, too
          */
         share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
     }
 
 }

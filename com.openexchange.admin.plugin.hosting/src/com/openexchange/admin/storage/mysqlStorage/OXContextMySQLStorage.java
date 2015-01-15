@@ -72,6 +72,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -116,6 +117,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
@@ -215,7 +217,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             // fetch tables which can contain context data and sort these tables magically by foreign keys
             LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
-            final Vector<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
+            final List<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
             LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
             // sort the tables by references (foreign keys)
             sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
@@ -539,13 +541,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
              * 2. Fetch tables with cid column which could perhaps store data relevant for us
              */
             LOG.debug("Fetching table structure from database scheme!");
-            final Vector<TableObject> fetchTableObjects = fetchTableObjects(ox_db_write_con);
+            final List<TableObject> fetchTableObjects = fetchTableObjects(ox_db_write_con);
             // ####### ##### geht hier was kaputt -> enableContext(); ########
             LOG.debug("Table structure fetched!");
 
             // this must sort the tables by references (foreign keys)
             LOG.debug("Try to find foreign key dependencies between tables and sort table!");
-            final ArrayList<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, ox_db_write_con);
+            final List<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, ox_db_write_con);
             // ####### ##### geht hier was kaputt -> enableContext(); ########
             LOG.debug("Dependencies found and tables sorted!");
 
@@ -854,7 +856,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 oxdb_read = cache.getConnectionForContext(context_id);
                 long quota_used = 0;
                 try {
-                    stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                    stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0");
                     stmt2.setInt(1, context_id);
                     rs2 = stmt2.executeQuery();
 
@@ -895,55 +897,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
+    @Deprecated
     public void changeStorageData(final Context ctx) throws StorageException {
-        Connection configdb_write_con = null;
-        final PreparedStatement prep = null;
-        try {
-            configdb_write_con = cache.getConnectionForConfigDB();
-            configdb_write_con.setAutoCommit(false);
-
-            changeStorageDataImpl(ctx, configdb_write_con);
-
-            configdb_write_con.commit();
-        } catch (final DataTruncation dt) {
-            LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException exp) {
-            LOG.error("SQL Error", exp);
-            try {
-                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                    configdb_write_con.rollback();
-                }
-            } catch (final SQLException expd) {
-                LOG.error("Error processing rollback of connection!", expd);
-            }
-            throw new StorageException(exp);
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            try {
-                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                    configdb_write_con.rollback();
-                }
-            } catch (final SQLException expd) {
-                LOG.error("Error processing rollback of connection!", expd);
-            }
-            throw new StorageException(e);
-        } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException exp) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
-            }
-            try {
-                if (configdb_write_con != null) {
-                    cache.pushConnectionForConfigDB(configdb_write_con);
-                }
-            } catch (final PoolException ecp) {
-                LOG.error("Error pushing configdb connection to pool!", ecp);
-            }
-        }
+        OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
+        oxcox.changeFilestoreDataFor(ctx);
     }
 
     @Override
@@ -953,7 +910,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         // Find filestore for context.
-        ctx.setFilestore_name(ctx.getIdAsString() + "_ctx_store");
+        ctx.setFilestore_name(FileStorages.getNameForContext(ctx.getId().intValue()));
         Integer storeId = ctx.getFilestoreId();
         if (null == storeId) {
             storeId = OXUtilStorageInterface.getInstance().findFilestoreForContext().getId();
@@ -1316,16 +1273,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         LOG.error("Context {} enabled back again!", ctx.getId());
     }
 
-    private void fillTargetDatabase(final ArrayList<TableObject> sorted_tables, final Connection target_ox_db_con, final Connection ox_db_connection, final Object criteriaMatch) throws SQLException {
+    private void fillTargetDatabase(List<TableObject> sorted_tables, Connection target_ox_db_con, Connection ox_db_connection, Object criteriaMatch) throws SQLException {
         // do the inserts for all tables!
-        for (int a = 0; a < sorted_tables.size(); a++) {
-            TableObject to = sorted_tables.get(a);
+        StringBuilder prep_sql = new StringBuilder();
+        StringBuilder sb_values = new StringBuilder();
+        for (TableObject to : sorted_tables) {
             to = getDataForTable(to, ox_db_connection, criteriaMatch);
             if (to.getDataRowCount() > 0) {
                 // ok data in table found, copy to db
                 for (int i = 0; i < to.getDataRowCount(); i++) {
-                    final StringBuilder prep_sql = new StringBuilder();
-                    final StringBuilder sb_values = new StringBuilder();
+                    prep_sql.setLength(0);
+                    sb_values.setLength(0);
 
                     prep_sql.append("INSERT INTO " + to.getName() + " ");
                     prep_sql.append("(");
@@ -1385,8 +1343,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }// end of table loop
     }
 
-    private Vector<TableObject> fetchTableObjects(final Connection ox_db_write_connection) throws SQLException {
-        final Vector<TableObject> tableObjects = new Vector<TableObject>();
+    private List<TableObject> fetchTableObjects(final Connection ox_db_write_connection) throws SQLException {
+        final List<TableObject> tableObjects = new LinkedList<TableObject>();
 
         // this.dbmetadata = this.dbConnection.getMetaData();
         final DatabaseMetaData db_metadata = ox_db_write_connection.getMetaData();
@@ -1433,17 +1391,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return tableObjects;
     }
 
-    private ArrayList<TableObject> sortTableObjects(final Vector<TableObject> tableObjects, final Connection ox_db_write_con) throws SQLException {
-        findReferences(tableObjects, ox_db_write_con);
+    private List<TableObject> sortTableObjects(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
+        findReferences(fetchTableObjects, ox_db_write_con);
         // thx http://de.wikipedia.org/wiki/Topologische_Sortierung :)
-        return sortTablesByForeignKey(tableObjects);
+        return sortTablesByForeignKey(fetchTableObjects);
     }
 
-    private ArrayList<TableObject> sortTablesByForeignKey(final Vector<TableObject> tableObjects) {
-        final ArrayList<TableObject> nasty_order = new ArrayList<TableObject>();
+    private List<TableObject> sortTablesByForeignKey(List<TableObject> fetchTableObjects) {
+        List<TableObject> nastyOrder = new ArrayList<TableObject>(fetchTableObjects.size());
 
-        final ArrayList<TableObject> unsorted = new ArrayList<TableObject>();
-        unsorted.addAll(tableObjects);
+        List<TableObject> unsorted = new ArrayList<TableObject>(fetchTableObjects);
 
         // now sort the table with a topological sort mech :)
         // work with the unsorted vector
@@ -1452,7 +1409,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final TableObject to = unsorted.get(a);
                 if (!to.hasCrossReferences()) {
                     // log.error("removing {}", to.getName());
-                    nasty_order.add(to);
+                    nastyOrder.add(to);
                     // remove object from list and sort the references new
                     removeAndSortNew(unsorted, to);
                     a--;
@@ -1460,36 +1417,35 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
         // printTables(nasty_order);
-        return nasty_order;
+        return nastyOrder;
     }
 
     /**
      * Finds references for each table
      */
-    private void findReferences(final Vector<TableObject> tableObjects, final Connection ox_db_write_con) throws SQLException {
-        final DatabaseMetaData dbmeta = ox_db_write_con.getMetaData();
-        final String db_catalog = ox_db_write_con.getCatalog();
-        for (int v = 0; v < tableObjects.size(); v++) {
-            final TableObject to = tableObjects.get(v);
+    private void findReferences(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
+        DatabaseMetaData dbmeta = ox_db_write_con.getMetaData();
+        String dbCatalog = ox_db_write_con.getCatalog();
+        for (TableObject to : fetchTableObjects) {
             // get references from this table to another
-            final String table_name = to.getName();
+            String tableName = to.getName();
             // ResultSet table_references =
             // dbmetadata.getCrossReference("%",null,table_name,getCatalogName(),null,getCatalogName());
-            final ResultSet table_references = dbmeta.getImportedKeys(db_catalog, null, table_name);
-            LOG.debug("Table {} has pk reference to table-column:", table_name);
-            while (table_references.next()) {
-                final String pk = table_references.getString("PKTABLE_NAME");
-                final String pkc = table_references.getString("PKCOLUMN_NAME");
+            final ResultSet tableReferences = dbmeta.getImportedKeys(dbCatalog, null, tableName);
+            LOG.debug("Table {} has pk reference to table-column:", tableName);
+            while (tableReferences.next()) {
+                final String pk = tableReferences.getString("PKTABLE_NAME");
+                final String pkc = tableReferences.getString("PKCOLUMN_NAME");
                 LOG.debug("--> Table: {} column ->{}", pk, pkc);
                 to.addCrossReferenceTable(pk);
-                final int pos_in_list = tableListContainsObject(pk, tableObjects);
-                if (pos_in_list != -1) {
-                    LOG.debug("Found referenced by {}<->{}->{}", table_name, pk, pkc);
-                    final TableObject edit_me = tableObjects.get(pos_in_list);
-                    edit_me.addReferencedBy(table_name);
+                final int pos = tableListContainsObject(pk, fetchTableObjects);
+                if (pos != -1) {
+                    LOG.debug("Found referenced by {}<->{}->{}", tableName, pk, pkc);
+                    final TableObject editMe = fetchTableObjects.get(pos);
+                    editMe.addReferencedBy(tableName);
                 }
             }
-            table_references.close();
+            tableReferences.close();
         }
     }
 
@@ -1497,10 +1453,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * remove no more needed element from list and remove the reference to removed element so that a new element exists which has now
      * references.
      */
-    private void removeAndSortNew(final ArrayList<TableObject> list, final TableObject to) {
-        list.remove(to);
-        for (int i = 0; i < list.size(); i++) {
-            final TableObject tob = list.get(i);
+    private void removeAndSortNew(List<TableObject> unsorted, TableObject to) {
+        unsorted.remove(to);
+        for (int i = 0; i < unsorted.size(); i++) {
+            TableObject tob = unsorted.get(i);
             tob.removeCrossReferenceTable(to.getName());
         }
     }
@@ -1508,15 +1464,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     /**
      * Returns -1 if not found else the position in the Vector where the object is located.
      */
-    private int tableListContainsObject(final String table_name, final Vector<TableObject> tableObjects) {
-        int found_at_position = -1;
-        for (int v = 0; v < tableObjects.size(); v++) {
-            final TableObject to = tableObjects.get(v);
+    private int tableListContainsObject(String table_name, List<TableObject> fetchTableObjects) {
+        int size = fetchTableObjects.size();
+        int pos = -1;
+        for (int v = 0; v < size; v++) {
+            TableObject to = fetchTableObjects.get(v);
             if (to.getName().equals(table_name)) {
-                found_at_position = v;
+                pos = v;
             }
         }
-        return found_at_position;
+        return pos;
     }
 
     private TableObject getDataForTable(final TableObject to, final Connection ox_db_connection, final Object criteriaMatch) throws SQLException {

@@ -47,21 +47,33 @@
  *
  */
 
-package com.openexchange.groupware.filestore;
+package com.openexchange.tools.servlet.http;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map;
-
+import javax.servlet.http.Cookie;
 
 /**
- * {@link FilestoreLocationUpdater}
+ * Internal data object for transferring cookies from requests.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since 7.8.0
  */
-public interface FilestoreLocationUpdater {
+public final class AuthCookie implements com.openexchange.authentication.Cookie {
 
-    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException;
+    private final String name, value;
 
+    public AuthCookie(final Cookie cookie) {
+        super();
+        this.name = cookie.getName();
+        this.value = cookie.getValue();
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }

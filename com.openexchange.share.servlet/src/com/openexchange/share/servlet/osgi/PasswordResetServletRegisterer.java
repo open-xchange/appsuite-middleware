@@ -77,7 +77,8 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
     private HttpService httpService;
     private DispatcherPrefixService prefixService;
 
-    private ShareLoginConfiguration loginConfig;
+    private final ShareLoginConfiguration loginConfig;
+    private final byte[] salt;
 
     /**
      * Initializes a new {@link PasswordResetServletRegisterer}.
@@ -86,10 +87,11 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
      * @param context The bundle context
      * @param loginConfig
      */
-    public PasswordResetServletRegisterer(BundleContext context, ShareLoginConfiguration loginConfig) {
+    public PasswordResetServletRegisterer(BundleContext context, ShareLoginConfiguration loginConfig, byte[] salt) {
         super();
         this.context = context;
         this.loginConfig = loginConfig;
+        this.salt = salt;
         this.lock = new ReentrantLock();
     }
 
@@ -149,7 +151,7 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
 
     private boolean registerServlet(String alias, HttpService httpService) {
         try {
-            httpService.registerServlet(alias, new PasswordResetServlet(this.loginConfig), null, null);
+            httpService.registerServlet(alias, new PasswordResetServlet(this.loginConfig, salt), null, null);
             LOG.info("PasswordResetServlet successfully registered");
             return true;
         } catch (Exception e) {

@@ -129,6 +129,30 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean mailenabledset = false;
 
+    // ------------------------ File storage members ------------------------
+
+    private Integer filestore_id;
+
+    private boolean filestore_idset;
+
+    private Integer filestore_owner;
+
+    private boolean filestore_ownerset;
+
+    private String filestore_name;
+
+    private boolean filestore_nameset;
+
+    private Long maxQuota;
+
+    private boolean maxQuotaset;
+
+    private Long usedQuota;
+
+    private boolean usedQuotaset;
+
+    // -----------------------------------------------------------------------
+
     private Date birthday;
 
     private boolean birthdayset = false;
@@ -1718,6 +1742,81 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         }
         this.mailenabled = enabled;
     }
+
+    // -----------------------------------------------------------------------------------------
+
+    public final Integer getFilestoreId() {
+        return filestore_id;
+    }
+
+    public final void setFilestoreId(final Integer filestore_id) {
+        this.filestore_id = filestore_id;
+        this.filestore_idset = true;
+    }
+
+    public boolean isFilestore_idset() {
+        return filestore_idset;
+    }
+
+    public final Integer getFilestoreOwner() {
+        return filestore_owner;
+    }
+
+    public final void setFilestoreOwner(final Integer filestore_owner) {
+        this.filestore_owner = filestore_owner;
+        this.filestore_ownerset = true;
+    }
+
+    public boolean isFilestore_ownerset() {
+        return filestore_ownerset;
+    }
+
+    /**
+     * @return max Quota (in MB)
+     */
+    public final Long getMaxQuota() {
+        return maxQuota;
+    }
+
+    /**
+     *
+     * @param maxQuota (in MB)
+     */
+    public final void setMaxQuota(final Long maxQuota) {
+        this.maxQuota = maxQuota;
+        this.maxQuotaset = true;
+    }
+
+    public boolean isMaxQuotaset() {
+        return maxQuotaset;
+    }
+
+    /**
+     * @return used Quota (in MB)
+     */
+    public final Long getUsedQuota() {
+        return usedQuota;
+    }
+
+    public final void setUsedQuota(final Long usedQuota) {
+        this.usedQuota = usedQuota;
+        this.usedQuotaset = true;
+    }
+
+    public final String getFilestore_name() {
+        return filestore_name;
+    }
+
+    public final void setFilestore_name(final String filestore_name) {
+        this.filestore_name = filestore_name;
+        this.filestore_nameset = true;
+    }
+
+    public boolean isFilestore_nameset() {
+        return filestore_nameset;
+    }
+
+    // -----------------------------------------------------------------------------------------
 
     /**
      * Returns the birthday of this user object
@@ -4155,6 +4254,13 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.sur_name = null;
         this.given_name = null;
         this.mailenabled = null;
+
+        this.filestore_id = null;
+        this.filestore_owner = null;
+        this.filestore_name = null;
+        this.maxQuota = null;
+        this.usedQuota = null;
+
         this.birthday = null;
         this.anniversary = null;
         this.branches = null;

@@ -135,7 +135,7 @@ public class DeleteTest extends ShareTest {
         AllResponse allResponse = client.execute(new AllRequest());
         List<ParsedShare> allShares = allResponse.getParsedShares();
         ParsedShare share = discoverShare(allShares, folder.getObjectID(), matchingPermission.getEntity());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         /*
          * check access to share
          */
@@ -214,7 +214,7 @@ public class DeleteTest extends ShareTest {
         AllResponse allResponse = client.execute(new AllRequest());
         List<ParsedShare> allShares = allResponse.getParsedShares();
         ParsedShare share = discoverShare(allShares, folder.getObjectID(), file.getId(), matchingPermission.getEntity());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, file, share);
         /*
          * check access to share
          */

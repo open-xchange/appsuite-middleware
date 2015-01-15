@@ -101,7 +101,9 @@ public class ShareServletActivator extends HousekeepingActivator {
         trackService(ShareNotificationService.class);
 
         // Initialize login configuration for shares
-        ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(getService(ConfigurationService.class));
+        ConfigurationService configService = getService(ConfigurationService.class);
+        byte[] salt = configService.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
+        ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(configService);
         AbstractShareHandler.setShareLoginConfiguration(loginConfig);
         // Dependently registers Servlets
         {
@@ -111,7 +113,7 @@ public class ShareServletActivator extends HousekeepingActivator {
         }
         {
             Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
-            PasswordResetServletRegisterer registerer = new PasswordResetServletRegisterer(context, loginConfig);
+            PasswordResetServletRegisterer registerer = new PasswordResetServletRegisterer(context, loginConfig, salt);
             track(filter, registerer);
         }
 

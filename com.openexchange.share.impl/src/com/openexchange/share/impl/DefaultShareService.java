@@ -714,7 +714,11 @@ public class DefaultShareService implements ShareService {
             Iterator<Share> iterator = shares.iterator();
             while (iterator.hasNext()) {
                 Share share = iterator.next();
-                if (false == moduleSupport.isVisible(share.getTarget(), session)) {
+                ShareTarget target = share.getTarget();
+                if (false == moduleSupport.exists(target, session)) {
+                    removeTargets(session.getContextId(), Collections.singletonList(target), Collections.singletonList(Integer.valueOf(share.getGuest())));
+                    iterator.remove();
+                } else if (false == moduleSupport.isVisible(target, session)) {
                     iterator.remove();
                 }
             }

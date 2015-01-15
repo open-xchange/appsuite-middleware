@@ -97,7 +97,7 @@ public class GuestPasswordTest extends ShareTest {
          * discover & check share
          */
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, share);
+        checkShare(guestPermission, folder, share);
         /*
          * check access to share
          */

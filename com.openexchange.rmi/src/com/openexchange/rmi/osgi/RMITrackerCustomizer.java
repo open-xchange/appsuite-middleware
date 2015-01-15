@@ -105,7 +105,7 @@ public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Re
         } catch (AccessException e) {
             logger.error("", e);
         } catch (RemoteException e) {
-            logger.error("", e);
+            logger.error("Failed to bind remote reference {} to name {}.", r.getClass().getName(), name, e);
         } catch (AlreadyBoundException e) {
             logger.error("", e);
         } catch (RuntimeException e) {

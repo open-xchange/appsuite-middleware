@@ -55,10 +55,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,6 +73,7 @@ import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.AllowedSharingModes;
+import com.openexchange.caldav.mixins.CalendarColor;
 import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.CalendarOwner;
 import com.openexchange.caldav.mixins.Invite;
@@ -93,9 +96,11 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.xml.jdom.JDOMParser;
@@ -121,7 +126,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         super(factory, url, folder);
         this.factory = factory;
         includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this), new Invite(factory, this),
-            new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this));
+            new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this), new CalendarColor(this));
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }
@@ -434,6 +439,56 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         } else {
             throw protocolException(HttpServletResponse.SC_FORBIDDEN);
         }
+    }
+
+    @Override
+    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+        if (CalendarColor.NAMESPACE.getURI().equals(prop.getNamespace()) && CalendarColor.NAME.equals(prop.getName())) {
+            if (false == PrivateType.getInstance().equals(folder.getType())) {
+                return; // ignore
+            }
+            /*
+             * apply color to meta field
+             */
+            String value = CalendarColor.parse(prop);
+            Map<String, Object> meta = folder.getMeta();
+            if (null == meta) {
+                meta = new HashMap<String, Object>();
+            } else {
+                meta = new HashMap<String, Object>(meta);
+            }
+            if (Strings.isEmpty(value)) {
+                meta.remove("color");
+            } else {
+                meta.put("color", value);
+            }
+            /*
+             * update folder
+             */
+            AbstractFolder updatedFolder = new AbstractFolder() {
+
+                private static final long serialVersionUID = -367640273380922433L;
+
+                @Override
+                public boolean isGlobalID() {
+                    return false;
+                }
+            };
+            updatedFolder.setID(folder.getID());
+            updatedFolder.setTreeID(folder.getTreeID());
+            updatedFolder.setType(folder.getType());
+            updatedFolder.setParentID(folder.getParentID());
+            updatedFolder.setMeta(meta);
+            try {
+                factory.getFolderService().updateFolder(updatedFolder, folder.getLastModified(), factory.getSession(), null);
+            } catch (OXException e) {
+                throw protocolException(e);
+            }
+        }
+    }
+
+    @Override
+    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
     }
 
     @Override

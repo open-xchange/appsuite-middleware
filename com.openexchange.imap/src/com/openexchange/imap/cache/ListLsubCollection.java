@@ -738,7 +738,7 @@ final class ListLsubCollection implements Serializable {
         "\\noselect",
         "\\hasnochildren")));
 
-    private static final Set<String> ATTRIBUTES_NO_SELECT_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("\\noselect")));
+    // private static final Set<String> ATTRIBUTES_NO_SELECT_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("\\noselect")));
 
     private static final String ATTRIBUTE_DRAFTS = "\\drafts";
     private static final String ATTRIBUTE_JUNK = "\\junk";
@@ -760,7 +760,7 @@ final class ListLsubCollection implements Serializable {
         {
             final String sCmd = new StringBuilder(command).append(" (SPECIAL-USE) \"\" \"*\"").toString();
             r = performCommand(protocol, sCmd);
-            LOG.debug("{0} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, r.length);
+            LOG.debug("{0} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -810,7 +810,7 @@ final class ListLsubCollection implements Serializable {
         {
             final String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
             r = performCommand(protocol, sCmd);
-            LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, r.length);
+            LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -866,6 +866,22 @@ final class ListLsubCollection implements Serializable {
                     // Root level
                     listLsubEntry.setParent(rootEntry);
                     rootEntry.addChild(listLsubEntry);
+                }
+
+                // Check attributes for marked folder
+                if (false == lsub) {
+                    Set<String> attrs = listLsubEntry.getAttributes();
+                    if (null != attrs && !attrs.isEmpty()) {
+                        if (attrs.contains(ATTRIBUTE_DRAFTS)) {
+                            this.draftsEntry = listLsubEntry;
+                        } else if (attrs.contains(ATTRIBUTE_JUNK)) {
+                            this.junkEntry = listLsubEntry;
+                        } else if (attrs.contains(ATTRIBUTE_SENT)) {
+                            this.sentEntry = listLsubEntry;
+                        } else if (attrs.contains(ATTRIBUTE_TRASH)) {
+                            this.trashEntry = listLsubEntry;
+                        }
+                    }
                 }
             } // End of for loop
             if (!parentMap.isEmpty()) {

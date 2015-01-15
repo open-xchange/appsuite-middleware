@@ -71,6 +71,7 @@ import com.openexchange.preferences.UserSettingServerDeleteListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionDeleteListener;
 import com.openexchange.tools.file.QuotaUsageDelete;
+import com.openexchange.tools.file.UserQuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 import com.openexchange.tools.oxfolder.deletelistener.ObjectPermissionDeleteListener;
 
@@ -179,6 +180,7 @@ public final class DeleteRegistry {
             new UserConfigurationDeleteListener(),
             new UserSettingMailDeleteListener(),
             new QuotaUsageDelete(),
+            new UserQuotaUsageDelete(),
             new AttachmentContextDelete(),
             new AttachmentDelDelete(),
             new CacheClearerOnContextDelete(),

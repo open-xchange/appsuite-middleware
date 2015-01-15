@@ -4172,4 +4172,35 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return newFetchProfile;
     }
 
+    @Override
+    public MailMessage[] getMessagesByMessageIDByFolder(String fullName, String... messageIDs) throws OXException {
+        try {
+            final int length = messageIDs.length;
+            final MailMessage[] retval = new MailMessage[length];
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw handleMessagingException(imapFolder.getFullName(), e);
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, "INBOX");
+            }
+            final long[] uids = IMAPCommandsCollection.messageId2UID(imapFolder, messageIDs);
+            if (uids.length == length) {
+                for (int i = 0; i < uids.length; i++) {
+                    final long uid = uids[i];
+                    if (uid != -1) {
+                        retval[i] = new IDMailMessage(String.valueOf(uid), fullName);
+                    }
+                }
+            }
+            return retval;
+        } catch (final MessagingException e) {
+            throw handleMessagingException(imapFolder.getFullName(), e);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
 }

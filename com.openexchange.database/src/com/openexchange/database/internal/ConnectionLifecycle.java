@@ -52,7 +52,6 @@ package com.openexchange.database.internal;
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -210,10 +209,11 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 con.setAutoCommit(true);
             }
             // Getting number of open statements.
-            final Class< ? extends Connection> connectionClass = con.getClass();
             try {
-                final Method method = connectionClass.getMethod("getActiveStatementCount");
-                final int active = ((Integer) method.invoke(con, new Object[0])).intValue();
+                int active = 0;
+                if (con instanceof com.mysql.jdbc.Connection) {
+                    active = ((com.mysql.jdbc.Connection) con).getActiveStatementCount();
+                }
                 if (active > 0) {
                     final OXException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
                     addTrace(dbe, data);
