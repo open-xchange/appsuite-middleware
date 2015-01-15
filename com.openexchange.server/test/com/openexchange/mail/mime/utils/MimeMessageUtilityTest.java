@@ -78,7 +78,7 @@ public class MimeMessageUtilityTest extends TestCase{
         String s = "=?UTF-8?Q?Wielkoszcz=C4=99ko=C5=9Bciskowiczkiewi?= =?UTF-8?Q?cz=C3=B3wnaOm=C3=B3jbo=C5=BCejestemno=C5=BCemwie?= "
             + "=?UTF-8?Q?leznacz=C4=85cychznak=C3=B3wsi=C4=99znaczyb?= =?UTF-8?Q?oprzecie=C5=BCniemo=C5=BCeby=C4=87zbyt=C5=82atwo!?= <foo@bar.tld>";
         s = MimeMessageUtility.decodeMultiEncodedHeader(s);
-        assertEquals("Address nor properly unfolded/decoded.", "WielkoszczękościskowiczkiewiczównaOmójbożejestemnożemwieleznaczącychznakówsięznaczyboprzecieżniemożebyćzbytłatwo! "
+        assertEquals("Address nor properly unfolded/decoded.", "Wielkoszcz\u0119ko\u015bciskowiczkiewicz\u00f3wnaOm\u00f3jbo\u017cejestemno\u017cemwieleznacz\u0105cychznak\u00f3wsi\u0119znaczyboprzecie\u017cniemo\u017ceby\u0107zbyt\u0142atwo! "
             + "<foo@bar.tld>", s);
 
         //expected (a b)
