@@ -63,6 +63,7 @@ public class UpdateRequest extends InsertRequest {
 
     private final FolderObject folder;
     private boolean handDown;
+    private boolean cascade;
 
     public UpdateRequest(API api, FolderObject folder, boolean failOnError) {
         super(api, folder, failOnError);
@@ -77,6 +78,11 @@ public class UpdateRequest extends InsertRequest {
         this.handDown = handDown;
         return this;
     }
+    
+    public UpdateRequest setCascadePermissions(boolean cascade) {
+        this.cascade = cascade;
+        return this;
+    }
 
     @Override
     protected void addParameters(List<Parameter> params) {
@@ -86,6 +92,9 @@ public class UpdateRequest extends InsertRequest {
         params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime())));
         if (handDown) {
             params.add(new Parameter("permissions", "inherit"));
+        }
+        if (cascade) {
+            params.add(new Parameter("inheritPermissions", cascade));
         }
     }
 }
