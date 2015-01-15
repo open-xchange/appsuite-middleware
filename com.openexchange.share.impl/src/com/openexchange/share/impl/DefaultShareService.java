@@ -806,7 +806,6 @@ public class DefaultShareService implements ShareService {
                  */
                 guestRecipient.setPassword(null);
 
-//                not required as it will be filtered out as 'already existing mapping'
                 guestService.addGuest(existingGuestUser.getMail(), context.getContextId(), existingGuestUser.getId());
                 return existingGuestUser;
             }

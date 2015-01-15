@@ -244,7 +244,6 @@ public class GuestCleanupTask extends AbstractTask<Void> {
          */
         try {
             services.getService(UserService.class).deleteUser(connection, context, guestID);
-//TODO use deletelistener instead            services.getService(GuestService.class).removeGuest(context.getContextId(), guestID);
         } catch (OXException e) {
             if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 LOG.debug("Guest user no longer found, skipping deletion.", e);
