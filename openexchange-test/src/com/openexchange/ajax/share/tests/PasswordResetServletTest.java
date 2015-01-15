@@ -133,9 +133,14 @@ public final class PasswordResetServletTest extends ShareTest {
         /*
          * start dummy smtp to catch password-reset mail
          */
-        StartSMTPRequest startSMTPReqeuest = new StartSMTPRequest(false);
-        startSMTPReqeuest.setUpdateNoReplyForContext(client.getValues().getContextId());
-        client.execute(startSMTPReqeuest);
+        try {
+            StartSMTPRequest startSMTPReqeuest = new StartSMTPRequest(false);
+            startSMTPReqeuest.setUpdateNoReplyForContext(client.getValues().getContextId());
+            client.execute(startSMTPReqeuest);
+        } catch (Exception e) {
+            tearDown();
+            throw e;
+        }
     }
 
     @Override
