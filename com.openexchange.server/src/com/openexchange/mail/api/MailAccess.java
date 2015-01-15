@@ -925,7 +925,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return The trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        final StringBuilder sBuilder = new StringBuilder(2048);
+        String lineSeparator = System.getProperty("line.separator");
+        StringBuilder sBuilder = new StringBuilder(2048);
         {
             final Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
@@ -957,7 +958,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
              * MailAccessWatcher.
              */
-            final StackTraceElement[] trace = usingThread.getStackTrace();
+            StackTraceElement[] trace = usingThread.getStackTrace();
             sBuilder.append("    at ").append(trace[0]);
             for (int i = 1; i < trace.length; i++) {
                 sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
