@@ -26,7 +26,7 @@ open-xchange-messaging-sms (7.6.2-0) unstable; urgency=medium
 
   * prepare for 7.6.2 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 13:40:23 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 17 Sep 2014 12:36:22 +0200
 
 open-xchange-messaging-sms (7.6.1-15) stable; urgency=low
 

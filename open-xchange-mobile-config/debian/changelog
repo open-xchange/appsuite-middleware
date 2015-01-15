@@ -26,7 +26,7 @@ open-xchange-mobile-config (7.6.2-0) unstable; urgency=medium
 
   * prepare for 7.6.2 release
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 05 Nov 2014 13:40:24 +0100
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 17 Sep 2014 12:36:23 +0200
 
 open-xchange-mobile-config (7.6.1-15) stable; urgency=low
 
