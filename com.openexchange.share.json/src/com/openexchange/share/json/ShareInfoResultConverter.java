@@ -78,6 +78,8 @@ public class ShareInfoResultConverter implements ResultConverter {
 
     private final ModuleSupport service;
 
+    public static final String INPUT_FORMAT = "shareinfo";
+
     /**
      * Initializes a new {@link ShareInfoResultConverter}.
      */
@@ -88,7 +90,7 @@ public class ShareInfoResultConverter implements ResultConverter {
 
     @Override
     public String getInputFormat() {
-        return "shareinfo";
+        return INPUT_FORMAT;
     }
 
     @Override

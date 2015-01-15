@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.json.ShareInfoResultConverter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -92,7 +93,7 @@ public class GetAction extends AbstractShareAction {
          * get token from service & return appropriate result
          */
         ShareInfo shareInfo = getShareService().getShare(session, token, path);
-        return new AJAXRequestResult(shareInfo, shareInfo.getShare().getModified(), "shareinfo");
+        return new AJAXRequestResult(shareInfo, shareInfo.getShare().getModified(), ShareInfoResultConverter.INPUT_FORMAT);
     }
 
 }
