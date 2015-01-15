@@ -109,6 +109,8 @@ if [ ${1:-0} -eq 2 ]; then
     fi
 
     # SoftwareChange_Request-2275
+    ox_set_property com.openexchange.oauth.boxcom false /opt/open-xchange/etc/boxcomoauth.properties
+    ox_set_property com.openexchange.oauth.dropbox false /opt/open-xchange/etc/dropboxoauth.properties
     ox_set_property com.openexchange.oauth.google false /opt/open-xchange/etc/googleoauth.properties
     ox_set_property com.openexchange.oauth.msliveconnect false /opt/open-xchange/etc/msliveconnectoauth.properties
     ox_set_property com.openexchange.oauth.xing false /opt/open-xchange/etc/xingoauth.properties
@@ -137,6 +139,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Mon Jan 12 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-01-09
 * Wed Jan 07 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-01-12
 * Mon Jan 05 2015 Steffen Templin <marcus.klein@open-xchange.com>

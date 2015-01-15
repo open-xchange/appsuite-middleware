@@ -73,6 +73,8 @@ done
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
+* Mon Jan 12 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2015-01-09
 * Wed Jan 07 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2015-01-12
 * Mon Jan 05 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
