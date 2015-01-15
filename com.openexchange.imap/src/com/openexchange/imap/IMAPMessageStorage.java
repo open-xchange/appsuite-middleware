@@ -1602,8 +1602,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         boolean fastFetch = getIMAPProperties().isFastFetch();
 
         if (null != indexRange) {
-            long st = System.currentTimeMillis();
-
             boolean hasIMAP4rev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
             char separator = getSeparator(imapFolder);
 
@@ -1649,10 +1647,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
             MailMessage[] mailMessages = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, uids, fetchProfile).doCommand();
             setAccountInfo(mailMessages);
-
-            long dur = System.currentTimeMillis() - st;
-            System.out.println("IMAPMessageStorage.fetchSortAndSlice() took " + dur);
-
             return mailMessages;
         }
 
