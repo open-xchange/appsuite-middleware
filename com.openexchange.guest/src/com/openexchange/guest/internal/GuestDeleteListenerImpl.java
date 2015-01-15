@@ -73,7 +73,7 @@ public class GuestDeleteListenerImpl implements DeleteListener {
      *
      * @param guestService - to delete the guest
      */
-    public GuestDeleteListenerImpl(DefaultGuestService guestService) {
+    public GuestDeleteListenerImpl(GuestService guestService) {
         Validate.notNull(guestService, "Required service GuestService is absent. Removing guests from mapping table not possible.");
 
         this.guestService = guestService;

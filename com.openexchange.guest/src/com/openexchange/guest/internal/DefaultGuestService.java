@@ -63,6 +63,7 @@ import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.GuestExceptionCodes;
 import com.openexchange.guest.GuestService;
 import com.openexchange.guest.storage.GuestStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.user.UserService;
 
@@ -133,6 +134,11 @@ public class DefaultGuestService implements GuestService {
     public void removeGuest(int contextId, int userId) throws OXException {
         final int relatedGuestId = GuestStorage.getInstance().getGuestId(contextId, userId); // this has to happen before guest assignment is removed!
 
+        if (relatedGuestId == GuestStorage.NOT_FOUND) {
+            LOG.warn("Guest with context {} and user id {} cannot be removed! No internal user found.", contextId, userId);
+            return;
+        }
+
         GuestStorage.getInstance().removeGuestAssignment(relatedGuestId, contextId, userId);
 
         int numberOfAssignments = GuestStorage.getInstance().getNumberOfAssignments(relatedGuestId);
@@ -148,9 +154,22 @@ public class DefaultGuestService implements GuestService {
     public void setPassword(String mailAddress, String password) throws OXException {
         check(mailAddress);
 
+        if (Strings.isEmpty(password)) {
+            LOG.error("Password update for guests with mail address {} not possible. New Password is empty.");
+            throw GuestExceptionCodes.PASSWORD_EMPTY_ERROR.create(mailAddress);
+        }
+
         final int guestId = GuestStorage.getInstance().getGuestId(mailAddress);
+        if (guestId == GuestStorage.NOT_FOUND) {
+            LOG.warn("Guest user for mail address {} not found. Cannot update password.", mailAddress);
+            return;
+        }
 
         List<Serializable> guestAssignments = GuestStorage.getInstance().getGuestAssignments(guestId);
+        if (guestAssignments.size() == 0) {
+            LOG.error("No assignment for the guest with mail address {} found. This might indicate incosistences as there is a guest user existing without assignments. Guest id: {}.", mailAddress, guestId);
+            throw GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_ERROR.create(mailAddress, Integer.toString(guestId));
+        }
 
         String encodedPassword = null;
         try {

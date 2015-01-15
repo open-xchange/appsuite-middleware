@@ -72,56 +72,56 @@ import com.openexchange.guest.GuestExceptionCodes;
  */
 public class RdbGuestStorage extends GuestStorage {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbGuestStorage.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbGuestStorage.class);
 
     /**
      * SQL statement for resolving the internal unique id based on the mail address
      */
-    private static final String RESOLVE_GUEST_ID_BY_MAIL = "SELECT id FROM guest WHERE mail_address=?";
+    protected static final String RESOLVE_GUEST_ID_BY_MAIL = "SELECT id FROM guest WHERE mail_address=?";
 
     /**
      * SQL statement for resolving the internal unique id based on context and user id
      */
-    private static final String RESOLVE_GUEST_ID_BY_CONTEXT_AND_USER = "SELECT guest_id FROM guest2context WHERE cid=? AND uid=?";
+    protected static final String RESOLVE_GUEST_ID_BY_CONTEXT_AND_USER = "SELECT guest_id FROM guest2context WHERE cid=? AND uid=?";
 
     /**
      * SQL statement for getting one assignment made for a user (resolved by mail address, context and user id)<br>
      * <br>
      * Checks if exactly the same user is existing.
      */
-    private static final String RESOLVE_GUEST_ASSIGNMENT = "SELECT * FROM guest2context WHERE cid=? AND uid=? AND guest_id=?";
+    protected static final String RESOLVE_GUEST_ASSIGNMENT = "SELECT * FROM guest2context WHERE cid=? AND uid=? AND guest_id=?";
 
     /**
      * SQL statement for getting assignments made for a user based on the mail address<br>
      * <br>
      * Checks if the given user has assignments.
      */
-    private static final String RESOLVE_GUEST_ASSIGNMENTS = "SELECT cid,uid FROM guest2context WHERE guest_id=?";
+    protected static final String RESOLVE_GUEST_ASSIGNMENTS = "SELECT cid,uid FROM guest2context WHERE guest_id=?";
 
     /**
      * SQL statement to count assignments that currently exist.
      */
-    private static final String RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID = "SELECT COUNT(*) FROM guest2context WHERE guest_id=?";
+    protected static final String RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID = "SELECT COUNT(*) FROM guest2context WHERE guest_id=?";
 
     /**
      * SQL statement to insert a new assignment for an existing guest
      */
-    private static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid) VALUES (?, ?, ?)";
+    protected static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid) VALUES (?, ?, ?)";
 
     /**
      * SQL statement to insert a new guest for an unknown mail address
      */
-    private static final String INSERT_GUEST = "INSERT INTO guest (mail_address) VALUES (?)";
+    protected static final String INSERT_GUEST = "INSERT INTO guest (mail_address) VALUES (?)";
 
     /**
      * SQL statement for deleting a guest assignment based on the context and user id.
      */
-    private static final String DELETE_GUEST_ASSIGNMENT = "DELETE FROM guest2context where guest_id=? AND cid=? AND uid=?";
+    protected static final String DELETE_GUEST_ASSIGNMENT = "DELETE FROM guest2context where guest_id=? AND cid=? AND uid=?";
 
     /**
      * SQL statement for deleting a guest based on its internal guest id.
      */
-    private static final String DELETE_GUEST = "DELETE FROM guest where id=?";
+    protected static final String DELETE_GUEST = "DELETE FROM guest where id=?";
 
     private final DatabaseService databaseService;
 
@@ -342,8 +342,9 @@ public class RdbGuestStorage extends GuestStorage {
             statement.setInt(1, guestId);
             int affectedRows = statement.executeUpdate();
 
-            if (affectedRows != 1) {
-                LOG.error("There have been " + affectedRows + " changes for removing a guest but there should only be 1. Executed SQL: " + statement.toString());
+            if (affectedRows > 1) {
+                LOG.error("There have been " + affectedRows + " guests removed but there should max be 1. Executed SQL: " + statement.toString());
+                throw GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED.create(Integer.toString(affectedRows), statement.toString());
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -405,7 +406,6 @@ public class RdbGuestStorage extends GuestStorage {
             statement.setInt(3, guestId);
             result = statement.executeQuery();
             if (result.next()) {
-                // already existing guest in this context
                 return true;
             }
         } catch (final SQLException e) {

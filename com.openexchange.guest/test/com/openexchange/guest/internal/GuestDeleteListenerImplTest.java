@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,76 @@
  *
  */
 
-package com.openexchange.guest;
+package com.openexchange.guest.internal;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.sql.Connection;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.guest.GuestService;
 
 /**
- *
- * {@link GuestExceptionMessage}
+ * {@link GuestDeleteListenerImplTest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class GuestExceptionMessage implements LocalizableStrings {
+@RunWith(PowerMockRunner.class)
+public class GuestDeleteListenerImplTest {
 
-    public final static String INVALID_EMAIL_ADDRESS_MSG = "The provided mail address %1$s is invalid! It cannot be added to guest administration.";
+    private static final int CONTEXT_ID = 1;
+    private static final int USER_ID = 11;
 
-    public final static String PASSWORD_EMPTY_MSG = "The new password might not be empty! Please provide a password.";
+    private GuestDeleteListenerImpl guestDeleteListenerImpl;
+
+    @Mock
+    private GuestService guestService;
+
+    @Mock
+    private DeleteEvent deleteEvent;
+
+    @Mock
+    private Connection connection;
+
+    @Mock
+    private Context context;
 
     /**
-     * Initializes a new {@link GuestExceptionMessage}.
+     * @throws java.lang.Exception
      */
-    private GuestExceptionMessage() {
-        super();
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_USER);
+        Mockito.when(deleteEvent.getContext()).thenReturn(context);
+        Mockito.when(deleteEvent.getId()).thenReturn(USER_ID);
+        Mockito.when(context.getContextId()).thenReturn(CONTEXT_ID);
+
+        this.guestDeleteListenerImpl = new GuestDeleteListenerImpl(guestService);
+    }
+
+    @Test
+    public void testDeletePerformed_wrongType_doNothing() throws OXException {
+        Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_CONTEXT);
+
+        guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
+
+        Mockito.verify(guestService, Mockito.never()).removeGuest(Matchers.anyInt(), Matchers.anyInt());
+    }
+
+    @Test
+    public void testDeletePerformed_dfadsfdas_doNothing() throws OXException {
+        guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
+
+        Mockito.verify(guestService, Mockito.times(1)).removeGuest(CONTEXT_ID, USER_ID);
     }
 }

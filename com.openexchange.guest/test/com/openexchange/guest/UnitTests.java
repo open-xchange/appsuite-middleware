@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,25 +49,32 @@
 
 package com.openexchange.guest;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.guest.internal.DefaultGuestServiceTest;
+import com.openexchange.guest.internal.GuestDeleteListenerImplTest;
+import com.openexchange.guest.storage.RdbGuestStorageTest;
 
 /**
  *
- * {@link GuestExceptionMessage}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class GuestExceptionMessage implements LocalizableStrings {
-
-    public final static String INVALID_EMAIL_ADDRESS_MSG = "The provided mail address %1$s is invalid! It cannot be added to guest administration.";
-
-    public final static String PASSWORD_EMPTY_MSG = "The new password might not be empty! Please provide a password.";
+@RunWith(Suite.class)
+@SuiteClasses({
+    RdbGuestStorageTest.class,
+    DefaultGuestServiceTest.class,
+    GuestDeleteListenerImplTest.class,
+})
+public class UnitTests {
 
     /**
-     * Initializes a new {@link GuestExceptionMessage}.
+     * Initializes a new {@link UnitTests}.
      */
-    private GuestExceptionMessage() {
+    public UnitTests() {
         super();
     }
 }

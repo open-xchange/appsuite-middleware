@@ -71,19 +71,37 @@ public enum GuestExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No connection to database.
      */
-    NO_CONNECTION("Cannot get connection to database.", GuestExceptionMessage.NO_CONNECTION_TO_GUEST_STORAGE_MSG, Category.CATEGORY_SERVICE_DOWN, 2),
+    NO_CONNECTION(GuestExceptionCodes.NO_CONNECTION_TO_GUEST_STORAGE_MSG, Category.CATEGORY_SERVICE_DOWN, 2),
     /**
      * SQL problem: %1$s.
      */
     SQL_ERROR("SQL problem: %1$s.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 3),
 
-    INVALID_EMAIL_ADDRESS(GuestExceptionMessage.INVALID_EMAIL_ADDRESS_MSG, GuestExceptionMessage.INVALID_EMAIL_ADDRESS_MSG, Category.CATEGORY_ERROR, 4),
+    INVALID_EMAIL_ADDRESS(GuestExceptionMessage.INVALID_EMAIL_ADDRESS_MSG, GuestExceptionMessage.INVALID_EMAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 4),
 
-    GUEST_CREATION_ERROR("Error while creating a new guest: %1$s.", GuestExceptionMessage.GUEST_CREATION_ERROR_MSG, Category.CATEGORY_ERROR, 5),
+    GUEST_CREATION_ERROR(GuestExceptionCodes.GUEST_CREATION_ERROR_MSG, Category.CATEGORY_ERROR, 5),
 
-    PASSWORD_RESET_ERROR("Error while resetting password for user with mail address: %1$s.", GuestExceptionMessage.PASSWORD_RESET_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+    PASSWORD_RESET_ERROR(GuestExceptionCodes.PASSWORD_RESET_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+
+    TOO_MANY_GUESTS_REMOVED(GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED_MSG, Category.CATEGORY_ERROR, 7),
+
+    PASSWORD_EMPTY_ERROR(GuestExceptionCodes.PASSWORD_EMPTY_MSG, GuestExceptionMessage.PASSWORD_EMPTY_MSG, Category.CATEGORY_USER_INPUT, 8),
+
+    GUEST_WITHOUT_ASSIGNMENT_ERROR(GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_MSG, Category.CATEGORY_ERROR, 8),
 
     ;
+
+    private final static String TOO_MANY_GUESTS_REMOVED_MSG = "There have been %1$s guests removed but there should max be 1. Executed SQL: %2$s.";
+
+    private final static String PASSWORD_EMPTY_MSG = "The new password to for guest with mail address %1$s is empty. Password update not possible!";
+
+    private final static String PASSWORD_RESET_ERROR_MSG = "Error while resetting password for user with mail address: %1$s.";
+
+    private final static String NO_CONNECTION_TO_GUEST_STORAGE_MSG = "Could not connect to the guest storage.";
+
+    private final static String GUEST_CREATION_ERROR_MSG = "The guest cannot be created due to an internal server error.";
+
+    private final static String GUEST_WITHOUT_ASSIGNMENT_MSG = "No assignment for the guest with mail address %1$s found. This might indicate incosistences as there is a guest user without assignments. Guest id: %2$s.";
 
     /**
      * (Log) Message of the exception.
@@ -104,6 +122,17 @@ public enum GuestExceptionCodes implements DisplayableOXExceptionCode {
      * Detail number of the exception.
      */
     private final int number;
+
+    /**
+     * Default constructor.
+     *
+     * @param message message.
+     * @param category category.
+     * @param number detail number.
+     */
+    private GuestExceptionCodes(final String message, final Category category, final int number) {
+        this(message, null, category, number);
+    }
 
     /**
      * Default constructor.
