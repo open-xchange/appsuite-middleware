@@ -101,7 +101,7 @@ public class ShareServletActivator extends HousekeepingActivator {
 
         // Initialize login configuration for shares
         ConfigurationService configService = getService(ConfigurationService.class);
-        byte[] salt = configService.getProperty("com.openexchange.cookie.hash.salt").getBytes();
+        byte[] salt = configService.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
         ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(configService);
         AbstractShareHandler.setShareLoginConfiguration(loginConfig);
         // Dependently registers Servlets
