@@ -54,6 +54,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc malpol
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Jan 12 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-01-09
 * Wed Jan 07 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-01-12
 * Mon Jan 05 2015 Carsten Hoeger <choeger@open-xchange.com>
