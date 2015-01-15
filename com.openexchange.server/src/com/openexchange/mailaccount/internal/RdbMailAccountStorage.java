@@ -1323,7 +1323,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             attribute.doSwitch(setSwitch);
                         }
                     }
-                    checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), userId, contextId, con);
 
                     // Check protocol mismatch
                     final String newProtocol = mailAccount.getTransportProtocol();
@@ -1334,8 +1333,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         }
                     }
                 } else if (attributes.contains(Attribute.TRANSPORT_URL_LITERAL)) {
-                    checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), userId, contextId, con);
-
                     // Check protocol mismatch
                     final String newProtocol = mailAccount.getTransportProtocol();
                     if (null != newProtocol) {
@@ -1838,7 +1835,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         try {
             // Check prerequisites
             checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {accountId}), userId, contextId, con);
-            checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {accountId}), userId, contextId, con);
             // Check protocol mismatch
             {
                 final MailAccount storageVersion = getMailAccount(accountId, userId, contextId, con);
@@ -2008,7 +2004,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 throw MailAccountExceptionCodes.CONFLICT_ADDR.create(primaryAddress, I(userId), I(contextId));
             }
             checkDuplicateMailAccount(mailAccount, null, userId, contextId, con);
-            checkDuplicateTransportAccount(mailAccount, null, userId, contextId, con);
             // Check name
             if (!isValid(name)) {
                 throw MailAccountExceptionCodes.INVALID_NAME.create(name);
@@ -2412,54 +2407,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             return false;
         }
         return protocol1.equalsIgnoreCase(protocol2);
-    }
-
-    private void checkDuplicateTransportAccount(final MailAccountDescription mailAccount, final TIntSet excepts, final int userId, final int contextId, final Connection con) throws OXException {
-        final String server = mailAccount.getTransportServer();
-        if (isEmpty(server)) {
-            // No transport server specified
-            return;
-        }
-
-        String login = mailAccount.getTransportLogin();
-        if (Strings.isEmpty(login) && isMailTransportAuth(mailAccount, userId, contextId, con)) {
-            // Impossible to check as login not given, hence preceding duplicate check for mail account is sufficient here
-            return;
-        }
-
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement("SELECT id, url, login FROM user_transport_account WHERE cid = ? AND user = ?");
-            stmt.setLong(1, contextId);
-            stmt.setLong(2, userId);
-            result = stmt.executeQuery();
-            if (!result.next()) {
-                return;
-            }
-            InetAddress addr;
-            try {
-                addr = InetAddress.getByName(IDNA.toASCII(server));
-            } catch (final UnknownHostException e) {
-                LOG.warn("", e);
-                addr = null;
-            }
-            int port = mailAccount.getTransportPort();
-            do {
-                final int id = (int) result.getLong(1);
-                if (null == excepts || !excepts.contains(id)) {
-                    final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
-                    current.parseTransportServerURL(result.getString(2));
-                    if (checkTransportServer(server, addr, current) && checkProtocol(mailAccount.getTransportProtocol(), current.getTransportProtocol()) && current.getTransportPort() == port && (null != login && login.equals(result.getString(3)))) {
-                        throw MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT.create(I(userId), I(contextId));
-                    }
-                }
-            } while (result.next());
-        } catch (final SQLException e) {
-            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
     }
 
     private boolean isMailTransportAuth(MailAccountDescription mailAccount, int userId, int contextId, Connection con) throws OXException {
