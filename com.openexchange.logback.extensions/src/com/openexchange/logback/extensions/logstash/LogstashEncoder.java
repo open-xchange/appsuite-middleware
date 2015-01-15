@@ -73,7 +73,6 @@ public class LogstashEncoder extends EncoderBase<ILoggingEvent> {
     public void doEncode(ILoggingEvent event) throws IOException {
         formatter.writeToStream(event, outputStream);
         IOUtils.write(CoreConstants.LINE_SEPARATOR, outputStream);
-        outputStream.flush();
     }
 
     /*

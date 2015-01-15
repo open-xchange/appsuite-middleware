@@ -303,17 +303,10 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             encoder.init(oos);
             socket.setSoTimeout(0);
             logInfo("Dispatching events...");
-            int counter = 0;
             while (true) {
                 ILoggingEvent event = queue.take();
                 encoder.doEncode(event);
                 oos.flush();
-                if (++counter >= CoreConstants.OOS_RESET_FREQUENCY) {
-                    // Failing to reset the object output stream every now and
-                    // then creates a serious memory leak.
-                    oos.flush();
-                    counter = 0;
-                }
             }
         } catch (IOException ex) {
             handleConnectionException(ex);
