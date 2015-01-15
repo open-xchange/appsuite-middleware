@@ -47,38 +47,84 @@
  *
  */
 
-package com.openexchange.user.json;
+package com.openexchange.user.json.actions;
 
-import com.openexchange.groupware.container.FolderObject;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link Constants} - Constants for the HTTP JSON interface of the user component.
+ * {@link UserMeActionFactory} - Factory for user/me component.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
+@Module(name = "user/me", description = "Provides access to user information.")
+public final class UserMeActionFactory implements AJAXActionServiceFactory {
 
     /**
-     * The module (appendix to servlet path).
+     * The singleton instance.
      */
-    public static final String MODULE = "user";
+    private static final UserMeActionFactory SINGLETON = new UserMeActionFactory();
 
     /**
-     * The module (appendix to servlet path).
+     * Gets the {@link UserMeActionFactory factory} instance.
+     *
+     * @return The {@link UserMeActionFactory factory} instance.
      */
-    public static final String MODULE_ME = "user/me";
-
-    /**
-     * The servlet path.
-     */
-    public static final String SERVLET_PATH_APPENDIX = MODULE;
-
-    /**
-     * The user address book folder identifier.
-     */
-    public static final int USER_ADDRESS_BOOK_FOLDER_ID = FolderObject.SYSTEM_LDAP_FOLDER_ID;
-
-    private Constants() {
-        super();
+    public static final UserMeActionFactory getInstance() {
+        return SINGLETON;
     }
+
+    /*-
+     * Member section
+     */
+
+    /**
+     * The map to store actions.
+     */
+    private final Map<String, AJAXActionService> actions;
+
+    /**
+     * Initializes a new {@link UserMeActionFactory}.
+     */
+    private UserMeActionFactory() {
+        super();
+        actions = initActions();
+    }
+
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        if (null == action) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
+        }
+        final AJAXActionService retval = actions.get(action);
+        if (null == retval) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
+        }
+        return retval;
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
+    }
+
+    /**
+     * Initializes the unmodifiable map to stored actions.
+     *
+     * @return The unmodifiable map with actions stored
+     */
+    private Map<String, AJAXActionService> initActions() {
+        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(2);
+        tmp.put(MeAction.ACTION, new MeAction());
+        return Collections.unmodifiableMap(tmp);
+    }
+
 }
