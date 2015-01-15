@@ -50,6 +50,7 @@
 package com.openexchange.drive.json.action;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +75,7 @@ import com.openexchange.login.Interface;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.AuthCookie;
 
 /**
  * {@link JumpAction}
@@ -148,27 +150,24 @@ public class JumpAction extends AbstractDriveAction {
     }
 
     private static Cookie[] getCookies(HttpServletRequest req) {
-        List<Cookie> cookies = new ArrayList<Cookie>();
-        if (null != req) {
+        final List<Cookie> cookies;
+        if (null == req) {
+            cookies = Collections.emptyList();
+        } else {
+            cookies = new ArrayList<Cookie>();
             for (final javax.servlet.http.Cookie c : req.getCookies()) {
-                cookies.add(new Cookie() {
-                    @Override
-                    public String getValue() {
-                        return c.getValue();
-                    }
-                    @Override
-                    public String getName() {
-                        return c.getName();
-                    }
-                });
+                cookies.add(new AuthCookie(c));
             }
         }
         return cookies.toArray(new Cookie[cookies.size()]);
     }
 
     private static Map<String, List<String>> getHeaders(HttpServletRequest req) {
-        Map<String, List<String>> headers = new HashMap<String, List<String>>();
-        if (null != req) {
+        final Map<String, List<String>> headers;
+        if (null == req) {
+            headers = Collections.emptyMap();
+        } else {
+            headers = new HashMap<String, List<String>>();
             Enumeration<String> headerNames = req.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String name = headerNames.nextElement();
