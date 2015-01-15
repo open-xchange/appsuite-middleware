@@ -1478,6 +1478,13 @@ public final class IMAPCommandsCollection {
         }
     }
 
+    /**
+     * Sets the given SPECIAL-USE flags for specified IMAP folder
+     *
+     * @param imapFolder The IMAP folder
+     * @param specialUses The SPECIAL-USE flags to apply; e.g. <code>"\Draft"</code>, <code>"\Sent"</code>, <code>"\Junk"</code>, or <code>"\Trash"</code>
+     * @throws MessagingException If operation fails
+     */
     public static void setSpecialUses(final IMAPFolder imapFolder, final Collection<String> specialUses) throws MessagingException {
         if (null == specialUses || specialUses.isEmpty()) {
             return;
@@ -1487,22 +1494,18 @@ public final class IMAPCommandsCollection {
         imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                final String fullName = imapFolder.getFullName();
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                String fullName = imapFolder.getFullName();
+
                 // Encode the mbox as per RFC2060
-                final String mbox;
-                if ((type & Folder.HOLDS_MESSAGES) == 0) {
-                    // Only holds folders
-                    mbox = prepareStringArgument(fullName + sep);
-                } else {
-                    mbox = prepareStringArgument(fullName);
-                }
-                // Create command
-                final String command;
+                String mbox = (type & Folder.HOLDS_MESSAGES) == 0 ? prepareStringArgument(fullName + sep) : prepareStringArgument(fullName);
+
+                // Craft IMAP command
+                String command;
                 {
-                    final StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox);
+                    StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox);
                     cmdBuilder.append("(");
-                    for (final String specialUse : specialUses) {
+                    for (String specialUse : specialUses) {
                         cmdBuilder.append("/private/specialuse ");
                         if (null == specialUse) {
                             cmdBuilder.append("NIL");
@@ -1517,15 +1520,16 @@ public final class IMAPCommandsCollection {
                     cmdBuilder.append(")");
                     command = cmdBuilder.toString();
                 }
+
                 // Issue command
-                final Response[] r = performCommand(protocol, command);
-                final Response response = r[r.length - 1];
+                Response[] r = performCommand(protocol, command);
+                Response response = r[r.length - 1];
                 if (response.isOK()) {
                     for (int i = 0, len = r.length - 1; i < len; i++) {
                         if (!(r[i] instanceof IMAPResponse)) {
                             continue;
                         }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals("METADATA")) {
                             r[i] = null;
                         }
