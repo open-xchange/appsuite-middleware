@@ -146,6 +146,8 @@ public final class FolderTestSuite {
         tests.addTestSuite(Bug17225Test.class);
         tests.addTestSuite(Bug17261Test.class);
         tests.addTestSuite(Bug29853Test.class);
+        
+        tests.addTestSuite(PermissionsCascadeTest.class);
 
         return tests;
     }
