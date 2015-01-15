@@ -63,11 +63,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -111,6 +113,9 @@ public class JumpAction extends AbstractDriveAction {
             if (Strings.isEmpty(method)) {
                 method = "preview";
             }
+            // TODO Check for possibilities that the client can determine the User-Agent from the browser and transfer it to create a more
+            // secure session.
+            String userAgent = requestData.getUserAgent();
             /*
              * obtain redirect URL from drive service, implicitly checking the existence of the target
              */
@@ -126,7 +131,8 @@ public class JumpAction extends AbstractDriveAction {
             Map<String, List<String>> headers = getHeaders(request);
             String client = getClient();
             String hash = HashCalculator.getInstance().getHash(request, requestData.getUserAgent(), client);
-            LoginRequestImpl req = new LoginRequestImpl(session.getServerSession().getLogin(), session.getServerSession().getPassword(), session.getServerSession().getLocalIp(), requestData.getUserAgent(), authId, client, "Drive Jump", hash, Interface.HTTP_JSON, headers, cookies, requestData.isSecure(), request.getServerName(), request.getServerPort(), requestData.getRoute());
+            boolean forceHTTPS = com.openexchange.tools.servlet.http.Tools.considerSecure(request, forceHTTPS());
+            LoginRequestImpl req = new LoginRequestImpl(session.getServerSession().getLogin(), session.getServerSession().getPassword(), session.getServerSession().getLocalIp(), userAgent, authId, client, "Drive Jump", hash, Interface.HTTP_JSON, headers, cookies, forceHTTPS, request.getServerName(), request.getServerPort(), requestData.getRoute());
             req.setClientToken(clientToken);
             LoginResult res = LoginPerformer.getInstance().doLogin(req);
             String serverToken = res.getServerToken();
@@ -141,33 +147,29 @@ public class JumpAction extends AbstractDriveAction {
         }
     }
 
-    private Cookie[] getCookies(HttpServletRequest req) {
+    private static Cookie[] getCookies(HttpServletRequest req) {
+        List<Cookie> cookies = new ArrayList<Cookie>();
         if (null != req) {
-            Cookie[] cookies = new Cookie[req.getCookies().length];
-            for (int i = 0; i < cookies.length; i++) {
-                final javax.servlet.http.Cookie c = req.getCookies()[i];
-                cookies[i] = new Cookie() {
-
+            for (final javax.servlet.http.Cookie c : req.getCookies()) {
+                cookies.add(new Cookie() {
                     @Override
                     public String getValue() {
                         return c.getValue();
                     }
-
                     @Override
                     public String getName() {
                         return c.getName();
                     }
-                };
+                });
             }
-            return cookies;
         }
-        return null;
+        return cookies.toArray(new Cookie[cookies.size()]);
     }
 
-    private Map<String, List<String>> getHeaders(HttpServletRequest req) {
+    private static Map<String, List<String>> getHeaders(HttpServletRequest req) {
+        Map<String, List<String>> headers = new HashMap<String, List<String>>();
         if (null != req) {
             Enumeration<String> headerNames = req.getHeaderNames();
-            Map<String, List<String>> headers = new HashMap<String, List<String>>();
             while (headerNames.hasMoreElements()) {
                 String name = headerNames.nextElement();
                 List<String> header = new ArrayList<String>();
@@ -177,22 +179,17 @@ public class JumpAction extends AbstractDriveAction {
                 header.add(req.getHeader(name));
                 headers.put(name, header);
             }
-            return headers;
         }
-        return null;
+        return headers;
     }
 
     private String getClient() throws OXException {
         ConfigurationService configService = getConfigService();
-        String uiWebPath = configService.getProperty("com.openexchange.UIWebPath");
-        if (null == uiWebPath) {
-            LOG.warn("Property com.openexchange.UIWebPath is unset.");
-            return "open-xchange-appsuite";
-        }
-        if (!uiWebPath.contains("appsuite")) {
-            return "com.openexchange.ox.gui.dhtml";
-        }
-        return "open-xchange-appsuite";
+        return configService.getProperty(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName(), ConfigurationProperty.HTTP_AUTH_CLIENT.getDefaultValue());
     }
 
+    private boolean forceHTTPS() throws OXException {
+        ConfigurationService configService = getConfigService();
+        return Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue()));
+    }
 }

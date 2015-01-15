@@ -97,11 +97,16 @@ public interface LoginRequest {
     Cookie[] getCookies();
 
     /**
-     * Every login mechanism defining this value must consider the following topics:
-     * <li>
-     * <ul>if com.openexchange.forceHTTPS is configured to true, then this must be true but not if the client comes through localhost</ul>
-     * <ul>the value told by the servlet container if the request was retrieved through HTTPS</ul>
+     * Every login mechanism defining this value must consider the following topics: <li>
+     * <ul>
+     * if com.openexchange.forceHTTPS is configured to true, then this must be true but not if the client comes from the local installation
+     * like USM
+     * </ul>
+     * <ul>
+     * the value told by the servlet container if the request was retrieved through HTTPS
+     * </ul>
      * </li>
+     *
      * @see Tools#considerSecure(javax.servlet.http.HttpServletRequest, boolean)
      * @return <code>true</code> if URLs should be told to the client with HTTPS.
      */
@@ -112,12 +117,12 @@ public interface LoginRequest {
     int getServerPort();
 
     String getHttpSessionID();
-    
+
     /**
      * Gets a value indicating whether the session should be created in a transient way or not, i.e. the session should not be distributed
      * to other nodes in the cluster or put into another persistent storage.
-     * 
-     * @return <code>true</code> if the session should be transient, <code>false</code>, otherwise  
+     *
+     * @return <code>true</code> if the session should be transient, <code>false</code>, otherwise
      */
     boolean isTransient();
 
