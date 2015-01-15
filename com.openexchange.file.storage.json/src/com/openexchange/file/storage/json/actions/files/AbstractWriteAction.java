@@ -51,6 +51,8 @@ package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 
 /**
  * {@link AbstractWriteAction}
@@ -76,8 +78,23 @@ public abstract class AbstractWriteAction extends AbstractFileAction {
     }
 
     @Override
-    protected void after(final AJAXInfostoreRequest req) throws OXException {
-        req.getFileAccess().finish();
+    protected void after(final AJAXInfostoreRequest req) {
+        IDBasedFileAccess fileAccess = req.optFileAccess();
+        if (null != fileAccess) {
+            try {
+                fileAccess.finish();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+        IDBasedFolderAccess folderAccess = req.optFolderAccess();
+        if (null != folderAccess) {
+            try {
+                folderAccess.finish();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
         super.after(req);
     }
 

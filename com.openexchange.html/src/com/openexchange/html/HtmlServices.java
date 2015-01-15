@@ -57,7 +57,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.WhitelistedSchemes;
+import com.openexchange.html.osgi.Services;
 import com.openexchange.html.tools.HTMLUtils;
 
 
@@ -186,6 +188,36 @@ public final class HtmlServices {
 
         // Not allowed...
         return false;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------- //
+
+    /** Volatile cache variable for HTML size threshold */
+    private static volatile Integer maxLength;
+
+    /**
+     * Gets the HTML size threshold (<code>"<i>com.openexchange.html.maxLength</i>"</code> property).
+     *
+     * @return The HTML size threshold
+     */
+    public static int htmlThreshold() {
+        Integer i = maxLength;
+        if (null == maxLength) {
+            synchronized (HtmlServices.class) {
+                i = maxLength;
+                if (null == maxLength) {
+                    // Default is 1MB
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    int defaultMaxLength = 1048576;
+                    if (null == service) {
+                        return defaultMaxLength;
+                    }
+                    i = Integer.valueOf(service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
+                    maxLength = i;
+                }
+            }
+        }
+        return i.intValue();
     }
 
 }

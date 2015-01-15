@@ -327,7 +327,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param desc The optional status description; e.g. <code>"The requested URL was not found on this server."</code>
      * @return A simple error page
      */
-    protected String getErrorPage(int sc, String msg, String desc) {
+    public static String getErrorPage(int sc, String msg, String desc) {
         String msg0 = null == msg ? HttpStatus.getStatusText(sc) : msg;
 
         StringBuilder sb = new StringBuilder(512);

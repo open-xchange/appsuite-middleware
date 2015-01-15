@@ -1,3 +1,25 @@
+* 2015-01-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35979: Null guard for passed cache keys
+
+* 2015-01-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35948: Check for a valid prepared SQL statement prior to attempting to execute it
+ 
+* 2014-12-21 - tobias.friedrich@open-xchange.com
+ 
+ - Fix for bug 35913: Fixed CacheEvent.aggregate(CacheEvent) implementation
+
+* 2014-12-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35889: Consider parent folder identifier when retrieving a file for publication
+
+* 2014-12-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35641: Do not perform check for duplicate transport account in case transport server credentials are supposed to be taken from the mail settings
+ - Fix for bug 34944: Ensure every threads holds its own IDBasedFileAccess instance
+ - Fix for bug 35784: Examine passed "version" parameter if it represents "null"
+
 * 2014-12-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 35746: Only delete referenced original message if a draft-edit operation takes place
@@ -19,6 +41,10 @@
 
  - Fix for bug 35426: Let session obfuscator properly maintain such parameters that are supposed to be taken over from session to stored
                       session representation
+
+* 2014-11-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35502: Apply max. file size and max. overall size when processing upload to abort uploading data once a threshold is exceeded
 
 * 2014-11-14 - thorben.betten@open-xchange.com
 
@@ -47,6 +73,10 @@
  - Fix for bug 34517: Create a new TGT for sessions created with login and password. Request a new forwarded TGT from the client for
    sessions created with a forwarded TGT.
 
+* 2014-10-23 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 35168: Consider '#' as literals and not as comments when inside of double quotes
+
 * 2014-10-23 - marcus.klein@open-xchange.com
 
  - Fix for bug 35129: Do not throw any misleading log messages if client comes to HTTP auth URL without Authorization header.
@@ -69,6 +99,7 @@
 
 * 2014-10-16 - thorben.betten@open-xchange.com
 
+ - Fix for bug 34995: Removed Dropbox and Box.com remnants from packaging
  - Fix for bug 34985: Restrictive reading of configuration and improved logging in case a .properties file contains a malformed Unicode
                       escape sequence
  - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger

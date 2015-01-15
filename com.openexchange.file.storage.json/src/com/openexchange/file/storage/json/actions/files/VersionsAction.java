@@ -80,12 +80,12 @@ import com.openexchange.tools.session.ServerSession;
 public class VersionsAction extends AbstractFileAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.ID);
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        final List<Field> columns = new ArrayList<File.Field>(request.getColumns());
+        List<Field> columns = new ArrayList<File.Field>(request.getColumns());
         if(!columns.contains(File.Field.VERSION)) {
             columns.add(File.Field.VERSION);
         }

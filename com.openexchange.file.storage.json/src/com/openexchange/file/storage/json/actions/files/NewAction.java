@@ -80,12 +80,11 @@ responseDescription = "Object ID of the newly created infoitem. The response is 
 public class NewAction extends AbstractWriteAction {
 
     @Override
-    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.requireFileMetadata();
 
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
-
-        final File file = request.getFile();
+        IDBasedFileAccess fileAccess = request.getFileAccess();
+        File file = request.getFile();
 
         // Check folder
         if (Strings.isEmpty(file.getFolderId())) {
@@ -102,9 +101,8 @@ public class NewAction extends AbstractWriteAction {
 
         if (request.extendedResponse()) {
             return result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request);
-        } else {
-            return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
         }
+        return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
     }
 
 }

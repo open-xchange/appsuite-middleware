@@ -55,12 +55,17 @@ import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -68,6 +73,8 @@ import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -553,7 +560,11 @@ public final class Tools {
      * @param fieldsToUpdate The fields/attributes to update
      * @param sep The separator character
      */
-    public static void checkNames(final MailAccountDescription accountDescription, final Set<Attribute> fieldsToUpdate, final char sep) {
+    public static void checkNames(final MailAccountDescription accountDescription, final Set<Attribute> fieldsToUpdate, final Character separator) {
+        if (null == separator) {
+            return;
+        }
+        char sep = separator.charValue();
         if (fieldsToUpdate.contains(Attribute.TRASH_FULLNAME_LITERAL) && !isEmpty(accountDescription.getTrashFullname()) && !fieldsToUpdate.contains(Attribute.TRASH_LITERAL)) {
             final String name = Tools.getName(accountDescription.getTrashFullname(), sep);
             accountDescription.setTrash(name);
@@ -599,27 +610,47 @@ public final class Tools {
      * @return The separator character
      * @throws OXException If separator character retrieval fails
      */
-    public static char getSeparator(final int accountId, final ServerSession session) throws OXException {
+    public static Character getSeparator(final int accountId, final ServerSession session) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session, accountId);
-
         return getSeparator(mailAccess);
     }
 
     /**
      * Gets the separator character from associated MailAccess.
-     * 
+     *
      * @param mailAccess - {@link MailAccess} to get the separator from.
      * @return The separator character
      * @throws OXException If separator character retrieval fails
      */
-    public static char getSeparator(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        try {
-            mailAccess.connect(false);
-            return mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-        } finally {
-            if (null != mailAccess) {
-                mailAccess.close(true);
+    public static Character getSeparator(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        if (null == mailAccess) {
+            return null;
+        }
+
+        AbstractTask<Character> task = new AbstractTask<Character>() {
+
+            @Override
+            public Character call() throws Exception {
+                try {
+                    mailAccess.connect(false);
+                    return Character.valueOf(mailAccess.getFolderStorage().getFolder("INBOX").getSeparator());
+                } finally {
+                    mailAccess.close(true);
+                }
             }
+        };
+
+        Future<Character> f = ThreadPools.getThreadPool().submit(task);
+        try {
+            return f.get(3000L, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+        } catch (ExecutionException e) {
+            throw ThreadPools.launderThrowable(e, OXException.class);
+        } catch (TimeoutException e) {
+            f.cancel(true);
+            return null;
         }
     }
 

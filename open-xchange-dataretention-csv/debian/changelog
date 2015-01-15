@@ -1,3 +1,15 @@
+open-xchange-dataretention-csv (7.6.1-15) stable; urgency=low
+
+  * Build for patch 2015-01-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 12 Jan 2015 17:17:18 +0100
+
+open-xchange-dataretention-csv (7.6.1-14) stable; urgency=low
+
+  * Build for patch 2015-01-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 07 Jan 2015 15:43:42 +0100
+
 open-xchange-dataretention-csv (7.6.1-13) stable; urgency=medium
 
   * Build for patch 2014-12-15
