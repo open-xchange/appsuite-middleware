@@ -113,7 +113,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             } else if (appointment.getPrincipalId() > 0) {
                 owner = appointment.getPrincipalId();
             }
-            ensureParticipant(appointment, action, owner);
+            ensureParticipant(appointment, change.getCurrentAppointment(), action, owner);
             Appointment original = determineOriginalAppointment(change, processed, session);
             Appointment forMail = appointment;
             if (original != null) {
@@ -204,17 +204,20 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
     }
 
 
-    private void ensureParticipant(CalendarDataObject appointment, ITipAction action, int owner) {
+    private void ensureParticipant(CalendarDataObject appointment, Appointment currentAppointment, ITipAction action, int owner) {
         int confirm = CalendarObject.NONE;
         switch (action) {
-        case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case CREATE: case UPDATE: confirm = CalendarObject.ACCEPT; break;
+        case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case CREATE: confirm = CalendarObject.ACCEPT; break;
         case DECLINE: confirm = CalendarObject.DECLINE; break;
         case TENTATIVE: confirm = CalendarObject.TENTATIVE; break;
+        case UPDATE: confirm = getCurrentConfirmation(currentAppointment, owner);
         default: confirm = -1;
         }
         String message = null;
         if (action.getMessage() != null && !action.getMessage().trim().equals("")) {
             message = action.getMessage();
+        } else {
+            message = getCurrentMessage(currentAppointment, owner);
         }
         Participant[] participants = appointment.getParticipants();
         boolean found = false;
@@ -277,8 +280,33 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         }
     }
 
+    private String getCurrentMessage(Appointment currentAppointment, int userId) {
+        if (currentAppointment.getUsers() == null || currentAppointment.getUsers().length == 0) {
+            return null;
+        }
 
+        for (UserParticipant up : currentAppointment.getUsers()) {
+            if (up.getIdentifier() == userId) {
+                if (up.containsConfirmMessage()) {
+                    return up.getConfirmMessage();
+                }
+            }
+        }
+        return null;
+    }
 
+    private int getCurrentConfirmation(Appointment currentAppointment, int userId) {
+        if (currentAppointment.getUsers() == null || currentAppointment.getUsers().length == 0) {
+            return -1;
+        }
 
-
+        for (UserParticipant up : currentAppointment.getUsers()) {
+            if (up.getIdentifier() == userId) {
+                if (up.containsConfirm()) {
+                    return up.getConfirm();
+                }
+            }
+        }
+        return -1;
+    }
 }
