@@ -74,6 +74,7 @@ public class ShareLoginConfiguration {
     private String shareClientVersion;
     private Integer shareCookieTTL;
     private boolean shareTransientSessions;
+    private byte[] cookieHashSalt;
 
     /**
      * Initializes a new {@link ShareLoginConfiguration}.
@@ -142,6 +143,15 @@ public class ShareLoginConfiguration {
     }
 
     /**
+     * Gets the cookie hash salt as configured via <code>com.openexchange.cookie.hash.salt</code>.
+     *
+     * @return The cookie hash salt as byte array
+     */
+    public byte[] getCookieHashSalt() {
+        return cookieHashSalt;
+    }
+
+    /**
      * (Re-)initializes the configuration.
      *
      * @param configService A reference to the configuration service
@@ -162,6 +172,7 @@ public class ShareLoginConfiguration {
             this.shareCookieTTL = Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTL));
         }
         this.shareTransientSessions = configService.getBoolProperty("com.openexchange.share.transientSessions", true);
+        this.cookieHashSalt = configService.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
     }
 
     /**

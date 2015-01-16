@@ -92,11 +92,9 @@ import com.openexchange.user.UserService;
 public class PasswordResetServlet extends HttpServlet {
 
     private static final long serialVersionUID = -598655895873570676L;
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
     private final ShareLoginConfiguration loginConfig;
-    private final byte[] salt;
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -105,10 +103,9 @@ public class PasswordResetServlet extends HttpServlet {
      *
      * @param loginConfig
      */
-    public PasswordResetServlet(ShareLoginConfiguration loginConfig, byte[] salt) {
+    public PasswordResetServlet(ShareLoginConfiguration loginConfig) {
         super();
         this.loginConfig = loginConfig;
-        this.salt = salt;
     }
 
     @Override
@@ -242,7 +239,7 @@ public class PasswordResetServlet extends HttpServlet {
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         md.reset();
         md.update(toHash.getBytes("UTF-8"));
-        md.update(salt);
+        md.update(loginConfig.getCookieHashSalt());
         byte[] hash = md.digest();
         return com.openexchange.tools.encoding.Base64.encode(hash);
     }

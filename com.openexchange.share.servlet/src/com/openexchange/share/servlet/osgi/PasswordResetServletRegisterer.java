@@ -67,18 +67,15 @@ import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 public final class PasswordResetServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServletRegisterer.class);
-
     private static final String ALIAS_APPENDIX = "share/reset/password";
 
     private final BundleContext context;
     private final Lock lock;
+    private final ShareLoginConfiguration loginConfig;
 
     private String alias;
     private HttpService httpService;
     private DispatcherPrefixService prefixService;
-
-    private final ShareLoginConfiguration loginConfig;
-    private final byte[] salt;
 
     /**
      * Initializes a new {@link PasswordResetServletRegisterer}.
@@ -87,11 +84,10 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
      * @param context The bundle context
      * @param loginConfig
      */
-    public PasswordResetServletRegisterer(BundleContext context, ShareLoginConfiguration loginConfig, byte[] salt) {
+    public PasswordResetServletRegisterer(BundleContext context, ShareLoginConfiguration loginConfig) {
         super();
         this.context = context;
         this.loginConfig = loginConfig;
-        this.salt = salt;
         this.lock = new ReentrantLock();
     }
 
@@ -151,7 +147,7 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
 
     private boolean registerServlet(String alias, HttpService httpService) {
         try {
-            httpService.registerServlet(alias, new PasswordResetServlet(this.loginConfig, salt), null, null);
+            httpService.registerServlet(alias, new PasswordResetServlet(loginConfig), null, null);
             LOG.info("PasswordResetServlet successfully registered");
             return true;
         } catch (Exception e) {
