@@ -974,6 +974,15 @@ ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt
 # SoftwareChange_Request-2250
 ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
 
+# SoftwareChange_Request-2335
+PFILE=/opt/open-xchange/etc/ox-scriptconf.sh
+JOPTS=$(eval ox_read_property JAVA_XTRAOPTS $PFILE)
+JOPTS=${JOPTS//\"/}
+if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
+    JOPTS="$JOPTS -Dlogback.threadlocal.put.duplicate=false"
+    ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
+fi
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
