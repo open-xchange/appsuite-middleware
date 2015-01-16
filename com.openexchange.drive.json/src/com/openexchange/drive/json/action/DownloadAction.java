@@ -50,6 +50,8 @@
 package com.openexchange.drive.json.action;
 
 import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -59,6 +61,8 @@ import com.openexchange.drive.DriveService;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonFileVersion;
+import com.openexchange.drive.json.pattern.JsonDirectoryPattern;
+import com.openexchange.drive.json.pattern.JsonFilePattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -103,6 +107,19 @@ public class DownloadAction extends AbstractDriveAction {
             long offset = 0;
             if (requestData.containsParameter("offset")) {
                 offset = requestData.getParameter("offset", Long.class).longValue();
+            }
+            /*
+             * extract file- and directory exclusions if present
+             */
+            Object data = requestData.getData();
+            if (null != data && JSONObject.class.isInstance(data)) {
+                JSONObject dataObject = (JSONObject) data;
+                try {
+                    session.setDirectoryExclusions(JsonDirectoryPattern.deserialize(dataObject.optJSONArray("directoryExclusions")));
+                    session.setFileExclusions(JsonFilePattern.deserialize(dataObject.optJSONArray("fileExclusions")));
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                }
             }
             /*
              * get data
