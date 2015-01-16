@@ -1150,6 +1150,9 @@ if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatIn
 EOF
 fi
 
+# SoftwareChange_Request-2353
+ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
