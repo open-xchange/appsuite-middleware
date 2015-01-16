@@ -110,7 +110,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DispatcherServlet.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DispatcherServlet.class);
 
     private static final @NonNull Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
@@ -120,7 +120,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final EnumSet<Name> PROPS_TO_IGNORE = EnumSet.of(LogProperties.Name.SESSION_CONTEXT_ID);
 
-    private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
+    protected static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
 
     /**
      * Sets the dispatcher instance.
@@ -169,6 +169,7 @@ public class DispatcherServlet extends SessionServlet {
      * The line separator.
      */
     protected final String lineSeparator;
+
 
     /**
      * Initializes a new {@link DispatcherServlet}.
@@ -329,7 +330,7 @@ public class DispatcherServlet extends SessionServlet {
      * @param e The {@code OXException} instance to check
      * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
      */
-    private static boolean ignore(OXException e) {
+    protected static boolean ignore(OXException e) {
         for (OXExceptionCode code : IGNOREES) {
             if (code.equals(e)) {
                 return true;
@@ -359,22 +360,8 @@ public class DispatcherServlet extends SessionServlet {
         AJAXState state = null;
         Dispatcher dispatcher = DISPATCHER.get();
         try {
-            AJAXRequestData requestData;
-            ServerSession session;
-            /*
-             * Parse & acquire session
-             */
-            {
-                AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-                String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
-                String action = requestDataTools.getAction(httpRequest);
-                session = getSession(httpRequest, dispatcher, module, action);
-                /*
-                 * Parse AJAXRequestData
-                 */
-                requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get(), httpResponse);
-                requestData.setSession(session);
-            }
+
+            AJAXRequestData requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
             /*
              * Start dispatcher processing
              */
@@ -382,93 +369,140 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Perform request
              */
-            AJAXRequestResult result = dispatcher.perform(requestData, state, session);
-            /*
-             * Check result's type
-             */
-            {
-                ResultType resultType = result.getType();
-                switch (resultType) {
-                case ETAG: {
-                    httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                    long expires = result.getExpires();
-                    Tools.setETag(requestData.getETag(), expires > 0 ? expires : -1L, httpResponse);
-                    return;
-                }
-                case HTTP_ERROR: {
-                    handleError(result, httpResponse);
-                    return;
-                }
-                case DIRECT: {
-                    // No further processing
-                    return;
-                }
-                default:
-                    break;
-                }
+            AJAXRequestResult result = dispatcher.perform(requestData, state, requestData.getSession());
+            if (renderResponse(requestData, result, httpRequest, httpResponse)) {
+                /*-
+                 * A common result
+                 *
+                 * Check for optional exception to log...
+                 */
+                logException(result.getException(), LogLevel.DEBUG);
+                /*
+                 * ... and send response
+                 */
+                sendResponse(requestData, result, httpRequest, httpResponse);
             }
-            /*-
-             * A common result
-             *
-             * Check for optional exception to log...
-             */
-            logException(result.getException(), LogLevel.DEBUG);
-            /*
-             * ... and send response
-             */
-            sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (OXException e) {
-            if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
-                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
-                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
-                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
-                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-            if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
-                Object[] logArgs = e.getLogArgs();
-                Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-                int sc = ((Integer) logArgs[0]).intValue();
-                sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
-                Throwable cause = e.getNonOXExceptionCause();
-                if (null == cause) {
-                    logException(e, LogLevel.DEBUG, sc);
-                } else {
-                    logException(e);
-                }
-                return;
-            }
-
-            // Handle other OXExceptions
-
-            if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
-                Throwable cause = e.getCause();
-                LOG.error("Unexpected error", null == cause ? e : cause);
-            } else {
-                // Ignore special "folder not found" error
-                if (ignore(e)) {
-                    logException(e, LogLevel.DEBUG, -1);
-                } else {
-                    logException(e);
-                }
-            }
-
-            if (APIResponseRenderer.expectsJsCallback(httpRequest)) {
-                writeErrorAsJsCallback(e, httpRequest, httpResponse);
-            } else {
-                handleOXException(e, httpRequest, httpResponse);
-            }
+            handleOXException(e, httpRequest, httpResponse);
         } catch (RuntimeException e) {
             logException(e);
-            handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
+            super.handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
             }
         }
+    }
+
+    @Override
+    protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
+            sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), resp);
+            logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+            sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), resp);
+            logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
+            Object[] logArgs = e.getLogArgs();
+            Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+            int sc = ((Integer) logArgs[0]).intValue();
+            sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), resp);
+            Throwable cause = e.getNonOXExceptionCause();
+            if (null == cause) {
+                logException(e, LogLevel.DEBUG, sc);
+            } else {
+                logException(e);
+            }
+            return;
+        }
+
+        // Handle other OXExceptions
+
+        if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
+            Throwable cause = e.getCause();
+            LOG.error("Unexpected error", null == cause ? e : cause);
+        } else {
+            // Ignore special "folder not found" error
+            if (ignore(e)) {
+                logException(e, LogLevel.DEBUG, -1);
+            } else {
+                logException(e);
+            }
+        }
+
+        if (APIResponseRenderer.expectsJsCallback(req)) {
+            writeErrorAsJsCallback(e, req, resp);
+        } else {
+            super.handleOXException(e, req, resp);
+        }
+    }
+
+    /**
+     * Checks if the result shall be rendered and written onto the servlet response.
+     *
+     * @param requestData The request data
+     * @param result The result
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @return <code>true</code> if the result shall be written out normally. Returns <code>false</code> if the result was treated specially
+     * and the response was already written.
+     * @throws IOException If an error occurs while reading/writing the servlet request/response
+     */
+    protected boolean renderResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+        /*
+         * Check result's type
+         */
+        ResultType resultType = result.getType();
+        switch (resultType) {
+            case ETAG: {
+                httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                long expires = result.getExpires();
+                Tools.setETag(requestData.getETag(), expires > 0 ? expires : -1L, httpResponse);
+                return false;
+            }
+            case HTTP_ERROR: {
+                handleError(result, httpResponse);
+                return false;
+            }
+            case DIRECT: {
+                // No further processing
+                return false;
+            }
+            default:
+                break;
+        }
+
+        return true;
+    }
+
+    /**
+     * Initializes the {@link AJAXRequestData} for this request. If a session is required, the according
+     * {@link ServerSession} must be also initialized and set within the request data. If any precondition
+     * checks fail, appropriate exceptions must be thrown (e.g. invalid session ID, unsupported action etc.).
+     *
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @param preferStream
+     * @return <code>true</code> to prefer passing request's body as binary data using an {@link InputStream} (typically for
+     *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
+     * @throws OXException On failing precondition checks
+     * @throws IOException If reading/writing the servlet request/response fails
+     */
+    protected AJAXRequestData initializeRequestData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws OXException, IOException {
+        AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+        String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+        String action = requestDataTools.getAction(httpRequest);
+        ServerSession session = getSession(httpRequest, DISPATCHER.get(), module, action);
+        /*
+         * Parse AJAXRequestData
+         */
+        AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get(), httpResponse);
+        requestData.setSession(session);
+        return requestData;
     }
 
     /**
@@ -479,7 +513,7 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpServletResponse The current {@link HttpServletResponse}
      * @throws IOException If sending the error fails
      */
-    private void handleError(AJAXRequestResult result, HttpServletResponse httpServletResponse) throws IOException {
+    protected void handleError(AJAXRequestResult result, HttpServletResponse httpServletResponse) throws IOException {
         int httpStatusCode = result.getHttpStatusCode();
         switch (httpStatusCode) {
         case 202: {
@@ -495,7 +529,7 @@ public class DispatcherServlet extends SessionServlet {
         httpServletResponse.sendError(result.getHttpStatusCode());
     }
 
-    private void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
+    protected void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
         // Try to write error page
         try {
             httpResponse.setStatus(statusCode);
@@ -507,15 +541,15 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void logException(@Nullable Exception e) {
+    protected void logException(@Nullable Exception e) {
         logException(e, null, -1);
     }
 
-    private void logException(@Nullable Exception e, @Nullable LogLevel logLevel) {
+    protected void logException(@Nullable Exception e, @Nullable LogLevel logLevel) {
         logException(e, logLevel, -1);
     }
 
-    private void logException(@Nullable Exception e, @Nullable LogLevel logLevel, int statusCode) {
+    protected void logException(@Nullable Exception e, @Nullable LogLevel logLevel, int statusCode) {
         if (null == e) {
             return;
         }

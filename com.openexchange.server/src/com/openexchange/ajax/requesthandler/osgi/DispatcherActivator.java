@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.ajax.requesthandler.AJAXActionAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -67,6 +68,7 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.DispatcherNotesProcessor;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -88,6 +90,9 @@ import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResul
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
+import com.openexchange.ajax.requesthandler.oauth.OAuthAnnotationProcessor;
+import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServlet;
+import com.openexchange.ajax.requesthandler.oauth.OAuthModule;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
@@ -212,7 +217,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             }
         });
 
-        final DispatcherServlet servlet = new DispatcherServlet();
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet();
+        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet();
         DispatcherServlet.setDispatcher(dispatcher);
 
         Multiple.setDispatcher(dispatcher);
@@ -222,6 +228,9 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
         DispatcherServlet.registerRenderer(new PreviewResponseRenderer());
+
+        registerService(AJAXActionAnnotationProcessor.class, new DispatcherNotesProcessor());
+        registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
 
         track(ResponseRenderer.class, new SimpleRegistryListener<ResponseRenderer>() {
 
@@ -260,7 +269,10 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 final String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
                 if (!servlets.contains(module)) {
-                    registerSessionServlet(prefix + module, servlet);
+                    registerSessionServlet(prefix + module, dispatcherServlet);
+                    if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
+                        registerSessionServlet(prefix + "oauth/modules/" + module, oAuthDispatcherServlet);
+                    }
                     servlets.add(module);
                 }
             }
@@ -270,9 +282,26 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 final String module = (String) ref.getProperty("module");
                 if (servlets.contains(module)) {
                     unregisterServlet(prefix + module);
+                    if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
+                        unregisterServlet(prefix + "oauth/modules/" + module);
+                    }
                     servlets.remove(module);
                 }
                 dispatcher.remove(module, service);
+            }
+
+        });
+
+        track(AJAXActionAnnotationProcessor.class, new SimpleRegistryListener<AJAXActionAnnotationProcessor>() {
+
+            @Override
+            public void added(ServiceReference<AJAXActionAnnotationProcessor> ref, AJAXActionAnnotationProcessor service) {
+                dispatcher.addAnnotationProcessor(service);
+            }
+
+            @Override
+            public void removed(ServiceReference<AJAXActionAnnotationProcessor> ref, AJAXActionAnnotationProcessor service) {
+                dispatcher.removeAnnotationProcessor(service);
             }
 
         });
