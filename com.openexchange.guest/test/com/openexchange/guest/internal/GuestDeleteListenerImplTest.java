@@ -96,7 +96,6 @@ public class GuestDeleteListenerImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_USER);
         Mockito.when(deleteEvent.getContext()).thenReturn(context);
         Mockito.when(deleteEvent.getId()).thenReturn(USER_ID);
         Mockito.when(context.getContextId()).thenReturn(CONTEXT_ID);
@@ -105,8 +104,8 @@ public class GuestDeleteListenerImplTest {
     }
 
     @Test
-    public void testDeletePerformed_wrongType_doNothing() throws OXException {
-        Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_CONTEXT);
+    public void testDeletePerformed_wrongType_doNotRemoveGuest() throws OXException {
+        Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_GROUP);
 
         guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
 
@@ -114,9 +113,29 @@ public class GuestDeleteListenerImplTest {
     }
 
     @Test
-    public void testDeletePerformed_dfadsfdas_doNothing() throws OXException {
+    public void testDeletePerformed_deleteCalledForUser_removeGuest() throws OXException {
+        Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_USER);
+
         guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
 
         Mockito.verify(guestService, Mockito.times(1)).removeGuest(CONTEXT_ID, USER_ID);
+    }
+
+    @Test
+    public void testDeletePerformed_wrongType_doNotRemoveGuests() throws OXException {
+        Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_GROUP);
+
+        guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
+
+        Mockito.verify(guestService, Mockito.never()).removeGuests(Matchers.anyInt());
+    }
+
+    @Test
+    public void testDeletePerformed_deleteCalledForContext_removeGuests() throws OXException {
+        Mockito.when(deleteEvent.getType()).thenReturn(DeleteEvent.TYPE_CONTEXT);
+
+        guestDeleteListenerImpl.deletePerformed(deleteEvent, connection, connection);
+
+        Mockito.verify(guestService, Mockito.times(1)).removeGuests(CONTEXT_ID);
     }
 }

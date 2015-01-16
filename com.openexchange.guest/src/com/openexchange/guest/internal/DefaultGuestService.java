@@ -99,21 +99,21 @@ public class DefaultGuestService implements GuestService {
     public void addGuest(String mailAddress, int contextId, int userId) throws OXException {
         check(mailAddress);
 
-        int guestId = GuestStorage.getInstance().getGuestId(mailAddress);
-
-        if (GuestStorage.getInstance().isAssignmentExisting(guestId, contextId, userId)) {
-            LOG.info("User with mail address '{}' in context {} with id {} already existing. Will not add him to mapping as a new guest.", mailAddress, contextId, userId);
-            return;
-        }
-
-        if (guestId != GuestStorage.NOT_FOUND) { // already existing, only add assignment
-            GuestStorage.getInstance().addGuestAssignment(guestId, contextId, userId);
-            return;
-        }
-
         ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
         try {
             connectionHelper.start();
+
+            int guestId = GuestStorage.getInstance().getGuestId(mailAddress, connectionHelper.getConnection());
+
+            if (GuestStorage.getInstance().isAssignmentExisting(guestId, contextId, userId, connectionHelper.getConnection())) {
+                LOG.info("Guest with mail address '{}' in context {} with id {} already existing. Will not add him to mapping as a new guest.", mailAddress, contextId, userId);
+                return;
+            }
+
+            if (guestId != GuestStorage.NOT_FOUND) { // already existing, only add assignment
+                GuestStorage.getInstance().addGuestAssignment(guestId, contextId, userId, connectionHelper.getConnection());
+                return;
+            }
 
             int newGuest = GuestStorage.getInstance().addGuest(mailAddress, connectionHelper.getConnection());
             if (newGuest == GuestStorage.NOT_FOUND) {
@@ -132,18 +132,52 @@ public class DefaultGuestService implements GuestService {
      */
     @Override
     public void removeGuest(int contextId, int userId) throws OXException {
-        final int relatedGuestId = GuestStorage.getInstance().getGuestId(contextId, userId); // this has to happen before guest assignment is removed!
+        ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
+        try {
+            connectionHelper.start();
 
-        if (relatedGuestId == GuestStorage.NOT_FOUND) {
-            LOG.warn("Guest with context {} and user id {} cannot be removed! No internal user found.", contextId, userId);
-            return;
+            final int relatedGuestId = GuestStorage.getInstance().getGuestId(contextId, userId, connectionHelper.getConnection()); // this has to happen before guest assignment is removed!
+
+            if (relatedGuestId == GuestStorage.NOT_FOUND) {
+                LOG.warn("Guest with context {} and user id {} cannot be removed! No internal guest to remove found.", contextId, userId);
+                return;
+            }
+
+            GuestStorage.getInstance().removeGuestAssignment(relatedGuestId, contextId, userId, connectionHelper.getConnection());
+
+            int numberOfAssignments = GuestStorage.getInstance().getNumberOfAssignments(relatedGuestId, connectionHelper.getConnection());
+            if ((numberOfAssignments == 0) && (relatedGuestId != GuestStorage.NOT_FOUND)) {
+                GuestStorage.getInstance().removeGuest(relatedGuestId, connectionHelper.getConnection());
+            }
+
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
         }
+    }
 
-        GuestStorage.getInstance().removeGuestAssignment(relatedGuestId, contextId, userId);
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeGuests(int contextId) throws OXException {
+        ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
+        try {
+            connectionHelper.start();
 
-        int numberOfAssignments = GuestStorage.getInstance().getNumberOfAssignments(relatedGuestId);
-        if ((numberOfAssignments == 0) && (relatedGuestId != GuestStorage.NOT_FOUND)) {
-            GuestStorage.getInstance().removeGuest(relatedGuestId);
+            List<Integer> removedGuests = GuestStorage.getInstance().removeGuests(contextId, connectionHelper.getConnection());
+
+            for (int guestId : removedGuests) {
+                int numberOfAssignments = GuestStorage.getInstance().getNumberOfAssignments(guestId, connectionHelper.getConnection());
+                if ((numberOfAssignments == 0) && (guestId != GuestStorage.NOT_FOUND)) {
+                    GuestStorage.getInstance().removeGuest(guestId, connectionHelper.getConnection());
+                }
+            }
+
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
         }
     }
 
@@ -159,42 +193,52 @@ public class DefaultGuestService implements GuestService {
             throw GuestExceptionCodes.PASSWORD_EMPTY_ERROR.create(mailAddress);
         }
 
-        final int guestId = GuestStorage.getInstance().getGuestId(mailAddress);
-        if (guestId == GuestStorage.NOT_FOUND) {
-            LOG.warn("Guest user for mail address {} not found. Cannot update password.", mailAddress);
-            return;
-        }
-
-        List<Serializable> guestAssignments = GuestStorage.getInstance().getGuestAssignments(guestId);
-        if (guestAssignments.size() == 0) {
-            LOG.error("No assignment for the guest with mail address {} found. This might indicate incosistences as there is a guest user existing without assignments. Guest id: {}.", mailAddress, guestId);
-            throw GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_ERROR.create(mailAddress, Integer.toString(guestId));
-        }
-
-        String encodedPassword = null;
+        ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
         try {
-            encodedPassword = PasswordMech.BCRYPT.encode(password);
+            connectionHelper.start();
 
-            for (Serializable assignment : guestAssignments) {
-                if (assignment instanceof GuestAssignment) {
-                    GuestAssignment guestAssignment = (GuestAssignment) assignment;
-                    if (guestId != guestAssignment.getGuestId()) {
-                        continue;
-                    }
-
-                    int contextId = guestAssignment.getContextId();
-                    int userId = guestAssignment.getUserId();
-                    User storageUser = userService.getUser(userId, contextId);
-                    UserImpl updatedUser = new UserImpl(storageUser);
-
-                    updatedUser.setUserPassword(encodedPassword);
-                    Context context = contextService.getContext(contextId);
-                    userService.updateUser(updatedUser, context);
-                    userService.invalidateUser(context, userId);
-                }
+            final int guestId = GuestStorage.getInstance().getGuestId(mailAddress, connectionHelper.getConnection());
+            if (guestId == GuestStorage.NOT_FOUND) {
+                LOG.warn("Guest for mail address {} not found. Cannot update password.", mailAddress);
+                return;
             }
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-            throw GuestExceptionCodes.PASSWORD_RESET_ERROR.create(e, mailAddress);
+
+            List<Serializable> guestAssignments = GuestStorage.getInstance().getGuestAssignments(guestId, connectionHelper.getConnection());
+            if (guestAssignments.size() == 0) {
+                LOG.error("No assignment for the guest with mail address {} found. This might indicate incosistences as there is a guest existing without assignments. Guest id: {}.", mailAddress, guestId);
+                throw GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_ERROR.create(mailAddress, Integer.toString(guestId));
+            }
+
+            String encodedPassword = null;
+            try {
+                encodedPassword = PasswordMech.BCRYPT.encode(password);
+
+                for (Serializable assignment : guestAssignments) {
+                    if (assignment instanceof GuestAssignment) {
+                        GuestAssignment guestAssignment = (GuestAssignment) assignment;
+                        if (guestId != guestAssignment.getGuestId()) {
+                            continue;
+                        }
+
+                        int contextId = guestAssignment.getContextId();
+                        int userId = guestAssignment.getUserId();
+                        User storageUser = userService.getUser(userId, contextId);
+                        UserImpl updatedUser = new UserImpl(storageUser);
+
+                        updatedUser.setUserPassword(encodedPassword);
+                        Context context = contextService.getContext(contextId);
+                        userService.updateUser(connectionHelper.getConnection(), updatedUser, context);
+                        connectionHelper.commit();  //TODO check if it is possible to commit multiple times
+
+                        userService.invalidateUser(context, userId);
+                    }
+                }
+            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+                throw GuestExceptionCodes.PASSWORD_RESET_ERROR.create(e, mailAddress);
+            }
+
+        } finally {
+            connectionHelper.finish();
         }
     }
 

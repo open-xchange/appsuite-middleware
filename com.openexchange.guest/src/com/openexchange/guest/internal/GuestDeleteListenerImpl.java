@@ -90,5 +90,10 @@ public class GuestDeleteListenerImpl implements DeleteListener {
 
             this.guestService.removeGuest(contextId, userId);
         }
+        if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
+            final int contextId = event.getContext().getContextId();
+
+            this.guestService.removeGuests(contextId);
+        }
     }
 }

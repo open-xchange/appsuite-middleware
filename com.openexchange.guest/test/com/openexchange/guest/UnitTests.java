@@ -54,7 +54,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.guest.internal.DefaultGuestServiceTest;
 import com.openexchange.guest.internal.GuestDeleteListenerImplTest;
-import com.openexchange.guest.storage.RdbGuestStorageTest;
+import com.openexchange.guest.internal.RdbGuestStorageTest;
 
 /**
  *

@@ -56,6 +56,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.internal.GuestStorageServiceLookup;
+import com.openexchange.guest.internal.RdbGuestStorage;
 
 /**
  * This class defines the methods for accessing the storage of guests.
@@ -92,7 +93,7 @@ public abstract class GuestStorage {
                 tmp = impl;
                 if (null == tmp) {
                     try {
-                        tmp = CachingGuestStorage.parent = new CachingGuestStorage(new RdbGuestStorage(GuestStorageServiceLookup.getService(DatabaseService.class)));
+                        tmp = new RdbGuestStorage(GuestStorageServiceLookup.getService(DatabaseService.class));
                         tmp.startUp();
                         impl = tmp;
                     } catch (final OXException e) {
@@ -110,17 +111,7 @@ public abstract class GuestStorage {
      *
      * @see com.openexchange.guest.storage.GuestStorage.addGuestAssignment(int, int, int)
      * @param mailAddress - mail address to add a new guest for
-     * @return the internal id of the guest
-     * @throws OXException
-     */
-    public abstract int addGuest(String mailAddress) throws OXException;
-
-    /**
-     * Tries to create a completely new guest entry. Please make sure to create related assignment for the returned guest id.
-     *
-     * @see com.openexchange.guest.storage.GuestStorage.addGuestAssignment(int, int, int)
-     * @param mailAddress - mail address to add a new guest for
-     * @param Connection - existing connection that should be used to create the guest.
+     * @param Connection - existing connection that should be used to add the guest.
      * @return the internal id of the guest
      * @throws OXException
      */
@@ -132,17 +123,7 @@ public abstract class GuestStorage {
      * @param guestId - the internal id of the guest to add a new assignment for (e. g. retrieved via com.openexchange.guest.storage.GuestStorage.getGuestId(String))
      * @param contextId - the context the guest is assigned to
      * @param userId - the id of the guest within the provided context
-     * @throws OXException
-     */
-    public abstract void addGuestAssignment(int guestId, int contextId, int userId) throws OXException;
-
-    /**
-     * Adds a new assignment for an already existing guest.
-     *
-     * @param guestId - the internal id of the guest to add a new assignment for (e. g. retrieved via com.openexchange.guest.storage.GuestStorage.getGuestId(String))
-     * @param contextId - the context the guest is assigned to
-     * @param userId - the id of the guest within the provided context
-     * @param Connection - existing connection that should be used to create the guest.
+     * @param Connection - existing connection that should be used to create the guest assignment.
      * @throws OXException
      */
     public abstract void addGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException;
@@ -151,9 +132,20 @@ public abstract class GuestStorage {
      * Removes the guest with the given internal id
      *
      * @param guestId - the internal id of the guest (e. g. retrieved via com.openexchange.guest.storage.GuestStorage.getGuestId(String))
+     * @param Connection - existing connection that should be used to remove the guest.
      * @throws OXException
      */
-    public abstract void removeGuest(int guestId) throws OXException;
+    public abstract void removeGuest(int guestId, Connection connection) throws OXException;
+
+    /**
+     * Removes the guests for the given context
+     *
+     * @param contextId - the context the guests should be deleted for
+     * @param Connection - existing connection that should be used to remove the guests.
+     * @return List with Integer containing internal guest ids to be able to check if there still are assignments existing or if the guest should be removed.
+     * @throws OXException
+     */
+    public abstract List<Integer> removeGuests(int contextId, Connection connection) throws OXException;
 
     /**
      * Removes the assignment of the guest based on the given internal guestId, context and user id
@@ -161,18 +153,20 @@ public abstract class GuestStorage {
      * @param guestId - the internal id of the guest to remove an assignment for (e. g. retrieved via com.openexchange.guest.storage.GuestStorage.getGuestId(String))
      * @param contextId - the context the guest is assigned to
      * @param userId - the id of the guest within the provided context
+     * @param Connection - existing connection that should be used to remove the guest assignment.
      * @throws OXException
      */
-    public abstract void removeGuestAssignment(int guestId, int contextId, int userId) throws OXException;
+    public abstract void removeGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException;
 
     /**
      * Returns the {@link GuestAssignment}s the guest (with the given mail address) is currently registered for.
      *
      * @param guestId - internal guest id of the user
+     * @param Connection - existing connection that should be used to get the guest assignments.
      * @return List with {@link GuestAssignment}s
      * @throws OXException
      */
-    public abstract List<Serializable> getGuestAssignments(final int guestId) throws OXException;
+    public abstract List<Serializable> getGuestAssignments(final int guestId, Connection connection) throws OXException;
 
     /**
      * Checks if exactly this mapping (user with mail address to context and user) is already existing
@@ -180,38 +174,42 @@ public abstract class GuestStorage {
      * @param guestId - internal guest id of the user
      * @param contextId - the context to check for
      * @param userId - the id of the guest user to check for
+     * @param Connection - existing connection that should be used to evaluate if assignment is existing.
      * @return <code>true</code> if existing, otherwise <code>false</code>
      * @throws OXException
      */
-    public abstract boolean isAssignmentExisting(int guestId, int contextId, int userId) throws OXException;
+    public abstract boolean isAssignmentExisting(int guestId, int contextId, int userId, Connection connection) throws OXException;
 
     /**
      * Returns the number of currently available context/user assignments to the given internal guest id.
      *
      * @param guestId - internal guest id of the user
+     * @param Connection - existing connection that should be used to number of guest assignments.
      * @return int with the number of assignments
      * @throws OXException
      */
-    public abstract int getNumberOfAssignments(int guestId) throws OXException;
+    public abstract int getNumberOfAssignments(int guestId, Connection connection) throws OXException;
 
     /**
      * Returns the internally used guest id associated to the given mail address or -1 if the guest does not exist
      *
      * @param mailAddress - mail address to get the id for
+     * @param Connection - existing connection that should be used to get the guest id.
      * @return int with the internal guest id or -1 if the guest does currently not exist
      * @throws OXException
      */
-    public abstract int getGuestId(String mailAddress) throws OXException;
+    public abstract int getGuestId(String mailAddress, Connection connection) throws OXException;
 
     /**
      * Returns the internally used guest id associated to the given context id/user id tuple or -1 if the guest does not exist.
      *
      * @param contextId - the context to check for
      * @param userId - the id of the guest user to check for
+     * @param Connection - existing connection that should be used to get the guest id.
      * @return int with the internal guest id or -1 if the guest does currently not exist
      * @throws OXException
      */
-    public abstract int getGuestId(int contextId, int userId) throws OXException;
+    public abstract int getGuestId(int contextId, int userId, Connection connection) throws OXException;
 
     /**
      * Internal start-up routine invoked in {@link #start()}

@@ -50,6 +50,7 @@
 package com.openexchange.guest;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link GuestService} defines methods to handle guests across context boundaries so, for instance, it is possible to set a password for a guest only once even it is a guest within multiple contexts.
@@ -57,6 +58,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
+@SingletonService
 public interface GuestService {
 
     /**
@@ -70,7 +72,7 @@ public interface GuestService {
     void addGuest(String mailAddress, int contextId, int userId) throws OXException;
 
     /**
-     * Remove an existing guest. If the last assignment of the mail address was removed even the complete guest will be removed.
+     * Remove an existing guest. If the last assignment for a guest was removed even the complete guest will be removed.
      *
      * @param mailAddress - mail address of the guest to remove
      * @param contextId - context id the guest is assigned to
@@ -78,6 +80,14 @@ public interface GuestService {
      * @throws OXException
      */
     void removeGuest(int contextId, int userId) throws OXException;
+
+    /**
+     * Remove existing guests for the given context. This should only be called in case the given context was deleted. If the last assignment of a guest was removed even the complete guest will be removed.
+     *
+     * @param contextId - context id the guest is assigned to
+     * @throws OXException
+     */
+    void removeGuests(int contextId) throws OXException;
 
     /**
      * Sets the password for all occurrences of the guest which means for all internal users over all contexts the provided mail address is registered for. After updating the user he will also removed from the cache if caching is used.<br>

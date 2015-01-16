@@ -89,6 +89,8 @@ public enum GuestExceptionCodes implements DisplayableOXExceptionCode {
 
     GUEST_WITHOUT_ASSIGNMENT_ERROR(GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_MSG, Category.CATEGORY_ERROR, 8),
 
+    CONTEXT_GUESTS_DELETION_ERROR(GuestExceptionCodes.CONTEXT_GUESTS_DELETION_ERROR_MSG, Category.CATEGORY_ERROR, 9),
+
     ;
 
     private final static String TOO_MANY_GUESTS_REMOVED_MSG = "There have been %1$s guests removed but there should max be 1. Executed SQL: %2$s.";
@@ -102,6 +104,8 @@ public enum GuestExceptionCodes implements DisplayableOXExceptionCode {
     private final static String GUEST_CREATION_ERROR_MSG = "The guest cannot be created due to an internal server error.";
 
     private final static String GUEST_WITHOUT_ASSIGNMENT_MSG = "No assignment for the guest with mail address %1$s found. This might indicate incosistences as there is a guest user without assignments. Guest id: %2$s.";
+
+    private final static String CONTEXT_GUESTS_DELETION_ERROR_MSG = "Inconsistences for deleting guest assignments: %1$s should be deleted but %2$s were deleted. Executed statement: %3$s";
 
     /**
      * (Log) Message of the exception.
