@@ -1,3 +1,7 @@
+* 2015-01-16 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34951: Check if WritePoolId and ReadPoolId are the same before increasing transaction counter
+
 * 2015-01-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 36128: Deal with possible "javax.mail.IllegalWriteException: IMAPMessage is read-only" error
