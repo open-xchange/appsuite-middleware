@@ -71,6 +71,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -500,7 +501,12 @@ public class OXFolderAccess {
             if (-1 != folderId) {
                 return folderId;
             }
-            if (FolderObject.INFOSTORE != module || UserStorage.getInstance().getUser(userId, ctx).isGuest()) {
+            if (FolderObject.INFOSTORE != module) {
+                throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
+                    folderModule2String(module), getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
+            }
+            User user = UserStorage.getInstance().getUser(userId, ctx);
+            if (user.isGuest()) {
                 throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
                     folderModule2String(module), getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
             }
@@ -523,7 +529,7 @@ public class OXFolderAccess {
                      * Not found, create default folder
                      */
                     int folderType = -1 == type ? FolderObject.PUBLIC : type;
-                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, ctx.getContextId(), userId, folderType);
+                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, ctx.getContextId(), userId, folderType, user.getLocale());
                     created = true;
                 }
                 wc.commit();
