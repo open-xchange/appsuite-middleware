@@ -1,3 +1,7 @@
+* 2015-01-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36141: Do proper url-encoding in composed redirect URI
+
 * 2015-01-14 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 36072: Remove white spaces between encoded words as per RFC2047.
