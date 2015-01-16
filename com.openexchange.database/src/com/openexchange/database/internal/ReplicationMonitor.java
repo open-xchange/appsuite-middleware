@@ -378,7 +378,7 @@ public class ReplicationMonitor {
 
     void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
         try {
-            if (!active || con.isClosed()) {
+            if (!active || assign.getWritePoolId() == assign.getReadPoolId() || con.isClosed()) {
                 return;
             }
         } catch (SQLException e) {
@@ -390,7 +390,7 @@ public class ReplicationMonitor {
     }
 
     public void increaseInCurrentTransaction(AssignmentImpl assign, Connection delegate, ConnectionState state) {
-        if (!active) {
+        if (!active || assign.getWritePoolId() == assign.getReadPoolId()) {
             return;
         }
         try {
