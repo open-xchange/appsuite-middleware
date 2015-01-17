@@ -82,11 +82,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AJAXServlet extends HttpServlet {
+public abstract class AbstractMailFilterServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3006497622205429579L;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJAXServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailFilterServlet.class);
 
     private static final String PARAMETER_SESSION = com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 
@@ -98,7 +98,7 @@ public abstract class AJAXServlet extends HttpServlet {
 
     private CookieHashSource hashSource;
 
-    protected AJAXServlet() {
+    protected AbstractMailFilterServlet() {
         super();
     }
 
