@@ -49,132 +49,91 @@
 
 package com.openexchange.hostname.ldap;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.exception.OXException;
-import com.openexchange.hostname.ldap.services.HostnameLDAPServiceRegistry;
-import com.openexchange.java.Autoboxing;
+import com.openexchange.hostname.ldap.osgi.Services;
 
 public class LDAPHostnameCache {
 
-    public final static String REGION_NAME = "LDAPHostname";
-
-    private static final ConcurrentMap<Object, ReadWriteLock> contextLocks = new ConcurrentHashMap<Object, ReadWriteLock>();
-
-    private static final Object[] EMPTY_ARGS = new Object[0];
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LDAPHostnameCache.class);
 
-    private static volatile LDAPHostnameCache singleton;
+    /** The name for the cache region */
+    public final static String REGION_NAME = "LDAPHostname";
 
-    private Cache cache;
-
-    /**
-     * Singleton instantiation.
-     *
-     * @throws OXException If cache instantiation fails
-     */
-    private LDAPHostnameCache() throws OXException {
-        super();
-        initCache();
-    }
+    private static final LDAPHostnameCache INSTANCE = new LDAPHostnameCache();
 
     /**
      * Gets the singleton instance.
      *
      * @return The singleton instance
-     * @throws OXException If instance initialization failed
      */
-    public static LDAPHostnameCache getInstance() throws OXException {
-        LDAPHostnameCache tmp = singleton;
-        if (null == tmp) {
-            synchronized (LDAPHostnameCache.class) {
-                tmp = singleton;
-                if (null == tmp) {
-                    tmp = singleton = new LDAPHostnameCache();
-                }
-            }
-        }
-        return tmp;
+    public static LDAPHostnameCache getInstance() {
+        return INSTANCE;
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Releases the singleton instance.
+     * Singleton instantiation.
      */
-    public static void releaseInstance() {
-        if (null != singleton) {
-            synchronized (LDAPHostnameCache.class) {
-                if (null != singleton) {
-                    singleton = null;
-                }
-            }
-        }
+    private LDAPHostnameCache() {
+        super();
     }
 
-    /**
-     * Fetches the appropriate lock.
-     *
-     * @param key The lock's key
-     * @return The appropriate lock
-     */
-    private static ReadWriteLock getLock(final Object key) {
-        ReadWriteLock l = contextLocks.get(key);
-        if (l == null) {
-            final ReentrantReadWriteLock tmp = new ReentrantReadWriteLock();
-            l = contextLocks.putIfAbsent(key, tmp);
-            if (null == l) {
-                l = tmp;
-            }
-        }
-        return l;
-    }
-
-
-
-    public void addHostnameToCache(final int cid, final String hostname) throws OXException {
-        if (null == cache) {
-            return;
-        } else if ((hostname == null) || (hostname.length() == 0)) {
-            return;
-        }
-        {
-            final Integer cid_int = Autoboxing.I(cid);
-            final Lock writeLock = getLock(cid_int).writeLock();
-            writeLock.lock();
-            try {
-                if (null != cache.get(cid_int)) {
-                    cache.remove(cid_int);
-                }
-                cache.put(cid_int, hostname, false);
-            } finally {
-                writeLock.unlock();
-            }
-        }
-
-    }
-
-    public String getHostnameFromCache(final int cid) {
-        if (null == cache) {
+    private Cache optCache() {
+        try {
+            CacheService service = Services.optService(CacheService.class);
+            return null == service ? null : service.getCache(REGION_NAME);
+        } catch (Exception e) {
+            LOG.warn("Cache {} could not be obtained", REGION_NAME, e);
             return null;
         }
-        final Integer cid_int = Autoboxing.I(cid);
-        final Lock readLock = getLock(cid_int).readLock();
-        readLock.lock();
-        try {
-            return (String) cache.get(cid_int);
-        } finally {
-            readLock.unlock();
-        }
-
     }
 
+    /**
+     * Associates the given host name with specified context identifier in cache.
+     *
+     * @param contextId The context identifier
+     * @param hostname The associated host name
+     * @throws OXException If operation fails
+     */
+    public void addHostnameToCache(int contextId, String hostname) throws OXException {
+        if (hostname != null && hostname.length() > 0) {
+            Cache cache = optCache();
+            if (null != cache) {
+                Integer iContextId = I(contextId);
+                try {
+                    cache.putSafe(iContextId, hostname);
+                } catch (Exception e) {
+                    // Put into cache failed
+                    cache.remove(iContextId);
+                    cache.put(iContextId, hostname, false);
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the host name associated with given context identifier from cache
+     *
+     * @param contextId The context identifier
+     * @return The associated host name or <code>null</code>
+     */
+    public String getHostnameFromCache(int contextId) {
+        Cache cache = optCache();
+        return null == cache ? null : (String) cache.get(I(contextId));
+    }
+
+    /**
+     * Outputs the cache configuration to this class' logger using <code>INFO</code> log level.
+     *
+     * @throws OXException If logging fails
+     */
     public void outputSettings() throws OXException {
+        Cache cache = optCache();
         final ElementAttributes defaultElementAttributes = cache.getDefaultElementAttributes();
         final StringBuilder sb = new StringBuilder(128).append('\n');
         sb.append("Cache setting for hostname ldap bundle:\n");
@@ -205,21 +164,6 @@ public class LDAPHostnameCache {
         sb.append(defaultElementAttributes.getIsSpool());
         sb.append('\n');
         LOG.info(sb.toString());
-    }
-
-    /**
-     * Initializes cache reference.
-     *
-     * @throws OXException If initializing the cache reference fails
-     */
-    private void initCache() throws OXException {
-        /*
-         * Check for proper started hostname cache configuration
-         */
-        if (cache != null) {
-            return;
-        }
-        cache = HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).getCache(REGION_NAME);
     }
 
 }
