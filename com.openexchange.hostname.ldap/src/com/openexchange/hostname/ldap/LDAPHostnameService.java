@@ -133,10 +133,10 @@ public class LDAPHostnameService implements HostnameService {
             return null;
         } finally {
             if (null != search) {
-                search.close();
+                try { search.close(); } catch (Exception x) { /* Ignore */ }
             }
-            if( context != null ) {
-                context.close();
+            if (context != null) {
+                try { context.close(); } catch (Exception x) { /* Ignore */ }
             }
         }
     }
