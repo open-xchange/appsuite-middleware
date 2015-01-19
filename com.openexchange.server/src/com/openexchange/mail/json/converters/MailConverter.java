@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.json.converters;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -58,6 +60,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,11 +73,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
@@ -585,6 +590,31 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 LOG.warn("Couldn't set \"unseen\" field in JSON mail representation.", e);
             }
         }
+
+        // Check for special view=document
+        if (DisplayMode.DOCUMENT.isIncluded(displayMode)) {
+            HttpServletResponse resp = requestData.optHttpServletResponse();
+            if (resp != null) {
+                try {
+                    String htmlContent = jMail.getJSONArray(MailJSONField.ATTACHMENTS.getKey()).getJSONObject(0).getString(MailJSONField.CONTENT.getKey());
+
+                    resp.setContentType("text/html; charset=UTF-8");
+                    resp.setHeader("Content-Disposition", "inline");
+                    PrintWriter writer = resp.getWriter();
+                    writer.write(htmlContent);
+                    writer.flush();
+                    result.setResultObject(null, "native");
+                    result.setType(ResultType.DIRECT);
+                    return;
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                } catch (IOException e) {
+                    throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+
+        //  Common handling
         result.setResultObject(jMail, "json");
         if (doUnseen) {
             /*-

@@ -311,7 +311,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize) throws OXException {
         super();
         this.multiparts = new LinkedList<MultipartInfo>();
-        this.embedded = embedded;
+        this.embedded = DisplayMode.DOCUMENT.equals(displayMode) ? false : embedded;
         this.attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.ttlMillis = ttlMillis;
         this.token = token;
@@ -760,7 +760,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
              * A text part has already been detected as message's body
              */
             if (isAlternative) {
-                if (DisplayMode.DISPLAY.equals(displayMode)) {
+                if (DisplayMode.DISPLAY.isIncluded(displayMode)) {
                     /*
                      * Check if previously appended text part was empty
                      */
@@ -886,7 +886,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         }
                     }
                 } else {
-                    asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                    asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.isIncluded(displayMode));
                 }
             } else if (DisplayMode.RAW.equals(displayMode)) {
                 /*
@@ -935,7 +935,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             if (contentType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || contentType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT) || contentType.startsWith(MimeTypes.MIME_TEXT_RTF)) {
                 if (textAppended) {
-                    if (DisplayMode.DISPLAY.equals(displayMode)) {
+                    if (DisplayMode.DISPLAY.isIncluded(displayMode)) {
                         /*
                          * Add alternative part as attachment
                          */
@@ -971,7 +971,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 contentType.getBaseType(),
                                 getHtmlDisplayVersion(contentType, plainTextContentArg),
                                 fileName,
-                                DisplayMode.DISPLAY.equals(displayMode));
+                                DisplayMode.DISPLAY.isIncluded(displayMode));
                     }
                     if (includePlainText && !textObject.has("plain_text")) {
                         textObject.put("plain_text", plainTextContentArg);
@@ -1010,7 +1010,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 } else {
                     if (usm.isDisplayHtmlInlineContent()) {
                         // Assume HTML content has been appended before
-                        if (DisplayMode.DISPLAY.equals(displayMode)) {
+                        if (DisplayMode.DISPLAY.isIncluded(displayMode)) {
                             /*
                              * Add alternative part as attachment
                              */

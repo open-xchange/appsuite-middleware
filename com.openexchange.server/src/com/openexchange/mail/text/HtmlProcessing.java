@@ -259,11 +259,14 @@ public final class HtmlProcessing {
             }
         } else {
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
-                if (DisplayMode.DISPLAY.equals(mode)) {
+                if (DisplayMode.DISPLAY.isIncluded(mode)) {
                     retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
                     retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
                     if (usm.isUseColorQuote()) {
                         retval.setContent(replaceHTMLSimpleQuotesForDisplay(retval.getContent()));
+                    }
+                    if (DisplayMode.DOCUMENT.equals(mode)) {
+                        retval.setContent(htmlService.getConformHTML(retval.getContent(), "UTF-8"));
                     }
                 } else {
                     retval = htmlService.htmlFormat(retval.getContent(), true, null, maxContentSize);

@@ -284,14 +284,20 @@ public class DefaultDispatcher implements Dispatcher {
                 final Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
 
                 while (iterator.hasNext()) {
-                    final AJAXActionCustomizer customizer = iterator.next();
+                    AJAXActionCustomizer customizer = iterator.next();
                     try {
-                        final AJAXRequestResult modified = customizer.outgoing(modifiedRequestData, result, session);
+                        AJAXRequestResult modified = customizer.outgoing(modifiedRequestData, result, session);
                         if (modified != null) {
                             result = modified;
+
+                            // Check (again) for direct result type
+                            if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
+                                // No further processing
+                                return result;
+                            }
                         }
                         iterator.remove();
-                    } catch (final FlowControl.Later l) {
+                    } catch (FlowControl.Later l) {
                         // Remains in list and is therefore retried
                     }
                 }
