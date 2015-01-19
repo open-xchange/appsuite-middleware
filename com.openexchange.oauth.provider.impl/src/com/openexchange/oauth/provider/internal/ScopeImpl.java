@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,24 +47,56 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal;
 
-import com.openexchange.exception.OXException;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.oauth.provider.Scope;
+
 
 /**
- * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
- * library</a>.
+ * {@link ScopeImpl}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.x.x
  */
-public interface OAuthProviderService extends OAuthProviderConstants {
+public class ScopeImpl implements Scope {
 
-    /**
-     *
-     * @param accessToken
-     * @return
-     * @throws OXException
+    /*
+     * From https://tools.ietf.org/html/rfc6749#section-3.3:
+     *   scope       = scope-token *( SP scope-token )
+     *   scope-token = 1*( %x21 / %x23-5B / %x5D-7E )
      */
-    OAuthToken validate(String accessToken) throws OXException;
+    private static final Pattern PREFIXED_OAUTH_SCOPE = Pattern.compile("(r_|w_|rw_)([\\x21\\x23-\\x5b\\x5d-\\x7e]+)");
 
+    private final Set<String> scopes;
+
+    public ScopeImpl(Set<String> scopes) {
+        super();
+        this.scopes = scopes;
+    }
+
+    @Override
+    public boolean has(String requiredScope) {
+        if (scopes.contains(requiredScope)) {
+            return true;
+        }
+
+        Matcher prefixedScopeMatcher = PREFIXED_OAUTH_SCOPE.matcher(requiredScope);
+        if (prefixedScopeMatcher.matches()) {
+            String prefix = prefixedScopeMatcher.group(1);
+            String scope = prefixedScopeMatcher.group(2);
+            switch (prefix) {
+                case "r_":
+                    return scopes.contains("rw_" + scope);
+                case "w_":
+                    return scopes.contains("rw_" + scope);
+                case "rw_":
+                    return scopes.contains("r_" + scope) && scopes.contains("w_" + scope);
+            }
+        }
+
+        return false;
+    }
 }

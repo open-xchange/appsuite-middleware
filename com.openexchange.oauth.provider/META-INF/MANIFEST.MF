@@ -16,7 +16,6 @@ Bundle-ClassPath: .,
  lib/org.apache.oltu.oauth2.common-1.0.0.jar,
  lib/org.apache.oltu.oauth2.resourceserver-1.0.0.jar
 Export-Package: com.openexchange.oauth.provider,
- com.openexchange.oauth.provider.v2,
  net.oauth,
  net.oauth.server,
  net.oauth.signature,

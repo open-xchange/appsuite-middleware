@@ -50,9 +50,13 @@
 package com.openexchange.ajax.requesthandler.oauth;
 
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
+import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,6 +72,9 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.oauth.OAuthInvalidTokenException.Reason;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Authorization;
@@ -92,6 +99,15 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
      */
     private static final Pattern TOKEN_PATTERN = Pattern.compile("[\\x41-\\x5a\\x61-\\x7a\\x30-\\x39-._~+/]+=*");
 
+    private final ServiceLookup services;
+
+
+
+    public OAuthDispatcherServlet(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
     @Override
     protected void initializeSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         if (SessionUtility.getSessionObject(httpRequest, false) != null) {
@@ -109,26 +125,68 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
                     throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
                 }
 
-
-//              TODO validate token and init session
-//              if (accessToken.equals("1234")) {
-//                  ServerSession session = createOAuthSession(accessToken);
-//                  session.setParameter("com.openexchange.authType", OAuthConstants.AUTH_TYPE);
-//                  SessionUtility.rememberSession(httpRequest, session);
-//                  return;
-//              }
+                OAuthProviderService oAuthProvider = requireService(OAuthProviderService.class, services);
+                OAuthToken token = oAuthProvider.validate(accessToken);
+                SessionUtility.rememberSession(httpRequest, createOAuthSession(token));
                 throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
             }
         }
     }
 
-    private ServerSession createOAuthSession(String accessToken) throws OXException {
-        SessionObject session = new SessionObject("oauthv2-access-token:" + accessToken);
-        session.setContextId(424242669);
-        session.setUsername("84");
-        session.setParameter("com.openexchange.oauth.scopes", "rw_contacts");
+    private ServerSession createOAuthSession(OAuthToken accessToken) throws OXException {
+        SessionObject session = new SessionObject("oauthv2-access-token:" + accessToken.getToken());
+        session.setContextId(accessToken.getContextID());
+        session.setUsername(Integer.toString(accessToken.getUserID()));
+        session.setParameter("com.openexchange.oauth.token", accessToken);
         return ServerSessionAdapter.valueOf(session);
     }
+
+//    private void doOAuthLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
+//        loginOperation(req, resp, new LoginClosure() {
+//
+//            @Override
+//            public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
+//                try {
+//                    final OAuthProviderService providerService = ServerServiceRegistry.getInstance().getService(OAuthProviderService.class);
+//                    final OAuthMessage requestMessage = OAuthServlet.getMessage(req2, null);
+//                    final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
+//                    providerService.getValidator().validateMessage(requestMessage, accessor);
+//                    final String login = accessor.<String> getProperty(OAuthProviderConstants.PROP_LOGIN);
+//                    final String password = accessor.<String> getProperty(OAuthProviderConstants.PROP_PASSWORD);
+//                    final LoginRequest request = LoginTools.parseLogin(
+//                        req2,
+//                        login,
+//                        password,
+//                        false,
+//                        conf.getDefaultClient(),
+//                        conf.isCookieForceHTTPS(),
+//                        false);
+//                    return LoginPerformer.getInstance().doLogin(request);
+//                } catch (final OAuthProblemException e) {
+//                    try {
+//                        handleException(e, req2, resp, false);
+//                        return null;
+//                    } catch (final IOException ioe) {
+//                        throw LoginExceptionCodes.UNKNOWN.create(ioe, ioe.getMessage());
+//                    } catch (final ServletException se) {
+//                        throw LoginExceptionCodes.UNKNOWN.create(se, se.getMessage());
+//                    }
+//                } catch (final IOException e) {
+//                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+//                } catch (final OAuthException e) {
+//                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+//                } catch (final URISyntaxException e) {
+//                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+//                }
+//            }
+//
+//            private void handleException(final Exception e, final HttpServletRequest request, final HttpServletResponse response, final boolean sendBody) throws IOException, ServletException {
+//                final StringBuilder realm = new StringBuilder(32).append((request.isSecure()) ? "https://" : "http://");
+//                realm.append(request.getLocalName());
+//                OAuthServlet.handleException(response, e, realm.toString(), sendBody);
+//            }
+//        }, conf);
+//    }
 
     @Override
     protected AJAXRequestData initializeRequestData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws OXException, IOException {
@@ -167,31 +225,28 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         if (e instanceof OAuthInvalidTokenException) {
             OAuthInvalidTokenException ex = (OAuthInvalidTokenException) e;
             if (ex.getReason() == Reason.TOKEN_MISSING) {
-                httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, OAuthConstants.BEARER_SCHEME);
-                httpResponse.setContentType(null);
-                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                sendEmptyErrorResponse(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, Collections.singletonMap(HttpHeaders.WWW_AUTHENTICATE, OAuthConstants.BEARER_SCHEME));
             } else {
-                StringBuilder sb = new StringBuilder(OAuthConstants.BEARER_SCHEME).append(",error=\"invalid_token\"");
-                httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, sb.toString());
+                String errorDescription = ex.getErrorDescription();
+                StringBuilder sb = new StringBuilder(OAuthConstants.BEARER_SCHEME);
+                sb.append(",error=\"invalid_token\"");
+                if (errorDescription != null) {
+                    sb.append(",error_description=\"").append(errorDescription).append("\"");
+                }
+
                 JSONObject result = new JSONObject();
                 try {
                     result.put("error", "invalid_token");
-                    result.put("error_description", ex.getErrorDescription());
+                    result.put("error_description", errorDescription);
                 } catch (JSONException je) {
                     result = null;
                     logException(je);
                 }
 
                 if (result == null) {
-                    httpResponse.reset();
-                    httpResponse.setContentType(null);
-                    httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    sendEmptyErrorResponse(httpResponse, HttpServletResponse.SC_UNAUTHORIZED);
                 } else {
-                    httpResponse.setContentType("application/json;charset=UTF-8");
-                    httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    PrintWriter writer = httpResponse.getWriter();
-                    writer.write(result.toString());
-                    writer.flush();
+                    sendErrorResponse(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, Collections.singletonMap(HttpHeaders.WWW_AUTHENTICATE, sb.toString()), result.toString());
                 }
             }
         } else if (e instanceof OAuthInsufficientScopeException) {
@@ -207,15 +262,9 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
             }
 
             if (result == null) {
-                httpResponse.reset();
-                httpResponse.setContentType(null);
-                httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
+                sendEmptyErrorResponse(httpResponse, HttpServletResponse.SC_FORBIDDEN);
             } else {
-                httpResponse.setContentType("application/json;charset=UTF-8");
-                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                PrintWriter writer = httpResponse.getWriter();
-                writer.write(result.toString());
-                writer.flush();
+                sendErrorResponse(httpResponse, HttpServletResponse.SC_FORBIDDEN, result.toString());
             }
         } else if (e instanceof OAuthInvalidRequestException) {
             OAuthInvalidRequestException ex = (OAuthInvalidRequestException) e;
@@ -229,20 +278,46 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
             }
 
             if (result == null) {
-                httpResponse.reset();
-                httpResponse.setContentType(null);
-                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                sendEmptyErrorResponse(httpResponse, HttpServletResponse.SC_BAD_REQUEST);
             } else {
-                httpResponse.setContentType("application/json;charset=UTF-8");
-                httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                PrintWriter writer = httpResponse.getWriter();
-                writer.write(result.toString());
-                writer.flush();
+                sendErrorResponse(httpResponse, HttpServletResponse.SC_BAD_REQUEST, result.toString());
             }
         } else {
             super.handleOXException(e, httpRequest, httpResponse);
         }
+    }
 
+    private static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
+        sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
+    }
+
+    private static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
+        httpResponse.reset();
+
+        for (Entry<String, String> header : additionalHeaders.entrySet()) {
+            httpResponse.setHeader(header.getKey(), header.getValue());
+        }
+
+        httpResponse.setContentType("application/json;charset=UTF-8");
+        httpResponse.setStatus(statusCode);
+        PrintWriter writer = httpResponse.getWriter();
+        writer.write(body);
+        writer.flush();
+    }
+
+    private static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
+        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
+    }
+
+    private static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
+        httpResponse.reset();
+
+        for (Entry<String, String> header : additionalHeaders.entrySet()) {
+            httpResponse.setHeader(header.getKey(), header.getValue());
+        }
+
+        httpResponse.setContentType(null);
+        httpResponse.sendError(statusCode);
     }
 
 }

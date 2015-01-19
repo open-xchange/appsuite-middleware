@@ -218,7 +218,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         });
 
         final DispatcherServlet dispatcherServlet = new DispatcherServlet();
-        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet();
+        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this);
         DispatcherServlet.setDispatcher(dispatcher);
 
         Multiple.setDispatcher(dispatcher);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,22 +49,15 @@
 
 package com.openexchange.oauth.provider;
 
-import com.openexchange.exception.OXException;
 
 /**
- * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
- * library</a>.
+ * {@link Scope}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public interface OAuthProviderService extends OAuthProviderConstants {
+public interface Scope {
 
-    /**
-     *
-     * @param accessToken
-     * @return
-     * @throws OXException
-     */
-    OAuthToken validate(String accessToken) throws OXException;
+    boolean has(String scope);
 
 }
