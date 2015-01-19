@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-01-09 13:37+0100\n"
+"PO-Revision-Date: 2015-01-19 12:31+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3990,6 +3990,37 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
 msgid "There was a problem while creating a connection to the remote service."
 msgstr "Fehler beim Erstellen der Verbindung zum entfernten Server."
+
+#. You need to grant additional %1$s permissions to access the resource.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
+msgid "You need to grant additional %1$s permissions to access the resource."
+msgstr ""
+"Für den Zugriff auf diese Ressource müssen Sie zusätzliche %1$s-"
+"Berechtigungen erteilen."
+
+#. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
+msgid ""
+"Your '%1$s' access was rejected. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"Ihr '%1$s'-Zugriff wurde verweigert. Sie müssen den Server zur Nutzung Ihres "
+"Accounts mit dem neuen Passwort autorisieren. Gehen Sie dafür zu "
+"Konfiguration -> Meine Social-Einstellungen -> Accounts. Versuchen Sie es "
+"dann erneut."
+
+#. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
+msgid ""
+"Your '%1$s' access was revoked. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"Ihr '%1$s'-Zugriff wurde zurückgesetzt. Sie müssen den Server zur Nutzung "
+"Ihres Accounts mit dem neuen Passwort autorisieren.  Gehen Sie dafür zu "
+"Konfiguration -> Meine Social-Einstellungen -> Accounts. Versuchen Sie es "
+"dann erneut."
 
 #. *
 #. * New password too short.
