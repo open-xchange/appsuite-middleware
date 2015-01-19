@@ -51,7 +51,6 @@ package com.openexchange.mail.text;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.isWhitespace;
-import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -81,25 +80,20 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
-import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
-import com.openexchange.mail.conversion.InlineImageDataSource;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.HashUtility;
@@ -961,10 +955,6 @@ public final class HtmlProcessing {
         "src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?",
         Pattern.CASE_INSENSITIVE);
 
-    private static final String STR_SRC = "src=";
-
-    // private static final String CHARSET_ISO8859 = "ISO-8859-1";
-
     /**
      * Filters inline images occurring in HTML content of a message:
      * <ul>
@@ -979,16 +969,39 @@ public final class HtmlProcessing {
      * @param msgUID The message's unique path in mailbox
      * @return The HTML content with all inline images replaced with valid links
      */
-    public static String filterInlineImages(final String content, final Session session, final MailPath msgUID) {
-        String ret = filterImgInlineImages(content, session, msgUID);
-        ret = filterBackgroundInlineImages(ret, session, msgUID);
+    public static String filterInlineImages(String content, Session session, MailPath msgUID) {
+        return filterInlineImages(content, session, msgUID, DefaultImageUriGenerator.getInstance());
+    }
+
+    /**
+     * Filters inline images occurring in HTML content of a message:
+     * <ul>
+     * <li>Inline images<br>
+     * The source of inline images is in the message itself. Thus loading the inline image is redirected to the appropriate message (image)
+     * attachment identified through header <code>Content-Id</code>; e.g.: <code>&lt;img
+     * src=&quot;cid:[cid-value]&quot; ... /&gt;</code>.</li>
+     * </ul>
+     *
+     * @param content The HTML content possibly containing images
+     * @param session The session
+     * @param msgUID The message's unique path in mailbox
+     * @param generator The image URI generator to use
+     * @return The HTML content with all inline images replaced with valid links
+     */
+    public static String filterInlineImages(String content, Session session, MailPath msgUID, ImageUriGenerator generator) {
+        String ret = filterImgInlineImages(content, session, msgUID, generator);
+        ret = filterBackgroundInlineImages(ret, session, msgUID, generator);
         return ret;
     }
 
-    private static final String EVENT_RESTRICTIONS = "\" onmousedown=\"return false;\" oncontextmenu=\"return false;\"";
-
     private static volatile String imageHost;
-    private static String imageHost() {
+
+    /**
+     * Gets the optional image host
+     *
+     * @return The optional image host
+     */
+    public static String imageHost() {
         String tmp = imageHost;
         if (null == tmp) {
             synchronized (HtmlProcessing.class) {
@@ -1007,7 +1020,7 @@ public final class HtmlProcessing {
         return tmp;
     }
 
-    private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID) {
+    private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
         String reval = content;
         try {
             final Matcher imgMatcher = BACKGROUND_PATTERN.matcher(reval);
@@ -1015,29 +1028,20 @@ public final class HtmlProcessing {
             final StringBuilder sb = new StringBuilder(reval.length());
             if (imgMatcher.find()) {
                 final StringBuilder linkBuilder = new StringBuilder(256);
-                /*
-                 * Replace inline images with Content-ID
-                 */
+                // Replace inline images with Content-ID
                 do {
-                    /*
-                     * Extract Content-ID
-                     */
+                    // Extract Content-ID
                     String cid = imgMatcher.group(2);
                     if (cid == null) {
                         cid = imgMatcher.group(3);
                     }
-                    /*
-                     * Compose corresponding image data
-                     */
-                    final String imageURL;
-                    {
-                        final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                        final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).optImageHost(imageHost()).build();
-                        imageURL = imgSource.generateUrl(imageLocation, session);
-                    }
+
+                    // Compose corresponding image data
                     linkBuilder.setLength(0);
-                    linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append(EVENT_RESTRICTIONS).append(imgMatcher.group(4));
-                    imgReplacer.appendLiteralReplacement(sb, linkBuilder.toString());
+                    String prefix = linkBuilder.append(imgMatcher.group(1)).append("background=").toString();
+                    linkBuilder.setLength(0);
+                    generator.generateImageUri(linkBuilder, prefix, imgMatcher.group(4), cid, msgUID, session);
+                    imgReplacer.appendLiteralReplacement(sb, 0 == linkBuilder.length() ? imgMatcher.group() : linkBuilder.toString());
                 } while (imgMatcher.find());
             }
             imgReplacer.appendTail(sb);
@@ -1060,9 +1064,10 @@ public final class HtmlProcessing {
      * @param content The HTML content possibly containing images
      * @param session The session
      * @param msgUID The message's unique path in mailbox
+     * @param generator
      * @return The HTML content with all inline images replaced with valid links
      */
-    private static String filterImgInlineImages(final String content, final Session session, final MailPath msgUID) {
+    private static String filterImgInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
         String reval = content;
         try {
             final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
@@ -1077,7 +1082,7 @@ public final class HtmlProcessing {
                  */
                 do {
                     final String imgTag = imgMatcher.group();
-                    if (!(replaceImgSrc(session, msgUID, imgTag, strBuffer, linkBuilder))) {
+                    if (!(replaceImgSrc(session, msgUID, imgTag, strBuffer, linkBuilder, generator))) {
                         /*
                          * No cid pattern found, try with filename
                          */
@@ -1089,15 +1094,9 @@ public final class HtmlProcessing {
                             /*
                              * Compose corresponding image data
                              */
-                            final String imageURL;
-                            {
-                                final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                                final ImageLocation imageLocation = new ImageLocation.Builder(filename).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).optImageHost(imageHost()).build();
-                                imageURL = imgSource.generateUrl(imageLocation, session);
-                            }
                             linkBuilder.setLength(0);
-                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(filename).append(EVENT_RESTRICTIONS);
-                            mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
+                            generator.generateImageUri(linkBuilder, "src=", null, filename, msgUID, session);
+                            mr.appendLiteralReplacement(strBuffer, 0 == linkBuilder.length() ? imgMatcher.group() : linkBuilder.toString());
                         }
                         mr.appendTail(strBuffer);
                     }
@@ -1113,7 +1112,7 @@ public final class HtmlProcessing {
         return reval;
     }
 
-    private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag, final StringBuilder cidBuffer, final StringBuilder linkBuilder) throws OXException {
+    private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag, final StringBuilder cidBuffer, final StringBuilder linkBuilder, ImageUriGenerator generator) throws OXException {
         boolean retval = false;
         final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
         final MatcherReplacer cidReplacer = new MatcherReplacer(cidMatcher, imgTag);
@@ -1130,32 +1129,9 @@ public final class HtmlProcessing {
                 /*
                  * Compose corresponding image data
                  */
-                final String imageURL;
-                {
-                    final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                    // Check mail identifier
-                    String mailId = msgUID.getMailID();
-                    if (mailId.indexOf('%') >= 0) {
-                        final int unifiedINBOXAccountID = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
-                        if (unifiedINBOXAccountID < 0 || msgUID.getAccountId() != unifiedINBOXAccountID) {
-                            String tmp = AJAXUtility.decodeUrl(mailId, null);
-                            if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-                                // Expect mail path; e.g. "default0/INBOX/123"
-                                try {
-                                    mailId = new MailPath(tmp).getMailID();
-                                } catch (OXException e) {
-                                    // Ignore
-                                }
-                            }
-                        }
-                    }
-                    // Build image location
-                    final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(mailId).optImageHost(imageHost()).build();
-                    imageURL = imgSource.generateUrl(imageLocation, session);
-                }
                 linkBuilder.setLength(0);
-                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(cid).append(EVENT_RESTRICTIONS);
-                cidReplacer.appendLiteralReplacement(cidBuffer, linkBuilder.toString());
+                generator.generateImageUri(linkBuilder, "src=", null, cid, msgUID, session);
+                cidReplacer.appendLiteralReplacement(cidBuffer, 0 == linkBuilder.length() ? cidMatcher.group() : linkBuilder.toString());
             } while (cidMatcher.find());
         }
         cidReplacer.appendTail(cidBuffer);
