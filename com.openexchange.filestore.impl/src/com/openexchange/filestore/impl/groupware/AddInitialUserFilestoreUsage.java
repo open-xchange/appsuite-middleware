@@ -84,7 +84,7 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { AddFilestoreOwnerColumnToUserTable.class.getName() };
+        return new String[] { AddUserColumnToFilestoreUsageTable.class.getName() };
     }
 
     @Override
