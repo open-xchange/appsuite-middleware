@@ -49,17 +49,14 @@
 
 package com.openexchange.ajax.login;
 
-import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -71,15 +68,10 @@ import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -113,7 +105,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
     public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Tools.disableCaching(resp);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
-        final Response response = new Response();
+        Response response = new Response();
         Session session = null;
         try {
             if (!conf.isSessiondAutoLogin()) {
@@ -124,119 +116,15 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                 }
                 return;
             }
-
-            Cookie[] cookies = req.getCookies();
-            if (cookies == null) {
-                cookies = new Cookie[0];
-            }
-
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (null == sessiondService) {
-                final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-                LOG.error("", se);
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-            String secret = null;
-            final String hash = HashCalculator.getInstance().getHash(req);
-            final String sessionCookieName = LoginServlet.SESSION_PREFIX + hash;
-            final String secretCookieName = LoginServlet.SECRET_PREFIX + hash;
-
-            NextCookie: for (final Cookie cookie : cookies) {
-                final String cookieName = cookie.getName();
-                if (cookieName.startsWith(sessionCookieName)) {
-                    final String sessionId = cookie.getValue();
-                    session = sessiondService.getSession(sessionId);
-                    if (null != session) {
-                        // IP check if enabled; otherwise update session's IP address if different to request's IP address
-                        // Insecure check is done in updateIPAddress method.
-                        if (!conf.isIpCheck()) {
-                            // Update IP address if necessary
-                            updateIPAddress(conf, req.getRemoteAddr(), session);
-                        } else {
-                            final String newIP = req.getRemoteAddr();
-                            SessionUtility.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
-                            // IP check passed: update IP address if necessary
-                            updateIPAddress(conf, newIP, session);
-                        }
-                        try {
-                            final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
-                            if (!ctx.isEnabled()) {
-                                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                            }
-                            final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
-                            if (!user.isMailEnabled()) {
-                                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                            }
-                        } catch (final UndeclaredThrowableException e) {
-                            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-                        }
-
-                        // Trigger client-specific ramp-up
-                        Future<JSONObject> optRampUp = rampUpAsync(ServerSessionAdapter.valueOf(session), req);
-
-                        // Request modules
-                        Future<Object> optModules = getModulesAsync(session, req);
-
-                        // Create JSON object
-                        final JSONObject json = new JSONObject(8);
-                        LoginWriter.write(session, json);
-
-                        if (null != optModules) {
-                            // Append "config/modules"
-                            try {
-                                final Object oModules = optModules.get();
-                                if (null != oModules) {
-                                    json.put("modules", oModules);
-                                }
-                            } catch (final InterruptedException e) {
-                                // Keep interrupted state
-                                Thread.currentThread().interrupt();
-                                throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
-                            } catch (final ExecutionException e) {
-                                // Cannot occur
-                                final Throwable cause = e.getCause();
-                                LOG.warn("Modules could not be added to login JSON response", cause);
-                            }
-                        }
-
-                        // Await client-specific ramp-up and add to JSON object
-                        if (null != optRampUp) {
-                            try {
-                                JSONObject jsonObject = optRampUp.get();
-                                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-                                    json.put(entry.getKey(), entry.getValue());
-                                }
-                            } catch (InterruptedException e) {
-                                // Keep interrupted state
-                                Thread.currentThread().interrupt();
-                                throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
-                            } catch (ExecutionException e) {
-                                // Cannot occur
-                                final Throwable cause = e.getCause();
-                                LOG.warn("Ramp-up information could not be added to login JSON response", cause);
-                            }
-                        }
-
-                        // Set data
-                        response.setData(json);
-
-                        // Secret already found?
-                        if (null != secret) {
-                            break NextCookie;
-                        }
-                    }
-                } else if (cookieName.startsWith(secretCookieName)) {
-                    secret = cookie.getValue();
-                    /*
-                     * Session already found?
-                     */
-                    if (null != session) {
-                        break NextCookie;
-                    }
-                }
-            }
-            if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
+            /*
+             * perform auto-login
+             */
+            String hash = HashCalculator.getInstance().getHash(req);
+            LoginResult loginResult = AutoLoginTools.tryAutologin(conf, req, hash);
+            if (null == loginResult) {
+                /*
+                 * auto-login failed
+                 */
                 SessionUtility.removeOXCookies(hash, req, resp);
                 SessionUtility.removeJSESSIONID(req, resp);
                 if (doAutoLogin(req, resp)) {
@@ -244,6 +132,60 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                 }
                 return;
             }
+            /*
+             * auto-login successful, prepare result
+             */
+            ServerSession serverSession = ServerSessionAdapter.valueOf(loginResult.getSession(), loginResult.getContext(), loginResult.getUser());
+            session = serverSession;
+
+            // Trigger client-specific ramp-up
+            Future<JSONObject> optRampUp = rampUpAsync(serverSession, req);
+
+            // Request modules
+            Future<Object> optModules = getModulesAsync(session, req);
+
+            // Create JSON object
+            final JSONObject json = new JSONObject(8);
+            LoginWriter.write(session, json);
+
+            // Append "config/modules"
+            if (null != optModules) {
+                try {
+                    final Object oModules = optModules.get();
+                    if (null != oModules) {
+                        json.put("modules", oModules);
+                    }
+                } catch (final InterruptedException e) {
+                    // Keep interrupted state
+                    Thread.currentThread().interrupt();
+                    throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                } catch (final ExecutionException e) {
+                    // Cannot occur
+                    final Throwable cause = e.getCause();
+                    LOG.warn("Modules could not be added to login JSON response", cause);
+                }
+            }
+
+            // Await client-specific ramp-up and add to JSON object
+            if (null != optRampUp) {
+                try {
+                    JSONObject jsonObject = optRampUp.get();
+                    for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                        json.put(entry.getKey(), entry.getValue());
+                    }
+                } catch (InterruptedException e) {
+                    // Keep interrupted state
+                    Thread.currentThread().interrupt();
+                    throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                } catch (ExecutionException e) {
+                    // Cannot occur
+                    final Throwable cause = e.getCause();
+                    LOG.warn("Ramp-up information could not be added to login JSON response", cause);
+                }
+            }
+
+            // Set data
+            response.setData(json);
 
             /*-
              * Ensure appropriate public-session-cookie is set
