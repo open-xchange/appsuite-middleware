@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,38 @@
  *
  */
 
-package com.openexchange.oauth.provider.osgi;
+package com.openexchange.oauth.provider.internal;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.internal.InMemoryOAuth2ProviderService;
-import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
-import com.openexchange.oauth.provider.servlets.AuthServlet;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import com.openexchange.oauth.provider.Scope;
 
 /**
- * {@link OAuthProviderImplActivator} - The activator for OAuth provider implementation bundle.
+ * {@link RefreshToken}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public final class OAuthProviderImplActivator extends HousekeepingActivator {
-
-    private static final String PATH_PREFIX = "oauth2/";
+public class RefreshToken extends AbstractToken {
 
     /**
-     * Initializes a new {@link OAuthProviderImplActivator}.
+     * Initializes a new {@link RefreshToken}.
+     *
+     * @param contextId
+     * @param userId
+     * @param token
+     * @param lifetime
+     * @param scope
      */
-    public OAuthProviderImplActivator() {
-        super();
+    public RefreshToken(int contextId, int userId, String token, Long lifetime, Scope scope) {
+        super(contextId, userId, token, lifetime, scope);
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.oauth.provider.OAuthToken#getType()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, AuthenticationService.class, ContextService.class, UserService.class, CryptoService.class, HttpService.class, DispatcherPrefixService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        OAuthProviderServiceLookup.set(this);
-        OAuthProviderService oauth2ProviderService = new InMemoryOAuth2ProviderService();
-        registerService(OAuthProviderService.class, oauth2ProviderService);
-        addService(OAuthProviderService.class, oauth2ProviderService);
-
-        String prefix = getService(DispatcherPrefixService.class).getPrefix();
-        getService(HttpService.class).registerServlet(prefix + PATH_PREFIX + AuthServlet.PATH, new AuthServlet(), null, null);
-
-        openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        OAuthProviderServiceLookup.set(null);
-        super.stopBundle();
+    public Type getType() {
+        return Type.REFRESH_TOKEN;
     }
 
 }

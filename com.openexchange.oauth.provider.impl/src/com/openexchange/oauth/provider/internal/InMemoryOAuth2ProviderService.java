@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,54 @@
  *
  */
 
-package com.openexchange.oauth.provider.osgi;
+package com.openexchange.oauth.provider.internal;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.internal.InMemoryOAuth2ProviderService;
-import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
-import com.openexchange.oauth.provider.servlets.AuthServlet;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.Scope;
 
 /**
- * {@link OAuthProviderImplActivator} - The activator for OAuth provider implementation bundle.
+ * {@link InMemoryOAuth2ProviderService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public final class OAuthProviderImplActivator extends HousekeepingActivator {
+public class InMemoryOAuth2ProviderService implements OAuthProviderService {
 
-    private static final String PATH_PREFIX = "oauth2/";
+    private final Map<String, OAuthToken> tokens;
+    private final Map<String, OAuthToken> authTokens;
 
-    /**
-     * Initializes a new {@link OAuthProviderImplActivator}.
-     */
-    public OAuthProviderImplActivator() {
-        super();
+    public InMemoryOAuth2ProviderService() {
+        tokens = new ConcurrentHashMap<String, OAuthToken>();
+        authTokens = new ConcurrentHashMap<String, OAuthToken>();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, AuthenticationService.class, ContextService.class, UserService.class, CryptoService.class, HttpService.class, DispatcherPrefixService.class };
+    public OAuthToken validate(String accessToken) throws OXException {
+        return tokens.get(accessToken);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        OAuthProviderServiceLookup.set(this);
-        OAuthProviderService oauth2ProviderService = new InMemoryOAuth2ProviderService();
-        registerService(OAuthProviderService.class, oauth2ProviderService);
-        addService(OAuthProviderService.class, oauth2ProviderService);
+    public String generateToken(int contextId, int userId, Scope scope) {
+        String tokenString = UUID.randomUUID().toString() + "@" + contextId;
+        OAuthToken token = new Token(contextId, userId, tokenString, 60 * 60 * 1000L, scope);
 
-        String prefix = getService(DispatcherPrefixService.class).getPrefix();
-        getService(HttpService.class).registerServlet(prefix + PATH_PREFIX + AuthServlet.PATH, new AuthServlet(), null, null);
+        tokens.put(token.getToken(), token);
 
-        openTrackers();
+        return token.getToken();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        OAuthProviderServiceLookup.set(null);
-        super.stopBundle();
+    public String generateAuthToken(int contextId, int userId) {
+        String tokenString = UUID.randomUUID().toString() + "@" + contextId;
+        OAuthToken token = new Token(contextId, userId, tokenString, 60 * 60 * 1000L, null);
+
+        authTokens.put(token.getToken(), token);
+
+        return token.getToken();
     }
 
 }

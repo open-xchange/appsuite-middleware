@@ -67,4 +67,8 @@ public interface OAuthProviderService extends OAuthProviderConstants {
      */
     OAuthToken validate(String accessToken) throws OXException;
 
+    String generateToken(int contextId, int userId, Scope scope);
+
+    String generateAuthToken(int contextId, int userId);
+
 }

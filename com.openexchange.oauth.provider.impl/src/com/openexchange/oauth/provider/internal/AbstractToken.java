@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,76 @@
  *
  */
 
-package com.openexchange.oauth.provider.osgi;
+package com.openexchange.oauth.provider.internal;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.internal.InMemoryOAuth2ProviderService;
-import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
-import com.openexchange.oauth.provider.servlets.AuthServlet;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import java.util.Date;
+import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.Scope;
 
 /**
- * {@link OAuthProviderImplActivator} - The activator for OAuth provider implementation bundle.
+ * {@link AbstractToken}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public final class OAuthProviderImplActivator extends HousekeepingActivator {
+public abstract class AbstractToken implements OAuthToken {
 
-    private static final String PATH_PREFIX = "oauth2/";
+    private int contextID;
+    private int userID;
+    private String token;
+    private Date expirationDate;
+    private Scope scope;
 
-    /**
-     * Initializes a new {@link OAuthProviderImplActivator}.
-     */
-    public OAuthProviderImplActivator() {
-        super();
+    public AbstractToken(int contextId, int userId, String token, Long lifetime, Scope scope) {
+        this.contextID = contextId;
+        this.userID = userId;
+        this.token = token;
+        this.expirationDate = new Date(System.currentTimeMillis() + lifetime);
+        this.scope = scope;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, AuthenticationService.class, ContextService.class, UserService.class, CryptoService.class, HttpService.class, DispatcherPrefixService.class };
+    public int getContextID() {
+        return contextID;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        OAuthProviderServiceLookup.set(this);
-        OAuthProviderService oauth2ProviderService = new InMemoryOAuth2ProviderService();
-        registerService(OAuthProviderService.class, oauth2ProviderService);
-        addService(OAuthProviderService.class, oauth2ProviderService);
-
-        String prefix = getService(DispatcherPrefixService.class).getPrefix();
-        getService(HttpService.class).registerServlet(prefix + PATH_PREFIX + AuthServlet.PATH, new AuthServlet(), null, null);
-
-        openTrackers();
+    public int getUserID() {
+        return userID;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        OAuthProviderServiceLookup.set(null);
-        super.stopBundle();
+    public String getToken() {
+        return token;
+    }
+
+    @Override
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    @Override
+    public Scope getScope() {
+        return scope;
+    }
+
+    public void setContextID(int contextID) {
+        this.contextID = contextID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
 }
