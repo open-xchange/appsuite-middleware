@@ -52,6 +52,7 @@ package com.openexchange.guest.internal;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.validator.routines.EmailValidator;
 import com.openexchange.context.ContextService;
@@ -199,6 +200,41 @@ public class DefaultGuestService implements GuestService {
             throw GuestExceptionCodes.PASSWORD_EMPTY_ERROR.create(mailAddress);
         }
 
+        List<Serializable> guestAssignments = retrieveGuestAssignments(mailAddress);
+
+        String encodedPassword = null;
+        try {
+            encodedPassword = PasswordMech.BCRYPT.encode(password);
+
+            for (Serializable assignment : guestAssignments) {
+                if (assignment instanceof GuestAssignment) {
+                    GuestAssignment guestAssignment = (GuestAssignment) assignment;
+                    int contextId = guestAssignment.getContextId();
+                    int userId = guestAssignment.getUserId();
+
+                    User storageUser = userService.getUser(userId, contextId);
+                    UserImpl updatedUser = new UserImpl(storageUser);
+
+                    updatedUser.setUserPassword(encodedPassword);
+                    Context context = contextService.getContext(contextId);
+                    userService.updateUser(updatedUser, context);
+                }
+            }
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+            throw GuestExceptionCodes.PASSWORD_RESET_ERROR.create(e, mailAddress);
+        }
+    }
+
+    /**
+     * Returns the guest assignments associated with the give mail address.
+     *
+     * @param mailAddress - mail address to get the {@link GuestAssignment}s for
+     * @return List with {@link GuestAssignment}s for the given mail
+     * @throws OXException
+     */
+    private List<Serializable> retrieveGuestAssignments(String mailAddress) throws OXException {
+        List<Serializable> guestAssignments = new ArrayList<Serializable>();
+
         ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
         try {
             connectionHelper.start();
@@ -206,46 +242,19 @@ public class DefaultGuestService implements GuestService {
             final int guestId = GuestStorage.getInstance().getGuestId(mailAddress, connectionHelper.getConnection());
             if (guestId == GuestStorage.NOT_FOUND) {
                 LOG.warn("Guest for mail address {} not found. Cannot update password.", mailAddress);
-                return;
+                return guestAssignments;
             }
 
-            List<Serializable> guestAssignments = GuestStorage.getInstance().getGuestAssignments(guestId, connectionHelper.getConnection());
+            guestAssignments.addAll(GuestStorage.getInstance().getGuestAssignments(guestId, connectionHelper.getConnection()));
             if (guestAssignments.size() == 0) {
                 LOG.error("No assignment for the guest with mail address {} found. This might indicate incosistences as there is a guest existing without assignments. Guest id: {}.", mailAddress, guestId);
                 throw GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_ERROR.create(mailAddress, Integer.toString(guestId));
             }
-
-            String encodedPassword = null;
-            try {
-                encodedPassword = PasswordMech.BCRYPT.encode(password);
-
-                for (Serializable assignment : guestAssignments) {
-                    if (assignment instanceof GuestAssignment) {
-                        GuestAssignment guestAssignment = (GuestAssignment) assignment;
-                        if (guestId != guestAssignment.getGuestId()) {
-                            continue;
-                        }
-
-                        int contextId = guestAssignment.getContextId();
-                        int userId = guestAssignment.getUserId();
-                        User storageUser = userService.getUser(userId, contextId);
-                        UserImpl updatedUser = new UserImpl(storageUser);
-
-                        updatedUser.setUserPassword(encodedPassword);
-                        Context context = contextService.getContext(contextId);
-                        userService.updateUser(connectionHelper.getConnection(), updatedUser, context);
-                        connectionHelper.commit();  //TODO check if it is possible to commit multiple times
-
-                        userService.invalidateUser(context, userId);
-                    }
-                }
-            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-                throw GuestExceptionCodes.PASSWORD_RESET_ERROR.create(e, mailAddress);
-            }
-
         } finally {
             connectionHelper.finish();
         }
+
+        return guestAssignments;
     }
 
     /**

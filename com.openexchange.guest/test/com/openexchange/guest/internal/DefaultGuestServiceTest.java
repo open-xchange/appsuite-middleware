@@ -253,8 +253,7 @@ public class DefaultGuestServiceTest {
 
         defaultGuestService.setPassword(GUEST_MAIL_ADDRESS, GUEST_PASSWORD);
 
-        Mockito.verify(userService, Mockito.times(1)).updateUser((Connection) Matchers.any(), (User) Matchers.any(), (Context) Matchers.any());
-        Mockito.verify(userService, Mockito.times(1)).invalidateUser((Context) Matchers.any(), Matchers.anyInt());
+        Mockito.verify(userService, Mockito.times(1)).updateUser((User) Matchers.any(), (Context) Matchers.any());
         Mockito.verify(guestStorage, Mockito.times(1)).getGuestAssignments(GUEST_ID, connection);
         Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }

@@ -74,7 +74,6 @@ public class ConnectionHelper {
     /**
      * Initializes a new {@link ConnectionHelper}.
      *
-     * @param contextID The context ID
      * @param services The service lookup
      * @param needsWritable <code>true</code> if a writable connection is required, <code>false</code>, otherwise
      * @throws OXException
