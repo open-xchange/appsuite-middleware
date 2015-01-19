@@ -80,6 +80,11 @@ public class DefaultToken implements OAuthToken {
     }
 
     @Override
+    public Type getType() {
+        return Type.TOKEN;
+    }
+
+    @Override
     public int getContextID() {
         return contextID;
     }

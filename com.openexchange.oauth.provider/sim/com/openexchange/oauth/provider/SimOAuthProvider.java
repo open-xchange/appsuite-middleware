@@ -88,4 +88,16 @@ public class SimOAuthProvider implements OAuthProviderService {
         tokens.remove(accessToken);
     }
 
+    @Override
+    public String generateToken(int contextId, int userId, Scope scope) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String generateAuthToken(int contextId, int userId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
