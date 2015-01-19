@@ -80,7 +80,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "id", description = "Object ID of the updated folder."),
     @Parameter(name = "timestamp", description = "Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail."),
     @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
-    @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
+    @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered."),
+    @Parameter(name = "cascadePermissions", description = "(Optional. Defaults to false) Flag to cascade permissions to all sub-folders. The user must have administrative permissions to all sub-folders subject to change. If one permission change fails, the entire operation fails.")
 }, requestBody = "Folder object as described in Common folder data and Detailed folder data. Only modified fields are present.",
     responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated folder, and maybe errors.")
 public final class UpdateAction extends AbstractFolderAction {
@@ -123,13 +124,13 @@ public final class UpdateAction extends AbstractFolderAction {
                 }
             }
         }
-        final boolean inheritPermissions;
+        final boolean cascadePermissions;
         {
-            final String inherit = request.getParameter("inheritPermissions");
+            final String inherit = request.getParameter("cascadePermissions");
             if (inherit == null) {
-                inheritPermissions = false;
+                cascadePermissions = false;
             } else {
-                inheritPermissions = Boolean.parseBoolean(inherit);
+                cascadePermissions = Boolean.parseBoolean(inherit);
             }
         }
         /*
@@ -161,7 +162,7 @@ public final class UpdateAction extends AbstractFolderAction {
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions"))
             .put("altNames", request.getParameter("altNames")).put("autorename", request.getParameter("autorename")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
-            .put("inheritPermissions", inheritPermissions).put(id, folderService));
+            .put("cascadePermissions", cascadePermissions).put(id, folderService));
 
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier

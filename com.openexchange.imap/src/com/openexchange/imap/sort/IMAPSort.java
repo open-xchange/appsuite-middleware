@@ -313,12 +313,13 @@ public final class IMAPSort {
      * @param searchTerm The search term or <code>null</code> to sort all messages
      * @param sortField The sort field; not <code>null</code>
      * @param order The sort order; not <code>null</code>
+     * @param allowESORT Whether to allow the ESORT command being issued (if supported) to limit number of sort results
      * @param imapConfig The IMAP configuration; not <code>null</code>
      * @return The IMAP-sorted sequence number
      * @throws MessagingException
      * @throws OXException
      */
-    public static ImapSortResult sortMessages(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, IMAPConfig imapConfig) throws MessagingException, OXException {
+    public static ImapSortResult sortMessages(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, boolean allowESORT, IMAPConfig imapConfig) throws MessagingException, OXException {
         final SortTerm[] sortTerms = IMAPSort.getSortTermsForIMAPCommand(sortField, order == OrderDirection.DESC);
         if (sortTerms == null) {
             throw IMAPException.create(Code.UNSUPPORTED_SORT_FIELD, sortField.toString());
@@ -337,7 +338,7 @@ public final class IMAPSort {
 
         boolean rangeApplied = false;
         int[] seqNums;
-        if (null != indexRange && imapConfig.asMap().containsKey("ESORT")) {
+        if (allowESORT && null != indexRange && imapConfig.asMap().containsKey("ESORT") && (null == searchTerm || !searchTerm.isAscii())) {
             try {
                 final String atom = new StringBuilder(16).append(indexRange.start + 1).append(':').append(indexRange.end).toString();
                 seqNums = (int[]) imapFolder.doCommand(new ProtocolCommand() {

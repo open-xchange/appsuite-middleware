@@ -49,35 +49,18 @@
 
 package com.openexchange.oauth.provider.osgi;
 
-import net.oauth.OAuthServiceProvider;
+import org.osgi.service.http.HttpService;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.groupware.OAuth2ProviderCreateTableService;
-import com.openexchange.oauth.provider.groupware.OAuth2ProviderCreateTableTask;
-import com.openexchange.oauth.provider.groupware.OAuthProviderCreateTableService;
-import com.openexchange.oauth.provider.groupware.OAuthProviderCreateTableTask;
-import com.openexchange.oauth.provider.groupware.OAuthProviderDeleteListener;
-import com.openexchange.oauth.provider.internal.DatabaseOAuth2ProviderService;
-import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
+import com.openexchange.oauth.provider.internal.InMemoryOAuth2ProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
-import com.openexchange.oauth.provider.servlets.AccessTokenServlet;
-import com.openexchange.oauth.provider.servlets.AccessTokenServlet2;
-import com.openexchange.oauth.provider.servlets.AuthorizationServlet;
-import com.openexchange.oauth.provider.servlets.AuthorizationServlet2;
-import com.openexchange.oauth.provider.servlets.EchoServlet;
-import com.openexchange.oauth.provider.servlets.RequestTokenServlet;
-import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
+import com.openexchange.oauth.provider.servlets.AuthServlet;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
 /**
@@ -86,6 +69,8 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthProviderImplActivator extends HousekeepingActivator {
+
+    private static final String PATH_PREFIX = "oauth2/";
 
     /**
      * Initializes a new {@link OAuthProviderImplActivator}.
@@ -96,49 +81,20 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, AuthenticationService.class, ContextService.class, UserService.class, CryptoService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, AuthenticationService.class, ContextService.class, UserService.class, CryptoService.class, HttpService.class, DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        new CheckConfigDBTables(getService(DatabaseService.class)).checkTables();
         OAuthProviderServiceLookup.set(this);
-        /*
-         * Register OAuth provider service
-         */
-        final DatabaseOAuthProviderService oauthProviderService = new DatabaseOAuthProviderService(this);
-        registerService(OAuthProviderService.class, oauthProviderService);
-        registerService(Reloadable.class, oauthProviderService);
-        addService(OAuthProviderService.class, oauthProviderService);
-        /*
-         * Register OAuth v2 provider service
-         */
-        final DatabaseOAuth2ProviderService oauth2ProviderService = new DatabaseOAuth2ProviderService(this);
-        registerService(OAuth2ProviderService.class, oauth2ProviderService);
-        registerService(Reloadable.class, oauth2ProviderService);
-        addService(OAuth2ProviderService.class, oauth2ProviderService);
-        /*
-         * Service trackers
-         */
-        final OAuthServiceProvider provider = oauthProviderService.getProvider();
-        // OAuth v1
-        rememberTracker(new HTTPServletRegistration(context, provider.accessTokenURL, new AccessTokenServlet()));
-        rememberTracker(new HTTPServletRegistration(context, provider.userAuthorizationURL, new AuthorizationServlet()));
-        rememberTracker(new HTTPServletRegistration(context, "/oauth/echo", new EchoServlet()));
-        rememberTracker(new HTTPServletRegistration(context, provider.requestTokenURL, new RequestTokenServlet()));
-        // OAuth v2
-        rememberTracker(new HTTPServletRegistration(context, provider.accessTokenURL+"/v2", new AccessTokenServlet2()));
-        rememberTracker(new HTTPServletRegistration(context, provider.userAuthorizationURL+"/v2", new AuthorizationServlet2()));
+        OAuthProviderService oauth2ProviderService = new InMemoryOAuth2ProviderService();
+        registerService(OAuthProviderService.class, oauth2ProviderService);
+        addService(OAuthProviderService.class, oauth2ProviderService);
+
+        String prefix = getService(DispatcherPrefixService.class).getPrefix();
+        getService(HttpService.class).registerServlet(prefix + PATH_PREFIX + AuthServlet.PATH, new AuthServlet(), null, null);
+
         openTrackers();
-        /*
-         * Register update task, create table job and delete listener
-         */
-        {
-            registerService(CreateTableService.class, new OAuthProviderCreateTableService());
-            registerService(CreateTableService.class, new OAuth2ProviderCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new OAuthProviderCreateTableTask(), new OAuth2ProviderCreateTableTask()));
-            registerService(DeleteListener.class, new OAuthProviderDeleteListener());
-        }
     }
 
     @Override

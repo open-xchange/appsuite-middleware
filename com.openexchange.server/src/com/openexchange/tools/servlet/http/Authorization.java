@@ -103,7 +103,7 @@ public final class Authorization {
         return true;
     }
 
-    private static String extractAuthScheme(String authHeader) {
+    public static String extractAuthScheme(String authHeader) {
         if (com.openexchange.java.Strings.isEmpty(authHeader)) {
             return null;
         }

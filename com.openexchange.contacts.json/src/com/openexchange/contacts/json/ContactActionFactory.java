@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.oauth.OAuthModule;
 import com.openexchange.contacts.json.actions.AdvancedSearchAction;
 import com.openexchange.contacts.json.actions.AllAction;
 import com.openexchange.contacts.json.actions.AnniversariesAction;
@@ -82,6 +83,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Module(name = "contact", description = "Provides access to contact information.")
+@OAuthModule
 public class ContactActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, ContactAction> actions;

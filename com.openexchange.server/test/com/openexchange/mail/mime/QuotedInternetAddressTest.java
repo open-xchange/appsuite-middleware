@@ -50,8 +50,8 @@
 package com.openexchange.mail.mime;
 
 import javax.mail.internet.InternetAddress;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import junit.framework.TestCase;
-
 
 /**
  * {@link QuotedInternetAddressTest}
@@ -60,6 +60,7 @@ import junit.framework.TestCase;
  * @since v7.6.1
  */
 public class QuotedInternetAddressTest extends TestCase {
+
     /**
      * Initializes a new {@link QuotedInternetAddressTest}.
      */
@@ -115,4 +116,12 @@ public class QuotedInternetAddressTest extends TestCase {
 
     }
 
+    public void testBug36095() throws Exception {
+        String s = "=?UTF-8?Q?F=C3=B6oooo=2C_Bar?= <s.foeoooobar@foobar.org>";
+        InternetAddress[] parsed = MimeMessageConverter.getAddressHeader(s);
+        assertEquals("Unexpected amount of addresses", 1, parsed.length);
+        
+        assertEquals("Display name does not equals \"F\u00f6oooo, Bar\"", "F\u00f6oooo, Bar", parsed[0].getPersonal());
+        assertEquals("Address does not equals \"s.foeoooobar@foobar.org\"", "s.foeoooobar@foobar.org", parsed[0].getAddress());
+    }
 }

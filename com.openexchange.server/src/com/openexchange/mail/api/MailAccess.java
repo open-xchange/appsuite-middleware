@@ -148,9 +148,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * ############### MEMBERS ###############
      */
 
-    /** Line separator string. This is the value of the line.separator property at the moment that the MailAccess was created. */
-    protected final String lineSeparator;
-
     /** The associated session */
     protected final transient Session session;
 
@@ -203,7 +200,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     protected MailAccess(final Session session, final int accountId) {
         super();
-        lineSeparator = System.getProperty("line.separator");
         warnings = new ArrayList<OXException>(2);
         this.session = session;
         this.accountId = accountId;
@@ -869,50 +865,51 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Logs the trace of the thread that lastly obtained this access.
      *
      */
-    public void logTrace(final StringBuilder sBuilder, final org.slf4j.Logger log) {
-        final Thread usingThread = this.usingThread;
+    public void logTrace(StringBuilder sBuilder, org.slf4j.Logger log) {
+        String lineSeparator = System.getProperty("line.separator");
+        Thread usingThread = this.usingThread;
         if (null != usingThread) {
-            final Map<String, String> taskProps = usingThreadProperties;
+            Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
-                final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Entry<String, String> entry : taskProps.entrySet()) {
-                    final String propertyName = entry.getKey();
-                    final String value = entry.getValue();
+                Map<String, String> sorted = new TreeMap<String, String>();
+                for (Entry<String, String> entry : taskProps.entrySet()) {
+                    String propertyName = entry.getKey();
+                    String value = entry.getValue();
                     if (null != value) {
                         sorted.put(propertyName, value);
                     }
                 }
-                for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                for (Map.Entry<String, String> entry : sorted.entrySet()) {
                     sBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
                 }
                 sBuilder.append(lineSeparator);
             }
         }
         sBuilder.append(toString());
-        final StackTraceElement[] traze = trace;
-        final int length;
+        StackTraceElement[] traze = trace;
+        int length;
         if (null != traze && (length = traze.length) > 3) {
             sBuilder.append(lineSeparator).append("Mail connection established (or fetched from cache) at: ").append(lineSeparator);
             /*
              * Start at index 3
              */
             {
-                final StackTraceElement[] tmp = new StackTraceElement[length - 3];
+                StackTraceElement[] tmp = new StackTraceElement[length - 3];
                 System.arraycopy(traze, 3, tmp, 0, tmp.length);
-                final Throwable thr = new Throwable();
+                Throwable thr = new Throwable();
                 thr.setStackTrace(tmp);
                 log.info(sBuilder.toString(), thr);
                 sBuilder.setLength(0);
             }
             if ((null != usingThread) && usingThread.isAlive()) {
-                final StackTraceElement[] trace = usingThread.getStackTrace();
+                StackTraceElement[] trace = usingThread.getStackTrace();
                 if (null != trace && trace.length > 0) {
                     sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
                     /*
                      * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
                      * MailAccessWatcher.
                      */
-                    final Throwable thr = new FastThrowable();
+                    Throwable thr = new FastThrowable();
                     thr.setStackTrace(trace);
                     log.info(sBuilder.toString(), thr);
                 }
@@ -928,7 +925,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return The trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        final StringBuilder sBuilder = new StringBuilder(2048);
+        String lineSeparator = System.getProperty("line.separator");
+        StringBuilder sBuilder = new StringBuilder(2048);
         {
             final Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
@@ -960,7 +958,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
              * MailAccessWatcher.
              */
-            final StackTraceElement[] trace = usingThread.getStackTrace();
+            StackTraceElement[] trace = usingThread.getStackTrace();
             sBuilder.append("    at ").append(trace[0]);
             for (int i = 1; i < trace.length; i++) {
                 sBuilder.append(lineSeparator).append("    at ").append(trace[i]);

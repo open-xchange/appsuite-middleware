@@ -51,6 +51,7 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.EnumSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.oauth.OAuthAction;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
@@ -73,6 +74,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "id", description = "Object ID of the requested contact."),
     @Parameter(name = "folder", description = "Object ID of the contact's folder.")
 }, responseDescription = "Response with timestamp: An object containing all data of the requested contact. The fields of the object are listed in Common object data and Detailed contact data. The field id is not included.")
+@OAuthAction("r_contacts")
 public class GetAction extends ContactAction {
 
     public GetAction(final ServiceLookup serviceLookup) {

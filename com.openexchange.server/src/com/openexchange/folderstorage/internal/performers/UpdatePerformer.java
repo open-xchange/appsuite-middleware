@@ -340,9 +340,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         /*
                          * Cascade folder permissions
                          */
-                        if (storageParameters.getDecorator().getBoolProperty("inheritPermissions")) {
+                        if (storageParameters.getDecorator().getBoolProperty("cascadePermissions")) {
                             // Switch back to false due to the recursive nature of FolderStorage.updateFolder in some implementations
-                            storageParameters.getDecorator().put("inheritPermissions", false);
+                            storageParameters.getDecorator().put("cascadePermissions", false);
                             checkOpenedStorage(realStorage, openedStorages);
                             List<String> ids = new ArrayList<String>();
                             gatherSubfolders(folder, realStorage, treeId, ids);

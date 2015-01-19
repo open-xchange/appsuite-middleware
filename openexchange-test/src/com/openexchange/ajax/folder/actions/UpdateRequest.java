@@ -94,7 +94,7 @@ public class UpdateRequest extends InsertRequest {
             params.add(new Parameter("permissions", "inherit"));
         }
         if (cascade) {
-            params.add(new Parameter("inheritPermissions", cascade));
+            params.add(new Parameter("cascadePermissions", cascade));
         }
     }
 }

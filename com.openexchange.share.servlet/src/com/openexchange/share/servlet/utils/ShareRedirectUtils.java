@@ -56,12 +56,10 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.user.UserService;
 
 /**
  * Utility methods to handle share redirects.
@@ -93,15 +91,7 @@ public class ShareRedirectUtils {
         if (AuthenticationMode.ANONYMOUS_PASSWORD == guestInfo.getAuthentication()) {
             url.append('&').append("login_type=anonymous");
         } else {
-            url.append('&').append("login_type=guest");
-            String mail;
-            {
-                // Special anonymous guests do not have a E-Mail address applied
-                UserService service = ShareServiceLookup.getService(UserService.class);
-                User user = service.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-                mail = user.getMail();
-            }
-            url.append('&').append("login_name=").append(urlEncode(mail));
+            url.append('&').append("login_type=guest").append('&').append("login_name=").append(urlEncode(guestInfo.getEmailAddress()));
         }
         return url.toString();
     }
