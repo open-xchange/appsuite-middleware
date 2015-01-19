@@ -610,7 +610,7 @@ public class AdminCache {
         contextAuthenticationDisabled = Boolean.parseBoolean(context_auth_disabled);
         log.debug("ContextAuthentication mechanism disabled: {}", contextAuthenticationDisabled);
         
-        allowMasterOverride = Boolean.parseBoolean(this.prop.getProp("MASTER_PASSWORD_OVERRIDE", "false"));
+        allowMasterOverride = Boolean.parseBoolean(this.prop.getProp("MASTER_ACCOUNT_OVERRIDE", "false"));
         log.debug("Master override: {}", allowMasterOverride);
     }
 
