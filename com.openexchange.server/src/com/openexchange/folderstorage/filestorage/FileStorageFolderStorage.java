@@ -363,6 +363,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 retval.setTreeID(treeId);
                 retval.setID(folderId);
                 retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
+                retval.setParentID(REAL_TREE_ID.equals(treeId) ? PRIVATE_FOLDER_ID : INFOSTORE);
                 return retval;
             }
         }
