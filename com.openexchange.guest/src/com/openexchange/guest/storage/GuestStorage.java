@@ -52,10 +52,8 @@ package com.openexchange.guest.storage;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.util.List;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.guest.GuestAssignment;
-import com.openexchange.guest.internal.GuestStorageServiceLookup;
 import com.openexchange.guest.internal.RdbGuestStorage;
 
 /**
@@ -93,7 +91,7 @@ public abstract class GuestStorage {
                 tmp = impl;
                 if (null == tmp) {
                     try {
-                        tmp = new RdbGuestStorage(GuestStorageServiceLookup.getService(DatabaseService.class));
+                        tmp = new RdbGuestStorage();
                         tmp.startUp();
                         impl = tmp;
                     } catch (final OXException e) {
@@ -138,14 +136,24 @@ public abstract class GuestStorage {
     public abstract void removeGuest(int guestId, Connection connection) throws OXException;
 
     /**
-     * Removes the guests for the given context
+     * Removes the guests assignments for the given context
      *
-     * @param contextId - the context the guests should be deleted for
+     * @param contextId - id of the context to get the guest ids for.
+     * @param Connection - existing connection that should be used to remove the guests.
+     * @return int - number of assignments that have been removed
+     * @throws OXException
+     */
+    public abstract int removeGuestAssignments(int contextId, Connection connection) throws OXException;
+
+    /**
+     * Returns the internal guest ids that currently have assignments for the given context.
+     *
+     * @param contextId - id of the context to get the guest ids for.
      * @param Connection - existing connection that should be used to remove the guests.
      * @return List with Integer containing internal guest ids to be able to check if there still are assignments existing or if the guest should be removed.
      * @throws OXException
      */
-    public abstract List<Integer> removeGuests(int contextId, Connection connection) throws OXException;
+    public abstract List<Integer> resolveGuestAssignments(int contextId, Connection connection) throws OXException;
 
     /**
      * Removes the assignment of the guest based on the given internal guestId, context and user id

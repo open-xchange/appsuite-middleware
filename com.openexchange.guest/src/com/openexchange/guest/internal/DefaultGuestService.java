@@ -112,6 +112,7 @@ public class DefaultGuestService implements GuestService {
 
             if (guestId != GuestStorage.NOT_FOUND) { // already existing, only add assignment
                 GuestStorage.getInstance().addGuestAssignment(guestId, contextId, userId, connectionHelper.getConnection());
+                connectionHelper.commit();
                 return;
             }
 
@@ -166,9 +167,14 @@ public class DefaultGuestService implements GuestService {
         try {
             connectionHelper.start();
 
-            List<Integer> removedGuests = GuestStorage.getInstance().removeGuests(contextId, connectionHelper.getConnection());
+            List<Integer> affectedGuests = GuestStorage.getInstance().resolveGuestAssignments(contextId, connectionHelper.getConnection());
+            if (affectedGuests.isEmpty()) {
+                return;
+            }
 
-            for (int guestId : removedGuests) {
+            GuestStorage.getInstance().removeGuestAssignments(contextId, connectionHelper.getConnection());
+
+            for (int guestId : affectedGuests) {
                 int numberOfAssignments = GuestStorage.getInstance().getNumberOfAssignments(guestId, connectionHelper.getConnection());
                 if ((numberOfAssignments == 0) && (guestId != GuestStorage.NOT_FOUND)) {
                     GuestStorage.getInstance().removeGuest(guestId, connectionHelper.getConnection());

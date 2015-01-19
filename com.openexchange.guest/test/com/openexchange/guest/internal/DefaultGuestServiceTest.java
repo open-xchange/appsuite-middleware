@@ -118,8 +118,8 @@ public class DefaultGuestServiceTest {
 
         PowerMockito.mockStatic(GuestStorage.class);
         PowerMockito.when(GuestStorage.getInstance()).thenReturn(guestStorage);
-        Mockito.when(guestStorage.getGuestId(Matchers.anyString(), (Connection)Matchers.any())).thenReturn(GUEST_ID);
-        Mockito.when(guestStorage.getGuestId(Matchers.anyInt(), Matchers.anyInt(), (Connection)Matchers.any())).thenReturn(GUEST_ID);
+        Mockito.when(guestStorage.getGuestId(Matchers.anyString(), (Connection) Matchers.any())).thenReturn(GUEST_ID);
+        Mockito.when(guestStorage.getGuestId(Matchers.anyInt(), Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(GUEST_ID);
 
         PowerMockito.mockStatic(GuestStorageServiceLookup.class);
         PowerMockito.when(GuestStorageServiceLookup.get()).thenReturn(services);
@@ -136,30 +136,32 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testAddGuest_alreadyExistingGuestAndAssignment_doNotAdd() throws OXException {
-        Mockito.when(guestStorage.isAssignmentExisting(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection)Matchers.any())).thenReturn(true);
+        Mockito.when(guestStorage.isAssignmentExisting(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(true);
 
         defaultGuestService.addGuest(GUEST_MAIL_ADDRESS, CONTEXT_ID, USER_ID);
 
-        Mockito.verify(guestStorage, Mockito.never()).addGuestAssignment(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection)Matchers.any());
+        Mockito.verify(guestStorage, Mockito.never()).addGuestAssignment(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection) Matchers.any());
         Mockito.verify(guestStorage, Mockito.never()).addGuest(Matchers.anyString(), (Connection) Matchers.any());
-        Mockito.verify(guestStorage, Mockito.never()).addGuest(Matchers.anyString(), (Connection)Matchers.any());
+        Mockito.verify(guestStorage, Mockito.never()).addGuest(Matchers.anyString(), (Connection) Matchers.any());
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test
     public void testAddGuest_alreadyExistingGuest_addAssignment() throws OXException {
-        Mockito.when(guestStorage.isAssignmentExisting(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection)Matchers.any())).thenReturn(false);
+        Mockito.when(guestStorage.isAssignmentExisting(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(false);
 
         defaultGuestService.addGuest(GUEST_MAIL_ADDRESS, CONTEXT_ID, USER_ID);
 
         Mockito.verify(guestStorage, Mockito.times(1)).addGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
         Mockito.verify(guestStorage, Mockito.never()).addGuest(Matchers.anyString(), (Connection) Matchers.any());
-        Mockito.verify(guestStorage, Mockito.never()).addGuest(Matchers.anyString(), (Connection)Matchers.any());
+        Mockito.verify(guestStorage, Mockito.never()).addGuest(Matchers.anyString(), (Connection) Matchers.any());
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test
     public void testAddGuest_alreadyExistingGuest_addCompleteNewGuest() throws OXException {
-        Mockito.when(guestStorage.isAssignmentExisting(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection)Matchers.any())).thenReturn(false);
-        Mockito.when(guestStorage.getGuestId(Matchers.anyString(), (Connection)Matchers.any())).thenReturn(GuestStorage.NOT_FOUND);
+        Mockito.when(guestStorage.isAssignmentExisting(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(false);
+        Mockito.when(guestStorage.getGuestId(Matchers.anyString(), (Connection) Matchers.any())).thenReturn(GuestStorage.NOT_FOUND);
         Mockito.when(guestStorage.addGuest(Matchers.anyString(), (Connection) Matchers.any())).thenReturn(GUEST_ID);
         Mockito.when(guestStorage.addGuest(GUEST_MAIL_ADDRESS, connection)).thenReturn(GUEST_ID);
 
@@ -167,36 +169,40 @@ public class DefaultGuestServiceTest {
 
         Mockito.verify(guestStorage, Mockito.times(1)).addGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
         Mockito.verify(guestStorage, Mockito.times(1)).addGuest(GUEST_MAIL_ADDRESS, connection);
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test
     public void testRemoveGuest_guestNotFound_doNothing() throws OXException {
-        Mockito.when(guestStorage.getGuestId(Matchers.anyInt(), Matchers.anyInt(), (Connection)Matchers.any())).thenReturn(GuestStorage.NOT_FOUND);
+        Mockito.when(guestStorage.getGuestId(Matchers.anyInt(), Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(GuestStorage.NOT_FOUND);
 
         defaultGuestService.removeGuest(CONTEXT_ID, USER_ID);
 
-        Mockito.verify(guestStorage, Mockito.never()).removeGuestAssignment(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection)Matchers.any());
-        Mockito.verify(guestStorage, Mockito.never()).removeGuest(Matchers.anyInt(), (Connection)Matchers.any());
+        Mockito.verify(guestStorage, Mockito.never()).removeGuestAssignment(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), (Connection) Matchers.any());
+        Mockito.verify(guestStorage, Mockito.never()).removeGuest(Matchers.anyInt(), (Connection) Matchers.any());
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test
     public void testRemoveGuest_assignmentStillExisting_doNotDeleteUser() throws OXException {
-        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection)Matchers.any())).thenReturn(10);
+        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(10);
 
         defaultGuestService.removeGuest(CONTEXT_ID, USER_ID);
 
         Mockito.verify(guestStorage, Mockito.times(1)).removeGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
-        Mockito.verify(guestStorage, Mockito.never()).removeGuest(Matchers.anyInt(), (Connection)Matchers.any());
+        Mockito.verify(guestStorage, Mockito.never()).removeGuest(Matchers.anyInt(), (Connection) Matchers.any());
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test
     public void testRemoveGuest_noAssignment_deleteUser() throws OXException {
-        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection)Matchers.any())).thenReturn(0);
+        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(0);
 
         defaultGuestService.removeGuest(CONTEXT_ID, USER_ID);
 
         Mockito.verify(guestStorage, Mockito.times(1)).removeGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
         Mockito.verify(guestStorage, Mockito.times(1)).removeGuest(GUEST_ID, connection);
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test(expected = OXException.class)
@@ -221,18 +227,19 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testSetPassword_userNotFound_doNotUpdate() throws OXException {
-        Mockito.when(guestStorage.getGuestId(Matchers.anyString(), (Connection)Matchers.any())).thenReturn(GuestStorage.NOT_FOUND);
+        Mockito.when(guestStorage.getGuestId(Matchers.anyString(), (Connection) Matchers.any())).thenReturn(GuestStorage.NOT_FOUND);
 
         defaultGuestService.setPassword(GUEST_MAIL_ADDRESS, GUEST_PASSWORD);
 
         Mockito.verify(userService, Mockito.never()).updateUser((User) Matchers.any(), (Context) Matchers.any());
-        Mockito.verify(guestStorage, Mockito.never()).getGuestAssignments(Matchers.anyInt(), (Connection)Matchers.any());
+        Mockito.verify(guestStorage, Mockito.never()).getGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any());
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test(expected = OXException.class)
     public void testSetPassword_userFoundWithoutAssignment_doNotUpdate() throws OXException {
         final List<Serializable> guestAssignments = new ArrayList<Serializable>();
-        Mockito.when(guestStorage.getGuestAssignments(Matchers.anyInt(), (Connection)Matchers.any())).thenReturn(guestAssignments);
+        Mockito.when(guestStorage.getGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(guestAssignments);
 
         defaultGuestService.setPassword(GUEST_MAIL_ADDRESS, GUEST_PASSWORD);
     }
@@ -241,13 +248,56 @@ public class DefaultGuestServiceTest {
     public void testSetPassword_userFoundWithAssignment_updateUser() throws OXException {
         final List<Serializable> guestAssignments = new ArrayList<Serializable>();
         guestAssignments.add(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID));
-        Mockito.when(guestStorage.getGuestAssignments(Matchers.anyInt(), (Connection)Matchers.any())).thenReturn(guestAssignments);
+        Mockito.when(guestStorage.getGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(guestAssignments);
         Mockito.when(userService.getUser(Matchers.anyInt(), Matchers.anyInt())).thenReturn(new UserImpl());
 
         defaultGuestService.setPassword(GUEST_MAIL_ADDRESS, GUEST_PASSWORD);
 
-        Mockito.verify(userService, Mockito.times(1)).updateUser((User) Matchers.any(), (Context) Matchers.any());
+        Mockito.verify(userService, Mockito.times(1)).updateUser((Connection) Matchers.any(), (User) Matchers.any(), (Context) Matchers.any());
         Mockito.verify(userService, Mockito.times(1)).invalidateUser((Context) Matchers.any(), Matchers.anyInt());
         Mockito.verify(guestStorage, Mockito.times(1)).getGuestAssignments(GUEST_ID, connection);
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
+    }
+
+    @Test
+    public void testremoveGuestAssignments_assignmentRemovedButAssignmentStillAvailable_doNotRemoveGuest() throws OXException {
+        List<Integer> removedGuests = new ArrayList<Integer>();
+        removedGuests.add(22);
+        removedGuests.add(44);
+        removedGuests.add(66);
+        Mockito.when(guestStorage.resolveGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(removedGuests);
+        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(2);
+
+        defaultGuestService.removeGuests(CONTEXT_ID);
+
+        Mockito.verify(guestStorage, Mockito.never()).removeGuest(Matchers.anyInt(), (Connection) Matchers.any());
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
+    }
+
+    @Test
+    public void testremoveGuestAssignments_assignmentRemovedButAssignmentNotAvailable_RemoveGuest() throws OXException {
+        List<Integer> removedGuests = new ArrayList<Integer>();
+        removedGuests.add(22);
+        removedGuests.add(44);
+        removedGuests.add(66);
+        Mockito.when(guestStorage.resolveGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(removedGuests);
+        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(0);
+
+        defaultGuestService.removeGuests(CONTEXT_ID);
+
+        Mockito.verify(guestStorage, Mockito.times(removedGuests.size())).removeGuest(Matchers.anyInt(), (Connection) Matchers.any());
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
+    }
+
+    @Test
+    public void testremoveGuestAssignments_noGuestRemoved() throws OXException {
+        List<Integer> removedGuests = new ArrayList<Integer>();
+        Mockito.when(guestStorage.resolveGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(removedGuests);
+
+        defaultGuestService.removeGuests(CONTEXT_ID);
+
+        Mockito.verify(guestStorage, Mockito.never()).removeGuest(Matchers.anyInt(), (Connection) Matchers.any());
+        Mockito.verify(guestStorage, Mockito.never()).getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any());
+        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 }

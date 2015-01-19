@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,12 +65,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.guest.GuestAssignment;
-import com.openexchange.guest.internal.RdbGuestStorage;
 import com.openexchange.guest.storage.GuestStorage;
 import com.openexchange.test.mock.MockUtils;
 
@@ -82,13 +81,11 @@ import com.openexchange.test.mock.MockUtils;
  * @since 7.8.0
  */
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({ IDGenerator.class })
 public class RdbGuestStorageTest {
 
     @InjectMocks
     private RdbGuestStorage rdbGuestStorage;
-
-    @Mock
-    private DatabaseService databaseService;
 
     @Mock
     private Connection connection;
@@ -112,28 +109,11 @@ public class RdbGuestStorageTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        Mockito.when(databaseService.getWritable()).thenReturn(connection);
-        Mockito.when(databaseService.getReadOnly()).thenReturn(connection);
         Mockito.when(connection.prepareStatement(Matchers.anyString())).thenReturn(preparedStatement);
         Mockito.when(connection.prepareStatement(Matchers.anyString(), Matchers.anyInt())).thenReturn(preparedStatement);
 
-        MockUtils.injectValueIntoPrivateField(rdbGuestStorage, "databaseService", databaseService);
-        Mockito.when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
-    }
-
-    @Test
-    public void testAddGuest_connectionNull_useDelegate() throws OXException, SQLException {
-        Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
-        Mockito.when(resultSet.next()).thenReturn(true, false);
-        Mockito.when(resultSet.getInt(Matchers.anyInt())).thenReturn(GUEST_ID);
-
-        int addGuest = rdbGuestStorage.addGuest(GUEST_MAIL_ADDRESS, null);
-
-        Assert.assertEquals(GUEST_ID, addGuest);
-        Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
-        Mockito.verify(preparedStatement, Mockito.times(1)).getGeneratedKeys();
-        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
-        Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.INSERT_GUEST, Statement.RETURN_GENERATED_KEYS);
+        PowerMockito.mockStatic(IDGenerator.class);
+        PowerMockito.when(IDGenerator.getId((Connection) Matchers.any())).thenReturn(GUEST_ID);
     }
 
     @Test
@@ -142,38 +122,30 @@ public class RdbGuestStorageTest {
         Mockito.when(resultSet.next()).thenReturn(true, false);
         Mockito.when(resultSet.getInt(Matchers.anyInt())).thenReturn(GUEST_ID);
 
-        int addGuest = rdbGuestStorage.addGuest(GUEST_MAIL_ADDRESS, null);
+        int addGuest = rdbGuestStorage.addGuest(GUEST_MAIL_ADDRESS, connection);
 
         Assert.assertEquals(GUEST_ID, addGuest);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
-        Mockito.verify(preparedStatement, Mockito.times(1)).getGeneratedKeys();
-        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
-        Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.INSERT_GUEST, Statement.RETURN_GENERATED_KEYS);
+        Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.INSERT_GUEST);
     }
 
     @Test(expected = OXException.class)
     public void testAddGuest_noRowAffected_throwOxException() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(0);
 
-        rdbGuestStorage.addGuest(GUEST_MAIL_ADDRESS, null);
-
-        Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
-        Mockito.verify(preparedStatement, Mockito.never()).getGeneratedKeys();
-        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
-        Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.INSERT_GUEST, Statement.RETURN_GENERATED_KEYS);
+        rdbGuestStorage.addGuest(GUEST_MAIL_ADDRESS, connection);
     }
 
     @Test
     public void testGetGuestAssignments_noResultFound_returnEmptyList() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
 
-        List<Serializable> guestAssignments = rdbGuestStorage.getGuestAssignments(GUEST_ID, null);
+        List<Serializable> guestAssignments = rdbGuestStorage.getGuestAssignments(GUEST_ID, connection);
 
         Assert.assertEquals(0, guestAssignments.size());
 
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeQuery();
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ASSIGNMENTS);
     }
 
@@ -186,7 +158,7 @@ public class RdbGuestStorageTest {
 
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
 
-        List<Serializable> guestAssignments = rdbGuestStorage.getGuestAssignments(GUEST_ID, null);
+        List<Serializable> guestAssignments = rdbGuestStorage.getGuestAssignments(GUEST_ID, connection);
 
         Assert.assertEquals(2, guestAssignments.size());
         Assert.assertEquals(1, ((GuestAssignment) guestAssignments.get(0)).getContextId());
@@ -196,8 +168,23 @@ public class RdbGuestStorageTest {
 
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeQuery();
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ASSIGNMENTS);
+    }
+
+    @Test(expected = OXException.class)
+    public void testAddGuestAssignment_connectionNull_throwException() throws OXException, SQLException {
+        rdbGuestStorage.addGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, null);
+    }
+
+    @Test
+    public void testAddGuestAssignment_assignmentAdded() throws OXException, SQLException {
+        Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
+
+        rdbGuestStorage.addGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
+
+        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
+        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(2, CONTEXT_ID);
+        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(3, USER_ID);
     }
 
     @Test
@@ -205,12 +192,11 @@ public class RdbGuestStorageTest {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(false);
 
-        int guestId = rdbGuestStorage.getGuestId(GUEST_MAIL_ADDRESS, null);
+        int guestId = rdbGuestStorage.getGuestId(GUEST_MAIL_ADDRESS, connection);
 
         Assert.assertEquals(GuestStorage.NOT_FOUND, guestId);
 
         Mockito.verify(preparedStatement, Mockito.times(1)).setString(1, GUEST_MAIL_ADDRESS);
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ID_BY_MAIL);
     }
 
@@ -220,12 +206,11 @@ public class RdbGuestStorageTest {
         Mockito.when(resultSet.next()).thenReturn(true);
         Mockito.when(resultSet.getInt(1)).thenReturn(GUEST_ID);
 
-        int guestId = rdbGuestStorage.getGuestId(GUEST_MAIL_ADDRESS, null);
+        int guestId = rdbGuestStorage.getGuestId(GUEST_MAIL_ADDRESS, connection);
 
         Assert.assertEquals(GUEST_ID, guestId);
 
         Mockito.verify(preparedStatement, Mockito.times(1)).setString(1, GUEST_MAIL_ADDRESS);
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ID_BY_MAIL);
     }
 
@@ -234,13 +219,12 @@ public class RdbGuestStorageTest {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(false);
 
-        int guestId = rdbGuestStorage.getGuestId(CONTEXT_ID, USER_ID, null);
+        int guestId = rdbGuestStorage.getGuestId(CONTEXT_ID, USER_ID, connection);
 
         Assert.assertEquals(GuestStorage.NOT_FOUND, guestId);
 
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, CONTEXT_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(2, USER_ID);
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ID_BY_CONTEXT_AND_USER);
     }
 
@@ -250,13 +234,12 @@ public class RdbGuestStorageTest {
         Mockito.when(resultSet.next()).thenReturn(true);
         Mockito.when(resultSet.getInt(1)).thenReturn(GUEST_ID);
 
-        int guestId = rdbGuestStorage.getGuestId(CONTEXT_ID, USER_ID, null);
+        int guestId = rdbGuestStorage.getGuestId(CONTEXT_ID, USER_ID, connection);
 
         Assert.assertEquals(GUEST_ID, guestId);
 
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, CONTEXT_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(2, USER_ID);
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ID_BY_CONTEXT_AND_USER);
     }
 
@@ -265,12 +248,11 @@ public class RdbGuestStorageTest {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(false);
 
-        int numberOfAssignments = rdbGuestStorage.getNumberOfAssignments(GUEST_ID, null);
+        int numberOfAssignments = rdbGuestStorage.getNumberOfAssignments(GUEST_ID, connection);
 
         Assert.assertEquals(0, numberOfAssignments);
 
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID);
     }
 
@@ -280,13 +262,12 @@ public class RdbGuestStorageTest {
         Mockito.when(resultSet.next()).thenReturn(true);
         Mockito.when(resultSet.getInt(1)).thenReturn(10);
 
-        int numberOfAssignments = rdbGuestStorage.getNumberOfAssignments(GUEST_ID, null);
+        int numberOfAssignments = rdbGuestStorage.getNumberOfAssignments(GUEST_ID, connection);
 
         Assert.assertEquals(10, numberOfAssignments);
 
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
         Mockito.verify(resultSet, Mockito.times(1)).getInt(1);
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID);
     }
 
@@ -295,11 +276,10 @@ public class RdbGuestStorageTest {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(false);
 
-        boolean assignmentExisting = rdbGuestStorage.isAssignmentExisting(GUEST_ID, CONTEXT_ID, USER_ID, null);
+        boolean assignmentExisting = rdbGuestStorage.isAssignmentExisting(GUEST_ID, CONTEXT_ID, USER_ID, connection);
 
         Assert.assertFalse(assignmentExisting);
 
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ASSIGNMENT);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, CONTEXT_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(2, USER_ID);
@@ -311,11 +291,10 @@ public class RdbGuestStorageTest {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(true);
 
-        boolean assignmentExisting = rdbGuestStorage.isAssignmentExisting(GUEST_ID, CONTEXT_ID, USER_ID, null);
+        boolean assignmentExisting = rdbGuestStorage.isAssignmentExisting(GUEST_ID, CONTEXT_ID, USER_ID, connection);
 
         Assert.assertTrue(assignmentExisting);
 
-        Mockito.verify(databaseService, Mockito.times(1)).backReadOnly(connection);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ASSIGNMENT);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, CONTEXT_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(2, USER_ID);
@@ -326,20 +305,18 @@ public class RdbGuestStorageTest {
     public void testRemoveGuest_moreThanOneRowDeleted_throwException() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(3);
 
-        rdbGuestStorage.removeGuest(GUEST_ID, null);
+        rdbGuestStorage.removeGuest(GUEST_ID, connection);
 
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.DELETE_GUEST);
-        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test
     public void testRemoveGuest_oneGuestDeleted_return() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        rdbGuestStorage.removeGuest(GUEST_ID, null);
+        rdbGuestStorage.removeGuest(GUEST_ID, connection);
 
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.DELETE_GUEST);
-        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
     }
 
@@ -347,10 +324,9 @@ public class RdbGuestStorageTest {
     public void testRemoveGuest_guestAlreadyDeleted_return() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(0);
 
-        rdbGuestStorage.removeGuest(GUEST_ID, null);
+        rdbGuestStorage.removeGuest(GUEST_ID, connection);
 
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.DELETE_GUEST);
-        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
     }
 
@@ -361,18 +337,35 @@ public class RdbGuestStorageTest {
 
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(0);
 
-        rdbGuestStorage.removeGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, null);
+        rdbGuestStorage.removeGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
 
         Mockito.verify(log, Mockito.times(1)).error(Matchers.anyString());
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.DELETE_GUEST_ASSIGNMENT);
-        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
+        Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
+    }
+
+    @Test(expected = OXException.class)
+    public void testRemoveGuests_connectionNull_throwException() throws OXException, SQLException {
+        rdbGuestStorage.removeGuestAssignments(CONTEXT_ID, null);
+    }
+
+    @Test
+    public void testRemoveGuests_fine_removeGuestAssignments() throws OXException, SQLException {
+        Mockito.when(preparedStatement.executeUpdate()).thenReturn(11);
+
+        rdbGuestStorage.removeGuestAssignments(CONTEXT_ID, connection);
+
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
     }
 
     @Test
-    public void testRemoveGuests_notYetImplemented() throws OXException, SQLException {
-        rdbGuestStorage.removeGuests(CONTEXT_ID, null);
-        Assert.fail("not yet implemented");
-    }
+    public void testResolveGuests_notYetImplemented() throws OXException, SQLException {
+        Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        Mockito.when(resultSet.next()).thenReturn(true, false);
+        Mockito.when(resultSet.getInt(Matchers.anyInt())).thenReturn(GUEST_ID);
 
+        List<Integer> resolveGuestAssignments = rdbGuestStorage.resolveGuestAssignments(CONTEXT_ID, connection);
+
+        Assert.assertEquals(GUEST_ID, resolveGuestAssignments.get(0).intValue());
+    }
 }

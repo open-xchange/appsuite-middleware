@@ -55,11 +55,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.GuestExceptionCodes;
 import com.openexchange.guest.storage.GuestStorage;
@@ -88,7 +87,7 @@ public class RdbGuestStorage extends GuestStorage {
     /**
      * SQL statement for resolving the internal unique id based on context
      */
-    protected static final String RESOLVE_GUESTS_CONTEXT = "SELECT guest_id FROM guest2context WHERE cid=?";
+    protected static final String RESOLVE_GUESTS_FOR_CONTEXT = "SELECT guest_id FROM guest2context WHERE cid=?";
 
     /**
      * SQL statement for getting one assignment made for a user (resolved by mail address, context and user id)<br>
@@ -117,7 +116,7 @@ public class RdbGuestStorage extends GuestStorage {
     /**
      * SQL statement to insert a new guest for an unknown mail address
      */
-    protected static final String INSERT_GUEST = "INSERT INTO guest (mail_address) VALUES (?)";
+    protected static final String INSERT_GUEST = "INSERT INTO guest (id, mail_address) VALUES (?, ?)";
 
     /**
      * SQL statement for deleting a guest assignment based on the context and user id.
@@ -132,32 +131,7 @@ public class RdbGuestStorage extends GuestStorage {
     /**
      * SQL statement for deleting guests based on its context.
      */
-    protected static final String DELETE_GUESTS = "DELETE FROM guest2context where cid=?";
-
-    private final DatabaseService databaseService;
-
-    /**
-     * Default constructor.
-     */
-    public RdbGuestStorage(DatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    private int addGuest(String mailAddress) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getWritable();
-
-            return addGuest(mailAddress, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backWritable(connection);
-        }
-    }
+    protected static final String DELETE_GUEST_ASSIGNMENTS = "DELETE FROM guest2context where cid=?";
 
     /**
      * {@inheritDoc}
@@ -165,25 +139,25 @@ public class RdbGuestStorage extends GuestStorage {
     @Override
     public int addGuest(String mailAddress, Connection connection) throws OXException {
         if (connection == null) {
-            return addGuest(mailAddress);
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
         int guestId = NOT_FOUND;
         try {
-            statement = connection.prepareStatement(INSERT_GUEST, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, mailAddress);
+            guestId = IDGenerator.getId(connection);
+            connection.commit();
+
+            statement = connection.prepareStatement(INSERT_GUEST);
+            statement.setInt(1, guestId);
+            statement.setString(2, mailAddress);
             int affectedRows = statement.executeUpdate();
 
             if (affectedRows == 0) {
                 throw GuestExceptionCodes.SQL_ERROR.create("Not able to create guest with mail address '" + mailAddress + "' as desired!");
             }
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    guestId = generatedKeys.getInt(1);
-                } else {
-                    throw GuestExceptionCodes.SQL_ERROR.create("Creating guest with mail address '" + mailAddress + "' failed, no ID obtained!");
-                }
+            if (guestId == NOT_FOUND) {
+                throw GuestExceptionCodes.SQL_ERROR.create("Creating guest with mail address '" + mailAddress + "' failed, no ID obtained!");
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -194,27 +168,13 @@ public class RdbGuestStorage extends GuestStorage {
         return guestId;
     }
 
-    private void addGuestAssignment(int guestId, int contextId, int userId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getWritable();
-
-            addGuestAssignment(guestId, contextId, userId, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backWritable(connection);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     public void addGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException {
         if (connection == null) {
-            addGuestAssignment(guestId, contextId, userId);
-            return;
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
@@ -236,25 +196,13 @@ public class RdbGuestStorage extends GuestStorage {
         }
     }
 
-    private int getGuestId(String mailAddress) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getReadOnly();
-            return getGuestId(mailAddress, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backReadOnly(connection);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     public int getGuestId(String mailAddress, Connection connection) throws OXException {
         if (connection == null) {
-            return getGuestId(mailAddress);
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
@@ -276,25 +224,13 @@ public class RdbGuestStorage extends GuestStorage {
         return guestId;
     }
 
-    private int getGuestId(int contextId, int userId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getReadOnly();
-            return getGuestId(contextId, userId, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backReadOnly(connection);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     public int getGuestId(int contextId, int userId, Connection connection) throws OXException {
         if (connection == null) {
-            return getGuestId(contextId, userId);
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
@@ -317,26 +253,13 @@ public class RdbGuestStorage extends GuestStorage {
         return guestId;
     }
 
-    private void removeGuestAssignment(int guestId, int contextId, int userId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getWritable();
-            removeGuestAssignment(guestId, contextId, userId, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backWritable(connection);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     public void removeGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException {
         if (connection == null) {
-            removeGuestAssignment(guestId, contextId, userId);
-            return;
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
@@ -357,19 +280,6 @@ public class RdbGuestStorage extends GuestStorage {
         }
     }
 
-    private void removeGuest(int guestId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getWritable();
-
-            removeGuest(guestId, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backWritable(connection);
-        }
-    }
-
     /**
      *
      * {@inheritDoc}
@@ -377,8 +287,7 @@ public class RdbGuestStorage extends GuestStorage {
     @Override
     public void removeGuest(int guestId, Connection connection) throws OXException {
         if (connection == null) {
-            removeGuest(guestId);
-            return;
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
@@ -398,73 +307,59 @@ public class RdbGuestStorage extends GuestStorage {
         }
     }
 
-    private List<Integer> removeGuests(int contextId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getWritable();
+    /**
+    *
+    * {@inheritDoc}
+    */
+   @Override
+   public List<Integer> resolveGuestAssignments(int contextId, Connection connection) throws OXException {
+       if (connection == null) {
+           throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
+       }
 
-            return removeGuests(contextId, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backWritable(connection);
-        }
-    }
+       List<Integer> guestIdsAssigmentsRemovedFor = new ArrayList<Integer>();
+
+       PreparedStatement statement = null;
+       try {
+           statement = connection.prepareStatement(RESOLVE_GUESTS_FOR_CONTEXT);
+           statement.setInt(1, contextId);
+           ResultSet result = statement.executeQuery();
+
+           while (result.next()) {
+               int guestId = result.getInt(1);
+               guestIdsAssigmentsRemovedFor.add(guestId);
+           }
+       } catch (final SQLException e) {
+           throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+       } finally {
+           closeSQLStuff(statement);
+       }
+       return guestIdsAssigmentsRemovedFor;
+   }
 
     /**
      *
      * {@inheritDoc}
      */
     @Override
-    public List<Integer> removeGuests(int contextId, Connection connection) throws OXException {
+    public int removeGuestAssignments(int contextId, Connection connection) throws OXException {
         if (connection == null) {
-            return removeGuests(contextId);
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
-        List<Integer> guestIdsAssigmentsRemovedFor = new ArrayList<Integer>();
-
         PreparedStatement statement = null;
+        int affectedRows = NOT_FOUND;
         try {
-            statement = connection.prepareStatement(RESOLVE_GUESTS_CONTEXT);
+            statement = connection.prepareStatement(DELETE_GUEST_ASSIGNMENTS);
             statement.setInt(1, contextId);
-            ResultSet result = statement.executeQuery();
-
-            while (result.next()) {
-                int guestId = result.getInt(1);
-                guestIdsAssigmentsRemovedFor.add(guestId);
-            }
-            closeSQLStuff(result);
-
-            statement = connection.prepareStatement(DELETE_GUESTS);
-            statement.setInt(1, contextId);
-            int affectedRows = statement.executeUpdate();
-
-            if (guestIdsAssigmentsRemovedFor.size() != affectedRows) {
-                throw GuestExceptionCodes.CONTEXT_GUESTS_DELETION_ERROR.create(guestIdsAssigmentsRemovedFor.size(), affectedRows, statement.toString());
-            }
-
+            affectedRows = statement.executeUpdate();
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(statement);
         }
-        return guestIdsAssigmentsRemovedFor;
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    private int getNumberOfAssignments(int guestId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getReadOnly();
-
-            return getNumberOfAssignments(guestId, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backReadOnly(connection);
-        }
+        return affectedRows;
     }
 
     /**
@@ -473,7 +368,7 @@ public class RdbGuestStorage extends GuestStorage {
     @Override
     public int getNumberOfAssignments(int guestId, Connection connection) throws OXException {
         if (connection == null) {
-            return getNumberOfAssignments(guestId);
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         int guestAssignments = 0;
@@ -495,26 +390,13 @@ public class RdbGuestStorage extends GuestStorage {
         return guestAssignments;
     }
 
-    private boolean isAssignmentExisting(int guestId, int contextId, int userId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getReadOnly();
-
-            return isAssignmentExisting(guestId, contextId, userId, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backReadOnly(connection);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean isAssignmentExisting(int guestId, int contextId, int userId, Connection connection) throws OXException {
         if (connection == null) {
-            return isAssignmentExisting(guestId, contextId, userId);
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
@@ -537,26 +419,13 @@ public class RdbGuestStorage extends GuestStorage {
         return false;
     }
 
-    private List<Serializable> getGuestAssignments(int guestId) throws OXException {
-        Connection connection = null;
-        try {
-            connection = this.databaseService.getReadOnly();
-
-            return getGuestAssignments(guestId, connection);
-        } catch (final OXException e) {
-            throw GuestExceptionCodes.NO_CONNECTION.create(e);
-        } finally {
-            databaseService.backReadOnly(connection);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     public List<Serializable> getGuestAssignments(int guestId, Connection connection) throws OXException {
         if (connection == null) {
-            return getGuestAssignments(guestId);
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         final List<Serializable> guestAssignments = new ArrayList<Serializable>();

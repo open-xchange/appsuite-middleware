@@ -105,10 +105,11 @@ CREATE TABLE context_server2db_pool (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE guest (
-    id INT4 UNSIGNED NOT NULL AUTO_INCREMENT,
+    id INT4 UNSIGNED NOT NULL,
     mail_address VARCHAR(255) NOT NULL,
     PRIMARY KEY (id),
     INDEX (mail_address),
+    UNIQUE (id),
     UNIQUE (mail_address)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -120,3 +121,4 @@ CREATE TABLE guest2context (
     FOREIGN KEY(`cid`) REFERENCES context (`cid`),
     FOREIGN KEY(`guest_id`) REFERENCES guest (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
