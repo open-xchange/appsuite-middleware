@@ -4,6 +4,7 @@ BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-admin
+BuildRequires:  open-xchange-rest
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
 %define         ox_release 14
@@ -16,6 +17,7 @@ Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Extensions for integration with Parallels
 Autoreqprov:    no
 Requires:       open-xchange-admin-soap >= @OXVERSION@
+Requires:       open-xchange-rest
 Requires:       open-xchange-spamhandler
 Provides:       open-xchange-authentication
 Provides:       open-xchange-custom-parallels = %{version}
