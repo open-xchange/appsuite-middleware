@@ -1114,6 +1114,9 @@ if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatIn
 EOF
 fi
 
+# SoftwareChange_Request-2379
+ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
