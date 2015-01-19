@@ -244,6 +244,14 @@ public abstract class OXResellerStorageInterface {
     public abstract boolean ownsContext(final Context ctx, final int admid) throws StorageException;
 
     /**
+     * @param ctx
+     * @param admid
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean ownsContextOrIsPidOfOwner(final Context ctx, final int admid) throws StorageException;
+
+    /**
      * Checks whether context is owned by a subadmin
      *
      * @param ctx

@@ -116,7 +116,7 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
                 return false;
             }
             ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(creds.getLogin())})[0];
-            return oxresell.ownsContext(ctx, adm.getId());
+            return oxresell.ownsContextOrIsPidOfOwner(ctx, adm.getId());
         } catch (StorageException e) {
             log.error("",e);
             throw new InvalidCredentialsException("authentication failed");

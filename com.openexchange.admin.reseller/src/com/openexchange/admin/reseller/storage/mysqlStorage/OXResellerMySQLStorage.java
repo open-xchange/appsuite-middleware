@@ -740,6 +740,62 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
+    public boolean ownsContextOrIsPidOfOwner(final Context ctx, final int admid) throws StorageException {
+        Connection oxcon = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            oxcon = cache.getConnectionForConfigDB();
+            if (ctx == null) {
+                prep = oxcon.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
+                prep.setInt(1, admid);
+                rs = prep.executeQuery();
+                if (!rs.next()) {
+                    return false;
+                }
+                return true;
+            } else {
+                prep = oxcon.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
+                prep.setInt(1, ctx.getId());
+                rs = prep.executeQuery();
+                if (!rs.next()) {
+                    return false;
+                }
+                final int ownedSid = rs.getInt("sid");
+
+                if (ownedSid == admid) {
+                    return true;
+                } else {
+                    rs.close();
+                    prep.close();
+                    prep = oxcon.prepareStatement("SELECT sid FROM subadmin WHERE pid=? AND sid=?");
+                    prep.setInt(1, admid);
+                    prep.setInt(2, ownedSid);
+                    rs = prep.executeQuery();
+                    if (!rs.next()) {
+                        return false;
+                    }
+                    return true;
+                }
+            }
+        } catch (final DataTruncation dt) {
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
+        } catch (final RuntimeException e) {
+            log.error("", e);
+            throw e;
+        } catch (final PoolException e) {
+            log.error("", e);
+            throw new StorageException(e.getMessage());
+        } catch (final SQLException e) {
+            log.error("", e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+        }
+    }
+
+    @Override
     public boolean checkOwnsContextAndSetSid(final Context ctx, final Credentials creds) throws StorageException {
         Connection oxcon = null;
         PreparedStatement prep = null;
