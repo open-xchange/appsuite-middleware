@@ -47,45 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.oauth;
+package com.openexchange.oauth.provider;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcessor;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.OAuthInvalidRequestException;
-import com.openexchange.oauth.provider.OAuthToken;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
 
 
 /**
- * {@link OAuthAnnotationProcessor}
+ * {@link SimOAuthProvider}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProcessor<OAuthAction> {
+public class SimOAuthProvider implements OAuthProviderService {
+
+    private final Map<String, OAuthToken> tokens = new HashMap<>();
 
     @Override
-    protected Class<OAuthAction> getAnnotation() {
-        return OAuthAction.class;
+    public OAuthToken validate(String accessToken) throws OXException {
+        OAuthToken token = tokens.get(accessToken);
+        if (token == null) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
+        }
+
+        if (new Date().after(token.getExpirationDate())) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
+        }
+
+        return token;
     }
 
-    @Override
-    protected void doProcess(OAuthAction annotation, AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
-        OAuthToken accessToken = (OAuthToken) session.getParameter("com.openexchange.oauth.token");
-        if (accessToken == null) {
-            throw new OAuthInvalidRequestException();
-        }
+    public void addToken(OAuthToken token) {
+        tokens.put(token.getToken(), token);
+    }
 
-        OAuthAction oAuthAction = action.getClass().getAnnotation(OAuthAction.class);
-        String requiredScope = oAuthAction.value();
-        if (!OAuthAction.GRANT_ALL.equals(requiredScope)) {
-            if (!accessToken.getScope().has(requiredScope)) {
-                throw new OAuthInsufficientScopeException(requiredScope);
-            }
-        }
+    public void removeToken(String accessToken) {
+        tokens.remove(accessToken);
     }
 
 }

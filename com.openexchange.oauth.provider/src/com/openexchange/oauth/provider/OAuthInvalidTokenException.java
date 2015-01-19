@@ -47,56 +47,66 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider;
 
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.openexchange.oauth.provider.Scope;
+import com.openexchange.exception.Category;
 
 
 /**
- * {@link ScopeImpl}
+ * {@link OAuthInvalidTokenException}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.8.0
  */
-public class ScopeImpl implements Scope {
+public class OAuthInvalidTokenException extends OAuthRequestException {
 
-    /*
-     * From https://tools.ietf.org/html/rfc6749#section-3.3:
-     *   scope       = scope-token *( SP scope-token )
-     *   scope-token = 1*( %x21 / %x23-5B / %x5D-7E )
-     */
-    private static final Pattern PREFIXED_OAUTH_SCOPE = Pattern.compile("(r_|w_|rw_)([\\x21\\x23-\\x5b\\x5d-\\x7e]+)");
+    private static final long serialVersionUID = 518106848861523133L;
 
-    private final Set<String> scopes;
+    public enum Reason {
+        TOKEN_MALFORMED,
+        TOKEN_EXPIRED,
+        TOKEN_UNKNOWN,
+        TOKEN_MISSING
+    }
 
-    public ScopeImpl(Set<String> scopes) {
+    private final Reason reason;
+
+    public OAuthInvalidTokenException(Reason reason) {
         super();
-        this.scopes = scopes;
+        this.reason = reason;
     }
 
     @Override
-    public boolean has(String requiredScope) {
-        if (scopes.contains(requiredScope)) {
-            return true;
-        }
-
-        Matcher prefixedScopeMatcher = PREFIXED_OAUTH_SCOPE.matcher(requiredScope);
-        if (prefixedScopeMatcher.matches()) {
-            String prefix = prefixedScopeMatcher.group(1);
-            String scope = prefixedScopeMatcher.group(2);
-            switch (prefix) {
-                case "r_":
-                    return scopes.contains("rw_" + scope);
-                case "w_":
-                    return scopes.contains("rw_" + scope);
-                case "rw_":
-                    return scopes.contains("r_" + scope) && scopes.contains("w_" + scope);
-            }
-        }
-
-        return false;
+    public int getCode() {
+        return 1;
     }
+
+    @Override
+    public Category getCategory() {
+        return Category.CATEGORY_PERMISSION_DENIED;
+    }
+
+    @Override
+    public String getError() {
+        return "invalid_token";
+    }
+
+    public Reason getReason() {
+        return reason;
+    }
+
+    @Override
+    public String getErrorDescription() {
+        switch (reason) {
+            case TOKEN_EXPIRED:
+                return "The passed access token is expired.";
+            case TOKEN_MALFORMED:
+                return "The passed access token is malformed.";
+            case TOKEN_UNKNOWN:
+                return "The passed access token is unknown to the server.";
+            default:
+                return null;
+        }
+    }
+
 }

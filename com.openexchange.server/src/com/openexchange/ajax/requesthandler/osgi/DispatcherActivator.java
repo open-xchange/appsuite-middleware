@@ -90,6 +90,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResul
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
+import com.openexchange.ajax.requesthandler.oauth.DefaultSessionManager;
 import com.openexchange.ajax.requesthandler.oauth.OAuthAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServlet;
 import com.openexchange.ajax.requesthandler.oauth.OAuthModule;
@@ -218,7 +219,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         });
 
         final DispatcherServlet dispatcherServlet = new DispatcherServlet();
-        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this);
+        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, new DefaultSessionManager(this));
         DispatcherServlet.setDispatcher(dispatcher);
 
         Multiple.setDispatcher(dispatcher);

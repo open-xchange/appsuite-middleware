@@ -77,7 +77,7 @@ public class SimHttpServletRequest implements HttpServletRequest {
     private String charset;
     private final Map<String, Object> attributes;
     private final Map<String, String> headers;
-    private final Map<String, String> parameters;
+    private final Map<String, String[]> parameters;
     private ServletInputStream inputStream;
     private String protocol;
     private String scheme;
@@ -116,7 +116,7 @@ public class SimHttpServletRequest implements HttpServletRequest {
         super();
         attributes = new HashMap<String, Object>(4);
         headers = new HashMap<String, String>(8);
-        parameters = new HashMap<String, String>(8);
+        parameters = new HashMap<String, String[]>(8);
     }
 
     @Override
@@ -201,12 +201,17 @@ public class SimHttpServletRequest implements HttpServletRequest {
      * @param value The value
      */
     public void setParameter(String name, String value) {
-        parameters.put(name, value);
+        parameters.put(name, new String[] { value });
     }
 
     @Override
     public String getParameter(String name) {
-        return parameters.get(name);
+        String[] strings = parameters.get(name);
+        if (strings == null || strings.length == 0) {
+            return null;
+        }
+
+        return strings[0];
     }
 
     @Override
@@ -228,8 +233,7 @@ public class SimHttpServletRequest implements HttpServletRequest {
 
     @Override
     public String[] getParameterValues(String name) {
-        String string = parameters.get(name);
-        return null == string ? null : new String[] {string};
+        return parameters.get(name);
     }
 
     @Override
@@ -512,8 +516,8 @@ public class SimHttpServletRequest implements HttpServletRequest {
 
     @Override
     public Enumeration getHeaders(String name) {
-        final Iterator<String> iterator = parameters.values().iterator();
-        return new Enumeration<String>() {
+        final Iterator<String[]> iterator = parameters.values().iterator();
+        return new Enumeration<String[]>() {
 
             @Override
             public boolean hasMoreElements() {
@@ -521,7 +525,7 @@ public class SimHttpServletRequest implements HttpServletRequest {
             }
 
             @Override
-            public String nextElement() {
+            public String[] nextElement() {
                 return iterator.next();
             }
         };
@@ -721,6 +725,9 @@ public class SimHttpServletRequest implements HttpServletRequest {
 
     @Override
     public HttpSession getSession(boolean create) {
+        if (httpSession == null) {
+            httpSession = new SimHttpSession();
+        }
         return httpSession;
     }
 
@@ -735,7 +742,7 @@ public class SimHttpServletRequest implements HttpServletRequest {
 
     @Override
     public HttpSession getSession() {
-        return httpSession;
+        return getSession(true);
     }
 
     @Override

@@ -70,16 +70,17 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
-import com.openexchange.ajax.requesthandler.oauth.OAuthInvalidTokenException.Reason;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.OAuthInvalidRequestException;
+import com.openexchange.oauth.provider.OAuthInvalidTokenException;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link OAuthDispatcherServlet}
@@ -101,11 +102,12 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
     private final ServiceLookup services;
 
+    private final OAuthSessionManager sessionManager;
 
-
-    public OAuthDispatcherServlet(ServiceLookup services) {
+    public OAuthDispatcherServlet(ServiceLookup services, OAuthSessionManager sessionManager) {
         super();
         this.services = services;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -127,66 +129,10 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
                 OAuthProviderService oAuthProvider = requireService(OAuthProviderService.class, services);
                 OAuthToken token = oAuthProvider.validate(accessToken);
-                SessionUtility.rememberSession(httpRequest, createOAuthSession(token));
-                throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
+                SessionUtility.rememberSession(httpRequest, sessionManager.getSession(httpRequest, token));
             }
         }
     }
-
-    private ServerSession createOAuthSession(OAuthToken accessToken) throws OXException {
-        SessionObject session = new SessionObject("oauthv2-access-token:" + accessToken.getToken());
-        session.setContextId(accessToken.getContextID());
-        session.setUsername(Integer.toString(accessToken.getUserID()));
-        session.setParameter("com.openexchange.oauth.token", accessToken);
-        return ServerSessionAdapter.valueOf(session);
-    }
-
-//    private void doOAuthLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
-//        loginOperation(req, resp, new LoginClosure() {
-//
-//            @Override
-//            public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
-//                try {
-//                    final OAuthProviderService providerService = ServerServiceRegistry.getInstance().getService(OAuthProviderService.class);
-//                    final OAuthMessage requestMessage = OAuthServlet.getMessage(req2, null);
-//                    final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
-//                    providerService.getValidator().validateMessage(requestMessage, accessor);
-//                    final String login = accessor.<String> getProperty(OAuthProviderConstants.PROP_LOGIN);
-//                    final String password = accessor.<String> getProperty(OAuthProviderConstants.PROP_PASSWORD);
-//                    final LoginRequest request = LoginTools.parseLogin(
-//                        req2,
-//                        login,
-//                        password,
-//                        false,
-//                        conf.getDefaultClient(),
-//                        conf.isCookieForceHTTPS(),
-//                        false);
-//                    return LoginPerformer.getInstance().doLogin(request);
-//                } catch (final OAuthProblemException e) {
-//                    try {
-//                        handleException(e, req2, resp, false);
-//                        return null;
-//                    } catch (final IOException ioe) {
-//                        throw LoginExceptionCodes.UNKNOWN.create(ioe, ioe.getMessage());
-//                    } catch (final ServletException se) {
-//                        throw LoginExceptionCodes.UNKNOWN.create(se, se.getMessage());
-//                    }
-//                } catch (final IOException e) {
-//                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-//                } catch (final OAuthException e) {
-//                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-//                } catch (final URISyntaxException e) {
-//                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-//                }
-//            }
-//
-//            private void handleException(final Exception e, final HttpServletRequest request, final HttpServletResponse response, final boolean sendBody) throws IOException, ServletException {
-//                final StringBuilder realm = new StringBuilder(32).append((request.isSecure()) ? "https://" : "http://");
-//                realm.append(request.getLocalName());
-//                OAuthServlet.handleException(response, e, realm.toString(), sendBody);
-//            }
-//        }, conf);
-//    }
 
     @Override
     protected AJAXRequestData initializeRequestData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws OXException, IOException {
@@ -207,13 +153,11 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
         AJAXActionServiceFactory factory = dispatcher.lookupFactory(module);
         if (factory == null || !factory.getClass().isAnnotationPresent(OAuthModule.class)) {
-            // TODO: 404
             throw AjaxExceptionCodes.UNKNOWN_MODULE.create(module);
         }
 
         AJAXActionService actionService = factory.createActionService(action);
         if (actionService == null || !actionService.getClass().isAnnotationPresent(OAuthAction.class)) {
-            // TODO: 404
             throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, module);
         }
 
