@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginRequestImpl;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -70,7 +71,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.oauth.provider.OAuthToken;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -98,10 +101,10 @@ public class DefaultSessionManager implements OAuthSessionManager {
     @Override
     public ServerSession getSession(HttpServletRequest httpRequest, OAuthToken accessToken) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
-        Context context = contextService.getContext(accessToken.getContextID());
+        final Context context = contextService.getContext(accessToken.getContextID());
 
         UserService userService = requireService(UserService.class, services);
-        User user = userService.getUser(accessToken.getUserID(), context);
+        final User user = userService.getUser(accessToken.getUserID(), context);
         Cookie[] cookies = getCookies(httpRequest);
         Map<String, List<String>> headers = getHeaders(httpRequest);
         String client = getClient();
@@ -124,7 +127,22 @@ public class DefaultSessionManager implements OAuthSessionManager {
             httpRequest.getServerName(),
             httpRequest.getServerPort(),
             com.openexchange.tools.servlet.http.Tools.getRoute(httpRequest.getSession(true).getId()));
-        LoginResult result = LoginPerformer.getInstance().doLogin(req);
+        LoginResult result = LoginPerformer.getInstance().doLogin(req, new HashMap<String, Object>(), new LoginMethodClosure() {
+            @Override
+            public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
+                return new Authenticated() {
+                    @Override
+                    public String getUserInfo() {
+                        return user.getLoginInfo();
+                    }
+
+                    @Override
+                    public String getContextInfo() {
+                        return context.getLoginInfo()[0];
+                    }
+                };
+            }
+        });
         Session session = result.getSession();
         session.setParameter("com.openexchange.oauth.token", accessToken);
         return ServerSessionAdapter.valueOf(session);

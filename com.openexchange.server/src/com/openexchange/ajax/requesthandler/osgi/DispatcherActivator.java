@@ -101,14 +101,17 @@ import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRend
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.mail.mime.utils.ImageMatcher;
+import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -218,12 +221,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             }
         });
 
-        final DispatcherServlet dispatcherServlet = new DispatcherServlet();
-        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, new DefaultSessionManager(this));
-        DispatcherServlet.setDispatcher(dispatcher);
-
         Multiple.setDispatcher(dispatcher);
-
+        DispatcherServlet.setDispatcher(dispatcher);
         DispatcherServlet.registerRenderer(new APIResponseRenderer());
         final FileResponseRenderer fileRenderer = new FileResponseRenderer();
         DispatcherServlet.registerRenderer(fileRenderer);
@@ -233,6 +232,11 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         registerService(AJAXActionAnnotationProcessor.class, new DispatcherNotesProcessor());
         registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
 
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet();
+        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, new DefaultSessionManager(this));
+        trackService(OAuthProviderService.class);
+        trackService(ContextService.class);
+        trackService(UserService.class);
         track(ResponseRenderer.class, new SimpleRegistryListener<ResponseRenderer>() {
 
             @Override
