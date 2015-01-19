@@ -949,6 +949,16 @@ if [ "500" = "${VALUE}" ]; then
     ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-2342
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# Check for possibly preset message format preference in JSLob and aligns the DB value accordingly
+!com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob
+EOF
+fi
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
