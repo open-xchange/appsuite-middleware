@@ -1,3 +1,15 @@
+* 2015-01-19 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 36095: Be more strict about the 'Reply-To' header while parsing
+
+* 2015-01-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36141: Do proper url-encoding in composed redirect URI
+
+* 2015-01-16 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34951: Check if WritePoolId and ReadPoolId are the same before increasing transaction counter
+
 * 2015-01-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 36128: Deal with possible "javax.mail.IllegalWriteException: IMAPMessage is read-only" error
