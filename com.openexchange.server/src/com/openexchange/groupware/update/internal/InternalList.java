@@ -771,9 +771,6 @@ public final class InternalList {
         // Extends "user" table by the (`cid`, `guestCreatedBy`) index
         list.add(new com.openexchange.groupware.update.tasks.AddGuestCreatedByIndexForUserTable());
 
-        // Creates an initial empty "filestore_usage" entry for users.
-        list.add(new com.openexchange.groupware.update.tasks.AddInitialUserFilestoreUsage());
-
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
