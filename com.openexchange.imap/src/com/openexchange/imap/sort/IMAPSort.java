@@ -338,7 +338,7 @@ public final class IMAPSort {
 
         boolean rangeApplied = false;
         int[] seqNums;
-        if (allowESORT && null != indexRange && imapConfig.asMap().containsKey("ESORT")) {
+        if (allowESORT && null != indexRange && imapConfig.asMap().containsKey("ESORT") && (null == searchTerm || searchTerm.isAscii())) {
             try {
                 final String atom = new StringBuilder(16).append(indexRange.start + 1).append(':').append(indexRange.end).toString();
                 seqNums = (int[]) imapFolder.doCommand(new ProtocolCommand() {
