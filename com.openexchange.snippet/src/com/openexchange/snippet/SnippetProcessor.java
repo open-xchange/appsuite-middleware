@@ -133,21 +133,30 @@ public class SnippetProcessor {
         ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
 
-        ConfigProperty<Integer> maxImageLimit = configView.property("com.openexchange.mail.signature.maxImageLimit", Integer.class);
-        if (!maxImageLimit.isDefined()) {
-            maxImageLimit.set(3);
+        ConfigProperty<Integer> maxImageLimitConf = configView.property("com.openexchange.mail.signature.maxImageLimit", Integer.class);
+
+        final Integer maxImageLimit;
+        if (maxImageLimitConf.isDefined()) {
+            maxImageLimit = maxImageLimitConf.get();
+        } else {
+            // Defaults to 3 images
+            maxImageLimit = 3;
         }
 
         final long maxImageSize;
         {
-            ConfigProperty<Double> mis = configView.property("com.openexchange.mail.signature.maxImageSize", Double.class);
-            if (!mis.isDefined()) {
-                mis.set(1d);
+            ConfigProperty<Double> misConf = configView.property("com.openexchange.mail.signature.maxImageSize", Double.class);
+            final double mis;
+            if (misConf.isDefined()) {
+                mis = misConf.get();
+            } else {
+                // Defaults to 1 MB
+                mis = (1d);
             }
-            maxImageSize = (long) (Math.pow(1024, 2) * mis.get());
+            maxImageSize = (long) (Math.pow(1024, 2) * mis);
         }
 
-        Map<String, String> imageTags = new HashMap<String, String>(maxImageLimit.get());
+        Map<String, String> imageTags = new HashMap<String, String>(maxImageLimit);
 
         final ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
         final ImageMatcher m = ImageMatcher.matcher(content);
@@ -163,8 +172,8 @@ public class SnippetProcessor {
             }
         }
 
-        if (count > maxImageLimit.get()) {
-            throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(maxImageLimit.get());
+        if (count > maxImageLimit) {
+            throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(maxImageLimit);
         }
 
         for (String id : imageTags.keySet()) {
