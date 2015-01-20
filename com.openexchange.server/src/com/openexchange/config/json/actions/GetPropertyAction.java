@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.json.ConfigAJAXRequest;
@@ -106,7 +107,7 @@ public class GetPropertyAction extends AbstractConfigAction {
         ServerSession session = req.getSession();
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
 
-        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        ConfigProperty<String> property = view.property("context", propertyName, String.class);
         if (false == property.isDefined()) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propertyName);
         }
@@ -116,7 +117,8 @@ public class GetPropertyAction extends AbstractConfigAction {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propertyName);
         }
 
-        return new AJAXRequestResult(new JSONObject(2).put("name", propertyName).put("value", property.get())); // Defaults to "json" format
+        ComposedConfigProperty<String> composedProperty = view.property(propertyName, String.class);
+        return new AJAXRequestResult(new JSONObject(2).put("name", propertyName).put("value", composedProperty.get())); // Defaults to "json" format
     }
 
 }
