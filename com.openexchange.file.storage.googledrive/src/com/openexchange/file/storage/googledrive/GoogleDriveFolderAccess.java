@@ -309,10 +309,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             /*
              * perform rename
              */
-            File driveDir = new File();
-            driveDir.setId(fid);
-            driveDir.setTitle(newName);
-            driveDir.setMimeType(GoogleDriveConstants.MIME_TYPE_DIRECTORY);
+            File driveDir = new File().setId(fid).setTitle(newName).setMimeType(GoogleDriveConstants.MIME_TYPE_DIRECTORY);
             File renamedDir = drive.files().patch(fid, driveDir).execute();
             return toFileStorageFolderId(renamedDir.getId());
         } catch (final HttpResponseException e) {
