@@ -70,6 +70,14 @@ public class SimContextService implements ContextService{
     }
 
     /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#setAttribute(java.lang.String, java.lang.String, int)
+     */
+    @Override
+    public void setAttribute(String name, String value, int contextId) throws OXException {
+        // Nothing
+    }
+
+    /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#getContext(int)
      */
     @Override

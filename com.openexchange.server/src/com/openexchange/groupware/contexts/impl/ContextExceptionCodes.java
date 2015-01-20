@@ -83,7 +83,13 @@ public enum ContextExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Cannot find context "%s".
      */
-    NO_MAPPING("Context \"%s\" cannot be found.", ContextExceptionMessage.NO_MAPPING_MSG, Category.CATEGORY_USER_INPUT, 10);
+    NO_MAPPING("Context \"%s\" cannot be found.", ContextExceptionMessage.NO_MAPPING_MSG, Category.CATEGORY_USER_INPUT, 10),
+    /**
+     * Denied concurrent update for context attributes for context %1$d.
+     */
+    CONCURRENT_ATTRIBUTES_UPDATE("Denied concurrent update for context attributes for context %1$d.", ContextExceptionMessage.CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY, Category.CATEGORY_ERROR, 11);
+
+
 
     /**
      * (Log) Message of the exception.

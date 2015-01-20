@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,72 @@
  *
  */
 
-package com.openexchange.oauth.osgi;
+package com.openexchange.config.cascade.context.osgi;
 
-import java.util.List;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OSGiContextService}
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OSGiContextService extends AbstractOSGiDelegateService<ContextService> implements ContextService {
+public final class Services {
 
     /**
-     * Initializes a new {@link OSGiContextService}.
+     * Initializes a new {@link Services}.
      */
-    public OSGiContextService() {
-        super(ContextService.class);
+    private Services() {
+        super();
     }
 
-    @Override
-    public void setAttribute(String name, String value, int contextId) throws OXException {
-        getService().setAttribute(name, value, contextId);
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        return getService().getAllContextIds();
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    @Override
-    public Context getContext(int contextId) throws OXException {
-        return getService().getContext(contextId);
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.config.cascade.context\" not started?");
+        }
+        return serviceLookup.getService(clazz);
     }
 
-    @Override
-    public int getContextId(final String loginContextInfo) throws OXException {
-        return getService().getContextId(loginContextInfo);
-    }
-
-    @Override
-    public void invalidateContext(final int contextId) throws OXException {
-        getService().invalidateContext(contextId);
-    }
-
-    @Override
-    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        getService().invalidateLoginInfo(loginContextInfo);
-    }
-
-    @Override
-    public Context loadContext(final int contextId) throws OXException {
-        return getService().loadContext(contextId);
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

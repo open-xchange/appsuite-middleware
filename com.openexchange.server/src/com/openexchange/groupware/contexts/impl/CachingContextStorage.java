@@ -148,6 +148,12 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     @Override
+    public void setAttribute(String name, String value, int contextId) throws OXException {
+        persistantImpl.setAttribute(name, value, contextId);
+        invalidateContexts(new int[] { contextId });
+    }
+
+    @Override
     protected void shutDown() throws OXException {
         if (!started) {
             LOG.error("Duplicate shutdown of CachingContextStorage.");
