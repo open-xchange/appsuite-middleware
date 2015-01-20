@@ -207,9 +207,13 @@ public final class SimHttpServletResponse implements HttpServletResponse {
         return headers;
     }
 
+    public String getHeader(String name) {
+        return headers.get(name.toLowerCase());
+    }
+
     @Override
     public boolean containsHeader(String name) {
-        return headers.containsKey(name);
+        return headers.containsKey(name.toLowerCase());
     }
 
     @Override

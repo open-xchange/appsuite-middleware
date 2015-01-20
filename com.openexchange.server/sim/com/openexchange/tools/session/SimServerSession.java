@@ -50,6 +50,8 @@
 package com.openexchange.tools.session;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
@@ -72,12 +74,14 @@ public class SimServerSession implements ServerSession {
     private UserConfiguration userConfig;
     private String login;
     private UserPermissionBits userPermissionBits;
+    private final Map<String, Object> parameters;
 
     public SimServerSession(final Context context, final User user, final UserConfiguration userConfig) {
         super();
         this.context = context;
         this.user = user;
         this.userConfig = userConfig;
+        this.parameters = new HashMap<String, Object>();
     }
 
     public SimServerSession(final int ctxId, final int uid) {
@@ -121,7 +125,7 @@ public class SimServerSession implements ServerSession {
 
     @Override
     public boolean containsParameter(final String name) {
-        return false;
+        return parameters.containsKey(name);
     }
 
     @Override
@@ -146,7 +150,7 @@ public class SimServerSession implements ServerSession {
 
     @Override
     public Object getParameter(final String name) {
-        return null;
+        return parameters.get(name);
     }
 
     @Override
@@ -181,12 +185,12 @@ public class SimServerSession implements ServerSession {
 
     @Override
     public void setParameter(final String name, final Object value) {
-        throw new UnsupportedOperationException();
+        parameters.put(name, value);
     }
 
     @Override
     public String getAuthId() {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override

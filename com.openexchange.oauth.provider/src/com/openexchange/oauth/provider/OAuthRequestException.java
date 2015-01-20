@@ -47,33 +47,46 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.oauth;
+package com.openexchange.oauth.provider;
+
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link OAuthInsufficientScopeException}
+ * {@link OAuthRequestException}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthInsufficientScopeException extends OAuthRequestException {
+public abstract class OAuthRequestException extends OXException {
 
-    private static final long serialVersionUID = -5103133884480860890L;
+    private static final long serialVersionUID = 1918267521309441464L;
 
-    private final String requiredScope;
+    protected final String description;
 
-    public OAuthInsufficientScopeException(String requiredScope) {
+    public OAuthRequestException() {
+        this(null);
+    }
+
+    public OAuthRequestException(String description) {
         super();
-        this.requiredScope = requiredScope;
+        this.description = description;
     }
 
     @Override
-    public String getError() {
-        return "insufficient_scope";
+    public String getPrefix() {
+        return "OAUTH_REQ";
     }
 
-    public String getScope() {
-        return requiredScope;
+    @Override
+    public String getMessage() {
+        return description == null ? getError() : description;
+    }
+
+    public abstract String getError();
+
+    public String getErrorDescription() {
+        return description;
     }
 
 }

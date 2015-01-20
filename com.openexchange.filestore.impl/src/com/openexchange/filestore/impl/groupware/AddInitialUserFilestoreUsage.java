@@ -47,13 +47,10 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.filestore.impl.groupware;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,7 +60,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -71,7 +70,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.IntReference;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Creates an initial empty "filestore_usage" entry for users.
@@ -86,7 +84,7 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { AddUserColumnToFilestoreUsageTable.class.getName() };
     }
 
     @Override
@@ -99,7 +97,7 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
         int contextId = params.getContextId();
         ProgressState state = params.getProgressState();
 
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        DatabaseService dbService = Services.requireService(DatabaseService.class);
         Connection con = dbService.getForUpdateTask(contextId);
         boolean rollback = false;
         try {
@@ -127,9 +125,9 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(con);
+               Databases.rollback(con);
             }
-            autocommit(con);
+            Databases.autocommit(con);
             dbService.backForUpdateTask(contextId, con);
         }
     }
@@ -155,7 +153,7 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
 
                 map.put(Integer.valueOf(cid), users);
             } finally {
-                closeSQLStuff(result, stmt);
+                Databases.closeSQLStuff(result, stmt);
             }
         }
 
@@ -173,7 +171,7 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
             result = stmt.executeQuery();
             return !result.next();
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
     }
 
@@ -185,7 +183,7 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
             stmt.setInt(2, userId);
             stmt.executeUpdate();
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 }

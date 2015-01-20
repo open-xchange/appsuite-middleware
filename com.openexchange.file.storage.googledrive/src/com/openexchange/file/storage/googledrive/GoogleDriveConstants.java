@@ -104,6 +104,6 @@ public final class GoogleDriveConstants implements FileStorageConstants {
     /**
      * The default fields to query.
      */
-    public static final String FIELDS_DEFAULT = "id,title,createdDate,modifiedDate,mimeType,fileSize,downloadUrl,description,version";
+    public static final String FIELDS_DEFAULT = "id,title,createdDate,modifiedDate,mimeType,fileSize,downloadUrl,description,version,md5Checksum";
 
 }

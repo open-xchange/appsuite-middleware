@@ -81,16 +81,14 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     // ---------------------------------------------------------------------------------------------------------------------- //
 
-    private final GoogleDriveAccountAccess accountAccess;
     private final int userId;
     private final String accountDisplayName;
 
     /**
      * Initializes a new {@link GoogleDriveFolderAccess}.
      */
-    public GoogleDriveFolderAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session, final GoogleDriveAccountAccess accountAccess) throws OXException {
+    public GoogleDriveFolderAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session) throws OXException {
         super(googleDriveAccess, account, session);
-        this.accountAccess = accountAccess;
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
     }
@@ -290,19 +288,31 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         String fid = toGoogleDriveFolderId(folderId);
         try {
             Drive drive = googleDriveAccess.getDrive(session);
-
-            Drive.Children.List list = drive.children().list(fid);
-            list.setQ("title='"+newName+"' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-            if (!list.execute().getItems().isEmpty()) {
-                // Already such a folder
-                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, drive.files().get(fid).execute().getTitle());
+            /*
+             * get folder to rename
+             */
+            File folder = drive.files().get(fid).setFields("parents/id,title").execute();
+            if (newName.equals(folder.getTitle())) {
+                return folderId;
             }
-
+            /*
+             * check for name conflict below parent folder
+             */
+            List<ParentReference> parentReferences = folder.getParents();
+            for (ParentReference parentReference : parentReferences) {
+                Drive.Children.List list = drive.children().list(parentReference.getId());
+                list.setQ("title='"+newName+"' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
+                if (false == list.execute().getItems().isEmpty()) {
+                    throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, drive.files().get(parentReference.getId()).execute().getTitle());
+                }
+            }
+            /*
+             * perform rename
+             */
             File driveDir = new File();
             driveDir.setId(fid);
             driveDir.setTitle(newName);
             driveDir.setMimeType(GoogleDriveConstants.MIME_TYPE_DIRECTORY);
-
             File renamedDir = drive.files().patch(fid, driveDir).execute();
             return toFileStorageFolderId(renamedDir.getId());
         } catch (final HttpResponseException e) {

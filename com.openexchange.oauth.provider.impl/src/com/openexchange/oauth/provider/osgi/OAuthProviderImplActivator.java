@@ -95,6 +95,42 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
         getService(HttpService.class).registerServlet(prefix + PATH_PREFIX + AuthServlet.PATH, new AuthServlet(), null, null);
 
         openTrackers();
+        /*
+         * Register OAuth provider service
+         */
+//        final DatabaseOAuthProviderService oauthProviderService = new DatabaseOAuthProviderService(this);
+////        registerService(OAuthProviderService.class, oauthProviderService);
+//        registerService(Reloadable.class, oauthProviderService);
+//        addService(OAuthProviderService.class, oauthProviderService);
+        /*
+         * Register OAuth v2 provider service
+         */
+//        final DatabaseOAuth2ProviderService oauth2ProviderService = new DatabaseOAuth2ProviderService(this);
+////        registerService(OAuthProviderService.class, oauth2ProviderService);
+//        registerService(Reloadable.class, oauth2ProviderService);
+//        addService(OAuthProviderService.class, oauth2ProviderService);
+        /*
+         * Service trackers
+         */
+//        final OAuthServiceProvider provider = oauthProviderService.getProvider();
+        // OAuth v1
+//        rememberTracker(new HTTPServletRegistration(context, provider.accessTokenURL, new AccessTokenServlet()));
+//        rememberTracker(new HTTPServletRegistration(context, provider.userAuthorizationURL, new AuthorizationServlet()));
+//        rememberTracker(new HTTPServletRegistration(context, "/oauth/echo", new EchoServlet()));
+//        rememberTracker(new HTTPServletRegistration(context, provider.requestTokenURL, new RequestTokenServlet()));
+//        // OAuth v2
+//        rememberTracker(new HTTPServletRegistration(context, provider.accessTokenURL+"/v2", new AccessTokenServlet2()));
+//        rememberTracker(new HTTPServletRegistration(context, provider.userAuthorizationURL+"/v2", new AuthorizationServlet2()));
+//        openTrackers();
+        /*
+         * Register update task, create table job and delete listener
+         */
+        {
+//            registerService(CreateTableService.class, new OAuthProviderCreateTableService());
+//            registerService(CreateTableService.class, new OAuth2ProviderCreateTableService());
+//            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new OAuthProviderCreateTableTask(), new OAuth2ProviderCreateTableTask()));
+//            registerService(DeleteListener.class, new OAuthProviderDeleteListener());
+        }
     }
 
     @Override

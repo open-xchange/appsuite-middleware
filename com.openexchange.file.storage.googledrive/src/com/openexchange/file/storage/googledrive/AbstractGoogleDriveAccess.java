@@ -56,6 +56,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.File.Labels;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
 import com.openexchange.session.Session;
@@ -127,7 +128,7 @@ public abstract class AbstractGoogleDriveAccess {
      */
     protected OXException handleHttpResponseError(String identifier, HttpResponseException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
-            return GoogleDriveExceptionCodes.NOT_FOUND.create(e, identifier);
+            return FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, identifier, "");
         }
 
         if (SC_UNAUTHORIZED == e.getStatusCode()) {
@@ -173,7 +174,7 @@ public abstract class AbstractGoogleDriveAccess {
     protected void checkIfTrashed(com.google.api.services.drive.model.File file) throws OXException {
         Boolean explicitlyTrashed = file.getExplicitlyTrashed();
         if (null != explicitlyTrashed && explicitlyTrashed.booleanValue()) {
-            throw GoogleDriveExceptionCodes.NOT_FOUND.create(file.getId());
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(file.getId(), "");
         }
     }
 

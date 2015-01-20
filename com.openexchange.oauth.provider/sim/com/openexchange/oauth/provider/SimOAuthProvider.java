@@ -47,56 +47,57 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider;
 
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.openexchange.oauth.provider.Scope;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
 
 
 /**
- * {@link ScopeImpl}
+ * {@link SimOAuthProvider}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.8.0
  */
-public class ScopeImpl implements Scope {
+public class SimOAuthProvider implements OAuthProviderService {
 
-    /*
-     * From https://tools.ietf.org/html/rfc6749#section-3.3:
-     *   scope       = scope-token *( SP scope-token )
-     *   scope-token = 1*( %x21 / %x23-5B / %x5D-7E )
-     */
-    private static final Pattern PREFIXED_OAUTH_SCOPE = Pattern.compile("(r_|w_|rw_)([\\x21\\x23-\\x5b\\x5d-\\x7e]+)");
+    private final Map<String, OAuthToken> tokens = new HashMap<>();
 
-    private final Set<String> scopes;
+    @Override
+    public OAuthToken validate(String accessToken) throws OXException {
+        OAuthToken token = tokens.get(accessToken);
+        if (token == null) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
+        }
 
-    public ScopeImpl(Set<String> scopes) {
-        super();
-        this.scopes = scopes;
+        if (new Date().after(token.getExpirationDate())) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
+        }
+
+        return token;
+    }
+
+    public void addToken(OAuthToken token) {
+        tokens.put(token.getToken(), token);
+    }
+
+    public void removeToken(String accessToken) {
+        tokens.remove(accessToken);
     }
 
     @Override
-    public boolean has(String requiredScope) {
-        if (scopes.contains(requiredScope)) {
-            return true;
-        }
-
-        Matcher prefixedScopeMatcher = PREFIXED_OAUTH_SCOPE.matcher(requiredScope);
-        if (prefixedScopeMatcher.matches()) {
-            String prefix = prefixedScopeMatcher.group(1);
-            String scope = prefixedScopeMatcher.group(2);
-            switch (prefix) {
-                case "r_":
-                    return scopes.contains("rw_" + scope);
-                case "w_":
-                    return scopes.contains("rw_" + scope);
-                case "rw_":
-                    return scopes.contains("r_" + scope) && scopes.contains("w_" + scope);
-            }
-        }
-
-        return false;
+    public String generateToken(int contextId, int userId, Scope scope) {
+        // TODO Auto-generated method stub
+        return null;
     }
+
+    @Override
+    public String generateAuthToken(int contextId, int userId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

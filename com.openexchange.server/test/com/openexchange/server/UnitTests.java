@@ -52,6 +52,7 @@ package com.openexchange.server;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
 
 /**
  * Suite for integrated unit tests of the com.openexchange.server bundle.
@@ -100,7 +101,8 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.mailaccount.json.actions.ValidateActionTest.class,
     com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverterTest.class,
     com.openexchange.mail.json.actions.GetMultipleAttachmentActionTest.class,
-    com.openexchange.mail.json.parser.MessageParserTest.class
+    com.openexchange.mail.json.parser.MessageParserTest.class,
+    OAuthDispatcherServletTest.class
 })
 public class UnitTests {
 

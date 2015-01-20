@@ -229,6 +229,8 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         }
         meta = fsFolder.getMeta();
         supportedCapabilities = fsFolder.getCapabilities();
+        lastModified = fsFolder.getLastModifiedDate();
+        creationDate = fsFolder.getCreationDate();
     }
 
     private static boolean showPersonalBelowInfoStore(final Session session, final boolean altNames) {

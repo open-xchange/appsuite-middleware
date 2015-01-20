@@ -47,45 +47,22 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.oauth;
-
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcessor;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.OAuthInvalidRequestException;
-import com.openexchange.oauth.provider.OAuthToken;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.oauth.provider;
 
 
 /**
- * {@link OAuthAnnotationProcessor}
+ * {@link OAuthInvalidRequestException}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProcessor<OAuthAction> {
+public class OAuthInvalidRequestException extends OAuthRequestException {
+
+    private static final long serialVersionUID = -3792229936050723721L;
 
     @Override
-    protected Class<OAuthAction> getAnnotation() {
-        return OAuthAction.class;
-    }
-
-    @Override
-    protected void doProcess(OAuthAction annotation, AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
-        OAuthToken accessToken = (OAuthToken) session.getParameter("com.openexchange.oauth.token");
-        if (accessToken == null) {
-            throw new OAuthInvalidRequestException();
-        }
-
-        OAuthAction oAuthAction = action.getClass().getAnnotation(OAuthAction.class);
-        String requiredScope = oAuthAction.value();
-        if (!OAuthAction.GRANT_ALL.equals(requiredScope)) {
-            if (!accessToken.getScope().has(requiredScope)) {
-                throw new OAuthInsufficientScopeException(requiredScope);
-            }
-        }
+    public String getError() {
+        return "invalid_request";
     }
 
 }

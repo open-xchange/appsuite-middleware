@@ -47,21 +47,66 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.oauth;
+package com.openexchange.oauth.provider;
+
+import com.openexchange.exception.Category;
 
 
 /**
- * {@link OAuthInvalidRequestException}
+ * {@link OAuthInvalidTokenException}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.8.0
  */
-public class OAuthInvalidRequestException extends OAuthRequestException {
+public class OAuthInvalidTokenException extends OAuthRequestException {
+
+    private static final long serialVersionUID = 518106848861523133L;
+
+    public enum Reason {
+        TOKEN_MALFORMED,
+        TOKEN_EXPIRED,
+        TOKEN_UNKNOWN,
+        TOKEN_MISSING
+    }
+
+    private final Reason reason;
+
+    public OAuthInvalidTokenException(Reason reason) {
+        super();
+        this.reason = reason;
+    }
+
+    @Override
+    public int getCode() {
+        return 1;
+    }
+
+    @Override
+    public Category getCategory() {
+        return Category.CATEGORY_PERMISSION_DENIED;
+    }
 
     @Override
     public String getError() {
-        // TODO Auto-generated method stub
-        return null;
+        return "invalid_token";
+    }
+
+    public Reason getReason() {
+        return reason;
+    }
+
+    @Override
+    public String getErrorDescription() {
+        switch (reason) {
+            case TOKEN_EXPIRED:
+                return "The passed access token is expired.";
+            case TOKEN_MALFORMED:
+                return "The passed access token is malformed.";
+            case TOKEN_UNKNOWN:
+                return "The passed access token is unknown to the server.";
+            default:
+                return null;
+        }
     }
 
 }

@@ -47,45 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.oauth;
-
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcessor;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.OAuthInvalidRequestException;
-import com.openexchange.oauth.provider.OAuthToken;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.oauth.provider;
 
 
 /**
- * {@link OAuthAnnotationProcessor}
+ * {@link OAuthInsufficientScopeException}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProcessor<OAuthAction> {
+public class OAuthInsufficientScopeException extends OAuthRequestException {
 
-    @Override
-    protected Class<OAuthAction> getAnnotation() {
-        return OAuthAction.class;
+    private static final long serialVersionUID = -5103133884480860890L;
+
+    private final String requiredScope;
+
+    public OAuthInsufficientScopeException(String requiredScope) {
+        super();
+        this.requiredScope = requiredScope;
     }
 
     @Override
-    protected void doProcess(OAuthAction annotation, AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
-        OAuthToken accessToken = (OAuthToken) session.getParameter("com.openexchange.oauth.token");
-        if (accessToken == null) {
-            throw new OAuthInvalidRequestException();
-        }
+    public String getError() {
+        return "insufficient_scope";
+    }
 
-        OAuthAction oAuthAction = action.getClass().getAnnotation(OAuthAction.class);
-        String requiredScope = oAuthAction.value();
-        if (!OAuthAction.GRANT_ALL.equals(requiredScope)) {
-            if (!accessToken.getScope().has(requiredScope)) {
-                throw new OAuthInsufficientScopeException(requiredScope);
-            }
-        }
+    public String getScope() {
+        return requiredScope;
     }
 
 }

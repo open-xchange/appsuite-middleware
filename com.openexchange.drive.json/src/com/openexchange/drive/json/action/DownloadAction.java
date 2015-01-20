@@ -64,6 +64,7 @@ import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.drive.json.pattern.JsonDirectoryPattern;
 import com.openexchange.drive.json.pattern.JsonFilePattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -154,7 +155,8 @@ public class DownloadAction extends AbstractDriveAction {
         int status;
         if (DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(e) || DriveExceptionCodes.FILE_NOT_FOUND.equals(e) ||
             DriveExceptionCodes.PATH_NOT_FOUND.equals(e) || "FLS-017".equals(e.getErrorCode()) ||
-            "DROPBOX-0005".equals(e.getErrorCode())) {
+            FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e) || FileStorageExceptionCodes.FOLDER_NOT_FOUND.equals(e) ||
+            "DROPBOX-0005".equals(e.getErrorCode()) || "GOOGLE_DRIVE-0005".equals(e.getErrorCode())) {
             status = HttpServletResponse.SC_NOT_FOUND;
         } else if (DriveExceptionCodes.INVALID_FILE_OFFSET.equals(e) || "FLS-018".equals(e.getErrorCode())
             || "FLS-019".equals(e.getErrorCode()) || "FLS-020".equals(e.getErrorCode())) {

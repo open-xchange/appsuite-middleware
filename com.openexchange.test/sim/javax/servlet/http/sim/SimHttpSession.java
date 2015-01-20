@@ -47,46 +47,122 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.oauth;
+package javax.servlet.http.sim;
 
-import com.openexchange.exception.OXException;
+import java.util.Enumeration;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionContext;
 
 
 /**
- * {@link OAuthRequestException}
+ * {@link SimHttpSession}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @since v7.x.x
  */
-public abstract class OAuthRequestException extends OXException {
+public class SimHttpSession implements HttpSession {
 
-    private static final long serialVersionUID = 1918267521309441464L;
-
-    protected final String description;
-
-    public OAuthRequestException() {
-        this(null);
-    }
-
-    public OAuthRequestException(String description) {
-        super();
-        this.description = description;
+    @Override
+    public long getCreationTime() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
     @Override
-    public String getPrefix() {
-        return "OAUTH_REQ";
+    public String getId() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public String getMessage() {
-        return description == null ? getError() : description;
+    public long getLastAccessedTime() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
-    public abstract String getError();
+    @Override
+    public ServletContext getServletContext() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-    public String getErrorDescription() {
-        return description;
+    @Override
+    public void setMaxInactiveInterval(int interval) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public int getMaxInactiveInterval() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public HttpSessionContext getSessionContext() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object getAttribute(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object getValue(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Enumeration getAttributeNames() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String[] getValueNames() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setAttribute(String name, Object value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void putValue(String name, Object value) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void removeValue(String name) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void invalidate() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean isNew() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

@@ -141,8 +141,12 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
                     setName(dir.getTitle());
                 }
 
-                creationDate = new Date(dir.getCreatedDate().getValue());
-                lastModifiedDate = new Date(dir.getModifiedDate().getValue());
+                if (null != dir.getCreatedDate()) {
+                    creationDate = new Date(dir.getCreatedDate().getValue());
+                }
+                if (null != dir.getModifiedDate()) {
+                    lastModifiedDate = new Date(dir.getModifiedDate().getValue());
+                }
 
                 {
                     final boolean hasSubfolders = hasSubfolder(dir.getId(), drive);
@@ -163,6 +167,8 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
     private boolean hasSubfolder(String folderId, Drive drive) throws IOException {
         Drive.Children.List list = drive.children().list(folderId);
         list.setQ(QUERY_STRING_DIRECTORIES_ONLY);
+        list.setMaxResults(Integer.valueOf(1));
+        list.setFields("items/id");
         return !list.execute().getItems().isEmpty();
     }
 
