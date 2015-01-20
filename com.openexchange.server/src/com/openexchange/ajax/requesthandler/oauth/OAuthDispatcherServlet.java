@@ -62,6 +62,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -74,13 +76,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.OAuthInvalidRequestException;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException;
+import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthToken;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link OAuthDispatcherServlet}
@@ -92,6 +96,8 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
     private static final long serialVersionUID = 2930109046898745937L;
 
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthDispatcherServlet.class);
+
     /*
      * From https://tools.ietf.org/html/rfc6750#section-2.1:
      *   The syntax for Bearer credentials is as follows:
@@ -102,12 +108,12 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
     private final ServiceLookup services;
 
-    private final OAuthSessionManager sessionManager;
+    private final OAuthSessionProvider sessionProvider;
 
-    public OAuthDispatcherServlet(ServiceLookup services, OAuthSessionManager sessionManager) {
+    public OAuthDispatcherServlet(ServiceLookup services, OAuthSessionProvider sessionProvider) {
         super();
         this.services = services;
-        this.sessionManager = sessionManager;
+        this.sessionProvider = sessionProvider;
     }
 
     @Override
@@ -119,19 +125,23 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         String authHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null) {
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
-        } else {
-            String authScheme = Authorization.extractAuthScheme(authHeader);
-            if (authScheme != null && authScheme.equalsIgnoreCase(OAuthConstants.BEARER_SCHEME) && authHeader.length() > OAuthConstants.BEARER_SCHEME.length() + 1) {
-                String accessToken = authHeader.substring(OAuthConstants.BEARER_SCHEME.length() + 1);
-                if (!TOKEN_PATTERN.matcher(accessToken).matches()) {
-                    throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
-                }
-
-                OAuthProviderService oAuthProvider = requireService(OAuthProviderService.class, services);
-                OAuthToken token = oAuthProvider.validate(accessToken);
-                SessionUtility.rememberSession(httpRequest, sessionManager.getSession(httpRequest, token));
-            }
         }
+
+        String authScheme = Authorization.extractAuthScheme(authHeader);
+        if (authScheme == null || !authScheme.equalsIgnoreCase(OAuthConstants.BEARER_SCHEME) || authHeader.length() <= OAuthConstants.BEARER_SCHEME.length() + 1) {
+            throw new OAuthInvalidTokenException(Reason.INVALID_AUTH_SCHEME);
+        }
+
+        String accessToken = authHeader.substring(OAuthConstants.BEARER_SCHEME.length() + 1);
+        if (!TOKEN_PATTERN.matcher(accessToken).matches()) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
+        }
+
+        OAuthProviderService oAuthProvider = requireService(OAuthProviderService.class, services);
+        OAuthToken token = oAuthProvider.validate(accessToken);
+        Session session = sessionProvider.getSession(token, httpRequest);
+        SessionUtility.rememberSession(httpRequest, ServerSessionAdapter.valueOf(session));
+        httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_TOKEN, token);
     }
 
     @Override
@@ -140,16 +150,25 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
         String module = requestDataTools.getModule(PREFIX.get() + "oauth/modules/", httpRequest);
         String action = requestDataTools.getAction(httpRequest);
-        ServerSession session = SessionUtility.getSessionObject(httpRequest);
+        ServerSession session = SessionUtility.getSessionObject(httpRequest, false);
         if (session == null) {
+            LOG.warn("Session was not contained in servlet request attributes!", new Exception());
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
         }
+
+        OAuthToken token = (OAuthToken) httpRequest.getAttribute(OAuthConstants.PARAM_OAUTH_TOKEN);
+        if (token == null) {
+            LOG.warn("OAuthToken was not contained in servlet request attributes!", new Exception());
+            throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
+        }
+
         /*
          * Parse AJAXRequestData
          */
         AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get(), httpResponse);
         requestData.setModule(module);
         requestData.setSession(session);
+        requestData.setProperty(OAuthConstants.PARAM_OAUTH_TOKEN, token);
 
         AJAXActionServiceFactory factory = dispatcher.lookupFactory(module);
         if (factory == null || !factory.getClass().isAnnotationPresent(OAuthModule.class)) {

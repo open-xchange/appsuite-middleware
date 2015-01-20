@@ -74,7 +74,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
 
     @Override
     protected void doProcess(OAuthAction annotation, AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
-        OAuthToken accessToken = (OAuthToken) session.getParameter("com.openexchange.oauth.token");
+        OAuthToken accessToken = requestData.getProperty(OAuthConstants.PARAM_OAUTH_TOKEN);
         if (accessToken == null) {
             throw new OAuthInvalidRequestException();
         }

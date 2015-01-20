@@ -60,12 +60,6 @@ public class OAuthConstants {
 
     public static final String BEARER_SCHEME = "Bearer";
 
-    public static final String ERROR_INVALID_REQUEST = "invalid_request";
-
-    public static final String ERROR_INVALID_TOKEN = "invalid_token";
-
-    public static final String ERROR_INSUFFICIENT_SCOPE = "insufficient_scope";
-
-    public static final String AUTH_TYPE = "OAuth 2.0";
+    public static final String PARAM_OAUTH_TOKEN = "com.openexchange.oauth.token";
 
 }

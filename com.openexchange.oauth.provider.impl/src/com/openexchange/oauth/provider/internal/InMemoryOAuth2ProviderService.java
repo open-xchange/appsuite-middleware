@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthToken;
 import com.openexchange.oauth.provider.Scope;
@@ -95,6 +96,12 @@ public class InMemoryOAuth2ProviderService implements OAuthProviderService {
         authTokens.put(token.getToken(), token);
 
         return token.getToken();
+    }
+
+    @Override
+    public Client getClient(OAuthToken token) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -47,69 +47,34 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.ajax.requesthandler.oauth;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
+import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link SimOAuthProvider}
+ * This is a bridge between OAuth 2.0 access tokens and the internal session mechanism.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class SimOAuthProvider implements OAuthProviderService {
+public interface OAuthSessionProvider {
 
-    private final Map<String, OAuthToken> tokens = new HashMap<>();
-
-    @Override
-    public OAuthToken validate(String accessToken) throws OXException {
-        OAuthToken token = tokens.get(accessToken);
-        if (token == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-        }
-
-        if (new Date().after(token.getExpirationDate())) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
-        }
-
-        return token;
-    }
-
-    public void addToken(OAuthToken token) {
-        tokens.put(token.getToken(), token);
-    }
-
-    public void removeToken(String accessToken) {
-        tokens.remove(accessToken);
-    }
-
-    @Override
-    public String generateToken(int contextId, int userId, Scope scope) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String generateAuthToken(int contextId, int userId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Client getClient(OAuthToken token) throws OXException {
-        return new Client() {
-
-            @Override
-            public String getName() {
-                return "Example App";
-            }
-
-        };
-    }
+    /**
+     * Gets a valid {@link ServerSession} according to the passed access token. A validation of
+     * the token does not take place here, it must be performed before calling this method. An
+     * implementation may decide to cache sessions across multiple calls to this method (i.e.
+     * across multiple OAuth requests).
+     *
+     * @param token The access token
+     * @param httpRequest The servlet request
+     * @return The session
+     * @throws OXException If an internal error occurs
+     */
+    Session getSession(OAuthToken token, HttpServletRequest httpRequest) throws OXException;
 
 }

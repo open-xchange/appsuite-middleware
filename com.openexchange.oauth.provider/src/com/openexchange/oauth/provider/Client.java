@@ -47,22 +47,17 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.oauth;
-
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthToken;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.oauth.provider;
 
 
 /**
- * {@link OAuthSessionManager}
+ * {@link Client}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface OAuthSessionManager {
+public interface Client {
 
-    ServerSession getSession(HttpServletRequest httpRequest, OAuthToken accessToken) throws OXException;
+    String getName();
 
 }

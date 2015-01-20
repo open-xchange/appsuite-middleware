@@ -56,78 +56,130 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.login.ConfigurationProperty;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
+import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthToken;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.tools.servlet.http.AuthCookie;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
-
 /**
- * {@link DefaultSessionManager}
+ * {@link DefaultSessionProvider}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class DefaultSessionManager implements OAuthSessionManager {
+public class DefaultSessionProvider implements OAuthSessionProvider {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultSessionProvider.class);
 
     private final ServiceLookup services;
 
-    public DefaultSessionManager(ServiceLookup services) {
+    private final Cache<String, String> sessionCache;
+
+    public DefaultSessionProvider(ServiceLookup services) {
         super();
         this.services = services;
+        sessionCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .expireAfterWrite(1, TimeUnit.HOURS)
+            .removalListener(new RemovalListener<String, String>() {
+
+                @Override
+                public void onRemoval(RemovalNotification<String, String> notification) {
+                    logout(notification.getValue());
+                }
+            })
+            .build();
+    }
+
+    private void logout(String sessionId) {
+        try {
+            Session session = LoginPerformer.getInstance().doLogout(sessionId);
+            if (session == null) {
+                LOG.debug("Removed session ID {} from OAuth 2.0 cache. The according session was already removed from the session container.", sessionId);
+            } else {
+                LOG.debug("Removed session ID {} from OAuth 2.0 cache. A logout was performed.", sessionId);
+            }
+        } catch (OXException e) {
+            LOG.warn("Error while removing OAuth 2.0 session", e);
+        }
     }
 
     @Override
-    public ServerSession getSession(HttpServletRequest httpRequest, OAuthToken accessToken) throws OXException {
-        ContextService contextService = requireService(ContextService.class, services);
-        final Context context = contextService.getContext(accessToken.getContextID());
+    public Session getSession(final OAuthToken token, final HttpServletRequest httpRequest) throws OXException {
+        SessiondService sessiondService = requireService(SessiondService.class, services);
+        String accessToken = token.getToken();
+        Session session = null;
+        try {
+            do {
+                String sessionId = sessionCache.get(accessToken, new Callable<String>() {
+                    @Override
+                    public String call() throws Exception {
+                        return login(token, httpRequest).getSessionID();
+                    }
+                });
 
+                if (sessiondService instanceof SessiondServiceExtended) {
+                    session = ((SessiondServiceExtended)sessiondService).getSession(sessionId, false);
+                } else {
+                    session = sessiondService.getSession(sessionId);
+                }
+                if (session == null) {
+                    LOG.debug("OAuth 2.0 session with ID {} was invalidated since last request", sessionId);
+                    sessionCache.asMap().remove(accessToken, sessionId);
+                }
+            } while (session == null);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (null != cause && OXException.class.isInstance(e.getCause())) {
+                throw (OXException) cause;
+            }
+            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+        }
+
+        return session;
+    }
+
+    private Session login(OAuthToken token, HttpServletRequest httpRequest) throws OXException {
+        ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
-        final User user = userService.getUser(accessToken.getUserID(), context);
-        Cookie[] cookies = getCookies(httpRequest);
-        Map<String, List<String>> headers = getHeaders(httpRequest);
-        String client = getClient();
-        String userAgent =  httpRequest.getHeader(HttpHeaders.USER_AGENT);
-        String hash = HashCalculator.getInstance().getHash(httpRequest, userAgent, client);
-        boolean forceHTTPS = com.openexchange.tools.servlet.http.Tools.considerSecure(httpRequest, forceHTTPS());
-        LoginRequestImpl req = new LoginRequestImpl(
-            user.getLoginInfo(),
-            null,                          /* password */
-            httpRequest.getRemoteAddr(),
-            userAgent,
-            null,                          /* auth id */
-            client,
-            "OAuth 2.0",
-            hash,
-            Interface.HTTP_JSON,
-            headers,
-            cookies,
-            forceHTTPS,
-            httpRequest.getServerName(),
-            httpRequest.getServerPort(),
-            com.openexchange.tools.servlet.http.Tools.getRoute(httpRequest.getSession(true).getId()));
-        LoginResult result = LoginPerformer.getInstance().doLogin(req, new HashMap<String, Object>(), new LoginMethodClosure() {
+        OAuthProviderService oAuthProvider = requireService(OAuthProviderService.class, services);
+
+        final Context context = contextService.getContext(token.getContextID());
+        final User user = userService.getUser(token.getUserID(), context);
+        final String client = oAuthProvider.getClient(token).getName();
+        LoginResult loginResult = LoginPerformer.getInstance().doLogin(getLoginRequest(httpRequest, user, client), new HashMap<String, Object>(1), new LoginMethodClosure() {
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
                 return new Authenticated() {
@@ -143,9 +195,37 @@ public class DefaultSessionManager implements OAuthSessionManager {
                 };
             }
         });
-        Session session = result.getSession();
-        session.setParameter("com.openexchange.oauth.token", accessToken);
-        return ServerSessionAdapter.valueOf(session);
+
+        Session session = loginResult.getSession();
+        LOG.debug("Created new OAuth 2.0 session: {}", session);
+        return session;
+    }
+
+    private LoginRequestImpl getLoginRequest(HttpServletRequest httpRequest, User user, String client) throws OXException {
+        String userAgent = httpRequest.getHeader(HttpHeaders.USER_AGENT);
+        String hash = HashCalculator.getInstance().getHash(httpRequest, userAgent, client);
+        boolean forceHTTPS = com.openexchange.tools.servlet.http.Tools.considerSecure(httpRequest, forceHTTPS());
+        Cookie[] cookies = getCookies(httpRequest);
+        Map<String, List<String>> headers = getHeaders(httpRequest);
+        LoginRequestImpl req = new LoginRequestImpl(
+            user.getLoginInfo(),
+            null,                                   /* password */
+            httpRequest.getRemoteAddr(),
+            userAgent,
+            UUIDs.getUnformattedStringFromRandom(), /* auth id */
+            client,
+            "1.0",
+            hash,
+            Interface.HTTP_JSON,
+            headers,
+            cookies,
+            forceHTTPS,
+            httpRequest.getServerName(),
+            httpRequest.getServerPort(),
+            com.openexchange.tools.servlet.http.Tools.getRoute(httpRequest.getSession(true).getId()));
+        req.setTransient(true);
+
+        return req;
     }
 
     private static Cookie[] getCookies(HttpServletRequest req) {
@@ -167,8 +247,7 @@ public class DefaultSessionManager implements OAuthSessionManager {
             headers = Collections.emptyMap();
         } else {
             headers = new HashMap<String, List<String>>();
-            @SuppressWarnings("unchecked")
-            Enumeration<String> headerNames = req.getHeaderNames();
+            @SuppressWarnings("unchecked") Enumeration<String> headerNames = req.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String name = headerNames.nextElement();
                 List<String> header = new ArrayList<String>();
@@ -180,11 +259,6 @@ public class DefaultSessionManager implements OAuthSessionManager {
             }
         }
         return headers;
-    }
-
-    private String getClient() throws OXException {
-        ConfigurationService configService = requireService(ConfigurationService.class, services);
-        return configService.getProperty(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName(), ConfigurationProperty.HTTP_AUTH_CLIENT.getDefaultValue());
     }
 
     private boolean forceHTTPS() throws OXException {
