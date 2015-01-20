@@ -5,7 +5,6 @@
 	xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
 	logicalFilePath="configdbChangeLog">
 
-
 	<!-- ******************************************************* -->
 	<!-- ************** Release 7.6.1 starts here ************** -->
 	<!-- ******************************************************* -->
@@ -43,12 +42,6 @@
 	<!-- ************** Release 7.8.0 starts here ************** -->
 	<!-- ******************************************************* -->
 
-	<changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
-		<tagDatabase tag="7.8.0-milestone" />
-	</changeSet>
-
-<!-- Possible table names: guest, login_address, user_address -->
-
 	<changeSet id="7.8.0:guest:create" author="martin.schneider@open-xchange.com">
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -68,16 +61,6 @@
 				UNIQUE (mail_address)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 		</sql>
-		<!--
-		<createTable schemaName="configdb" tableName="guest">
-			<column name="id" type="int" autoIncrement="true" >
-           		<constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="mail_address" type="varchar(255)">
-           		<constraints nullable="false"/>
-            </column>
-		</createTable>
-		-->
 		<rollback>
 			<dropTable tableName="guest"/>
 		</rollback>
@@ -103,16 +86,13 @@
 			    INDEX (guest_id)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 		</sql>
-		<!--
-		<createTable schemaName="configdb" tableName="guest2context">
-			<column name="id" type="int"/>
-            <column name="cid" type="int"/>
-            <column name="userid" type="int"/>
-		</createTable>
-		 -->
 		<rollback>
 			<dropTable tableName="guest2context"/>
 		</rollback>
+	</changeSet>
+
+	<changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
+		<tagDatabase tag="7.8.0-milestone" />
 	</changeSet>
 
 </databaseChangeLog>
