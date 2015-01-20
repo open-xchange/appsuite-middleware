@@ -122,7 +122,9 @@ public final class GoogleDriveFile extends DefaultFile {
                 final String name = file.getTitle();
                 setTitle(name);
                 setFileName(name);
-                setVersion(file.getVersion().toString());
+                if (null != file.getVersion()) {
+                    setVersion(file.getVersion().toString());
+                }
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
 
                 if (set.contains(Field.CREATED)) {
@@ -165,6 +167,9 @@ public final class GoogleDriveFile extends DefaultFile {
                 }
                 if (set.contains(Field.VERSION_COMMENT)) {
                     setVersionComment(null);
+                }
+                if (set.contains(Field.FILE_MD5SUM)) {
+                    setFileMD5Sum(file.getMd5Checksum());
                 }
             } catch (final RuntimeException e) {
                 throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

@@ -81,16 +81,14 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     // ---------------------------------------------------------------------------------------------------------------------- //
 
-    private final GoogleDriveAccountAccess accountAccess;
     private final int userId;
     private final String accountDisplayName;
 
     /**
      * Initializes a new {@link GoogleDriveFolderAccess}.
      */
-    public GoogleDriveFolderAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session, final GoogleDriveAccountAccess accountAccess) throws OXException {
+    public GoogleDriveFolderAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session) throws OXException {
         super(googleDriveAccess, account, session);
-        this.accountAccess = accountAccess;
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
     }

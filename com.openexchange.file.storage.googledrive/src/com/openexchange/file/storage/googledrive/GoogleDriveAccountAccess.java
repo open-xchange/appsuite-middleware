@@ -130,7 +130,7 @@ public final class GoogleDriveAccountAccess implements FileStorageAccountAccess 
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        return new GoogleDriveFolderAccess(googleDriveAccess, account, session, this);
+        return new GoogleDriveFolderAccess(googleDriveAccess, account, session);
     }
 
     @Override
