@@ -49,6 +49,9 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
+
 /**
  * {@link FileStorageConstants} - Provides constants for file storage.
  *
@@ -59,11 +62,16 @@ public interface FileStorageConstants {
     /**
      * The name of login property.
      */
-    public static final String CONF_PROPERTY_LOGIN = "login";
+    static final String CONF_PROPERTY_LOGIN = "login";
 
     /**
      * The name of password property.
      */
-    public static final String CONF_PROPERTY_PASSWORD = "password";
+    static final String CONF_PROPERTY_PASSWORD = "password";
+
+    /**
+     * An empty file iterator.
+     */
+    static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
 
 }

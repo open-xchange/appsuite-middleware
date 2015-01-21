@@ -56,6 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.About;
 import com.google.api.services.drive.model.ChildList;
 import com.google.api.services.drive.model.ChildReference;
 import com.google.api.services.drive.model.File;
@@ -360,51 +361,28 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
-
+            /*
+             * build request to list all files in a folder
+             */
             String fid = toGoogleDriveFolderId(folderId);
-            if (hardDelete || isTrashed(fid, drive)) {
-                // Delete permanently
-                Drive.Children.List list = drive.children().list(fid);
-                ChildList childList = list.execute();
-                if (!childList.getItems().isEmpty()) {
-                    for (ChildReference child : childList.getItems()) {
+            boolean deletePermanently = hardDelete || isTrashed(fid, drive);
+            com.google.api.services.drive.Drive.Children.List listRequest = drive.children().list(fid)
+                .setQ(GoogleDriveConstants.QUERY_STRING_FILES_ONLY).setFields("nextPageToken,items(id)");
+            /*
+             * execute as often as needed & delete files
+             */
+            ChildList childList;
+            do {
+                childList = listRequest.execute();
+                for (ChildReference child : childList.getItems()) {
+                    if (deletePermanently) {
                         drive.files().delete(child.getId()).execute();
-                    }
-
-                    String nextPageToken = childList.getNextPageToken();
-                    while (!isEmpty(nextPageToken)) {
-                        list.setPageToken(nextPageToken);
-                        childList = list.execute();
-                        if (!childList.getItems().isEmpty()) {
-                            for (ChildReference child : childList.getItems()) {
-                                drive.files().delete(child.getId()).execute();
-                            }
-                        }
-                        nextPageToken = childList.getNextPageToken();
-                    }
-                }
-            } else {
-                // Move to trash
-                Drive.Children.List list = drive.children().list(fid);
-                ChildList childList = list.execute();
-                if (!childList.getItems().isEmpty()) {
-                    for (ChildReference child : childList.getItems()) {
+                    } else {
                         drive.files().trash(child.getId()).execute();
                     }
-
-                    String nextPageToken = childList.getNextPageToken();
-                    while (!isEmpty(nextPageToken)) {
-                        list.setPageToken(nextPageToken);
-                        childList = list.execute();
-                        if (!childList.getItems().isEmpty()) {
-                            for (ChildReference child : childList.getItems()) {
-                                drive.files().trash(child.getId()).execute();
-                            }
-                        }
-                        nextPageToken = childList.getNextPageToken();
-                    }
                 }
-            }
+                listRequest.setPageToken(childList.getNextPageToken());
+            } while (null != childList.getNextPageToken());
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
@@ -445,22 +423,47 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
     }
 
     @Override
-    public Quota getStorageQuota(final String folderId) throws OXException {
-        return Type.STORAGE.getUnlimited();
+    public Quota getStorageQuota(String folderId) throws OXException {
+        try {
+            Drive drive = googleDriveAccess.getDrive(session);
+            About about = drive.about().get().setFields("quotaType,quotaBytesUsed,quotaBytesTotal").execute();
+            if ("UNLIMITED".equals(about.getQuotaType())) {
+                return Type.STORAGE.getUnlimited();
+            }
+            return new Quota(about.getQuotaBytesTotal(), about.getQuotaBytesUsed(), Type.STORAGE);
+        } catch (HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
-    public Quota getFileQuota(final String folderId) throws OXException {
+    public Quota getFileQuota(String folderId) throws OXException {
         return Type.FILE.getUnlimited();
     }
 
     @Override
-    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
-        final Quota[] ret = new Quota[types.length];
-        for (int i = 0; i < types.length; i++) {
-            ret[i] = types[i].getUnlimited();
+    public Quota[] getQuotas(String folder, Type[] types) throws OXException {
+        if (null == types) {
+            return null;
         }
-        return ret;
+        Quota[] quotas = new Quota[types.length];
+        for (int i = 0; i < types.length; i++) {
+            switch (types[i]) {
+            case FILE:
+                quotas[i] = getFileQuota(folder);
+                break;
+            case STORAGE:
+                quotas[i] = getStorageQuota(folder);
+                break;
+            default:
+                throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Quota " + types[i]);
+            }
+        }
+        return quotas;
     }
 
 }
