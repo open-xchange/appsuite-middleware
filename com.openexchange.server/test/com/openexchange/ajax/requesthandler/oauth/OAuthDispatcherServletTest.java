@@ -221,12 +221,11 @@ public class OAuthDispatcherServletTest {
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
         serviceLookup.add(OAuthProviderService.class, provider);
-        servlet = new OAuthDispatcherServlet(serviceLookup, new OAuthSessionManager() {
+        servlet = new OAuthDispatcherServlet(serviceLookup, new OAuthSessionProvider() {
             @Override
-            public ServerSession getSession(HttpServletRequest httpRequest, OAuthToken accessToken) throws OXException {
-                SimServerSession simServerSession = new SimServerSession(accessToken.getContextID(), accessToken.getUserID());
+            public ServerSession getSession(OAuthToken token, HttpServletRequest httpRequest) throws OXException {
+                SimServerSession simServerSession = new SimServerSession(token.getContextID(), token.getUserID());
                 simServerSession.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), "oxdb1");
-                simServerSession.setParameter("com.openexchange.oauth.token", accessToken);
                 return simServerSession;
             }
         });

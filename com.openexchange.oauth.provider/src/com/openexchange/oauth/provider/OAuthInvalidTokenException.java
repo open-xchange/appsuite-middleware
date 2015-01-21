@@ -66,7 +66,8 @@ public class OAuthInvalidTokenException extends OAuthRequestException {
         TOKEN_MALFORMED,
         TOKEN_EXPIRED,
         TOKEN_UNKNOWN,
-        TOKEN_MISSING
+        TOKEN_MISSING,
+        INVALID_AUTH_SCHEME
     }
 
     private final Reason reason;
@@ -104,6 +105,8 @@ public class OAuthInvalidTokenException extends OAuthRequestException {
                 return "The passed access token is malformed.";
             case TOKEN_UNKNOWN:
                 return "The passed access token is unknown to the server.";
+            case INVALID_AUTH_SCHEME:
+                return "Invalid auth scheme, must always be 'Bearer'.";
             default:
                 return null;
         }
