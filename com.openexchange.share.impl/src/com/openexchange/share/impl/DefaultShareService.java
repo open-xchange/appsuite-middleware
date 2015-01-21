@@ -76,6 +76,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.guest.GuestService;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
@@ -760,7 +761,7 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Gets a guest user for a new share. A new guest use is created if no matching one exists, the permission bits are applied as needed.
+     * Gets a guest user for a new share. A new guest user is created if no matching one exists, the permission bits are applied as needed.
      *
      * @param connection A (writable) connection to the database
      * @param context The context
@@ -773,6 +774,12 @@ public class DefaultShareService implements ShareService {
     private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient) throws OXException {
         UserService userService = services.getService(UserService.class);
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
+        GuestService guestService = services.getService(GuestService.class);
+        if (guestService == null) {
+            LOG.error("Required service GuestService absent");
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("GuestService");
+        }
+
         if (GuestRecipient.class.isInstance(recipient)) {
             /*
              * re-use existing, non-anonymous guest user if possible
@@ -798,6 +805,8 @@ public class DefaultShareService implements ShareService {
                  * messages
                  */
                 guestRecipient.setPassword(null);
+
+                guestService.addGuest(existingGuestUser.getMail(), context.getContextId(), existingGuestUser.getId());
                 return existingGuestUser;
             }
         }
@@ -823,6 +832,9 @@ public class DefaultShareService implements ShareService {
         } else {
             LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), permissionBits, context.getContextId(), guestID);
         }
+
+        guestService.addGuest(guestUser.getMail(), context.getContextId(), guestID);
+
         return guestUser;
     }
 

@@ -3116,6 +3116,16 @@ msgstr ""
 msgid "The session is no longer available. Please try again."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guest/src/com/openexchange/guest/GuestExceptionMessage.java:63
+msgid ""
+"The provided mail address %1$s is invalid! It cannot be added to guest "
+"administration."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guest/src/com/openexchange/guest/GuestExceptionMessage.java:65
+msgid "The new password might not be empty! Please provide a password."
+msgstr ""
+
 #. No Linked-In account available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
 msgid "No Linked-In account available."

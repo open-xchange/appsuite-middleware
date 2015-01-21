@@ -63,9 +63,8 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
@@ -142,9 +141,9 @@ public class PasswordResetServlet extends HttpServlet {
             int guestID = guestInfo.getGuestID();
             User storageUser = userService.getUser(guestID, context);
 
+            String hash = getHash(storageUser.getUserPassword());
             if (null == confirm) {
                 // Generate hash and send link to confirm
-                String hash = getHash(storageUser.getUserPassword());
                 GuestShare guestShare = shareService.resolveToken(token);
                 User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
                 ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
@@ -163,16 +162,8 @@ public class PasswordResetServlet extends HttpServlet {
                 response.flushBuffer();
             } else {
                 // Try to set new password
-                String hash = getHash(storageUser.getUserPassword());
                 if (confirm.equals(hash)) {
-                    // update user
-                    UserImpl updatedUser = new UserImpl(storageUser);
                     String password = PasswordUtility.generate();
-                    String encodedPassword = PasswordMech.BCRYPT.encode(password);
-                    updatedUser.setUserPassword(encodedPassword);
-                    userService.updateUser(updatedUser, context);
-                    // Invalidate
-                    userService.invalidateUser(context, guestID);
 
                     GuestShare guestShare = shareService.resolveToken(token);
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
@@ -188,6 +179,8 @@ public class PasswordResetServlet extends HttpServlet {
                         .setPassword(password)
                         .build();
                     notificationService.send(notification);
+
+                    ShareServiceLookup.getService(GuestService.class).setPassword(mailAddress, password);
 
                     setRedirect(guestShare, null, response);
                 } else {
