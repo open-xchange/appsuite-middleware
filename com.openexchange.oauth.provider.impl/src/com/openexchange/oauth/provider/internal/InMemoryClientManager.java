@@ -104,7 +104,7 @@ public class InMemoryClientManager implements ClientManager {
         private String secret;
 
         @Override
-        public String getID() {
+        public String getId() {
             return id;
         }
 
@@ -123,7 +123,7 @@ public class InMemoryClientManager implements ClientManager {
             return secret;
         }
 
-        public void setID(String id) {
+        public void setId(String id) {
             this.id = id;
         }
 

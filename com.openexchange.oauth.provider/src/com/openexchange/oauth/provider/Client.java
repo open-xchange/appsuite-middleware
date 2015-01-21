@@ -59,6 +59,11 @@ package com.openexchange.oauth.provider;
  */
 public interface Client {
 
+    /**
+     * Gets the client's description
+     *
+     * @return The description
+     */
     String getDescription();
 
     /**
@@ -73,7 +78,7 @@ public interface Client {
      *
      * @return The public identifier
      */
-    String getID();
+    String getId();
 
     // TODO: Better hide?
 

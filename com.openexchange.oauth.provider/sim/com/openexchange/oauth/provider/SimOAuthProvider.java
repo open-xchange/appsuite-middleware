@@ -110,7 +110,7 @@ public class SimOAuthProvider implements OAuthProviderService {
             }
 
             @Override
-            public String getID() {
+            public String getId() {
                 // TODO Auto-generated method stub
                 return null;
             }

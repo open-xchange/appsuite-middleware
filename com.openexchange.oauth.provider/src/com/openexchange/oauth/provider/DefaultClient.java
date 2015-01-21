@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,76 +47,82 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
-
-import java.util.Date;
-import com.openexchange.oauth.provider.OAuthToken;
-import com.openexchange.oauth.provider.Scope;
+package com.openexchange.oauth.provider;
 
 /**
- * {@link AbstractToken}
+ * {@link DefaultClient} - The default {@link Client} implementation.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public abstract class AbstractToken implements OAuthToken {
+public class DefaultClient implements Client {
 
-    private int contextID;
-    private int userID;
-    private String token;
-    private Date expirationDate;
-    private Scope scope;
+    private String id;
+    private String description;
+    private String name;
+    private String secret;
 
-    public AbstractToken(int contextId, int userId, String token, Long lifetime, Scope scope) {
-        this.contextID = contextId;
-        this.userID = userId;
-        this.token = token;
-        this.expirationDate = new Date(System.currentTimeMillis() + lifetime);
-        this.scope = scope;
+    /**
+     * Initializes a new {@link DefaultClient}.
+     */
+    public DefaultClient() {
+        super();
     }
 
     @Override
-    public int getContextId() {
-        return contextID;
+    public String getDescription() {
+        return description;
     }
 
     @Override
-    public int getUserId() {
-        return userID;
+    public String getName() {
+        return name;
     }
 
     @Override
-    public String getAccessToken() {
-        return token;
+    public String getId() {
+        return id;
     }
 
     @Override
-    public Date getExpirationDate() {
-        return expirationDate;
+    public String getSecret() {
+        return secret;
     }
 
-    @Override
-    public Scope getScope() {
-        return scope;
+    /**
+     * Sets the identifier
+     *
+     * @param id The identifier to set
+     */
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public void setContextID(int contextID) {
-        this.contextID = contextID;
+    /**
+     * Sets the description
+     *
+     * @param description The description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public void setUserID(int userID) {
-        this.userID = userID;
+    /**
+     * Sets the name
+     *
+     * @param name The name to set
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
-    public void setScope(Scope scope) {
-        this.scope = scope;
+    /**
+     * Sets the secret
+     *
+     * @param secret The secret to set
+     */
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 
 }

@@ -224,7 +224,7 @@ public class OAuthDispatcherServletTest {
         servlet = new OAuthDispatcherServlet(serviceLookup, new OAuthSessionProvider() {
             @Override
             public ServerSession getSession(OAuthToken token, HttpServletRequest httpRequest) throws OXException {
-                SimServerSession simServerSession = new SimServerSession(token.getContextID(), token.getUserID());
+                SimServerSession simServerSession = new SimServerSession(token.getContextId(), token.getUserId());
                 simServerSession.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), "oxdb1");
                 return simServerSession;
             }

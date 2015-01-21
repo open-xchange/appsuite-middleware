@@ -83,12 +83,12 @@ public class DefaultToken implements OAuthToken {
     }
 
     @Override
-    public int getContextID() {
+    public int getContextId() {
         return contextID;
     }
 
     @Override
-    public int getUserID() {
+    public int getUserId() {
         return userID;
     }
 

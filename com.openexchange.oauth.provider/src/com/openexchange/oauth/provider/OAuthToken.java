@@ -59,9 +59,9 @@ import java.util.Date;
  */
 public interface OAuthToken {
 
-    int getContextID();
+    int getContextId();
 
-    int getUserID();
+    int getUserId();
 
     String getAccessToken();
 
