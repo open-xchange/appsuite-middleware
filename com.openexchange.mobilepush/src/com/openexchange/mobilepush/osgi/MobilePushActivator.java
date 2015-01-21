@@ -49,9 +49,11 @@
 
 package com.openexchange.mobilepush.osgi;
 
+import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.mobilepush.rampup.MobileLoginRampUp;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link MobilePushActivator}
@@ -62,7 +64,7 @@ public class MobilePushActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {  };
+        return new Class[] { ThreadPoolService.class, Dispatcher.class };
     }
 
     @Override
