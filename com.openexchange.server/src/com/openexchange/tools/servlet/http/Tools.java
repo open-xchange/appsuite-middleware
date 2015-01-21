@@ -667,10 +667,27 @@ public final class Tools {
         return builder.toString();
     }
 
+    /**
+     * Sends an error response having a JSON body using given HTTP response
+     *
+     * @param httpResponse The HTTP response to use
+     * @param statusCode The HTTP status code
+     * @param body The associated JSON body
+     * @throws IOException If an I/O error occurs
+     */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
         sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
     }
 
+    /**
+     * Sends an error response having a JSON body using given HTTP response
+     *
+     * @param httpResponse The HTTP response to use
+     * @param statusCode The HTTP status code
+     * @param additionalHeaders Optional additional headers to apply to HTTP response
+     * @param body The associated JSON body
+     * @throws IOException If an I/O error occurs
+     */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
         httpResponse.reset();
 
@@ -685,18 +702,34 @@ public final class Tools {
         writer.flush();
     }
 
+    /**
+     * Sends an error response w/o body data using given HTTP response
+     *
+     * @param httpResponse The HTTP response
+     * @param statusCode The HTTP status code
+     * @throws IOException If an I/O error occurs
+     */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
         sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
     }
 
+    /**
+     * Sends an error response w/o body data using given HTTP response
+     *
+     * @param httpResponse The HTTP response
+     * @param statusCode The HTTP status code
+     * @param additionalHeaders Optional additional headers to apply to HTTP response
+     * @throws IOException If an I/O error occurs
+     */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
         httpResponse.reset();
+
+        httpResponse.setContentType(null);
 
         for (Entry<String, String> header : additionalHeaders.entrySet()) {
             httpResponse.setHeader(header.getKey(), header.getValue());
         }
 
-        httpResponse.setContentType(null);
         httpResponse.sendError(statusCode);
     }
 }
