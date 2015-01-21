@@ -104,4 +104,24 @@ public class InMemoryOAuth2ProviderService implements OAuthProviderService {
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.provider.OAuthProviderService#validateClientId(java.lang.String)
+     */
+    @Override
+    public boolean validateClientId(String clientId) throws OXException {
+        // TODO Auto-generated method stub
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.provider.OAuthProviderService#validateClientIdAndRedirectUri(java.lang.String, java.lang.String)
+     */
+    @Override
+    public boolean validateClientIdAndRedirectUri(String clientId, String redirectUri) throws OXException {
+        // TODO Auto-generated method stub
+        return true;
+    }
+
+
+
 }

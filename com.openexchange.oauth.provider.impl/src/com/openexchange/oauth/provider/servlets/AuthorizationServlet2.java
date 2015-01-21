@@ -49,10 +49,15 @@
 
 package com.openexchange.oauth.provider.servlets;
 
+import static com.openexchange.ajax.AJAXUtility.encodeUrl;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
+import com.openexchange.oauth.provider.OAuthProviderService;
 
 /**
  * {@link AuthorizationServlet2} - Authorization request handler for OAuth2.0.
@@ -65,7 +70,56 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            String responseType = request.getParameter(OAuthProviderConstants.PARAM_RESPONSE_TYPE);
+            if (!"code".equals(responseType)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid " + OAuthProviderConstants.PARAM_RESPONSE_TYPE);
+                return;
+            }
 
+            String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
+            if (Strings.isEmpty(clientId)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing " + OAuthProviderConstants.PARAM_CLIENT_ID);
+                return;
+            }
+            String scope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
+            if (Strings.isEmpty(scope)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing " + OAuthProviderConstants.PARAM_SCOPE);
+                return;
+            }
+            String state = request.getParameter(OAuthProviderConstants.PARAM_STATE);
+            if (Strings.isEmpty(state)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing " + OAuthProviderConstants.PARAM_STATE);
+                return;
+            }
+            String redirectUri = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
+            if (Strings.isEmpty(redirectUri)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing " + OAuthProviderConstants.PARAM_REDIRECT_URI);
+                return;
+            }
+
+            OAuthProviderService providerService = getProviderService();
+            if (null == providerService) {
+                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Missing " + OAuthProviderService.class.getSimpleName());
+                return;
+            }
+
+            StringBuilder builder = new StringBuilder(encodeUrl(redirectUri, true, false));
+            char concat = '?';
+            if (redirectUri.indexOf('?') >= 0) {
+                concat = '&';
+            }
+
+            if (false == providerService.validateClientId(clientId)) {
+                builder.append(concat);
+                concat = '&';
+                builder.append("error").append('=').append(encodeUrl("Invalid client identifier", true, true));
+            }
+
+
+        } catch (OXException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
