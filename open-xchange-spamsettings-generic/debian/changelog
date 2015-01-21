@@ -1,3 +1,9 @@
+open-xchange-spamsettings-generic (7.6.1-16) stable; urgency=low
+
+  * Build for patch 2015-01-26
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 21 Jan 2015 10:09:01 +0100
+
 open-xchange-spamsettings-generic (7.6.1-15) stable; urgency=low
 
   * Build for patch 2015-01-09

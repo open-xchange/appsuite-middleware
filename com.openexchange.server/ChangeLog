@@ -3,13 +3,28 @@
  - Fix for bug 35182: Schedule a timer for Kerberos ticket renewal removing the ticket from the session. Additionally a ticket reload from
    the client through SPNEGO or a new ticket authorization against KDC is triggered.
 
+* 2015-01-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36141: Do proper url-encoding in composed redirect URI
+
+* 2015-01-14 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 36072: Remove white spaces between encoded words as per RFC2047.
+
 * 2015-01-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 35979: Null guard for passed cache keys
+ - Fix for bug 35937: Fixed number of placeholders in prepared statement
+ - Fix for bug 35348: Drop weird attributes from start tags that break HTML parsing and added <center> tag to white-list
 
 * 2015-01-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 35948: Check for a valid prepared SQL statement prior to attempting to execute it
+
+* 2014-12-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug35895: Have the message format set to BOTH by default on user creation.
+                     Check for possibly preset message format preference in JSLob and align the DB value accordingly
 
 * 2014-12-21 - tobias.friedrich@open-xchange.com
 

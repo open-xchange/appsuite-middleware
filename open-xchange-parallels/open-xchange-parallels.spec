@@ -4,9 +4,10 @@ BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-admin
+BuildRequires:  open-xchange-rest
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 15
+%define         ox_release 16
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -16,6 +17,7 @@ Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Extensions for integration with Parallels
 Autoreqprov:    no
 Requires:       open-xchange-admin-soap >= @OXVERSION@
+Requires:       open-xchange-rest
 Requires:       open-xchange-spamhandler
 Provides:       open-xchange-authentication
 Provides:       open-xchange-custom-parallels = %{version}
@@ -75,6 +77,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Wed Jan 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-26
 * Mon Jan 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-09
 * Wed Jan 07 2015 Marcus Klein <marcus.klein@open-xchange.com>

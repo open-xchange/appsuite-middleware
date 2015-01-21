@@ -67,7 +67,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -110,7 +109,6 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.version.Version;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
@@ -173,7 +171,7 @@ public final class IMAPCommandsCollection {
 
         Capabilities(final Collection<String> col) {
             super();
-            set = Collections.unmodifiableSet(new HashSet<String>(col));
+            set = java.util.Collections.unmodifiableSet(new HashSet<String>(col));
         }
 
         @Override
@@ -210,7 +208,7 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                return Collections.unmodifiableMap(new HashMap<String, String>(p.getCapabilities()));
+                return java.util.Collections.unmodifiableMap(new HashMap<String, String>(p.getCapabilities()));
             }
         }));
     }
@@ -562,7 +560,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 } else {
-                    list = Collections.emptyList();
+                    list = java.util.Collections.emptyList();
                 }
                 notifyResponseHandlers(r, protocol);
                 protocol.handleResult(response);
@@ -1485,7 +1483,7 @@ public final class IMAPCommandsCollection {
         }
         final int type = imapFolder.getType();
         final char sep = imapFolder.getSeparator();
-        final Boolean ret = (Boolean) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
@@ -1554,7 +1552,8 @@ public final class IMAPCommandsCollection {
 
     private final static String TEMPL_STORE_FLAGS = "STORE %s %sFLAGS (%s)";
 
-    private static final Object ALL_COLOR_LABELS = "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
+    /** The string constant for color labels */
+    static final Object ALL_COLOR_LABELS = "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
 
     /**
      * Clears an sets only known colors in user defined IMAP flag
@@ -1885,7 +1884,8 @@ public final class IMAPCommandsCollection {
         return getServerSortList(folder, sortCrit, RANGE_ALL);
     }
 
-    private static final String COMMAND_SORT = "SORT";
+    /** The <code>"SORT"</code> string constant */
+    static final String COMMAND_SORT = "SORT".intern();
 
     /**
      * Executes the IMAP <i>SORT</i> command parameterized with given sort criteria and given sort range.
@@ -1913,12 +1913,11 @@ public final class IMAPCommandsCollection {
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String command =
-                    new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
-                final Response[] r = performCommand(p, command);
-                final Response response = r[r.length - 1];
-                final SmartIntArray sia = new SmartIntArray(32);
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
+                String command = new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
+                Response[] r = performCommand(p, command);
+                Response response = r[r.length - 1];
+                TIntList sia = new TIntArrayList(32);
                 if (response.isOK()) {
                     for (int i = 0, len = r.length; i < len; i++) {
                         if (!(r[i] instanceof IMAPResponse)) {
@@ -1929,8 +1928,8 @@ public final class IMAPCommandsCollection {
                             String num;
                             while ((num = ir.readAtomString()) != null) {
                                 try {
-                                    sia.append(Integer.parseInt(num));
-                                } catch (final NumberFormatException e) {
+                                    sia.add(Integer.parseInt(num));
+                                } catch (NumberFormatException e) {
                                     LOG.error("", e);
                                     throw wrapException(e, "Invalid Message Number: " + num);
                                 }
@@ -2071,7 +2070,7 @@ public final class IMAPCommandsCollection {
 
             private int[] handleSearchResponses(final Response[] r, final IMAPProtocol p) throws ProtocolException {
                 final Response response = r[r.length - 1];
-                final SmartIntArray tmp = new SmartIntArray(32);
+                final TIntList tmp = new TIntArrayList(32);
                 if (response.isOK()) {
                     for (int i = 0, len = r.length - 1; i < len; i++) {
                         if (!(r[i] instanceof IMAPResponse)) {
@@ -2087,7 +2086,7 @@ public final class IMAPCommandsCollection {
                             String num;
                             while ((num = ir.readAtomString()) != null) {
                                 try {
-                                    tmp.append(Integer.parseInt(num));
+                                    tmp.add(Integer.parseInt(num));
                                 } catch (final NumberFormatException e) {
                                     continue;
                                 }
@@ -2699,7 +2698,7 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                LOG.debug("{}: IMAP resolve fetch >>>UID FETCH ... (UID)<<< for {} messages took {}msec", imapFolder.getFullName(), length, (System.currentTimeMillis() - start));
+                LOG.debug("{}: IMAP resolve fetch >>>UID FETCH ... (UID)<<< for {} messages took {}msec", imapFolder.getFullName(), Integer.valueOf(length), Long.valueOf(System.currentTimeMillis() - start));
                 final int[] retval = new int[length];
                 for (int i = 0; i < retval.length; i++) {
                     final int seqNum = seqNumMap.get(uids[i]);
@@ -2948,7 +2947,7 @@ public final class IMAPCommandsCollection {
     protected static Set<String> parseUserFlags(final Flags flags) {
         final String[] userFlags = flags.getUserFlags();
         if (userFlags == null) {
-            return Collections.emptySet();
+            return java.util.Collections.emptySet();
         }
         /*
          * Mark message to contain user flags

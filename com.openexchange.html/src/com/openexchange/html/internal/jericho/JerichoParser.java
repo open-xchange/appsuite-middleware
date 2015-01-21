@@ -160,7 +160,7 @@ public final class JerichoParser {
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("(<[^>]+)(>?)");
+    private static final Pattern FIX_START_TAG = Pattern.compile("^\\s*(<[^?][^>]+)(>?)\\s*$");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -226,7 +226,7 @@ public final class JerichoParser {
             MAPPING = Collections.unmodifiableMap(m);
         }
 
-        protected static EnumTagType enumFor(final TagType tagType) {
+        protected static EnumTagType enumFor(TagType tagType) {
             return MAPPING.get(tagType);
         }
     }
@@ -295,14 +295,14 @@ public final class JerichoParser {
         }
     }
 
-    private String fixStyleAttribute(final String startTag) {
+    private String fixStyleAttribute(String startTag) {
         if (startTag.indexOf("style=") <= 0) {
             return startTag;
         }
         return INVALID_DELIM.matcher(startTag).replaceAll("; ");
     }
 
-    private static boolean startsWith(final char startingChar, final CharSequence toCheck) {
+    private static boolean startsWith(char startingChar, CharSequence toCheck) {
         if (null == toCheck) {
             return false;
         }
@@ -322,7 +322,7 @@ public final class JerichoParser {
         return startingChar == toCheck.charAt(i);
     }
 
-    private static boolean contains(final char c, final CharSequence toCheck) {
+    private static boolean contains(char c, CharSequence toCheck) {
         if (null == toCheck) {
             return false;
         }

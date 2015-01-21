@@ -74,4 +74,47 @@ public class MimeMessageUtilityTest extends TestCase{
         assertEquals("Subject nor properly unfolded/decoded.", "Potwierdzenie zam\u00f3wienia", s);
     }
 
+    public void testForBug36072_AddressUnfolding() {
+        String s = "=?UTF-8?Q?Wielkoszcz=C4=99ko=C5=9Bciskowiczkiewi?= =?UTF-8?Q?cz=C3=B3wnaOm=C3=B3jbo=C5=BCejestemno=C5=BCemwie?= "
+            + "=?UTF-8?Q?leznacz=C4=85cychznak=C3=B3wsi=C4=99znaczyb?= =?UTF-8?Q?oprzecie=C5=BCniemo=C5=BCeby=C4=87zbyt=C5=82atwo!?= <foo@bar.tld>";
+        s = MimeMessageUtility.decodeMultiEncodedHeader(s);
+        assertEquals("Address nor properly unfolded/decoded.", "WielkoszczękościskowiczkiewiczównaOmójbożejestemnożemwieleznaczącychznakówsięznaczyboprzecieżniemożebyćzbytłatwo! "
+            + "<foo@bar.tld>", s);
+
+        //expected (a b)
+        s = "=?ISO-8859-1?Q?a?= b";
+        s = MimeMessageUtility.decodeMultiEncodedHeader(s);
+        assertEquals("Not properly unfolded/decoded.", "a b", s);
+
+        //expected (ab)
+        s = "=?ISO-8859-1?Q?a?= =?ISO-8859-1?Q?b?=";
+        s = MimeMessageUtility.decodeMultiEncodedHeader(s);
+        assertEquals("Not properly unfolded/decoded.", "ab", s);
+
+        //expected (ab)
+        s = "=?ISO-8859-1?Q?a?=  =?ISO-8859-1?Q?b?=";
+        s = MimeMessageUtility.decodeMultiEncodedHeader(s);
+        assertEquals("Not properly unfolded/decoded.", "ab", s);
+
+        //expected (ab)
+        s = "=?ISO-8859-1?Q?a?=\r\n" +
+            "\t=?ISO-8859-1?Q?b?=";
+        s = MimeMessageUtility.decodeMultiEncodedHeader(s);
+        assertEquals("Not properly unfolded/decoded.", "ab", s);
+
+        //expected (a b)
+        s = "=?ISO-8859-1?Q?a_b?=";
+        s = MimeMessageUtility.decodeMultiEncodedHeader(s);
+        assertEquals("Not properly unfolded/decoded.", "a b", s);
+
+        //expected (a b)
+        s = "=?ISO-8859-1?Q?a?= =?ISO-8859-2?Q?_b?=";
+        s = MimeMessageUtility.decodeMultiEncodedHeader(s);
+        assertEquals("Not properly unfolded/decoded.", "a b", s);
+
+        //expected (a b)
+        s = "a b";
+        s = MimeMessageUtility.decodeMultiEncodedHeader(s);
+        assertEquals("Not properly unfolded/decoded.", "a b", s);
+    }
 }

@@ -59,7 +59,7 @@ public final class StringAppender {
 
     private final StringBuilder sb;
     private final char delim;
-    private boolean first;
+    private boolean first = true;
 
     /**
      * Initializes a new {@link StringAppender}.

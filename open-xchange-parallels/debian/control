@@ -2,13 +2,13 @@ Source: open-xchange-parallels
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-admin (>=@OXVERSION@)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-admin (>=@OXVERSION@), open-xchange-rest (>=@OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-parallels
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-spamhandler, open-xchange-admin-soap (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-spamhandler, open-xchange-admin-soap (>= @OXVERSION@), open-xchange-rest (>=@OXVERSION@)
 Suggests: open-xchange-spamhandler-parallels (>= @OXVERSION@)
 Replaces: open-xchange-custom-parallels (<< 6.21.0-0)
 Conflicts: open-xchange-authentication-database,open-xchange-authentication-ldap,open-xchange-authentication-imap,open-xchange-authentication-kerberos, open-xchange-custom-parallels (<< 6.21.0-0)

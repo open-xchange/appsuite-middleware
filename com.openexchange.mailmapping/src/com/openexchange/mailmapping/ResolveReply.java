@@ -47,63 +47,30 @@
  *
  */
 
-package com.openexchange.mailmapping.osgiservice;
-
-import org.osgi.framework.ServiceReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.mailmapping.MailResolver;
-import com.openexchange.mailmapping.ResolveReply;
-import com.openexchange.mailmapping.ResolvedMail;
-import com.openexchange.osgi.ServiceSet;
-import com.openexchange.osgi.SimpleRegistryListener;
+package com.openexchange.mailmapping;
 
 
 /**
- * The {@link OSGIMailMappingService} is a utility class for consulting mail mapping services
+ * This enum represents the possible replies that a {@link MailResolver} can return alongside with a {@link ResolvedMail} instance.
+ * <p>
+ * Based on the order that the ResolveReply values are declared,
+ * <code>ResolveReply.ACCEPT.compareTo(ResolveReply.DENY)</code> will return a positive value.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added constructor
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OSGIMailMappingService implements MailResolver, SimpleRegistryListener<MailResolver> {
-
-    private final ServiceSet<MailResolver> chain;
+public enum ResolveReply {
 
     /**
-     * Initializes a new {@link OSGIMailMappingService}.
+     * The {@link MailResolver} denies further processing of passed E-Mail address.
      */
-    public OSGIMailMappingService() {
-        super();
-        chain = new ServiceSet<MailResolver>();
-    }
-
-    @Override
-    public ResolvedMail resolve(String mail) throws OXException {
-        for (MailResolver resolver : chain) {
-            ResolvedMail resolved = resolver.resolve(mail);
-            if (resolved != null) {
-                ResolveReply reply = resolved.getResolveReply();
-                if (ResolveReply.ACCEPT.equals(reply)) {
-                    // Return resolved instance
-                    return resolved;
-                }
-                if (ResolveReply.DENY.equals(reply)) {
-                    // No further processing allowed
-                    return null;
-                }
-                // Otherwise NEUTRAL reply; next in chain
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void added(ServiceReference<MailResolver> ref, MailResolver service) {
-        chain.added(ref, service);
-    }
-
-    @Override
-    public void removed(ServiceReference<MailResolver> ref, MailResolver service) {
-        chain.removed(ref, service);
-    }
+    DENY,
+    /**
+     * The {@link MailResolver} cannot handle passed E-Mail address, therefore delegates to the next one in chain.
+     */
+    NEUTRAL,
+    /**
+     * The {@link MailResolver} successfully handled passed E-Mail address.
+     */
+    ACCEPT;
 
 }

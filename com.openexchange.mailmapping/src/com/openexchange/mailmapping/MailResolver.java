@@ -52,7 +52,7 @@ package com.openexchange.mailmapping;
 import com.openexchange.exception.OXException;
 
 /**
- * A {@link MailResolver} knows how to resolve mail addresses to a context and userId.
+ * A {@link MailResolver} knows how to resolve mail addresses to a context and user identifier.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc

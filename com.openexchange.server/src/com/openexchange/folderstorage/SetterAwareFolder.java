@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,22 @@
  *
  */
 
-package com.openexchange.mailmapping.osgiservice;
-
-import org.osgi.framework.ServiceReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.mailmapping.MailResolver;
-import com.openexchange.mailmapping.ResolveReply;
-import com.openexchange.mailmapping.ResolvedMail;
-import com.openexchange.osgi.ServiceSet;
-import com.openexchange.osgi.SimpleRegistryListener;
+package com.openexchange.folderstorage;
 
 
 /**
- * The {@link OSGIMailMappingService} is a utility class for consulting mail mapping services
+ * {@link SetterAwareFolder} - Extends {@link Folder} interface by <code>containsXXX()</code> methods.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added constructor
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
  */
-public class OSGIMailMappingService implements MailResolver, SimpleRegistryListener<MailResolver> {
-
-    private final ServiceSet<MailResolver> chain;
+public interface SetterAwareFolder extends Folder {
 
     /**
-     * Initializes a new {@link OSGIMailMappingService}.
+     * Signals if subscribed flag has been set.
+     *
+     * @return <code>true</code> if subscribed flag has been set; otherwise <code>false</code>
      */
-    public OSGIMailMappingService() {
-        super();
-        chain = new ServiceSet<MailResolver>();
-    }
-
-    @Override
-    public ResolvedMail resolve(String mail) throws OXException {
-        for (MailResolver resolver : chain) {
-            ResolvedMail resolved = resolver.resolve(mail);
-            if (resolved != null) {
-                ResolveReply reply = resolved.getResolveReply();
-                if (ResolveReply.ACCEPT.equals(reply)) {
-                    // Return resolved instance
-                    return resolved;
-                }
-                if (ResolveReply.DENY.equals(reply)) {
-                    // No further processing allowed
-                    return null;
-                }
-                // Otherwise NEUTRAL reply; next in chain
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void added(ServiceReference<MailResolver> ref, MailResolver service) {
-        chain.added(ref, service);
-    }
-
-    @Override
-    public void removed(ServiceReference<MailResolver> ref, MailResolver service) {
-        chain.removed(ref, service);
-    }
+    boolean containsSubscribed();
 
 }
