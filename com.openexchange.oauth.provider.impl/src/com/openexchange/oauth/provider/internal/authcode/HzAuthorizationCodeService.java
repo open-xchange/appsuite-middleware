@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.provider.internal.authcode;
 
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.lang.RandomStringUtils;
 import com.hazelcast.core.HazelcastException;
@@ -57,7 +56,6 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.DefaultOAuthToken;

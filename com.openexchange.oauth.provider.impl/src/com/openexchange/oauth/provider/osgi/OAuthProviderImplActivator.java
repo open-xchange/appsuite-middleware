@@ -67,7 +67,6 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.GrantAllProvider;
-import com.openexchange.oauth.provider.internal.InMemoryOAuth2ProviderService;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeService;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeService;
 import com.openexchange.oauth.provider.servlets.AuthServlet;
