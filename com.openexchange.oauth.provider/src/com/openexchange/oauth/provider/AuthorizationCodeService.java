@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,41 +49,43 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
+
 
 /**
- * {@link Client}
+ * {@link AuthorizationCodeService} - Manages authorization codes generated for/redeemed by OAuth client applications.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Client {
-
-    String getName();
-
-    String getDescription();
+@SingletonService
+public interface AuthorizationCodeService {
 
     /**
-     * Gets the client's name
-     *
-     * @return The name
+     * The default timeout for an generated authorization code in milliseconds.
      */
-    String getName();
+    public static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
 
     /**
-     * Gets the client's public identifier
+     * Generates a new authorization code that bound to given client identifier and scope.
      *
-     * @return The public identifier
+     * @param clientId The client identifier
+     * @param scope The scope
+     * @return A new authorization code
+     * @throws OXException If operation fails
      */
-    String getID();
-
-    // TODO: Better hide?
+    String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException;
 
     /**
-     * Gets the client's secret identifier
+     * Redeems the passed authorization code for an access token.
      *
-     * @return The secret identifier
+     * @param client The client
+     * @param authCode The authorization code
+     * @return A newly created access token or <code>null</code> if the code was invalid
+     * @throws OXException If redeem operation fails
      */
-    String getSecret();
+    OAuthToken redeemAuthCode(Client client, String authCode) throws OXException;
 
 }

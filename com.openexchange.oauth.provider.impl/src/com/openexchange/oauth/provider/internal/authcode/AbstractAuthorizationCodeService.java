@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,73 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal.authcode;
+
+import java.util.concurrent.TimeUnit;
+import com.openexchange.oauth.provider.AuthorizationCodeService;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link Client}
+ * {@link AbstractAuthorizationCodeService}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Client {
+public abstract class AbstractAuthorizationCodeService implements AuthorizationCodeService {
 
-    String getName();
-
-    String getDescription();
-
-    /**
-     * Gets the client's name
-     *
-     * @return The name
-     */
-    String getName();
+    /** The service look-up */
+    protected final ServiceLookup services;
 
     /**
-     * Gets the client's public identifier
-     *
-     * @return The public identifier
+     * Initializes a new {@link AbstractAuthorizationCodeService}.
      */
-    String getID();
-
-    // TODO: Better hide?
+    protected AbstractAuthorizationCodeService(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     /**
-     * Gets the client's secret identifier
+     * Generate an appropriate value for given time stamp and client identifier pair
      *
-     * @return The secret identifier
+     * @param nanos The time stamp
+     * @param clientId The client identifier
+     * @return The value
      */
-    String getSecret();
+    protected String generateValue(long nanos, String clientId) {
+        return new StringBuilder(32).append(nanos).append('?').append(clientId).toString();
+    }
+
+    /**
+     * Parses the time stamp nanos from given value
+     *
+     * @param value The value
+     * @return The nano seconds
+     */
+    protected long parseNanosFromValue(String value) {
+        return Long.parseLong(value.substring(0, value.indexOf('?')));
+    }
+
+    /**
+     * Parses the client identifier from given value
+     *
+     * @param value The value
+     * @return The client identifier
+     */
+    protected String parseClientIdFromValue(String value) {
+        return value.substring(value.indexOf('?') + 1);
+    }
+
+    /**
+     * Checks validity of passed value in comparison to given time stamp (and session).
+     *
+     * @param value The value to check
+     * @param now The current time stamp nano seconds
+     * @param clientId The client identifier
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    protected boolean validValue(String value, long now, String clientId) {
+        return (TimeUnit.NANOSECONDS.toMillis(now - parseNanosFromValue(value)) <= TIMEOUT_MILLIS) && clientId.equals(parseClientIdFromValue(value));
+    }
 
 }

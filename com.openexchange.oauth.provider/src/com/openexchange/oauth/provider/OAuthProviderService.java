@@ -105,24 +105,4 @@ public interface OAuthProviderService extends OAuthProviderConstants {
      */
     Scope validateScope(String scope) throws OXException;
 
-    /**
-     * Generates a new authorization code that bound to given client identifier and scope.
-     *
-     * @param clientId The client identifier
-     * @param scope The scope
-     * @return A new authorization code
-     * @throws OXException If operation fails
-     */
-    String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException;
-
-    /**
-     * Redeems the passed authorization code for an access token.
-     *
-     * @param client The client
-     * @param authCode The authorization code
-     * @return A newly created access token or <code>null</code> if the code was invalid
-     * @throws OXException
-     */
-    OAuthToken redeemAuthCode(Client client, String authCode) throws OXException;
-
 }

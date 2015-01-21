@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.Scope;
@@ -118,6 +119,12 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
                 return;
             }
 
+            AuthorizationCodeService authCodeService = getAuthCodeService();
+            if (null == authCodeService) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "missing required service").put("error", "server_error").toString());
+                return;
+            }
+
             Scope scope = providerService.validateScope(sScope);
             if (null == scope) {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_SCOPE).put("error", "invalid_scope").toString());
@@ -136,7 +143,7 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
 
             // YOUR_REDIRECT_URI/?code=AUTHORIZATION_CODE&state=STATE
 
-            String code = providerService.generateAuthorizationCodeFor(clientId, scope);
+            String code = authCodeService.generateAuthorizationCodeFor(clientId, scope);
 
             StringBuilder builder = new StringBuilder(encodeUrl(redirectUri, true, false));
             char concat = '?';

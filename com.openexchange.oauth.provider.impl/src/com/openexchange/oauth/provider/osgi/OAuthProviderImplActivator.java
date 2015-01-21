@@ -49,15 +49,27 @@
 
 package com.openexchange.oauth.provider.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.GrantAllProvider;
+import com.openexchange.oauth.provider.internal.InMemoryOAuth2ProviderService;
+import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeService;
+import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeService;
 import com.openexchange.oauth.provider.servlets.AuthServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -68,6 +80,102 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthProviderImplActivator extends HousekeepingActivator {
+
+    private static final class HzConfigTracker implements ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> {
+
+        final BundleContext context;
+        final OAuthProviderImplActivator activator;
+        private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
+
+        HzConfigTracker(BundleContext context, OAuthProviderImplActivator activator) {
+            super();
+            this.context = context;
+            this.activator = activator;
+        }
+
+        @Override
+        public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
+            HazelcastConfigurationService hzConfigService = context.getService(reference);
+
+            try {
+                boolean hzEnabled = hzConfigService.isEnabled();
+                if (false == hzEnabled) {
+                    Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderImplActivator.class);
+                    String msg = "Authorization-Code service is configured to use Hazelcast, but Hazelcast is disabled as per configuration! Start of Authorization-Code service aborted!";
+                    logger.error(msg, new Exception(msg));
+
+                    context.ungetService(reference);
+                    return null;
+                }
+
+                final BundleContext context = this.context;
+                ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> stc = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+
+                    private volatile ServiceRegistration<AuthorizationCodeService> reg;
+
+                    @Override
+                    public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
+                        HazelcastInstance hzInstance = context.getService(reference);
+                        activator.addService(HazelcastInstance.class, hzInstance);
+
+                        AuthorizationCodeService authCodeService = new HzAuthorizationCodeService("authcode-1", activator);
+                        reg = context.registerService(AuthorizationCodeService.class, authCodeService, null);
+                        activator.addService(AuthorizationCodeService.class, authCodeService);
+
+                        return hzInstance;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                        // Nothing
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                        ServiceRegistration<AuthorizationCodeService> reg = this.reg;
+                        if (null != reg) {
+                            reg.unregister();
+                            this.reg = null;
+                        }
+
+                        activator.removeService(HazelcastInstance.class);
+                        activator.removeService(AuthorizationCodeService.class);
+                        context.ungetService(reference);
+                    }
+                };
+                ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, stc);
+                this.hzInstanceTracker = hzInstanceTracker;
+                hzInstanceTracker.open();
+
+                return hzConfigService;
+            } catch (Exception e) {
+                Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderImplActivator.class);
+                logger.warn("Failed to start Authorization-Code service!", e);
+            }
+
+            context.ungetService(reference);
+            return null;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
+            // Ignore
+        }
+
+        @Override
+        public void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
+            ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = this.hzInstanceTracker;
+            if (null != hzInstanceTracker) {
+                hzInstanceTracker.close();
+                this.hzInstanceTracker = null;
+            }
+
+            context.ungetService(reference);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
 
     private static final String PATH_PREFIX = "oauth2/";
 
@@ -86,15 +194,26 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.set(this);
-//        OAuthProviderService oauth2ProviderService = new InMemoryOAuth2ProviderService();
-        OAuthProviderService oauth2ProviderService = new GrantAllProvider();
-        registerService(OAuthProviderService.class, oauth2ProviderService);
-        addService(OAuthProviderService.class, oauth2ProviderService);
 
         String prefix = getService(DispatcherPrefixService.class).getPrefix();
         getService(HttpService.class).registerServlet(prefix + PATH_PREFIX + AuthServlet.PATH, new AuthServlet(), null, null);
 
+        ConfigurationService configService = getService(ConfigurationService.class);
+        if ("hz".equalsIgnoreCase(configService.getProperty("com.openexchange.oauth.provider.authcode.type", "hz").trim())) {
+            // Start tracking for Hazelcast
+            track(HazelcastConfigurationService.class, new HzConfigTracker(context, this));
+        } else {
+            DbAuthorizationCodeService authCodeService = new DbAuthorizationCodeService(this);
+            registerService(AuthorizationCodeService.class, authCodeService);
+            addService(AuthorizationCodeService.class, authCodeService);
+        }
+
         openTrackers();
+
+        OAuthProviderService oauth2ProviderService = new GrantAllProvider();
+        registerService(OAuthProviderService.class, oauth2ProviderService);
+        addService(OAuthProviderService.class, oauth2ProviderService);
+
         /*
          * Register OAuth provider service
          */
@@ -137,6 +256,16 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         Services.set(null);
         super.stopBundle();
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 
 }

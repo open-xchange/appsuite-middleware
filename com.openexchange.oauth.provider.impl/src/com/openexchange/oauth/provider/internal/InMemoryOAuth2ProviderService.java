@@ -134,23 +134,8 @@ public class InMemoryOAuth2ProviderService implements OAuthProviderService {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.provider.OAuthProviderService#generateAuthorizationCodeFor(java.lang.String, com.openexchange.oauth.provider.Scope)
-     */
-    @Override
-    public String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     @Override
     public Client getClientByID(String clientID) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OAuthToken redeemAuthCode(Client client, String authCode) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

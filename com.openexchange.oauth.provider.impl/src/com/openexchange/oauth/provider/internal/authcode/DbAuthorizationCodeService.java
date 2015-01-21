@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,40 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal.authcode;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.Scope;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link Client}
+ * {@link DbAuthorizationCodeService}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Client {
-
-    String getName();
-
-    String getDescription();
+public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService {
 
     /**
-     * Gets the client's name
-     *
-     * @return The name
+     * Initializes a new {@link DbAuthorizationCodeService}.
      */
-    String getName();
+    public DbAuthorizationCodeService(ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Gets the client's public identifier
-     *
-     * @return The public identifier
-     */
-    String getID();
+    @Override
+    public String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-    // TODO: Better hide?
-
-    /**
-     * Gets the client's secret identifier
-     *
-     * @return The secret identifier
-     */
-    String getSecret();
+    @Override
+    public OAuthToken redeemAuthCode(Client client, String authCode) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

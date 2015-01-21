@@ -7,6 +7,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n,
+ com.openexchange.osgi.annotation,
  javax.servlet,
  javax.servlet.http,
  javax.servlet.resources

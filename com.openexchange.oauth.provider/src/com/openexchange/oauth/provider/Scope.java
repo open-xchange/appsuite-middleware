@@ -60,4 +60,11 @@ public interface Scope {
 
     boolean has(String scope);
 
+    /**
+     * Gets the string identifier for this scope
+     *
+     * @return The string identifier
+     */
+    String scopeString();
+
 }
