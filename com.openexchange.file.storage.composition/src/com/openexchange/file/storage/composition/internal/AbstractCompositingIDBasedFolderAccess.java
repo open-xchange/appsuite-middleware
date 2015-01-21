@@ -238,7 +238,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
         FolderID folderID = new FolderID(folderId);
-        getFolderAccess(folderID).clearFolder(folderID.getFolderId());
+        getFolderAccess(folderID).clearFolder(folderID.getFolderId(), hardDelete);
     }
 
     @Override
