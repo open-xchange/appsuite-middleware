@@ -139,7 +139,7 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
     @Override
     public Session getSession(final OAuthToken token, final HttpServletRequest httpRequest) throws OXException {
         SessiondService sessiondService = requireService(SessiondService.class, services);
-        String accessToken = token.getToken();
+        String accessToken = token.getAccessToken();
         Session session = null;
         try {
             do {

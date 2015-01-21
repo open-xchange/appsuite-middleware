@@ -114,6 +114,9 @@ public interface OAuthProviderConstants {
     /** Required. Value of your <b>API Key</b> given when you registered your application */
     public static final String PARAM_CLIENT_ID = "client_id";
 
+    /** Required. Value of your <b>API Secret</b> given when you registered your application */
+    public static final String PARAM_CLIENT_SECRET = "client_secret";
+
     /** Optional. Used to specify a list of needed member permissions */
     public static final String PARAM_SCOPE = "scope";
 
@@ -125,5 +128,8 @@ public interface OAuthProviderConstants {
 
     /** Required. Value of <b>authorization_code</b>. */
     public static final String PARAM_CODE = "code";
+
+    /** Required. Must always be <b>authorization_code</b>. */
+    public static final String PARAM_GRANT_TYPE = "grant_type";
 
 }

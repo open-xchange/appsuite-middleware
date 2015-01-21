@@ -49,34 +49,96 @@
 
 package com.openexchange.oauth.provider.internal;
 
-import com.openexchange.oauth.provider.Scope;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.ClientData;
+import com.openexchange.oauth.provider.ClientManager;
+import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 
 
 /**
- * {@link Token}
+ * {@link InMemoryClientManager}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class Token extends AbstractToken {
+public class InMemoryClientManager implements ClientManager {
 
-    /**
-     * Initializes a new {@link Token}.
-     * @param contextId
-     * @param userId
-     * @param token
-     * @param lifetime
-     * @param scope
-     */
-    public Token(int contextId, int userId, String token, Long lifetime, Scope scope) {
-        super(contextId, userId, token, lifetime, scope);
+    private final Map<String, ClientImpl> clients;
+
+    public InMemoryClientManager() {
+        super();
+        clients = new HashMap<>();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.provider.OAuthToken#getType()
-     */
     @Override
-    public Type getType() {
-        return Type.TOKEN;
+    public Client validate(String clientID, String secret) throws OXException {
+        ClientImpl client = clients.get(clientID);
+        if (client == null) {
+            throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(clientID);
+        }
+
+        if (!client.getSecret().equals(secret)) {
+
+        }
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Client register(ClientData clientData) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private static final class ClientImpl implements Client {
+
+        private String id;
+
+        private String name;
+
+        private String description;
+
+        private String secret;
+
+        @Override
+        public String getID() {
+            return id;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getDescription() {
+            return description;
+        }
+
+        @Override
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setID(String id) {
+            this.id = id;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public void setSecret(String secret) {
+            this.secret = secret;
+        }
+
     }
 
 }

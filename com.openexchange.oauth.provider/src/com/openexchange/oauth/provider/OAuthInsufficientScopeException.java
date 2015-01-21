@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.provider;
 
+import com.openexchange.exception.Category;
+
 
 /**
  * {@link OAuthInsufficientScopeException}
@@ -72,8 +74,18 @@ public class OAuthInsufficientScopeException extends OAuthRequestException {
         return "insufficient_scope";
     }
 
+    @Override
+    public int getCode() {
+        return 2;
+    }
+
     public String getScope() {
         return requiredScope;
+    }
+
+    @Override
+    public Category getCategory() {
+        return Category.CATEGORY_PERMISSION_DENIED;
     }
 
 }

@@ -49,11 +49,14 @@
 
 package com.openexchange.oauth.provider.internal;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.DefaultScope;
+import com.openexchange.oauth.provider.DefaultToken;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthToken;
 import com.openexchange.oauth.provider.Scope;
@@ -81,21 +84,21 @@ public class InMemoryOAuth2ProviderService implements OAuthProviderService {
     @Override
     public String generateToken(int contextId, int userId, Scope scope) {
         String tokenString = UUID.randomUUID().toString() + "@" + contextId;
-        OAuthToken token = new Token(contextId, userId, tokenString, 60 * 60 * 1000L, scope);
+        OAuthToken token = new DefaultToken(contextId, userId, tokenString, UUID.randomUUID().toString(), new Date(System.currentTimeMillis() + (60 * 60 * 1000L)), scope);
 
-        tokens.put(token.getToken(), token);
+        tokens.put(token.getAccessToken(), token);
 
-        return token.getToken();
+        return token.getAccessToken();
     }
 
     @Override
     public String generateAuthToken(int contextId, int userId) {
         String tokenString = UUID.randomUUID().toString() + "@" + contextId;
-        OAuthToken token = new Token(contextId, userId, tokenString, 60 * 60 * 1000L, null);
+        OAuthToken token = new DefaultToken(contextId, userId, tokenString, UUID.randomUUID().toString(), new Date(System.currentTimeMillis() + (60 * 60 * 1000L)), new DefaultScope());
 
-        authTokens.put(token.getToken(), token);
+        authTokens.put(token.getAccessToken(), token);
 
-        return token.getToken();
+        return token.getAccessToken();
     }
 
     @Override
@@ -136,6 +139,18 @@ public class InMemoryOAuth2ProviderService implements OAuthProviderService {
      */
     @Override
     public String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Client getClientByID(String clientID) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public OAuthToken redeemAuthCode(Client client, String authCode) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

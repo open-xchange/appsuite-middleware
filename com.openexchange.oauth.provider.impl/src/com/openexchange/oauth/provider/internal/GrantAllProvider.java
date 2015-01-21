@@ -47,45 +47,30 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Date;
+import java.util.UUID;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.DefaultScope;
+import com.openexchange.oauth.provider.DefaultToken;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.Scope;
 
 
 /**
- * {@link SimOAuthProvider}
+ * {@link GrantAllProvider}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @since v7.x.x
  */
-public class SimOAuthProvider implements OAuthProviderService {
-
-    private final Map<String, OAuthToken> tokens = new HashMap<>();
+public class GrantAllProvider implements OAuthProviderService {
 
     @Override
     public OAuthToken validate(String accessToken) throws OXException {
-        OAuthToken token = tokens.get(accessToken);
-        if (token == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-        }
-
-        if (new Date().after(token.getExpirationDate())) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
-        }
-
-        return token;
-    }
-
-    public void addToken(OAuthToken token) {
-        tokens.put(token.getAccessToken(), token);
-    }
-
-    public void removeToken(String accessToken) {
-        tokens.remove(accessToken);
+        return new DefaultToken(424242669, 84, accessToken, UUID.randomUUID().toString(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("rw_contacts"));
     }
 
     @Override
@@ -103,7 +88,6 @@ public class SimOAuthProvider implements OAuthProviderService {
     @Override
     public Client getClient(OAuthToken token) throws OXException {
         return new Client() {
-
             @Override
             public String getName() {
                 return "Example App";
@@ -126,11 +110,14 @@ public class SimOAuthProvider implements OAuthProviderService {
                 // TODO Auto-generated method stub
                 return null;
             }
-
         };
     }
 
-    // -----------------------------------------------------------------------------------------------------
+    @Override
+    public Client getClientByID(String clientID) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public boolean validateClientId(String clientId) throws OXException {
@@ -152,12 +139,6 @@ public class SimOAuthProvider implements OAuthProviderService {
 
     @Override
     public String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Client getClientByID(String clientID) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

@@ -57,7 +57,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.internal.InMemoryOAuth2ProviderService;
+import com.openexchange.oauth.provider.internal.GrantAllProvider;
 import com.openexchange.oauth.provider.servlets.AuthServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -86,7 +86,8 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.set(this);
-        OAuthProviderService oauth2ProviderService = new InMemoryOAuth2ProviderService();
+//        OAuthProviderService oauth2ProviderService = new InMemoryOAuth2ProviderService();
+        OAuthProviderService oauth2ProviderService = new GrantAllProvider();
         registerService(OAuthProviderService.class, oauth2ProviderService);
         addService(OAuthProviderService.class, oauth2ProviderService);
 
