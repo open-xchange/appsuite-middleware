@@ -47,36 +47,21 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider;
 
-import com.openexchange.oauth.provider.Scope;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link AuthToken}
+ * {@link ClientManager}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class AuthToken extends AbstractToken {
+public interface ClientManager {
 
-    /**
-     * Initializes a new {@link AuthToken}.
-     * @param contextId
-     * @param userId
-     * @param token
-     * @param lifetime
-     * @param scope
-     */
-    public AuthToken(int contextId, int userId, String token, Long lifetime, Scope scope) {
-        super(contextId, userId, token, lifetime, scope);
-    }
+    Client validate(String clientID, String secret) throws OXException;
 
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.provider.OAuthToken#getType()
-     */
-    @Override
-    public Type getType() {
-        return Type.AUTH_TOKEN;
-    }
+    Client register(ClientData clientData) throws OXException;
 
 }

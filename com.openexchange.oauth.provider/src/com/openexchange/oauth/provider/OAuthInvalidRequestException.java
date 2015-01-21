@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.provider;
 
+import com.openexchange.exception.Category;
+
 
 /**
  * {@link OAuthInvalidRequestException}
@@ -63,6 +65,16 @@ public class OAuthInvalidRequestException extends OAuthRequestException {
     @Override
     public String getError() {
         return "invalid_request";
+    }
+
+    @Override
+    public int getCode() {
+        return 3;
+    }
+
+    @Override
+    public Category getCategory() {
+        return Category.CATEGORY_ERROR;
     }
 
 }

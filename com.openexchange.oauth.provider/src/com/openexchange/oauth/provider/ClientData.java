@@ -47,38 +47,54 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
-
-import com.openexchange.oauth.provider.Scope;
+package com.openexchange.oauth.provider;
 
 /**
- * {@link RefreshToken}
+ * {@link ClientData}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class RefreshToken extends AbstractToken {
+public class ClientData {
 
-    /**
-     * Initializes a new {@link RefreshToken}.
-     *
-     * @param contextId
-     * @param userId
-     * @param token
-     * @param lifetime
-     * @param scope
-     */
-    public RefreshToken(int contextId, int userId, String token, Long lifetime, Scope scope) {
-        super(contextId, userId, token, lifetime, scope);
+    private String owner;
+
+    private String name;
+
+    private String description;
+
+    private String contactAddress;
+
+    public String getOwner() {
+        return owner;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.provider.OAuthToken#getType()
-     */
-    @Override
-    public Type getType() {
-        return Type.REFRESH_TOKEN;
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getContactAddress() {
+        return contactAddress;
+    }
+
+    public void setContactAddress(String contactAddress) {
+        this.contactAddress = contactAddress;
     }
 
 }

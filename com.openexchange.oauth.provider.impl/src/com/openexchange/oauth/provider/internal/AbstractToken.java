@@ -85,7 +85,7 @@ public abstract class AbstractToken implements OAuthToken {
     }
 
     @Override
-    public String getToken() {
+    public String getAccessToken() {
         return token;
     }
 

@@ -199,25 +199,25 @@ public class OAuthDispatcherServletTest {
     @Before
     public void setUp() throws Exception {
         provider = new SimOAuthProvider();
-        DefaultToken readToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("r_test"));
+        DefaultToken readToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("r_test"));
         provider.addToken(readToken);
-        this.readToken = readToken.getToken();
+        this.readToken = readToken.getAccessToken();
 
-        DefaultToken writeToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("w_test"));
+        DefaultToken writeToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("w_test"));
         provider.addToken(writeToken);
-        this.writeToken = writeToken.getToken();
+        this.writeToken = writeToken.getAccessToken();
 
-        DefaultToken readWriteToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("rw_test"));
+        DefaultToken readWriteToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("rw_test"));
         provider.addToken(readWriteToken);
-        this.readWriteToken = readWriteToken.getToken();
+        this.readWriteToken = readWriteToken.getAccessToken();
 
-        DefaultToken expiredToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() - 1L), new DefaultScope("rw_test"));
+        DefaultToken expiredToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() - 1L), new DefaultScope("rw_test"));
         provider.addToken(expiredToken);
-        this.expiredToken = expiredToken.getToken();
+        this.expiredToken = expiredToken.getAccessToken();
 
-        DefaultToken scopelessToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope());
+        DefaultToken scopelessToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope());
         provider.addToken(scopelessToken);
-        this.scopelessToken = scopelessToken.getToken();
+        this.scopelessToken = scopelessToken.getAccessToken();
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
         serviceLookup.add(OAuthProviderService.class, provider);

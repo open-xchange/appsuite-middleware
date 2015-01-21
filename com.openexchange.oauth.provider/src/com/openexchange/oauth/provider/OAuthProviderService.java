@@ -69,6 +69,8 @@ public interface OAuthProviderService extends OAuthProviderConstants {
 
     Client getClient(OAuthToken token) throws OXException;
 
+    Client getClientByID(String clientID) throws OXException;
+
     // ------------------------------------------------------------------------------------------------------
 
     String generateToken(int contextId, int userId, Scope scope);

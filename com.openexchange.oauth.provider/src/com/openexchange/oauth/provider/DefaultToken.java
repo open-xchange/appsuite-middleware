@@ -66,22 +66,20 @@ public class DefaultToken implements OAuthToken {
 
     private final String accessToken;
 
+    private final String refreshToken;
+
     private final Date expirationDate;
 
     private final Scope scope;
 
-    public DefaultToken(int contextID, int userID, String accessToken, Date expirationDate, Scope scope) {
+    public DefaultToken(int contextID, int userID, String accessToken, String refreshToken, Date expirationDate, Scope scope) {
         super();
         this.contextID = contextID;
         this.userID = userID;
         this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
         this.expirationDate = expirationDate;
         this.scope = scope;
-    }
-
-    @Override
-    public Type getType() {
-        return Type.TOKEN;
     }
 
     @Override
@@ -95,8 +93,13 @@ public class DefaultToken implements OAuthToken {
     }
 
     @Override
-    public String getToken() {
+    public String getAccessToken() {
         return accessToken;
+    }
+
+    @Override
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
     @Override
@@ -114,6 +117,7 @@ public class DefaultToken implements OAuthToken {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((accessToken == null) ? 0 : accessToken.hashCode());
+        result = prime * result + ((refreshToken == null) ? 0 : refreshToken.hashCode());
         result = prime * result + contextID;
         result = prime * result + ((expirationDate == null) ? 0 : expirationDate.hashCode());
         result = prime * result + ((scope == null) ? 0 : scope.hashCode());
@@ -138,6 +142,13 @@ public class DefaultToken implements OAuthToken {
                 return false;
             }
         } else if (!accessToken.equals(other.accessToken)) {
+            return false;
+        }
+        if (refreshToken == null) {
+            if (other.refreshToken != null) {
+                return false;
+            }
+        } else if (!refreshToken.equals(other.refreshToken)) {
             return false;
         }
         if (contextID != other.contextID) {
@@ -165,7 +176,7 @@ public class DefaultToken implements OAuthToken {
 
     @Override
     public String toString() {
-        return "SimOAuthToken [contextID=" + contextID + ", userID=" + userID + ", accessToken=" + accessToken + ", expirationDate=" + expirationDate + ", scope=" + scope + "]";
+        return "DefaultToken [contextID=" + contextID + ", userID=" + userID + ", accessToken=" + accessToken + ", refreshToken=" + refreshToken + ", expirationDate=" + expirationDate + ", scope=" + scope + "]";
     }
 
 }

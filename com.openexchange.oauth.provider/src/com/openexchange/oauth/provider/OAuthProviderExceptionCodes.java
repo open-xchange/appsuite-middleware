@@ -100,9 +100,9 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
      */
     OAUTH_ERROR("An OAuth error occurred: %1$s", Category.CATEGORY_ERROR, 9),
     /**
-     * No OAuth provider found for identifier %1$s.
+     * No registered client was found for identifier %1$s.
      */
-    PROVIDER_NOT_FOUND("No OAuth provider found for identifier %1$s.", Category.CATEGORY_ERROR, 10),
+    CLIENT_NOT_FOUND("No registered client was found for identifier %1$s.", Category.CATEGORY_ERROR, 10),
 
     ;
 
@@ -116,13 +116,13 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
     private final int number;
 
     private final String message;
-    
+
     private final String displayMessage;
 
     private OAuthProviderExceptionCodes(final String message, final Category category, final int detailNumber) {
         this(message, null, category, detailNumber);
     }
-    
+
     private OAuthProviderExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.number = detailNumber;

@@ -58,6 +58,13 @@ package com.openexchange.oauth.provider;
  */
 public interface Client {
 
+    String getID();
+
     String getName();
+
+    String getDescription();
+
+    // TODO: better hide it?
+    String getSecret();
 
 }

@@ -52,11 +52,10 @@ package com.openexchange.ajax.requesthandler.oauth;
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
+import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
+import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -248,39 +247,6 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         } else {
             super.handleOXException(e, httpRequest, httpResponse);
         }
-    }
-
-    private static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
-        sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
-    }
-
-    private static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
-        httpResponse.reset();
-
-        for (Entry<String, String> header : additionalHeaders.entrySet()) {
-            httpResponse.setHeader(header.getKey(), header.getValue());
-        }
-
-        httpResponse.setContentType("application/json;charset=UTF-8");
-        httpResponse.setStatus(statusCode);
-        PrintWriter writer = httpResponse.getWriter();
-        writer.write(body);
-        writer.flush();
-    }
-
-    private static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
-        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
-    }
-
-    private static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
-        httpResponse.reset();
-
-        for (Entry<String, String> header : additionalHeaders.entrySet()) {
-            httpResponse.setHeader(header.getKey(), header.getValue());
-        }
-
-        httpResponse.setContentType(null);
-        httpResponse.sendError(statusCode);
     }
 
 }
