@@ -1,3 +1,9 @@
+open-xchange-hostname-ldap (7.6.0-37) stable; urgency=low
+
+  * Build for patch 2015-01-29
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 21 Jan 2015 09:40:18 +0100
+
 open-xchange-hostname-ldap (7.6.0-36) stable; urgency=low
 
   * Build for patch 2015-01-12
