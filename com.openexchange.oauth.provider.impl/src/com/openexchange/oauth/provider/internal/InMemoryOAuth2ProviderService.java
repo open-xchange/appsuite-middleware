@@ -110,18 +110,34 @@ public class InMemoryOAuth2ProviderService implements OAuthProviderService {
     @Override
     public boolean validateClientId(String clientId) throws OXException {
         // TODO Auto-generated method stub
-        return true;
+        return false;
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.oauth.provider.OAuthProviderService#validateClientIdAndRedirectUri(java.lang.String, java.lang.String)
+     * @see com.openexchange.oauth.provider.OAuthProviderService#validateRedirectUri(java.lang.String, java.lang.String)
      */
     @Override
-    public boolean validateClientIdAndRedirectUri(String clientId, String redirectUri) throws OXException {
+    public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
         // TODO Auto-generated method stub
-        return true;
+        return false;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.provider.OAuthProviderService#validateScope(java.lang.String)
+     */
+    @Override
+    public Scope validateScope(String scope) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.provider.OAuthProviderService#generateAuthorizationCodeFor(java.lang.String, com.openexchange.oauth.provider.Scope)
+     */
+    @Override
+    public String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

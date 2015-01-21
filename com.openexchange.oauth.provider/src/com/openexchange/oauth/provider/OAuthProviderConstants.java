@@ -123,4 +123,7 @@ public interface OAuthProviderConstants {
     /** Required. URI of the app used as redirect after authorization. */
     public static final String PARAM_REDIRECT_URI = "redirect_uri";
 
+    /** Required. Value of <b>authorization_code</b>. */
+    public static final String PARAM_CODE = "code";
+
 }

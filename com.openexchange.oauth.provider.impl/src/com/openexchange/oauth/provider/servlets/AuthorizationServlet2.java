@@ -50,14 +50,19 @@
 package com.openexchange.oauth.provider.servlets;
 
 import static com.openexchange.ajax.AJAXUtility.encodeUrl;
+import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.Scope;
 
 /**
  * {@link AuthorizationServlet2} - Authorization request handler for OAuth2.0.
@@ -66,43 +71,72 @@ import com.openexchange.oauth.provider.OAuthProviderService;
  */
 public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
 
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AuthorizationServlet2.class);
+
     private static final long serialVersionUID = 6393806486708501254L;
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
             String responseType = request.getParameter(OAuthProviderConstants.PARAM_RESPONSE_TYPE);
+            if (Strings.isEmpty(responseType)) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_RESPONSE_TYPE+"\",\"error\":\"invalid_request\"}");
+                return;
+            }
             if (!"code".equals(responseType)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid " + OAuthProviderConstants.PARAM_RESPONSE_TYPE);
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "response type not supported: " + responseType).put("error", "unsupported_response_type").toString());
                 return;
             }
 
             String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
             if (Strings.isEmpty(clientId)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing " + OAuthProviderConstants.PARAM_CLIENT_ID);
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_CLIENT_ID+"\",\"error\":\"invalid_request\"}");
                 return;
             }
-            String scope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
-            if (Strings.isEmpty(scope)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing " + OAuthProviderConstants.PARAM_SCOPE);
-                return;
-            }
+
             String state = request.getParameter(OAuthProviderConstants.PARAM_STATE);
             if (Strings.isEmpty(state)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing " + OAuthProviderConstants.PARAM_STATE);
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_STATE+"\",\"error\":\"invalid_request\"}");
                 return;
             }
+
             String redirectUri = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
             if (Strings.isEmpty(redirectUri)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing " + OAuthProviderConstants.PARAM_REDIRECT_URI);
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_REDIRECT_URI+"\",\"error\":\"invalid_request\"}");
+                return;
+            }
+
+            String sScope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
+            if (Strings.isEmpty(sScope)) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_SCOPE+"\",\"error\":\"invalid_request\"}");
                 return;
             }
 
             OAuthProviderService providerService = getProviderService();
             if (null == providerService) {
-                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Missing " + OAuthProviderService.class.getSimpleName());
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "missing required service").put("error", "server_error").toString());
                 return;
             }
+
+            Scope scope = providerService.validateScope(sScope);
+            if (null == scope) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_SCOPE).put("error", "invalid_scope").toString());
+                return;
+            }
+
+            if (false == providerService.validateClientId(clientId)) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_CLIENT_ID).put("error", "invalid_request").toString());
+                return;
+            }
+
+            if (false == providerService.validateRedirectUri(clientId, redirectUri)) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_REDIRECT_URI).put("error", "invalid_request").toString());
+                return;
+            }
+
+            // YOUR_REDIRECT_URI/?code=AUTHORIZATION_CODE&state=STATE
+
+            String code = providerService.generateAuthorizationCodeFor(clientId, scope);
 
             StringBuilder builder = new StringBuilder(encodeUrl(redirectUri, true, false));
             char concat = '?';
@@ -110,15 +144,24 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
                 concat = '&';
             }
 
-            if (false == providerService.validateClientId(clientId)) {
+            {
                 builder.append(concat);
                 concat = '&';
-                builder.append("error").append('=').append(encodeUrl("Invalid client identifier", true, true));
+                builder.append(OAuthProviderConstants.PARAM_CODE).append('=').append(encodeUrl(code, true, true));
             }
 
+            {
+                builder.append(concat);
+                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+            }
 
+            response.sendRedirect(builder.toString());
         } catch (OXException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            LOGGER.error("Authorization request failed", e);
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
+        } catch (JSONException e) {
+            LOGGER.error("Authorization request failed", e);
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
     }
 

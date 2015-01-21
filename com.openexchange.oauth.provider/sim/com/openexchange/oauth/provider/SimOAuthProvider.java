@@ -112,4 +112,30 @@ public class SimOAuthProvider implements OAuthProviderService {
         };
     }
 
+    // -----------------------------------------------------------------------------------------------------
+
+    @Override
+    public boolean validateClientId(String clientId) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Scope validateScope(String scope) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

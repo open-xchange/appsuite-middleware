@@ -92,6 +92,25 @@ public interface OAuthProviderService extends OAuthProviderConstants {
      * @return <code>true</code> if given client identifier and redirect URI pair is invalid; e.g. client identifier unknown or redirect URI mismatch; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
-    boolean validateClientIdAndRedirectUri(String clientId, String redirectUri) throws OXException;
+    boolean validateRedirectUri(String clientId, String redirectUri) throws OXException;
+
+    /**
+     * Validates given scope string if it might be invalid, unknown, or malformed.
+     *
+     * @param scope The scope to check
+     * @return A valid {@link Scope} instance if valid; otherwise <code>null</code> if invalid, unknown, or malformed
+     * @throws OXException If operation fails
+     */
+    Scope validateScope(String scope) throws OXException;
+
+    /**
+     * Generates a new authorization code that bound to given client identifier and scope.
+     *
+     * @param clientId The client identifier
+     * @param scope The scope
+     * @return A new authorization code
+     * @throws OXException If operation fails
+     */
+    String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException;
 
 }
