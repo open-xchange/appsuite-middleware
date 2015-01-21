@@ -5,6 +5,7 @@
 * 2015-01-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 36076: Serve "Range" requests for inline download requests
+ - Fix for bug 36235: Deduce the MIME type for uploaded files by their file names (if available)
 
 * 2015-01-19 - ioannis.chouklis@open-xchange.com
 
