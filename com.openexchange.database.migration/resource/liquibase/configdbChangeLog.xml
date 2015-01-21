@@ -49,7 +49,7 @@
 			</not>
 		</preConditions>
 		<comment>
-			Add table 'guest' to save known login addresses.
+			Add table 'guest' to save known login addresses of guest users.
 		</comment>
 		<sql>
 			CREATE TABLE guest (
@@ -73,7 +73,7 @@
 			</not>
 		</preConditions>
 		<comment>
-			Add table 'guest2context' to save known login addresses.
+			Add table 'guest2context' to save mappings from guests to context and users.
 		</comment>
 		<sql>
 			CREATE TABLE guest2context (

@@ -119,6 +119,7 @@ CREATE TABLE guest2context (
     uid INT4 UNSIGNED NOT NULL,
     PRIMARY KEY(`guest_id`, `cid`,`uid`),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`),
-    FOREIGN KEY(`guest_id`) REFERENCES guest (`id`)
+    FOREIGN KEY(`guest_id`) REFERENCES guest (`id`),
+    INDEX (guest_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
