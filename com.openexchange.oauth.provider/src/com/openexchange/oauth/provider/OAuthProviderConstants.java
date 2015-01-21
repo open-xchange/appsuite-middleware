@@ -106,4 +106,21 @@ public interface OAuthProviderConstants {
      */
     public static final String PROP_ID = "id";
 
+    // -------------------------------------------------------------------------------------------------------
+
+    /** Required. Value is always <b><code>code</code></b> */
+    public static final String PARAM_RESPONSE_TYPE = "response_type";
+
+    /** Required. Value of your <b>API Key</b> given when you registered your application */
+    public static final String PARAM_CLIENT_ID = "client_id";
+
+    /** Optional. Used to specify a list of needed member permissions */
+    public static final String PARAM_SCOPE = "scope";
+
+    /** Required. A long unique string value of that is hard to guess */
+    public static final String PARAM_STATE = "state";
+
+    /** Required. URI of the app used as redirect after authorization. */
+    public static final String PARAM_REDIRECT_URI = "redirect_uri";
+
 }
