@@ -141,7 +141,7 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
-                stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND u.filestore_id > 0");
+                stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND filestore_id > 0");
                 stmt.setInt(1, cid);
                 result = stmt.executeQuery();
 

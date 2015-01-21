@@ -66,6 +66,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The file you requested does not exist.
     public static final String FILE_NOT_EXISTS_MSG = "The file you requested does not exist.";
 
+    // The file version you requested does not exist.
+    public static final String FILE_VERSION_NOT_EXISTS_MSG = "The file version you requested does not exist.";
+
     // A folder named "%1$s" already exists below the parent folder "%2$s".
     public static final String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists below the parent folder \"%2$s\".";
 

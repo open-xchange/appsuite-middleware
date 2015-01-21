@@ -147,7 +147,7 @@ public abstract class AbstractGoogleDriveAccess {
      * @throws IOException If check fails
      */
     protected static boolean isTrashed(String id, Drive drive) throws IOException {
-        Labels labels = drive.files().get(id).execute().getLabels();
+        Labels labels = drive.files().get(id).setFields("labels/trashed").execute().getLabels();
         if (null == labels) {
             return false;
         }

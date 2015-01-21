@@ -69,6 +69,15 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultAppSuiteLoginRampUp} - The default ramp-up implementation.
+ * <p>
+ * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+ * <b>Note</b><br>
+ * The passed {@link ServiceLookup} instance needs to track the following singleton services:
+ * <ul>
+ * <li>com.openexchange.threadpool.ThreadPoolService</li>
+ * <li>com.openexchange.ajax.requesthandler.Dispatcher</li>
+ * </ul>
+ * </div>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -66,6 +66,7 @@ import net.oauth.SimpleOAuthValidator;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
+import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -106,7 +107,7 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
              * The OAuth standard requires the token to be omitted from the stored nonce. But I include it, to harmonize with a Consumer
              * that generates nonces using several independent computers, each with its own token.
              */
-            final DatabaseService databaseService = OAuthProviderServiceLookup.getService(DatabaseService.class);
+            final DatabaseService databaseService = Services.getService(DatabaseService.class);
             final boolean valid = insertIfAbsent(nonce, databaseService);
             if (!valid) {
                 throw new OAuthProblemException(OAuth.Problems.NONCE_USED);

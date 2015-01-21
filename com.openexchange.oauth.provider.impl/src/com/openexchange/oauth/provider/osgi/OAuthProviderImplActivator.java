@@ -58,7 +58,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.InMemoryOAuth2ProviderService;
-import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 import com.openexchange.oauth.provider.servlets.AuthServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -86,7 +85,7 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        OAuthProviderServiceLookup.set(this);
+        Services.set(this);
         OAuthProviderService oauth2ProviderService = new InMemoryOAuth2ProviderService();
         registerService(OAuthProviderService.class, oauth2ProviderService);
         addService(OAuthProviderService.class, oauth2ProviderService);
@@ -135,7 +134,7 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        OAuthProviderServiceLookup.set(null);
+        Services.set(null);
         super.stopBundle();
     }
 
