@@ -1,3 +1,7 @@
+* 2015-01-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36076: Serve "Range" requests for inline download requests
+
 * 2015-01-19 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 36095: Be more strict about the 'Reply-To' header while parsing
