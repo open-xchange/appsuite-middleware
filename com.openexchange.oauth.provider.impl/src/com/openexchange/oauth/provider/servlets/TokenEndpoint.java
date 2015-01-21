@@ -63,10 +63,12 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.osgi.Services;
 
 
 /**
@@ -151,7 +153,13 @@ public class TokenEndpoint extends HttpServlet {
                 return;
             }
 
-            OAuthToken token = service.redeemAuthCode(client, authCode);
+            AuthorizationCodeService authCodeService = getAuthCodeService();
+            if (null == authCodeService) {
+                sendErrorResponse(resp, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "missing required service").put("error", "server_error").toString());
+                return;
+            }
+
+            OAuthToken token = authCodeService.redeemAuthCode(client, authCode);
             if (token == null) {
                 failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CODE);
                 return;
@@ -191,6 +199,15 @@ public class TokenEndpoint extends HttpServlet {
             LOG.error("Could not compile error response object", e);
             sendEmptyErrorResponse(httpResponse, statusCode);
         }
+    }
+
+    /**
+     * Gets the {@link AuthorizationCodeService} instance.
+     *
+     * @return The {@link AuthorizationCodeService} instance or <code>null</code>
+     */
+    private AuthorizationCodeService getAuthCodeService() {
+        return Services.getService(AuthorizationCodeService.class);
     }
 
 }

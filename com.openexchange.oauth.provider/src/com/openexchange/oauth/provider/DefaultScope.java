@@ -147,4 +147,10 @@ public class DefaultScope implements Scope {
         return "DefaultScope [scopes=" + scopes + "]";
     }
 
+    @Override
+    public String scopeString() {
+        // TODO
+        return null;
+    }
+
 }

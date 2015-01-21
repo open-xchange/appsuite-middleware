@@ -151,19 +151,7 @@ public class SimOAuthProvider implements OAuthProviderService {
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Client getClientByID(String clientID) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OAuthToken redeemAuthCode(Client client, String authCode) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

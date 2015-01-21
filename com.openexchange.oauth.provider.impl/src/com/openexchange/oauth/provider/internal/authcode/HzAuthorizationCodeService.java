@@ -138,7 +138,7 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
         }
 
         // Check if valid
-        if (validValue(value, now, client.getId())) {
+        if (validValue(value, now, client.getID())) {
             // TODO:
             return null;
         }

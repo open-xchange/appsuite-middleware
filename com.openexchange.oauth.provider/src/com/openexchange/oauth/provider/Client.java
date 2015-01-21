@@ -59,8 +59,6 @@ package com.openexchange.oauth.provider;
  */
 public interface Client {
 
-    String getName();
-
     String getDescription();
 
     /**
