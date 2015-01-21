@@ -51,6 +51,7 @@ package com.openexchange.oauth.provider.internal.authcode;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.lang.RandomStringUtils;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
@@ -117,7 +118,7 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
         IMap<String, String> map = map();
 
         // Continue...
-        String authCode = UUIDs.getUnformattedString(UUID.randomUUID());
+        String authCode = RandomStringUtils.randomAlphabetic(64);
         long now = System.nanoTime();
         map.put(authCode, generateValue(now, clientId));
         return authCode;
