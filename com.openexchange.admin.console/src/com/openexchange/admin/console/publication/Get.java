@@ -49,21 +49,28 @@
 
 package com.openexchange.admin.console.publication;
 
-import java.rmi.RemoteException;
+import java.util.List;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXPublicationInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Publication;
-import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
-
 
 /**
  * {@link Get}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Get extends GetCore {
+public final class Get extends PublicationAbstraction {
+
+    /**
+     * Entry point
+     * 
+     * @param args Command line arguments
+     */
+    public static void main(final String[] args) {
+        new Get(args);
+    }
 
     /**
      * Initializes a new {@link Get}.
@@ -71,24 +78,64 @@ public final class Get extends GetCore {
     public Get(final String[] args) {
         super();
         final AdminParser parser = new AdminParser("getpublication");
-        commonfunctions(parser, args);
+        parser.setUsage("[-A <adminuser> -P <adminpass>] [ -c <contextid> [-u <publication-url>] | [-e <entity-id>] | [-i <userid> [-m <module>]]]");
+        setOptions(parser);
+        process(parser, args);
     }
 
-    public static void main(final String[] args) {
-        new Get(args);
-    }
+    /**
+     * Process the command
+     * 
+     * @param parser The admin parser
+     * @param args The command line arguments
+     */
+    private void process(final AdminParser parser, final String[] args) {
+        boolean error = true;
+        String successtext = null;
 
-    @Override
-    protected void maincall(AdminParser parser, OXPublicationInterface oxpub, Publication pub, Credentials auth) throws RemoteException, DuplicateExtensionException {
-        Context context = contextparsing(parser);
-        pub.setContext(context);
-        String url = parseAndSetPublicationUrl(parser);
-        pub.setUrl(url);
+        try {
+            parser.ownparse(args);
+            final Context context = contextparsing(parser);
+
+            final Credentials auth = credentialsparsing(parser);
+            final OXPublicationInterface oxpub = getPublicationInterface();
+
+            final List<Publication> publications;
+
+            if (parser.hasOption(options.get(OPT_ID_LONG))) {
+                final int userId = Integer.parseInt((String) parser.getOptionValue(options.get(OPT_ID_LONG)));
+                if (parser.hasOption(options.get(OPT_MODULE))) {
+                    final String module = (String) parser.getOptionValue(options.get(OPT_MODULE));
+                    publications = oxpub.listPublications(context, auth, userId, module);
+                } else {
+                    publications = oxpub.listPublications(context, auth, userId);
+                }
+            } else if (parser.hasOption(options.get(OPT_ENTITY))) {
+                final String entityId = (String) parser.getOptionValue(options.get(OPT_ENTITY));
+                publications = oxpub.listPublications(context, auth, entityId);
+            } else if (parser.hasOption(options.get(OPT_PUBLICATION_URL))) {
+                final String publicationUrl = parseAndSetPublicationUrl(parser);
+                Publication publication = oxpub.getPublication(context, publicationUrl, auth);
+                createMessageForStdout(publication.toString(), null, null, parser);
+                publications = null;
+                sysexit(0);
+            } else {
+                publications = oxpub.listPublications(context, auth);
+            }
+            printList(publications);
+
+            error = false;
+        } catch (final Exception e) {
+            printErrors(successtext, null, e, parser);
+        } finally {
+            if (error) {
+                sysexit(SYSEXIT_UNKNOWN_OPTION);
+            }
+        }
     }
 
     @Override
     protected void setFurtherOptions(AdminParser parser) {
-        // No further options
+        // nothing
     }
-
 }

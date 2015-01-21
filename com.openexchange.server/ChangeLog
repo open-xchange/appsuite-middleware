@@ -1,3 +1,7 @@
+* 2015-01-21 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 35691: Adjusted the logic of the URL parsing to extract all relevant information in order to recreate the original publication URL. Enhanced 'getpublication' and 'deletepublication CLTs.
+
 * 2015-01-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 36076: Serve "Range" requests for inline download requests
