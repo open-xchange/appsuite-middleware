@@ -256,7 +256,7 @@ public final class NewAction extends AbstractMailAction {
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                 final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
                 if (null != folder) {
-                    // Do the transport
+                    // Do the "fake" transport by providing poison address
                     MailTransport mailTransport = MailTransport.getInstance(session, accountId);
                     MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
 
