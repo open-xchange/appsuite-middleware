@@ -50,6 +50,8 @@
 package com.openexchange.tools.servlet.http;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -62,6 +64,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.Cookie;
@@ -662,5 +665,38 @@ public final class Tools {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
+        sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
+    }
+
+    public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
+        httpResponse.reset();
+
+        for (Entry<String, String> header : additionalHeaders.entrySet()) {
+            httpResponse.setHeader(header.getKey(), header.getValue());
+        }
+
+        httpResponse.setContentType("application/json;charset=UTF-8");
+        httpResponse.setStatus(statusCode);
+        PrintWriter writer = httpResponse.getWriter();
+        writer.write(body);
+        writer.flush();
+    }
+
+    public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
+        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
+    }
+
+    public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
+        httpResponse.reset();
+
+        for (Entry<String, String> header : additionalHeaders.entrySet()) {
+            httpResponse.setHeader(header.getKey(), header.getValue());
+        }
+
+        httpResponse.setContentType(null);
+        httpResponse.sendError(statusCode);
     }
 }
