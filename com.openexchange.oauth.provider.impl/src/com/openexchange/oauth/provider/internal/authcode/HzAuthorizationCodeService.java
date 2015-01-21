@@ -120,7 +120,7 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
         // Continue...
         String authCode = RandomStringUtils.randomAlphabetic(64);
         long now = System.nanoTime();
-        map.put(authCode, generateValue(now, clientId));
+        map.put(authCode, generateValue(now, clientId, scope));
         return authCode;
     }
 
@@ -146,6 +146,7 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
 
         // Valid
         DefaultOAuthToken token = new DefaultOAuthToken();
+        token.setScope(parseScopeFromValue(value));
         // TODO: Set its attributes
         return token;
     }

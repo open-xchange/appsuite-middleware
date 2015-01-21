@@ -51,6 +51,8 @@ package com.openexchange.oauth.provider.internal.authcode;
 
 import java.util.concurrent.TimeUnit;
 import com.openexchange.oauth.provider.AuthorizationCodeService;
+import com.openexchange.oauth.provider.DefaultScope;
+import com.openexchange.oauth.provider.Scope;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -78,10 +80,11 @@ public abstract class AbstractAuthorizationCodeService implements AuthorizationC
      *
      * @param nanos The time stamp
      * @param clientId The client identifier
+     * @param scope The associated scope
      * @return The value
      */
-    protected String generateValue(long nanos, String clientId) {
-        return new StringBuilder(32).append(nanos).append('?').append(clientId).toString();
+    protected String generateValue(long nanos, String clientId, Scope scope) {
+        return new StringBuilder(32).append(nanos).append("?==?").append(clientId).append("?==?").append(null == scope ? "null" : scope.scopeString()).toString();
     }
 
     /**
@@ -91,7 +94,7 @@ public abstract class AbstractAuthorizationCodeService implements AuthorizationC
      * @return The nano seconds
      */
     protected long parseNanosFromValue(String value) {
-        return Long.parseLong(value.substring(0, value.indexOf('?')));
+        return Long.parseLong(value.substring(0, value.indexOf("?==?")));
     }
 
     /**
@@ -101,7 +104,21 @@ public abstract class AbstractAuthorizationCodeService implements AuthorizationC
      * @return The client identifier
      */
     protected String parseClientIdFromValue(String value) {
-        return value.substring(value.indexOf('?') + 1);
+        int start = value.indexOf("?==?") + 4;
+        int end = value.indexOf("?==?", start + 1);
+        return value.substring(start, end);
+    }
+
+    /**
+     * Parses the scope from given value
+     *
+     * @param value The value
+     * @return The scope
+     */
+    protected Scope parseScopeFromValue(String value) {
+        int start = value.lastIndexOf("?==?") + 4;
+        String sScope = value.substring(start);
+        return DefaultScope.parseScope(sScope);
     }
 
     /**

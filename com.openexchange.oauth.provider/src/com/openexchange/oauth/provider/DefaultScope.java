@@ -49,16 +49,20 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.StringAppender;
+import com.openexchange.java.Strings;
 
 
 /**
  * {@link DefaultScope}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
 public class DefaultScope implements Scope {
@@ -70,8 +74,30 @@ public class DefaultScope implements Scope {
      */
     private static final Pattern PREFIXED_OAUTH_SCOPE = Pattern.compile("(r_|w_|rw_)([\\x21\\x23-\\x5b\\x5d-\\x7e]+)");
 
+    /**
+     * Parses the scope from specified string representation.
+     *
+     * @param scopeStr The sscope's string representation
+     * @return The parsed scope or <code>null</code> if string is {@link Strings#isEmpty(String) empty}
+     */
+    public static DefaultScope parseScope(String scopeStr) {
+        if (Strings.isEmpty(scopeStr)) {
+            return null;
+        }
+
+        return new DefaultScope(Strings.splitByComma(scopeStr));
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    /** The scope set */
     private final Set<String> scopes;
 
+    /**
+     * Initializes a new {@link DefaultScope}.
+     *
+     * @param scopes The scopes
+     */
     public DefaultScope(String... scopes) {
         super();
         this.scopes = new HashSet<>();
@@ -84,9 +110,14 @@ public class DefaultScope implements Scope {
         }
     }
 
+    /**
+     * Initializes a new {@link DefaultScope}.
+     *
+     * @param scopes The scope set
+     */
     public DefaultScope(Set<String> scopes) {
         super();
-        this.scopes = scopes;
+        this.scopes = null == scopes ? Collections.<String> emptySet() : scopes;
     }
 
     @Override
@@ -101,9 +132,9 @@ public class DefaultScope implements Scope {
             String scope = prefixedScopeMatcher.group(2);
             switch (prefix) {
                 case "r_":
-                    return scopes.contains("rw_" + scope);
+                    return scopes.contains("r_" + scope);
                 case "w_":
-                    return scopes.contains("rw_" + scope);
+                    return scopes.contains("w_" + scope);
                 case "rw_":
                     return scopes.contains("r_" + scope) && scopes.contains("w_" + scope);
             }
@@ -125,10 +156,7 @@ public class DefaultScope implements Scope {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof DefaultScope)) {
             return false;
         }
         DefaultScope other = (DefaultScope) obj;
@@ -144,13 +172,21 @@ public class DefaultScope implements Scope {
 
     @Override
     public String toString() {
-        return "DefaultScope [scopes=" + scopes + "]";
+        return scopeString();
     }
 
     @Override
     public String scopeString() {
-        // TODO
-        return null;
+        Set<String> scopes = this.scopes;
+        if (null == scopes || scopes.isEmpty()) {
+            return "";
+        }
+
+        StringAppender sa = new StringAppender(',');
+        for (String scope : scopes) {
+            sa.append(scope);
+        }
+        return sa.toString();
     }
 
 }
