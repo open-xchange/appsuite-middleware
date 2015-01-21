@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Categories.ExcludeCategory;
 import com.openexchange.exception.OXException;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

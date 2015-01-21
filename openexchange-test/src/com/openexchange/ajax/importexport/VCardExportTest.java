@@ -51,7 +51,6 @@ package com.openexchange.ajax.importexport;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.framework.AJAXClient;

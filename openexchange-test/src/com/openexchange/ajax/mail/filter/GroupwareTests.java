@@ -17,7 +17,6 @@ import com.meterware.httpunit.WebResponse;
 import com.meterware.httpunit.cookies.CookieListener;
 import com.meterware.httpunit.cookies.CookieProperties;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.fields.LoginFields;
 
 public class GroupwareTests extends AJAXTest {
 

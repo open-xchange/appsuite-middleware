@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.calendar.AbstractCalendarTest;
 
 /**

@@ -57,7 +57,6 @@ import com.openexchange.ajax.resource.actions.ResourceNewRequest;
 import com.openexchange.ajax.resource.actions.ResourceNewResponse;
 import com.openexchange.ajax.resource.actions.ResourceUpdatesRequest;
 import com.openexchange.ajax.resource.actions.ResourceUpdatesResponse;
-import com.openexchange.group.Group;
 import com.openexchange.resource.Resource;
 
 

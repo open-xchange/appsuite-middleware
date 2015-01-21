@@ -57,7 +57,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.AJAXRequest.FileParameter;
 import com.openexchange.ajax.framework.Header.SimpleHeader;
 
 /**

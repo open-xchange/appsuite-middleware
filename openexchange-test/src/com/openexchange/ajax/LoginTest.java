@@ -50,7 +50,6 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.WebConversation;

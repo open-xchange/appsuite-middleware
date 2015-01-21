@@ -50,7 +50,6 @@
 package com.openexchange.ajax.session.actions;
 
 import java.io.IOException;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpResponse;

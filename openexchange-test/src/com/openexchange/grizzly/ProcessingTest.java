@@ -49,11 +49,9 @@
 
 package com.openexchange.grizzly;
 
-import static org.junit.Assert.*;
 import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Test;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 import com.openexchange.ajax.simple.SimpleResponse;
 

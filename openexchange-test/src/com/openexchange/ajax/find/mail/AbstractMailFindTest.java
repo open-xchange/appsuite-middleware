@@ -1,17 +1,12 @@
 package com.openexchange.ajax.find.mail;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
-import com.openexchange.ajax.mail.actions.ImportMailRequest;
-import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.exception.OXException;
@@ -23,10 +18,6 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.java.util.TimeZones;
-import com.openexchange.mail.utils.DateUtils;
-import com.openexchange.test.ContactTestManager;
 
 
 public abstract class AbstractMailFindTest extends AbstractFindTest {

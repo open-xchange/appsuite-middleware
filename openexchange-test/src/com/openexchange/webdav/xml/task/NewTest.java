@@ -57,12 +57,10 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TaskExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.TaskTest;
-import com.openexchange.webdav.xml.XmlServlet;
 
 public class NewTest extends TaskTest {
 

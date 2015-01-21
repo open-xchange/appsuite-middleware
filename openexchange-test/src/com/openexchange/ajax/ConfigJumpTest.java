@@ -40,7 +40,6 @@ package com.openexchange.ajax;
 import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;

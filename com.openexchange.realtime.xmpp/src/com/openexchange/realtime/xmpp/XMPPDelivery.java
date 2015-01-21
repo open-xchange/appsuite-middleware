@@ -51,7 +51,6 @@ package com.openexchange.realtime.xmpp;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link XMPPDelivery}

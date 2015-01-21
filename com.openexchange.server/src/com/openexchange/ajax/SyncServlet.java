@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.io.IOException;
 import java.io.Writer;

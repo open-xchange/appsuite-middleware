@@ -50,7 +50,6 @@
 package com.openexchange.ajax.infostore.actions;
 
 import java.util.Date;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest;
 import com.openexchange.groupware.search.Order;
 

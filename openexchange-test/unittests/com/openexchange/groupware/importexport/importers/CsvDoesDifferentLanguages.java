@@ -63,7 +63,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractContactTest;
-import com.openexchange.groupware.importexport.CSVContactImportTest;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.importers.CSVContactImporter;

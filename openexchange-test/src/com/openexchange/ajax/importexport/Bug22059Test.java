@@ -1,16 +1,12 @@
 package com.openexchange.ajax.importexport;
 
-import java.util.Date;
 import java.util.TimeZone;
 
-import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug22059Test extends ManagedAppointmentTest {

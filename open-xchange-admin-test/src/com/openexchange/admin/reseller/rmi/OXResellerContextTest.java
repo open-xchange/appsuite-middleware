@@ -72,7 +72,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.user.copy.rmi.TestTool;
 
 public class OXResellerContextTest extends OXResellerAbstractTest {
 
