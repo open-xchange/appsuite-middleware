@@ -112,8 +112,8 @@ public class Statements {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT cid, user, token FROM mobileEventSubscriptions WHERE provider=? ");
         if(blockLoginPush) {
-            stringBuilder.append("AND blockLoginPushUntil <= " +  System.currentTimeMillis());
-            stringBuilder.append(" OR blockLoginPushUntil IS NULL");
+            stringBuilder.append(" AND (blockLoginPushUntil IS NULL");
+            stringBuilder.append(" OR blockLoginPushUntil <= ").append(System.currentTimeMillis()).append(')');
         }
         stringBuilder.append(" GROUP BY user, cid;");
         return stringBuilder.toString();
