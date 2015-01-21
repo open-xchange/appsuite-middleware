@@ -79,6 +79,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
@@ -97,7 +98,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess {
+public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess, FileStoragePersistentIDs {
 
     private static final String QUERY_STRING_FILES_ONLY = GoogleDriveConstants.QUERY_STRING_FILES_ONLY;
     private static final String QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH = GoogleDriveConstants.QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH;
