@@ -47,22 +47,22 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OAuthProviderServiceLookup}
+ * {@link Services}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OAuthProviderServiceLookup {
+public final class Services {
 
     /**
-     * Initializes a new {@link OAuthProviderServiceLookup}.
+     * Initializes a new {@link Services}.
      */
-    private OAuthProviderServiceLookup() {
+    private Services() {
         super();
     }
 

@@ -62,7 +62,8 @@ import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.user.UserService;
 
 
@@ -83,6 +84,15 @@ public abstract class AbstractAuthorizationServlet extends HttpServlet {
     }
 
     /**
+     * Gets the {@link OAuthProviderService} instance.
+     *
+     * @return The {@link OAuthProviderService} instance or <code>null</code>
+     */
+    protected OAuthProviderService getProviderService() {
+        return Services.getService(OAuthProviderService.class);
+    }
+
+    /**
      * Resolves specified login/password pair to user/context.
      *
      * @param login The login
@@ -90,35 +100,35 @@ public abstract class AbstractAuthorizationServlet extends HttpServlet {
      * @return A map containing resolved user/context with keys <code>"user"</code>/<code>"context"</code>.
      * @throws OXException If resolving fails
      */
-    protected Map<String, Object> resolveLogin(final String login, final String password) throws OXException {
+    protected Map<String, Object> resolveLogin(String login, String password) throws OXException {
         /*
          * Resolve login
          */
-        final AuthenticationService authenticationService = OAuthProviderServiceLookup.getService(AuthenticationService.class);
-        final Authenticated authenticated = authenticationService.handleLoginInfo(new DefaultLoginInfo(login, password));
-        final Context ctx = findContext(authenticated.getContextInfo());
-        final Map<String, Object> map = new HashMap<String, Object>(2);
+        AuthenticationService authenticationService = Services.getService(AuthenticationService.class);
+        Authenticated authenticated = authenticationService.handleLoginInfo(new DefaultLoginInfo(login, password));
+        Context ctx = findContext(authenticated.getContextInfo());
+        Map<String, Object> map = new HashMap<String, Object>(2);
         map.put("user", findUser(ctx, authenticated.getUserInfo()));
         map.put("context", ctx);
         return map;
     }
 
-    private Context findContext(final String contextInfo) throws OXException {
-        final ContextService contextService = OAuthProviderServiceLookup.getService(ContextService.class);
-        final int contextId = contextService.getContextId(contextInfo);
+    private Context findContext(String contextInfo) throws OXException {
+        ContextService contextService = Services.getService(ContextService.class);
+        int contextId = contextService.getContextId(contextInfo);
         if (ContextStorage.NOT_FOUND == contextId) {
             throw ContextExceptionCodes.NO_MAPPING.create(contextInfo);
         }
-        final Context context = contextService.getContext(contextId);
+        Context context = contextService.getContext(contextId);
         if (null == context) {
             throw ContextExceptionCodes.NOT_FOUND.create(Integer.valueOf(contextId));
         }
         return context;
     }
 
-    private User findUser(final Context ctx, final String userInfo) throws OXException {
-        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
-        final UserService userService = OAuthProviderServiceLookup.getService(UserService.class);
+    private User findUser(Context ctx, String userInfo) throws OXException {
+        String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
+        UserService userService = Services.getService(UserService.class);
         int userId = 0;
         if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
             userId = userService.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
@@ -127,20 +137,4 @@ public abstract class AbstractAuthorizationServlet extends HttpServlet {
         }
         return userService.getUser(userId, ctx);
     }
-
-    /**
-     * Tests for empty string.
-     */
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }
