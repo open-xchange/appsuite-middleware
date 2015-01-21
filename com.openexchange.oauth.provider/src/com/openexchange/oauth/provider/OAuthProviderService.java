@@ -113,4 +113,14 @@ public interface OAuthProviderService extends OAuthProviderConstants {
      */
     String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException;
 
+    /**
+     * Redeems the passed authorization code for an access token.
+     *
+     * @param client The client
+     * @param authCode The authorization code
+     * @return A newly created access token or <code>null</code> if the code was invalid
+     * @throws OXException
+     */
+    OAuthToken redeemAuthCode(Client client, String authCode) throws OXException;
+
 }
