@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.DefaultOAuthToken;
 import com.openexchange.oauth.provider.OAuthToken;
 import com.openexchange.oauth.provider.Scope;
 import com.openexchange.server.ServiceExceptionCode;
@@ -143,7 +144,9 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
         }
 
         // Valid
-        return null;
+        DefaultOAuthToken token = new DefaultOAuthToken();
+        // TODO: Set its attributes
+        return token;
     }
 
 }
