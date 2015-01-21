@@ -68,4 +68,6 @@ public interface ClientPrincipal {
 
     byte[] getClientTicket();
 
+    boolean isSPNEGO();
+
 }

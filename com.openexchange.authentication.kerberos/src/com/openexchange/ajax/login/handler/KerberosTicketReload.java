@@ -55,8 +55,12 @@ import static com.openexchange.ajax.SessionUtility.verifySession;
 import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
 import static com.openexchange.kerberos.KerberosUtils.SESSION_SUBJECT;
 import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.SessionServlet;
@@ -66,6 +70,9 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.kerberos.ClientPrincipal;
 import com.openexchange.kerberos.KerberosService;
+import com.openexchange.kerberos.KerberosUtils;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.servlet.http.Authorization;
@@ -75,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  * Implements a servlet action to refetch the kerberos ticket from the client again within a running session.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public final class KerberosTicketReload extends SessionServlet implements LoginRequestHandler {
 
@@ -84,11 +91,13 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
 
     private final SessiondService sessiondService;
     private final KerberosService kerberosService;
+    private final EventAdmin eventAdmin;
 
-    public KerberosTicketReload(SessiondService sessiondService, KerberosService kerberosService) {
+    public KerberosTicketReload(SessiondService sessiondService, KerberosService kerberosService, EventAdmin eventAdmin) {
         super();
         this.sessiondService = sessiondService;
         this.kerberosService = kerberosService;
+        this.eventAdmin = eventAdmin;
     }
 
     @Override
@@ -96,10 +105,8 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
         try {
             doAuthHeaderTicketReload(req, resp);
         } catch (OXException e) {
-            LOG.error("", e);
-            resp.addHeader("WWW-Authenticate", "NEGOTIATE");
-            resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            LOG.error(e.getMessage(), e);
+            notAuthorized(resp, e.getMessage());
         }
     }
 
@@ -113,9 +120,7 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
         }
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
-            resp.addHeader("WWW-Authenticate", "NEGOTIATE");
-            resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+            notAuthorized(resp, "Authorization Required!");
             return;
         }
         if (!Authorization.checkForAuthorizationHeader(auth)) {
@@ -126,9 +131,30 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
         }
 
         final byte[] ticket = Base64.decode(auth.substring("Negotiate ".length()));
-        ClientPrincipal principal = kerberosService.verifyAndDelegate(ticket);
+        ClientPrincipal principal;
+        try {
+            principal = kerberosService.verifyAndDelegate(ticket);
+        } catch (IllegalStateException e) {
+            // Is thrown if the ticket is no longer valid. See bug 35182.
+            LOG.error(e.getMessage(), e);
+            notAuthorized(resp, e.getMessage());
+            return;
+        }
         session.setParameter(SESSION_SUBJECT, principal.getDelegateSubject());
         session.setParameter(SESSION_PRINCIPAL, principal);
         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        postEvent(session);
+    }
+
+    private void postEvent(Session session) {
+        final Dictionary<String, Object> dic = new Hashtable<String, Object>();
+        dic.put(SessiondEventConstants.PROP_SESSION, session);
+        eventAdmin.postEvent(new Event(KerberosUtils.TOPIC_TICKET_READDED, dic));
+    }
+
+    private static void notAuthorized(HttpServletResponse resp, String message) throws IOException {
+        resp.addHeader("WWW-Authenticate", "NEGOTIATE");
+        resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
+        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
     }
 }

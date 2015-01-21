@@ -95,36 +95,63 @@ class TicketRenewalTimer implements Runnable {
         if (null == principal) {
             throw KerberosExceptionCodes.TICKET_MISSING.create(session.getSessionID());
         }
-        schedule(principal.getDelegateSubject());
+        schedule(principal.getClientSubject(), principal.getDelegateSubject());
     }
 
-    private void schedule(Subject subject) throws OXException {
-        final int ticketExpiresInSeconds = KerberosUtils.calculateRenewalTime(subject);
+    private void schedule(Subject clientSubject, Subject delegateSubject) throws OXException {
+        OXException exc = null;
+        int clientSubjectExpires;
+        try {
+            clientSubjectExpires = KerberosUtils.calculateRenewalTime(clientSubject);
+        } catch (OXException e) {
+            exc = e;
+            clientSubjectExpires = Integer.MAX_VALUE;
+        }
+        int delegateSubjectExpires;
+        try {
+            delegateSubjectExpires = KerberosUtils.calculateRenewalTime(delegateSubject);
+        } catch (OXException e) {
+            exc = e;
+            delegateSubjectExpires = Integer.MAX_VALUE;
+        }
+        final int ticketExpiresInSeconds = Math.min(clientSubjectExpires, delegateSubjectExpires);
+        if (Integer.MAX_VALUE == ticketExpiresInSeconds && null != exc) {
+            throw exc;
+        }
         if (LOG.isDebugEnabled()) {
             Calendar cal = new GregorianCalendar(TimeZones.UTC, Locale.ENGLISH);
             cal.add(Calendar.SECOND, ticketExpiresInSeconds);
-            LOG.debug("Ticket for {} expires in {}. Running timer in {} seconds.", getName(subject), cal.toString(), I(ticketExpiresInSeconds));
+            LOG.debug("Ticket for {} expires at {}. Running timer in {} seconds.", getName(clientSubject), cal.getTime(), I(ticketExpiresInSeconds));
         }
         scheduled = timerService.schedule(this, ticketExpiresInSeconds, TimeUnit.SECONDS);
     }
 
     @Override
     public void run() {
-        try {
-            final ClientPrincipal principal = (ClientPrincipal) session.getParameter(SESSION_PRINCIPAL);
-            if (null == principal) {
-                throw KerberosExceptionCodes.TICKET_MISSING.create(session.getSessionID());
-            }
-            ClientPrincipal newPrincipal = kerberosService.verifyAndDelegate(principal.getClientTicket());
-            session.setParameter(SESSION_PRINCIPAL, newPrincipal);
-            final Subject subject = newPrincipal.getDelegateSubject();
-            session.setParameter(SESSION_SUBJECT, subject);
-            schedule(subject);
-            disposeSubject(principal.getClientSubject());
-            disposeSubject(principal.getDelegateSubject());
-        } catch (OXException e) {
-            LOG.error("", e);
+        final ClientPrincipal principal = (ClientPrincipal) session.getParameter(SESSION_PRINCIPAL);
+        if (null == principal) {
+            OXException e = KerberosExceptionCodes.TICKET_MISSING.create(session.getSessionID());
+            LOG.error(e.getMessage(), e);
+            return;
         }
+        LOG.debug("Ticket for {} expired.", getName(principal.getClientSubject()));
+        if (principal.isSPNEGO()) {
+            // we got a ticket through SPNEGO. Just delete the ticket in the session and we will refetch it from the client like after a
+            // session migration where transfering the ticket through hazelcast and serialization is prohibited.
+            session.setParameter(SESSION_PRINCIPAL, null);
+            session.setParameter(SESSION_SUBJECT, null);
+        } else if (null != session.getPassword()) {
+            try {
+                ClientPrincipal newPrincipal = kerberosService.authenticate(session.getLogin(), session.getPassword());
+                session.setParameter(SESSION_PRINCIPAL, newPrincipal);
+                session.setParameter(SESSION_SUBJECT, newPrincipal.getDelegateSubject());
+                schedule(newPrincipal.getClientSubject(), newPrincipal.getDelegateSubject());
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
+        }
+        disposeSubject(principal.getClientSubject());
+        disposeSubject(principal.getDelegateSubject());
     }
 
     public void cancel() {

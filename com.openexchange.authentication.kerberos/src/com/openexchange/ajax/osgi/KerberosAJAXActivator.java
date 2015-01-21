@@ -56,6 +56,7 @@ import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.SessionServletInterceptor;
 import com.openexchange.ajax.login.LoginRequestHandler;
@@ -87,7 +88,7 @@ public final class KerberosAJAXActivator implements BundleActivator {
         registration = context.registerService(SessionServletInterceptor.class, new MissingKerberosTicketInterceptor(), null);
         Dictionary<String, String> d = new Hashtable<String, String>();
         d.put(PARAMETER_ACTION, "ticketReload");
-        DependentServiceRegisterer<LoginRequestHandler> registerer = new DependentServiceRegisterer<LoginRequestHandler>(context, LoginRequestHandler.class, KerberosTicketReload.class, d, SessiondService.class, KerberosService.class);
+        DependentServiceRegisterer<LoginRequestHandler> registerer = new DependentServiceRegisterer<LoginRequestHandler>(context, LoginRequestHandler.class, KerberosTicketReload.class, d, SessiondService.class, KerberosService.class, EventAdmin.class);
         trackers.push(new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer));
         Tools.open(trackers);
 
