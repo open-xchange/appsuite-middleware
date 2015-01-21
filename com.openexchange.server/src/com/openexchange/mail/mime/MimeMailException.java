@@ -315,18 +315,24 @@ public class MimeMailException extends OXException {
                     if (nextException instanceof com.sun.mail.smtp.SMTPSendFailedException) {
                         com.sun.mail.smtp.SMTPSendFailedException failedError = (com.sun.mail.smtp.SMTPSendFailedException) nextException;
                         smtpInfo = getSmtpInfo(failedError);
-                        invalidAddresses = failedError.getInvalidAddresses();
                         returnCode = failedError.getReturnCode();
+                        if (invalidAddresses == null || invalidAddresses.length == 0) {
+                            invalidAddresses = failedError.getInvalidAddresses();
+                        }
                     } else if (nextException instanceof com.sun.mail.smtp.SMTPSenderFailedException) {
                         com.sun.mail.smtp.SMTPSenderFailedException failedError = (com.sun.mail.smtp.SMTPSenderFailedException) nextException;
                         smtpInfo = getSmtpInfo(failedError);
-                        invalidAddresses = failedError.getInvalidAddresses();
                         returnCode = failedError.getReturnCode();
+                        if (invalidAddresses == null || invalidAddresses.length == 0) {
+                            invalidAddresses = failedError.getInvalidAddresses();
+                        }
                     } else if (nextException instanceof com.sun.mail.smtp.SMTPAddressFailedException) {
                         com.sun.mail.smtp.SMTPAddressFailedException failedError = (com.sun.mail.smtp.SMTPAddressFailedException) nextException;
                         smtpInfo = getSmtpInfo(failedError);
-                        invalidAddresses = failedError.getInvalidAddresses();
                         returnCode = failedError.getReturnCode();
+                        if (invalidAddresses == null || invalidAddresses.length == 0) {
+                            invalidAddresses = failedError.getInvalidAddresses();
+                        }
                     }
                 }
                 // Message too large?
