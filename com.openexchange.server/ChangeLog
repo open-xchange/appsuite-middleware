@@ -1,3 +1,7 @@
+* 2015-01-22 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35992: Drop external participants completely after deleting. Empty copies in a backup table do not make any sense.
+
 * 2015-01-19 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 36095: Be more strict about the 'Reply-To' header while parsing

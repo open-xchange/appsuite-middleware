@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,70 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.ajax.task;
 
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.io.IOException;
+import java.util.TimeZone;
+import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
 
 /**
- * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
- * to start up the bundle.
+ * Verifies that external participants can not be created with empty email address.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since 7.6.2
  */
-public class Activator extends HousekeepingActivator {
+public final class Bug35992Test extends AbstractAJAXSession {
 
-    // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
+    private AJAXClient client1;
+    private TimeZone timeZone;
+    private Task task;
 
-    public Activator() {
-        super();
+    public Bug35992Test(String name) {
+        super(name);
     }
 
+    @Before
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    protected void setUp() throws Exception {
+        super.setUp();
+        client1 = getClient();
+        timeZone = client1.getValues().getTimeZone();
+        task = new Task();
+        task.setParentFolderID(client1.getValues().getPrivateTaskFolder());
+        task.setTitle("Test for bug 35992");
+        ExternalUserParticipant participant = new ExternalUserParticipant("");
+        participant.setDisplayName("");
+        task.addParticipant(participant);
     }
 
+    @After
     @Override
-    public void startBundle() {
-        final ConfigurationService configService = getService(ConfigurationService.class);
-
-        ExcludedList.getInstance().configure(configService);
-        try {
-            InternalList.getInstance().start();
-        } catch (Error e) {
-            // Helps finding errors in a lot of static code initialization.
-            e.printStackTrace();
+    protected void tearDown() throws Exception {
+        if (task.containsObjectID()) {
+            client1.execute(new DeleteRequest(task));
         }
-
-        rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
-        rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-
-        openTrackers();
-
-        registerService(CreateTableService.class, new CreateUpdateTaskTable());
-        registerService(CreateTableService.class, new ObjectPermissionCreateTableService());
+        super.tearDown();
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        InternalList.getInstance().stop();
-        super.stopBundle();
+    @Test
+    public void testForExternalParticipantWithEmpyEMail() throws OXException, IOException, JSONException {
+        InsertResponse response = client1.execute(new InsertRequest(task, timeZone, false));
+        if (!response.hasError()) {
+            response.fillTask(task);
+        }
+        assertTrue("Creating task with external participants having an empty email address should not be possible.", response.hasError());
+        assertTrue("Did not get expected exception about external participant with empty email address.", TaskExceptionCode.EXTERNAL_WITHOUT_MAIL.create().similarTo(response.getException()));
     }
 }

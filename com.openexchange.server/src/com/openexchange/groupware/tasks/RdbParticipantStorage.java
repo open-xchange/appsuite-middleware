@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import java.sql.Connection;
@@ -63,12 +64,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -276,68 +275,49 @@ public class RdbParticipantStorage extends ParticipantStorage {
         return Collections.toArray(tasks);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected Map<Integer, Set<ExternalParticipant>> selectExternal(
-        final Context ctx, final Connection con, final int[] tasks,
-        final StorageType type) throws OXException {
-        final Map<Integer, Set<ExternalParticipant>> retval =
-            new HashMap<Integer, Set<ExternalParticipant>>();
-        if (StorageType.REMOVED == type) {
-            return retval;
+    protected Map<Integer, Set<ExternalParticipant>> selectExternal(Context ctx, Connection con, int[] tasks, StorageType type) throws OXException {
+        if (StorageType.REMOVED == type || StorageType.DELETED == type) {
+            return java.util.Collections.emptyMap();
         }
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL.get(type),
-                tasks.length));
+        final Map<Integer, Set<ExternalParticipant>> retval = new HashMap<Integer, Set<ExternalParticipant>>();
+        try (PreparedStatement stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL.get(type), tasks.length))) {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             for (final int taskId : tasks) {
                 stmt.setInt(pos++, taskId);
             }
-            result = stmt.executeQuery();
-            while (result.next()) {
-                pos = 1;
-                final int taskId = result.getInt(pos++);
-                final ExternalUserParticipant external =
-                    new ExternalUserParticipant(result.getString(pos++));
-                external.setDisplayName(result.getString(pos++));
-                final ExternalParticipant participant =
-                    new ExternalParticipant(external);
-                Set<ExternalParticipant> participants = retval.get(Integer
-                    .valueOf(taskId));
-                if (null == participants) {
-                    participants = new HashSet<ExternalParticipant>();
-                    retval.put(Integer.valueOf(taskId), participants);
+            try (ResultSet result = stmt.executeQuery()) {
+                while (result.next()) {
+                    pos = 1;
+                    final int taskId = result.getInt(pos++);
+                    final ExternalUserParticipant external =
+                        new ExternalUserParticipant(result.getString(pos++));
+                    external.setDisplayName(result.getString(pos++));
+                    final ExternalParticipant participant =
+                        new ExternalParticipant(external);
+                    Set<ExternalParticipant> participants = retval.get(Integer
+                        .valueOf(taskId));
+                    if (null == participants) {
+                        participants = new HashSet<ExternalParticipant>();
+                        retval.put(Integer.valueOf(taskId), participants);
+                    }
+                    participants.add(participant);
                 }
-                participants.add(participant);
             }
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
-        } finally {
-            closeSQLStuff(result, stmt);
         }
         return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    void deleteExternal(final Context ctx, final Connection con,
-        final int taskId, final String[] addresses, final StorageType type,
-        final boolean check) throws OXException {
-        if (0 == addresses.length || StorageType.REMOVED == type) {
+    void deleteExternal(Context ctx, Connection con, int taskId, String[] addresses, StorageType type, boolean check) throws OXException {
+        if (0 == addresses.length || StorageType.REMOVED == type || StorageType.DELETED == type) {
             return;
         }
-        PreparedStatement stmt = null;
         int deleted = 0;
-        try {
-            stmt = con.prepareStatement(getIN(SQL.DELETE_EXTERNAL.get(type),
-                addresses.length));
+        try (PreparedStatement stmt = con.prepareStatement(getIN(SQL.DELETE_EXTERNAL.get(type), addresses.length))) {
             int counter = 1;
             stmt.setInt(counter++, ctx.getContextId());
             stmt.setInt(counter++, taskId);
@@ -347,51 +327,38 @@ public class RdbParticipantStorage extends ParticipantStorage {
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
-        } finally {
-            closeSQLStuff(null, stmt);
         }
         if (check && addresses.length != deleted) {
-            final OXException exc = TaskExceptionCode
-                .PARTICIPANT_DELETE_WRONG.create(Integer.valueOf(addresses.length),
-                Integer.valueOf(deleted));
-            LOG.error("", exc);
+            OXException exc = TaskExceptionCode.PARTICIPANT_DELETE_WRONG.create(I(addresses.length), I(deleted));
+            LOG.error(exc.getMessage(), exc);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void insertExternals(final Context ctx, final Connection con,
-        final int taskId, final Set<ExternalParticipant> participants,
-        final StorageType type) throws OXException {
-        if (0 == participants.size() || StorageType.REMOVED == type) {
+    public void insertExternals(Context ctx, Connection con, int taskId, Set<ExternalParticipant> participants, StorageType type) throws OXException {
+        if (0 == participants.size() || StorageType.REMOVED == type || StorageType.DELETED == type) {
             return;
         }
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL.INSERT_EXTERNAL.get(type));
+        try (PreparedStatement stmt = con.prepareStatement(SQL.INSERT_EXTERNAL.get(type))) {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, taskId);
             for (final ExternalParticipant participant : participants) {
                 pos = 3;
-                stmt.setString(pos++, StorageType.DELETED.equals(type) ? UUIDs.getUnformattedString(UUID.randomUUID()) : participant.getMail());
+                stmt.setString(pos++, participant.getMail());
                 final String displayName = participant.getDisplayName();
                 if (null == displayName) {
                     stmt.setNull(pos++, java.sql.Types.VARCHAR);
                 } else {
-                    stmt.setString(pos++, StorageType.DELETED.equals(type) ? "" : displayName);
+                    stmt.setString(pos++, displayName);
                 }
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw parseTruncatedE(con, e, type, participants);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
-        } finally {
-            closeSQLStuff(null, stmt);
         }
     }
 
