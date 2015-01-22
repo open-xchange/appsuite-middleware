@@ -100,14 +100,15 @@ public class DefaultScope implements Scope {
      */
     public DefaultScope(String... scopes) {
         super();
-        this.scopes = new HashSet<>();
+        Set<String> set = new HashSet<>();
         if (scopes != null) {
             for (String scope : scopes) {
                 if (scope != null) {
-                    this.scopes.add(scope);
+                    set.add(scope);
                 }
             }
         }
+        this.scopes = set;
     }
 
     /**
