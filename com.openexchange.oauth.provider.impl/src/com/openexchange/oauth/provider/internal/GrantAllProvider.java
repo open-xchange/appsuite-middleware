@@ -122,19 +122,19 @@ public class GrantAllProvider implements OAuthProviderService {
     @Override
     public boolean validateClientId(String clientId) throws OXException {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public Scope validateScope(String scope) throws OXException {
         // TODO Auto-generated method stub
-        return null;
+        return new DefaultScope("rw_calendar");
     }
 
 }

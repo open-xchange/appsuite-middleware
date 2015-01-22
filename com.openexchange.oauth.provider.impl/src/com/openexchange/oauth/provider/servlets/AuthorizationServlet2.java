@@ -446,7 +446,7 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
                 sb.append("<title>Login</title>").append(lineSep);
             }
             sb.append("</head><body>").append(lineSep);
-            sb.append("<form action=\"").append(Tools.considerSecure(request) ? "https://" : "http://").append(determineHostName(request, -1, -1)).append(SERVLET_ALIAS).append("\" method=\"POST\" enctype=\"multipart/form-data\">");
+            sb.append("<form action=\"").append(Tools.considerSecure(request) ? "https://" : "http://").append(determineHostName(request, -1, -1)).append(SERVLET_ALIAS).append("\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">");
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\" type=\"text\">");
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\" type=\"password\">");
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CLIENT_ID).append("\" type=\"hidden\" value=\"").append(clientId).append("\">");
