@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.osgi;
 
+import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -56,6 +57,8 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
@@ -94,12 +97,12 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
         @Override
         public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
-            HazelcastConfigurationService hzConfigService = context.getService(reference);
+            final HazelcastConfigurationService hzConfigService = context.getService(reference);
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderImplActivator.class);
 
             try {
                 boolean hzEnabled = hzConfigService.isEnabled();
                 if (false == hzEnabled) {
-                    Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderImplActivator.class);
                     String msg = "Authorization-Code service is configured to use Hazelcast, but Hazelcast is disabled as per configuration! Start of Authorization-Code service aborted!";
                     logger.error(msg, new Exception(msg));
 
@@ -115,13 +118,30 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
                     @Override
                     public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
                         HazelcastInstance hzInstance = context.getService(reference);
-                        activator.addService(HazelcastInstance.class, hzInstance);
 
-                        AuthorizationCodeService authCodeService = new HzAuthorizationCodeService("authcode-1", activator);
-                        reg = context.registerService(AuthorizationCodeService.class, authCodeService, null);
-                        activator.addService(AuthorizationCodeService.class, authCodeService);
+                        try {
+                            String hzMapName = discoverHzMapName(hzConfigService.getConfig(), HzAuthorizationCodeService.HZ_MAP_NAME, logger);
+                            if (null == hzMapName) {
+                                context.ungetService(reference);
+                                return null;
+                            }
 
-                        return hzInstance;
+                            // Initialize & register HzAuthorizationCodeService
+                            AuthorizationCodeService authCodeService = new HzAuthorizationCodeService(hzMapName, activator);
+                            reg = context.registerService(AuthorizationCodeService.class, authCodeService, null);
+
+                            // Add to service look-up
+                            activator.addService(HazelcastInstance.class, hzInstance);
+                            activator.addService(AuthorizationCodeService.class, authCodeService);
+
+                            return hzInstance;
+                        } catch (Exception e) {
+                            logger.warn("Couldn't initialize distributed token-session map.", e);
+                        }
+
+                        // Something went wrong... Unget tracked service
+                        context.ungetService(reference);
+                        return null;
                     }
 
                     @Override
@@ -141,14 +161,14 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
                         activator.removeService(AuthorizationCodeService.class);
                         context.ungetService(reference);
                     }
-                };
+                }; // End of ServiceTrackerCustomizer definition
+
                 ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, stc);
                 this.hzInstanceTracker = hzInstanceTracker;
                 hzInstanceTracker.open();
 
                 return hzConfigService;
             } catch (Exception e) {
-                Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderImplActivator.class);
                 logger.warn("Failed to start Authorization-Code service!", e);
             }
 
@@ -171,6 +191,21 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
 
             context.ungetService(reference);
         }
+
+        String discoverHzMapName(Config config, String mapPrefix, Logger logger) throws IllegalStateException {
+            Map<String, MapConfig> mapConfigs = config.getMapConfigs();
+            if (null != mapConfigs && !mapConfigs.isEmpty()) {
+                for (String mapName : mapConfigs.keySet()) {
+                    if (mapName.startsWith(mapPrefix)) {
+                        logger.info("Using distributed auth-code map '{}'.", mapName);
+                        return mapName;
+                    }
+                }
+            }
+            logger.info("No distributed auth-code map with mapPrefix {} in hazelcast configuration", mapPrefix);
+            return null;
+        }
+
     }
 
     // ---------------------------------------------------------------------------------------------

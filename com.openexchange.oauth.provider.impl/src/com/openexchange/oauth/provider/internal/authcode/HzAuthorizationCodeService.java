@@ -73,6 +73,13 @@ import com.openexchange.server.ServiceLookup;
  */
 public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService {
 
+    /**
+     * The name for the associated Hazelcast map.
+     */
+    public static final String HZ_MAP_NAME = "authcode";
+
+    // -------------------------------------------------------------------------------------------------------
+
     private final String mapName;
     private final AtomicBoolean notActive;
 
