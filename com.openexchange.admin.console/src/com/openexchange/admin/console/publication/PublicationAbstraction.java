@@ -183,7 +183,7 @@ public abstract class PublicationAbstraction extends UserAbstraction {
      * @param publications The publications to sort
      * @return The length of the widest URL
      */
-    private static <T extends Comparable<? super T>> int sortAndFetchWidestURL(List<Publication> publications) {
+    private static int sortAndFetchWidestURL(List<Publication> publications) {
         int widestURL = 5;
         Object[] a = publications.toArray();
         Arrays.sort(a);
