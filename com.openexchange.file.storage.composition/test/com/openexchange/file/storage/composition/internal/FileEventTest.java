@@ -55,7 +55,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
@@ -69,9 +68,9 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.InMemoryFileStorageFileAccess;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 
@@ -269,16 +268,6 @@ public class FileEventTest {
         }
 
         @Override
-        protected FileStorageService getFileStorageService(String serviceId) throws OXException {
-            return null;
-        }
-
-        @Override
-        protected List<FileStorageService> getAllFileStorageServices() throws OXException {
-            return null;
-        }
-
-        @Override
         protected EventAdmin getEventAdmin() {
             return null;
         }
@@ -319,6 +308,12 @@ public class FileEventTest {
          */
         @Override
         public Document getDocumentAndMetadata(String id, String version) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        protected FileStorageServiceRegistry getFileStorageServiceRegistry() {
             // TODO Auto-generated method stub
             return null;
         }

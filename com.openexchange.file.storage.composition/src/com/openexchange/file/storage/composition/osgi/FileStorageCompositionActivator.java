@@ -49,13 +49,11 @@
 
 package com.openexchange.file.storage.composition.osgi;
 
-import java.util.List;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderAware;
@@ -93,13 +91,8 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
         }
 
         @Override
-        protected List<FileStorageService> getAllFileStorageServices() throws OXException {
-            return getService(FileStorageServiceRegistry.class).getAllServices();
-        }
-
-        @Override
-        protected FileStorageService getFileStorageService(final String serviceId) throws OXException {
-            return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
+        protected FileStorageServiceRegistry getFileStorageServiceRegistry() {
+            return getService(FileStorageServiceRegistry.class);
         }
 
         @Override
@@ -126,6 +119,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
             }
             return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(folderId);
         }
+
     }
 
     private final class CompositingIDBasedFolderAccessImpl extends AbstractCompositingIDBasedFolderAccess {
@@ -135,13 +129,8 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
         }
 
         @Override
-        protected FileStorageService getFileStorageService(String serviceId) throws OXException {
-            return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
-        }
-
-        @Override
-        protected List<FileStorageService> getAllFileStorageServices() throws OXException {
-            return getService(FileStorageServiceRegistry.class).getAllServices();
+        protected FileStorageServiceRegistry getFileStorageServiceRegistry() {
+            return getService(FileStorageServiceRegistry.class);
         }
 
         @Override

@@ -78,15 +78,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptions;
-import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageETagProvider;
@@ -98,7 +94,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
@@ -114,7 +109,6 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedETagProvider;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.Results;
@@ -129,16 +123,14 @@ import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.MergingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tx.AbstractService;
 import com.openexchange.tx.TransactionAwares;
-import com.openexchange.tx.TransactionException;
 
 /**
  * {@link AbstractCompositingIDBasedFileAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedRandomFileAccess, IDBasedSequenceNumberProvider, IDBasedETagProvider {
+public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompositingIDBasedAccess implements IDBasedRandomFileAccess, IDBasedSequenceNumberProvider, IDBasedETagProvider {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFileAccess.class);
 
@@ -193,22 +185,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     // ------------------------------------------------------------------------------------------------- //
 
-    /** The associated session */
-    protected Session session;
-
-    private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
-    private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
-
     /**
      * Initializes a new {@link AbstractCompositingIDBasedFileAccess}.
      *
      * @param session The associated session
      */
-    protected AbstractCompositingIDBasedFileAccess(final Session session) {
-        super();
-        this.session = session;
-        connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
-        accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
+    protected AbstractCompositingIDBasedFileAccess(Session session) {
+        super(session);
     }
 
     @Override
@@ -1447,191 +1430,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             gets.add(new IDTuple(fileID.getFolderId(), fileID.getFileId()));
         }
         return fileAccesses;
-    }
-
-    /**
-     * Gets the file access.
-     *
-     * @param serviceId The service identifier
-     * @param accountId The account identifier
-     * @return The file access
-     * @throws OXException If an error occurs
-     */
-    protected FileStorageFileAccess getFileAccess(final String serviceId, final String accountId) throws OXException {
-        // Special handling for InfoStore
-        if (INFOSTORE_SERVICE_ID.equals(serviceId)) {
-            return getInfoStoreService().getAccountAccess(accountId, session).getFileAccess();
-        }
-
-        // Others...
-        Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
-        if (null == connectedAccounts) {
-            connectedAccounts = new HashMap<String, FileStorageAccountAccess>();
-            this.connectedAccounts.set(connectedAccounts);
-        }
-        final FileStorageAccountAccess cached = connectedAccounts.get(new StringBuilder(serviceId).append('/').append(accountId).toString());
-        if (cached != null) {
-            return cached.getFileAccess();
-        }
-        final FileStorageService fileStorage = getFileStorageService(serviceId);
-
-        final FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
-        connect(accountAccess);
-        return accountAccess.getFileAccess();
-    }
-
-    /**
-     * Gets the folder access.
-     *
-     * @param serviceId The service identifier
-     * @param accountId The account identifier
-     * @return The folder access
-     * @throws OXException If an error occurs
-     */
-    protected FileStorageFolderAccess getFolderAccess(final String serviceId, final String accountId) throws OXException {
-        // Special handling for InfoStore
-        if (INFOSTORE_SERVICE_ID.equals(serviceId)) {
-            return getInfoStoreService().getAccountAccess(accountId, session).getFolderAccess();
-        }
-
-        // Others...
-        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
-        if (cached != null) {
-            return cached.getFolderAccess();
-        }
-        final FileStorageService fileStorage = getFileStorageService(serviceId);
-
-        final FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
-        connect(accountAccess);
-        return accountAccess.getFolderAccess();
-    }
-
-    private void connect(final FileStorageAccountAccess accountAccess) throws OXException {
-        final String id = accountAccess.getService().getId() + "/" + accountAccess.getAccountId();
-
-        Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
-        if (!connectedAccounts.containsKey(id)) {
-            connectedAccounts.put(id, accountAccess);
-            accountAccess.connect();
-            List<FileStorageAccountAccess> accessesToClose = this.accessesToClose.get();
-            if (null == accessesToClose) {
-                accessesToClose = new LinkedList<FileStorageAccountAccess>();
-                this.accessesToClose.set(accessesToClose);
-            }
-            accessesToClose.add(accountAccess);
-        }
-    }
-
-    protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
-        final List<FileStorageService> allFileStorageServices = getAllFileStorageServices();
-        final List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
-        for (final FileStorageService fsService : allFileStorageServices) {
-            List<FileStorageAccount> accounts = null;
-            if (fsService instanceof AccountAware) {
-                accounts = ((AccountAware) fsService).getAccounts(session);
-            }
-            if (null == accounts) {
-                accounts = fsService.getAccountManager().getAccounts(session);
-            }
-            for (final FileStorageAccount fileStorageAccount : accounts) {
-                try {
-                    final FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
-                    connect(accountAccess);
-                    retval.add(accountAccess.getFileAccess());
-                } catch (OXException e) {
-                    // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
-                    if (!e.equalsCode(4, "OAUTH") && !OXExceptions.containsCommunicationError(e)) {
-                        throw e;
-                    }
-                }
-            }
-        }
-        return retval;
-    }
-
-    /**
-     * Gets the special InfoStore service.
-     *
-     * @return The special InfoStore service
-     * @throws OXException If special InfoStore cannot be returned
-     */
-    protected FileStorageService getInfoStoreService() throws OXException {
-        FileStorageService infstoreService = INFOSTORE_SERVICE_REF.get();
-        if (null == infstoreService) {
-            infstoreService = Services.getService(FileStorageServiceRegistry.class).getFileStorageService(INFOSTORE_SERVICE_ID);
-            if (null == infstoreService) {
-                throw FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.create(INFOSTORE_SERVICE_ID);
-            }
-            INFOSTORE_SERVICE_REF.set(infstoreService);
-        }
-        return infstoreService;
-    }
-
-    protected abstract FileStorageService getFileStorageService(String serviceId) throws OXException;
-
-    protected abstract List<FileStorageService> getAllFileStorageServices() throws OXException;
-
-    protected abstract EventAdmin getEventAdmin();
-
-    // Transaction Handling
-
-    @Override
-    protected void commit(final Transaction transaction) throws TransactionException {
-        // Nothing
-    }
-
-    @Override
-    protected Transaction createTransaction() throws TransactionException {
-        return null;
-    }
-
-    @Override
-    protected void rollback(final Transaction transaction) throws TransactionException {
-        // Nothing
-    }
-
-    @Override
-    public void setCommitsTransaction(final boolean commits) {
-        // Nothing
-    }
-
-    @Override
-    public void setRequestTransactional(final boolean transactional) {
-        // Nothing
-    }
-
-    @Override
-    public void setTransactional(final boolean transactional) {
-        // Nothing
-    }
-
-    @Override
-    public void startTransaction() throws TransactionException {
-        super.startTransaction();
-        Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
-        if (null != connectedAccounts) {
-            connectedAccounts.clear();
-        }
-        List<FileStorageAccountAccess> accessesToClose = this.accessesToClose.get();
-        if (null != accessesToClose) {
-            accessesToClose.clear();
-        }
-    }
-
-    @Override
-    public void finish() throws TransactionException {
-        Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
-        if (null != connectedAccounts) {
-            connectedAccounts.clear();
-        }
-        List<FileStorageAccountAccess> accessesToClose = this.accessesToClose.get();
-        if (null != accessesToClose) {
-            for (final FileStorageAccountAccess acc : accessesToClose) {
-                acc.close();
-            }
-            accessesToClose.clear();
-        }
-        super.finish();
     }
 
     /**

@@ -56,16 +56,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptions;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -81,40 +77,24 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.java.Collators;
 import com.openexchange.session.Session;
-import com.openexchange.tx.AbstractService;
-import com.openexchange.tx.TransactionException;
 
 /**
  * {@link AbstractCompositingIDBasedFolderAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractService<Transaction> implements IDBasedFolderAccess {
+public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCompositingIDBasedAccess implements IDBasedFolderAccess {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFolderAccess.class);
-
-    private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
-    private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
-    private final Session session;
 
     /**
      * Initializes a new {@link AbstractCompositingIDBasedFolderAccess}.
      *
      * @param session The associated session
      */
-    protected AbstractCompositingIDBasedFolderAccess(final Session session) {
-        super();
-        this.session = session;
-        connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
-        accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
+    protected AbstractCompositingIDBasedFolderAccess(Session session) {
+        super(session);
     }
-
-    /**
-     * Gets the {@link EventAdmin} service.
-     *
-     * @return The event admin service
-     */
-    protected abstract EventAdmin getEventAdmin();
 
     @Override
     public boolean exists(String folderId) throws OXException {
@@ -266,46 +246,6 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
         return getFolderAccess(folderID).getQuotas(folderID.getFolderId(), types);
     }
 
-    /**
-     * Gets the folder access.
-     *
-     * @param serviceId The service identifier
-     * @param accountId The account identifier
-     * @return The folder access
-     * @throws OXException If an error occurs
-     */
-    protected FileStorageFolderAccess getFolderAccess(String serviceId, String accountId) throws OXException {
-        FileStorageAccountAccess accountAccess = connectedAccounts.get().get(serviceId + '/' + accountId);
-        if (null == accountAccess) {
-            try {
-                FileStorageService fileStorage = getFileStorageService(serviceId);
-                accountAccess = fileStorage.getAccountAccess(accountId, session);
-                connect(accountAccess);
-            } catch (OXException e) {
-                // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
-                if (e.equalsCode(4, "OAUTH") || OXExceptions.containsCommunicationError(e)) {
-                    throw FileStorageExceptionCodes.ACCOUNT_NOT_ACCESSIBLE.create(e, accountId, serviceId, session.getUserId(), session.getContextId());
-                }
-                throw e;
-            }
-        }
-        return accountAccess.getFolderAccess();
-    }
-
-    protected FileStorageFolderAccess getFolderAccess(FolderID folderID) throws OXException {
-        return getFolderAccess(folderID.getService(), folderID.getAccountId());
-    }
-
-    private void connect(FileStorageAccountAccess accountAccess) throws OXException {
-        String id = accountAccess.getService().getId() + '/' + accountAccess.getAccountId();
-        Map<String, FileStorageAccountAccess> accounts = connectedAccounts.get();
-        if (false == accounts.containsKey(id)) {
-            accounts.put(id, accountAccess);
-            accountAccess.connect();
-            accessesToClose.get().add(accountAccess);
-        }
-    }
-
     @Override
     public FileStorageFolder getPersonalFolder(String folderId) throws OXException {
         FolderID folderID = new FolderID(folderId);
@@ -364,7 +304,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
     }
 
     protected List<AccessWrapper> getAllAccountAccesses() throws OXException {
-        List<FileStorageService> allFileStorageServices = getAllFileStorageServices();
+        List<FileStorageService> allFileStorageServices = getFileStorageServiceRegistry().getAllServices();
         List<AccessWrapper> accountAccesses = new ArrayList<AccessWrapper>(allFileStorageServices.size());
         for (FileStorageService fsService : allFileStorageServices) {
             List<FileStorageAccount> accounts = null;
@@ -375,82 +315,12 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
                 accounts = fsService.getAccountManager().getAccounts(session);
             }
             for (FileStorageAccount fileStorageAccount : accounts) {
-                try {
-                    FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
-                    connect(accountAccess);
-                    accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
-                } catch (OXException e) {
-                    // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
-                    if (!e.equalsCode(4, "OAUTH") && !OXExceptions.containsCommunicationError(e)) {
-                        throw e;
-                    }
-                }
+                FileStorageAccountAccess accountAccess = getAccountAccess(fsService.getId(), fileStorageAccount.getId());
+                accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
             }
         }
         return accountAccesses;
     }
-
-    protected abstract FileStorageService getFileStorageService(String serviceId) throws OXException;
-
-    protected abstract List<FileStorageService> getAllFileStorageServices() throws OXException;
-
-    // Transaction Handling
-
-    @Override
-    protected void commit(final Transaction transaction) throws TransactionException {
-        // Nothing
-    }
-
-    @Override
-    protected Transaction createTransaction() throws TransactionException {
-        return null;
-    }
-
-    @Override
-    protected void rollback(final Transaction transaction) throws TransactionException {
-        // Nothing
-    }
-
-    @Override
-    public void setCommitsTransaction(final boolean commits) {
-        // Nothing
-    }
-
-    @Override
-    public void setRequestTransactional(final boolean transactional) {
-        // Nothing
-    }
-
-    @Override
-    public void setTransactional(final boolean transactional) {
-        // Nothing
-    }
-
-    @Override
-    public void startTransaction() throws TransactionException {
-        super.startTransaction();
-        connectedAccounts.get().clear();
-        accessesToClose.get().clear();
-    }
-
-    @Override
-    public void finish() throws TransactionException {
-        connectedAccounts.get().clear();
-        for(final FileStorageAccountAccess acc : accessesToClose.get()) {
-            acc.close();
-        }
-        accessesToClose.get().clear();
-        super.finish();
-    }
-
-//    private Dictionary<String, Object> getEventProperties(FolderID folderID) {
-//        Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
-//        properties.put(FileStorageEventConstants.SESSION, session);
-//        properties.put(FileStorageEventConstants.FOLDER_ID, folderID.getFolderId());
-//        properties.put(FileStorageEventConstants.ACCOUNT_ID, folderID.getAccountId());
-//        properties.put(FileStorageEventConstants.SERVICE, folderID.getService());
-//        return properties;
-//    }
 
     private Dictionary<String, Object> getEventProperties(FolderID folderID, FileStorageFolder[] path) {
         Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
@@ -467,12 +337,6 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
         }
         return properties;
     }
-
-//    private Dictionary<String, Object> getEventProperties(FolderID folderID, FolderID parentFolderID) {
-//        Dictionary<String, Object> properties = getEventProperties(folderID);
-//        properties.put(FileStorageEventConstants.PARENT_FOLDER_ID, parentFolderID.getFolderId());
-//        return properties;
-//    }
 
     private void fire(final Event event) {
         EventAdmin eventAdmin = getEventAdmin();
@@ -507,7 +371,6 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
             this.accountAccess = accountAccess;
             this.displayName = displayName;
         }
-
 
     }
 
