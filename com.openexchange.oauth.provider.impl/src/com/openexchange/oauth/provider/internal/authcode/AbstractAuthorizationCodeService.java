@@ -57,7 +57,7 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link AbstractAuthorizationCodeService}
+ * {@link AbstractAuthorizationCodeService} - The abstract {@link AuthorizationCodeService} class.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
@@ -118,6 +118,9 @@ public abstract class AbstractAuthorizationCodeService implements AuthorizationC
     protected Scope parseScopeFromValue(String value) {
         int start = value.lastIndexOf("?==?") + 4;
         String sScope = value.substring(start);
+        if ("null".equals(sScope)) {
+            return null;
+        }
         return DefaultScope.parseScope(sScope);
     }
 
