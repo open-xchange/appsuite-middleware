@@ -132,4 +132,19 @@ public interface OAuthProviderConstants {
     /** Required. Must always be <b>authorization_code</b>. */
     public static final String PARAM_GRANT_TYPE = "grant_type";
 
+    /** Required. The user login */
+    public static final String PARAM_USER_LOGIN = "user_login";
+
+    /** Required. The user password */
+    public static final String PARAM_USER_PASSWORD = "user_password";
+
+    /** Required. The user password */
+    public static final String PARAM_ACCESS_DENIED = "access_denied";
+
+    /** The error */
+    public static final Object PARAM_ERROR = "error";
+
+    /** The error description */
+    public static final Object PARAM_ERROR_DESCRIPTION = "error_description";
+
 }
