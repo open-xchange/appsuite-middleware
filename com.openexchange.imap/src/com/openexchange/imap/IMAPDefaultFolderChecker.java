@@ -546,7 +546,7 @@ public class IMAPDefaultFolderChecker {
                  */
                 throw MimeMailException.handleMessagingException(e, imapConfig, session);
             }
-            LOG.warn("Couldn't check default folder: {}", (null == fullName ? (namespace + name) : fullName), e);
+            LOG.warn("Couldn't check default folder: {}. Namespace prefix: \"{}\"", (null == fullName ? (namespace + name) : fullName), (null == namespace ? "null" : namespace), e);
             OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
             imapAccess.addWarnings(Collections.singleton(warning));
         }
