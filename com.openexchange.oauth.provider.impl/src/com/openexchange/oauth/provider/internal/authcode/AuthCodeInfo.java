@@ -49,38 +49,133 @@
 
 package com.openexchange.oauth.provider.internal.authcode;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.OAuthToken;
-import com.openexchange.oauth.provider.Scope;
-import com.openexchange.server.ServiceLookup;
-
-
 /**
- * {@link DbAuthorizationCodeService}
+ * {@link AuthCodeInfo}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService {
+public class AuthCodeInfo {
+
+    private String clientId;
+    private String scope;
+    private int userId;
+    private int contextId;
+    private long nanos;
 
     /**
-     * Initializes a new {@link DbAuthorizationCodeService}.
+     * Initializes a new {@link AuthCodeInfo}.
      */
-    public DbAuthorizationCodeService(ServiceLookup services) {
-        super(services);
+    public AuthCodeInfo() {
+        super();
     }
 
-    @Override
-    public String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    /**
+     * Initializes a new {@link AuthCodeInfo}.
+     *
+     * @param clientId The client identifier
+     * @param scope The scope identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param nanos The nanos
+     */
+    public AuthCodeInfo(String clientId, String scope, int userId, int contextId, long nanos) {
+        super();
+        this.clientId = clientId;
+        this.scope = scope;
+        this.userId = userId;
+        this.contextId = contextId;
+        this.nanos = nanos;
     }
 
-    @Override
-    public OAuthToken redeemAuthCode(Client client, String authCode) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    /**
+     * Gets the client identifier
+     *
+     * @return The client identifier
+     */
+    public String getClientId() {
+        return clientId;
+    }
+
+    /**
+     * Sets the client identifier
+     *
+     * @param clientId The client identifier to set
+     */
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    /**
+     * Gets the scope
+     *
+     * @return The scope
+     */
+    public String getScope() {
+        return scope;
+    }
+
+    /**
+     * Sets the scope
+     *
+     * @param scope The scope to set
+     */
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Sets the user identifier
+     *
+     * @param userId The user identifier to set
+     */
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Sets the context identifier
+     *
+     * @param contextId The context identifier to set
+     */
+    public void setContextId(int contextId) {
+        this.contextId = contextId;
+    }
+
+    /**
+     * Gets the nanos
+     *
+     * @return The nanos
+     */
+    public long getNanos() {
+        return nanos;
+    }
+
+    /**
+     * Sets the nanos
+     *
+     * @param nanos The nanos to set
+     */
+    public void setNanos(long nanos) {
+        this.nanos = nanos;
     }
 
 }

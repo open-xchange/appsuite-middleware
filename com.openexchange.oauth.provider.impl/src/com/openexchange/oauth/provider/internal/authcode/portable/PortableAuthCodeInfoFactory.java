@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,26 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal.authcode;
+package com.openexchange.oauth.provider.internal.authcode.portable;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.OAuthToken;
-import com.openexchange.oauth.provider.Scope;
-import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link DbAuthorizationCodeService}
+ * {@link PortableAuthCodeInfoFactory} - The portable factory for {@link PortableAuthCodeInfo} type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
  */
-public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService {
+public class PortableAuthCodeInfoFactory extends AbstractCustomPortableFactory {
 
-    /**
-     * Initializes a new {@link DbAuthorizationCodeService}.
-     */
-    public DbAuthorizationCodeService(ServiceLookup services) {
-        super(services);
+    @Override
+    public CustomPortable create() {
+        return new PortableAuthCodeInfo();
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OAuthToken redeemAuthCode(Client client, String authCode) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public int getClassId() {
+        return PortableAuthCodeInfo.CLASS_ID;
     }
 
 }

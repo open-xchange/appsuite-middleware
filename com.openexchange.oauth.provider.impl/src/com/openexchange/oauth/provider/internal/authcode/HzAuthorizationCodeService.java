@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.internal.authcode;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.lang.RandomStringUtils;
 import com.hazelcast.core.HazelcastException;
@@ -60,8 +61,12 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.DefaultOAuthToken;
+import com.openexchange.oauth.provider.DefaultScope;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthToken;
 import com.openexchange.oauth.provider.Scope;
+import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo;
+import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -95,7 +100,7 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
         notActive = new AtomicBoolean();
     }
 
-    private IMap<String, String> map() throws OXException {
+    private IMap<String, PortableAuthCodeInfo> map() throws OXException {
         try {
             HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
             if (null == hzInstance) {
@@ -117,18 +122,18 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException {
+    public String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException {
         if (notActive.get()) {
-            return fallback.generateAuthorizationCodeFor(clientId, scope);
+            return fallback.generateAuthorizationCodeFor(clientId, scope, userId, contextId);
         }
 
         // Get Hazelcast map
-        IMap<String, String> map = map();
+        IMap<String, PortableAuthCodeInfo> map = map();
 
         // Continue...
         String authCode = RandomStringUtils.randomAlphabetic(64);
         long now = System.nanoTime();
-        map.put(authCode, generateValue(now, clientId, scope));
+        map.put(authCode, new PortableAuthCodeInfo(clientId, scope, userId, contextId, now));
         return authCode;
     }
 
@@ -139,23 +144,30 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
         }
 
         // Get Hazelcast map
-        IMap<String, String> map = map();
+        IMap<String, PortableAuthCodeInfo> map = map();
         long now = System.nanoTime();
-        String value = map.remove(authCode);
+        PortableAuthCodeInfo value = map.remove(authCode);
 
         if (null == value) {
             return null;
         }
 
         // Check if valid
-        if (false == validValue(value, now, client.getId())) {
+        int contextId = value.getContextId();
+        int userId = value.getUserId();
+        String sScope = value.getScope();
+        if (false == validValue(new AuthCodeInfo(value.getClientId(), sScope, userId, contextId, value.getNanos()), now, client.getId())) {
             return null;
         }
 
         // Valid
         DefaultOAuthToken token = new DefaultOAuthToken();
-        token.setScope(parseScopeFromValue(value));
-        // TODO: Set its attributes
+        token.setScope("null".equals(sScope) ? null : DefaultScope.parseScope(sScope));
+        token.setContextId(contextId);
+        token.setUserId(userId);
+        token.setAccessToken(new UserizedToken(userId, contextId).getToken());
+        token.setRefreshToken(new UserizedToken(userId, contextId).getToken());
+        token.setExpirationDate(new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION));
         return token;
     }
 

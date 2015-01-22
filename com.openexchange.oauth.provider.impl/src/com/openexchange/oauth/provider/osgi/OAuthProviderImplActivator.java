@@ -67,11 +67,13 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.GrantAllProvider;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeService;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeService;
+import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfoFactory;
 import com.openexchange.oauth.provider.servlets.AuthServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -228,6 +230,9 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.set(this);
+
+        // Create & register portable factory
+        registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory());
 
         String prefix = getService(DispatcherPrefixService.class).getPrefix();
         getService(HttpService.class).registerServlet(prefix + PATH_PREFIX + AuthServlet.PATH, new AuthServlet(), null, null);

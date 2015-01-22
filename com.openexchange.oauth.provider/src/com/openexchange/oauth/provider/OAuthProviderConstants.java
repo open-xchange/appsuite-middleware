@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * {@link OAuthProviderConstants} - Constants for OAuth provider.
  *
@@ -105,6 +107,13 @@ public interface OAuthProviderConstants {
      * Property name <code>"id"</code>
      */
     public static final String PROP_ID = "id";
+
+    // -------------------------------------------------------------------------------------------------------
+
+    /**
+     * The default expiration time for a generated access token in milliseconds.
+     */
+    public static final long DEFAULT_EXPIRATION = TimeUnit.HOURS.toMillis(1L);
 
     // -------------------------------------------------------------------------------------------------------
 

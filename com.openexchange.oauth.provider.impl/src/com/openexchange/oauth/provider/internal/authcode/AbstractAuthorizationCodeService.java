@@ -51,8 +51,6 @@ package com.openexchange.oauth.provider.internal.authcode;
 
 import java.util.concurrent.TimeUnit;
 import com.openexchange.oauth.provider.AuthorizationCodeService;
-import com.openexchange.oauth.provider.DefaultScope;
-import com.openexchange.oauth.provider.Scope;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -76,55 +74,6 @@ public abstract class AbstractAuthorizationCodeService implements AuthorizationC
     }
 
     /**
-     * Generate an appropriate value for given time stamp and client identifier pair
-     *
-     * @param nanos The time stamp
-     * @param clientId The client identifier
-     * @param scope The associated scope
-     * @return The value
-     */
-    protected String generateValue(long nanos, String clientId, Scope scope) {
-        return new StringBuilder(32).append(nanos).append("?==?").append(clientId).append("?==?").append(null == scope ? "null" : scope.scopeString()).toString();
-    }
-
-    /**
-     * Parses the time stamp nanos from given value
-     *
-     * @param value The value
-     * @return The nano seconds
-     */
-    protected long parseNanosFromValue(String value) {
-        return Long.parseLong(value.substring(0, value.indexOf("?==?")));
-    }
-
-    /**
-     * Parses the client identifier from given value
-     *
-     * @param value The value
-     * @return The client identifier
-     */
-    protected String parseClientIdFromValue(String value) {
-        int start = value.indexOf("?==?") + 4;
-        int end = value.indexOf("?==?", start + 1);
-        return value.substring(start, end);
-    }
-
-    /**
-     * Parses the scope from given value
-     *
-     * @param value The value
-     * @return The scope
-     */
-    protected Scope parseScopeFromValue(String value) {
-        int start = value.lastIndexOf("?==?") + 4;
-        String sScope = value.substring(start);
-        if ("null".equals(sScope)) {
-            return null;
-        }
-        return DefaultScope.parseScope(sScope);
-    }
-
-    /**
      * Checks validity of passed value in comparison to given time stamp (and session).
      *
      * @param value The value to check
@@ -132,8 +81,8 @@ public abstract class AbstractAuthorizationCodeService implements AuthorizationC
      * @param clientId The client identifier
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
-    protected boolean validValue(String value, long now, String clientId) {
-        return (TimeUnit.NANOSECONDS.toMillis(now - parseNanosFromValue(value)) <= TIMEOUT_MILLIS) && clientId.equals(parseClientIdFromValue(value));
+    protected boolean validValue(AuthCodeInfo value, long now, String clientId) {
+        return (TimeUnit.NANOSECONDS.toMillis(now - value.getNanos()) <= TIMEOUT_MILLIS) && clientId.equals(value.getClientId());
     }
 
 }

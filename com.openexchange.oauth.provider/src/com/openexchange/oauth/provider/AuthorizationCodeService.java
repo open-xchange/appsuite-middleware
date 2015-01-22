@@ -73,10 +73,12 @@ public interface AuthorizationCodeService {
      *
      * @param clientId The client identifier
      * @param scope The scope
+     * @param userId TODO
+     * @param contextId TODO
      * @return A new authorization code
      * @throws OXException If operation fails
      */
-    String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException;
+    String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException;
 
     /**
      * Redeems the passed authorization code for an access token.

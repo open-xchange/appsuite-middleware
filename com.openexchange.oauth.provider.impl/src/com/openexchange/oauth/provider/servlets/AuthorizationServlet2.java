@@ -305,7 +305,7 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
                 // Everything OK, do the redirect with authorization code & state
                 // YOUR_REDIRECT_URI/?code=AUTHORIZATION_CODE&state=STATE
 
-                String code = authCodeService.generateAuthorizationCodeFor(clientId, scope);
+                String code = authCodeService.generateAuthorizationCodeFor(clientId, scope, user.getId(), ctx.getContextId());
 
                 {
                     builder.append(concat);

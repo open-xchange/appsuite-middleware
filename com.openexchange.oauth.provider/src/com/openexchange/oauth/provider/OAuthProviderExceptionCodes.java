@@ -103,7 +103,10 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
      * No registered client was found for identifier %1$s.
      */
     CLIENT_NOT_FOUND("No registered client was found for identifier %1$s.", Category.CATEGORY_ERROR, 10),
-
+    /**
+     * Invalid authorization code: %1$s
+     */
+    INVALID_AUTH_CODE("Invalid authorization code: %1$s", Category.CATEGORY_ERROR, 11),
     ;
 
     /**
