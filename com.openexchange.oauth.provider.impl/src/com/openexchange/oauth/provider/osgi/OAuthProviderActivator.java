@@ -64,12 +64,19 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableService;
+import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableTask;
+import com.openexchange.oauth.provider.groupware.AuthCodeDeleteListener;
 import com.openexchange.oauth.provider.internal.GrantAllProvider;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeService;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeService;
@@ -79,19 +86,19 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
 /**
- * {@link OAuthProviderImplActivator} - The activator for OAuth provider implementation bundle.
+ * {@link OAuthProviderActivator} - The activator for OAuth provider implementation bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OAuthProviderImplActivator extends HousekeepingActivator {
+public final class OAuthProviderActivator extends HousekeepingActivator {
 
     private static final class HzConfigTracker implements ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> {
 
         final BundleContext context;
-        final OAuthProviderImplActivator activator;
+        final OAuthProviderActivator activator;
         private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
 
-        HzConfigTracker(BundleContext context, OAuthProviderImplActivator activator) {
+        HzConfigTracker(BundleContext context, OAuthProviderActivator activator) {
             super();
             this.context = context;
             this.activator = activator;
@@ -100,7 +107,7 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
         @Override
         public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
             final HazelcastConfigurationService hzConfigService = context.getService(reference);
-            final Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderImplActivator.class);
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderActivator.class);
 
             try {
                 boolean hzEnabled = hzConfigService.isEnabled();
@@ -216,9 +223,9 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
     private static final String PATH_PREFIX = "oauth2/";
 
     /**
-     * Initializes a new {@link OAuthProviderImplActivator}.
+     * Initializes a new {@link OAuthProviderActivator}.
      */
-    public OAuthProviderImplActivator() {
+    public OAuthProviderActivator() {
         super();
     }
 
@@ -252,6 +259,14 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
         OAuthProviderService oauth2ProviderService = new GrantAllProvider();
         registerService(OAuthProviderService.class, oauth2ProviderService);
         addService(OAuthProviderService.class, oauth2ProviderService);
+
+        // Register update task, create table job and delete listener
+        registerService(CreateTableService.class, new AuthCodeCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask()));
+        registerService(DeleteListener.class, new AuthCodeDeleteListener());
+
+
+
 
         /*
          * Register OAuth provider service

@@ -109,7 +109,7 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
             return hzInstance.getMap(mapName);
         } catch (HazelcastInstanceNotActiveException e) {
             handleNotActiveException(e);
-            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            return null;
         } catch (HazelcastException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -129,6 +129,9 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
 
         // Get Hazelcast map
         IMap<String, PortableAuthCodeInfo> map = map();
+        if (null == map) {
+            return fallback.generateAuthorizationCodeFor(clientId, scope, userId, contextId);
+        }
 
         // Continue...
         String authCode = RandomStringUtils.randomAlphabetic(64);
@@ -145,6 +148,10 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
 
         // Get Hazelcast map
         IMap<String, PortableAuthCodeInfo> map = map();
+        if (null == map) {
+            return null;
+        }
+
         long now = System.nanoTime();
         PortableAuthCodeInfo value = map.remove(authCode);
 
