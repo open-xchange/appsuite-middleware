@@ -126,16 +126,20 @@ public class DefaultScope implements Scope {
             return true;
         }
 
+        // Given scope is not literally contained; check for others that might include it
         Matcher prefixedScopeMatcher = PREFIXED_OAUTH_SCOPE.matcher(requiredScope);
         if (prefixedScopeMatcher.matches()) {
             String prefix = prefixedScopeMatcher.group(1);
             String scope = prefixedScopeMatcher.group(2);
             switch (prefix) {
                 case "r_":
-                    return scopes.contains("r_" + scope);
+                    // Do also check for "rw_" which includes "r"
+                    return scopes.contains("rw_" + scope);
                 case "w_":
-                    return scopes.contains("w_" + scope);
+                    // Do also check for "rw_" which includes "w"
+                    return scopes.contains("rw_" + scope);
                 case "rw_":
+                    // Do also for separate "r" and "w"
                     return scopes.contains("r_" + scope) && scopes.contains("w_" + scope);
             }
         }
