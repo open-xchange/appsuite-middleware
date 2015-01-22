@@ -71,6 +71,8 @@ import com.openexchange.oauth.provider.OAuthGrant;
 
 /**
  * {@link TokenEndpoint}
+ * <p>
+ * <img src="./webflow.png" alt="OAuth Web Flow">
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
