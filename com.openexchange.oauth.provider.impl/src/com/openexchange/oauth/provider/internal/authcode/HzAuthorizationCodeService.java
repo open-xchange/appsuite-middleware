@@ -51,18 +51,20 @@ package com.openexchange.oauth.provider.internal.authcode;
 
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.lang.RandomStringUtils;
+
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.DefaultOAuthToken;
 import com.openexchange.oauth.provider.DefaultScope;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
+import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthToken;
 import com.openexchange.oauth.provider.Scope;
 import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo;
@@ -111,9 +113,9 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
             handleNotActiveException(e);
             return null;
         } catch (HazelcastException e) {
-            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
