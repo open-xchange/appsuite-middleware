@@ -49,26 +49,19 @@
 
 package com.openexchange.oauth.provider;
 
-import java.util.Date;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link OAuthToken}
+ * {@link OAuthResourceService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface OAuthToken {
+public interface OAuthResourceService {
 
-    int getContextId();
+    OAuthGrant validate(String accessToken) throws OXException;
 
-    int getUserId();
-
-    String getAccessToken();
-
-    String getRefreshToken();
-
-    Date getExpirationDate();
-
-    Scope getScope();
+    Client getClient(OAuthGrant token) throws OXException;
 
 }

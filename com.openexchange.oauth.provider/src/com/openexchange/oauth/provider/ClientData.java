@@ -49,6 +49,10 @@
 
 package com.openexchange.oauth.provider;
 
+import java.net.URI;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * {@link ClientData}
  *
@@ -64,6 +68,13 @@ public class ClientData {
     private String description;
 
     private String contactAddress;
+
+    private final List<URI> redirectUris;
+
+    public ClientData() {
+        super();
+        redirectUris = new LinkedList<>();
+    }
 
     public String getOwner() {
         return owner;
@@ -95,6 +106,20 @@ public class ClientData {
 
     public void setContactAddress(String contactAddress) {
         this.contactAddress = contactAddress;
+    }
+
+
+    /**
+     * Gets the redirectUris
+     *
+     * @return The redirectUris
+     */
+    public List<URI> getRedirectUris() {
+        return redirectUris;
+    }
+
+    public void addRedirectUri(URI uri) {
+        redirectUris.add(uri);
     }
 
 }

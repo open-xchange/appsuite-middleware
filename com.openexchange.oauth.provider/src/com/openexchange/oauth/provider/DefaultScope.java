@@ -82,7 +82,7 @@ public class DefaultScope implements Scope {
      */
     public static DefaultScope parseScope(String scopeStr) {
         if (Strings.isEmpty(scopeStr)) {
-            return null;
+            return new DefaultScope();
         }
 
         return new DefaultScope(Strings.splitByComma(scopeStr));

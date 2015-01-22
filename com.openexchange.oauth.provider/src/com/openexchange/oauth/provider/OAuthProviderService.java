@@ -49,7 +49,9 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
@@ -57,25 +59,59 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public interface OAuthProviderService extends OAuthProviderConstants {
 
-    /**
-     *
-     * @param accessToken
-     * @return
-     * @throws OXException
-     */
-    OAuthToken validate(String accessToken) throws OXException;
-
-    Client getClient(OAuthToken token) throws OXException;
+    // -------------------------------------- Client Handling -------------------------------------- \\
 
     Client getClientByID(String clientID) throws OXException;
 
-    // ------------------------------------------------------------------------------------------------------
+    Client registerClient(ClientData clientData) throws OXException;
 
-    String generateToken(int contextId, int userId, Scope scope);
+    Client unregisterClient(String clientId) throws OXException;
 
-    String generateAuthToken(int contextId, int userId);
+    Client revokeClientSecret(String clientId) throws OXException;
+
+    // -------------------------------- Authorization Code Handling -------------------------------- \\
+    //  Manages authorization codes generated for/redeemed by OAuth client applications.
+
+    /**
+     * The default timeout for an generated authorization code in milliseconds.
+     */
+    public static final long AUTH_CODE_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
+
+    /**
+     * Generates a new authorization code that bound to given client identifier and scope.
+     *
+     * @param contextId The context ID
+     * @param user The user ID
+     * @param clientId The client identifier
+     * @param scope The scope
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return A new authorization code
+     * @throws OXException If operation fails
+     */
+    String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException;
+
+    /**
+     * Redeems the passed authorization code for an access token.
+     *
+     * @param client The client
+     * @param authCode The authorization code
+     * @return A newly created access token or <code>null</code> if the code was invalid
+     * @throws OXException If redeem operation fails
+     */
+    OAuthGrant redeemAuthCode(Client client, String authCode) throws OXException;
+
+    // ------------------------------------ Access Code Handling ----------------------------------- \\
+
+    OAuthGrant redeemRefreshToken(Client client, String refreshToken);
+
+
+
+
+    // ---------------------------------------------------------------------------------------------
 
     /**
      * Validates given client identifier

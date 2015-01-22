@@ -51,7 +51,7 @@ package com.openexchange.ajax.requesthandler.oauth;
 
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,6 +75,6 @@ public interface OAuthSessionProvider {
      * @return The session
      * @throws OXException If an internal error occurs
      */
-    Session getSession(OAuthToken token, HttpServletRequest httpRequest) throws OXException;
+    Session getSession(OAuthGrant token, HttpServletRequest httpRequest) throws OXException;
 
 }

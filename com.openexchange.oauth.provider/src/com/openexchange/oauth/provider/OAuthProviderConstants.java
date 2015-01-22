@@ -59,54 +59,14 @@ import java.util.concurrent.TimeUnit;
 public interface OAuthProviderConstants {
 
     /**
-     * The identifier of the default provider.
+     * Servlet alias of the authorization endpoint
      */
-    public static final int DEFAULT_PROVIDER = 0;
+    public static final String AUTHORIZATION_SERVLET_ALIAS = "/o/oauth2/authorization";
 
     /**
-     * Property name <code>"authorized"</code>
+     * Servlet alias of the access token endpoint
      */
-    public static final String PROP_AUTHORIZED = "authorized";
-
-    /**
-     * Property name <code>"user"</code>
-     */
-    public static final String PROP_USER = "user";
-
-    /**
-     * Property name <code>"context"</code>
-     */
-    public static final String PROP_CONTEXT = "context";
-
-    /**
-     * Property name <code>"password"</code>
-     */
-    public static final String PROP_PASSWORD = "password";
-
-    /**
-     * Property name <code>"login"</code>
-     */
-    public static final String PROP_LOGIN = "login";
-
-    /**
-     * Property name <code>"description"</code>
-     */
-    public static final String PROP_DESCRIPTION = "description";
-
-    /**
-     * Property name <code>"providerId"</code>
-     */
-    public static final String PROP_PROVIDER_ID = "providerId";
-
-    /**
-     * Property name <code>"name"</code>
-     */
-    public static final String PROP_NAME = "name";
-
-    /**
-     * Property name <code>"id"</code>
-     */
-    public static final String PROP_ID = "id";
+    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "/o/oauth2/accessToken";
 
     // -------------------------------------------------------------------------------------------------------
 
@@ -140,6 +100,9 @@ public interface OAuthProviderConstants {
 
     /** Required. Must always be <b>authorization_code</b>. */
     public static final String PARAM_GRANT_TYPE = "grant_type";
+
+    /** Required. The refresh token */
+    public static final String PARAM_REFRESH_TOKEN = "refresh_token";
 
     /** Required. The user login */
     public static final String PARAM_USER_LOGIN = "user_login";

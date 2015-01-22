@@ -50,7 +50,7 @@
 package com.openexchange.oauth.provider.internal;
 
 import java.util.Date;
-import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.Scope;
 
 /**
@@ -58,7 +58,7 @@ import com.openexchange.oauth.provider.Scope;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public abstract class AbstractToken implements OAuthToken {
+public abstract class AbstractToken implements OAuthGrant {
 
     private int contextID;
     private int userID;

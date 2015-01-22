@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,32 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal;
 
-import java.util.concurrent.TimeUnit;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import java.util.Date;
 
 
 /**
- * {@link AuthorizationCodeService} - Manages authorization codes generated for/redeemed by OAuth client applications.
+ * {@link OAuthGrant}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@SingletonService
-public interface AuthorizationCodeService {
+public class OAuthGrant {
 
-    /**
-     * The default timeout for an generated authorization code in milliseconds.
-     */
-    public static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
+    private int contextId;
 
-    /**
-     * Generates a new authorization code that bound to given client identifier and scope.
-     *
-     * @param clientId The client identifier
-     * @param scope The scope
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return A new authorization code
-     * @throws OXException If operation fails
-     */
-    String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException;
+    private int userId;
 
-    /**
-     * Redeems the passed authorization code for an access token.
-     *
-     * @param client The client
-     * @param authCode The authorization code
-     * @return A newly created access token or <code>null</code> if the code was invalid
-     * @throws OXException If redeem operation fails
-     */
-    OAuthToken redeemAuthCode(Client client, String authCode) throws OXException;
+    private String clientId;
+
+    private String accessToken;
+
+    private String refreshToken;
+
+    private Date expirationDate;
+
+    private String scope;
+
 
 }

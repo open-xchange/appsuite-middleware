@@ -92,11 +92,11 @@ import com.openexchange.oauth.provider.DefaultToken;
 import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.OAuthInvalidRequestException;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException;
-import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthRequestException;
-import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.SimOAuthProvider;
+import com.openexchange.oauth.provider.SimOAuthResourceService;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
@@ -179,7 +179,7 @@ public class OAuthDispatcherServletTest {
     private SimHttpServletRequest request;
     private SimHttpServletResponse response;
     private ByteArrayOutputStream responseStream;
-    private SimOAuthProvider provider;
+    private SimOAuthResourceService resourceService;
     private String readToken;
     private String writeToken;
     private String readWriteToken;
@@ -198,32 +198,32 @@ public class OAuthDispatcherServletTest {
 
     @Before
     public void setUp() throws Exception {
-        provider = new SimOAuthProvider();
+        resourceService = new SimOAuthResourceService();
         DefaultToken readToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("r_test"));
-        provider.addToken(readToken);
+        resourceService.addToken(readToken);
         this.readToken = readToken.getAccessToken();
 
         DefaultToken writeToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("w_test"));
-        provider.addToken(writeToken);
+        resourceService.addToken(writeToken);
         this.writeToken = writeToken.getAccessToken();
 
         DefaultToken readWriteToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("rw_test"));
-        provider.addToken(readWriteToken);
+        resourceService.addToken(readWriteToken);
         this.readWriteToken = readWriteToken.getAccessToken();
 
         DefaultToken expiredToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() - 1L), new DefaultScope("rw_test"));
-        provider.addToken(expiredToken);
+        resourceService.addToken(expiredToken);
         this.expiredToken = expiredToken.getAccessToken();
 
         DefaultToken scopelessToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope());
-        provider.addToken(scopelessToken);
+        resourceService.addToken(scopelessToken);
         this.scopelessToken = scopelessToken.getAccessToken();
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
-        serviceLookup.add(OAuthProviderService.class, provider);
+        serviceLookup.add(OAuthResourceService.class, resourceService);
         servlet = new OAuthDispatcherServlet(serviceLookup, new OAuthSessionProvider() {
             @Override
-            public ServerSession getSession(OAuthToken token, HttpServletRequest httpRequest) throws OXException {
+            public ServerSession getSession(OAuthGrant token, HttpServletRequest httpRequest) throws OXException {
                 SimServerSession simServerSession = new SimServerSession(token.getContextId(), token.getUserId());
                 simServerSession.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), "oxdb1");
                 return simServerSession;

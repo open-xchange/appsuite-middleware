@@ -58,7 +58,7 @@ import java.util.Date;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class DefaultToken implements OAuthToken {
+public class DefaultToken implements OAuthGrant {
 
     private final int contextID;
 

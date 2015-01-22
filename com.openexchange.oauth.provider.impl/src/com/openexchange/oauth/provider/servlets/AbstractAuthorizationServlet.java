@@ -62,7 +62,6 @@ import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.user.UserService;
@@ -91,15 +90,6 @@ public abstract class AbstractAuthorizationServlet extends HttpServlet {
      */
     protected OAuthProviderService getProviderService() {
         return Services.getService(OAuthProviderService.class);
-    }
-
-    /**
-     * Gets the {@link AuthorizationCodeService} instance.
-     *
-     * @return The {@link AuthorizationCodeService} instance or <code>null</code>
-     */
-    protected AuthorizationCodeService getAuthCodeService() {
-        return Services.getService(AuthorizationCodeService.class);
     }
 
     /**

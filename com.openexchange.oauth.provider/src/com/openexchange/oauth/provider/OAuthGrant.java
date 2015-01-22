@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,28 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal.authcode;
+package com.openexchange.oauth.provider;
 
-import java.util.concurrent.TimeUnit;
-import com.openexchange.oauth.provider.AuthorizationCodeService;
-import com.openexchange.server.ServiceLookup;
-
+import java.util.Date;
 
 /**
- * {@link AbstractAuthorizationCodeService} - The abstract {@link AuthorizationCodeService} class.
+ * {@link OAuthGrant}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public abstract class AbstractAuthorizationCodeService implements AuthorizationCodeService {
+public interface OAuthGrant {
 
-    /** The service look-up */
-    protected final ServiceLookup services;
+    int getContextId();
 
-    /**
-     * Initializes a new {@link AbstractAuthorizationCodeService}.
-     */
-    protected AbstractAuthorizationCodeService(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
+    int getUserId();
 
-    /**
-     * Checks validity of passed value in comparison to given time stamp (and session).
-     *
-     * @param value The value to check
-     * @param now The current time stamp nano seconds
-     * @param clientId The client identifier
-     * @return <code>true</code> if valid; otherwise <code>false</code>
-     */
-    protected boolean validValue(AuthCodeInfo value, long now, String clientId) {
-        return (TimeUnit.NANOSECONDS.toMillis(now - value.getNanos()) <= TIMEOUT_MILLIS) && clientId.equals(value.getClientId());
-    }
+    String getAccessToken();
+
+    String getRefreshToken();
+
+    Date getExpirationDate();
+
+    Scope getScope();
 
 }

@@ -55,7 +55,7 @@ import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcesso
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.OAuthInvalidRequestException;
-import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -74,7 +74,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
 
     @Override
     protected void doProcess(OAuthAction annotation, AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
-        OAuthToken accessToken = requestData.getProperty(OAuthConstants.PARAM_OAUTH_TOKEN);
+        OAuthGrant accessToken = requestData.getProperty(OAuthConstants.PARAM_OAUTH_TOKEN);
         if (accessToken == null) {
             throw new OAuthInvalidRequestException();
         }

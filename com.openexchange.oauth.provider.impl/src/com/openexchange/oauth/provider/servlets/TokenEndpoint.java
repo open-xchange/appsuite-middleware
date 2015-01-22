@@ -63,12 +63,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.OAuthToken;
-import com.openexchange.oauth.provider.osgi.Services;
+import com.openexchange.oauth.provider.OAuthGrant;
 
 
 /**
@@ -83,13 +81,11 @@ public class TokenEndpoint extends HttpServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(TokenEndpoint.class);
 
+    private final OAuthProviderService oAuthProvider;
 
-    // TODO: rename
-    private final OAuthProviderService service;
-
-    public TokenEndpoint(OAuthProviderService service) {
+    public TokenEndpoint(OAuthProviderService oAuthProvider) {
         super();
-        this.service = service;
+        this.oAuthProvider = oAuthProvider;
     }
 
     @Override
@@ -102,13 +98,13 @@ public class TokenEndpoint extends HttpServlet {
                                            &client_secret=YOUR_SECRET_KEY
          */
         try {
-            String clientID = req.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
-            if (clientID == null) {
+            String clientId = req.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
+            if (clientId == null) {
                 failWithMissingParameter(resp, OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
 
-            Client client = service.getClientByID(clientID);
+            Client client = oAuthProvider.getClientByID(clientId);
             if (client == null) {
                 failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
@@ -125,60 +121,81 @@ public class TokenEndpoint extends HttpServlet {
                 return;
             }
 
-            String redirectURI = req.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
-            if (redirectURI == null) {
-                failWithMissingParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
-                return;
-            }
-
-            if (!service.validateRedirectUri(clientID, redirectURI)) {
-                failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
-                return;
-            }
-
             String grantType = req.getParameter(OAuthProviderConstants.PARAM_GRANT_TYPE);
             if (grantType == null) {
                 failWithMissingParameter(resp, OAuthProviderConstants.PARAM_GRANT_TYPE);
                 return;
             }
 
-            if (!grantType.equals("authorization_code")) {
+            if ("authorization_code".equals(grantType)) {
+                handleAuthorizationCode(client, req, resp);
+            } else if ("refresh_token".equals(grantType)) {
+                handleRefreshToken(client, req, resp);
+            } else {
                 failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_GRANT_TYPE);
                 return;
             }
-
-            String authCode = req.getParameter(OAuthProviderConstants.PARAM_CODE);
-            if (authCode == null) {
-                failWithMissingParameter(resp, OAuthProviderConstants.PARAM_CODE);
-                return;
-            }
-
-            AuthorizationCodeService authCodeService = getAuthCodeService();
-            if (null == authCodeService) {
-                sendErrorResponse(resp, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "missing required service").put("error", "server_error").toString());
-                return;
-            }
-
-            OAuthToken token = authCodeService.redeemAuthCode(client, authCode);
-            if (token == null) {
-                failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CODE);
-                return;
-            }
-
-            JSONObject result = new JSONObject();
-            result.put("access_token", token.getAccessToken());
-            result.put("refresh_token", token.getRefreshToken());
-            result.put("expires_in", TimeUnit.SECONDS.convert(token.getExpirationDate().getTime(), TimeUnit.MILLISECONDS) - TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
-
-            resp.setContentType("application/json;charset=UTF-8");
-            resp.setStatus(HttpServletResponse.SC_OK);
-            PrintWriter writer = resp.getWriter();
-            writer.write(result.toString());
-            writer.flush();
         } catch (OXException | JSONException e) {
-            LOG.error("", e);
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            LOG.error("Token request failed", e);
+            sendErrorResponse(resp, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
+    }
+
+    private void handleAuthorizationCode(Client client, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException, OXException {
+        String redirectUri = req.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
+        if (redirectUri == null) {
+            failWithMissingParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
+            return;
+        }
+
+        if (!oAuthProvider.validateRedirectUri(client.getId(), redirectUri)) {
+            failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
+            return;
+        }
+
+        String authCode = req.getParameter(OAuthProviderConstants.PARAM_CODE);
+        if (authCode == null) {
+            failWithMissingParameter(resp, OAuthProviderConstants.PARAM_CODE);
+            return;
+        }
+
+        OAuthGrant token = oAuthProvider.redeemAuthCode(client, authCode);
+        if (token == null) {
+            failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CODE);
+            return;
+        }
+
+        respondWithToken(token, resp);
+    }
+
+    private void handleRefreshToken(Client client, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException, OXException {
+        String refreshToken = req.getParameter(OAuthProviderConstants.PARAM_REFRESH_TOKEN);
+        if (refreshToken == null) {
+            failWithMissingParameter(resp, OAuthProviderConstants.PARAM_REFRESH_TOKEN);
+            return;
+        }
+
+        OAuthGrant token = oAuthProvider.redeemRefreshToken(client, refreshToken);
+        if (token == null) {
+            failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_REFRESH_TOKEN);
+            return;
+        }
+
+        respondWithToken(token, resp);
+    }
+
+    private static void respondWithToken(OAuthGrant token, HttpServletResponse resp) throws IOException, JSONException {
+        JSONObject result = new JSONObject();
+        result.put("access_token", token.getAccessToken());
+        result.put("refresh_token", token.getRefreshToken());
+        result.put("token_type", "Bearer");
+        result.put("expires_in", TimeUnit.SECONDS.convert(token.getExpirationDate().getTime(), TimeUnit.MILLISECONDS) - TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+
+        resp.setContentType("application/json;charset=UTF-8");
+        resp.setStatus(HttpServletResponse.SC_OK);
+        PrintWriter writer = resp.getWriter();
+        writer.write(result.toString());
+        writer.flush();
     }
 
     private static void failWithMissingParameter(HttpServletResponse httpResponse, String param) throws IOException {
@@ -199,15 +216,6 @@ public class TokenEndpoint extends HttpServlet {
             LOG.error("Could not compile error response object", e);
             sendEmptyErrorResponse(httpResponse, statusCode);
         }
-    }
-
-    /**
-     * Gets the {@link AuthorizationCodeService} instance.
-     *
-     * @return The {@link AuthorizationCodeService} instance or <code>null</code>
-     */
-    private AuthorizationCodeService getAuthCodeService() {
-        return Services.getService(AuthorizationCodeService.class);
     }
 
 }

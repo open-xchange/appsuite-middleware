@@ -106,7 +106,7 @@ import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.mail.mime.utils.ImageMatcher;
-import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.OAuthResourceService;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -235,7 +235,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         final DispatcherServlet dispatcherServlet = new DispatcherServlet();
         final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, new DefaultSessionProvider(this));
-        trackService(OAuthProviderService.class);
+        trackService(OAuthResourceService.class);
         trackService(ContextService.class);
         trackService(UserService.class);
         trackService(SessiondService.class);

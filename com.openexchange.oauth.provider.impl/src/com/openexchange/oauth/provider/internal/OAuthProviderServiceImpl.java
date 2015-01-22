@@ -50,94 +50,109 @@
 package com.openexchange.oauth.provider.internal;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.DefaultScope;
-import com.openexchange.oauth.provider.DefaultToken;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.Scope;
+import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
+import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
+import com.openexchange.oauth.provider.tools.UserizedToken;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link InMemoryOAuth2ProviderService}
+ * {@link OAuthProviderServiceImpl}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.x.x
  */
-public class InMemoryOAuth2ProviderService implements OAuthProviderService {
+public class OAuthProviderServiceImpl implements OAuthProviderService {
 
-    private final Map<String, OAuthToken> tokens;
-    private final Map<String, OAuthToken> authTokens;
+    private final ServiceLookup services;
 
-    public InMemoryOAuth2ProviderService() {
-        tokens = new ConcurrentHashMap<String, OAuthToken>();
-        authTokens = new ConcurrentHashMap<String, OAuthToken>();
-    }
+    private final AbstractAuthorizationCodeProvider authCodeProvider;
 
-    @Override
-    public OAuthToken validate(String accessToken) throws OXException {
-        return tokens.get(accessToken);
-    }
-
-    @Override
-    public String generateToken(int contextId, int userId, Scope scope) {
-        String tokenString = UUID.randomUUID().toString() + "@" + contextId;
-        OAuthToken token = new DefaultToken(contextId, userId, tokenString, UUID.randomUUID().toString(), new Date(System.currentTimeMillis() + (60 * 60 * 1000L)), scope);
-
-        tokens.put(token.getAccessToken(), token);
-
-        return token.getAccessToken();
-    }
-
-    @Override
-    public String generateAuthToken(int contextId, int userId) {
-        String tokenString = UUID.randomUUID().toString() + "@" + contextId;
-        OAuthToken token = new DefaultToken(contextId, userId, tokenString, UUID.randomUUID().toString(), new Date(System.currentTimeMillis() + (60 * 60 * 1000L)), new DefaultScope());
-
-        authTokens.put(token.getAccessToken(), token);
-
-        return token.getAccessToken();
-    }
-
-    @Override
-    public Client getClient(OAuthToken token) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.provider.OAuthProviderService#validateClientId(java.lang.String)
-     */
-    @Override
-    public boolean validateClientId(String clientId) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.provider.OAuthProviderService#validateRedirectUri(java.lang.String, java.lang.String)
-     */
-    @Override
-    public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.provider.OAuthProviderService#validateScope(java.lang.String)
-     */
-    @Override
-    public Scope validateScope(String scope) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public OAuthProviderServiceImpl(ServiceLookup services, AbstractAuthorizationCodeProvider authCodeProvider) {
+        super();
+        this.services = services;
+        this.authCodeProvider = authCodeProvider;
     }
 
     @Override
     public Client getClientByID(String clientID) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public Client registerClient(ClientData clientData) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Client unregisterClient(String clientId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Client revokeClientSecret(String clientId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException {
+        return authCodeProvider.generateAuthorizationCodeFor(clientId, scope, userId, contextId);
+    }
+
+    @Override
+    public OAuthGrant redeemAuthCode(Client client, String authCode) throws OXException {
+        AuthCodeInfo authCodeInfo = authCodeProvider.redeemAuthCode(client, authCode);
+        if (authCodeInfo == null) {
+            return null;
+        }
+
+        int contextId = authCodeInfo.getContextId();
+        int userId = authCodeInfo.getUserId();
+        String accessToken = new UserizedToken(userId, contextId).getToken();
+        String refreshToken = new UserizedToken(userId, contextId).getToken();
+        Date expirationDate = new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION);
+
+        persistGrant(authCodeInfo, accessToken, refreshToken, expirationDate);
+        return new OAuthGrantImpl(authCodeInfo, accessToken, refreshToken, expirationDate);
+    }
+
+    private void persistGrant(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) throws OXException {
+
+    }
+
+    @Override
+    public OAuthGrant redeemRefreshToken(Client client, String refreshToken) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean validateClientId(String clientId) throws OXException {
+        // TODO Auto-generated method stub
+        return true;
+    }
+
+    @Override
+    public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
+        // TODO Auto-generated method stub
+        return true;
+    }
+
+    @Override
+    public Scope validateScope(String scope) throws OXException {
+        // TODO Auto-generated method stub
+        return new DefaultScope("rw_calendar");
     }
 
 }

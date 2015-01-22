@@ -57,18 +57,18 @@ import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
 
 
 /**
- * {@link SimOAuthProvider}
+ * {@link SimOAuthResourceService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class SimOAuthProvider implements OAuthProviderService {
+public class SimOAuthResourceService implements OAuthResourceService {
 
-    private final Map<String, OAuthToken> tokens = new HashMap<>();
+    private final Map<String, OAuthGrant> tokens = new HashMap<>();
 
     @Override
-    public OAuthToken validate(String accessToken) throws OXException {
-        OAuthToken token = tokens.get(accessToken);
+    public OAuthGrant validate(String accessToken) throws OXException {
+        OAuthGrant token = tokens.get(accessToken);
         if (token == null) {
             throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
         }
@@ -80,7 +80,7 @@ public class SimOAuthProvider implements OAuthProviderService {
         return token;
     }
 
-    public void addToken(OAuthToken token) {
+    public void addToken(OAuthGrant token) {
         tokens.put(token.getAccessToken(), token);
     }
 
@@ -89,19 +89,7 @@ public class SimOAuthProvider implements OAuthProviderService {
     }
 
     @Override
-    public String generateToken(int contextId, int userId, Scope scope) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String generateAuthToken(int contextId, int userId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Client getClient(OAuthToken token) throws OXException {
+    public Client getClient(OAuthGrant token) throws OXException {
         return new Client() {
 
             @Override
@@ -128,32 +116,6 @@ public class SimOAuthProvider implements OAuthProviderService {
             }
 
         };
-    }
-
-    // -----------------------------------------------------------------------------------------------------
-
-    @Override
-    public boolean validateClientId(String clientId) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public Scope validateScope(String scope) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Client getClientByID(String clientID) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

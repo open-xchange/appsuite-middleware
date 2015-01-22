@@ -49,37 +49,28 @@
 
 package com.openexchange.oauth.provider.internal.authcode;
 
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.lang.RandomStringUtils;
-
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.DefaultOAuthToken;
-import com.openexchange.oauth.provider.DefaultScope;
-import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.OAuthToken;
 import com.openexchange.oauth.provider.Scope;
 import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo;
-import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link HzAuthorizationCodeService}
+ * {@link HzAuthorizationCodeProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService {
+public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvider {
 
     /**
      * The name for the associated Hazelcast map.
@@ -90,12 +81,12 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
 
     private final String mapName;
     private final AtomicBoolean notActive;
-    private final AuthorizationCodeService fallback;
+    private final AbstractAuthorizationCodeProvider fallback;
 
     /**
-     * Initializes a new {@link HzAuthorizationCodeService}.
+     * Initializes a new {@link HzAuthorizationCodeProvider}.
      */
-    public HzAuthorizationCodeService(String mapName, AuthorizationCodeService fallback, ServiceLookup services) {
+    public HzAuthorizationCodeProvider(String mapName, AbstractAuthorizationCodeProvider fallback, ServiceLookup services) {
         super(services);
         this.mapName = mapName;
         this.fallback = fallback;
@@ -143,7 +134,7 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
     }
 
     @Override
-    public OAuthToken redeemAuthCode(Client client, String authCode) throws OXException {
+    public AuthCodeInfo redeemAuthCode(Client client, String authCode) throws OXException {
         if (notActive.get()) {
             return fallback.redeemAuthCode(client, authCode);
         }
@@ -165,19 +156,23 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
         int contextId = value.getContextId();
         int userId = value.getUserId();
         String sScope = value.getScope();
-        if (false == validValue(new AuthCodeInfo(value.getClientId(), sScope, userId, contextId, value.getNanos()), now, client.getId())) {
+        AuthCodeInfo authCodeInfo = new AuthCodeInfo(value.getClientId(), sScope, userId, contextId, value.getNanos());
+        if (false == validValue(authCodeInfo, now, client.getId())) {
             return null;
         }
 
+        return authCodeInfo;
+
         // Valid
-        DefaultOAuthToken token = new DefaultOAuthToken();
-        token.setScope("null".equals(sScope) ? null : DefaultScope.parseScope(sScope));
-        token.setContextId(contextId);
-        token.setUserId(userId);
-        token.setAccessToken(new UserizedToken(userId, contextId).getToken());
-        token.setRefreshToken(new UserizedToken(userId, contextId).getToken());
-        token.setExpirationDate(new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION));
-        return token;
+        // FIXME: remove
+//        DefaultOAuthToken token = new DefaultOAuthToken();
+//        token.setScope("null".equals(sScope) ? null : DefaultScope.parseScope(sScope));
+//        token.setContextId(contextId);
+//        token.setUserId(userId);
+//        token.setAccessToken(new UserizedToken(userId, contextId).getToken());
+//        token.setRefreshToken(new UserizedToken(userId, contextId).getToken());
+//        token.setExpirationDate(new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION));
+//        return token;
     }
 
 }

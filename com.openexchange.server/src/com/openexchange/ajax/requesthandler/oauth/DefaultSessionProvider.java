@@ -84,8 +84,8 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -137,7 +137,7 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
     }
 
     @Override
-    public Session getSession(final OAuthToken token, final HttpServletRequest httpRequest) throws OXException {
+    public Session getSession(final OAuthGrant token, final HttpServletRequest httpRequest) throws OXException {
         SessiondService sessiondService = requireService(SessiondService.class, services);
         String accessToken = token.getAccessToken();
         Session session = null;
@@ -171,14 +171,14 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
         return session;
     }
 
-    private Session login(OAuthToken token, HttpServletRequest httpRequest) throws OXException {
+    private Session login(OAuthGrant token, HttpServletRequest httpRequest) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
-        OAuthProviderService oAuthProvider = requireService(OAuthProviderService.class, services);
+        OAuthResourceService oAuthResourceService = requireService(OAuthResourceService.class, services);
 
         final Context context = contextService.getContext(token.getContextId());
         final User user = userService.getUser(token.getUserId(), context);
-        final String client = oAuthProvider.getClient(token).getName();
+        final String client = oAuthResourceService.getClient(token).getName();
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(getLoginRequest(httpRequest, user, client), new HashMap<String, Object>(1), new LoginMethodClosure() {
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {

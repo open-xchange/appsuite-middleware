@@ -53,16 +53,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.DefaultOAuthToken;
-import com.openexchange.oauth.provider.DefaultScope;
-import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.OAuthToken;
 import com.openexchange.oauth.provider.Scope;
 import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.oauth.provider.tools.UserizedToken;
@@ -71,17 +66,17 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link DbAuthorizationCodeService}
+ * {@link DbAuthorizationCodeProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService {
+public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvider {
 
     /**
-     * Initializes a new {@link DbAuthorizationCodeService}.
+     * Initializes a new {@link DbAuthorizationCodeProvider}.
      */
-    public DbAuthorizationCodeService(ServiceLookup services) {
+    public DbAuthorizationCodeProvider(ServiceLookup services) {
         super(services);
     }
 
@@ -132,12 +127,12 @@ public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService
     }
 
     @Override
-    public OAuthToken redeemAuthCode(Client client, String authCode) throws OXException {
+    public AuthCodeInfo redeemAuthCode(Client client, String authCode) throws OXException {
         UserizedToken token = new UserizedToken(authCode);
         int contextId = token.getContextId();
         DatabaseService dbService = getDbService();
 
-        OAuthToken oAuthToken = null;
+        AuthCodeInfo authCodeInfo = null;
 
         Connection con = dbService.getWritable(contextId);
         boolean rollback = false;
@@ -145,12 +140,12 @@ public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService
             Databases.startTransaction(con);
             rollback = true;
 
-            oAuthToken = redeemAuthCode(client, token, con);
+            authCodeInfo = redeemAuthCode(client, token, con);
 
             con.commit();
             rollback = false;
 
-            return oAuthToken;
+            return authCodeInfo;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -158,7 +153,7 @@ public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            if (null == oAuthToken) {
+            if (null == authCodeInfo) {
                 dbService.backWritableAfterReading(contextId, con);
             } else {
                 dbService.backWritable(contextId, con);
@@ -166,7 +161,7 @@ public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService
         }
     }
 
-    private OAuthToken redeemAuthCode(Client client, UserizedToken authCode, Connection con) throws OXException {
+    private AuthCodeInfo redeemAuthCode(Client client, UserizedToken authCode, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -192,7 +187,8 @@ public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService
 
             // Perform check
             long now = System.nanoTime();
-            if (false == super.validValue(new AuthCodeInfo(clientId, sScope, userId, contextId, nanos), now, client.getId())) {
+            AuthCodeInfo authCodeInfo = new AuthCodeInfo(clientId, sScope, userId, contextId, nanos);
+            if (false == super.validValue(authCodeInfo, now, client.getId())) {
                 return null;
             }
             if (authCode.getContextId() != contextId) {
@@ -202,15 +198,7 @@ public class DbAuthorizationCodeService extends AbstractAuthorizationCodeService
                 return null;
             }
 
-            // Valid
-            DefaultOAuthToken token = new DefaultOAuthToken();
-            token.setScope("null".equals(sScope) ? null : DefaultScope.parseScope(sScope));
-            token.setContextId(contextId);
-            token.setUserId(userId);
-            token.setAccessToken(new UserizedToken(userId, contextId).getToken());
-            token.setRefreshToken(new UserizedToken(userId, contextId).getToken());
-            token.setExpirationDate(new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION));
-            return token;
+            return authCodeInfo;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

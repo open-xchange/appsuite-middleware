@@ -52,12 +52,12 @@ package com.openexchange.oauth.provider;
 import java.util.Date;
 
 /**
- * {@link DefaultOAuthToken} - The default {@link OAuthToken} implementation.
+ * {@link DefaultOAuthToken} - The default {@link OAuthGrant} implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DefaultOAuthToken implements OAuthToken {
+public class DefaultOAuthToken implements OAuthGrant {
 
     private int contextId;
     private int userId;

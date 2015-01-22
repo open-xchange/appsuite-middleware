@@ -75,9 +75,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.OAuthInvalidRequestException;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException;
+import com.openexchange.oauth.provider.OAuthResourceService;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.OAuthToken;
+import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -136,8 +136,8 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
             throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
         }
 
-        OAuthProviderService oAuthProvider = requireService(OAuthProviderService.class, services);
-        OAuthToken token = oAuthProvider.validate(accessToken);
+        OAuthResourceService oAuthResourceService = requireService(OAuthResourceService.class, services);
+        OAuthGrant token = oAuthResourceService.validate(accessToken);
         Session session = sessionProvider.getSession(token, httpRequest);
         SessionUtility.rememberSession(httpRequest, ServerSessionAdapter.valueOf(session));
         httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_TOKEN, token);
@@ -155,7 +155,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
         }
 
-        OAuthToken token = (OAuthToken) httpRequest.getAttribute(OAuthConstants.PARAM_OAUTH_TOKEN);
+        OAuthGrant token = (OAuthGrant) httpRequest.getAttribute(OAuthConstants.PARAM_OAUTH_TOKEN);
         if (token == null) {
             LOG.warn("OAuthToken was not contained in servlet request attributes!", new Exception());
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);

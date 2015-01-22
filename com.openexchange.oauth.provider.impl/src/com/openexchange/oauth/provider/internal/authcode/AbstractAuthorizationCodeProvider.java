@@ -47,37 +47,49 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider.internal.authcode;
 
-import net.oauth.v2.OAuth2Validator;
-import net.oauth.v2.SimpleOAuth2Validator;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.Scope;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link DatabaseOAuth2Validator} - A simple {@link OAuth2Validator}.
+ * {@link AbstractAuthorizationCodeProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public final class DatabaseOAuth2Validator extends SimpleOAuth2Validator {
+public abstract class AbstractAuthorizationCodeProvider {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseOAuth2Validator.class);
+    /** The service look-up */
+    protected final ServiceLookup services;
 
     /**
-     * Initializes a new {@link DatabaseOAuth2Validator} that rejects messages more than five minutes old or with a OAuth version other than
-     * <code>1.0</code>.
+     * Initializes a new {@link AbstractAuthorizationCodeProvider}.
      */
-    public DatabaseOAuth2Validator() {
+    protected AbstractAuthorizationCodeProvider(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
+    public abstract String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException;
+
+    public abstract AuthCodeInfo redeemAuthCode(Client client, String authCode) throws OXException;
+
     /**
-     * Initializes a new {@link DatabaseOAuth2Validator}.
+     * Checks validity of passed value in comparison to given time stamp (and session).
      *
-     * @param maxTimestampAgeMsec The range of valid time stamps, in milliseconds into the past or future. So the total range of valid time
-     *            stamps is twice this value, rounded to the nearest second.
-     * @param maxVersion The maximum valid oauth_version
+     * @param value The value to check
+     * @param now The current time stamp nano seconds
+     * @param clientId The client identifier
+     * @return <code>true</code> if valid; otherwise <code>false</code>
      */
-    public DatabaseOAuth2Validator(final long maxTimestampAgeMsec, final double maxVersion) {
-        super(maxTimestampAgeMsec, maxVersion);
+    protected boolean validValue(AuthCodeInfo value, long now, String clientId) {
+        return (TimeUnit.NANOSECONDS.toMillis(now - value.getNanos()) <= OAuthProviderService.AUTH_CODE_TIMEOUT_MILLIS) && clientId.equals(value.getClientId());
     }
 
 }

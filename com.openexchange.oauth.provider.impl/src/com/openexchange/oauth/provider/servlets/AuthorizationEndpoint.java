@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -76,7 +77,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.Scope;
@@ -85,25 +85,26 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * {@link AuthorizationServlet2} - Authorization request handler for OAuth2.0.
+ * {@link AuthorizationEndpoint} - Authorization request handler for OAuth2.0.
  * <p>
  * <img src="./webflow.png" alt="OAuth Web Flow">
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
+public class AuthorizationEndpoint extends HttpServlet {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AuthorizationServlet2.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AuthorizationEndpoint.class);
 
     private static final long serialVersionUID = 6393806486708501254L;
 
-    public static final String SERVLET_ALIAS = "/o/oauth2/authorization";
+    private final OAuthProviderService oAuthProvider;
 
     /**
-     * Initializes a new {@link AuthorizationServlet2}.
+     * Initializes a new {@link AuthorizationEndpoint}.
      */
-    public AuthorizationServlet2() {
+    public AuthorizationEndpoint(OAuthProviderService oAuthProvider) {
         super();
+        this.oAuthProvider = oAuthProvider;
     }
 
     @Override
@@ -123,18 +124,12 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
                 return;
             }
 
-            OAuthProviderService providerService = getProviderService();
-            if (null == providerService) {
-                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "missing required service").put("error", "server_error").toString());
-                return;
-            }
-
-            if (false == providerService.validateClientId(clientId)) {
+            if (false == oAuthProvider.validateClientId(clientId)) {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_CLIENT_ID).put("error", "invalid_request").toString());
                 return;
             }
 
-            if (false == providerService.validateRedirectUri(clientId, redirectUri)) {
+            if (false == oAuthProvider.validateRedirectUri(clientId, redirectUri)) {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_REDIRECT_URI).put("error", "invalid_request").toString());
                 return;
             }
@@ -261,27 +256,9 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
                 return;
             }
 
-            // Require AuthorizationCodeService service
-            AuthorizationCodeService authCodeService = getAuthCodeService();
-            if (null == authCodeService) {
-                builder.append(concat);
-                concat = '&';
-                builder.append(OAuthProviderConstants.PARAM_ERROR).append('=').append("server_error");
-
-                builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("missing required service", true, true));
-
-                builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
-
-                response.sendRedirect(builder.toString());
-                return;
-            }
-
-
             try {
                 // Validate scope
-                Scope scope = providerService.validateScope(sScope);
+                Scope scope = oAuthProvider.validateScope(sScope);
                 if (null == scope) {
                     builder.append(concat);
                     concat = '&';
@@ -318,7 +295,7 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
                 // Everything OK, do the redirect with authorization code & state
                 // YOUR_REDIRECT_URI/?code=AUTHORIZATION_CODE&state=STATE
 
-                String code = authCodeService.generateAuthorizationCodeFor(clientId, scope, user.getId(), ctx.getContextId());
+                String code = oAuthProvider.generateAuthorizationCodeFor(clientId, scope, user.getId(), ctx.getContextId());
 
                 {
                     builder.append(concat);
@@ -401,33 +378,20 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
                 return;
             }
 
-            OAuthProviderService providerService = getProviderService();
-            if (null == providerService) {
-                // Send error page
-                sendErrorPage(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "missing required service");
-                return;
-            }
-
-            AuthorizationCodeService authCodeService = getAuthCodeService();
-            if (null == authCodeService) {
-                sendErrorPage(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "missing required service");
-                return;
-            }
-
-            Scope scope = providerService.validateScope(sScope);
+            Scope scope = oAuthProvider.validateScope(sScope);
             if (null == scope) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_SCOPE);
                 return;
             }
 
-            if (false == providerService.validateClientId(clientId)) {
+            if (false == oAuthProvider.validateClientId(clientId)) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
 
-            if (false == providerService.validateRedirectUri(clientId, redirectUri)) {
+            if (false == oAuthProvider.validateRedirectUri(clientId, redirectUri)) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_REDIRECT_URI);
                 return;
@@ -446,7 +410,7 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
                 sb.append("<title>Login</title>").append(lineSep);
             }
             sb.append("</head><body>").append(lineSep);
-            sb.append("<form action=\"").append(Tools.considerSecure(request) ? "https://" : "http://").append(determineHostName(request, -1, -1)).append(SERVLET_ALIAS).append("\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">");
+            sb.append("<form action=\"").append(Tools.considerSecure(request) ? "https://" : "http://").append(determineHostName(request, -1, -1)).append(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS).append("\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">");
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\" type=\"text\">");
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\" type=\"password\">");
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CLIENT_ID).append("\" type=\"hidden\" value=\"").append(clientId).append("\">");

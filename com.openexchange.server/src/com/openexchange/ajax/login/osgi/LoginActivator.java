@@ -61,7 +61,6 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.format.CompositeLoginFormatter;
-import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -116,8 +115,6 @@ public class LoginActivator extends HousekeepingActivator {
                 ServerServiceRegistry.getInstance().removeService(clazz);
             }
         }
-        track(OAuthProviderService.class, new ServerServiceRegistryTracker<OAuthProviderService>(OAuthProviderService.class));
-        track(OAuthProviderService.class, new ServerServiceRegistryTracker<OAuthProviderService>(OAuthProviderService.class));
         track(ShareService.class, new ServerServiceRegistryTracker<ShareService>(ShareService.class));
         track(ShareCryptoService.class, new ServerServiceRegistryTracker<ShareCryptoService>(ShareCryptoService.class));
         track(ModuleSupport.class, new ServerServiceRegistryTracker<ModuleSupport>(ModuleSupport.class));
