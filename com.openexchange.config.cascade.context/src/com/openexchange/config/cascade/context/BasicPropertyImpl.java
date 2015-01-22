@@ -52,11 +52,9 @@ package com.openexchange.config.cascade.context;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.context.osgi.Services;
@@ -130,10 +128,10 @@ final class BasicPropertyImpl implements BasicProperty {
         }
 
         // Compose the attribute string to set
-        StringBuilder newNameBuilder = new StringBuilder(property.length() << 1).append(DYNAMIC_ATTR_PREFIX).append(property);
+        StringBuilder newValueBuilder = new StringBuilder(newValue.length() << 1).append(newValue.replace("%", "%25").replace(";", "%3B"));
         if (null == this.value) {
             // Newly set value
-            newNameBuilder.append("; protected=false");
+            newValueBuilder.append("; protected=false");
         } else {
             // Keep old meta-data
             int size = metadata.size();
@@ -142,19 +140,19 @@ final class BasicPropertyImpl implements BasicProperty {
                     // Check if meta-data only contains "protected=true" (which is default)
                     if (false == Boolean.parseBoolean(metadata.get("protected"))) {
                         for (Map.Entry<String, String> metaEntry : metadata.entrySet()) {
-                            newNameBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
+                            newValueBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
                         }
                     }
                 } else {
                     for (Map.Entry<String, String> metaEntry : metadata.entrySet()) {
-                        newNameBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
+                        newValueBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
                     }
                 }
             }
         }
 
         // Set and unload
-        contextService.setAttribute(newNameBuilder.toString(), newValue, contextId);
+        contextService.setAttribute(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString(), newValueBuilder.toString(), contextId);
         unload();
     }
 
@@ -181,48 +179,27 @@ final class BasicPropertyImpl implements BasicProperty {
     private void forceLoad(Context context) {
         boolean error = false;
         try {
-            List<String> values = null;
-            String fullName = null;
-            {
-                Map<String, List<String>> attributes = context.getAttributes();
-                if (attributes.isEmpty()) {
-                    this.value = null;
-                    metadata = Collections.emptyMap();
-                    return;
-                }
-                String prefix = new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString();
-                for (Iterator<Entry<String, List<String>>> it = attributes.entrySet().iterator(); null == values && it.hasNext();) {
-                    Map.Entry<String, List<String>> attrEntry = it.next();
-                    fullName = attrEntry.getKey();
-                    if (fullName.startsWith(prefix)) {
-                        values = attrEntry.getValue();
-                        if (fullName.length() == prefix.length()) {
-                            this.value = values.get(0);
-                            // Assume "protected=true" by default
-                            metadata = new HashMap<String, String>(2);
-                            metadata.put("protected", "true");
-                            return;
-                        }
-                    }
-                }
-            }
-            if (values == null || values.isEmpty() || null == fullName) {
+            List<String> values = context.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString());
+            if (values == null || values.isEmpty()) {
+                // No such property
                 this.value = null;
                 metadata = Collections.emptyMap();
                 return;
             }
+
             String value = values.get(0);
-            int pos = fullName.indexOf(';');
-            if (pos <= 0) {
-                this.value = value;
+            int pos = value.indexOf(';');
+            if (pos < 0) {
+                this.value = value.replaceAll("%3B", ";").replace("%25", "%");
                 // Assume "protected=true" by default
                 metadata = new HashMap<String, String>(2);
                 metadata.put("protected", "true");
                 return;
             }
+
             // Parameters available
-            String params = fullName.substring(pos).trim();
-            this.value = value;
+            String params = value.substring(pos).trim();
+            this.value = value.substring(0, pos).trim().replaceAll("%3B", ";").replace("%25", "%");
             metadata = new LinkedHashMap<String, String>(2);
             pos = 0;
             while (pos >= 0 && pos < params.length()) {
