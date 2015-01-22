@@ -57,6 +57,7 @@ import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.DefaultOAuthToken;
 import com.openexchange.oauth.provider.OAuthToken;
@@ -82,13 +83,15 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
 
     private final String mapName;
     private final AtomicBoolean notActive;
+    private final AuthorizationCodeService fallback;
 
     /**
      * Initializes a new {@link HzAuthorizationCodeService}.
      */
-    public HzAuthorizationCodeService(String mapName, ServiceLookup services) {
+    public HzAuthorizationCodeService(String mapName, AuthorizationCodeService fallback, ServiceLookup services) {
         super(services);
         this.mapName = mapName;
+        this.fallback = fallback;
         notActive = new AtomicBoolean();
     }
 
@@ -116,7 +119,7 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
     @Override
     public String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException {
         if (notActive.get()) {
-            return null;
+            return fallback.generateAuthorizationCodeFor(clientId, scope);
         }
 
         // Get Hazelcast map
@@ -132,7 +135,7 @@ public class HzAuthorizationCodeService extends AbstractAuthorizationCodeService
     @Override
     public OAuthToken redeemAuthCode(Client client, String authCode) throws OXException {
         if (notActive.get()) {
-            return null;
+            return fallback.redeemAuthCode(client, authCode);
         }
 
         // Get Hazelcast map

@@ -127,7 +127,7 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
                             }
 
                             // Initialize & register HzAuthorizationCodeService
-                            AuthorizationCodeService authCodeService = new HzAuthorizationCodeService(hzMapName, activator);
+                            AuthorizationCodeService authCodeService = new HzAuthorizationCodeService(hzMapName, new DbAuthorizationCodeService(activator), activator);
                             reg = context.registerService(AuthorizationCodeService.class, authCodeService, null);
 
                             // Add to service look-up
