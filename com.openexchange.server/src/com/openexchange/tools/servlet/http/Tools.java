@@ -70,6 +70,7 @@ import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.httpclient.HttpStatus;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
@@ -732,4 +733,65 @@ public final class Tools {
 
         httpResponse.sendError(statusCode);
     }
+
+    /**
+     * Sends an HTML error page to HTTP response.
+     * @param httpResponse The HTTP response
+     * @param statusCode The HTTP status code
+     * @param desc The error description
+     *
+     * @throws IOException If an I/O error occurs
+     */
+    public static void sendErrorPage(HttpServletResponse httpResponse, int statusCode, String desc) throws IOException {
+        httpResponse.reset();
+        httpResponse.setContentType("text/html; charset=UTF-8");
+        httpResponse.setHeader("Content-Disposition", "inline");
+        httpResponse.setStatus(statusCode);
+        PrintWriter writer = httpResponse.getWriter();
+        writer.write(getErrorPage(statusCode, null, desc));
+        writer.flush();
+    }
+
+    /**
+     * Generates a simple error page for given arguments.
+     *
+     * @param statusCode The status code; e.g. <code>404</code>
+     * @param msg The optional status message; e.g. <code>"Not Found"</code>
+     * @param desc The optional status description; e.g. <code>"The requested URL was not found on this server."</code>
+     * @return A simple error page
+     */
+    public static String getErrorPage(int statusCode, String msg, String desc) {
+        String msg0 = null == msg ? HttpStatus.getStatusText(statusCode) : msg;
+
+        StringBuilder sb = new StringBuilder(512);
+        String lineSep = System.getProperty("line.separator");
+        sb.append("<!DOCTYPE html>").append(lineSep);
+        sb.append("<html><head>").append(lineSep);
+        {
+            sb.append("<title>").append(statusCode);
+            if (null != msg0) {
+                sb.append(' ').append(msg0);
+            }
+            sb.append("</title>").append(lineSep);
+        }
+
+        sb.append("</head><body>").append(lineSep);
+
+        sb.append("<h1>");
+        if (null == msg0) {
+            sb.append(statusCode);
+        } else {
+            sb.append(msg0);
+        }
+        sb.append("</h1>").append(lineSep);
+
+        String desc0 = null == desc ? msg0 : desc;
+        if (null != desc0) {
+            sb.append("<p>").append(desc0).append("</p>").append(lineSep);
+        }
+
+        sb.append("</body></html>").append(lineSep);
+        return sb.toString();
+    }
+
 }
