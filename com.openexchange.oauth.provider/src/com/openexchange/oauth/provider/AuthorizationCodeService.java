@@ -73,8 +73,8 @@ public interface AuthorizationCodeService {
      *
      * @param clientId The client identifier
      * @param scope The scope
-     * @param userId TODO
-     * @param contextId TODO
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return A new authorization code
      * @throws OXException If operation fails
      */
