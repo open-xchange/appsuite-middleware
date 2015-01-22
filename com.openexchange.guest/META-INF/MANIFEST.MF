@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange bundle for handling guests over multiple contexts
+Bundle-SymbolicName: com.openexchange.guest
+Bundle-Version: 7.8.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Activator: com.openexchange.guest.osgi.GuestActivator
+Bundle-ClassPath: .
+Import-Package: com.openexchange.caching,
+ com.openexchange.context,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
+ com.openexchange.groupware.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.passwordmechs,
+ com.openexchange.server,
+ com.openexchange.tools.sql,
+ com.openexchange.user,
+ org.apache.commons.io,
+ org.apache.commons.lang,
+ org.apache.commons.validator.routines,
+ org.osgi.framework,
+ org.osgi.framework.wiring,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Vendor: Open-Xchange Inc.
+Export-Package: com.openexchange.guest

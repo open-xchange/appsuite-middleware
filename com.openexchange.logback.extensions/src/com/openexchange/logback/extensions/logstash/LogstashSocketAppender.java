@@ -68,7 +68,6 @@ import javax.net.SocketFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.net.AbstractSocketAppender;
 import ch.qos.logback.core.net.DefaultSocketConnector;

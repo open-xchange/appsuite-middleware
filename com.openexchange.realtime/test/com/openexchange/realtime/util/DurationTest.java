@@ -50,7 +50,6 @@
 package com.openexchange.realtime.util;
 
 import static org.junit.Assert.*;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static com.openexchange.realtime.util.Duration.*;

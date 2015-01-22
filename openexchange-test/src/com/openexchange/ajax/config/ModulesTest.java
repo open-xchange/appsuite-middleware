@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.config;
 
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;

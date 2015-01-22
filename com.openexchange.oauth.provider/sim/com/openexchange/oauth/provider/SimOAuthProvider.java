@@ -81,7 +81,7 @@ public class SimOAuthProvider implements OAuthProviderService {
     }
 
     public void addToken(OAuthToken token) {
-        tokens.put(token.getToken(), token);
+        tokens.put(token.getAccessToken(), token);
     }
 
     public void removeToken(String accessToken) {
@@ -109,7 +109,51 @@ public class SimOAuthProvider implements OAuthProviderService {
                 return "Example App";
             }
 
+            @Override
+            public String getId() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public String getDescription() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public String getSecret() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
         };
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+
+    @Override
+    public boolean validateClientId(String clientId) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Scope validateScope(String scope) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Client getClientByID(String clientID) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

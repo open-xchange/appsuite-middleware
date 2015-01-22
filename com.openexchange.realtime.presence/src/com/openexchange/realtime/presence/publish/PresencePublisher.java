@@ -50,7 +50,6 @@
 package com.openexchange.realtime.presence.publish;
 
 import java.util.List;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.ChangeListener;
 import com.openexchange.realtime.directory.Resource;

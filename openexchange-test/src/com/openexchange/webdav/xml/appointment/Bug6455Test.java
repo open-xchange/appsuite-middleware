@@ -3,7 +3,6 @@ package com.openexchange.webdav.xml.appointment;
 import java.util.Locale;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 

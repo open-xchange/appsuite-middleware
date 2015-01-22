@@ -140,7 +140,7 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
 
     private ShareExceptionCodes(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
-        this.displayMessage = displayMessage;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
         this.number = detailNumber;
         this.category = category;
     }

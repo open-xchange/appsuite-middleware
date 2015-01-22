@@ -57,6 +57,8 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 %config(noreplace) /opt/open-xchange/etc/contact-storage-ldap/cache.properties
 
 %changelog
+* Wed Jan 21 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2015-01-29
 * Mon Jan 12 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2015-01-09
 * Wed Jan 07 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.mail.filter;
 
-import java.util.Arrays;
-import java.util.List;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -58,9 +56,6 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.mail.MailTestManager;
-import com.openexchange.ajax.mail.TestMail;
-import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.action.Vacation;
 import com.openexchange.ajax.mail.filter.comparison.ContainsComparison;

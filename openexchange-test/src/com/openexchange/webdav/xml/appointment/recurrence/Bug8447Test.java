@@ -3,7 +3,6 @@ package com.openexchange.webdav.xml.appointment.recurrence;
 import java.util.Date;
 import java.util.Locale;
 
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.XmlServlet;

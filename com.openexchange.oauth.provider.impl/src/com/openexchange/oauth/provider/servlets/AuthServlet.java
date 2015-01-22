@@ -66,7 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
+import com.openexchange.oauth.provider.osgi.Services;
 
 /**
  * {@link AuthServlet}
@@ -91,7 +91,7 @@ public class AuthServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        OAuthProviderService service = OAuthProviderServiceLookup.getService(OAuthProviderService.class);
+        OAuthProviderService service = Services.getService(OAuthProviderService.class);
 
         String redirectURI = validateRedirectURI(req);
         Authenticated authenticated = null;
@@ -128,7 +128,7 @@ public class AuthServlet extends HttpServlet {
         String login = req.getParameter("login");
         String password = req.getParameter("password");
 
-        AuthenticationService authService = OAuthProviderServiceLookup.getService(AuthenticationService.class);
+        AuthenticationService authService = Services.getService(AuthenticationService.class);
         Authenticated authenticated = authService.handleLoginInfo(new DefaultLoginInfo(login, password));
         return authenticated;
     }

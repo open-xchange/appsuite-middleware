@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mail;
 
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;

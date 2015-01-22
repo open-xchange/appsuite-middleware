@@ -51,7 +51,6 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;

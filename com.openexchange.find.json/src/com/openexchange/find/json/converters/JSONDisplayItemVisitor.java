@@ -49,7 +49,6 @@
 
 package com.openexchange.find.json.converters;
 
-import static com.openexchange.ajax.AJAXUtility.sanitizeParam;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;

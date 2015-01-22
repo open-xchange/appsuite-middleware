@@ -59,22 +59,16 @@ import java.util.Date;
  */
 public interface OAuthToken {
 
-    public enum Type {
-        TOKEN,
-        AUTH_TOKEN,
-        REFRESH_TOKEN;
-    }
+    int getContextId();
 
-    int getContextID();
+    int getUserId();
 
-    int getUserID();
+    String getAccessToken();
 
-    String getToken();
+    String getRefreshToken();
 
     Date getExpirationDate();
 
     Scope getScope();
-
-    Type getType();
 
 }

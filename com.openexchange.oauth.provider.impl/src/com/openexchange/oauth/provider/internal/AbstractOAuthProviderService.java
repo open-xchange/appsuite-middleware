@@ -158,7 +158,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
             stmt.setInt(1, DEFAULT_PROVIDER);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw OAuthProviderExceptionCodes.PROVIDER_NOT_FOUND.create(Integer.valueOf(DEFAULT_PROVIDER));
+                throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(Integer.valueOf(DEFAULT_PROVIDER));
             }
             return new OAuthServiceProvider(rs.getString(1), rs.getString(2), rs.getString(3));
         } catch (final SQLException e) {

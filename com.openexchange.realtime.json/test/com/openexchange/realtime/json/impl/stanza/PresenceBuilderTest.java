@@ -57,7 +57,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +66,6 @@ import com.openexchange.realtime.json.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.json.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.PayloadTree;
 
 
 /**

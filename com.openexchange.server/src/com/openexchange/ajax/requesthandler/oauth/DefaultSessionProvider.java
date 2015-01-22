@@ -139,7 +139,7 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
     @Override
     public Session getSession(final OAuthToken token, final HttpServletRequest httpRequest) throws OXException {
         SessiondService sessiondService = requireService(SessiondService.class, services);
-        String accessToken = token.getToken();
+        String accessToken = token.getAccessToken();
         Session session = null;
         try {
             do {
@@ -176,8 +176,8 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
         UserService userService = requireService(UserService.class, services);
         OAuthProviderService oAuthProvider = requireService(OAuthProviderService.class, services);
 
-        final Context context = contextService.getContext(token.getContextID());
-        final User user = userService.getUser(token.getUserID(), context);
+        final Context context = contextService.getContext(token.getContextId());
+        final User user = userService.getUser(token.getUserId(), context);
         final String client = oAuthProvider.getClient(token).getName();
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(getLoginRequest(httpRequest, user, client), new HashMap<String, Object>(1), new LoginMethodClosure() {
             @Override

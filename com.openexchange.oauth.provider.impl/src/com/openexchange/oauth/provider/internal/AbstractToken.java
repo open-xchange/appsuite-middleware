@@ -75,17 +75,17 @@ public abstract class AbstractToken implements OAuthToken {
     }
 
     @Override
-    public int getContextID() {
+    public int getContextId() {
         return contextID;
     }
 
     @Override
-    public int getUserID() {
+    public int getUserId() {
         return userID;
     }
 
     @Override
-    public String getToken() {
+    public String getAccessToken() {
         return token;
     }
 

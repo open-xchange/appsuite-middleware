@@ -59,8 +59,6 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;

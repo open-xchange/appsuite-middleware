@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,114 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider;
 
-import com.openexchange.oauth.provider.Scope;
-
+import java.util.Date;
 
 /**
- * {@link AuthToken}
+ * {@link DefaultOAuthToken} - The default {@link OAuthToken} implementation.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class AuthToken extends AbstractToken {
+public class DefaultOAuthToken implements OAuthToken {
+
+    private int contextId;
+    private int userId;
+    private String accessToken;
+    private String refreshToken;
+    private Date expirationDate;
+    private Scope scope;
 
     /**
-     * Initializes a new {@link AuthToken}.
-     * @param contextId
-     * @param userId
-     * @param token
-     * @param lifetime
-     * @param scope
+     * Initializes a new {@link DefaultOAuthToken}.
      */
-    public AuthToken(int contextId, int userId, String token, Long lifetime, Scope scope) {
-        super(contextId, userId, token, lifetime, scope);
+    public DefaultOAuthToken() {
+        super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.provider.OAuthToken#getType()
-     */
     @Override
-    public Type getType() {
-        return Type.AUTH_TOKEN;
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    @Override
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    @Override
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    @Override
+    public Scope getScope() {
+        return scope;
+    }
+
+    /**
+     * Sets the context identifier
+     *
+     * @param contextId The context identifier to set
+     */
+    public void setContextId(int contextId) {
+        this.contextId = contextId;
+    }
+
+    /**
+     * Sets the user identifier
+     *
+     * @param userId The user identifier to set
+     */
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * Sets the access token
+     *
+     * @param accessToken The access token to set
+     */
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    /**
+     * Sets the refresh token
+     *
+     * @param refreshToken The refresh token to set
+     */
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    /**
+     * Sets the expiration date
+     *
+     * @param expirationDate The expiration date to set
+     */
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    /**
+     * Sets the scope
+     *
+     * @param scope The scope to set
+     */
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
 }

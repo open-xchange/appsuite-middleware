@@ -54,10 +54,39 @@ package com.openexchange.oauth.provider;
  * {@link Client}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
 public interface Client {
 
+    /**
+     * Gets the client's description
+     *
+     * @return The description
+     */
+    String getDescription();
+
+    /**
+     * Gets the client's name
+     *
+     * @return The name
+     */
     String getName();
+
+    /**
+     * Gets the client's public identifier
+     *
+     * @return The public identifier
+     */
+    String getId();
+
+    // TODO: Better hide?
+
+    /**
+     * Gets the client's secret identifier
+     *
+     * @return The secret identifier
+     */
+    String getSecret();
 
 }

@@ -49,16 +49,20 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.StringAppender;
+import com.openexchange.java.Strings;
 
 
 /**
  * {@link DefaultScope}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
 public class DefaultScope implements Scope {
@@ -70,23 +74,51 @@ public class DefaultScope implements Scope {
      */
     private static final Pattern PREFIXED_OAUTH_SCOPE = Pattern.compile("(r_|w_|rw_)([\\x21\\x23-\\x5b\\x5d-\\x7e]+)");
 
+    /**
+     * Parses the scope from specified string representation.
+     *
+     * @param scopeStr The sscope's string representation
+     * @return The parsed scope or <code>null</code> if string is {@link Strings#isEmpty(String) empty}
+     */
+    public static DefaultScope parseScope(String scopeStr) {
+        if (Strings.isEmpty(scopeStr)) {
+            return null;
+        }
+
+        return new DefaultScope(Strings.splitByComma(scopeStr));
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    /** The scope set */
     private final Set<String> scopes;
 
+    /**
+     * Initializes a new {@link DefaultScope}.
+     *
+     * @param scopes The scopes
+     */
     public DefaultScope(String... scopes) {
         super();
-        this.scopes = new HashSet<>();
+        Set<String> set = new HashSet<>();
         if (scopes != null) {
             for (String scope : scopes) {
                 if (scope != null) {
-                    this.scopes.add(scope);
+                    set.add(scope);
                 }
             }
         }
+        this.scopes = set;
     }
 
+    /**
+     * Initializes a new {@link DefaultScope}.
+     *
+     * @param scopes The scope set
+     */
     public DefaultScope(Set<String> scopes) {
         super();
-        this.scopes = scopes;
+        this.scopes = null == scopes ? Collections.<String> emptySet() : scopes;
     }
 
     @Override
@@ -95,16 +127,20 @@ public class DefaultScope implements Scope {
             return true;
         }
 
+        // Given scope is not literally contained; check for others that might include it
         Matcher prefixedScopeMatcher = PREFIXED_OAUTH_SCOPE.matcher(requiredScope);
         if (prefixedScopeMatcher.matches()) {
             String prefix = prefixedScopeMatcher.group(1);
             String scope = prefixedScopeMatcher.group(2);
             switch (prefix) {
                 case "r_":
+                    // Do also check for "rw_" which includes "r"
                     return scopes.contains("rw_" + scope);
                 case "w_":
+                    // Do also check for "rw_" which includes "w"
                     return scopes.contains("rw_" + scope);
                 case "rw_":
+                    // Do also for separate "r" and "w"
                     return scopes.contains("r_" + scope) && scopes.contains("w_" + scope);
             }
         }
@@ -125,10 +161,7 @@ public class DefaultScope implements Scope {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof DefaultScope)) {
             return false;
         }
         DefaultScope other = (DefaultScope) obj;
@@ -144,7 +177,21 @@ public class DefaultScope implements Scope {
 
     @Override
     public String toString() {
-        return "DefaultScope [scopes=" + scopes + "]";
+        return scopeString();
+    }
+
+    @Override
+    public String scopeString() {
+        Set<String> scopes = this.scopes;
+        if (null == scopes || scopes.isEmpty()) {
+            return "";
+        }
+
+        StringAppender sa = new StringAppender(',');
+        for (String scope : scopes) {
+            sa.append(scope);
+        }
+        return sa.toString();
     }
 
 }

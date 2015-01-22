@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,27 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.guest;
 
-import com.openexchange.oauth.provider.Scope;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Token}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * {@link GuestExceptionMessage}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class Token extends AbstractToken {
+public class GuestExceptionMessage implements LocalizableStrings {
+
+    public final static String INVALID_EMAIL_ADDRESS_MSG = "The provided mail address %1$s is invalid! It cannot be added to guest administration.";
+
+    public final static String PASSWORD_EMPTY_MSG = "The new password might not be empty! Please provide a password.";
 
     /**
-     * Initializes a new {@link Token}.
-     * @param contextId
-     * @param userId
-     * @param token
-     * @param lifetime
-     * @param scope
+     * Initializes a new {@link GuestExceptionMessage}.
      */
-    public Token(int contextId, int userId, String token, Long lifetime, Scope scope) {
-        super(contextId, userId, token, lifetime, scope);
+    private GuestExceptionMessage() {
+        super();
     }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.provider.OAuthToken#getType()
-     */
-    @Override
-    public Type getType() {
-        return Type.TOKEN;
-    }
-
 }

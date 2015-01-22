@@ -77,7 +77,6 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredential
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
-import com.openexchange.tools.encoding.Hex;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see

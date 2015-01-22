@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,45 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider;
 
-import com.openexchange.oauth.provider.Scope;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
+
 
 /**
- * {@link RefreshToken}
+ * {@link AuthorizationCodeService} - Manages authorization codes generated for/redeemed by OAuth client applications.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class RefreshToken extends AbstractToken {
+@SingletonService
+public interface AuthorizationCodeService {
 
     /**
-     * Initializes a new {@link RefreshToken}.
-     *
-     * @param contextId
-     * @param userId
-     * @param token
-     * @param lifetime
-     * @param scope
+     * The default timeout for an generated authorization code in milliseconds.
      */
-    public RefreshToken(int contextId, int userId, String token, Long lifetime, Scope scope) {
-        super(contextId, userId, token, lifetime, scope);
-    }
+    public static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Generates a new authorization code that bound to given client identifier and scope.
      *
-     * @see com.openexchange.oauth.provider.OAuthToken#getType()
+     * @param clientId The client identifier
+     * @param scope The scope
+     * @return A new authorization code
+     * @throws OXException If operation fails
      */
-    @Override
-    public Type getType() {
-        return Type.REFRESH_TOKEN;
-    }
+    String generateAuthorizationCodeFor(String clientId, Scope scope) throws OXException;
+
+    /**
+     * Redeems the passed authorization code for an access token.
+     *
+     * @param client The client
+     * @param authCode The authorization code
+     * @return A newly created access token or <code>null</code> if the code was invalid
+     * @throws OXException If redeem operation fails
+     */
+    OAuthToken redeemAuthCode(Client client, String authCode) throws OXException;
 
 }

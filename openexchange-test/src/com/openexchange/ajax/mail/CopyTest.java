@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import javax.mail.internet.AddressException;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;

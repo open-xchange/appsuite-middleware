@@ -50,7 +50,6 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.SearchRequest;

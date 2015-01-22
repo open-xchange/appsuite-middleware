@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.simple;
 
-import java.net.URI;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 
 
