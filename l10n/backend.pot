@@ -2314,6 +2314,16 @@ msgstr ""
 msgid "The file storage account is currently not accessible."
 msgstr ""
 
+#. The folder \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
+msgid "The folder \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr ""
+
+#. The file \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
+msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr ""
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
