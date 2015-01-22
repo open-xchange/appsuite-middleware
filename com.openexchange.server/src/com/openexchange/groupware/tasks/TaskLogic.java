@@ -332,7 +332,7 @@ public final class TaskLogic {
     private static void checkExternal(final Set<ExternalParticipant> participants) throws OXException {
         for (final ExternalParticipant participant : participants) {
             final String mail = participant.getMail();
-            if (null == mail || mail.length() == 0) {
+            if (null == mail || mail.isEmpty()) {
                 throw TaskExceptionCode.EXTERNAL_WITHOUT_MAIL.create();
             }
         }

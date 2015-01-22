@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,68 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.groupware.tasks.database;
 
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.osgi.HousekeepingActivator;
+import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
+import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
- * to start up the bundle.
+ * {@link RemoveUselessExternalParticipantsV2} drops table task_eparticipant because it does not contain any useful information anymore after
+ * US #53461243 and fixing bug 29809.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * TODO Enable this tasks with the next major release after 7.8.0.
+ * TODO @since
  */
-public class Activator extends HousekeepingActivator {
+public final class RemoveUselessExternalParticipantsV2 extends UpdateTaskAdapter {
 
-    // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
+    private final DatabaseService service;
 
-    public Activator() {
+    public RemoveUselessExternalParticipantsV2(DatabaseService service) {
         super();
+        this.service = service;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    public String[] getDependencies() {
+        return new String[] { RemoveUselessExternalParticipants.class.getName() };
     }
 
     @Override
-    public void startBundle() {
-        final ConfigurationService configService = getService(ConfigurationService.class);
+    public TaskAttributes getAttributes() {
+        return new Attributes(BACKGROUND, SCHEMA);
+    }
 
-        ExcludedList.getInstance().configure(configService);
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        Connection con = service.getForUpdateTask(contextID);
         try {
-            InternalList.getInstance().start();
-        } catch (Error e) {
-            // Helps finding errors in a lot of static code initialization.
-            e.printStackTrace();
+            startTransaction(con);
+            Tools.dropTable(con, "del_task_eparticipant");
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            service.backForUpdateTask(contextID, con);
         }
-
-        rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
-        rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-
-        openTrackers();
-
-        registerService(CreateTableService.class, new CreateUpdateTaskTable());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        InternalList.getInstance().stop();
-        super.stopBundle();
     }
 }

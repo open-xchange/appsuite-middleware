@@ -1,3 +1,7 @@
+* 2015-01-22 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35992: Drop external participants completely after deleting. Empty copies in a backup table do not make any sense.
+
 * 2015-01-21 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35691: Adjusted the logic of the URL parsing to extract all relevant information in order to recreate the original publication URL. Enhanced 'getpublication' and 'deletepublication CLTs.
