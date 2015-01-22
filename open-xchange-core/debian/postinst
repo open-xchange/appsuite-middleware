@@ -981,7 +981,7 @@ ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/op
 ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
 setConfigFilePermissions() {
-    PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
+    PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
     do
         ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640

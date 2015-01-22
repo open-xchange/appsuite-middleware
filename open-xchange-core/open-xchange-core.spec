@@ -191,7 +191,7 @@ find %{buildroot}/opt/open-xchange/etc \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;^(.*?)\s+(.*/paths.perfMap)$;$2;' %{configfiles}
-perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|oauth-provider|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %pre
@@ -1139,7 +1139,7 @@ ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/op
 # SoftwareChange_Request-2270
 ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
-PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
+PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
