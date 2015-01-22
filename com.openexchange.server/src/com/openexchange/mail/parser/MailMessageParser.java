@@ -436,52 +436,59 @@ public final class MailMessageParser {
                 }
             } else {
                 if (isInline) {
-                    String content = readContent(mailPart, contentType, mailId, folder);
-                    UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-                    if (uuencodedMP.isUUEncoded()) {
-                        /*
-                         * UUEncoded content detected. Handle normal text.
-                         */
-                        if (!handler.handleInlineUUEncodedPlainText(
-                            uuencodedMP.getCleanText(),
-                            contentType,
-                            uuencodedMP.getCleanText().length(),
-                            fileName,
-                            getSequenceId(prefix, partCount))) {
-                            stop = true;
-                            return;
-                        }
-                        /*
-                         * Now handle uuencoded attachments
-                         */
-                        int count = uuencodedMP.getCount();
-                        if (count > 0) {
-                            for (int a = 0; a < count; a++) {
-                                /*
-                                 * Increment part count by 1
-                                 */
-                                partCount++;
-                                if (!handler.handleInlineUUEncodedAttachment(
-                                    uuencodedMP.getBodyPart(a),
-                                    MailMessageParser.getSequenceId(prefix, partCount))) {
-                                    stop = true;
-                                    return;
+                    if (null != mailPart.getFileName()) {
+                        contentType.setParameter("realfilename", mailPart.getFileName());
+                    }
+                    try {
+                        String content = readContent(mailPart, contentType, mailId, folder);
+                        UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
+                        if (uuencodedMP.isUUEncoded()) {
+                            /*
+                             * UUEncoded content detected. Handle normal text.
+                             */
+                            if (!handler.handleInlineUUEncodedPlainText(
+                                uuencodedMP.getCleanText(),
+                                contentType,
+                                uuencodedMP.getCleanText().length(),
+                                fileName,
+                                getSequenceId(prefix, partCount))) {
+                                stop = true;
+                                return;
+                            }
+                            /*
+                             * Now handle uuencoded attachments
+                             */
+                            int count = uuencodedMP.getCount();
+                            if (count > 0) {
+                                for (int a = 0; a < count; a++) {
+                                    /*
+                                     * Increment part count by 1
+                                     */
+                                    partCount++;
+                                    if (!handler.handleInlineUUEncodedAttachment(
+                                        uuencodedMP.getBodyPart(a),
+                                        MailMessageParser.getSequenceId(prefix, partCount))) {
+                                        stop = true;
+                                        return;
+                                    }
                                 }
                             }
+                        } else {
+                            /*
+                             * Just non-encoded plain text
+                             */
+                            if (!handler.handleInlinePlainText(
+                                content,
+                                contentType,
+                                size,
+                                fileName,
+                                MailMessageParser.getSequenceId(prefix, partCount))) {
+                                stop = true;
+                                return;
+                            }
                         }
-                    } else {
-                        /*
-                         * Just non-encoded plain text
-                         */
-                        if (!handler.handleInlinePlainText(
-                            content,
-                            contentType,
-                            size,
-                            fileName,
-                            MailMessageParser.getSequenceId(prefix, partCount))) {
-                            stop = true;
-                            return;
-                        }
+                    } finally {
+                        contentType.removeParameter("realfilename");
                     }
                 } else {
                     /*
@@ -510,9 +517,16 @@ public final class MailMessageParser {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
                 if (isInline) {
-                    if (!handler.handleInlineHtml(new ContentProviderImpl(contentType, mailPart, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
-                        stop = true;
-                        return;
+                    if (null != mailPart.getFileName()) {
+                        contentType.setParameter("realfilename", mailPart.getFileName());
+                    }
+                    try {
+                        if (!handler.handleInlineHtml(new ContentProviderImpl(contentType, mailPart, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
+                            stop = true;
+                            return;
+                        }
+                    } finally {
+                        contentType.removeParameter("realfilename");
                     }
                 } else {
                     if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {

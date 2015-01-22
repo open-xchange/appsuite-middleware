@@ -232,6 +232,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private String altId;
     private boolean textAppended;
     private boolean textWasEmpty;
+    private boolean html;
     private final boolean[] modified;
     private PlainTextContent plainText;
     private String tokenFolder;
@@ -906,6 +907,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
+            html = true;
             textAppended = true;
         }
         return true;
@@ -993,6 +995,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                     getAttachmentsArr().put(jsonObject);
                 }
+                html = false;
                 textAppended = true;
                 return true;
             }
@@ -1014,9 +1017,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             /*
                              * Add alternative part as attachment
                              */
-                             if(plainTextContentArg.length() > 0) {
+                            if (null != contentType.getParameter("realfilename") && plainTextContentArg.length() > 0) {
                                 asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
-                             }
+                            }
                             return true;
                         } else if (DisplayMode.RAW.equals(displayMode)) {
                             /*
@@ -1070,6 +1073,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     textObject.put("plain_text", plainTextContentArg);
                 }
                 textAppended = true;
+                html = false;
                 textWasEmpty = (null == sanitizeResult.getContent() || 0 == sanitizeResult.getContent().length());
             }
             return true;
