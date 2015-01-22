@@ -189,24 +189,21 @@ public class ShareToken {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
         if (!(obj instanceof ShareToken)) {
             return false;
         }
         ShareToken other = (ShareToken) obj;
+        if (contextID != other.contextID) {
+            return false;
+        }
+        if (userID != other.userID) {
+            return false;
+        }
         if (baseToken == null) {
             if (other.baseToken != null) {
                 return false;
             }
         } else if (!baseToken.equals(other.baseToken)) {
-            return false;
-        }
-        if (contextID != other.contextID) {
-            return false;
-        }
-        if (userID != other.userID) {
             return false;
         }
         return true;
