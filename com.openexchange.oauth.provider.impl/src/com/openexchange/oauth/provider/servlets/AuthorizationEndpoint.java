@@ -410,17 +410,17 @@ public class AuthorizationEndpoint extends HttpServlet {
                 sb.append("<title>Login</title>").append(lineSep);
             }
             sb.append("</head><body>").append(lineSep);
-            sb.append("<form action=\"").append(Tools.considerSecure(request) ? "https://" : "http://").append(determineHostName(request, -1, -1)).append(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS).append("\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">");
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\" type=\"text\">");
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\" type=\"password\">");
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CLIENT_ID).append("\" type=\"hidden\" value=\"").append(clientId).append("\">");
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_REDIRECT_URI).append("\" type=\"hidden\" value=\"").append(redirectUri).append("\">");
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_SCOPE).append("\" type=\"hidden\" value=\"").append((null == scope ? "" : scope.scopeString())).append("\">");
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_STATE).append("\" type=\"hidden\" value=\"").append(state).append("\">");
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_RESPONSE_TYPE).append("\" type=\"hidden\" value=\"").append(responseType).append("\">");
-            sb.append("<button name=\"").append(OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"false\">Allow</button>");
-            sb.append("<button name=\"").append( OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"true\">Deny</button>");
-            sb.append("</form>");
+            sb.append("<form action=\"").append(Tools.considerSecure(request) ? "https://" : "http://").append(determineHostName(request, -1, -1)).append(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS).append("\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">").append(lineSep);
+            sb.append("<p><label for=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\">Username: </label><input name=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\" type=\"text\"><br>").append(lineSep);
+            sb.append("<p><label for=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\">Password:  </label><input name=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\" type=\"password\">").append(lineSep);
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CLIENT_ID).append("\" type=\"hidden\" value=\"").append(clientId).append("\">").append(lineSep);
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_REDIRECT_URI).append("\" type=\"hidden\" value=\"").append(redirectUri).append("\">").append(lineSep);
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_SCOPE).append("\" type=\"hidden\" value=\"").append((null == scope ? "" : scope.scopeString())).append("\">").append(lineSep);
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_STATE).append("\" type=\"hidden\" value=\"").append(state).append("\">").append(lineSep);
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_RESPONSE_TYPE).append("\" type=\"hidden\" value=\"").append(responseType).append("\">").append(lineSep);
+            sb.append("<p><button name=\"").append(OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"false\">Allow</button>").append(lineSep);
+            sb.append("<button name=\"").append( OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"true\">Deny</button>").append(lineSep);
+            sb.append("</form>").append(lineSep);
             sb.append("</body></html>").append(lineSep);
 
             response.setContentType("text/html; charset=UTF-8");
