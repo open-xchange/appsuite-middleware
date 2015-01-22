@@ -49,7 +49,9 @@
 
 package com.openexchange.oauth.provider.osgi;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.servlet.http.HttpServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -60,14 +62,13 @@ import org.slf4j.Logger;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
@@ -81,7 +82,7 @@ import com.openexchange.oauth.provider.internal.GrantAllProvider;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeService;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeService;
 import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfoFactory;
-import com.openexchange.oauth.provider.servlets.AuthServlet;
+import com.openexchange.oauth.provider.servlets.AuthorizationServlet2;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -219,9 +220,6 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     // ---------------------------------------------------------------------------------------------
 
-
-    private static final String PATH_PREFIX = "oauth2/";
-
     /**
      * Initializes a new {@link OAuthProviderActivator}.
      */
@@ -231,18 +229,19 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, AuthenticationService.class, ContextService.class, UserService.class, CryptoService.class, HttpService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
+            CryptoService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderActivator.class);
+        final BundleContext context = this.context;
+
         Services.set(this);
 
         // Create & register portable factory
         registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory());
-
-        String prefix = getService(DispatcherPrefixService.class).getPrefix();
-        getService(HttpService.class).registerServlet(prefix + PATH_PREFIX + AuthServlet.PATH, new AuthServlet(), null, null);
 
         ConfigurationService configService = getService(ConfigurationService.class);
         if ("hz".equalsIgnoreCase(configService.getProperty("com.openexchange.oauth.provider.authcode.type", "hz").trim())) {
@@ -253,6 +252,56 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             registerService(AuthorizationCodeService.class, authCodeService);
             addService(AuthorizationCodeService.class, authCodeService);
         }
+
+        trackService(HostnameService.class);
+
+        track(HttpService.class, new ServiceTrackerCustomizer<HttpService, HttpService>() {
+
+            private volatile Map<String, HttpServlet> servlets;
+
+            @Override
+            public HttpService addingService(ServiceReference<HttpService> reference) {
+                HttpService service = context.getService(reference);
+
+                Map<String, HttpServlet> servlets = new LinkedHashMap<String, HttpServlet>(4);
+                this.servlets = servlets;
+
+                try {
+                    // Initialize servlets
+                    AuthorizationServlet2 authorizationServlet = new AuthorizationServlet2();
+                    service.registerServlet(AuthorizationServlet2.SERVLET_ALIAS, authorizationServlet, null, service.createDefaultHttpContext());
+                    servlets.put(AuthorizationServlet2.SERVLET_ALIAS, authorizationServlet);
+
+                    return service;
+                } catch (Exception e) {
+                    logger.error("Error wile starting OAuth2 servlets", e);
+                }
+
+                for (Map.Entry<String, HttpServlet> servletEntry : servlets.entrySet()) {
+                    service.unregister(servletEntry.getKey());
+                }
+
+                context.ungetService(reference);
+                return null;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<HttpService> reference, HttpService service) {
+                // Ignore
+            }
+
+            @Override
+            public void removedService(ServiceReference<HttpService> reference, HttpService service) {
+                Map<String, HttpServlet> servlets = this.servlets;
+                if (null != servlets) {
+                    for (Map.Entry<String, HttpServlet> servletEntry : servlets.entrySet()) {
+                        service.unregister(servletEntry.getKey());
+                    }
+                    this.servlets = null;
+                }
+                context.ungetService(reference);
+            }
+        });
 
         openTrackers();
 

@@ -55,6 +55,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorPage;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -72,13 +73,16 @@ import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.oauth.provider.AuthorizationCodeService;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.Scope;
+import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link AuthorizationServlet2} - Authorization request handler for OAuth2.0.
@@ -92,6 +96,15 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AuthorizationServlet2.class);
 
     private static final long serialVersionUID = 6393806486708501254L;
+
+    public static final String SERVLET_ALIAS = "/o/oauth2/authorization";
+
+    /**
+     * Initializes a new {@link AuthorizationServlet2}.
+     */
+    public AuthorizationServlet2() {
+        super();
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -422,8 +435,36 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
 
             // Redirect to login page
 
-            // TODO:
+            // Hidden: Client identifier, Redirect URI, Scope, State, Response Type
+            // Visible: Login, Password
 
+            StringBuilder sb = new StringBuilder(1024);
+            String lineSep = System.getProperty("line.separator");
+            sb.append("<!DOCTYPE html>").append(lineSep);
+            sb.append("<html><head>").append(lineSep);
+            {
+                sb.append("<title>Login</title>").append(lineSep);
+            }
+            sb.append("</head><body>").append(lineSep);
+            sb.append("<form action=\"").append(Tools.considerSecure(request) ? "https://" : "http://").append(determineHostName(request, -1, -1)).append(SERVLET_ALIAS).append("\" method=\"POST\" enctype=\"multipart/form-data\">");
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\" type=\"text\">");
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\" type=\"password\">");
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CLIENT_ID).append("\" type=\"hidden\" value=\"").append(clientId).append("\">");
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_REDIRECT_URI).append("\" type=\"hidden\" value=\"").append(redirectUri).append("\">");
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_SCOPE).append("\" type=\"hidden\" value=\"").append((null == scope ? "" : scope.scopeString())).append("\">");
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_STATE).append("\" type=\"hidden\" value=\"").append(state).append("\">");
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_RESPONSE_TYPE).append("\" type=\"hidden\" value=\"").append(responseType).append("\">");
+            sb.append("<button name=\"").append(OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"false\">Allow</button>");
+            sb.append("<button name=\"").append( OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"true\">Deny</button>");
+            sb.append("</form>");
+            sb.append("</body></html>").append(lineSep);
+
+            response.setContentType("text/html; charset=UTF-8");
+            response.setHeader("Content-Disposition", "inline");
+            response.setStatus(200);
+            PrintWriter writer = response.getWriter();
+            writer.write(sb.toString());
+            writer.flush();
         } catch (OXException e) {
             LOGGER.error("Login request failed", e);
             sendErrorPage(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internal error");
@@ -468,6 +509,15 @@ public class AuthorizationServlet2 extends AbstractAuthorizationServlet {
             userId = us.getUserId(userInfo, ctx);
         }
         return us.getUser(userId, ctx);
+    }
+
+    private String determineHostName(HttpServletRequest req, int userId, int contextId) {
+        HostnameService hostnameService = Services.getService(HostnameService.class);
+        if (null == hostnameService) {
+            return req.getServerName();
+        }
+        String hn = hostnameService.getHostname(userId, contextId);
+        return null == hn ? req.getServerName() : hn;
     }
 
 }
