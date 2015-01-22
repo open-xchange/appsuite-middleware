@@ -135,7 +135,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
                             // Add to service look-up
                             activator.addService(HazelcastInstance.class, hzInstance);
-                            registerServlets(activator.getService(HttpService.class), new OAuthProviderServiceImpl(activator, new HzAuthorizationCodeProvider(hzMapName, new DbAuthorizationCodeProvider(activator), activator)));
+                            registerServlets(activator.getService(HttpService.class), new OAuthProviderServiceImpl(activator, new HzAuthorizationCodeProvider(hzMapName, activator)));
                             return hzInstance;
                         } catch (Exception e) {
                             logger.warn("Couldn't initialize distributed token-session map.", e);
@@ -153,12 +153,12 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
                     @Override
                     public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                        final Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderActivator.class);
+                        Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderActivator.class);
                         logger.info("Unegistering OAuth servlets due to Hazelcast absence");
                         activator.removeService(HazelcastInstance.class);
                         try {
                             unregisterServlets(activator.getService(HttpService.class));
-                        } catch (ServletException | NamespaceException e) {
+                        } catch (Exception e) {
                             logger.error("Could not unregister OAuth servlets", e);
                         }
                         context.ungetService(reference);
@@ -221,10 +221,9 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class, HttpService.class, HazelcastConfigurationService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
+            HttpService.class };
     }
-
-
 
     @Override
     protected void startBundle() throws Exception {
@@ -251,7 +250,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         registerService(DeleteListener.class, new AuthCodeDeleteListener());
     }
 
-    private static void registerServlets(HttpService httpService, OAuthProviderService oAuthProvider) throws ServletException, NamespaceException {
+    static void registerServlets(HttpService httpService, OAuthProviderService oAuthProvider) throws ServletException, NamespaceException {
         AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint(oAuthProvider);
         TokenEndpoint tokenEndpoint = new TokenEndpoint(oAuthProvider);
 
@@ -259,7 +258,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         httpService.registerServlet(OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS, tokenEndpoint, null, httpService.createDefaultHttpContext());
     }
 
-    private static void unregisterServlets(HttpService httpService) throws ServletException, NamespaceException {
+    static void unregisterServlets(HttpService httpService) {
         httpService.unregister(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS);
         httpService.unregister(OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS);
     }

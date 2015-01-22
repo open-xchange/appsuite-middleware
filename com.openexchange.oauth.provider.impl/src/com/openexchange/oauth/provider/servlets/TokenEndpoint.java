@@ -64,9 +64,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.OAuthGrant;
 
 
 /**

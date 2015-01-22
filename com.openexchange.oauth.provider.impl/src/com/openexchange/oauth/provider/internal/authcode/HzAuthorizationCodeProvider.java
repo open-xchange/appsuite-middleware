@@ -81,15 +81,13 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
 
     private final String mapName;
     private final AtomicBoolean notActive;
-    private final AbstractAuthorizationCodeProvider fallback;
 
     /**
      * Initializes a new {@link HzAuthorizationCodeProvider}.
      */
-    public HzAuthorizationCodeProvider(String mapName, AbstractAuthorizationCodeProvider fallback, ServiceLookup services) {
+    public HzAuthorizationCodeProvider(String mapName, ServiceLookup services) {
         super(services);
         this.mapName = mapName;
-        this.fallback = fallback;
         notActive = new AtomicBoolean();
     }
 
@@ -117,13 +115,13 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     @Override
     public String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException {
         if (notActive.get()) {
-            return fallback.generateAuthorizationCodeFor(clientId, scope, userId, contextId);
+            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
         // Get Hazelcast map
         IMap<String, PortableAuthCodeInfo> map = map();
         if (null == map) {
-            return fallback.generateAuthorizationCodeFor(clientId, scope, userId, contextId);
+            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
         // Continue...
@@ -136,7 +134,7 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     @Override
     public AuthCodeInfo redeemAuthCode(Client client, String authCode) throws OXException {
         if (notActive.get()) {
-            return fallback.redeemAuthCode(client, authCode);
+            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
         // Get Hazelcast map
