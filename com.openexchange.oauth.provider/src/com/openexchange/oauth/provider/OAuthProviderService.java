@@ -51,24 +51,29 @@ package com.openexchange.oauth.provider;
 
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
- * library</a>.
+ * {@link OAuthProviderService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@SingletonService
 public interface OAuthProviderService extends OAuthProviderConstants {
 
     // -------------------------------------- Client Handling -------------------------------------- \\
 
-    Client getClientById(String clientID) throws OXException;
+    /**
+     * Returns the client identified by the given ID.
+     *
+     * @param clientId The clients ID
+     * @return The client or <code>null</code> if the ID is invalid
+     * @throws OXException
+     */
+    Client getClientById(String clientId) throws OXException;
 
     Client registerClient(ClientData clientData) throws OXException;
 
-    Client unregisterClient(String clientId) throws OXException;
+    boolean unregisterClient(String clientId) throws OXException;
 
     Client revokeClientSecret(String clientId) throws OXException;
 

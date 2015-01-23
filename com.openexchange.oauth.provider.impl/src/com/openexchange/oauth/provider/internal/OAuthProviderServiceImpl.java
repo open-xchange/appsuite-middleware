@@ -50,9 +50,16 @@
 package com.openexchange.oauth.provider.internal;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
+import com.openexchange.oauth.provider.DefaultClient;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
@@ -74,34 +81,68 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     private final AbstractAuthorizationCodeProvider authCodeProvider;
 
+    private final Map<String, DefaultClient> clients;
+
+    private final List<OAuthGrantImpl> grants;
+
+
     public OAuthProviderServiceImpl(ServiceLookup services, AbstractAuthorizationCodeProvider authCodeProvider) {
         super();
         this.services = services;
         this.authCodeProvider = authCodeProvider;
+        clients = new HashMap<>();
+        grants = new LinkedList<>();
+
+        DefaultClient client = new DefaultClient();
+        client.setId("983e78b3e76d423988ed09c345364f05");
+        client.setSecret("a1dd1c62735f4e61b80b6aa2b29df37d");
+        client.setName("Example App");
+        client.setDescription("An app that provides funny example stuff");
+        client.addRedirectURI("http://localhost:8080");
+        clients.put(client.getId(), client);
     }
 
     @Override
-    public Client getClientById(String clientID) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public Client getClientById(String clientId) throws OXException {
+        return clients.get(clientId);
     }
 
     @Override
     public Client registerClient(ClientData clientData) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        DefaultClient client = new DefaultClient();
+        client.setId(UUIDs.getUnformattedStringFromRandom());
+        client.setSecret(UUIDs.getUnformattedStringFromRandom());
+        client.setName(clientData.getName());
+        client.setDescription(clientData.getDescription());
+        for (String uri : clientData.getRedirectURIs()) {
+            client.addRedirectURI(uri);
+        }
+
+        clients.put(client.getId(), client);
+        return client;
     }
 
     @Override
-    public Client unregisterClient(String clientId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public boolean unregisterClient(String clientId) throws OXException {
+        DefaultClient client = clients.remove(clientId);
+        if (client == null) {
+            return false;
+        }
+
+        deleteGrantsForClient(clientId);
+        return true;
     }
 
     @Override
     public Client revokeClientSecret(String clientId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        DefaultClient client = clients.get(clientId);
+        if (client == null) {
+            return null;
+        }
+
+        client.setSecret(UUIDs.getUnformattedStringFromRandom());
+        deleteGrantsForClient(clientId);
+        return client;
     }
 
     @Override
@@ -121,37 +162,51 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         String accessToken = new UserizedToken(userId, contextId).getToken();
         String refreshToken = new UserizedToken(userId, contextId).getToken();
         Date expirationDate = new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION);
-
-        persistGrant(authCodeInfo, accessToken, refreshToken, expirationDate);
-        return new OAuthGrantImpl(authCodeInfo, accessToken, refreshToken, expirationDate);
+        return persistGrant(authCodeInfo, accessToken, refreshToken, expirationDate);
     }
 
-    private void persistGrant(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) throws OXException {
+    private OAuthGrant persistGrant(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) throws OXException {
+        OAuthGrantImpl grant = new OAuthGrantImpl(authCodeInfo, accessToken, refreshToken, expirationDate);
+        grants.add(grant);
+        return grant;
+    }
 
+    private void deleteGrantsForClient(String clientId) {
+        Iterator<OAuthGrantImpl> it = grants.iterator();
+        while (it.hasNext()) {
+            OAuthGrantImpl grant = it.next();
+            if (clientId.equals(grant.getAuthCodeInfo().getClientId())) {
+                it.remove();
+            }
+        }
     }
 
     @Override
     public OAuthGrant redeemRefreshToken(Client client, String refreshToken) {
-        // TODO Auto-generated method stub
+        Iterator<OAuthGrantImpl> it = grants.iterator();
+        while (it.hasNext()) {
+            OAuthGrantImpl grant = it.next();
+            if (client.getId().equals(grant.getAuthCodeInfo().getClientId()) && grant.getRefreshToken().equals(refreshToken)) {
+                grant.setAccessToken(new UserizedToken(grant.getUserId(), grant.getContextId()).getToken());
+                grant.setRefreshToken(new UserizedToken(grant.getUserId(), grant.getContextId()).getToken());
+                grant.setExpirationDate(new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION));
+                return grant;
+            }
+        }
+
         return null;
     }
 
-//    @Override
-//    public boolean validateClientId(String clientId) throws OXException {
-//        // TODO Auto-generated method stub
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
-//        // TODO Auto-generated method stub
-//        return true;
-//    }
-//
-//    @Override
-//    public Scope validateScope(String scope) throws OXException {
-//        // TODO Auto-generated method stub
-//        return new DefaultScope("rw_calendar");
-//    }
+    public OAuthGrantImpl getGrantByAccessToken(String accessToken) {
+        Iterator<OAuthGrantImpl> it = grants.iterator();
+        while (it.hasNext()) {
+            OAuthGrantImpl grant = it.next();
+            if (grant.getAccessToken().equals(accessToken)) {
+                return grant;
+            }
+        }
+
+        return null;
+    }
 
 }

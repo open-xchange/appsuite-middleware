@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -63,13 +64,14 @@ public class DefaultClient implements Client {
     private String description;
     private String name;
     private String secret;
-    private List<String> redirectURIs;
+    private final List<String> redirectURIs;
 
     /**
      * Initializes a new {@link DefaultClient}.
      */
     public DefaultClient() {
         super();
+        redirectURIs = new LinkedList<>();
     }
 
     @Override

@@ -80,8 +80,8 @@ import com.openexchange.oauth.provider.OAuthResourceService;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableService;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableTask;
 import com.openexchange.oauth.provider.groupware.AuthCodeDeleteListener;
-import com.openexchange.oauth.provider.internal.GrantAllResourceService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceImpl;
+import com.openexchange.oauth.provider.internal.OAuthResourceServiceImpl;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfoFactory;
@@ -141,7 +141,10 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
                             // Add to service look-up
                             activator.addService(HazelcastInstance.class, hzInstance);
-                            registerServlets(activator, new OAuthProviderServiceImpl(activator, new HzAuthorizationCodeProvider(hzMapName, activator)));
+                            OAuthProviderServiceImpl oAuthProvider = new OAuthProviderServiceImpl(activator, new HzAuthorizationCodeProvider(hzMapName, activator));
+                            registerServlets(activator, oAuthProvider);
+                            OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(oAuthProvider);
+                            activator.registerService(OAuthResourceService.class, resourceService);
                             return hzInstance;
                         } catch (Exception e) {
                             logger.warn("Couldn't initialize distributed token-session map.", e);
@@ -164,6 +167,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
                         activator.removeService(HazelcastInstance.class);
                         try {
                             unregisterServlets(activator);
+//                            activator.unregisterService(service); // TODO
                         } catch (Exception e) {
                             logger.error("Could not unregister OAuth servlets", e);
                         }
@@ -243,7 +247,10 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             // Start tracking for Hazelcast
             track(HazelcastConfigurationService.class, new HzConfigTracker(context, this));
         } else {
-            registerServlets(this, new OAuthProviderServiceImpl(this, new DbAuthorizationCodeProvider(this)));
+            OAuthProviderServiceImpl oAuthProvider = new OAuthProviderServiceImpl(this, new DbAuthorizationCodeProvider(this));
+            registerServlets(this, oAuthProvider);
+            OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(oAuthProvider);
+            registerService(OAuthResourceService.class, resourceService);
         }
 
         trackService(HostnameService.class);
@@ -253,7 +260,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new AuthCodeCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(this)));
         registerService(DeleteListener.class, new AuthCodeDeleteListener());
-        registerService(OAuthResourceService.class, new GrantAllResourceService());
+
     }
 
     static void registerServlets(ServiceLookup services, OAuthProviderService oAuthProvider) throws ServletException, NamespaceException, OXException {

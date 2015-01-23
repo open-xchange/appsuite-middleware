@@ -137,10 +137,10 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         }
 
         OAuthResourceService oAuthResourceService = requireService(OAuthResourceService.class, services);
-        OAuthGrant token = oAuthResourceService.validate(accessToken);
-        Session session = sessionProvider.getSession(token, httpRequest);
+        OAuthGrant grant = oAuthResourceService.validate(accessToken);
+        Session session = sessionProvider.getSession(grant, httpRequest);
         SessionUtility.rememberSession(httpRequest, ServerSessionAdapter.valueOf(session));
-        httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_TOKEN, token);
+        httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_GRANT, grant);
     }
 
     @Override
@@ -155,7 +155,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
         }
 
-        OAuthGrant token = (OAuthGrant) httpRequest.getAttribute(OAuthConstants.PARAM_OAUTH_TOKEN);
+        OAuthGrant token = (OAuthGrant) httpRequest.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
         if (token == null) {
             LOG.warn("OAuthToken was not contained in servlet request attributes!", new Exception());
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
@@ -167,7 +167,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get(), httpResponse);
         requestData.setModule(module);
         requestData.setSession(session);
-        requestData.setProperty(OAuthConstants.PARAM_OAUTH_TOKEN, token);
+        requestData.setProperty(OAuthConstants.PARAM_OAUTH_GRANT, token);
 
         AJAXActionServiceFactory factory = dispatcher.lookupFactory(module);
         if (factory == null || !factory.getClass().isAnnotationPresent(OAuthModule.class)) {

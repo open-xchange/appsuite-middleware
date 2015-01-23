@@ -62,6 +62,6 @@ public interface OAuthResourceService {
 
     OAuthGrant validate(String accessToken) throws OXException;
 
-    Client getClient(OAuthGrant token) throws OXException;
+    Client getClient(OAuthGrant grant) throws OXException;
 
 }

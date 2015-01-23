@@ -49,13 +49,14 @@
 
 package com.openexchange.oauth.provider.servlets;
 
-import static com.openexchange.ajax.AJAXUtility.encodeUrl;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorPage;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -116,7 +117,7 @@ public class AuthorizationEndpoint extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // First, check & validate client identifier, redirect URI and state
+            // First, check & validate client, redirect URI and state
             // Respond with JSON errors w/o redirect
             String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
             if (Strings.isEmpty(clientId)) {
@@ -124,15 +125,26 @@ public class AuthorizationEndpoint extends HttpServlet {
                 return;
             }
 
-            String redirectURI = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
-            if (Strings.isEmpty(redirectURI)) {
-                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_REDIRECT_URI+"\",\"error\":\"invalid_request\"}");
+            String clientSecret = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_SECRET);
+            if (clientSecret == null) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_CLIENT_SECRET+"\",\"error\":\"invalid_request\"}");
                 return;
             }
 
             Client client = oAuthProvider.getClientById(clientId);
             if (client == null) {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_CLIENT_ID).put("error", "invalid_request").toString());
+                return;
+            }
+
+            if (!client.getSecret().equals(clientSecret)) {
+                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "{\"error_description\":\"invalid client secret\",\"error\":\"unauthorized_client\"}");
+                return;
+            }
+
+            String redirectURI = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
+            if (Strings.isEmpty(redirectURI)) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_REDIRECT_URI+"\",\"error\":\"invalid_request\"}");
                 return;
             }
 
@@ -154,7 +166,7 @@ public class AuthorizationEndpoint extends HttpServlet {
             // If not: YOUR_REDIRECT_URI/?error=<error-code>&error_description=<error-desc>&state=<state>
 
             // Start composing redirect
-            StringBuilder builder = new StringBuilder(encodeUrl(redirectURI, true, false));
+            StringBuilder builder = new StringBuilder(encodeUrl(redirectURI));
             char concat = '?';
             if (redirectURI.indexOf('?') >= 0) {
                 concat = '&';
@@ -170,10 +182,10 @@ public class AuthorizationEndpoint extends HttpServlet {
                     builder.append(OAuthProviderConstants.PARAM_ERROR).append('=').append("access_denied");
 
                     builder.append(concat);
-                    builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("the user denied your request", true, true));
+                    builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("the user denied your request"));
 
                     builder.append(concat);
-                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state));
 
                     response.sendRedirect(builder.toString());
                     return;
@@ -188,10 +200,10 @@ public class AuthorizationEndpoint extends HttpServlet {
                 builder.append(OAuthProviderConstants.PARAM_ERROR).append('=').append("invalid_request");
 
                 builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("missing required parameter: "+OAuthProviderConstants.PARAM_USER_LOGIN, true, true));
+                builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("missing required parameter: "+OAuthProviderConstants.PARAM_USER_LOGIN));
 
                 builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state));
 
                 response.sendRedirect(builder.toString());
                 return;
@@ -204,10 +216,10 @@ public class AuthorizationEndpoint extends HttpServlet {
                 builder.append(OAuthProviderConstants.PARAM_ERROR).append('=').append("invalid_request");
 
                 builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("missing required parameter: "+OAuthProviderConstants.PARAM_USER_PASSWORD, true, true));
+                builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("missing required parameter: "+OAuthProviderConstants.PARAM_USER_PASSWORD));
 
                 builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state));
 
                 response.sendRedirect(builder.toString());
                 return;
@@ -222,10 +234,10 @@ public class AuthorizationEndpoint extends HttpServlet {
                     builder.append(OAuthProviderConstants.PARAM_ERROR).append('=').append("invalid_request");
 
                     builder.append(concat);
-                    builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("missing required parameter: "+OAuthProviderConstants.PARAM_RESPONSE_TYPE, true, true));
+                    builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("missing required parameter: "+OAuthProviderConstants.PARAM_RESPONSE_TYPE));
 
                     builder.append(concat);
-                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state));
 
                     response.sendRedirect(builder.toString());
                     return;
@@ -236,10 +248,10 @@ public class AuthorizationEndpoint extends HttpServlet {
                     builder.append(OAuthProviderConstants.PARAM_ERROR).append('=').append("unsupported_response_type");
 
                     builder.append(concat);
-                    builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("response type not supported: "+responseType, true, true));
+                    builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("response type not supported: "+responseType));
 
                     builder.append(concat);
-                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state));
 
                     response.sendRedirect(builder.toString());
                     return;
@@ -254,10 +266,10 @@ public class AuthorizationEndpoint extends HttpServlet {
                 builder.append(OAuthProviderConstants.PARAM_ERROR).append('=').append("invalid_request");
 
                 builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("missing required parameter: " + OAuthProviderConstants.PARAM_SCOPE, true, true));
+                builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("missing required parameter: " + OAuthProviderConstants.PARAM_SCOPE));
 
                 builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state));
 
                 response.sendRedirect(builder.toString());
                 return;
@@ -272,10 +284,10 @@ public class AuthorizationEndpoint extends HttpServlet {
                     builder.append(OAuthProviderConstants.PARAM_ERROR).append('=').append("invalid_scope");
 
                     builder.append(concat);
-                    builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("invalid parameter value:" + OAuthProviderConstants.PARAM_SCOPE, true, true));
+                    builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("invalid parameter value:" + OAuthProviderConstants.PARAM_SCOPE));
 
                     builder.append(concat);
-                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state));
 
                     response.sendRedirect(builder.toString());
                     return;
@@ -307,12 +319,12 @@ public class AuthorizationEndpoint extends HttpServlet {
                 {
                     builder.append(concat);
                     concat = '&';
-                    builder.append(OAuthProviderConstants.PARAM_CODE).append('=').append(encodeUrl(code, true, true));
+                    builder.append(OAuthProviderConstants.PARAM_CODE).append('=').append(encodeUrl(code));
                 }
 
                 {
                     builder.append(concat);
-                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+                    builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state));
                 }
 
                 response.sendRedirect(builder.toString());
@@ -324,10 +336,10 @@ public class AuthorizationEndpoint extends HttpServlet {
                 builder.append(OAuthProviderConstants.PARAM_ERROR).append('=').append("server_error");
 
                 builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("internal error", true, true));
+                builder.append(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION).append('=').append(encodeUrl("internal error"));
 
                 builder.append(concat);
-                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state, true, true));
+                builder.append(OAuthProviderConstants.PARAM_STATE).append('=').append(encodeUrl(state));
 
                 response.sendRedirect(builder.toString());
                 return;
@@ -340,6 +352,10 @@ public class AuthorizationEndpoint extends HttpServlet {
             LOGGER.error("Authorization request failed", e);
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
+    }
+
+    private String encodeUrl(String str) throws UnsupportedEncodingException {
+        return URLEncoder.encode(str, "UTF-8");
     }
 
     @Override
@@ -361,6 +377,13 @@ public class AuthorizationEndpoint extends HttpServlet {
             if (Strings.isEmpty(clientId)) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "missing required parameter: "+OAuthProviderConstants.PARAM_CLIENT_ID);
+                return;
+            }
+
+            Client client = oAuthProvider.getClientById(clientId);
+            if (client == null) {
+                // Send error page
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
 
@@ -389,13 +412,6 @@ public class AuthorizationEndpoint extends HttpServlet {
             if (null == scope) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_SCOPE);
-                return;
-            }
-
-            Client client = oAuthProvider.getClientById(clientId);
-            if (client == null) {
-                // Send error page
-                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
 

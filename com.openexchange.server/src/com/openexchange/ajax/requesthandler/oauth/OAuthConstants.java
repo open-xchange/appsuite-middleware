@@ -60,6 +60,6 @@ public class OAuthConstants {
 
     public static final String BEARER_SCHEME = "Bearer";
 
-    public static final String PARAM_OAUTH_TOKEN = "com.openexchange.oauth.token";
+    public static final String PARAM_OAUTH_GRANT = "com.openexchange.oauth.grant";
 
 }

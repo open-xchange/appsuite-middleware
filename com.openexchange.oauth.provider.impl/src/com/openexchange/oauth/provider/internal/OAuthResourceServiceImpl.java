@@ -47,21 +47,54 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal;
 
+import java.util.Date;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.OAuthInvalidTokenException;
+import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
 
 
 /**
- * {@link ClientManager}
+ * {@link OAuthResourceServiceImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ClientManager {
+public class OAuthResourceServiceImpl implements OAuthResourceService {
 
-    Client validate(String clientID, String secret) throws OXException;
+    private final OAuthProviderServiceImpl provider;
 
-    Client register(ClientData clientData) throws OXException;
+    public OAuthResourceServiceImpl(OAuthProviderServiceImpl provider) {
+        super();
+        this.provider = provider;
+    }
+
+    @Override
+    public OAuthGrant validate(String accessToken) throws OXException {
+        OAuthGrantImpl grant = provider.getGrantByAccessToken(accessToken);
+        if (grant == null) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
+        }
+
+        if (grant.getExpirationDate().before(new Date())) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
+        }
+
+        return grant;
+    }
+
+    @Override
+    public Client getClient(OAuthGrant grant) throws OXException {
+        Client client = provider.getClientById(((OAuthGrantImpl)grant).getAuthCodeInfo().getClientId());
+        if (client == null) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
+        }
+
+        return client;
+    }
 
 }

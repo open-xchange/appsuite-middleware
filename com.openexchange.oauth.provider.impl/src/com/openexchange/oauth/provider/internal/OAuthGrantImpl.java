@@ -66,21 +66,22 @@ public class OAuthGrantImpl implements OAuthGrant {
 
     private final AuthCodeInfo authCodeInfo;
 
-    private final String accessToken;
-
-    private final String refreshToken;
-
-    private final Date expirationDate;
-
     private final DefaultScope scope;
+
+    private String accessToken;
+
+    private String refreshToken;
+
+    private Date expirationDate;
+
 
     public OAuthGrantImpl(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) {
         super();
         this.authCodeInfo = authCodeInfo;
+        scope = DefaultScope.parseScope(authCodeInfo.getScope());
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.expirationDate = expirationDate;
-        scope = DefaultScope.parseScope(authCodeInfo.getScope());
     }
 
     @Override
@@ -111,6 +112,22 @@ public class OAuthGrantImpl implements OAuthGrant {
     @Override
     public Scope getScope() {
         return scope;
+    }
+
+    public AuthCodeInfo getAuthCodeInfo() {
+        return authCodeInfo;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
 }

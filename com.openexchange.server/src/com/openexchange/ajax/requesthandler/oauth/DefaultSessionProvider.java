@@ -137,16 +137,16 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
     }
 
     @Override
-    public Session getSession(final OAuthGrant token, final HttpServletRequest httpRequest) throws OXException {
+    public Session getSession(final OAuthGrant grant, final HttpServletRequest httpRequest) throws OXException {
         SessiondService sessiondService = requireService(SessiondService.class, services);
-        String accessToken = token.getAccessToken();
+        String accessToken = grant.getAccessToken();
         Session session = null;
         try {
             do {
                 String sessionId = sessionCache.get(accessToken, new Callable<String>() {
                     @Override
                     public String call() throws Exception {
-                        return login(token, httpRequest).getSessionID();
+                        return login(grant, httpRequest).getSessionID();
                     }
                 });
 
@@ -171,14 +171,14 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
         return session;
     }
 
-    private Session login(OAuthGrant token, HttpServletRequest httpRequest) throws OXException {
+    private Session login(OAuthGrant grant, HttpServletRequest httpRequest) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
         OAuthResourceService oAuthResourceService = requireService(OAuthResourceService.class, services);
 
-        final Context context = contextService.getContext(token.getContextId());
-        final User user = userService.getUser(token.getUserId(), context);
-        final String client = oAuthResourceService.getClient(token).getName();
+        final Context context = contextService.getContext(grant.getContextId());
+        final User user = userService.getUser(grant.getUserId(), context);
+        final String client = oAuthResourceService.getClient(grant).getName();
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(getLoginRequest(httpRequest, user, client), new HashMap<String, Object>(1), new LoginMethodClosure() {
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
