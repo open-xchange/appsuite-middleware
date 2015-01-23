@@ -50,8 +50,8 @@
 package com.openexchange.sessionstorage.hazelcast.serialization;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.BitSet;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
@@ -243,7 +243,22 @@ public class PortableSession extends StoredSession implements CustomPortable {
     }
 
     private static List<String> parseColonString(String str) {
-        return Arrays.asList(str.split(":"));
+        List<String> retval = new LinkedList<String>();
+        int length = str.length();
+        {
+            int prev = 0;
+            int pos;
+            while (prev < length && (pos = str.indexOf(':', prev)) >= 0) {
+                if (pos > 0) {
+                    retval.add(str.substring(prev, pos));
+                }
+                prev = pos + 1;
+            }
+            if (prev < length) {
+                retval.add(str.substring(prev));
+            }
+        }
+        return retval;
     }
 
     private static String getSafeValue(String sValue) {
