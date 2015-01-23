@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.List;
+
 /**
  * {@link DefaultClient} - The default {@link Client} implementation.
  *
@@ -61,6 +63,7 @@ public class DefaultClient implements Client {
     private String description;
     private String name;
     private String secret;
+    private List<String> redirectURIs;
 
     /**
      * Initializes a new {@link DefaultClient}.
@@ -87,6 +90,11 @@ public class DefaultClient implements Client {
     @Override
     public String getSecret() {
         return secret;
+    }
+
+    @Override
+    public boolean hasRedirectURI(String uri) {
+        return redirectURIs.contains(uri);
     }
 
     /**
@@ -123,6 +131,10 @@ public class DefaultClient implements Client {
      */
     public void setSecret(String secret) {
         this.secret = secret;
+    }
+
+    public void addRedirectURI(String uri) {
+        redirectURIs.add(uri);
     }
 
 }

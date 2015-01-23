@@ -85,7 +85,7 @@ public class DefaultScope implements Scope {
             return new DefaultScope();
         }
 
-        return new DefaultScope(Strings.splitByComma(scopeStr));
+        return new DefaultScope(Strings.splitByWhitespaces(scopeStr));
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
@@ -187,7 +187,7 @@ public class DefaultScope implements Scope {
             return "";
         }
 
-        StringAppender sa = new StringAppender(',');
+        StringAppender sa = new StringAppender(' ');
         for (String scope : scopes) {
             sa.append(scope);
         }

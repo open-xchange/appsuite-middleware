@@ -47,46 +47,60 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal;
+
+import java.util.Date;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
 
 
 /**
- * {@link Client}
+ * {@link GrantAllResourceService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Client {
+public class GrantAllResourceService implements OAuthResourceService {
 
-    /**
-     * Gets the client's description
-     *
-     * @return The description
-     */
-    String getDescription();
+    @Override
+    public OAuthGrant validate(String accessToken) throws OXException {
+        AuthCodeInfo authCodeInfo = new AuthCodeInfo("1234", "r_contacts", 84, 424242669, System.nanoTime() + 3600 * 1000 * 1000 * 1000);
+        return new OAuthGrantImpl(authCodeInfo, accessToken, UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000));
+    }
 
-    /**
-     * Gets the client's name
-     *
-     * @return The name
-     */
-    String getName();
+    @Override
+    public Client getClient(OAuthGrant token) throws OXException {
+        return new Client() {
 
-    /**
-     * Gets the client's public identifier
-     *
-     * @return The public identifier
-     */
-    String getId();
+            @Override
+            public boolean hasRedirectURI(String uri) {
+                return true;
+            }
 
-    /**
-     * Gets the client's secret identifier
-     *
-     * @return The secret identifier
-     */
-    String getSecret();
+            @Override
+            public String getSecret() {
+                return "2345";
+            }
 
-    boolean hasRedirectURI(String uri);
+            @Override
+            public String getName() {
+                return "Example App";
+            }
+
+            @Override
+            public String getId() {
+                return "1234";
+            }
+
+            @Override
+            public String getDescription() {
+                return "An OAuth example app";
+            }
+        };
+    }
 
 }

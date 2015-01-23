@@ -49,44 +49,43 @@
 
 package com.openexchange.oauth.provider;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link Client}
+ * {@link DefaultScopeProvider}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Client {
+public class DefaultScopeProvider implements OAuthScopeProvider {
+
+    private final String scopeId;
 
     /**
-     * Gets the client's description
+     * Initializes a new {@link DefaultScopeProvider}.
      *
-     * @return The description
+     * @param scopeId The scopes unique ID
      */
-    String getDescription();
+    public DefaultScopeProvider(String scopeId) {
+        super();
+        this.scopeId = scopeId;
+    }
 
-    /**
-     * Gets the client's name
-     *
-     * @return The name
-     */
-    String getName();
+    @Override
+    public String getId() {
+        return scopeId;
+    }
 
-    /**
-     * Gets the client's public identifier
-     *
-     * @return The public identifier
-     */
-    String getId();
+    @Override
+    public String getDescription() {
+        return "Read access for getting contact data.";
+    }
 
-    /**
-     * Gets the client's secret identifier
-     *
-     * @return The secret identifier
-     */
-    String getSecret();
-
-    boolean hasRedirectURI(String uri);
+    @Override
+    public boolean canBeGranted(Session session) throws OXException {
+        return true;
+    }
 
 }

@@ -92,8 +92,8 @@ public @interface OAuthAction {
     /**
      * Indicates the required OAuth 2.0 scope to call this action.
      * @return The scope. If all requests are authorized to call this action
-     * {@link OAuthAction#GRANT_ALL} is returned.
+     * {@link OAuthAction#GRANT_ALL} must be returned.
      */
-    String value() default GRANT_ALL;
+    String value();
 
 }

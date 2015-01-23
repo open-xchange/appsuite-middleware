@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.internal.authcode;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,8 +60,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.Scope;
-import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.oauth.provider.tools.UserizedToken;
+import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -81,11 +82,7 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     }
 
     private DatabaseService getDbService() throws OXException {
-        DatabaseService service = Services.getService(DatabaseService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-        return service;
+        return requireService(DatabaseService.class, services);
     }
 
     @Override

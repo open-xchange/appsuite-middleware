@@ -64,7 +64,7 @@ public interface OAuthProviderService extends OAuthProviderConstants {
 
     // -------------------------------------- Client Handling -------------------------------------- \\
 
-    Client getClientByID(String clientID) throws OXException;
+    Client getClientById(String clientID) throws OXException;
 
     Client registerClient(ClientData clientData) throws OXException;
 
@@ -113,32 +113,32 @@ public interface OAuthProviderService extends OAuthProviderConstants {
 
     // ---------------------------------------------------------------------------------------------
 
-    /**
-     * Validates given client identifier
-     *
-     * @param clientId The client identifier
-     * @return <code>true</code> if client identifier is valid/known; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean validateClientId(String clientId) throws OXException;
-
-    /**
-     * Validates given client identifier and redirect URI pair
-     *
-     * @param clientId The client identifier
-     * @param redirectUri The redirect URI
-     * @return <code>true</code> if given client identifier and redirect URI pair is invalid; e.g. client identifier unknown or redirect URI mismatch; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean validateRedirectUri(String clientId, String redirectUri) throws OXException;
-
-    /**
-     * Validates given scope string if it might be invalid, unknown, or malformed.
-     *
-     * @param scope The scope to check
-     * @return A valid {@link Scope} instance if valid; otherwise <code>null</code> if invalid, unknown, or malformed
-     * @throws OXException If operation fails
-     */
-    Scope validateScope(String scope) throws OXException;
+//    /**
+//     * Validates given client identifier
+//     *
+//     * @param clientId The client identifier
+//     * @return <code>true</code> if client identifier is valid/known; otherwise <code>false</code>
+//     * @throws OXException If operation fails
+//     */
+//    boolean validateClientId(String clientId) throws OXException;
+//
+//    /**
+//     * Validates given client identifier and redirect URI pair
+//     *
+//     * @param clientId The client identifier
+//     * @param redirectUri The redirect URI
+//     * @return <code>true</code> if given client identifier and redirect URI pair is invalid; e.g. client identifier unknown or redirect URI mismatch; otherwise <code>false</code>
+//     * @throws OXException If operation fails
+//     */
+//    boolean validateRedirectUri(String clientId, String redirectUri) throws OXException;
+//
+//    /**
+//     * Validates given scope string if it might be invalid, unknown, or malformed.
+//     *
+//     * @param scope The scope to check
+//     * @return A valid {@link Scope} instance if valid; otherwise <code>null</code> if invalid, unknown, or malformed
+//     * @throws OXException If operation fails
+//     */
+//    Scope validateScope(String scope) throws OXException;
 
 }

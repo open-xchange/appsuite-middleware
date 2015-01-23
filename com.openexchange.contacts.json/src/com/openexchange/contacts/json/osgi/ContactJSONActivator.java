@@ -54,6 +54,8 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
+import com.openexchange.oauth.provider.DefaultScopeProvider;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
@@ -71,6 +73,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerModule(new ContactActionFactory(this), "contacts");
         registerService(ResultConverter.class, new ContactJSONResultConverter());
+        registerService(OAuthScopeProvider.class, new DefaultScopeProvider("r_contacts"));
     }
 
 }

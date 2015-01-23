@@ -59,14 +59,14 @@ import java.util.concurrent.TimeUnit;
 public interface OAuthProviderConstants {
 
     /**
-     * Servlet alias of the authorization endpoint
+     * Servlet alias of the authorization endpoint without leading and trailing slashes
      */
-    public static final String AUTHORIZATION_SERVLET_ALIAS = "/o/oauth2/authorization";
+    public static final String AUTHORIZATION_SERVLET_ALIAS = "o/oauth2/authorization";
 
     /**
-     * Servlet alias of the access token endpoint
+     * Servlet alias of the access token endpoint without leading and trailing slashes
      */
-    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "/o/oauth2/accessToken";
+    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "o/oauth2/accessToken";
 
     // -------------------------------------------------------------------------------------------------------
 

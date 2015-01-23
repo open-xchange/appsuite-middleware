@@ -139,6 +139,11 @@ public class InMemoryClientManager implements ClientManager {
             this.secret = secret;
         }
 
+        @Override
+        public boolean hasRedirectURI(String uri) {
+            return false;
+        }
+
     }
 
 }

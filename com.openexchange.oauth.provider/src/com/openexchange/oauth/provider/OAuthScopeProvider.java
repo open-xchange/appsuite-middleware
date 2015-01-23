@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,53 @@
  *
  */
 
-package com.openexchange.oauth.provider.osgi;
+package com.openexchange.oauth.provider;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link Services}
+ * Provides information and validation methods for an OAuth scope. Such a scope can be
+ * seen as a protection domain that includes a dedicated set of accessible modules and
+ * actions. For every scope that is defined on an action to prevent unauthorized access
+ * a {@link OAuthScopeProvider} must be registered as OSGi service.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public final class Services {
+public interface OAuthScopeProvider {
 
     /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
-    }
-
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
+     * The scopes ID. Must be unique within the whole application. It is
+     * considered best practice to use the modules name prefixed by 'r_', 'w_' or 'rw_'
+     * to require read, write or combined access (e.g. 'rw_contacts'). Scopes that follow
+     * this notation are automatically considered as satisfied, if an access token has
+     * the same or a higher scope (i.e. 'r_contacts' and 'w_contacts' are satisfied if
+     * a request is authorized in scope 'rw_contacts').
      *
-     * @return The service look-up or <code>null</code>
+     * Allowed characters are %x21 / %x23-5B / %x5D-7E
+     * @return The scopes ID
      */
-    public static ServiceLookup get() {
-        return ref.get();
-    }
+    String getId();
 
     /**
-     * Gets the service of specified type
+     * A localizable string that describes the impact of granting the denoted scope
+     * to an external application.
      *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
+     * @return The description
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = ref.get();
-        return null == serviceLookup ? null : serviceLookup.getService(clazz);
-    }
+    String getDescription();
 
     /**
-     * Sets the service look-up
+     * Checks whether the denoted scope can be granted for the passed sessions user
+     * based on his permissions/capabilities.
      *
-     * @param serviceLookup The service look-up or <code>null</code>
+     * @param session The session to check
+     * @return <code>true</code> if the scope can be granted, <code>false</code> if not.
+     * @throws OXException If an error occurs during the permission check.
      */
-    public static void set(final ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
-    }
+    boolean canBeGranted(Session session) throws OXException;
 
 }

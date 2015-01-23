@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,33 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.servlets;
+
+import javax.servlet.http.HttpServlet;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link Client}
+ * {@link OAuthEndpoint} - The abstract OAuth endpoint servlet
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
  */
-public interface Client {
+public abstract class OAuthEndpoint extends HttpServlet {
+
+    private static final long serialVersionUID = 6538319126816587520L;
+
+    protected final OAuthProviderService oAuthProvider;
+
+    protected final ServiceLookup services;
 
     /**
-     * Gets the client's description
-     *
-     * @return The description
+     * Initializes a new {@link OAuthEndpoint}.
      */
-    String getDescription();
-
-    /**
-     * Gets the client's name
-     *
-     * @return The name
-     */
-    String getName();
-
-    /**
-     * Gets the client's public identifier
-     *
-     * @return The public identifier
-     */
-    String getId();
-
-    /**
-     * Gets the client's secret identifier
-     *
-     * @return The secret identifier
-     */
-    String getSecret();
-
-    boolean hasRedirectURI(String uri);
+    protected OAuthEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
+        super();
+        this.oAuthProvider = oAuthProvider;
+        this.services = services;
+    }
 
 }

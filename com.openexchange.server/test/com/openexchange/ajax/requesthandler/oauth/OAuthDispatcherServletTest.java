@@ -122,7 +122,7 @@ public class OAuthDispatcherServletTest {
     @OAuthModule
     private static final class TestFactory implements AJAXActionServiceFactory {
 
-        @OAuthAction
+        @OAuthAction(OAuthAction.GRANT_ALL)
         private final class GrantAllAction implements AJAXActionService {
             @Override
             public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {

@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.osgi;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.Map;
 import javax.servlet.ServletException;
 import org.osgi.framework.BundleContext;
@@ -65,6 +66,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -73,9 +76,11 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.OAuthResourceService;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableService;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableTask;
 import com.openexchange.oauth.provider.groupware.AuthCodeDeleteListener;
+import com.openexchange.oauth.provider.internal.GrantAllResourceService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceImpl;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeProvider;
@@ -83,6 +88,7 @@ import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCo
 import com.openexchange.oauth.provider.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.servlets.TokenEndpoint;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
@@ -135,7 +141,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
                             // Add to service look-up
                             activator.addService(HazelcastInstance.class, hzInstance);
-                            registerServlets(activator.getService(HttpService.class), new OAuthProviderServiceImpl(activator, new HzAuthorizationCodeProvider(hzMapName, activator)));
+                            registerServlets(activator, new OAuthProviderServiceImpl(activator, new HzAuthorizationCodeProvider(hzMapName, activator)));
                             return hzInstance;
                         } catch (Exception e) {
                             logger.warn("Couldn't initialize distributed token-session map.", e);
@@ -157,7 +163,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
                         logger.info("Unegistering OAuth servlets due to Hazelcast absence");
                         activator.removeService(HazelcastInstance.class);
                         try {
-                            unregisterServlets(activator.getService(HttpService.class));
+                            unregisterServlets(activator);
                         } catch (Exception e) {
                             logger.error("Could not unregister OAuth servlets", e);
                         }
@@ -222,13 +228,12 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
-            HttpService.class };
+            HttpService.class, DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
-        Services.set(this);
 
         // Create & register portable factory
         registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory());
@@ -238,7 +243,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             // Start tracking for Hazelcast
             track(HazelcastConfigurationService.class, new HzConfigTracker(context, this));
         } else {
-            registerServlets(getService(HttpService.class), new OAuthProviderServiceImpl(this, new DbAuthorizationCodeProvider(this)));
+            registerServlets(this, new OAuthProviderServiceImpl(this, new DbAuthorizationCodeProvider(this)));
         }
 
         trackService(HostnameService.class);
@@ -246,27 +251,31 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
         // Register update task, create table job and delete listener
         registerService(CreateTableService.class, new AuthCodeCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(this)));
         registerService(DeleteListener.class, new AuthCodeDeleteListener());
+        registerService(OAuthResourceService.class, new GrantAllResourceService());
     }
 
-    static void registerServlets(HttpService httpService, OAuthProviderService oAuthProvider) throws ServletException, NamespaceException {
-        AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint(oAuthProvider);
+    static void registerServlets(ServiceLookup services, OAuthProviderService oAuthProvider) throws ServletException, NamespaceException, OXException {
+        AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint(oAuthProvider, services);
         TokenEndpoint tokenEndpoint = new TokenEndpoint(oAuthProvider);
 
-        httpService.registerServlet(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS, authorizationEndpoint, null, httpService.createDefaultHttpContext());
-        httpService.registerServlet(OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS, tokenEndpoint, null, httpService.createDefaultHttpContext());
+        HttpService httpService = requireService(HttpService.class, services);
+        DispatcherPrefixService dispatcherPrefixService = requireService(DispatcherPrefixService.class, services);
+        httpService.registerServlet(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS, authorizationEndpoint, null, httpService.createDefaultHttpContext());
+        httpService.registerServlet(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS, tokenEndpoint, null, httpService.createDefaultHttpContext());
     }
 
-    static void unregisterServlets(HttpService httpService) {
-        httpService.unregister(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS);
-        httpService.unregister(OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS);
+    static void unregisterServlets(ServiceLookup services) throws OXException {
+        HttpService httpService = requireService(HttpService.class, services);
+        DispatcherPrefixService dispatcherPrefixService = requireService(DispatcherPrefixService.class, services);
+        httpService.unregister(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS);
+        httpService.unregister(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        unregisterServlets(getService(HttpService.class));
-        Services.set(null);
+        unregisterServlets(this);
         super.stopBundle();
     }
 

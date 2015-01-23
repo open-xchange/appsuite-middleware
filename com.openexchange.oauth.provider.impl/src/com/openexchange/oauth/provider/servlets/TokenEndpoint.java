@@ -106,7 +106,7 @@ public class TokenEndpoint extends HttpServlet {
                 return;
             }
 
-            Client client = oAuthProvider.getClientByID(clientId);
+            Client client = oAuthProvider.getClientById(clientId);
             if (client == null) {
                 failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
@@ -150,7 +150,7 @@ public class TokenEndpoint extends HttpServlet {
             return;
         }
 
-        if (!oAuthProvider.validateRedirectUri(client.getId(), redirectUri)) {
+        if (!client.hasRedirectURI(redirectUri)) {
             failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
             return;
         }
@@ -186,12 +186,13 @@ public class TokenEndpoint extends HttpServlet {
         respondWithToken(token, resp);
     }
 
-    private static void respondWithToken(OAuthGrant token, HttpServletResponse resp) throws IOException, JSONException {
+    private static void respondWithToken(OAuthGrant grant, HttpServletResponse resp) throws IOException, JSONException {
         JSONObject result = new JSONObject();
-        result.put("access_token", token.getAccessToken());
-        result.put("refresh_token", token.getRefreshToken());
+        result.put("access_token", grant.getAccessToken());
+        result.put("refresh_token", grant.getRefreshToken());
         result.put("token_type", "Bearer");
-        result.put("expires_in", TimeUnit.SECONDS.convert(token.getExpirationDate().getTime(), TimeUnit.MILLISECONDS) - TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+        result.put("expires_in", TimeUnit.SECONDS.convert(grant.getExpirationDate().getTime(), TimeUnit.MILLISECONDS) - TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+        result.put("scope", grant.getScope().scopeString());
 
         resp.setContentType("application/json;charset=UTF-8");
         resp.setStatus(HttpServletResponse.SC_OK);

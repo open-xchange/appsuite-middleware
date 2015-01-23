@@ -68,6 +68,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
@@ -77,11 +78,13 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.DefaultScope;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.Scope;
-import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -99,12 +102,15 @@ public class AuthorizationEndpoint extends HttpServlet {
 
     private final OAuthProviderService oAuthProvider;
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link AuthorizationEndpoint}.
      */
-    public AuthorizationEndpoint(OAuthProviderService oAuthProvider) {
+    public AuthorizationEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
         super();
         this.oAuthProvider = oAuthProvider;
+        this.services = services;
     }
 
     @Override
@@ -118,18 +124,19 @@ public class AuthorizationEndpoint extends HttpServlet {
                 return;
             }
 
-            String redirectUri = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
-            if (Strings.isEmpty(redirectUri)) {
+            String redirectURI = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
+            if (Strings.isEmpty(redirectURI)) {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_REDIRECT_URI+"\",\"error\":\"invalid_request\"}");
                 return;
             }
 
-            if (false == oAuthProvider.validateClientId(clientId)) {
+            Client client = oAuthProvider.getClientById(clientId);
+            if (client == null) {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_CLIENT_ID).put("error", "invalid_request").toString());
                 return;
             }
 
-            if (false == oAuthProvider.validateRedirectUri(clientId, redirectUri)) {
+            if (!client.hasRedirectURI(redirectURI)) {
                 sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_REDIRECT_URI).put("error", "invalid_request").toString());
                 return;
             }
@@ -147,9 +154,9 @@ public class AuthorizationEndpoint extends HttpServlet {
             // If not: YOUR_REDIRECT_URI/?error=<error-code>&error_description=<error-desc>&state=<state>
 
             // Start composing redirect
-            StringBuilder builder = new StringBuilder(encodeUrl(redirectUri, true, false));
+            StringBuilder builder = new StringBuilder(encodeUrl(redirectURI, true, false));
             char concat = '?';
-            if (redirectUri.indexOf('?') >= 0) {
+            if (redirectURI.indexOf('?') >= 0) {
                 concat = '&';
             }
 
@@ -258,7 +265,7 @@ public class AuthorizationEndpoint extends HttpServlet {
 
             try {
                 // Validate scope
-                Scope scope = oAuthProvider.validateScope(sScope);
+                Scope scope = convertRequestedScope(sScope);
                 if (null == scope) {
                     builder.append(concat);
                     concat = '&';
@@ -364,8 +371,8 @@ public class AuthorizationEndpoint extends HttpServlet {
                 return;
             }
 
-            String redirectUri = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
-            if (Strings.isEmpty(redirectUri)) {
+            String redirectURI = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
+            if (Strings.isEmpty(redirectURI)) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "missing required parameter: "+OAuthProviderConstants.PARAM_REDIRECT_URI);
                 return;
@@ -378,20 +385,21 @@ public class AuthorizationEndpoint extends HttpServlet {
                 return;
             }
 
-            Scope scope = oAuthProvider.validateScope(sScope);
+            Scope scope = convertRequestedScope(sScope);
             if (null == scope) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_SCOPE);
                 return;
             }
 
-            if (false == oAuthProvider.validateClientId(clientId)) {
+            Client client = oAuthProvider.getClientById(clientId);
+            if (client == null) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
 
-            if (false == oAuthProvider.validateRedirectUri(clientId, redirectUri)) {
+            if (!client.hasRedirectURI(redirectURI)) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_REDIRECT_URI);
                 return;
@@ -410,11 +418,11 @@ public class AuthorizationEndpoint extends HttpServlet {
                 sb.append("<title>Login</title>").append(lineSep);
             }
             sb.append("</head><body>").append(lineSep);
-            sb.append("<form action=\"").append(Tools.considerSecure(request) ? "https://" : "http://").append(determineHostName(request, -1, -1)).append(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS).append("\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">").append(lineSep);
+            sb.append("<form action=\"").append(getAuthorizationEndpointURL(request)).append("\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">").append(lineSep);
             sb.append("<p><label for=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\">Username: </label><input name=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\" type=\"text\"><br>").append(lineSep);
             sb.append("<p><label for=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\">Password:  </label><input name=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\" type=\"password\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CLIENT_ID).append("\" type=\"hidden\" value=\"").append(clientId).append("\">").append(lineSep);
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_REDIRECT_URI).append("\" type=\"hidden\" value=\"").append(redirectUri).append("\">").append(lineSep);
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_REDIRECT_URI).append("\" type=\"hidden\" value=\"").append(redirectURI).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_SCOPE).append("\" type=\"hidden\" value=\"").append((null == scope ? "" : scope.scopeString())).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_STATE).append("\" type=\"hidden\" value=\"").append(state).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_RESPONSE_TYPE).append("\" type=\"hidden\" value=\"").append(responseType).append("\">").append(lineSep);
@@ -433,6 +441,25 @@ public class AuthorizationEndpoint extends HttpServlet {
             LOGGER.error("Login request failed", e);
             sendErrorPage(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internal error");
         }
+    }
+
+    private final String getAuthorizationEndpointURL(HttpServletRequest request) throws OXException {
+        String hostName = determineHostName(request, -1, -1);
+        DispatcherPrefixService dispatcherPrefixService = com.openexchange.osgi.Tools.requireService(DispatcherPrefixService.class, services);
+        String servletPrefix = dispatcherPrefixService.getPrefix();
+        return (Tools.considerSecure(request) ? "https://" : "http://") + hostName + servletPrefix + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
+    }
+
+    /**
+     * @param sScope
+     * @return
+     */
+    private static Scope convertRequestedScope(String sScope) {
+        DefaultScope scope = DefaultScope.parseScope(sScope);
+        /*
+         * - Do all of the requested scopes exist?
+         */
+        return scope;
     }
 
     /**
@@ -476,7 +503,7 @@ public class AuthorizationEndpoint extends HttpServlet {
     }
 
     private String determineHostName(HttpServletRequest req, int userId, int contextId) {
-        HostnameService hostnameService = Services.getService(HostnameService.class);
+        HostnameService hostnameService = services.getService(HostnameService.class);
         if (null == hostnameService) {
             return req.getServerName();
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.groupware;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -60,8 +61,8 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -71,21 +72,21 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class OAuthProviderCreateTableTask extends UpdateTaskAdapter {
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link OAuthProviderCreateTableTask}.
      *
      * @param dbService
      */
-    public OAuthProviderCreateTableTask() {
+    public OAuthProviderCreateTableTask(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = Services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
+        DatabaseService dbService = requireService(DatabaseService.class, services);
         final int contextId = params.getContextId();
         final Connection writeCon = dbService.getForUpdateTask(contextId);
         PreparedStatement stmt = null;

@@ -115,6 +115,12 @@ public class SimOAuthResourceService implements OAuthResourceService {
                 return null;
             }
 
+            @Override
+            public boolean hasRedirectURI(String uri) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+
         };
     }
 

@@ -53,7 +53,6 @@ import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
-import com.openexchange.oauth.provider.DefaultScope;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
@@ -82,7 +81,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     }
 
     @Override
-    public Client getClientByID(String clientID) throws OXException {
+    public Client getClientById(String clientID) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -137,22 +136,22 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         return null;
     }
 
-    @Override
-    public boolean validateClientId(String clientId) throws OXException {
-        // TODO Auto-generated method stub
-        return true;
-    }
-
-    @Override
-    public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
-        // TODO Auto-generated method stub
-        return true;
-    }
-
-    @Override
-    public Scope validateScope(String scope) throws OXException {
-        // TODO Auto-generated method stub
-        return new DefaultScope("rw_calendar");
-    }
+//    @Override
+//    public boolean validateClientId(String clientId) throws OXException {
+//        // TODO Auto-generated method stub
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean validateRedirectUri(String clientId, String redirectUri) throws OXException {
+//        // TODO Auto-generated method stub
+//        return true;
+//    }
+//
+//    @Override
+//    public Scope validateScope(String scope) throws OXException {
+//        // TODO Auto-generated method stub
+//        return new DefaultScope("rw_calendar");
+//    }
 
 }
