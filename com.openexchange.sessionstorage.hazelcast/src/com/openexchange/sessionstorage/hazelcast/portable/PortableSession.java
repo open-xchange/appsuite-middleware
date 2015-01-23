@@ -254,6 +254,9 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 }
                 prev = pos + 1;
             }
+            if (prev < length) {
+                retval.add(str.substring(prev));
+            }
         }
         return retval;
     }
