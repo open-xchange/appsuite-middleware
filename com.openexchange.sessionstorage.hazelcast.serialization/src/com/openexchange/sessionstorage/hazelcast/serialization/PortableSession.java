@@ -289,13 +289,22 @@ public class PortableSession extends StoredSession implements CustomPortable {
     }
 
     private static List<String> parseColonString(String str) {
-        List<String> l = new LinkedList<String>();
-        for (int start = 0, end, len = str.length(); start < len && (end = str.indexOf(':', start)) >= 0; start = end + 1) {
-            if (end > start) {
-                l.add(str.substring(start, end));
+        List<String> retval = new LinkedList<String>();
+        int length = str.length();
+        {
+            int prev = 0;
+            int pos;
+            while (prev < length && (pos = str.indexOf(':', prev)) >= 0) {
+                if (pos > 0) {
+                    retval.add(str.substring(prev, pos));
+                }
+                prev = pos + 1;
+            }
+            if (prev < length) {
+                retval.add(str.substring(prev));
             }
         }
-        return l;
+        return retval;
     }
 
     private static String getSafeValue(String sValue) {
