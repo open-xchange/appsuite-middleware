@@ -89,7 +89,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
-import com.openexchange.sessiond.ParameterizableAddSessionParameterWrapper;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -219,17 +218,6 @@ public final class LoginPerformer {
                         sessionParameter = modified;
                     }
                 }
-
-
-                Map<String, Object> ip = new HashMap<String, Object>(3);
-                ip.put("remoteParameter1", "value1");
-                ip.put("remoteParameter2", "value2");
-
-                sessionParameter = new ParameterizableAddSessionParameterWrapper(sessionParameter, ip);
-
-
-
-
                 session = sessiondService.addSession(sessionParameter);
                 if (null == session) {
                     // Session could not be created
