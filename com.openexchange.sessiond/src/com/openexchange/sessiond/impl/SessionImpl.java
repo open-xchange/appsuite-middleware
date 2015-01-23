@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,9 +105,9 @@ public final class SessionImpl implements PutIfAbsent {
      * @param client The client type
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId,
-        final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash,
-        final String client, final boolean tranzient) {
+    public SessionImpl(int userId, String loginName, String password, int contextId, String sessionId,
+        String secret, String randomToken, String localIp, String login, String authId, String hash,
+        String client, boolean tranzient, Map<String, Object> initialParams) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -122,6 +123,9 @@ public final class SessionImpl implements PutIfAbsent {
         this.client = client;
         this.tranzient = tranzient;
         parameters = new ConcurrentHashMap<String, Object>();
+        if (null != initialParams) {
+            parameters.putAll(initialParams);
+        }
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
         parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
