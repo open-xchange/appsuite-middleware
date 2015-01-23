@@ -177,8 +177,6 @@ public final class SessionHandler {
     }
 
     /**
-<<<<<<< HEAD
-=======
      * Gets the session obfuscator that performs the conversion into/from a stored session
      *
      * @return The session obfuscator instance
@@ -198,7 +196,6 @@ public final class SessionHandler {
     }
 
     /**
->>>>>>> 41cf89f... Fix for bug 35426: Let session obfuscator properly maintain such parameters that are supposed to be taken over from session to stored session representation
      * Removes all sessions associated with given user in specified context
      *
      * @param userId The user ID
@@ -461,10 +458,11 @@ public final class SessionHandler {
      * @param clientHost The client host name or IP address
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
+     * @param initialParams The optional initial parameters
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient) throws OXException {
+    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, Map<String, Object> initialParams) throws OXException {
         SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -476,7 +474,7 @@ public final class SessionHandler {
         checkAuthId(login, authId);
 
         // Create new session instance
-        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient);
+        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, initialParams);
 
         // Either add session or yield short-time token for it
         SessionImpl addedSession;
@@ -484,7 +482,8 @@ public final class SessionHandler {
             addedSession = sessionData.addSession(newSession, noLimit).getSession();
 
             // Store session if not marked as transient and associated client is applicable
-            putIntoSessionStorage(addedSession);
+            List<String> remotes = getRemoteParameterNames();
+            putIntoSessionStorage(addedSession, null == remotes || remotes.isEmpty());
 
             // Post event for created session
             postSessionCreation(addedSession);
@@ -513,10 +512,11 @@ public final class SessionHandler {
      * @param hash The hash string
      * @param client The client identifier
      * @param tranzient Whether the session is meant to be transient/volatile; typically the session gets dropped soon
+     * @param initialParams The optional initial parameters
      * @return The newly created {@code SessionImpl} instance
      * @throws OXException If create attempt fails
      */
-    public static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
+    public static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, Map<String, Object> initialParams) throws OXException {
         // Generate identifier, secret, and random
         SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
         String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
@@ -524,7 +524,7 @@ public final class SessionHandler {
         String randomToken = sessionIdGenerator.createRandomId();
 
         // Create the instance
-        SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient);
+        SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient, initialParams);
 
         // Return...
         return newSession;
@@ -537,6 +537,16 @@ public final class SessionHandler {
      * @return <code>true</code> if put into session storage; otherwise <code>false</code>
      */
     public static boolean putIntoSessionStorage(SessionImpl session) {
+        return putIntoSessionStorage(session, asyncPutToSessionStorage);
+    }
+
+    /**
+     * Puts the given session into session storage if possible
+     *
+     * @param session The session
+     * @return <code>true</code> if put into session storage; otherwise <code>false</code>
+     */
+    public static boolean putIntoSessionStorage(SessionImpl session, boolean asyncPutToSessionStorage) {
         if (useSessionStorage(session)) {
             SessionStorageService sessionStorageService = SessiondServiceRegistry.getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
@@ -1591,7 +1601,7 @@ public final class SessionHandler {
         private final boolean addIfAbsent;
         private final SessionImpl session;
 
-        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+        protected StoreSessionTask(SessionImpl session, SessionStorageService sessionStorageService, boolean addIfAbsent) {
             super();
             this.sessionStorageService = sessionStorageService;
             this.addIfAbsent = addIfAbsent;
@@ -1708,7 +1718,7 @@ public final class SessionHandler {
      * @param session The session to check
      * @return <code>true</code> if session should be put to storage, <code>false</code>, otherwise
      */
-    private static boolean useSessionStorage(SessionImpl session) {
+    public static boolean useSessionStorage(SessionImpl session) {
         return null != session && false == session.isTransient() && false == isUsmEas(session.getClient());
     }
 
