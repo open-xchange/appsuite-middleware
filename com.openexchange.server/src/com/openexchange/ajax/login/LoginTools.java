@@ -159,6 +159,10 @@ public final class LoginTools {
         return parseParameter(req, REDIRECT_URL, "");
     }
 
+    public static String parseAutoLogin(HttpServletRequest req, String defaultAutoLogin) {
+        return parseParameter(req, LoginFields.AUTOLOGIN_PARAM, defaultAutoLogin);
+    }
+
     public static String parseParameter(HttpServletRequest req, String paramName, boolean strict, String fallback) throws OXException {
         final String value = req.getParameter(paramName);
         if (null == value) {

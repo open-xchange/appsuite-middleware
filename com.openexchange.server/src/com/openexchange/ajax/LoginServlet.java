@@ -927,7 +927,8 @@ public class LoginServlet extends AJAXServlet {
         Tools.disableCaching(resp);
         writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
         addHeadersAndCookies(loginResult, resp);
-        resp.sendRedirect(LoginTools.generateRedirectURL(null, conf.getHttpAuthAutoLogin(), session.getSessionID(), conf.getUiWebPath()));
+        String autoLogin = LoginTools.parseAutoLogin(req, confReference.get().getHttpAuthAutoLogin());
+        resp.sendRedirect(LoginTools.generateRedirectURL(null, autoLogin, session.getSessionID(), conf.getUiWebPath()));
     }
 
     /**
