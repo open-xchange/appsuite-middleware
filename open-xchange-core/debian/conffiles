@@ -36,7 +36,6 @@ opt/open-xchange/etc/messaging.properties
 opt/open-xchange/etc/mime.types
 opt/open-xchange/etc/noipcheck.cnf
 opt/open-xchange/etc/notification.properties
-opt/open-xchange/etc/oauth-provider.properties
 opt/open-xchange/etc/quota.properties
 opt/open-xchange/etc/contextSets/quota.yml
 opt/open-xchange/etc/ox-scriptconf.sh
