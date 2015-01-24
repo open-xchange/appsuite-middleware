@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.osgi;
 
+import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.activation.MailcapCommandMap;
@@ -59,6 +60,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
@@ -74,6 +76,7 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.threader.ThreadableCache;
 import com.openexchange.imap.threader.ThreadableLoginHandler;
+import com.openexchange.imap.util.ExtAccountFolderField;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailProvider;
@@ -158,6 +161,29 @@ public final class IMAPActivator extends HousekeepingActivator {
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             track(CacheEventService.class, new ListLsubInvalidator(context));
             openTrackers();
+            /*
+             * Initialize cache region
+             */
+            {
+                String regionName = ExtAccountFolderField.REGION_NAME;
+                byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                    "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxObjects=100000\n" +
+                    "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                    "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
+                    "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                    "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                    "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                    "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                    "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
+                    "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
+
+                registerService(AdditionalFolderField.class, new ExtAccountFolderField());
+            }
             /*
              * Register login handler
              */
