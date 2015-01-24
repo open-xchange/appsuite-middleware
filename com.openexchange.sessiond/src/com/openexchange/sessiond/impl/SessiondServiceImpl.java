@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
-import com.openexchange.sessiond.ParameterizableAddSessionParameter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
