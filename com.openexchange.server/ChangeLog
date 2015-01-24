@@ -2,6 +2,10 @@
 
  - Fix for bug 35504: Backported software change request 2249 and 2250.
 
+* 2015-01-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35899: Properly handle RTF part inside TNEF attachments to keep sequence identifiers in sync
+
 * 2015-01-14 - martin.herfurth@open-xchange.com
 
  - Fix for bug 36035: External updates override internal confirmation status.
