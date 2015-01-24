@@ -1,3 +1,7 @@
+* 2015-01-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35899: Properly handle RTF part inside TNEF attachments to keep sequence identifiers in sync
+
 * 2015-01-22 - marcus.klein@open-xchange.com
 
  - Fix for bug 35992: Drop external participants completely after deleting. Empty copies in a backup table do not make any sense.

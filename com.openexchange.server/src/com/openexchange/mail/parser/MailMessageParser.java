@@ -710,6 +710,7 @@ public final class MailMessageParser {
                             rtfPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
                             rtfPart.setHeader(HDR_CONTENT_TYPE, contentTypeStr);
                             rtfPart.setSize(decompressedBytes.length);
+                            parseMailContent(MimeMessageConverter.convertPart(rtfPart), handler, prefix, partCount++);
                             /*
                              * Further process TNEF attachment
                              */
