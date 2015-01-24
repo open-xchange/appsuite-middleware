@@ -80,7 +80,7 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
     @Override
     public BasicProperty get(String property, Context ctx, int user) throws OXException {
-        return new BasicPropertyImpl(property, ctx);
+        return new BasicPropertyImpl(property, ctx, services);
     }
 
     @Override
