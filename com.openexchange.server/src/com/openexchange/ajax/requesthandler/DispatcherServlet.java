@@ -81,6 +81,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -382,6 +383,14 @@ public class DispatcherServlet extends SessionServlet {
                  */
                 sendResponse(requestData, result, httpRequest, httpResponse);
             }
+        } catch (UploadException e) {
+            if (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e)) {
+                // An upload failed
+                httpResponse.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
+                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+                return;
+            }
+            handleOXException(e, httpRequest, httpResponse);
         } catch (OXException e) {
             handleOXException(e, httpRequest, httpResponse);
         } catch (RuntimeException e) {

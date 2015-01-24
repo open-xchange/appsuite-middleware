@@ -66,6 +66,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -95,12 +96,18 @@ public abstract class SessionServlet extends AJAXServlet {
     /** White-list file identifier */
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
+    // ------------------------------------------------------------------------------------------------------------------------------
+
+    /** The error prefix for session-related exceptions */
+    private final String sessionErrorPrefix;
+
     /**
      * Initializes a new {@link SessionServlet}.
      */
     protected SessionServlet() {
         super();
         SessionUtility.initialize();
+        sessionErrorPrefix = SessionExceptionCodes.getErrorPrefix();
     }
 
     /**
@@ -252,7 +259,11 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws IOException If an I/O error occurs
      */
     protected void handleOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
+        if (UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e)) {
+            // An upload failed
+            LOG.debug("", e);
+            resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
+        } else if (sessionErrorPrefix.equals(e.getPrefix())) {
             LOG.debug("", e);
             handleSessiondException(e, req, resp);
 

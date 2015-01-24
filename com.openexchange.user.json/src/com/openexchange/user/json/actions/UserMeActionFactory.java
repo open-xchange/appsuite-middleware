@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,68 @@
  *
  */
 
-package com.openexchange.oauth.osgi;
+package com.openexchange.user.json.actions;
 
-import java.util.List;
-import com.openexchange.context.ContextService;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link OSGiContextService}
+ * {@link UserMeActionFactory} - Factory for user/me component.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OSGiContextService extends AbstractOSGiDelegateService<ContextService> implements ContextService {
+@Module(name = "user/me", description = "Provides access to user information.")
+public final class UserMeActionFactory implements AJAXActionServiceFactory {
+
+    /** The map to store actions. */
+    private final Map<String, AJAXActionService> actions;
+
+    /** The service look-up */
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link OSGiContextService}.
+     * Initializes a new {@link UserActionFactory}.
      */
-    public OSGiContextService() {
-        super(ContextService.class);
+    public UserMeActionFactory(ServiceLookup services) {
+        super();
+        this.services = services;
+        actions = initActions();
     }
 
     @Override
-    public void setAttribute(String name, String value, int contextId) throws OXException {
-        getService().setAttribute(name, value, contextId);
+    public AJAXActionService createActionService(final String action) throws OXException {
+        if (null == action) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
+        }
+        final AJAXActionService retval = actions.get(action);
+        if (null == retval) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
+        }
+        return retval;
     }
 
     @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        return getService().getAllContextIds();
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
-    @Override
-    public Context getContext(int contextId) throws OXException {
-        return getService().getContext(contextId);
-    }
-
-    @Override
-    public int getContextId(final String loginContextInfo) throws OXException {
-        return getService().getContextId(loginContextInfo);
-    }
-
-    @Override
-    public void invalidateContext(final int contextId) throws OXException {
-        getService().invalidateContext(contextId);
-    }
-
-    @Override
-    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        getService().invalidateLoginInfo(loginContextInfo);
-    }
-
-    @Override
-    public Context loadContext(final int contextId) throws OXException {
-        return getService().loadContext(contextId);
+    /**
+     * Initializes the unmodifiable map to stored actions.
+     *
+     * @return The unmodifiable map with actions stored
+     */
+    private Map<String, AJAXActionService> initActions() {
+        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(2);
+        tmp.put(MeAction.ACTION, new MeAction(services));
+        return Collections.unmodifiableMap(tmp);
     }
 
 }

@@ -200,13 +200,21 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     ACCOUNT_NOT_ACCESSIBLE("File storage account %1$s of service \"%2$s\" cannot be accessed for user %3$s in context %4$s.", Category.CATEGORY_ERROR, 35, FileStorageExceptionMessages.ACCOUNT_NOT_ACCESSIBLE_MSG),
     /**
+     * The folder \"%1$s\" cannot be moved to \"%2$s\".
+     */
+    FOLDER_MOVE_NOT_SUPPORTED("The folder \"%1$s\" cannot be moved to \"%2$s\".", Category.CATEGORY_USER_INPUT, 36, FileStorageExceptionMessages.FOLDER_MOVE_NOT_SUPPORTED_MSG),
+    /**
+     * The file \"%1$s\" cannot be moved to \"%2$s\".
+     */
+    FILE_MOVE_NOT_SUPPORTED("The file \"%1$s\" cannot be moved to \"%2$s\".", Category.CATEGORY_USER_INPUT, 37, FileStorageExceptionMessages.FILE_MOVE_NOT_SUPPORTED_MSG),
+    /**
      * No administrative file access exists for service "%1$s"
      */
-    ADMIN_FILE_ACCESS_NOT_AVAILABLE("No administrative file access exists for service \"%1$s\"", Category.CATEGORY_ERROR, 36),
+    ADMIN_FILE_ACCESS_NOT_AVAILABLE("No administrative file access exists for service \"%1$s\"", Category.CATEGORY_ERROR, 38),
     /**
      * File version %1$s of file %2$s not found in folder %3$s.
      */
-    FILE_VERSION_NOT_FOUND("File version %1$s of file %2$s not found in folder %3$s.", Category.CATEGORY_USER_INPUT, 37, FileStorageExceptionMessages.FILE_VERSION_NOT_EXISTS_MSG),
+    FILE_VERSION_NOT_FOUND("File version %1$s of file %2$s not found in folder %3$s.", Category.CATEGORY_USER_INPUT, 39, FileStorageExceptionMessages.FILE_VERSION_NOT_EXISTS_MSG),
 
     ;
 

@@ -94,6 +94,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
@@ -888,12 +889,20 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         document.setFolderId(folderId.getFolderId());
         document.setObjectPermissions(null);
 
+        /*
+         * don't attempt to move if there is more than one version to avoid data loss
+         */
+        File original = sourceAccess.getFileMetadata(id.getFolderId(), id.getFileId(), FileStorageFileAccess.CURRENT_VERSION);
+        if (1 < original.getNumberOfVersions()) {
+            FileStorageFolder destFolder = getFolderAccess(folderId.getService(), folderId.getAccountId()).getFolder(folderId.getFolderId());
+            throw FileStorageExceptionCodes.FILE_MOVE_NOT_SUPPORTED.create(original.getFileName(), destFolder.getName());
+        }
+
         if (data == null) {
             data = sourceAccess.getDocument(id.getFolderId(), id.getFileId(), FileStorageFileAccess.CURRENT_VERSION);
         }
 
         if (partialUpdate) {
-            final File original = sourceAccess.getFileMetadata(id.getFolderId(), id.getFileId(), FileStorageFileAccess.CURRENT_VERSION);
             final Set<Field> fieldsToSkip = new HashSet<Field>(modifiedColumns);
             fieldsToSkip.add(Field.FOLDER_ID);
             fieldsToSkip.add(Field.ID);

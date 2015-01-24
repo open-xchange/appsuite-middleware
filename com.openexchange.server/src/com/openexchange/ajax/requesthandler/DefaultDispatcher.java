@@ -273,6 +273,12 @@ public class DefaultDispatcher implements Dispatcher {
                     final AJAXRequestResult modified = customizer.outgoing(requestData, modifiedResult, session);
                     if (modified != null) {
                         modifiedResult = modified;
+
+                        // Check (again) for direct result type
+                        if (AJAXRequestResult.ResultType.DIRECT == modifiedResult.getType()) {
+                            // No further processing
+                            return modifiedResult;
+                        }
                     }
                     iterator.remove();
                 } catch (final FlowControl.Later l) {

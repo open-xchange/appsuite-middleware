@@ -1,6 +1,19 @@
+* 2015-01-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35899: Properly handle RTF part inside TNEF attachments to keep sequence identifiers in sync
+
 * 2015-01-22 - marcus.klein@open-xchange.com
 
  - Fix for bug 35992: Drop external participants completely after deleting. Empty copies in a backup table do not make any sense.
+
+* 2015-01-21 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 35691: Adjusted the logic of the URL parsing to extract all relevant information in order to recreate the original publication URL. Enhanced 'getpublication' and 'deletepublication CLTs.
+
+* 2015-01-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36076: Serve "Range" requests for inline download requests
+ - Fix for bug 36235: Deduce the MIME type for uploaded files by their file names (if available)
 
 * 2015-01-19 - ioannis.chouklis@open-xchange.com
 

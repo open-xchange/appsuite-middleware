@@ -436,11 +436,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         final MailMessage mail = smalMailAccess.getDelegateMailAccess().getMessageStorage().getMessage(folder, mailId, markSeen);
-        if (mail == null)  {
-            throw MailExceptionCode.MAIL_NOT_FOUN_BY_MESSAGE_ID.create(folder, mailId);
+        if (mail != null)  {
+            mail.setAccountId(accountId);
         }
 
-        mail.setAccountId(accountId);
         // TODO: this may be critical to performance.
 //        try {
 //            if (!mail.isPrevSeen()) {

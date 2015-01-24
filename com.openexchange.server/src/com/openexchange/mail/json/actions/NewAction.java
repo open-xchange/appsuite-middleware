@@ -67,6 +67,8 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -149,7 +151,19 @@ public final class NewAction extends AbstractMailAction {
             }
             long maxSize = usm.getUploadQuota();
             if (maxSize <= 0) {
-                maxSize = -1L;
+                if (maxSize == 0) {
+                    maxSize = -1L;
+                } else {
+                    LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
+                    int globalQuota;
+                    try {
+                        globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
+                    } catch (final OXException e) {
+                        LOG.error("", e);
+                        globalQuota = 0;
+                    }
+                    maxSize = globalQuota <= 0 ? -1L : globalQuota;
+                }
             }
             if (request.hasUploads(maxFileSize, maxSize) || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
                 return performWithUploads(req, request, warnings);
@@ -242,7 +256,7 @@ public final class NewAction extends AbstractMailAction {
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                 final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
                 if (null != folder) {
-                    // Do the transport
+                    // Do the "fake" transport by providing poison address
                     MailTransport mailTransport = MailTransport.getInstance(session, accountId);
                     MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
 

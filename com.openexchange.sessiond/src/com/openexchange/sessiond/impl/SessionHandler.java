@@ -482,7 +482,8 @@ public final class SessionHandler {
             addedSession = sessionData.addSession(newSession, noLimit).getSession();
 
             // Store session if not marked as transient and associated client is applicable
-            putIntoSessionStorage(addedSession);
+            List<String> remotes = getRemoteParameterNames();
+            putIntoSessionStorage(addedSession, null == remotes || remotes.isEmpty());
 
             // Post event for created session
             postSessionCreation(addedSession);
@@ -541,6 +542,16 @@ public final class SessionHandler {
      * @return <code>true</code> if put into session storage; otherwise <code>false</code>
      */
     public static boolean putIntoSessionStorage(SessionImpl session) {
+        return putIntoSessionStorage(session, asyncPutToSessionStorage);
+    }
+
+    /**
+     * Puts the given session into session storage if possible
+     *
+     * @param session The session
+     * @return <code>true</code> if put into session storage; otherwise <code>false</code>
+     */
+    public static boolean putIntoSessionStorage(SessionImpl session, boolean asyncPutToSessionStorage) {
         if (useSessionStorage(session)) {
             SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
             if (sessionStorageService != null) {
@@ -1591,7 +1602,7 @@ public final class SessionHandler {
         private final boolean addIfAbsent;
         private final SessionImpl session;
 
-        protected StoreSessionTask(SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
+        protected StoreSessionTask(SessionImpl session, SessionStorageService sessionStorageService, boolean addIfAbsent) {
             super();
             this.sessionStorageService = sessionStorageService;
             this.addIfAbsent = addIfAbsent;
@@ -1708,7 +1719,7 @@ public final class SessionHandler {
      * @param session The session to check
      * @return <code>true</code> if session should be put to storage, <code>false</code>, otherwise
      */
-    static boolean useSessionStorage(SessionImpl session) {
+    public static boolean useSessionStorage(SessionImpl session) {
         return null != session && false == session.isTransient() && false == isUsmEas(session.getClient());
     }
 

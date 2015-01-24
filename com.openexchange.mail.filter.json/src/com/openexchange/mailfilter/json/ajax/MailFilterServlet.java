@@ -56,7 +56,7 @@ import com.openexchange.mailfilter.json.ajax.actions.MailFilterRequest;
  *
  * @author d7
  */
-public class MailFilterServlet extends AJAXServlet {
+public class MailFilterServlet extends AbstractMailFilterServlet {
 
     /**
      *

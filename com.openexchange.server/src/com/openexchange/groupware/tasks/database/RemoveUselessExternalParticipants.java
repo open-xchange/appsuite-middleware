@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks.database;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
@@ -96,11 +97,11 @@ public final class RemoveUselessExternalParticipants extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         int contextID = params.getContextId();
         Connection con = service.getForUpdateTask(contextID);
+        Statement stmt = null;
         try {
             startTransaction(con);
-            try (Statement stmt = con.createStatement()) {
-                stmt.execute("DELETE FROM del_task_eparticipant");
-            }
+            stmt = con.createStatement();
+            stmt.execute("DELETE FROM del_task_eparticipant");
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -109,6 +110,7 @@ public final class RemoveUselessExternalParticipants extends UpdateTaskAdapter {
             rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            closeSQLStuff(stmt);
             autocommit(con);
             service.backForUpdateTask(contextID, con);
         }

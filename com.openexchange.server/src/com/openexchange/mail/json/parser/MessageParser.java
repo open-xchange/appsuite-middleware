@@ -714,7 +714,7 @@ public final class MessageParser {
                      * Decide how to retrieve part
                      */
                     ReferencedMailPart referencedMailPart;
-                    if (isMail || null == seqId || ROOT.equals(seqId)) {
+                    if (isMail || ROOT.equals(seqId)) {
                         /*
                          * The mail itself
                          */
@@ -730,7 +730,7 @@ public final class MessageParser {
                         referencedMail = ManagedMimeMessage.clone(referencedMail);
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
-                        referencedMailPart = groupedReferencedParts.get(seqId);
+                        referencedMailPart = null == seqId ? null : groupedReferencedParts.get(seqId);
                     }
                     if (null != referencedMailPart) {
                         referencedMailPart.setMsgref(msgref);

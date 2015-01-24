@@ -88,8 +88,8 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
+import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.SearchSequence;
@@ -338,7 +338,7 @@ public final class IMAPSort {
 
         boolean rangeApplied = false;
         int[] seqNums;
-        if (allowESORT && null != indexRange && imapConfig.asMap().containsKey("ESORT") && (null == searchTerm || !searchTerm.isAscii())) {
+        if (allowESORT && null != indexRange && imapConfig.asMap().containsKey("ESORT") && (null == searchTerm || searchTerm.isAscii())) {
             try {
                 final String atom = new StringBuilder(16).append(indexRange.start + 1).append(':').append(indexRange.end).toString();
                 seqNums = (int[]) imapFolder.doCommand(new ProtocolCommand() {

@@ -63,6 +63,7 @@ import com.openexchange.user.json.UserContactResultConverter;
 import com.openexchange.user.json.actions.UserActionFactory;
 import com.openexchange.user.json.anonymizer.ContactAnonymizerService;
 import com.openexchange.user.json.anonymizer.UserAnonymizerService;
+import com.openexchange.user.json.actions.UserMeActionFactory;
 
 /**
  * {@link UserJSONActivator} - Activator for JSON user interface.
@@ -89,6 +90,11 @@ public class UserJSONActivator extends AJAXModuleActivator {
             Services.setServiceLookup(this);
 
             registerModule(new UserActionFactory(this), Constants.MODULE);
+            registerModule(new UserMeActionFactory(this), Constants.MODULE_ME);
+
+            /*
+             * Register result converter
+             */
             registerService(ResultConverter.class, new UserContactResultConverter());
             registerService(AnonymizerService.class.getName(), new UserAnonymizerService());
             registerService(AnonymizerService.class.getName(), new ContactAnonymizerService());

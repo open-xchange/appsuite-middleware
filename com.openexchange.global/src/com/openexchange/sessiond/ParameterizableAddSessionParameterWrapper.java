@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,50 +46,96 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.console.publication;
 
-import java.rmi.RemoteException;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.rmi.OXPublicationInterface;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Publication;
-import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
+package com.openexchange.sessiond;
 
-public abstract class DeleteCore extends PublicationAbstraction {
+import java.util.Map;
+import com.openexchange.groupware.contexts.Context;
 
-    protected final void commonfunctions(final AdminParser parser, final String[] args) {
-        setOptions(parser);
 
-        boolean error = true;
-        String successtext = null;
-        try {
-            parser.ownparse(args);
+/**
+ * {@link ParameterizableAddSessionParameterWrapper}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class ParameterizableAddSessionParameterWrapper implements ParameterizableAddSessionParameter {
 
-            final Credentials auth = credentialsparsing(parser);
+    private final AddSessionParameter sessionParameter;
+    private final Map<String, Object> initialParameters;
 
-            final OXPublicationInterface oxpub = getPublicationInterface();
-
-            final Publication publication = new Publication();
-
-            maincall(parser, oxpub, publication, auth);
-
-            boolean success = oxpub.deletePublication(publication.getContext(), publication.getUrl(), auth);
-            if (success) {
-                successtext = "Publication with URL \"" + publication.getUrl() + "\" successfully deleted from context " + publication.getContext().getId();
-                error = false;
-            } else {
-                successtext = "Failed to delete publication with URL \"" + publication.getUrl() + "\" from context " + publication.getContext().getId();
-                error = true;
-            }
-            System.out.println(successtext);
-        } catch (final Exception e) {
-            printErrors(successtext, null, e, parser);
-        } finally {
-            if (error) {
-                sysexit(SYSEXIT_UNKNOWN_OPTION);
-            }
-        }
+    /**
+     * Initializes a new {@link ParameterizableAddSessionParameterWrapper}.
+     *
+     * @param sessionParameter The wrapped {@link AddSessionParameter} instance
+     */
+    public ParameterizableAddSessionParameterWrapper(AddSessionParameter sessionParameter, Map<String, Object> initialParameters) {
+        super();
+        this.sessionParameter = sessionParameter;
+        this.initialParameters = initialParameters;
     }
 
-    protected abstract void maincall(final AdminParser parser, final OXPublicationInterface oxpub, final Publication pub, final Credentials auth) throws RemoteException, DuplicateExtensionException;
+    @Override
+    public Map<String, Object> getInitialParameters() {
+        return initialParameters;
+    }
+
+    @Override
+    public String getFullLogin() {
+        return sessionParameter.getFullLogin();
+    }
+
+    @Override
+    public String getPassword() {
+        return sessionParameter.getPassword();
+    }
+
+    @Override
+    public int getUserId() {
+        return sessionParameter.getUserId();
+    }
+
+    @Override
+    public String getUserLoginInfo() {
+        return sessionParameter.getUserLoginInfo();
+    }
+
+    @Override
+    public Context getContext() {
+        return sessionParameter.getContext();
+    }
+
+    @Override
+    public String getClientIP() {
+        return sessionParameter.getClientIP();
+    }
+
+    @Override
+    public String getAuthId() {
+        return sessionParameter.getAuthId();
+    }
+
+    @Override
+    public String getHash() {
+        return sessionParameter.getHash();
+    }
+
+    @Override
+    public String getClient() {
+        return sessionParameter.getClient();
+    }
+
+    @Override
+    public String getClientToken() {
+        return sessionParameter.getClientToken();
+    }
+
+    @Override
+    public boolean isTransient() {
+        return sessionParameter.isTransient();
+    }
+
+
+
+
+
 }

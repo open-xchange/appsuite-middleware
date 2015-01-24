@@ -56,10 +56,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import org.slf4j.Logger;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -295,7 +302,7 @@ public class RdbContextStorage extends ContextStorage {
         try {
             stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id = ?");
             stmt.setInt(1, filestoreId);
-            
+
             result = stmt.executeQuery();
             while (result.next()) {
                 retval.add(Integer.valueOf(result.getInt(1)));
@@ -317,6 +324,104 @@ public class RdbContextStorage extends ContextStorage {
     @Override
     protected void startUp() {
         // Nothing to do.
+    }
+
+    /**
+     * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link ContextExceptionCodes#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param contextId Identifier of the context that attribute should be set.
+     * @throws OXException if writing the attribute fails.
+     * @see ContextExceptionCodes#CONCURRENT_ATTRIBUTES_UPDATE
+     */
+    @Override
+    public void setAttribute(String name, String value, int contextId) throws OXException {
+        if (null == name) {
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("CTX");
+        }
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = dbService.getWritable(contextId);
+            if (value == null) {
+                stmt = con.prepareStatement("DELETE FROM contextAttribute WHERE cid = ? AND name = ?");
+                stmt.setInt(1, contextId);
+                stmt.setString(2, name);
+                stmt.executeUpdate();
+            } else {
+                insertOrUpdateAttribute(name, value, contextId, con);
+            }
+        } catch (SQLException e) {
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("CTX");
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            if (con != null) {
+                dbService.backWritable(contextId, con);
+            }
+        }
+    }
+
+    private static void insertOrUpdateAttribute(String name, String newValue, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+            stmt = con.prepareStatement("SELECT value FROM contextAttribute WHERE cid=? AND name=?");
+            stmt.setInt(1, contextId);
+            stmt.setString(2, name);
+            rs = stmt.executeQuery();
+            List<String> toUpdate = new LinkedList<String>();
+            while (rs.next()) {
+                toUpdate.add(rs.getString(1));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            if (toUpdate.isEmpty()) {
+                stmt = con.prepareStatement("INSERT INTO contextAttribute (cid,name,value) VALUES (?,?,?)");
+                stmt.setInt(1, contextId);
+                stmt.setString(2, name);
+                stmt.setString(3, newValue);
+                stmt.executeUpdate();
+            } else {
+                stmt = con.prepareStatement("UPDATE contextAttribute SET value=? WHERE cid=? AND name=? AND value=?");
+                for (String oldValue : toUpdate) {
+                    stmt.setString(1, newValue);
+                    stmt.setInt(2, contextId);
+                    stmt.setString(3, name);
+                    stmt.setString(4, oldValue);
+                    stmt.addBatch();
+                }
+                int[] updateCounts = stmt.executeBatch();
+                for (int updateCount : updateCounts) {
+                    // Concurrent modification of at least one attribute. We lost the race...
+                    if (updateCount != 1) {
+                        Logger logger = org.slf4j.LoggerFactory.getLogger(RdbContextStorage.class);
+                        logger.error("Concurrent modification of attribute '{}' for context {}. New value '{}' could not be set.", name, I(contextId), newValue);
+                        throw ContextExceptionCodes.CONCURRENT_ATTRIBUTES_UPDATE.create(I(contextId));
+                    }
+                }
+            }
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(con);
+        }
     }
 
 }

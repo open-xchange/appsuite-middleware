@@ -265,6 +265,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     protected static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
 
+    protected static final String VIEW_DOCUMENT = "document";
+
     /**
      * Detects the display mode.
      *
@@ -289,6 +291,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 usm.setDisplayHtmlInlineContent(true);
                 usm.setAllowHTMLImages(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else if (VIEW_DOCUMENT.equals(view)) {
+                displayMode = DisplayMode.DOCUMENT;
             } else {
                 LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", Mail.PARAMETER_VIEW, view);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;

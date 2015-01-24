@@ -222,7 +222,7 @@ public final class LoginPerformer {
 
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
-            // Create session
+            // Check needed service
             SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
             if (null == sessiondService) {
                 sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
@@ -248,7 +248,6 @@ public final class LoginPerformer {
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             retval.setSession(session);
-
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
             return retval;
@@ -308,14 +307,17 @@ public final class LoginPerformer {
      */
     public static Context findContext(String contextInfo) throws OXException {
         ContextStorage contextStor = ContextStorage.getInstance();
+
         int contextId = contextStor.getContextId(contextInfo);
         if (ContextStorage.NOT_FOUND == contextId) {
             throw ContextExceptionCodes.NO_MAPPING.create(contextInfo);
         }
+
         Context context = contextStor.getContext(contextId);
         if (null == context) {
             throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
         }
+
         return context;
     }
 
@@ -328,14 +330,16 @@ public final class LoginPerformer {
      * @throws OXException If user look-up fails
      */
     public static User findUser(Context ctx, String userInfo) throws OXException {
-        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
-        final UserStorage us = UserStorage.getInstance();
-        int userId = 0;
+        String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
+        UserStorage us = UserStorage.getInstance();
+
+        int userId;
         if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
             userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
         } else {
             userId = us.getUserId(userInfo, ctx);
         }
+
         return us.getUser(userId, ctx);
     }
 
@@ -372,7 +376,7 @@ public final class LoginPerformer {
      * @param sessionId The session ID
      * @throws OXException If logout fails
      */
-    public Session doLogout(final String sessionId) throws OXException {
+    public Session doLogout(String sessionId) throws OXException {
         // Drop the session
         SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
         if (null == sessiondService) {

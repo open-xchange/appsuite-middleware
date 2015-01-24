@@ -133,10 +133,10 @@ public final class LoginTools {
         // Now let's see, if this URL already contains a fragment
         if (retval.indexOf('#') < 0) {
             // Apparently it didn't, so we can append our own
-            return retval + '#' + param + '=' + value + query;
+            return retval + '#' + AJAXUtility.encodeUrl(param) + '=' + AJAXUtility.encodeUrl(value) + query;
         }
         // Ok, we already have a fragment, let's append a new parameter
-        return retval + '&' + param + '=' + value + query;
+        return retval + '&' + AJAXUtility.encodeUrl(param) + '=' + AJAXUtility.encodeUrl(value) + query;
     }
 
     public static String parseAuthId(HttpServletRequest req, boolean strict) throws OXException {

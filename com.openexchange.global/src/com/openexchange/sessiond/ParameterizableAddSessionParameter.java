@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,24 @@
  *
  */
 
-package com.openexchange.oauth.osgi;
+package com.openexchange.sessiond;
 
-import java.util.List;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import java.util.Map;
+import com.openexchange.session.Session;
 
 /**
- * {@link OSGiContextService}
+ * {@link ParameterizableAddSessionParameter} - Extends the {@link AddSessionParameter} interface by the possibility to specify initial
+ * parameters obtainable by {@link Session#getParameter(String)} method.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OSGiContextService extends AbstractOSGiDelegateService<ContextService> implements ContextService {
+public interface ParameterizableAddSessionParameter extends AddSessionParameter {
 
     /**
-     * Initializes a new {@link OSGiContextService}.
+     * Gets the initial parameters obtainable by {@link Session#getParameter(String)} method.
+     *
+     * @return The initial parameters or <code>null</code>
      */
-    public OSGiContextService() {
-        super(ContextService.class);
-    }
-
-    @Override
-    public void setAttribute(String name, String value, int contextId) throws OXException {
-        getService().setAttribute(name, value, contextId);
-    }
-
-    @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        return getService().getAllContextIds();
-    }
-
-    @Override
-    public Context getContext(int contextId) throws OXException {
-        return getService().getContext(contextId);
-    }
-
-    @Override
-    public int getContextId(final String loginContextInfo) throws OXException {
-        return getService().getContextId(loginContextInfo);
-    }
-
-    @Override
-    public void invalidateContext(final int contextId) throws OXException {
-        getService().invalidateContext(contextId);
-    }
-
-    @Override
-    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        getService().invalidateLoginInfo(loginContextInfo);
-    }
-
-    @Override
-    public Context loadContext(final int contextId) throws OXException {
-        return getService().loadContext(contextId);
-    }
+    Map<String, Object> getInitialParameters();
 
 }

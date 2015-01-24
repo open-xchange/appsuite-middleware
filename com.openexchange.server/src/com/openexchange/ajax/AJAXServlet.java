@@ -113,6 +113,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -1180,12 +1181,19 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         try {
             final UploadFile retval = new UploadFileImpl();
             retval.setFieldName(item.getFieldName());
+            String mimeType = null;
             if (isEmpty(fileName)) {
-                retval.setFileName(item.getName());
+                String name = item.getName();
+                retval.setFileName(name);
+                // Deduce MIME type from passed file name
+                if (!isEmpty(name)) {
+                    mimeType = MimeType2ExtMap.getContentType(name, null);
+                }
             } else {
                 retval.setFileName(fileName);
+                mimeType = MimeType2ExtMap.getContentType(fileName, null);
             }
-            retval.setContentType(item.getContentType());
+            retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
             final long size = item.getSize();
             retval.setSize(size);
             final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));

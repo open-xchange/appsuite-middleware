@@ -577,13 +577,6 @@ public class FileResponseRenderer implements ResponseRenderer {
                         outputStream.println(new StringBuilder("--").append(boundary).append("--").toString());
                     }
                 } else {
-                    // Check if "Range" header was sent by client although we do not know exact size/length
-                    if (length <= 0 && null != sRange) {
-                        // Client requested a range, but cannot be satisfied
-                        setHeaderSafe("Content-Range", "bytes */" + documentData.available(), resp); // Required in 416.
-                        resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                        return;
-                    }
                     // Check for "off"/"len" parameters
                     final int off = AJAXRequestDataTools.parseIntParameter(req.getParameter("off"), -1);
                     final int amount = AJAXRequestDataTools.parseIntParameter(req.getParameter("len"), -1);

@@ -306,7 +306,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     if (isEmpty(mailPart.getFileName())) {
                         mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
                     }
-                    boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                    boolean exactLength = !saveToDisk || AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
                     if (exactLength) {
                         size = Streams.countInputStream(mailPart.getInputStream());
                     }

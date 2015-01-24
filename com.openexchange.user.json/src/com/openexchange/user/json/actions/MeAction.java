@@ -47,56 +47,69 @@
  *
  */
 
-package com.openexchange.config.cascade.context;
+package com.openexchange.user.json.actions;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import com.openexchange.config.cascade.BasicProperty;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ContextConfigProvider}
+ * {@link MeAction} - Maps the action to a <tt>GET</tt> action.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
+@Action(method = RequestMethod.GET, name = "GET", description = "Get information about requesting user.", parameters = {
+		@Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, responseDescription = "Response with timestamp: A JSON object providing some user information.")
+public final class MeAction extends AbstractUserAction {
 
-    static final String DYNAMIC_ATTR_PREFIX = "config/";
+    /**
+     * The <tt>GET</tt> action string.
+     */
+    public static final String ACTION = "GET";
 
-    public ContextConfigProvider(ServiceLookup services) {
+    /**
+     * Initializes a new {@link MeAction}.
+     */
+    public MeAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    public String getScope() {
-    	return "context";
-    }
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
+        try {
+            int userId = session.getUserId();
+            Context context = session.getContext();
 
-    @Override
-    public BasicProperty get(String property, Context ctx, int user) throws OXException {
-        return new BasicPropertyImpl(property, ctx);
-    }
+            // Obtain user's contact
+            Contact contact = services.getService(ContactService.class).getUser(session, userId);
 
-    @Override
-    public Collection<String> getAllPropertyNames(Context ctx) {
-        Map<String, List<String>> attributes = ctx.getAttributes();
-        Set<String> allNames = new HashSet<String>();
+            // Craft JSON result
+            JSONObject jReturn = new JSONObject(8);
+            jReturn.put("context_id", session.getContextId());
+            jReturn.put("user_id", session.getUserId());
+            jReturn.put("is_context_admin", session.getUserId() == context.getMailadmin());
+            String str = session.getLoginName();
+            jReturn.put("login_name", str == null ? "<unknown>" : str);
+            str = contact.getDisplayName();
+            jReturn.put("display_name", str == null ? "<unknown>" : str);
 
-        String prefix = DYNAMIC_ATTR_PREFIX;
-        int snip1 = prefix.length();
-        for (String name : attributes.keySet()) {
-            if (name.startsWith(prefix)) {
-                allNames.add(name.substring(snip1));
-            }
+            // Return appropriate result
+            return new AJAXRequestResult(jReturn, contact.getLastModified(), "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-
-        return allNames;
     }
 
 }

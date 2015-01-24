@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.admin.console;
 
 import java.util.ArrayList;
@@ -271,6 +270,16 @@ public class CLIParser {
         }
 
         return remove ? vals.remove(0) : vals.get(0);
+    }
+
+    /**
+     * Returns true if the CLIParser contains the specified option; false otherwise
+     * 
+     * @param o The option
+     * @return Returns true if the CLIParser contains the specified option; false otherwise
+     */
+    public boolean hasOption(final CLIOption o) {
+        return values.containsKey(o.longForm());
     }
 
     /**

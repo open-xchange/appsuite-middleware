@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,55 @@
  *
  */
 
-package com.openexchange.oauth.osgi;
+package com.openexchange.authentication;
 
-import java.util.List;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.AddSessionParameter;
+import com.openexchange.sessiond.ParameterizableAddSessionParameter;
 
 /**
- * {@link OSGiContextService}
+ * {@link AddSessionParameterEnhancement} - An optional interface which may be implemented by {@link Authenticated} to apply custom parameters
+ * that are applied to the {@link Session} instance which is supposed to be created.
+ * <p>
+ * Please check {@link ParameterizableAddSessionParameter} interface to specify initial parameters obtainable by
+ * {@link Session#getParameter(String)} method.
+ * <p>
+ * Example:
+ * <pre>
+ *  public class MyAddSessionParameterEnhancement implements Authenticated, AddSessionParameterEnhancement {
+ *
+ *      // The custom initial parameters
+ *      private Map&lt;String, Object&gt; myInitialParameters;
+ *
+ *      ...
+ *
+ *      public AddSessionParameter enhanceParameter(AddSessionParameter parameter) {
+ *          return new ParameterizableAddSessionParameterWrapper(parameter, myInitialParameters);
+ *      }
+ *
+ *      public String getContextInfo() {
+ *          ...
+ *      }
+ *
+ *      public String getUserInfo() {
+ *          ...
+ *      }
+ *  }
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OSGiContextService extends AbstractOSGiDelegateService<ContextService> implements ContextService {
+public interface AddSessionParameterEnhancement {
 
     /**
-     * Initializes a new {@link OSGiContextService}.
+     * Sets custom properties in specified {@link Session}.
+     * <p>
+     * Please check {@link ParameterizableAddSessionParameter} interface to specify initial parameters obtainable by
+     * {@link Session#getParameter(String)} method.
+     *
+     * @param parameter The session parameter to enhance
+     * @return The possibly changed {@link AddSessionParameter} instance
      */
-    public OSGiContextService() {
-        super(ContextService.class);
-    }
-
-    @Override
-    public void setAttribute(String name, String value, int contextId) throws OXException {
-        getService().setAttribute(name, value, contextId);
-    }
-
-    @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        return getService().getAllContextIds();
-    }
-
-    @Override
-    public Context getContext(int contextId) throws OXException {
-        return getService().getContext(contextId);
-    }
-
-    @Override
-    public int getContextId(final String loginContextInfo) throws OXException {
-        return getService().getContextId(loginContextInfo);
-    }
-
-    @Override
-    public void invalidateContext(final int contextId) throws OXException {
-        getService().invalidateContext(contextId);
-    }
-
-    @Override
-    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        getService().invalidateLoginInfo(loginContextInfo);
-    }
-
-    @Override
-    public Context loadContext(final int contextId) throws OXException {
-        return getService().loadContext(contextId);
-    }
+    AddSessionParameter enhanceParameter(AddSessionParameter parameter);
 
 }

@@ -190,10 +190,25 @@ public final class ConfigAJAXRequest {
         }
     }
 
+    /**
+     * Checks for denoted parameter
+     *
+     * @param name The parameter name
+     * @return The parameter value
+     * @throws OXException If parameter is absent
+     * @throws NullPointerException If name is <code>null</code>
+     */
     public String checkParameter(final String name) throws OXException {
         return request.checkParameter(name);
     }
 
+    /**
+     * Gets for denoted parameter
+     *
+     * @param name The parameter name
+     * @return The parameter value or <code>null</code> if absent
+     * @throws NullPointerException If name is <code>null</code>
+     */
     public String getParameter(final String name) {
         return request.getParameter(name);
     }
