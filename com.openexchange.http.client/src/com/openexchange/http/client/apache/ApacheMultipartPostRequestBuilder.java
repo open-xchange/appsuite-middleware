@@ -51,6 +51,7 @@ package com.openexchange.http.client.apache;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -130,6 +131,12 @@ public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<H
 	}
 
 	@Override
+    public HTTPMultipartPostRequestBuilder part(String fieldName, InputStream is, String contentType, long length, String filename) throws OXException {
+            parts.add(new FilePart(fieldName, partSource(length, filename, is), contentType, "UTF-8"));
+        return this;
+    }
+
+	@Override
     public HTTPMultipartPostRequestBuilder stringPart(String fieldName, String fieldValue) {
         parts.add(new StringPart(fieldName, fieldValue, "UTF-8"));
         return this;
@@ -155,6 +162,27 @@ public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<H
 		}
 	}
 
+	private PartSource partSource(final long size, final String filename, final InputStream is) throws OXException {
+	    PartSource source = new PartSource() {
+
+            @Override
+            public long getLength() {
+                return size;
+            }
+
+            @Override
+            public String getFileName() {
+                return filename;
+            }
+
+            @Override
+            public InputStream createInputStream() throws IOException {
+                return is;
+            }
+        };
+        return source;
+    }
+
 	@Override
 	public void done() {
 		for (ManagedFile managedFile : managedFiles) {
@@ -163,6 +191,8 @@ public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<H
 		managedFiles.clear();
 		super.done();
 	}
+
+
 
 
 }
