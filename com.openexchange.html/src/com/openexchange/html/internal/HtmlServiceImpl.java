@@ -542,6 +542,35 @@ public final class HtmlServiceImpl implements HtmlService {
         return sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix, -1).getContent();
     }
 
+    private String normalize(String str) {
+        boolean needsCheck = false;
+        int length = str.length();
+        for (int i = 0; !needsCheck && i < length; i++) {
+            needsCheck = str.charAt(i) >= 128;
+        }
+
+        if (!needsCheck) {
+            return str;
+        }
+
+        StringBuilder tmp = new StringBuilder(length);
+        OneCharSequence helper = null;
+        for (int i = 0; i < length; i++) {
+            char c = str.charAt(i);
+            if (c < 128) {
+                tmp.append(c);
+            } else {
+                if (null == helper) {
+                    helper = new OneCharSequence(c);
+                } else {
+                    helper.setCharacter(c);
+                }
+                tmp.append(Normalizer.normalize(helper, Form.NFKC));
+            }
+        }
+        return tmp.toString();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -556,23 +585,15 @@ public final class HtmlServiceImpl implements HtmlService {
 
             // Normalize the string
             {
-                int length = html.length();
-                StringBuilder tmp = new StringBuilder(length);
-                OneCharSequence helper = null;
-                for (int i = 0; i < length; i++) {
-                    char c = html.charAt(i);
-                    if (c < 128) {
-                        tmp.append(c);
-                    } else {
-                        if (null == helper) {
-                            helper = new OneCharSequence(c);
-                        } else {
-                            helper.setCharacter(c);
-                        }
-                        tmp.append(Normalizer.normalize(helper, Form.NFKC));
-                    }
+                Matcher matcher = PATTERN_URL.matcher(html);
+                if (matcher.find()) {
+                    StringBuffer sb = new StringBuffer(html.length());
+                    do {
+                        matcher.appendReplacement(sb, Matcher.quoteReplacement(normalize(matcher.group())));
+                    } while (matcher.find());
+                    matcher.appendTail(sb);
+                    html = sb.toString();
                 }
-                html = tmp.toString();
             }
 
             // Perform one-shot sanitizing
