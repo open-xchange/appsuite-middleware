@@ -134,7 +134,7 @@ public class Obfuscator {
         // Instantiate session
         SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(),
             session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(),
-            session.getAuthId(), session.getHash(), session.getClient(), false, null);
+            session.getAuthId(), session.getHash(), session.getClient(), false);
 
         // Check for remote parameter names
         if (null != remoteParameterNames) {
