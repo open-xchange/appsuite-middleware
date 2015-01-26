@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -69,7 +70,7 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     private String client;
     private String clientToken;
     private boolean tranzient;
-    private SessionModifyCallback callback;
+    private SessionEnhancement enhancement;
 
     /**
      * Initializes a new {@link DefaultAddSessionParameter}.
@@ -255,11 +256,11 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     }
 
     @Override
-    public SessionModifyCallback getCallback() {
-        return callback;
+    public SessionEnhancement getEnhancement() {
+        return enhancement;
     }
 
-    public void setCallback(SessionModifyCallback callback) {
-        this.callback = callback;
+    public void setEnhancement(SessionEnhancement enhancement) {
+        this.enhancement = enhancement;
     }
 }

@@ -1,3 +1,7 @@
+* 2015-01-26 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35426: Execute SessionEnhancement earlier, so parameters added through this get populated with the session in the cluster.
+
 * 2015-01-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 35182: Schedule a timer for Kerberos ticket renewal removing the ticket from the session. Additionally a ticket reload from

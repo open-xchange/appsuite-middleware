@@ -73,6 +73,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -82,7 +83,6 @@ import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
-import com.openexchange.sessiond.SessionModifyCallback;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
@@ -372,7 +372,7 @@ public final class SessionHandler {
                                 retval[i] = obfuscator.unwrap(userSessions[i], remoteParameterNames);
                             }
                             return retval;
-                        }
+                            }
                     };
                     final Session[] sessions = getFrom(c, new Session[0]);
                     retval = new SessionControl[sessions.length];
@@ -463,11 +463,11 @@ public final class SessionHandler {
      * @param clientHost The client host name or IP address
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
-     * @param callback after creating the session, this callback will be called when not <code>null</code> for extending the session.
+     * @param enhancement after creating the session, this callback will be called when not <code>null</code> for extending the session.
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final String clientToken, final boolean tranzient, SessionModifyCallback callback) throws OXException {
+    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, SessionEnhancement enhancement) throws OXException {
         SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -480,8 +480,8 @@ public final class SessionHandler {
 
         // Create new session instance
         SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient);
-        if (null != callback) {
-            callback.modify(newSession);
+        if (null != enhancement) {
+            enhancement.enhanceSession(newSession);
         }
 
         // Either add session or yield short-time token for it

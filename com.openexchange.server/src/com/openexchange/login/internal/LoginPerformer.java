@@ -87,7 +87,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionModifyCallback;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -210,12 +209,7 @@ public final class LoginPerformer {
             }
             AddSessionParameterImpl addSession = new AddSessionParameterImpl(username, request, user, ctx);
             if (SessionEnhancement.class.isInstance(authed)) {
-                addSession.setCallback(new SessionModifyCallback() {
-                    @Override
-                    public void modify(Session session2) {
-                        ((SessionEnhancement) authed).enhanceSession(session2);
-                    }
-                });
+                addSession.setEnhancement((SessionEnhancement) authed);
             }
             final Session session = sessiondService.addSession(addSession);
             if (null == session) {
