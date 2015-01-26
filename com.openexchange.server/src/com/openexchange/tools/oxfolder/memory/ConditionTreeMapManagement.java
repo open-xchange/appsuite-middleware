@@ -112,7 +112,7 @@ public final class ConditionTreeMapManagement {
      *
      * @param contextId The context identifier
      */
-    public static void dropFor(final int contextId) {
+    public static void dropFor(int contextId) {
         final ConditionTreeMapManagement mm = instance;
         if (null != mm) {
             mm.context2maps.remove(Integer.valueOf(contextId));
@@ -123,7 +123,7 @@ public final class ConditionTreeMapManagement {
      * -------------------- Member stuff -----------------------------
      */
 
-    private static final int TIME2LIVE = 300000; // 5 minutes time-to-live
+    private static final int TIME2LIVE = 360000; // 6 minutes time-to-live
 
     protected final ConcurrentMap<Integer, Future<ConditionTreeMap>> context2maps;
     private final boolean enabled;
@@ -134,20 +134,19 @@ public final class ConditionTreeMapManagement {
      */
     private ConditionTreeMapManagement() {
         super();
-        // Evict context-associated ConditionTreeMaps after 10 minutes idle time
-        context2maps = new ConcurrentLinkedHashMap<Integer, Future<ConditionTreeMap>>(8192, 0.75F, 16, Integer.MAX_VALUE, new ExpirationPolicy(0, 600000));
-        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        context2maps = new ConcurrentLinkedHashMap<Integer, Future<ConditionTreeMap>>(8192);
+        ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         enabled = null == service || service.getBoolProperty("com.openexchange.oxfolder.memory.enabled", true);
     }
 
     private void start() {
-        final Runnable task = new ShrinkerRunnable();
-        final int delay = 60000; // Every minute
+        Runnable task = new ShrinkerRunnable();
+        int delay = 20000; // Every 20 seconds
         timerTask = ServerServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(task, delay, delay);
     }
 
     private void stop() {
-        final ScheduledTimerTask timerTask = this.timerTask;
+        ScheduledTimerTask timerTask = this.timerTask;
         if (null != timerTask) {
             timerTask.cancel();
             this.timerTask = null;
@@ -162,14 +161,14 @@ public final class ConditionTreeMapManagement {
      * @return The tree map.
      * @throws OXException If returning tree map fails
      */
-    public ConditionTreeMap getMapFor(final int contextId) throws OXException {
+    public ConditionTreeMap getMapFor(int contextId) throws OXException {
         if (!enabled) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create("Memory tree map disabled as per configuration.");
         }
-        final Integer key = Integer.valueOf(contextId);
+        Integer key = Integer.valueOf(contextId);
         Future<ConditionTreeMap> f = context2maps.get(key);
         if (null == f) {
-            final FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, LOG));
+            FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, LOG));
             f = context2maps.putIfAbsent(key, ft);
             if (null == f) {
                 f = ft;
@@ -186,11 +185,11 @@ public final class ConditionTreeMapManagement {
      * @return The tree map or <code>null</code>
      * @throws OXException If returning tree map fails
      */
-    public ConditionTreeMap optMapFor(final int contextId) throws OXException {
+    public ConditionTreeMap optMapFor(int contextId) throws OXException {
         if (!enabled) {
             return null;
         }
-        final Future<ConditionTreeMap> f = context2maps.get(Integer.valueOf(contextId));
+        Future<ConditionTreeMap> f = context2maps.get(Integer.valueOf(contextId));
         if (null == f) {
             /*
              * Submit a task for tree map initialization
@@ -201,28 +200,28 @@ public final class ConditionTreeMapManagement {
         return timedFrom(f, 1000);
     }
 
-    protected ConditionTreeMap getFrom(final Future<ConditionTreeMap> f) throws OXException {
+    protected ConditionTreeMap getFrom(Future<ConditionTreeMap> f) throws OXException {
         try {
             return f.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Cannot occur
             Thread.currentThread().interrupt();
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, OXException.class);
         }
     }
 
-    protected ConditionTreeMap timedFrom(final Future<ConditionTreeMap> f, final long timeoutMillis) throws OXException {
+    protected ConditionTreeMap timedFrom(Future<ConditionTreeMap> f, long timeoutMillis) throws OXException {
         try {
             return f.get(timeoutMillis, TimeUnit.MILLISECONDS);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Cannot occur
             Thread.currentThread().interrupt();
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, OXException.class);
-        } catch (final TimeoutException e) {
+        } catch (TimeoutException e) {
             return null;
         }
     }
@@ -231,14 +230,14 @@ public final class ConditionTreeMapManagement {
      * Drops elapsed maps.
      */
     protected void shrink() {
-        final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
-        for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
-            final Future<ConditionTreeMap> future = it.next();
+        long maxStamp = System.currentTimeMillis() - TIME2LIVE;
+        for (Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
+            Future<ConditionTreeMap> future = it.next();
             if (null != future) {
                 try {
-                    final ConditionTreeMap map = getFrom(future);
+                    ConditionTreeMap map = getFrom(future);
                     map.trim(maxStamp);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }
@@ -266,7 +265,7 @@ public final class ConditionTreeMapManagement {
         private final int contextId;
         private final org.slf4j.Logger logger;
 
-        protected LoadTreeMapRunnable(final int contextId, final org.slf4j.Logger logger) {
+        protected LoadTreeMapRunnable(int contextId, org.slf4j.Logger logger) {
             super();
             this.contextId = contextId;
             this.logger = logger;
@@ -274,8 +273,8 @@ public final class ConditionTreeMapManagement {
 
         @Override
         public void run() {
-            final FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, logger));
-            final Future<ConditionTreeMap> prev = context2maps.putIfAbsent(Integer.valueOf(contextId), ft);
+            FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, logger));
+            Future<ConditionTreeMap> prev = context2maps.putIfAbsent(Integer.valueOf(contextId), ft);
             if (null == prev) {
                 ft.run();
             }
@@ -287,7 +286,7 @@ public final class ConditionTreeMapManagement {
         private final int contextId;
         private final org.slf4j.Logger logger;
 
-        protected InitTreeMapCallable(final int contextId, final org.slf4j.Logger logger) {
+        protected InitTreeMapCallable(int contextId, org.slf4j.Logger logger) {
             super();
             this.contextId = contextId;
             this.logger = logger;
@@ -296,13 +295,13 @@ public final class ConditionTreeMapManagement {
         @Override
         public ConditionTreeMap call() {
             try {
-                final ConditionTreeMap newMap = new ConditionTreeMap(contextId, TIME2LIVE);
+                ConditionTreeMap newMap = new ConditionTreeMap(contextId, TIME2LIVE);
                 newMap.init();
                 return newMap;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 logger.warn("", e);
                 return null;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 logger.error("", e);
                 return null;
             }
