@@ -68,19 +68,31 @@ import com.openexchange.session.Session;
  */
 public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
 
-    private final String mapName;
+    private volatile String mapName;
     private final AtomicBoolean notActive;
 
     /**
      * Initializes a new {@link HzImapIdleClusterLock}.
      */
-    public HzImapIdleClusterLock(String mapName, ServiceLookup services) {
+    public HzImapIdleClusterLock(ServiceLookup services) {
         super(services);
-        this.mapName = mapName;
         notActive = new AtomicBoolean();
     }
 
+    /**
+     * Sets the map name
+     *
+     * @param mapName The map name to set
+     */
+    public void setMapName(String mapName) {
+        this.mapName = mapName;
+    }
+
     private IMap<String, String> map(HazelcastInstance hzInstance) throws OXException {
+        String mapName = this.mapName;
+        if (null == mapName) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create("Missing map name");
+        }
         try {
             return hzInstance.getMap(mapName);
         } catch (HazelcastInstanceNotActiveException e) {

@@ -49,12 +49,16 @@
 
 package com.openexchange.push.imapidle.osgi;
 
+import java.util.Map;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
@@ -68,6 +72,7 @@ import com.openexchange.push.imapidle.ImapIdleConfiguration;
 import com.openexchange.push.imapidle.ImapIdleDeleteListener;
 import com.openexchange.push.imapidle.ImapIdleMailAccountDeleteListener;
 import com.openexchange.push.imapidle.ImapIdlePushManagerService;
+import com.openexchange.push.imapidle.locking.HzImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -100,13 +105,12 @@ public class ImapIdleActivator extends HousekeepingActivator {
         public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
             HazelcastConfigurationService hzConfigService = context.getService(reference);
 
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleActivator.class);
             try {
                 boolean hzEnabled = hzConfigService.isEnabled();
                 if (false == hzEnabled) {
-                    Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleActivator.class);
                     String msg = "IMAP-IDLE is configured to use Hazelcast-based locking, but Hazelcast is disabled as per configuration! Start of IMAP-IDLE aborted!";
                     logger.error(msg, new Exception(msg));
-
                     context.ungetService(reference);
                     return null;
                 }
@@ -119,6 +123,8 @@ public class ImapIdleActivator extends HousekeepingActivator {
                     @Override
                     public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
                         HazelcastInstance hzInstance = context.getService(reference);
+                        String mapName = discoverSessionsMapName(hzInstance.getConfig(), logger);
+                        ((HzImapIdleClusterLock) configuration.getClusterLock()).setMapName(mapName);
                         activator.addService(HazelcastInstance.class, hzInstance);
 
                         reg = context.registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, activator), null);
@@ -149,7 +155,6 @@ public class ImapIdleActivator extends HousekeepingActivator {
 
                 return hzConfigService;
             } catch (Exception e) {
-                Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleActivator.class);
                 logger.warn("Failed to start IMAP-IDLE!", e);
             }
 
@@ -171,6 +176,27 @@ public class ImapIdleActivator extends HousekeepingActivator {
             }
 
             context.ungetService(reference);
+        }
+
+        /**
+         * Discovers the sessions map name from the supplied hazelcast configuration.
+         *
+         * @param config The config object
+         * @return The sessions map name
+         * @throws IllegalStateException
+         */
+        String discoverSessionsMapName(Config config, Logger logger) throws IllegalStateException {
+            Map<String, MapConfig> mapConfigs = config.getMapConfigs();
+            if (null != mapConfigs && 0 < mapConfigs.size()) {
+                for (String mapName : mapConfigs.keySet()) {
+                    if (mapName.startsWith("imapidle-")) {
+                        logger.info("Using distributed IMAP-IDLE map '{}'.", mapName);
+                        return mapName;
+                    }
+                }
+            }
+            String msg = "No distributed IMAP-IDLE map found in hazelcast configuration";
+            throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
         }
     }
 
