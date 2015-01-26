@@ -233,6 +233,15 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 storageFolder,
                 UserServiceHolder.requireUserService(),
                 transactionManager.getConnection());
+            
+            boolean addedDecorator = false;
+            FolderServiceDecorator decorator = storageParameters.getDecorator();
+            if (decorator == null) {
+                decorator = new FolderServiceDecorator();
+                storageParameters.setDecorator(decorator);
+                addedDecorator = true;
+            }
+            final boolean cascadePermissions = decorator.getBoolProperty("cascadePermissions");
 
             /*
              * Do move?
@@ -305,14 +314,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 } else {
                     doRenameVirtual(folder, storage, openedStorages);
                 }
-            } else if (comparedPermissions.hasChanges()) {
-                boolean addedDecorator = false;
-                FolderServiceDecorator decorator = storageParameters.getDecorator();
-                if (decorator == null) {
-                    decorator = new FolderServiceDecorator();
-                    storageParameters.setDecorator(decorator);
-                    addedDecorator = true;
-                }
+            } else if (comparedPermissions.hasChanges() || cascadePermissions) {
 
                 boolean isRecursion = decorator.containsProperty(RECURSION_MARKER);
                 if (!isRecursion) {
@@ -340,9 +342,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         /*
                          * Cascade folder permissions
                          */
-                        if (storageParameters.getDecorator().getBoolProperty("cascadePermissions")) {
+                        if (cascadePermissions) {
                             // Switch back to false due to the recursive nature of FolderStorage.updateFolder in some implementations
-                            storageParameters.getDecorator().put("cascadePermissions", false);
+                            decorator.put("cascadePermissions", false);
                             checkOpenedStorage(realStorage, openedStorages);
                             List<String> ids = new ArrayList<String>();
                             gatherSubfolders(folder, realStorage, treeId, ids);
