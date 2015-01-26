@@ -83,9 +83,9 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
     private static final String OPT_USER_LONG = "user";
     private static final String OPT_CONTEXT_SHORT = "c";
     private static final String OPT_CONTEXT_LONG = "context";
-    private static final String OPT_CONFIGURATION_SHORT = "conf";
+    private static final String OPT_CONFIGURATION_SHORT = "o";
     private static final String OPT_CONFIGURATION_LONG = "user-configuration";
-    private static final String OPT_CAPABILITIES_SHORT = "cap";
+    private static final String OPT_CAPABILITIES_SHORT = "a";
     private static final String OPT_CAPABILITIES_LONG = "user-capabilities";
 
     public static void main(String[] args) {

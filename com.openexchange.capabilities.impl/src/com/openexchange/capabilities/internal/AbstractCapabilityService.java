@@ -687,6 +687,10 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     if (!StringUtils.containsIgnoreCase(key, searchPattern)) {
                         continue;
                     }
+                    if ((entry.getValue().getScope() == null) && (entry.getValue().get() == null)) {
+                        LOG.info("Scope and value for property {} null. Going to ignore it", key);
+                        continue;
+                    }
                     properties.add(new ConfigurationProperty(entry.getValue().getScope(), key, entry.getValue().get()));
                 }
             }
