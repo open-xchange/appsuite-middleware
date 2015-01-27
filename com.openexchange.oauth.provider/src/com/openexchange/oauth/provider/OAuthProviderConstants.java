@@ -114,9 +114,9 @@ public interface OAuthProviderConstants {
     public static final String PARAM_ACCESS_DENIED = "access_denied";
 
     /** The error */
-    public static final Object PARAM_ERROR = "error";
+    public static final String PARAM_ERROR = "error";
 
     /** The error description */
-    public static final Object PARAM_ERROR_DESCRIPTION = "error_description";
+    public static final String PARAM_ERROR_DESCRIPTION = "error_description";
 
 }
