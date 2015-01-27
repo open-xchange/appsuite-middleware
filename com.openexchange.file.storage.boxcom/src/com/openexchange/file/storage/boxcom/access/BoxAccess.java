@@ -67,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.boxcom.BoxExceptionCodes;
 import com.openexchange.file.storage.boxcom.Services;
+import com.openexchange.file.storage.boxcom.access.extended.ExtendedNonRefreshingBoxClient;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
@@ -74,7 +75,6 @@ import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link BoxAccess}
@@ -182,8 +182,22 @@ public class BoxAccess {
 
     private BoxClient createBoxClient(BoxOAuthInfo boxOAuthInfo) {
         BoxClient boxClient = new NonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
+        applyOAuthToken(boxOAuthInfo, boxClient);
+        return boxClient;
+    }
 
-        // Apply access token and refresh token from OAuth account
+    private ExtendedNonRefreshingBoxClient createExtendedBoxClient(BoxOAuthInfo boxOAuthInfo) {
+        ExtendedNonRefreshingBoxClient boxClient = new ExtendedNonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
+        applyOAuthToken(boxOAuthInfo, boxClient);
+        return boxClient;
+    }
+
+    /**
+     * Apply access token and refresh token from OAuth account
+     * 
+     * @param boxOAuthInfo
+     */
+    private void applyOAuthToken(BoxOAuthInfo boxOAuthInfo, BoxClient boxClient) {
         Map<String, Object> tokenSpec = new HashMap<String, Object>(6);
         OAuthAccount boxOAuthAccount = boxOAuthInfo.boxOAuthAccount;
         tokenSpec.put(BoxOAuthToken.FIELD_ACCESS_TOKEN, boxOAuthAccount.getToken());
@@ -191,7 +205,6 @@ public class BoxAccess {
         tokenSpec.put(BoxOAuthToken.FIELD_TOKEN_TYPE, "bearer");
         tokenSpec.put(BoxOAuthToken.FIELD_EXPIRES_IN, Integer.valueOf(3600));
         ((OAuthAuthorization) boxClient.getAuth()).setOAuthData(new BoxOAuthToken(tokenSpec));
-        return boxClient;
     }
 
     private OAuthAccount recreateTokenIfExpired(boolean considerExpired, BoxOAuthInfo boxOAuthInfo, Session session) throws OXException {
@@ -274,6 +287,15 @@ public class BoxAccess {
      */
     public BoxClient getBoxClient() {
         return createBoxClient(boxOAuthInfoRef.get());
+    }
+
+    /**
+     * Gets the extended box client
+     * 
+     * @return The extended box client
+     */
+    public ExtendedNonRefreshingBoxClient getExtendedBoxClient() {
+        return createExtendedBoxClient(boxOAuthInfoRef.get());
     }
 
     /**

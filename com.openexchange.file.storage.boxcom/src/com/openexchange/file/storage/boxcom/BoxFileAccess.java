@@ -707,9 +707,25 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
      * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#removeVersion(java.lang.String, java.lang.String, java.lang.String[])
      */
     @Override
-    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public String[] removeVersion(String folderId, final String id, final String[] versions) throws OXException {
+        return perform(new BoxClosure<String[]>() {
+
+            @Override
+            protected String[] doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                List<String> undeletable = new ArrayList<String>();
+                Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
+                for (String version : versions) {
+                    try {
+                        boxAccess.getExtendedBoxClient().getFilesManager().deleteFileVersion(id, version, null);
+                    } catch (BoxServerException e) {
+                        undeletable.add(version);
+                        logger.warn("Could not delete version: {}", version, e);
+                    }
+                }
+                return undeletable.toArray(new String[undeletable.size()]);
+            }
+
+        });
     }
 
     @Override
