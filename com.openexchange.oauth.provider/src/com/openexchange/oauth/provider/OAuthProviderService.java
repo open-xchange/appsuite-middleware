@@ -73,6 +73,8 @@ public interface OAuthProviderService extends OAuthProviderConstants {
 
     Client registerClient(ClientData clientData) throws OXException;
 
+    Client updateClient(String clientId, ClientData clientData) throws OXException;
+
     boolean unregisterClient(String clientId) throws OXException;
 
     Client revokeClientSecret(String clientId) throws OXException;
