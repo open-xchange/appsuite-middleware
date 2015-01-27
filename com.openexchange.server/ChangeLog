@@ -1,6 +1,7 @@
 * 2015-01-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 35733: List existing (external) file storage accounts below "InfoStore" folder in classic folder tree view
+ - Fix for bug 36291: Made number of run-loops configurable
 
 * 2015-01-26 - thorben.betten@open-xchange.com
 
