@@ -844,7 +844,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             }
         }
     }
-    
+
     public void removeUnrecoverableItems(final FileStorageService parentService, final String secret, final Session session) throws OXException {
         final Set<String> secretProperties = parentService.getSecretProperties();
         if (secretProperties.isEmpty()) {
@@ -857,10 +857,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         // Proceed...
         final Context ctx = getContext(session);
         final Map<String, Object> content = new HashMap<String, Object>();
-        
+
         List<FileStorageAccount> accountsToDelete = new ArrayList<FileStorageAccount>(confId2AccountMap.size());
         TIntArrayList confIdsToDelete = new TIntArrayList(confId2AccountMap.size());
-        
+
         for (final int confId : confId2AccountMap.keys()) {
             content.clear();
             genericConfStorageService.fill(ctx, confId, content);
@@ -886,7 +886,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     }
                 }
             }
-            
+
             deleteAccounts(serviceId, accountsToDelete.toArray(new FileStorageAccount[accountsToDelete.size()]), confIdsToDelete.toArray(), session);
         }
     }

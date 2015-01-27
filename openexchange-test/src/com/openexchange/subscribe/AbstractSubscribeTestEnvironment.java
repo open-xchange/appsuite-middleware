@@ -61,6 +61,8 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountResponse;
+import com.openexchange.ajax.oauth.actions.DeleteOAuthAccountRequest;
+import com.openexchange.ajax.oauth.provider.actions.AuthenticationProvider;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionRequest;
@@ -70,7 +72,6 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.google.actions.DeleteOAuthAccountRequest;
 import com.openexchange.test.FolderTestManager;
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -93,7 +94,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Initializes a new {@link AbstractSubscribeTestEnvironment}.
-     * 
+     *
      * @param serviceId The service identifier
      */
     protected AbstractSubscribeTestEnvironment(final String serviceId) {
@@ -102,7 +103,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Initialize the test environment
-     * 
+     *
      * @throws OXException
      */
     public void init() {
@@ -118,7 +119,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Initialize the client
-     * 
+     *
      * @throws OXException
      * @throws JSONException
      * @throws IOException
@@ -143,7 +144,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Create a subscription
-     * 
+     *
      * @param accountId
      * @param sourceId
      * @param module
@@ -168,7 +169,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Returns the account identifier that is bound to the specified service identifier
-     * 
+     *
      * @param serviceID
      * @return
      * @throws OXException
@@ -192,13 +193,13 @@ public abstract class AbstractSubscribeTestEnvironment {
                 }
             }
         }
-        
+
         return accountId;
     }
 
     /**
      * Create a subscription folder
-     * 
+     *
      * @param name
      * @param module
      * @param parentId
@@ -216,7 +217,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Create a DynamicFormDescription object for the specified sourceId.
-     * 
+     *
      * @param sourceId
      * @return
      * @throws Exception
@@ -245,7 +246,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Create a Subscription object
-     * 
+     *
      * @param desc
      * @param sourceId
      * @param accountId
@@ -268,7 +269,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Logout the client
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -285,7 +286,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Clean up
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -300,7 +301,7 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Delete the test oauth account
-     * 
+     *
      * @throws JSONException
      * @throws IOException
      * @throws OXException
