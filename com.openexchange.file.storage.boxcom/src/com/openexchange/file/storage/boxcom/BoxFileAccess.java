@@ -209,8 +209,8 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     }
 
     @Override
-    public IDTuple saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+    public IDTuple saveFileMetadata(final File file, long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME) || modifiedFields.contains(Field.DESCRIPTION)) {
             return perform(new BoxClosure<IDTuple>() {
 
                 @Override
@@ -221,7 +221,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         checkFileValidity(boxfile);
 
                         BoxFileRequestObject requestObject = BoxFileRequestObject.getRequestObject();
+
                         requestObject.setName(file.getFileName());
+                        requestObject.setDescription(file.getDescription());
                         boxfile = boxClient.getFilesManager().updateFileInfo(file.getId(), requestObject);
                         return new IDTuple(file.getFolderId(), boxfile.getId());
                     } catch (final BoxServerException e) {
