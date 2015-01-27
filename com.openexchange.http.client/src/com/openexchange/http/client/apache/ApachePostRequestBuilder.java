@@ -51,7 +51,9 @@ package com.openexchange.http.client.apache;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.TreeMap;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -60,6 +62,7 @@ import com.openexchange.http.client.builder.HTTPPostRequestBuilder;
 public class ApachePostRequestBuilder extends CommonApacheHTTPRequest<HTTPPostRequestBuilder>implements HTTPPostRequestBuilder {
 
     private RequestEntity requestEntity = null;;
+    protected Map<String, String> urlParameters = new TreeMap<String, String>();
 
 	public ApachePostRequestBuilder(final ApacheClientRequestBuilder coreBuilder) {
 		super(coreBuilder);
@@ -75,13 +78,37 @@ public class ApachePostRequestBuilder extends CommonApacheHTTPRequest<HTTPPostRe
 	}
 
 	@Override
+	public void urlParameter(String parameter, String value) {
+	    urlParameters.put(parameter, value);
+    }
+
+	@Override
 	protected void addParams(final HttpMethodBase m, final String qString) {
+
+	    NameValuePair[] query = new NameValuePair[urlParameters.size()];
+
+        int i = 0;
+        for (Map.Entry<String, String> entry : urlParameters.entrySet()) {
+            query[i++] = new NameValuePair(entry.getKey(), entry.getValue());
+        }
+        m.setQueryString(query);
+        String queryString = m.getQueryString();
+        if (qString != null) {
+            if (queryString != null && queryString.length() > 0) {
+                queryString = queryString+"&"+qString;
+            } else {
+                queryString = qString;
+            }
+        }
+        m.setQueryString(queryString);
+
 		final PostMethod pm = (PostMethod) m;
 
 		for(final Map.Entry<String, String> entry: parameters.entrySet()) {
 			pm.setParameter(entry.getKey(), entry.getValue());
 		}
 	}
+
 
 	@Override
     public void setRequestEntity(String requestEntity, String contentType) {

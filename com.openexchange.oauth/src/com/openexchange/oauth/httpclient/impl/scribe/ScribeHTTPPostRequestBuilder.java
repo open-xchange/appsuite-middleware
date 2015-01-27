@@ -79,4 +79,9 @@ public class ScribeHTTPPostRequestBuilder extends ScribeGenericHTTPRequestBuilde
         // Not supported
     }
 
+    @Override
+    public void urlParameter(String parameter, String value) {
+        // Not supported
+    }
+
 }
