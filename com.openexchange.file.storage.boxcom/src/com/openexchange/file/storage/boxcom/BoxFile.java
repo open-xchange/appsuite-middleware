@@ -123,7 +123,6 @@ public final class BoxFile extends DefaultFile {
                 final String name = file.getName();
                 setTitle(name);
                 setFileName(name);
-                setVersion(file.getVersionNumber());
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
 
                 if (set.contains(Field.CREATED)) {

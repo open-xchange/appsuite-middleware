@@ -52,12 +52,16 @@ package com.openexchange.file.storage.boxcom;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.slf4j.Logger;
 import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.dao.BoxCollection;
 import com.box.boxjavalibv2.dao.BoxFile;
+import com.box.boxjavalibv2.dao.BoxFileVersion;
 import com.box.boxjavalibv2.dao.BoxFolder;
 import com.box.boxjavalibv2.dao.BoxThumbnail;
 import com.box.boxjavalibv2.dao.BoxTypedObject;
@@ -69,6 +73,7 @@ import com.box.boxjavalibv2.requests.requestobjects.BoxImageRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxItemCopyRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
 import com.box.boxjavalibv2.resourcemanagers.IBoxFilesManager;
+import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
@@ -78,11 +83,13 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -92,7 +99,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware {
+public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageVersionedFileAccess {
 
     private final BoxAccountAccess accountAccess;
     final int userId;
@@ -181,10 +188,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected File doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
-                    BoxFile file = boxClient.getFilesManager().getFile(id, null);
+                    final int versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, null).size();
+
+                    BoxFile file = boxClient.getFilesManager().getFile(id, defaultBoxRequest());
                     checkFileValidity(file);
 
-                    return new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId).parseBoxFile(file);
+                    com.openexchange.file.storage.boxcom.BoxFile boxFile = new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId).parseBoxFile(file);
+                    boxFile.setNumberOfVersions(versions);
+                    return boxFile;
                 } catch (final BoxServerException e) {
                     throw handleHttpResponseError(id, e);
                 }
@@ -346,15 +357,17 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected InputStream doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
+
                     BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
                     checkFileValidity(boxfile);
 
-                    return boxClient.getFilesManager().downloadFile(id, null);
+                    BoxDefaultRequestObject versionRequest = new BoxDefaultRequestObject();
+                    versionRequest.getRequestExtras().addQueryParam("version", version);
+                    return boxClient.getFilesManager().downloadFile(id, versionRequest);
                 } catch (final BoxServerException e) {
                     throw handleHttpResponseError(id, e);
                 }
             }
-
         });
     }
 
@@ -522,7 +535,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     } while (resultsFound == limit);
                 }
 
-
                 return new FileTimedResult(files);
             }
         });
@@ -687,6 +699,117 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         if (null != sort && 1 < files.size()) {
             Collections.sort(files, order.comparatorBy(sort));
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#removeVersion(java.lang.String, java.lang.String, java.lang.String[])
+     */
+    @Override
+    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
+        return getVersions(folderId, id, null);
+    }
+
+    @Override
+    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
+        return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#getVersions(java.lang.String, java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
+     */
+    @Override
+    public TimedResult<File> getVersions(final String folderId, final String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
+        return perform(new BoxClosure<TimedResult<File>>() {
+
+            @Override
+            protected TimedResult<File> doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                List<BoxFileVersion> versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, null);
+                MimeTypeMap map = Services.getService(MimeTypeMap.class);
+
+                List<File> files = new LinkedList<File>();
+                for (BoxFileVersion version : versions) {
+                    com.openexchange.file.storage.boxcom.BoxFile file = new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId);
+                    file.setTitle(version.getName());
+                    file.setFileName(version.getName());
+                    file.setFileSize((int) version.getExtraData("size"));
+                    file.setFileMD5Sum((String) version.getValue("sha1"));
+                    file.setFileMIMEType(map.getContentType(version.getName()));
+                    file.setVersion(version.getId());
+                    file.setNumberOfVersions(versions.size());
+                    try {
+                        file.setLastModified(ISO8601DateParser.parse(version.getModifiedAt()));
+                    } catch (ParseException e) {
+                        Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
+                        logger.warn("Could not parse date from: {}", version.getModifiedAt(), e);
+                    }
+                    files.add(file);
+                }
+                return new FileTimedResult(files);
+            }
+
+        });
+    }
+
+    /**
+     * Create a default request
+     * 
+     * @return
+     */
+    private static BoxDefaultRequestObject defaultBoxRequest() {
+        List<String> fields = new ArrayList<String>();
+        fields.add(BoxFile.FIELD_MODIFIED_AT);
+        fields.add(BoxFile.FIELD_MODIFIED_BY);
+        fields.add(BoxFile.FIELD_PARENT);
+        fields.add(BoxFile.FIELD_NAME);
+        fields.add(BoxFile.FIELD_VERSION_NUMBER);
+        //fields.add(BoxFile.FIELD_); content?
+        fields.add(BoxFile.FIELD_ID);
+        fields.add(BoxFile.FIELD_SIZE);
+        fields.add(BoxFile.FIELD_DESCRIPTION);
+        fields.add(BoxFile.FIELD_SHARED_LINK);
+        fields.add(BoxFile.FIELD_CREATED_BY);
+        fields.add(BoxFile.FIELD_NAME);//filename
+        fields.add(BoxFile.FIELD_TYPE); //mimetype
+        fields.add(BoxFile.FIELD_SEQUENCE_ID);
+        //fields.add(BoxFile.FIELD_); category?
+        //fields.add(BoxFile.FIELD_LOCK); locked until?
+        //fields.add(BoxFile.FIELD_); comment?
+        fields.add(BoxFile.FIELD_ETAG); //version?
+        //fields.add(BoxFile.FIELD_); color?
+        fields.add(BoxFile.FIELD_MODIFIED_AT); //convert to utc
+        //fields.add(BoxFile.FIELD_VERSION_NUMBER);
+
+        BoxDefaultRequestObject requestObject = new BoxDefaultRequestObject();
+        requestObject.getRequestExtras().addFields(fields);
+        return requestObject;
+    }
+
+    /**
+     * request version
+     * 
+     * @return
+     */
+    private static BoxDefaultRequestObject versionRequestObject() {
+        BoxDefaultRequestObject versionReqObj = new BoxDefaultRequestObject();
+        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_VERSION_NUMBER);
+        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_NAME);
+        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_MODIFIED_AT);
+        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_ID);
+        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_SIZE);
+        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_COMMENT_COUNT);
+        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_CREATED_BY);
+        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_SEQUENCE_ID);
+        return versionReqObj;
     }
 
 }
