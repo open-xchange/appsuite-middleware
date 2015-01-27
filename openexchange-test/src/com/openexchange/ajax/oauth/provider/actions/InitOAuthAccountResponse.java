@@ -47,24 +47,24 @@
  *
  */
 
-package com.openexchange.subscribe.google.actions;
+package com.openexchange.ajax.oauth.provider.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link DeleteOAuthAccountResponse}
+ * {@link InitOAuthAccountResponse}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DeleteOAuthAccountResponse extends AbstractAJAXResponse {
+public class InitOAuthAccountResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link DeleteOAuthAccountResponse}.
+     * Initializes a new {@link InitOAuthAccountResponse}.
      * 
      * @param response
      */
-    protected DeleteOAuthAccountResponse(Response response) {
+    protected InitOAuthAccountResponse(Response response) {
         super(response);
     }
 

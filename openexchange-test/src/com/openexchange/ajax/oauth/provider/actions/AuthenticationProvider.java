@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,37 @@
  *
  */
 
-package com.openexchange.subscribe.google.actions;
+package com.openexchange.ajax.oauth.provider.actions;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link AbstractOAuthRequest}
+ * {@link AuthenticationProvider}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-abstract class AbstractOAuthRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public enum AuthenticationProvider {
+    GOOGLE("google", "com.openexchange.oauth.google", "com.openexchange.file.storage.googledrive"),
+    DROPBOX("dropbox", "com.openexchange.oauth.dropbox", "com.openexchange.file.storage.dropbox");
 
-    /**
-     * URL of the test AJAX interface.
-     */
-    static final String URL = "/ajax/googleTest";
+    private String provider;
+    private String oAuthServiceId;
+    private String filestorageService;
 
-    /**
-     * Default constructor.
-     */
-    protected AbstractOAuthRequest() {
-        super();
+    private AuthenticationProvider(String provider, String oAuthServiceId, String filestorageService) {
+        this.provider = provider;
+        this.oAuthServiceId = oAuthServiceId;
+        this.filestorageService = filestorageService;
     }
 
-    @Override
-    public String getServletPath() {
-        return URL;
+    public String getProvider() {
+        return provider;
     }
 
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
+    public String getFilestorageService() {
+        return filestorageService;
     }
 
+    public String getOAuthServiceId() {
+        return oAuthServiceId;
+    }
 }

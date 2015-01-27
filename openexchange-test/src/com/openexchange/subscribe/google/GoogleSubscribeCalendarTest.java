@@ -73,7 +73,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
 
     /**
      * Initializes a new {@link GoogleSubscribeCalendarTest}.
-     * 
+     *
      * @param name
      */
     public GoogleSubscribeCalendarTest(String name) {
@@ -119,7 +119,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("recurrence type", CalendarObject.NO_RECURRENCE, appointment.getRecurrenceType());
         assertNotNullAndEquals("fulltime", true, appointment.getFullTime());
     }
-    
+
     public void testDailyRecurrenceAppointment() throws OXException, IOException, JSONException {
         final String title = "Daily recurrence appointment | 27 Jan 2014 - 14 March 2014";
         Appointment appointment = fetchAppointment(getDateTime(27, 1, 2014, 15, 30), getDateTime(27, 1, 2014, 17, 30), title, true);
@@ -167,7 +167,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertEquals("This appointment has no confirmation, but the mapping exist", 0, appointment.getConfirmations().length);
         assertNull("This appointment has no participants, but the mapping exist", appointment.getParticipants());
     }
-    
+
     public void testYearlyRecurrenceAppointment() throws OXException, IOException, JSONException {
         final String title = "Yearly recurrence appointment | 14 March 2014 - 14 March 2016";
         Appointment appointment = fetchAppointment(getDateTime(14, 3, 2014, 19, 00), getDateTime(14, 3, 2014, 20, 30), title, true);
@@ -221,7 +221,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         Map<String, Part> participants = new HashMap<String, Part>();
         participants.put("ewaldbartkowiak@gmail.com", new Part("ewaldbartkowiak@gmail.com", Participant.EXTERNAL_USER, ConfirmStatus.ACCEPT));
         participants.put("dimitribronkowitsch@googlemail.com", new Part("dimitribronkowitsch@googlemail.com", Participant.EXTERNAL_USER, ConfirmStatus.NONE));
-        
+
         int externals = 0;
         assertNotNull(appointment.getConfirmations());
         for (ConfirmableParticipant cp : appointment.getConfirmations()) {
@@ -237,7 +237,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         }
         assertEquals("External participants are not equal", 2, externals);
     }
-    
+
     private Appointment fetchAppointment(final Date startDate, final Date endDate, final String title, final boolean reccurence) {
         final int folderId = getCalendarTestFolderID();
         final Appointment[] appointments = getCalendarManager().all(folderId, startDate, endDate, Appointment.ALL_COLUMNS, reccurence);
@@ -251,11 +251,11 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
 
     private class Part {
 
-        private String emailAddress;
+        private final String emailAddress;
 
-        private int participantType;
+        private final int participantType;
 
-        private ConfirmStatus confirmStatus;
+        private final ConfirmStatus confirmStatus;
 
         public Part(String emailAddress, int participantType, ConfirmStatus confirmStatus) {
             super();

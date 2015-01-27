@@ -47,51 +47,34 @@
  *
  */
 
-package com.openexchange.subscribe.google.actions;
+package com.openexchange.ajax.oauth.provider.actions;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link InitOAuthAccountRequest}
+ * {@link AbstractOAuthRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class InitOAuthAccountRequest extends AbstractOAuthRequest<InitOAuthAccountResponse> {
+abstract class AbstractOAuthRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
+    /**
+     * URL of the test AJAX interface.
+     */
+
+    protected AbstractOAuthRequest() {
+        super();
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> parameterList = new ArrayList<Parameter>();
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "init"));
-        return parameterList.toArray(new Parameter[parameterList.size()]);
+    public String getServletPath() {
+        return "/ajax/connectOAuthTest";
     }
 
     @Override
-    public AbstractAJAXParser<? extends InitOAuthAccountResponse> getParser() {
-        return new AbstractAJAXParser<InitOAuthAccountResponse>(true) {
-
-            @Override
-            protected InitOAuthAccountResponse createResponse(Response response) throws JSONException {
-                return new InitOAuthAccountResponse(response);
-            }
-
-        };
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

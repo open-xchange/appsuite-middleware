@@ -50,7 +50,7 @@
 package com.openexchange.ajax.oauth.actions;
 
 import java.util.LinkedList;
-import org.json.JSONArray;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 
@@ -92,7 +92,7 @@ public class DeleteOAuthAccountRequest extends AbstractOAuthAccountRequest<Commo
 
     @Override
     public Object getBody() {
-        return new JSONArray();
+        return new JSONObject();
     }
 
 }

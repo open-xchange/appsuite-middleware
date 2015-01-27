@@ -74,7 +74,7 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link AbstractGoogleSubscribeTest}.
-     * 
+     *
      * @param name
      */
     protected AbstractGoogleSubscribeTest(String name) {
@@ -90,7 +90,7 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
 
     /**
      * Get the calendar test manager
-     * 
+     *
      * @return
      */
     public CalendarTestManager getCalendarManager() {
@@ -99,7 +99,7 @@ public abstract class AbstractGoogleSubscribeTest extends AbstractAJAXSession {
 
     /**
      * Get the contact test manager
-     * 
+     *
      * @return
      */
     public ContactTestManager getContactManager() {

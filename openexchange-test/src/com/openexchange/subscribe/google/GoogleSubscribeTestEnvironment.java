@@ -49,9 +49,10 @@
 
 package com.openexchange.subscribe.google;
 
+import com.openexchange.ajax.oauth.provider.actions.AuthenticationProvider;
+import com.openexchange.ajax.oauth.provider.actions.InitOAuthAccountRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
-import com.openexchange.subscribe.google.actions.InitOAuthAccountRequest;
 
 /**
  * {@link GoogleSubscribeTestEnvironment}
@@ -68,7 +69,7 @@ public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
 
     /**
      * Get the instance of the environment
-     * 
+     *
      * @return the instance
      */
     public static final GoogleSubscribeTestEnvironment getInstance() {
@@ -76,8 +77,8 @@ public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
     }
 
     // -------------------------------------------------------------------------------------------------- //
-    
-    
+
+
     /**
      * Initializes a new {@link GoogleSubscribeTestEnvironment}.
      * @param serviceId
@@ -92,7 +93,7 @@ public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
      */
     @Override
     protected void initEnvironment() throws Exception {
-        InitOAuthAccountRequest req = new InitOAuthAccountRequest();
+        InitOAuthAccountRequest req = new InitOAuthAccountRequest(AuthenticationProvider.GOOGLE);
         ajaxClient.execute(req);
     }
 
@@ -107,7 +108,7 @@ public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
         final int privateContactFolder = ajaxClient.getValues().getPrivateContactFolder();
         createSubscription(getAccountId(), CALENDAR_SOURCE_ID, FolderObject.CALENDAR, privateAppointmentFolder, userId);
         createSubscription(getAccountId(), CONTACT_SOURCE_ID, FolderObject.CONTACT, privateContactFolder, userId);
-        
+
         // Give the asynchronous tasks a few seconds to finish
         Thread.sleep(5000);
     }

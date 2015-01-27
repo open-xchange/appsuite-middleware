@@ -92,7 +92,7 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
         boolean testAccount3Success = false;
 
         for (Contact c : contacts) {
-            if (c.getDisplayName() != null)
+            if (c.getDisplayName() != null) {
                 if (c.getDisplayName().equals(testAccount1)) {
                     // name
                     assertNotNullAndEquals("given name", "Paul", c.getGivenName());
@@ -156,8 +156,6 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     float meanCurrent = meanHistogramRGBValue(biCurrent);
 
                     assertValueInRange(meanCurrent, meanExpected - 0.5f, meanExpected + 0.5f);
-                    System.out.println("Mean Expected:" + meanExpected);
-                    System.out.println("Mean Current:" + meanCurrent);
                     testAccount1Success = true;
                 } else if (c.getDisplayName().equals(testAccount2)) {
                     assertNotNullAndEquals("given name", "Maria", c.getGivenName());
@@ -255,6 +253,7 @@ public class GoogleSubscribeContactTest extends AbstractGoogleSubscribeTest {
                     assertFieldIsNull("Image does not equals", c.getImage1());
                     testAccount3Success = true;
                 }
+            }
 
             if (testAccount1Success && testAccount2Success && testAccount3Success) {
                 return;
