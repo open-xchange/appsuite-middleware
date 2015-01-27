@@ -209,4 +209,10 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         return null;
     }
 
+    @Override
+    public Client updateClient(String clientId, ClientData clientData) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
