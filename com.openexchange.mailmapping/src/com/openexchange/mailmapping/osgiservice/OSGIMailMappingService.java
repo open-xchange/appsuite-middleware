@@ -52,6 +52,7 @@ package com.openexchange.mailmapping.osgiservice;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailmapping.MailResolver;
+import com.openexchange.mailmapping.ResolveReply;
 import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -65,22 +66,31 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public class OSGIMailMappingService implements MailResolver, SimpleRegistryListener<MailResolver> {
 
-    private final ServiceSet<MailResolver> allResolvers;
+    private final ServiceSet<MailResolver> chain;
 
     /**
      * Initializes a new {@link OSGIMailMappingService}.
      */
     public OSGIMailMappingService() {
         super();
-        allResolvers = new ServiceSet<MailResolver>();
+        chain = new ServiceSet<MailResolver>();
     }
 
     @Override
     public ResolvedMail resolve(String mail) throws OXException {
-        for (MailResolver resolver : allResolvers) {
+        for (MailResolver resolver : chain) {
             ResolvedMail resolved = resolver.resolve(mail);
             if (resolved != null) {
-                return resolved;
+                ResolveReply reply = resolved.getResolveReply();
+                if (ResolveReply.ACCEPT.equals(reply)) {
+                    // Return resolved instance
+                    return resolved;
+                }
+                if (ResolveReply.DENY.equals(reply)) {
+                    // No further processing allowed
+                    return null;
+                }
+                // Otherwise NEUTRAL reply; next in chain
             }
         }
         return null;
@@ -88,12 +98,12 @@ public class OSGIMailMappingService implements MailResolver, SimpleRegistryListe
 
     @Override
     public void added(ServiceReference<MailResolver> ref, MailResolver service) {
-        allResolvers.added(ref, service);
+        chain.added(ref, service);
     }
 
     @Override
     public void removed(ServiceReference<MailResolver> ref, MailResolver service) {
-        allResolvers.removed(ref, service);
+        chain.removed(ref, service);
     }
 
 }

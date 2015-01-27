@@ -53,6 +53,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.UUID;
 import junit.framework.TestCase;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
@@ -192,6 +193,10 @@ public class SessiondTest extends TestCase {
             public boolean isTransient() {
                 return false;
             }
+            @Override
+            public SessionEnhancement getEnhancement() {
+                return null;
+            }
         });
     }
 
@@ -245,6 +250,10 @@ public class SessiondTest extends TestCase {
             @Override
             public boolean isTransient() {
                 return false;
+            }
+            @Override
+            public SessionEnhancement getEnhancement() {
+                return null;
             }
         });
         sessiondCon.getSession(session.getSessionID());
@@ -301,6 +310,10 @@ public class SessiondTest extends TestCase {
             public boolean isTransient() {
                 return false;
             }
+            @Override
+            public SessionEnhancement getEnhancement() {
+                return null;
+            }
         });
         sessiondCon.removeSession(session.getSessionID());
     }
@@ -355,6 +368,10 @@ public class SessiondTest extends TestCase {
             @Override
             public boolean isTransient() {
                 return false;
+            }
+            @Override
+            public SessionEnhancement getEnhancement() {
+                return null;
             }
         });
         sessiondCon.getSession(session.getSessionID());

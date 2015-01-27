@@ -49,6 +49,7 @@
 
 package com.openexchange.login.internal;
 
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
@@ -63,6 +64,7 @@ final class AddSessionParameterImpl implements AddSessionParameter {
     private final LoginRequest request;
     private final User user;
     private final Context ctx;
+    private SessionEnhancement enhancement;
 
     AddSessionParameterImpl(final String username, final LoginRequest request, final User user, final Context ctx) {
         super();
@@ -126,5 +128,13 @@ final class AddSessionParameterImpl implements AddSessionParameter {
     public boolean isTransient() {
         return request.isTransient();
     }
-    
+
+    @Override
+    public SessionEnhancement getEnhancement() {
+        return enhancement;
+    }
+
+    public void setEnhancement(SessionEnhancement enhancement) {
+        this.enhancement = enhancement;
+    }
 }

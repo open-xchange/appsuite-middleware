@@ -58,6 +58,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
+import com.openexchange.imap.IMAPFolderWorker;
 import com.openexchange.imap.cache.util.FolderMap;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPProperties;
@@ -224,7 +225,7 @@ public final class FolderCache {
         MailFolder mailFolder = folderMap.get(fullName);
         if (null == mailFolder) {
             try {
-                final MailFolder newFld = loadFolder(fullName, folderStorage, imapFolder);
+                MailFolder newFld = loadFolder(fullName, folderStorage, imapFolder);
                 if (isNotCacheable(fullName, session, accountId, folderStorage.getImapStore())) {
                     /*
                      * Don't cache
@@ -236,8 +237,8 @@ public final class FolderCache {
                 if (null == mailFolder) {
                     mailFolder = newFld;
                 }
-            } catch (final MessagingException e) {
-                throw IMAPException.handleMessagingException(e, folderStorage.getImapConfig(), session, accountId, mapFor("fullName", fullName));
+            } catch (MessagingException e) {
+                throw folderStorage.handleMessagingException(fullName, e);
             }
         } else {
             // Fetched from cache
@@ -249,19 +250,22 @@ public final class FolderCache {
         return (mailFolder.clone());
     }
 
-    private static boolean isNotCacheable(final String fullName, final Session session, final int accountId, final IMAPStore imapStore) throws MessagingException {
+    private static boolean isNotCacheable(String fullName, Session session, int accountId, IMAPStore imapStore) throws MessagingException {
         return NamespaceFoldersCache.startsWithAnyOfSharedNamespaces(fullName, imapStore, true, session, accountId) || NamespaceFoldersCache.startsWithAnyOfUserNamespaces(fullName, imapStore, true, session, accountId);
     }
 
-    private static final MailFolder loadFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws OXException {
-        if (null != imapFolder) {
-            return IMAPFolderConverter.convertFolder(imapFolder, folderStorage.getSession(), folderStorage.getImapAccess(), folderStorage.getContext());
-        }
-        final Session session = folderStorage.getSession();
-        final IMAPConfig imapConfig = folderStorage.getImapConfig();
+    private static final MailFolder loadFolder(String fullName, IMAPFolderStorage folderStorage, IMAPFolder imapFolder) throws OXException {
+        Session session = folderStorage.getSession();
+        IMAPConfig imapConfig = folderStorage.getImapConfig();
         try {
-            final IMAPStore imapStore = folderStorage.getImapStore();
-            final String imapFullName;
+            IMAPFolderWorker.checkFailFast(folderStorage.getImapStore(), fullName);
+            if (null != imapFolder) {
+                return IMAPFolderConverter.convertFolder(imapFolder, folderStorage.getSession(), folderStorage.getImapAccess(), folderStorage.getContext());
+            }
+
+            // Load w/o IMAP folder instance
+            IMAPStore imapStore = folderStorage.getImapStore();
+            String imapFullName;
             IMAPFolder f;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName) || 0 == fullName.length()) {
                 f = (IMAPFolder) imapStore.getDefaultFolder();
@@ -277,8 +281,8 @@ public final class FolderCache {
                 }
             }
             return IMAPFolderConverter.convertFolder(f, session, folderStorage.getImapAccess(), folderStorage.getContext());
-        } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, folderStorage.getAccountId(), mapFor("fullName", fullName));
+        } catch (MessagingException e) {
+            throw folderStorage.handleMessagingException(fullName, e);
         }
     }
 

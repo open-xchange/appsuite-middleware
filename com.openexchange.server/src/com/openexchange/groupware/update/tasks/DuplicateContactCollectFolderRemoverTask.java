@@ -52,6 +52,8 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
@@ -85,7 +87,6 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
@@ -409,9 +410,9 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
             stmt.setString(pos++, name);
             rs = stmt.executeQuery();
 
-            final SmartIntArray sia = new SmartIntArray(16);
+            final TIntList sia = new TIntArrayList(16);
             while (rs.next()) {
-                sia.append(rs.getInt(1));
+                sia.add(rs.getInt(1));
             }
 
             return sia.toArray();

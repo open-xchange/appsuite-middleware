@@ -190,8 +190,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static final String STR_INBOX = "INBOX";
 
-    private static final char[] STR_MSEC = new char[] { 'm','s','e','c' };
-
     private final IMAPStore imapStore;
     private final IMAPAccess imapAccess;
     private final int accountId;
@@ -218,6 +216,30 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         this.session = session;
         ctx = session instanceof ServerSession ? ((ServerSession) session).getContext() : ContextStorage.getStorageContext(session.getContextId());
         imapConfig = imapAccess.getIMAPConfig();
+    }
+
+    /**
+     * Handles specified {@link MessagingException} instance.
+     *
+     * @param e The {@link MessagingException} instance
+     * @return The appropriate {@link OXException} instance
+     */
+    public OXException handleMessagingException(MessagingException e) {
+        return handleMessagingException(null, e);
+    }
+
+    /**
+     * Handles specified {@link MessagingException} instance.
+     *
+     * @param optFullName The optional full name
+     * @param e The {@link MessagingException} instance
+     * @return The appropriate {@link OXException} instance
+     */
+    public OXException handleMessagingException(String optFullName, MessagingException e) {
+        if (null != optFullName && MimeMailException.isInUseException(e)) {
+            IMAPFolderWorker.markForFailFast(imapStore, optFullName, e);
+        }
+        return IMAPException.handleMessagingException(e, imapConfig, session, accountId, null == optFullName ? null : mapFor("fullName", optFullName));
     }
 
     /**
@@ -376,6 +398,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             // Retrieve folder...
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder f;
             if (0 == fn.length()) {
                 f = (IMAPFolder) imapStore.getDefaultFolder();
@@ -394,7 +417,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, f, session);
             return null == listEntry ? IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId) : toFolderInfo(listEntry);
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, new HashMap<String, Object>(0));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -489,7 +512,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             Collections.sort(retval, new FullDisplayNameComparator(locale));
             return retval;
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, new HashMap<String, Object>(0));
+            throw handleMessagingException(e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -568,7 +591,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -600,7 +623,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -632,7 +655,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -664,7 +687,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -692,7 +715,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             return false;
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -718,7 +741,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             String[] personalNamespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
             return null == personalNamespaces || 0 == personalNamespaces.length ? null : personalNamespaces[0];
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
+            throw handleMessagingException(e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -857,7 +880,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             return EMPTY_PATH;
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", parentFullName));
+            throw handleMessagingException(parentFullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -1174,7 +1197,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 throw IMAPException.create(IMAPException.Code.FOLDER_CREATION_FAILED, imapConfig, session, e, createMe.getFullName(), isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
                             }
 
-                            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", createMe.getFullName()));
+                            throw handleMessagingException(createMe.getFullName(), e);
                         }
                         LOG.warn("IMAP folder creation failed due to unsupported type. Going to retry with fallback type HOLDS-MESSAGES.", e);
                         if (!(created = createMe.create(Folder.HOLDS_MESSAGES))) {
@@ -1257,8 +1280,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         e2);
                 }
             }
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
-        } catch (final OXException e) {
+            throw handleMessagingException(e);
+        } catch (OXException e) {
             /*
              * No folder deletion on IMAP error "NO_ADMINISTER_ACCESS_ON_INITIAL"
              */
@@ -1500,7 +1523,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return renameMe.getFullName();
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final IMAPException e) {
             throw e;
         } catch (final OXException e) {
@@ -1750,7 +1773,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return moveMe.getFullName();
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final IMAPException e) {
             throw e;
         } catch (final OXException e) {
@@ -1918,7 +1941,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return updateMe.getFullName();
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final IMAPException e) {
             throw e;
         } catch (final RuntimeException e) {
@@ -2015,7 +2038,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return fullName;
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -2111,7 +2134,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -2292,7 +2315,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -2338,7 +2361,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             return list.toArray(new MailFolder[list.size()]);
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
+            throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -2382,19 +2405,19 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (null == namespaces || 0 == namespaces.length) {
                     // No namespaces available
                     String prefixByInferiors = prefixByInferiors();
-                    LOG.info("IMAP server {} does not provide a personal namespace for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, session.getUserId(), session.getContextId());
+                    LOG.info("IMAP server {} does not provide a personal namespace for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                     return prefixByInferiors;
                 }
                 prefix = namespaces[0];
             } catch (final MessagingException e) {
                 String prefixByInferiors = prefixByInferiors();
-                LOG.info("NAMESPACE command failed for any reason on IMAP server {} for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, session.getUserId(), session.getContextId(), e);
+                LOG.info("NAMESPACE command failed for any reason on IMAP server {} for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 return prefixByInferiors;
             }
             // Return prefix as indicated by NAMESPACE command
             return prefix.length() == 0 ? prefix : new StringBuilder(prefix).append(((DefaultFolder) imapStore.getDefaultFolder()).getSeparator()).toString();
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
+            throw handleMessagingException(e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -2408,7 +2431,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             return "";
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
+            throw handleMessagingException(e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -2536,7 +2559,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return quotas;
             }
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", folder));
+            throw handleMessagingException(folder, e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -2843,7 +2866,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws OXException, MessagingException {
+    private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws OXException {
         final List<ACL> acls = new ArrayList<ACL>(perms.length);
         for (int i = 0; i < perms.length; i++) {
             final ACLPermission aclPermission = getACLPermission(perms[i]);
@@ -2856,10 +2879,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             } catch (final OXException e) {
                 if (Entity2ACLExceptionCode.UNKNOWN_USER.equals(e)) {
                     // Obviously the user is not known, skip
-                    LOG.debug("User {} is not known on IMAP server \"{}\"", aclPermission.getEntity(), imapConfig.getImapServerAddress());
+                    LOG.debug("User {} is not known on IMAP server \"{}\"", Integer.valueOf(aclPermission.getEntity()), imapConfig.getImapServerAddress());
                 } else if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                     // Obviously the user is not known, skip
-                    LOG.debug("User 0} is not known on IMAP server \"{}\"", aclPermission.getEntity(), imapConfig.getImapServerAddress());
+                    LOG.debug("User 0} is not known on IMAP server \"{}\"", Integer.valueOf(aclPermission.getEntity()), imapConfig.getImapServerAddress());
                 } else {
                     throw e;
                 }
@@ -3249,7 +3272,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         try {
             return getLISTEntry(STR_INBOX, (IMAPFolder) imapStore.getDefaultFolder()).getSeparator();
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
+            throw handleMessagingException(e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -3266,23 +3289,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         try {
             return getLISTEntry(STR_INBOX, imapFolder).getSeparator();
         } catch (final MessagingException e) {
-            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", imapFolder.getFullName()));
+            throw handleMessagingException(imapFolder.getFullName(), e);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
     }
 
-    /**
-     * Handles specified {@link MessagingException} instance.
-     *
-     * @param e The {@link MessagingException} instance
-     * @return The appropriate {@link OXException} instance
-     */
-    public OXException handleMessagingException(final MessagingException e) {
-        return IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
-    }
-
-    private String getNameOf(final IMAPFolder imapFolder) throws OXException, MessagingException {
+    private String getNameOf(final IMAPFolder imapFolder) throws OXException {
         final String fullName = imapFolder.getFullName();
         return fullName.substring(fullName.lastIndexOf(getSeparator(imapFolder)) + 1);
     }

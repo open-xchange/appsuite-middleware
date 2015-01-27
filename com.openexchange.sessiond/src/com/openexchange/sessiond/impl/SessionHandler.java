@@ -72,6 +72,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -177,8 +178,6 @@ public final class SessionHandler {
     }
 
     /**
-<<<<<<< HEAD
-=======
      * Gets the session obfuscator that performs the conversion into/from a stored session
      *
      * @return The session obfuscator instance
@@ -198,7 +197,6 @@ public final class SessionHandler {
     }
 
     /**
->>>>>>> 41cf89f... Fix for bug 35426: Let session obfuscator properly maintain such parameters that are supposed to be taken over from session to stored session representation
      * Removes all sessions associated with given user in specified context
      *
      * @param userId The user ID
@@ -370,7 +368,7 @@ public final class SessionHandler {
                                 retval[i] = obfuscator.unwrap(userSessions[i], remoteParameterNames);
                             }
                             return retval;
-                        }
+                            }
                     };
                     final Session[] sessions = getFrom(c, new Session[0]);
                     retval = new SessionControl[sessions.length];
@@ -461,10 +459,11 @@ public final class SessionHandler {
      * @param clientHost The client host name or IP address
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
+     * @param enhancement after creating the session, this callback will be called when not <code>null</code> for extending the session.
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient) throws OXException {
+    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, SessionEnhancement enhancement) throws OXException {
         SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -476,7 +475,7 @@ public final class SessionHandler {
         checkAuthId(login, authId);
 
         // Create new session instance
-        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient);
+        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, enhancement);
 
         // Either add session or yield short-time token for it
         SessionImpl addedSession;
@@ -516,7 +515,7 @@ public final class SessionHandler {
      * @return The newly created {@code SessionImpl} instance
      * @throws OXException If create attempt fails
      */
-    public static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
+    public static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, SessionEnhancement enhancement) throws OXException {
         // Generate identifier, secret, and random
         SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
         String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
@@ -525,7 +524,9 @@ public final class SessionHandler {
 
         // Create the instance
         SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient);
-
+        if (null != enhancement) {
+            enhancement.enhanceSession(newSession);
+        }
         // Return...
         return newSession;
     }

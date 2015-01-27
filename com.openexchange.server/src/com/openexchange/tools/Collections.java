@@ -55,7 +55,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -80,7 +79,7 @@ public final class Collections {
     private Collections() {
         super();
     }
-    
+
     public static <K, V> V opt(ConcurrentHashMap<K, V> map, K key, V defaultValue) {
         V v = map.get(key);
         if (v == null) {
@@ -88,7 +87,7 @@ public final class Collections {
             V meantime = map.putIfAbsent(key, v);
             v = (meantime == null) ? v : meantime;
         }
-        
+
         return v;
     }
 
@@ -216,114 +215,6 @@ public final class Collections {
             retval[i] = iter.next().intValue();
         }
         return retval;
-    }
-
-    /**
-     * SmartIntArray - A tiny helper class to increase arrays of <code>int</code> like dynamically lists
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     */
-    public static class SmartIntArray {
-
-        /**
-         * Pointer to keep track of position in the array
-         */
-        private int pointer;
-
-        private int[] array;
-
-        private final int growthSize;
-
-        public SmartIntArray() {
-            this(1024);
-        }
-
-        public SmartIntArray(final int initialSize) {
-            this(initialSize, (initialSize >> 2));
-        }
-
-        public SmartIntArray(final int initialSize, final int growthSize) {
-            this.growthSize = growthSize;
-            array = new int[initialSize];
-        }
-
-        public SmartIntArray append(final int i) {
-            if (pointer >= array.length) {
-                /*
-                 * time to grow!
-                 */
-                final int[] tmpArray = new int[array.length + growthSize];
-                System.arraycopy(array, 0, tmpArray, 0, array.length);
-                array = tmpArray;
-            }
-            array[pointer++] = i;
-            return this;
-        }
-
-        public int[] toArray() {
-            final int[] trimmedArray = new int[pointer];
-            System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
-            return trimmedArray;
-        }
-
-        @Override
-        public String toString() {
-            return Arrays.toString(toArray());
-        }
-    }
-
-    /**
-     * SmartLongArray - A tiny helper class to increase arrays of <code>long</code> as dynamically lists
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     */
-    public static class SmartLongArray {
-
-        /**
-         * Pointer to keep track of position in the array
-         */
-        private int pointer;
-
-        private long[] array;
-
-        private final int growthSize;
-
-        public SmartLongArray() {
-            this(1024);
-        }
-
-        public SmartLongArray(final int initialSize) {
-            this(initialSize, (initialSize >> 2));
-        }
-
-        public SmartLongArray(final int initialSize, final int growthSize) {
-            this.growthSize = growthSize;
-            array = new long[initialSize];
-        }
-
-        public SmartLongArray append(final long i) {
-            if (pointer >= array.length) {
-                /*
-                 * time to grow!
-                 */
-                final long[] tmpArray = new long[array.length + growthSize];
-                System.arraycopy(array, 0, tmpArray, 0, array.length);
-                array = tmpArray;
-            }
-            array[pointer++] = i;
-            return this;
-        }
-
-        public long[] toArray() {
-            final long[] trimmedArray = new long[pointer];
-            System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
-            return trimmedArray;
-        }
-
-        @Override
-        public String toString() {
-            return Arrays.toString(toArray());
-        }
     }
 
     /**

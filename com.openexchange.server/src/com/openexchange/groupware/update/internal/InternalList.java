@@ -752,6 +752,11 @@ public final class InternalList {
         // Adds the 'full_time' column to the tasks tables
         list.add(new com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask());
 
+        // +++++++++++++++++++++++++++++++++ Version 7.6.2 starts here. +++++++++++++++++++++++++++++++++
+
+        // Check for possibly preset message format preference in JSLob and aligns the DB value accordingly
+        list.add(new com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

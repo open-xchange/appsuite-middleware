@@ -206,16 +206,17 @@ public final class LoginPerformer {
                     throw ServiceExceptionCode.absentService(SessiondService.class);
                 }
             }
-            final Session session = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
+            AddSessionParameterImpl addSession = new AddSessionParameterImpl(username, request, user, ctx);
+            if (SessionEnhancement.class.isInstance(authed)) {
+                addSession.setEnhancement((SessionEnhancement) authed);
+            }
+            final Session session = sessiondService.addSession(addSession);
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
             }
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
-            if (SessionEnhancement.class.isInstance(authed)) {
-                ((SessionEnhancement) authed).enhanceSession(session);
-            }
             retval.setSession(session);
 
             // Trigger registered login handlers

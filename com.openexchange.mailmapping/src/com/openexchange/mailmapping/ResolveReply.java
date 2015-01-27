@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,139 +47,30 @@
  *
  */
 
-package com.openexchange.calendar.api.itip;
+package com.openexchange.mailmapping;
 
-import java.util.Collections;
-import java.util.Set;
-import com.openexchange.session.Session;
 
-public class ITipSession implements Session {
+/**
+ * This enum represents the possible replies that a {@link MailResolver} can return alongside with a {@link ResolvedMail} instance.
+ * <p>
+ * Based on the order that the ResolveReply values are declared,
+ * <code>ResolveReply.ACCEPT.compareTo(ResolveReply.DENY)</code> will return a positive value.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public enum ResolveReply {
 
-	private final int ctxId;
-	private final int userId;
+    /**
+     * The {@link MailResolver} denies further processing of passed E-Mail address.
+     */
+    DENY,
+    /**
+     * The {@link MailResolver} cannot handle passed E-Mail address, therefore delegates to the next one in chain.
+     */
+    NEUTRAL,
+    /**
+     * The {@link MailResolver} successfully handled passed E-Mail address.
+     */
+    ACCEPT;
 
-	public ITipSession(final int uid, final int ctxId) {
-		this.userId = uid;
-		this.ctxId = ctxId;
-	}
-
-	@Override
-    public int getContextId() {
-		return ctxId;
-	}
-
-	@Override
-    public String getLocalIp() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setLocalIp(final String ip) {
-		// Nothing to do
-
-	}
-
-	@Override
-    public String getLoginName() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public boolean containsParameter(final String name) {
-		// Nothing to do
-		return false;
-	}
-
-	@Override
-    public Object getParameter(final String name) {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getPassword() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getRandomToken() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSecret() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getSessionID() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public int getUserId() {
-		return userId;
-	}
-
-	@Override
-    public String getUserlogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getLogin() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setParameter(final String name, final Object value) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getAuthId() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public String getHash() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setHash(final String hash) {
-		// Nothing to do
-	}
-
-	@Override
-    public String getClient() {
-		// Nothing to do
-		return null;
-	}
-
-	@Override
-    public void setClient(final String client) {
-		// Nothing to do
-
-	}
-
-    @Override
-    public boolean isTransient() {
-        return false;
-    }
-
-    @Override
-    public Set<String> getParameterNames() {
-        return Collections.emptySet();
-    }
 }

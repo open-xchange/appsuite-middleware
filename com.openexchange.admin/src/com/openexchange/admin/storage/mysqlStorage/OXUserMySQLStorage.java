@@ -1541,7 +1541,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 myChangeInsertModuleAccess(ctx, userId, moduleAccess, true, con, groupsForUser);
 
                 // add users standard mail settings
-                final StringBuffer sb = new StringBuffer("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,send_addr,bits,confirmed_spam,confirmed_ham,");
+                final StringBuffer sb = new StringBuffer("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,msg_format,send_addr,bits,confirmed_spam,confirmed_ham,");
                 final boolean uploadFileSizeLimitset = usrdata.getUploadFileSizeLimit() != null;
                 final boolean uploadFileSizeLimitPerFileset = usrdata.getUploadFileSizeLimitPerFile() != null;
                 if (uploadFileSizeLimitset) {
@@ -1552,7 +1552,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 // Remove comma
                 sb.deleteCharAt(sb.length() - 1);
-                sb.append(") VALUES (?,?,?,?,?,?,?,?,?,?,");
+                sb.append(") VALUES (?,?,?,?,?,?,?,?,?,?,?,");
                 if (uploadFileSizeLimitset) {
                     sb.append("?,");
                 }
@@ -1562,13 +1562,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 sb.deleteCharAt(sb.length() - 1);
                 sb.append(')');
                 stmt = con.prepareStatement(sb.toString());
-                stmt.setInt(1, ctx.getId());
-                stmt.setInt(2, userId);
-                stmt.setString(3, std_mail_folder_trash);
-                stmt.setString(4, std_mail_folder_sent);
-                stmt.setString(5, std_mail_folder_drafts);
-                stmt.setString(6, std_mail_folder_spam);
-                stmt.setString(7, usrdata.getDefaultSenderAddress());
+                pos = 1;
+                stmt.setInt(pos++, ctx.getId());
+                stmt.setInt(pos++, userId);
+                stmt.setString(pos++, std_mail_folder_trash);
+                stmt.setString(pos++, std_mail_folder_sent);
+                stmt.setString(pos++, std_mail_folder_drafts);
+                stmt.setString(pos++, std_mail_folder_spam);
+                stmt.setInt(pos++, UserSettingMail.MSG_FORMAT_BOTH);
+                stmt.setString(pos++, usrdata.getDefaultSenderAddress());
                 // set the flag for "receiving notifications" in the ox, was bug
                 // #5336
                 // TODO: choeger: Extend API to allow setting of these flags
@@ -1598,15 +1600,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_OWNER;
                 flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT;
 
-                stmt.setInt(8, flags);
-                stmt.setString(9, std_mail_folder_confirmed_spam);
-                stmt.setString(10, std_mail_folder_confirmed_ham);
-                int index = 11;
+                stmt.setInt(pos++, flags);
+                stmt.setString(pos++, std_mail_folder_confirmed_spam);
+                stmt.setString(pos++, std_mail_folder_confirmed_ham);
                 if (uploadFileSizeLimitset) {
-                    stmt.setInt(index++, usrdata.getUploadFileSizeLimit());
+                    stmt.setInt(pos++, usrdata.getUploadFileSizeLimit());
                 }
                 if (uploadFileSizeLimitPerFileset) {
-                    stmt.setInt(index++, usrdata.getUploadFileSizeLimitPerFile());
+                    stmt.setInt(pos++, usrdata.getUploadFileSizeLimitPerFile());
                 }
                 stmt.executeUpdate();
                 stmt.close();

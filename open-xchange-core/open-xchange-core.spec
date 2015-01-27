@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 15
+%define        ox_release 16
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1104,6 +1104,19 @@ if [ "500" = "${VALUE}" ]; then
     ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-2342
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# Check for possibly preset message format preference in JSLob and aligns the DB value accordingly
+!com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob
+EOF
+fi
+
+# SoftwareChange_Request-2379
+ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1142,6 +1155,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Jan 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-26
 * Mon Jan 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-09
 * Wed Jan 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
