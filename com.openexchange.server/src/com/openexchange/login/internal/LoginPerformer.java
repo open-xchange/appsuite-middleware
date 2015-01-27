@@ -58,7 +58,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.security.auth.login.LoginException;
 import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.authentication.AddSessionParameterEnhancement;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -88,7 +87,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -210,27 +208,17 @@ public final class LoginPerformer {
                     throw ServiceExceptionCode.absentService(SessiondService.class);
                 }
             }
-            // Create session
-            Session session;
-            {
-                AddSessionParameter sessionParameter = new AddSessionParameterImpl(username, request, user, ctx);
-                if (AddSessionParameterEnhancement.class.isInstance(authed)) {
-                    AddSessionParameter modified = ((AddSessionParameterEnhancement) authed).enhanceParameter(sessionParameter);
-                    if (null != modified) {
-                        sessionParameter = modified;
-                    }
-                }
-                session = sessiondService.addSession(sessionParameter);
-                if (null == session) {
-                    // Session could not be created
-                    throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-                }
+            AddSessionParameterImpl addSession = new AddSessionParameterImpl(username, request, user, ctx);
+            if (SessionEnhancement.class.isInstance(authed)) {
+                addSession.setEnhancement((SessionEnhancement) authed);
+            }
+            final Session session = sessiondService.addSession(addSession);
+            if (null == session) {
+                // Session could not be created
+                throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
             }
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
-            if (SessionEnhancement.class.isInstance(authed)) {
-                ((SessionEnhancement) authed).enhanceSession(session);
-            }
             retval.setSession(session);
             // Trigger registered login handlers
             triggerLoginHandlers(retval);

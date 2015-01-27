@@ -1039,6 +1039,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             return false;
         }
 
+        @Override
+        public Set<String> getParameterNames() {
+            return parameters.keySet();
+        }
     }
-
 }

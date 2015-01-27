@@ -68,6 +68,8 @@ done
 %changelog
 * Tue Jan 27 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Fifth candidate for 7.6.2 release
+* Mon Jan 26 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2015-01-26
 * Wed Jan 21 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2015-01-29
 * Mon Jan 12 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>

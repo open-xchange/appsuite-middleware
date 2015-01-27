@@ -4,6 +4,7 @@ BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-admin
+BuildRequires:  open-xchange-rest
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
 %define         ox_release 5
@@ -78,6 +79,8 @@ fi
 %changelog
 * Tue Jan 27 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.6.2 release
+* Mon Jan 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-26
 * Wed Jan 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-29
 * Mon Jan 12 2015 Marcus Klein <marcus.klein@open-xchange.com>

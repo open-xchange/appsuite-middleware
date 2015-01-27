@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.session;
 
+import java.util.Set;
 import org.apache.commons.lang.Validate;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
@@ -528,4 +529,8 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         return session().hashCode();
     }
 
+    @Override
+    public Set<String> getParameterNames() {
+        return session().getParameterNames();
+    }
 }

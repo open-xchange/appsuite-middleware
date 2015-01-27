@@ -49,8 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -107,7 +106,7 @@ public final class SessionImpl implements PutIfAbsent {
      */
     public SessionImpl(int userId, String loginName, String password, int contextId, String sessionId,
         String secret, String randomToken, String localIp, String login, String authId, String hash,
-        String client, boolean tranzient, Map<String, Object> initialParams) {
+        String client, boolean tranzient) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -123,9 +122,6 @@ public final class SessionImpl implements PutIfAbsent {
         this.client = client;
         this.tranzient = tranzient;
         parameters = new ConcurrentHashMap<String, Object>();
-        if (null != initialParams) {
-            parameters.putAll(initialParams);
-        }
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
         parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
@@ -152,6 +148,9 @@ public final class SessionImpl implements PutIfAbsent {
         this.client = s.getClient();
         this.tranzient = false;
         parameters = new ConcurrentHashMap<String, Object>();
+        for (String name : s.getParameterNames()) {
+            parameters.put(name, s.getParameter(name));
+        }
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
         final Object altId = s.getParameter(PARAM_ALTERNATIVE_ID);
@@ -159,15 +158,6 @@ public final class SessionImpl implements PutIfAbsent {
             parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
         } else {
             parameters.put(PARAM_ALTERNATIVE_ID, altId);
-        }
-        List<String> remoteParameterNames = SessionHandler.getRemoteParameterNames();
-        if (null != remoteParameterNames) {
-            for (String parameterName : remoteParameterNames) {
-                Object value = s.getParameter(parameterName);
-                if (null != value) {
-                    parameters.put(parameterName, value);
-                }
-            }
         }
     }
 
@@ -571,4 +561,8 @@ public final class SessionImpl implements PutIfAbsent {
         return builder.toString();
     }
 
+    @Override
+    public Set<String> getParameterNames() {
+        return parameters.keySet();
+    }
 }

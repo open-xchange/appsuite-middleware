@@ -160,7 +160,7 @@ public final class JerichoParser {
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[^?][^>]+)(>?)\\s*$");
+    private static final Pattern FIX_START_TAG = Pattern.compile("^\\s*(<[^?][^>]+)(>?)\\s*$");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}

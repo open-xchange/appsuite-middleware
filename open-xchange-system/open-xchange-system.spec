@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Tue Jan 27 2015 Carsten Hoeger <choeger@open-xchange.com>
 Fifth candidate for 7.6.2 release
+* Mon Jan 26 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-01-26
 * Mon Jan 12 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-01-09
 * Wed Jan 07 2015 Carsten Hoeger <choeger@open-xchange.com>
