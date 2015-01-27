@@ -69,11 +69,11 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
     public AccountActionFactory(final FileStorageServiceRegistry registry) {
         actions = new HashMap<String, AJAXActionService>();
 
-//        actions.put("all", new AllAction(registry));
-//        actions.put("delete", new DeleteAction(registry));
-//        actions.put("get", new GetAction(registry));
-//        actions.put("new", new NewAction(registry));
-//        actions.put("update", new UpdateAction(registry));
+        actions.put("all", new AllAction(registry));
+        actions.put("delete", new DeleteAction(registry));
+        actions.put("get", new GetAction(registry));
+        actions.put("new", new NewAction(registry));
+        actions.put("update", new UpdateAction(registry));
 
     }
 

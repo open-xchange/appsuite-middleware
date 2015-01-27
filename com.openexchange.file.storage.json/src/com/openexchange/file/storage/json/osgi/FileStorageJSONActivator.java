@@ -58,6 +58,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.json.FileConverter;
 import com.openexchange.file.storage.json.FileMetadataParser;
+import com.openexchange.file.storage.json.actions.accounts.AccountActionFactory;
 import com.openexchange.file.storage.json.actions.files.AliasFileActionFactory;
 import com.openexchange.file.storage.json.actions.files.FileActionFactory;
 import com.openexchange.file.storage.json.services.Services;
@@ -91,6 +92,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");
             registerModule(AliasFileActionFactory.ALIAS_INSTANCE, "files");
+            registerModule(new AccountActionFactory(getService(FileStorageServiceRegistry.class)), "fileaccount");
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
             registerService(ResultConverter.class, new FileConverter());
         } catch (final Exception x) {
