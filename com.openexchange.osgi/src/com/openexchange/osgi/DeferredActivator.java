@@ -391,7 +391,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     /*
                      * Shut-down
                      */
-                    reset();
                     if (Bundle.STARTING == bundle.getState()) {
                         /*
                          * Bundle cannot be stopped by same thread if still in STARTING state
@@ -406,6 +405,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     } else {
                         shutDownBundle(bundle, errorBuilder);
                     }
+                    reset();
                 }
             }
         }
@@ -547,9 +547,17 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
     @Override
     public <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
-        final ServiceReference<? extends S> serviceReference = context.getServiceReference(clazz);
+        ServiceProvider<?> serviceProvider = services.get(clazz);
+        if (null != serviceProvider) {
+            Object service = serviceProvider.getService();
+            if (null != service) {
+                return clazz.cast(service);
+            }
+        }
+
+        ServiceReference<? extends S> serviceReference = context.getServiceReference(clazz);
         if (serviceReference == null) {
-        	return null;
+            return null;
         }
         return context.getService(serviceReference);
     }
