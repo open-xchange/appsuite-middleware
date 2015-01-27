@@ -100,6 +100,17 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      */
     protected static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];
 
+    private static final class ReferencedService<S> {
+        final ServiceReference<S> reference;
+        final S service;
+
+        ReferencedService(S service, ServiceReference<S> reference) {
+            super();
+            this.service = service;
+            this.reference = reference;
+        }
+    }
+
     private <S> DeferredServiceTracker<S> newDeferredTracker(final BundleContext context, final Class<S> clazz, final int index) {
         return new DeferredServiceTracker<S>(context, clazz, index);
     }
@@ -169,6 +180,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             signalUnavailability(index, clazz);
 
             // ... and remove from services
+            ConcurrentMap<Class<?>, ServiceProvider<?>> services = DeferredActivator.this.services;
             if (services != null) {
                 services.remove(clazz);
             }
@@ -212,11 +224,17 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     protected ConcurrentMap<Class<?>, ServiceProvider<?>> services;
 
     /**
+     * Additionally fetched services.
+     */
+    protected final ConcurrentMap<Class<?>, ReferencedService<?>> additionalServices;
+
+    /**
      * Initializes a new {@link DeferredActivator}.
      */
     protected DeferredActivator() {
         super();
         started = new AtomicBoolean();
+        additionalServices = new ConcurrentHashMap<Class<?>, ReferencedService<?>>(6);
     }
 
     /**
@@ -303,9 +321,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * Resets this deferred activator's members.
      */
     private final void reset() {
+        // Close trackers
         if (null != neededServiceTrackers) {
             for (int i = 0; i < neededServiceTrackers.length; i++) {
-                final ServiceTracker<?, ?> tracker = neededServiceTrackers[i];
+                ServiceTracker<?, ?> tracker = neededServiceTrackers[i];
                 if (tracker != null) {
                     tracker.close();
                     neededServiceTrackers[i] = null;
@@ -315,11 +334,21 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
         availability = 0;
         allAvailable = -1;
+
+        // Unget additional services
+        for (ReferencedService<?> referencedService : additionalServices.values()) {
+            context.ungetService(referencedService.reference);
+        }
+        additionalServices.clear();
+
+        // Empty tracked services
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null != services) {
             services.clear();
             this.services = null;
         }
+
+        // Release context reference
         context = null;
     }
 
@@ -338,6 +367,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         final List<String> missing = new ArrayList<String>(classes.length);
         final List<String> present = new ArrayList<String>(classes.length);
 
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         for (final Class<?> clazz : classes) {
             if (services != null && services.containsKey(clazz)) {
                 present.add(clazz.getName());
@@ -525,6 +555,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      */
     @Override
     public <S extends Object> S getService(final Class<? extends S> clazz) {
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services) {
             /*
              * Services not initialized
@@ -545,6 +576,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         return clazz.cast(service);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
         ServiceProvider<?> serviceProvider = services.get(clazz);
@@ -555,11 +587,23 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             }
         }
 
-        ServiceReference<? extends S> serviceReference = context.getServiceReference(clazz);
-        if (serviceReference == null) {
-            return null;
+        ReferencedService<S> referencedService = (ReferencedService<S>) additionalServices.get(clazz);
+        if (null == referencedService) {
+            ServiceReference<S> serviceReference = (ServiceReference<S>) context.getServiceReference(clazz);
+            if (serviceReference == null) {
+                return null;
+            }
+
+            S service = context.getService(serviceReference);
+            ReferencedService<S> newReferencedService = new ReferencedService<S>(service, serviceReference);
+            referencedService = (ReferencedService<S>) additionalServices.putIfAbsent(clazz, newReferencedService);
+            if (null == referencedService) {
+                referencedService = newReferencedService;
+            } else {
+                context.ungetService(serviceReference);
+            }
         }
-        return context.getService(serviceReference);
+        return referencedService.service;
     }
 
     /**
@@ -571,6 +615,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @return <code>true</code> if service is added; otherwise <code>false</code> if not initialized or such a service already exists
      */
     protected <S> boolean addService(final Class<S> clazz, final S service) {
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services || !clazz.isInstance(service)) {
             /*
              * Services not initialized
@@ -589,6 +634,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @return <code>true</code> if service is added; otherwise <code>false</code> if not initialized or such a service already exists
      */
     protected <S> boolean addServiceAlt(final Class<? extends S> clazz, final S service) {
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services || !clazz.isInstance(service)) {
             /*
              * Services not initialized
@@ -606,6 +652,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @return <code>true</code> if service is removes; otherwise <code>false</code> if not initialized or absent
      */
     protected <S> boolean removeService(final Class<? extends S> clazz) {
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services) {
             /*
              * Services not initialized
