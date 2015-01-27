@@ -108,18 +108,18 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         super();
     }
 
-    private Map<String, String> getExternalAccountFolders(ServerSession session) throws OXException {
+    private Map<String, FolderInfo> getExternalAccountFolders(ServerSession session) throws OXException {
         CacheService cacheService = Services.getService(CacheService.class);
         Cache cache = cacheService.getCache(REGION_NAME);
 
         // Get from cache
         Object object = cache.get(cacheService.newCacheKey(session.getContextId(), session.getUserId()));
         if (object instanceof Map) {
-            return (Map<String, String>) object;
+            return (Map<String, FolderInfo>) object;
         }
 
         // Cache MISS
-        ConcurrentHashMap<String, String> tmp;
+        ConcurrentHashMap<String, FolderInfo> tmp;
         {
             IMAPFolderStorage folderStorage = null;
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
@@ -129,8 +129,8 @@ public class ExtAccountFolderField implements AdditionalFolderField {
 
                 folderStorage = getImapFolderStorage(mailAccess);
                 IMAPStore imapStore = folderStorage.getImapStore();
-                Map<String, String> folders = getExternalAccountFolders((IMAPFolder) imapStore.getDefaultFolder());
-                tmp = null == folders ? new ConcurrentHashMap<String, String>(0) : new ConcurrentHashMap<String, String>(folders);
+                Map<String, FolderInfo> folders = getExternalAccountFolders((IMAPFolder) imapStore.getDefaultFolder());
+                tmp = null == folders ? new ConcurrentHashMap<String, FolderInfo>(0) : new ConcurrentHashMap<String, FolderInfo>(folders);
             } catch (MessagingException e) {
                 throw folderStorage.handleMessagingException(e);
             } finally {
@@ -161,8 +161,20 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         }
 
         try {
-            return getExternalAccountFolders(session).get(fa.getFullName());
-        } catch (OXException e) {
+            FolderInfo extAccountInfo = getExternalAccountFolders(session).get(fa.getFullName());
+            if (null == extAccountInfo) {
+                return JSONObject.NULL;
+            }
+
+            JSONObject jResult = new JSONObject(2);
+            if (null != extAccountInfo.alias) {
+                jResult.put("alias", extAccountInfo.alias);
+            }
+            if (null != extAccountInfo.externalAccount) {
+                jResult.put("externalAccount", extAccountInfo.externalAccount);
+            }
+            return jResult;
+        } catch (Exception e) {
             return null;
         }
     }
@@ -183,6 +195,17 @@ public class ExtAccountFolderField implements AdditionalFolderField {
     }
 
     // -------------------------------------------------------------------------------------------------------------
+
+    private static final class FolderInfo {
+        final String externalAccount;
+        final String alias;
+
+        FolderInfo(String externalAccount, String alias) {
+            super();
+            this.externalAccount = externalAccount;
+            this.alias = alias;
+        }
+    }
 
     /**
      * Get the IMP folder storage from the specified mail access
@@ -212,9 +235,9 @@ public class ExtAccountFolderField implements AdditionalFolderField {
      * @return
      * @throws OXException
      */
-    private Map<String, String> getExternalAccountFolders(final IMAPFolder imapFolder) throws OXException {
+    private Map<String, FolderInfo> getExternalAccountFolders(final IMAPFolder imapFolder) throws OXException {
         try {
-            final Map<String, String> results = new HashMap<String, String>(8);
+            final Map<String, FolderInfo> results = new HashMap<String, FolderInfo>(8);
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
@@ -226,20 +249,58 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                     }
 
                     // Perform command
-                    final String command = "GETMETADATA * (/shared/vendor/vendor.dovecot/ext-account)";
-                    final com.sun.mail.iap.Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
-                    final int mlen = r.length - 1;
-                    final com.sun.mail.iap.Response response = r[mlen];
+                    String command = "GETMETADATA * (/shared/vendor/vendor.dovecot/ext-account /shared/vendor/vendor.dovecot/alias)";
+                    com.sun.mail.iap.Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
+                    int mlen = r.length - 1;
+                    com.sun.mail.iap.Response response = r[mlen];
+
                     if (response.isOK()) {
-                        final String cMetadata = "METADATA";
+                        String cMetadata = "METADATA";
                         for (int i = 0; i < mlen; i++) {
-                            final IMAPResponse ir = (IMAPResponse) r[i];
+                            if (!(r[i] instanceof IMAPResponse)) {
+                                continue;
+                            }
+
+                            IMAPResponse ir = (IMAPResponse) r[i];
                             if (ir.keyEquals(cMetadata)) {
-                                // * METADATA ...
-                                parseMetadataResponse(ir, results);
+                                // E.g.
+                                // * METADATA INBOX/alias@orange.fr (/shared/vendor/vendor.dovecot/ext-account NIL /shared/vendor/vendor.dovecot/alias {15} alias@orange.fr)
+                                // * METADATA INBOX/teppo.testaaja.in@gmail.com (/shared/vendor/vendor.dovecot/ext-account {27} teppo.testaaja.in@gmail.com /shared/vendor/vendor.dovecot/alias NIL)
+                                // * METADATA INBOX/QUARANTAINE (/shared/vendor/vendor.dovecot/ext-account NIL /shared/vendor/vendor.dovecot/alias NIL)
+                                String fullName = ir.readAtomString();
+                                String[] metadatas = ir.readAtomStringList();
+                                int length = metadatas.length;
+                                int index = 0;
+
+                                String extAccount = null;
+                                String alias = null;
+
+                                while (index < length) {
+                                    String name = metadatas[index++];
+                                    if ("/shared/vendor/vendor.dovecot/ext-account".equals(name)) {
+                                        String value = metadatas[index++];
+                                        if (!"NIL".equalsIgnoreCase(value)) {
+                                            extAccount = metadatas[index++];
+                                        }
+                                    } else if ("/shared/vendor/vendor.dovecot/alias".equals(name)) {
+                                        String value = metadatas[index++];
+                                        if (!"NIL".equalsIgnoreCase(value)) {
+                                            alias = metadatas[index++];
+                                        }
+                                    }
+                                }
+
+                                if (null != extAccount || null != alias) {
+                                    results.put(fullName, new FolderInfo(extAccount, alias));
+                                }
                                 r[i] = null;
                             }
                         }
+
+                        // Dispatch remaining untagged responses
+                        protocol.notifyResponseHandlers(r);
+                        protocol.handleResult(response);
+
                         return null;
                     } else if (response.isBAD()) {
                         if (ImapUtility.isInvalidMessageset(response)) {
