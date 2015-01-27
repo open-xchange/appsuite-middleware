@@ -62,11 +62,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.net.HttpHeaders;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.internal.URLHelper;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -91,7 +94,7 @@ public class TokenEndpoint extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         /*
          * https://www.superduperhosting.com/appsuite/api/oauth2/accessToken?grant_type=authorization_code
                                            &code=AUTHORIZATION_CODE
@@ -100,61 +103,61 @@ public class TokenEndpoint extends HttpServlet {
                                            &client_secret=YOUR_SECRET_KEY
          */
         try {
-            String clientId = req.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
+            if (!Tools.considerSecure(request)) {
+                response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
+                response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
+                return;
+            }
+
+            String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
             if (clientId == null) {
-                failWithMissingParameter(resp, OAuthProviderConstants.PARAM_CLIENT_ID);
+                failWithMissingParameter(response, OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
 
             Client client = oAuthProvider.getClientById(clientId);
             if (client == null) {
-                failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CLIENT_ID);
+                failWithInvalidParameter(response, OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
 
-            String clientSecret = req.getParameter(OAuthProviderConstants.PARAM_CLIENT_SECRET);
+            String clientSecret = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_SECRET);
             if (clientSecret == null) {
-                failWithMissingParameter(resp, OAuthProviderConstants.PARAM_CLIENT_SECRET);
+                failWithMissingParameter(response, OAuthProviderConstants.PARAM_CLIENT_SECRET);
                 return;
             }
 
             if (!client.getSecret().equals(clientSecret)) {
-                fail(resp, HttpServletResponse.SC_UNAUTHORIZED, "unauthorized_client", "invalid client secret");
+                fail(response, HttpServletResponse.SC_UNAUTHORIZED, "unauthorized_client", "invalid client secret");
                 return;
             }
 
-            String grantType = req.getParameter(OAuthProviderConstants.PARAM_GRANT_TYPE);
+            String grantType = request.getParameter(OAuthProviderConstants.PARAM_GRANT_TYPE);
             if (grantType == null) {
-                failWithMissingParameter(resp, OAuthProviderConstants.PARAM_GRANT_TYPE);
+                failWithMissingParameter(response, OAuthProviderConstants.PARAM_GRANT_TYPE);
                 return;
             }
 
             if ("authorization_code".equals(grantType)) {
-                handleAuthorizationCode(client, req, resp);
+                handleAuthorizationCode(client, request, response);
             } else if ("refresh_token".equals(grantType)) {
-                handleRefreshToken(client, req, resp);
+                handleRefreshToken(client, request, response);
             } else {
-                failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_GRANT_TYPE);
+                failWithInvalidParameter(response, OAuthProviderConstants.PARAM_GRANT_TYPE);
                 return;
             }
         } catch (OXException | JSONException e) {
             LOG.error("Token request failed", e);
-            sendErrorResponse(resp, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
     }
 
     private void handleAuthorizationCode(Client client, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException, OXException {
-        String redirectUri = req.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
-        if (redirectUri == null) {
-            failWithMissingParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
-            return;
-        }
-
-        if (!client.hasRedirectURI(redirectUri)) {
-            failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
-            return;
-        }
-
+        /*
+         * The contained auth code must be invalidated even in error cases to
+         * prevent replay attacks. Therefore it must be checked before any other
+         * parameters.
+         */
         String authCode = req.getParameter(OAuthProviderConstants.PARAM_CODE);
         if (authCode == null) {
             failWithMissingParameter(resp, OAuthProviderConstants.PARAM_CODE);
@@ -164,6 +167,17 @@ public class TokenEndpoint extends HttpServlet {
         OAuthGrant token = oAuthProvider.redeemAuthCode(client, authCode);
         if (token == null) {
             failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CODE);
+            return;
+        }
+
+        String redirectUri = req.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
+        if (redirectUri == null) {
+            failWithMissingParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
+            return;
+        }
+
+        if (!client.hasRedirectURI(redirectUri)) {
+            failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
             return;
         }
 

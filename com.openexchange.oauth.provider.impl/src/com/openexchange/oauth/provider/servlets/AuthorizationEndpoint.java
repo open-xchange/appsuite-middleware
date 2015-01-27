@@ -55,11 +55,14 @@ import static com.openexchange.tools.servlet.http.Tools.sendErrorPage;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -77,6 +80,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.DefaultScope;
@@ -97,7 +101,12 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class AuthorizationEndpoint extends HttpServlet {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AuthorizationEndpoint.class);
+    /**
+     *
+     */
+    private static final String ATTR_OAUTH_CSRF_TOKEN = "oauth-csrf-token";
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationEndpoint.class);
 
     private static final long serialVersionUID = 6393806486708501254L;
 
@@ -117,7 +126,26 @@ public class AuthorizationEndpoint extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // First, check & validate client, redirect URI and state
+            if (!Tools.considerSecure(request)) {
+                response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
+                response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
+                return;
+            }
+
+            // Check for CSRF
+            // Respond with JSON errors w/o redirect
+            if (isInvalidReferer(request)) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"request contains no or invalid referer header\",\"error\":\"invalid_request\"}");
+                return;
+            }
+
+            // Set JSESSIONID cookie and generate CSRF token
+            if (isInvalidCSRFToken(request)) {
+                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"request contains no or invalid CSRF token. Ensure that cookies are allowed.\",\"error\":\"invalid_request\"}");
+                return;
+            }
+
+            // Check & validate client, redirect URI and state
             // Respond with JSON errors w/o redirect
             String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
             if (Strings.isEmpty(clientId)) {
@@ -239,18 +267,73 @@ public class AuthorizationEndpoint extends HttpServlet {
                 response.sendRedirect(URLHelper.getRedirectLocation(redirectURI, OAuthProviderConstants.PARAM_CODE, code, OAuthProviderConstants.PARAM_STATE, state));
             } catch (OXException e) {
                 // Special handling for OXException after client identifier and redirect URI have been validated
-                LOGGER.error("Authorization request failed", e);
+                LOG.error("Authorization request failed", e);
                 response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "server_error", "internal error", OAuthProviderConstants.PARAM_STATE, state));
                 return;
             }
 
         } catch (OXException e) {
-            LOGGER.error("Authorization request failed", e);
+            LOG.error("Authorization request failed", e);
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         } catch (JSONException e) {
-            LOGGER.error("Authorization request failed", e);
+            LOG.error("Authorization request failed", e);
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
+    }
+
+    private static boolean isInvalidCSRFToken(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return true;
+        }
+
+        String csrfToken = (String) session.getAttribute(ATTR_OAUTH_CSRF_TOKEN);
+        session.removeAttribute(ATTR_OAUTH_CSRF_TOKEN); // not necessary anymore
+        if (csrfToken == null) {
+            return true;
+        }
+
+        String actualToken = request.getParameter(OAuthProviderConstants.PARAM_CSRF_TOKEN);
+        if (actualToken == null) {
+            return true;
+        }
+
+        if (!csrfToken.equals(actualToken)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean isInvalidReferer(HttpServletRequest request) throws OXException {
+        String referer = request.getHeader(HttpHeaders.REFERER);
+        if (Strings.isEmpty(referer)) {
+            return true;
+        }
+
+        try {
+            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
+            URI actualReferer = new URI(referer);
+            if (!expectedReferer.getScheme().equals(actualReferer.getScheme())) {
+                return true;
+            }
+
+            if (!expectedReferer.getHost().equals(actualReferer.getHost())) {
+                return true;
+            }
+
+            if (expectedReferer.getPort() != actualReferer.getPort()) {
+                return true;
+            }
+
+            if (!expectedReferer.getPath().equals(actualReferer.getPath())) {
+                return true;
+            }
+        } catch (URISyntaxException e) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -322,11 +405,15 @@ public class AuthorizationEndpoint extends HttpServlet {
                 return;
             }
 
+            // Set JSESSIONID cookie and generate CSRF token
+            HttpSession session = request.getSession(true);
+            String csrfToken = UUIDs.getUnformattedStringFromRandom();
+            session.setAttribute(ATTR_OAUTH_CSRF_TOKEN, csrfToken);
+
             // Redirect to login page
 
-            // Hidden: Client identifier, Redirect URI, Scope, State, Response Type
+            // Hidden: Client identifier, Redirect URI, Scope, State, Response Type, CSRF Token
             // Visible: Login, Password
-
             StringBuilder sb = new StringBuilder(1024);
             String lineSep = System.getProperty("line.separator");
             sb.append("<!DOCTYPE html>").append(lineSep);
@@ -342,11 +429,13 @@ public class AuthorizationEndpoint extends HttpServlet {
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_REDIRECT_URI).append("\" type=\"hidden\" value=\"").append(redirectURI).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_SCOPE).append("\" type=\"hidden\" value=\"").append((null == scope ? "" : scope.scopeString())).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_STATE).append("\" type=\"hidden\" value=\"").append(state).append("\">").append(lineSep);
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CSRF_TOKEN).append("\" type=\"hidden\" value=\"").append(csrfToken).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_RESPONSE_TYPE).append("\" type=\"hidden\" value=\"").append(responseType).append("\">").append(lineSep);
             sb.append("<p><button name=\"").append(OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"false\">Allow</button>").append(lineSep);
             sb.append("<button name=\"").append( OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"true\">Deny</button>").append(lineSep);
             sb.append("</form>").append(lineSep);
             sb.append("</body></html>").append(lineSep);
+
 
             response.setContentType("text/html; charset=UTF-8");
             response.setHeader("Content-Disposition", "inline");
@@ -355,7 +444,7 @@ public class AuthorizationEndpoint extends HttpServlet {
             writer.write(sb.toString());
             writer.flush();
         } catch (OXException e) {
-            LOGGER.error("Login request failed", e);
+            LOG.error("Login request failed", e);
             sendErrorPage(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internal error");
         }
     }

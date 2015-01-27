@@ -113,6 +113,9 @@ public interface OAuthProviderConstants {
     /** Required. The user password */
     public static final String PARAM_ACCESS_DENIED = "access_denied";
 
+    /** Required. The CSRF token */
+    public static final String PARAM_CSRF_TOKEN = "csrf_token";
+
     /** The error */
     public static final String PARAM_ERROR = "error";
 
