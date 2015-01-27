@@ -128,6 +128,40 @@ public class ServiceCallWrapper {
         }
     }
 
+    /**
+     * Performs a call to a specified service. The service is requested from the OSGi service registry and passed
+     * to the call()-method of a given {@link ServiceUser}. If the requested service is not available, the given
+     * default value is returned.
+     *
+     * @param caller The calling class. Will be used to determine the {@link BundleContext} for getting the service.
+     *  Must not be <code>null</code>.
+     * @param serviceClass The class of the required service. The service registry will be asked for a service according
+     *  to this class.
+     * @param serviceUser The {@link ServiceUser} that is called with the requested service.
+     * @return The return value of {@link ServiceUser#call(Object)}.
+     * @throws ServiceException if an error occurred during {@link ServiceUser#call(Object)}.
+     */
+    public static <S, T> T tryServiceCall(Class<?> caller, Class<S> serviceClass, ServiceUser<S, T> serviceUser, T defaultValue) throws ServiceException {
+        BundleContext bundleContext = BC_PROVIDER.getBundleContext(caller, serviceClass);
+        ServiceReference<S> serviceReference = bundleContext.getServiceReference(serviceClass);
+        if (serviceReference == null) {
+            return defaultValue;
+        }
+
+        try {
+            S service = bundleContext.getService(serviceReference);
+            if (service == null) {
+                return defaultValue;
+            }
+
+            return serviceUser.call(service);
+        } catch (Exception e) {
+            throw new ServiceException(e, serviceClass);
+        } finally {
+            bundleContext.ungetService(serviceReference);
+        }
+    }
+
     public static interface ServiceUser<S, T> {
         T call(S service) throws Exception;
     }
