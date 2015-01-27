@@ -49,6 +49,9 @@
 
 package com.openexchange.oauth.provider;
 
+import java.io.Serializable;
+import java.util.List;
+
 
 /**
  * {@link Client}
@@ -57,7 +60,7 @@ package com.openexchange.oauth.provider;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Client {
+public interface Client extends Serializable {
 
     /**
      * Gets the client's description
@@ -87,6 +90,33 @@ public interface Client {
      */
     String getSecret();
 
+    /**
+     * Gets the redirect URIs
+     *
+     * @return The URIs
+     */
+    List<String> getRedirectURIs();
+
+    /**
+     * Checks if given redirect URI is contained in registered redirect URIs for this client
+     *
+     * @param uri The URI to check
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
     boolean hasRedirectURI(String uri);
+
+    /**
+     * Gets the owner
+     *
+     * @return The owner
+     */
+    String getOwner();
+
+    /**
+     * Gets the contact address
+     *
+     * @return The address
+     */
+    String getContactAddress();
 
 }

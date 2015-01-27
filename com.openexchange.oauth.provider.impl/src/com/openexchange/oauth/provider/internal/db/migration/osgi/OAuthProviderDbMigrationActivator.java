@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,40 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal.db.migration.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.slf4j.Logger;
+import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link OAuthProviderExceptionMessages} - Exception messages that needs to be translated.
+ * {@link OAuthProviderDbMigrationActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public final class OAuthProviderExceptionMessages implements LocalizableStrings {
-
-    // Account not found.
-    public static final String ACCOUNT_NOT_FOUND_MSG = "Account not found";
-
-    // Another process already revoked the secret for a client
-    public static final String CONCURRENT_SECRET_REVOKE_MSG = "Another process already revoked the secret of your client";
+public class OAuthProviderDbMigrationActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link OAuthProviderExceptionMessages}.
+     * Initializes a new {@link OAuthProviderDbMigrationActivator}.
      */
-    private OAuthProviderExceptionMessages() {
+    public OAuthProviderDbMigrationActivator() {
         super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DBMigrationExecutorService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthProviderDbMigrationActivator.class);
+        logger.info("Starting bundle: " + this.context.getBundle().getSymbolicName());
+
+        DBMigrationExecutorService dbMigrationExecutorService = getService(DBMigrationExecutorService.class);
+        dbMigrationExecutorService.scheduleConfigDBMigration("/liquibase/configdbChangeLog.xml", new BundleResourceAccessor(context));
     }
 
 }

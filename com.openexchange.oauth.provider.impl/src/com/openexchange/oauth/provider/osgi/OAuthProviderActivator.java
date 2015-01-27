@@ -50,9 +50,11 @@
 package com.openexchange.oauth.provider.osgi;
 
 import static com.openexchange.osgi.Tools.requireService;
+import java.io.ByteArrayInputStream;
 import java.util.Map;
 import javax.servlet.ServletException;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -62,8 +64,10 @@ import org.slf4j.Logger;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -85,6 +89,9 @@ import com.openexchange.oauth.provider.internal.OAuthResourceServiceImpl;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfoFactory;
+import com.openexchange.oauth.provider.internal.client.CachingOAuthClientStorage;
+import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
+import com.openexchange.oauth.provider.internal.client.RdbOAuthClientStorage;
 import com.openexchange.oauth.provider.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.servlets.TokenEndpoint;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -232,7 +239,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
-            HttpService.class, DispatcherPrefixService.class };
+            HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class };
     }
 
     @Override
@@ -256,6 +263,30 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(HostnameService.class);
         openTrackers();
 
+        try {
+            String regionName = CachingOAuthClientStorage.REGION_NAME;
+            byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=100000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
+
+            // Add appropriate OAuthClientStorage into this service look-up instance
+            addService(OAuthClientStorage.class, new CachingOAuthClientStorage(new RdbOAuthClientStorage(this), this));
+        } catch (BundleException x) {
+            throw new IllegalStateException(x);
+        }
+
         // Register update task, create table job and delete listener
         registerService(CreateTableService.class, new AuthCodeCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(this)));
@@ -273,11 +304,15 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         httpService.registerServlet(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS, tokenEndpoint, null, httpService.createDefaultHttpContext());
     }
 
-    static void unregisterServlets(ServiceLookup services) throws OXException {
-        HttpService httpService = requireService(HttpService.class, services);
-        DispatcherPrefixService dispatcherPrefixService = requireService(DispatcherPrefixService.class, services);
-        httpService.unregister(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS);
-        httpService.unregister(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS);
+    static void unregisterServlets(ServiceLookup services) {
+        HttpService httpService = services.getOptionalService(HttpService.class);
+        if (null != httpService) {
+            DispatcherPrefixService dispatcherPrefixService = services.getOptionalService(DispatcherPrefixService.class);
+            if (null != dispatcherPrefixService) {
+                httpService.unregister(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS);
+                httpService.unregister(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS);
+            }
+        }
     }
 
     @Override
@@ -294,6 +329,11 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     @Override
     public <S> boolean removeService(Class<? extends S> clazz) {
         return super.removeService(clazz);
+    }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
     }
 
 }

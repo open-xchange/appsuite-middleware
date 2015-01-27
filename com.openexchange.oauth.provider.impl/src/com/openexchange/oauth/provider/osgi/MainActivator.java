@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,31 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.osgi.framework.BundleActivator;
+import com.openexchange.oauth.provider.internal.db.migration.osgi.OAuthProviderDbMigrationActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
+
 
 /**
- * {@link OAuthProviderExceptionMessages} - Exception messages that needs to be translated.
+ * {@link MainActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * @since v7.8.0
  */
-public final class OAuthProviderExceptionMessages implements LocalizableStrings {
-
-    // Account not found.
-    public static final String ACCOUNT_NOT_FOUND_MSG = "Account not found";
-
-    // Another process already revoked the secret for a client
-    public static final String CONCURRENT_SECRET_REVOKE_MSG = "Another process already revoked the secret of your client";
+public class MainActivator extends CompositeBundleActivator {
 
     /**
-     * Initializes a new {@link OAuthProviderExceptionMessages}.
+     * Initializes a new {@link MainActivator}.
      */
-    private OAuthProviderExceptionMessages() {
+    public MainActivator() {
         super();
+    }
+
+    @Override
+    protected BundleActivator[] getActivators() {
+        return new BundleActivator[] { new OAuthProviderActivator(), new OAuthProviderDbMigrationActivator() };
     }
 
 }

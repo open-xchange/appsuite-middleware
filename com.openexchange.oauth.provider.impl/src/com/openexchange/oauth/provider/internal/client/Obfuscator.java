@@ -47,29 +47,60 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal.client;
 
-import com.openexchange.i18n.LocalizableStrings;
+import static com.openexchange.java.Strings.isEmpty;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OAuthProviderExceptionMessages} - Exception messages that needs to be translated.
+ * {@link Obfuscator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * Utility class to wrap/unwrap sessions before/after putting/getting them from the session storage.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class OAuthProviderExceptionMessages implements LocalizableStrings {
+public class Obfuscator {
 
-    // Account not found.
-    public static final String ACCOUNT_NOT_FOUND_MSG = "Account not found";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Obfuscator.class);
 
-    // Another process already revoked the secret for a client
-    public static final String CONCURRENT_SECRET_REVOKE_MSG = "Another process already revoked the secret of your client";
+    private final String obfuscationKey;
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link OAuthProviderExceptionMessages}.
+     * Initializes a new {@link Obfuscator}.
+     *
+     * @param obfuscationKey The key used to (un)obfuscate secret data
      */
-    private OAuthProviderExceptionMessages() {
+    public Obfuscator(String obfuscationKey, ServiceLookup services) {
         super();
+        this.services = services;
+        this.obfuscationKey = obfuscationKey;
+    }
+
+    public String obfuscate(String string) {
+        if (isEmpty(string)) {
+            return string;
+        }
+        try {
+            return services.getService(CryptoService.class).encrypt(string, obfuscationKey);
+        } catch (OXException e) {
+            LOG.error("Could not obfuscate string", e);
+            return string;
+        }
+    }
+
+    public String unobfuscate(String string) {
+        if (isEmpty(string)) {
+            return string;
+        }
+        try {
+            return services.getService(CryptoService.class).decrypt(string, obfuscationKey);
+        } catch (OXException e) {
+            LOG.error("Could not unobfuscate string", e);
+            return string;
+        }
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,133 +47,71 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal.client;
 
-import java.util.LinkedList;
-import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.ClientData;
 
 /**
- * {@link DefaultClient} - The default {@link Client} implementation.
+ * {@link OAuthClientStorage} - The storage for clients.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DefaultClient implements Client {
-
-    private static final long serialVersionUID = 8478439580309382857L;
-
-    private String id;
-    private String description;
-    private String name;
-    private String secret;
-    private final List<String> redirectURIs;
-    private String owner;
-    private String contactAddress;
+public interface OAuthClientStorage {
 
     /**
-     * Initializes a new {@link DefaultClient}.
-     */
-    public DefaultClient() {
-        super();
-        redirectURIs = new LinkedList<>();
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getSecret() {
-        return secret;
-    }
-
-    @Override
-    public boolean hasRedirectURI(String uri) {
-        return redirectURIs.contains(uri);
-    }
-
-    /**
-     * Sets the identifier
+     * Gets the client identified by the given identifier.
      *
-     * @param id The identifier to set
+     * @param clientId The clients identifier
+     * @return The client or <code>null</code> if there is no such client
+     * @throws OXException If operation fails
      */
-    public void setId(String id) {
-        this.id = id;
-    }
+    Client getClientById(String clientId) throws OXException;
 
     /**
-     * Sets the description
+     * Registers (adds) a client according to given client data.
      *
-     * @param description The description to set
+     * @param clientData The client data to create the client from
+     * @return The newly created client
+     * @throws OXException If create operation fails
      */
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    Client registerClient(ClientData clientData) throws OXException;
 
     /**
-     * Sets the name
+     * Updates an existing client's attributes according to given client data.
      *
-     * @param name The name to set
+     * @param clientId The client identifier
+     * @param clientData The client data
+     * @return The updated client
+     * @throws OXException If update operation fails
      */
-    public void setName(String name) {
-        this.name = name;
-    }
+    Client updateClient(String clientId, ClientData clientData) throws OXException;
 
     /**
-     * Sets the secret
+     * Unregisters an existing client
      *
-     * @param secret The secret to set
+     * @param clientId The client identifier
+     * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
+     * @throws OXException
      */
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
-
-    public void addRedirectURI(String uri) {
-        redirectURIs.add(uri);
-    }
-
-    @Override
-    public String getOwner() {
-        return owner;
-    }
+    boolean unregisterClient(String clientId) throws OXException;
 
     /**
-     * Sets the owner
+     * Revokes a client's current secret and generates a new one.
      *
-     * @param owner The owner to set
+     * @param clientId The client identifier
+     * @return The client with revoked/new secret
+     * @throws OXException If revoke operation fails
      */
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    @Override
-    public String getContactAddress() {
-        return contactAddress;
-    }
+    Client revokeClientSecret(String clientId) throws OXException;
 
     /**
-     * Sets the contact address
+     * Invalidates denoted client from cache
      *
-     * @param contactAddress The contact address to set
+     * @param clientId The client identifier
      */
-    public void setContactAddress(String contactAddress) {
-        this.contactAddress = contactAddress;
-    }
-
-    @Override
-    public List<String> getRedirectURIs() {
-        return redirectURIs;
-    }
+    void invalidateClient(String clientId);
 
 }

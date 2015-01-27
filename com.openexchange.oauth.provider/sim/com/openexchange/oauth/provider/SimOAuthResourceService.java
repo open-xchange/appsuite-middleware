@@ -51,6 +51,7 @@ package com.openexchange.oauth.provider;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
@@ -119,6 +120,24 @@ public class SimOAuthResourceService implements OAuthResourceService {
             public boolean hasRedirectURI(String uri) {
                 // TODO Auto-generated method stub
                 return false;
+            }
+
+            @Override
+            public List<String> getRedirectURIs() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public String getOwner() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public String getContactAddress() {
+                // TODO Auto-generated method stub
+                return null;
             }
 
         };
