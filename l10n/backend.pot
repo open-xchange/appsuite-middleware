@@ -3701,9 +3701,14 @@ msgstr ""
 msgid "Invalid OAuth account specified."
 msgstr ""
 
-#. Account not found with identifier %1$s for user %2$s in context %3$s.
+#. Account not found.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:63
-msgid "Account not found with identifier %1$s for user %2$s"
+msgid "Account not found"
+msgstr ""
+
+#. Another process already revoked the secret for a client
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:66
+msgid "Another process already revoked the secret of your client"
 msgstr ""
 
 #. Account not found with identifier %1$s for user %2$s in context %3$s.
