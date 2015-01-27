@@ -49,7 +49,10 @@
 
 package com.openexchange.oauth2;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -65,88 +68,77 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import com.openexchange.ajax.contact.action.GetRequest;
-import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 
 
 /**
- * {@link ProviderTest}
+ * {@link OAuthSession}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @since v7.x.x
  */
-public class ProviderTest {
+public class OAuthSession extends AJAXSession {
+
+    private static final String REDIRECT_URI = "http://localhost:8080";
+
+    private String accessToken;
 
     /**
-     *
+     * Initializes a new {@link OAuthSession}.
      */
-    private static final String REDIRECT_URI = "http://localhost:8080";
-    private static String protocol;
-    private static String hostname;
-    private static String login;
-    private static String password;
-
-    private DefaultHttpClient client;
-
-    @BeforeClass
-    public static void beforeClass() throws OXException {
-        AJAXConfig.init();
-        protocol = "https"; // AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
-        hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        login = AJAXConfig.getProperty(User.User1.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(User.User1.getPassword());
+    public OAuthSession(User user) {
+        super(newWebConversation(), newOAuthHttpClient(), null);
+        try {
+            AJAXConfig.init();
+            obtainAccess(user, getHttpClient());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
     }
 
-    @Before
-    public void before() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
-        client = new DefaultHttpClient(new PoolingClientConnectionManager());
+    private static DefaultHttpClient newOAuthHttpClient() {
+        DefaultHttpClient client = newHttpClient();
+        try {
+            SSLSocketFactory ssf = new SSLSocketFactory(new TrustSelfSignedStrategy(), new AllowAllHostnameVerifier());
+            client.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, ssf));
+        } catch (KeyManagementException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException e) {
+            Assert.fail(e.getMessage());
+        }
+
         HttpParams params = client.getParams();
-        int minute = 1 * 60 * 1000;
-        HttpConnectionParams.setConnectionTimeout(params, minute);
-        HttpConnectionParams.setSoTimeout(params, minute);
-
-        SSLSocketFactory ssf = new SSLSocketFactory(new TrustSelfSignedStrategy(), new AllowAllHostnameVerifier());
-        client.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, ssf));
+        params.setBooleanParameter(ClientPNames.HANDLE_AUTHENTICATION, false);
+        return client;
     }
 
-    @Test
-    public void testWithClient() throws Exception {
-        OAuthClient client = new OAuthClient();
-        GetResponse response = client.execute(new GetRequest(34, 535005, TimeZones.UTC));
-        Assert.assertEquals("hebert.meier@open-xchange.com", response.getContact().getEmail1());
-    }
+    private void obtainAccess(User user, HttpClient client) throws Exception {
+        String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        String login = AJAXConfig.getProperty(user.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
+        String password = AJAXConfig.getProperty(user.getPassword());
 
-    @Test
-    public void testAuthFlow() throws Exception {
         String csrfState = UUIDs.getUnformattedStringFromRandom();
         HttpGet getLoginForm = new HttpGet(new URIBuilder()
-            .setScheme(protocol)
+            .setScheme("https")
             .setHost(hostname)
             .setPath("/ajax/o/oauth2/authorization")
             .setParameter("response_type", "code")
@@ -169,7 +161,7 @@ public class ProviderTest {
         }
 
         HttpPost submitLoginForm = new HttpPost(new URIBuilder()
-            .setScheme(protocol)
+            .setScheme("https")
             .setHost(hostname)
             .setPath("/ajax/o/oauth2/authorization")
             .build());
@@ -205,7 +197,7 @@ public class ProviderTest {
         redeemAuthCodeParams.add(new BasicNameValuePair("code", code));
 
         HttpPost redeemAuthCode = new HttpPost(new URIBuilder()
-            .setScheme(protocol)
+            .setScheme("https")
             .setHost(hostname)
             .setPath("/ajax/o/oauth2/accessToken")
             .build());
@@ -219,7 +211,18 @@ public class ProviderTest {
         assertNotNull(jAccessTokenResponse.get("refresh_token"));
         assertNotNull(jAccessTokenResponse.get("scope"));
         assertNotNull(jAccessTokenResponse.get("expires_in"));
-        System.out.println(jAccessTokenResponse);
+
+        accessToken = jAccessTokenResponse.getString("access_token");
+    }
+
+
+    /**
+     * Gets the accessToken
+     *
+     * @return The accessToken
+     */
+    public String getAccessToken() {
+        return accessToken;
     }
 
     private static Map<String, String> getHiddenFormParams(String loginForm) {
@@ -284,5 +287,4 @@ public class ProviderTest {
 
         return params;
     }
-
 }
