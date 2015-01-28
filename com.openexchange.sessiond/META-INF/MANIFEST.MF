@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.sessiond
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.hazelcast.config,
+Import-Package: com.openexchange.authentication,
+ com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.instance,
  com.hazelcast.logging,

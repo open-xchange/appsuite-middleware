@@ -321,9 +321,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Image attachments are not supported
      */
-    IMAGE_ATTACHMENTS_UNSUPPORTED("Image attachments are not supported", CATEGORY_ERROR, 1032),
-
-    ;
+    IMAGE_ATTACHMENTS_UNSUPPORTED("Image attachments are not supported", CATEGORY_ERROR, 1032);
 
     private final String message;
     private final int detailNumber;

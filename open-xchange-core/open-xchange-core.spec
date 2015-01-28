@@ -1124,12 +1124,6 @@ fi
 # SoftwareChange_Request-2245
 ox_add_property com.openexchange.sessiond.useDistributedTokenSessions false /opt/open-xchange/etc/sessiond.properties
 
-# SoftwareChange_Request-2110
-ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
-
-# SoftwareChange_Request-2224
-ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
-
 # SoftwareChange_Request-2249
 ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt/open-xchange/etc/requestwatcher.properties
 
@@ -1137,6 +1131,19 @@ ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt
 ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
 
 # SoftwareChange_Request-2270
+ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+
+# SoftwareChange_Request-2342
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# Check for possibly preset message format preference in JSLob and aligns the DB value accordingly
+!com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob
+EOF
+fi
+
+# SoftwareChange_Request-2379
 ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
@@ -1179,6 +1186,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Jan 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-26
 * Wed Jan 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-29
 * Mon Jan 12 2015 Marcus Klein <marcus.klein@open-xchange.com>

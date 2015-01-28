@@ -129,6 +129,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
+            this.parameters.putAll(parameters);
             List<String> remoteParameterNames = new ArrayList<String>();
             remoteParameterNames.addAll(SessionStorageConfiguration.getInstance().getRemoteParameterNames());
             remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));
@@ -159,6 +160,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(PARAM_ALTERNATIVE_ID, parameter);
             }
+            this.parameters.putAll(parameters);
             List<String> remoteParameterNames = new ArrayList<String>();
             remoteParameterNames.addAll(SessionStorageConfiguration.getInstance().getRemoteParameterNames());
             remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));

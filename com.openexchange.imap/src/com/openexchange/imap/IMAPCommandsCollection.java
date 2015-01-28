@@ -172,7 +172,7 @@ public final class IMAPCommandsCollection {
 
         Capabilities(final Collection<String> col) {
             super();
-            set = Collections.unmodifiableSet(new HashSet<String>(col));
+            set = java.util.Collections.unmodifiableSet(new HashSet<String>(col));
         }
 
         @Override
@@ -209,7 +209,7 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                return Collections.unmodifiableMap(new HashMap<String, String>(p.getCapabilities()));
+                return java.util.Collections.unmodifiableMap(new HashMap<String, String>(p.getCapabilities()));
             }
         }));
     }
@@ -561,7 +561,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 } else {
-                    list = Collections.emptyList();
+                    list = java.util.Collections.emptyList();
                 }
                 notifyResponseHandlers(r, protocol);
                 protocol.handleResult(response);
@@ -3003,7 +3003,7 @@ public final class IMAPCommandsCollection {
     protected static Set<String> parseUserFlags(final Flags flags) {
         final String[] userFlags = flags.getUserFlags();
         if (userFlags == null) {
-            return Collections.emptySet();
+            return java.util.Collections.emptySet();
         }
         /*
          * Mark message to contain user flags

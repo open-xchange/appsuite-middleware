@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -139,5 +140,5 @@ public interface AddSessionParameter {
      * session. Normally some parameters are added. Use this to get this arbitrary information published to the whole cluster.
      * @return a callback for modifying the session after its creation or <code>null</code> if no modification should take place.
      */
-    SessionModifyCallback getCallback();
+    SessionEnhancement getEnhancement();
 }

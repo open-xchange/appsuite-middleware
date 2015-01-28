@@ -7,12 +7,12 @@ BuildRequires:  ant
 %else
 BuildRequires:  ant-nodeps
 %endif
-BuildRequires:  open-xchange-admin
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires:  java7-devel
 %else
 BuildRequires:  java-devel >= 1.7.0
 %endif
+BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
 %define         ox_release 0
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
@@ -84,6 +84,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Mon Jan 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-26
 * Wed Jan 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-29
 * Mon Jan 12 2015 Marcus Klein <marcus.klein@open-xchange.com>

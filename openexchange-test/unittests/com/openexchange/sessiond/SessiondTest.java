@@ -53,6 +53,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.UUID;
 import junit.framework.TestCase;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
@@ -193,7 +194,7 @@ public class SessiondTest extends TestCase {
                 return false;
             }
             @Override
-            public SessionModifyCallback getCallback() {
+            public SessionEnhancement getEnhancement() {
                 return null;
             }
         });
@@ -251,7 +252,7 @@ public class SessiondTest extends TestCase {
                 return false;
             }
             @Override
-            public SessionModifyCallback getCallback() {
+            public SessionEnhancement getEnhancement() {
                 return null;
             }
         });
@@ -310,7 +311,7 @@ public class SessiondTest extends TestCase {
                 return false;
             }
             @Override
-            public SessionModifyCallback getCallback() {
+            public SessionEnhancement getEnhancement() {
                 return null;
             }
         });
@@ -369,7 +370,7 @@ public class SessiondTest extends TestCase {
                 return false;
             }
             @Override
-            public SessionModifyCallback getCallback() {
+            public SessionEnhancement getEnhancement() {
                 return null;
             }
         });

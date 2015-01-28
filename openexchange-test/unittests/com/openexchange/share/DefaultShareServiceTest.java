@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import junit.framework.TestCase;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.TestServiceRegistry;
@@ -62,7 +63,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
-import com.openexchange.sessiond.SessionModifyCallback;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.test.AjaxInit;
@@ -197,7 +197,7 @@ public class DefaultShareServiceTest extends TestCase {
             }
 
             @Override
-            public SessionModifyCallback getCallback() {
+            public SessionEnhancement getEnhancement() {
                 return null;
             }
         });
