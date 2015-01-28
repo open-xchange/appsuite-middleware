@@ -59,6 +59,7 @@ import com.box.restclientv2.IBoxRESTClient;
 import com.box.restclientv2.authorization.IBoxRequestAuth;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.openexchange.file.storage.boxcom.access.extended.requests.DeleteFileVersionRequest;
+import com.openexchange.file.storage.boxcom.access.extended.requests.LockRequest;
 import com.openexchange.file.storage.boxcom.access.extended.requests.PreflightCheckRequest;
 import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.PreflightCheckRequestObject;
 
@@ -127,6 +128,32 @@ public class BoxExtendedFilesManager extends BoxFilesManagerImpl {
      */
     public void preflightCheck(PreflightCheckRequestObject requestObject) throws BoxRestException, BoxServerException, AuthFatalFailureException {
         PreflightCheckRequest request = new PreflightCheckRequest(getConfig(), getJSONParser(), requestObject);
+        executeRequestWithNoResponseBody(request);
+    }
+
+    /**
+     * Lock the specified file
+     * 
+     * @param fileId the file identifier
+     * @throws BoxRestException
+     * @throws BoxServerException
+     * @throws AuthFatalFailureException
+     */
+    public void lockFile(String fileId) throws BoxRestException, BoxServerException, AuthFatalFailureException {
+        LockRequest request = new LockRequest(getConfig(), getJSONParser(), fileId, true);
+        executeRequestWithNoResponseBody(request);
+    }
+
+    /**
+     * Unlock the specified file
+     * 
+     * @param fileId the file identifier
+     * @throws BoxRestException
+     * @throws BoxServerException
+     * @throws AuthFatalFailureException
+     */
+    public void unlockFile(String fileId) throws BoxRestException, BoxServerException, AuthFatalFailureException {
+        LockRequest request = new LockRequest(getConfig(), getJSONParser(), fileId, false);
         executeRequestWithNoResponseBody(request);
     }
 }

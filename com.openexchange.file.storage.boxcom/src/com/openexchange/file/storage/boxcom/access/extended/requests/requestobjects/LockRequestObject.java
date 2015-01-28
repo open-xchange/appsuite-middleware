@@ -47,59 +47,33 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access.extended.requests;
+package com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects;
 
-import org.apache.http.HttpStatus;
-import com.box.boxjavalibv2.IBoxConfig;
-import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
-import com.box.restclientv2.RestMethod;
-import com.box.restclientv2.exceptions.BoxRestException;
-import com.box.restclientv2.requestsbase.DefaultBoxRequest;
-import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.PreflightCheckRequestObject;
+import com.box.boxjavalibv2.dao.BoxFile;
+import com.box.boxjavalibv2.jsonentities.MapJSONStringEntity;
+import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 
 /**
- * {@link PreflightCheckRequest}
+ * {@link LockRequestObject}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PreflightCheckRequest extends DefaultBoxRequest {
-
-    private static final String NEW_UPLOAD_URI = "/files/content";
-
-    private static final String UPDATE_UPLOAD_URI = "/files/%s/content";
+public class LockRequestObject extends BoxDefaultRequestObject {
 
     /**
+     * Initializes a new {@link LockRequestObject}.
      * 
-     * Initializes a new {@link PreflightCheckRequest}.
-     * 
-     * @param config
-     * @param parser
-     * @param filename
-     * @param filesize
-     * @param fileId
-     * @param requestObject
-     * @throws BoxRestException
+     * @param lock true to lock the object, false to unlock
      */
-    public PreflightCheckRequest(IBoxConfig config, IBoxJSONParser parser, PreflightCheckRequestObject requestObject) throws BoxRestException {
-        super(config, parser, NEW_UPLOAD_URI, RestMethod.OPTIONS, requestObject);
-        setExpectedResponseCode(HttpStatus.SC_OK);
-    }
-
-    /**
-     * 
-     * Initializes a new {@link PreflightCheckRequest}.
-     * 
-     * @param config
-     * @param parser
-     * @param filename
-     * @param filesize
-     * @param fileId
-     * @param parentId
-     * @param requestObject
-     * @throws BoxRestException
-     */
-    public PreflightCheckRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, PreflightCheckRequestObject requestObject) throws BoxRestException {
-        super(config, parser, String.format(UPDATE_UPLOAD_URI, fileId), RestMethod.OPTIONS, requestObject);
-        setExpectedResponseCode(HttpStatus.SC_OK);
+    public LockRequestObject(boolean lock) {
+        final MapJSONStringEntity entity;
+        if (lock) {
+            entity = new MapJSONStringEntity();
+            entity.put(BoxFile.FIELD_TYPE, "lock");
+            entity.put("is_download_prevented", true);
+        } else {
+            entity = null;
+        }
+        put(BoxFile.FIELD_LOCK, entity);
     }
 }

@@ -55,51 +55,27 @@ import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
 import com.box.restclientv2.RestMethod;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.DefaultBoxRequest;
-import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.PreflightCheckRequestObject;
+import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.LockRequestObject;
 
 /**
- * {@link PreflightCheckRequest}
+ * {@link LockRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PreflightCheckRequest extends DefaultBoxRequest {
+public class LockRequest extends DefaultBoxRequest {
 
-    private static final String NEW_UPLOAD_URI = "/files/content";
-
-    private static final String UPDATE_UPLOAD_URI = "/files/%s/content";
+    private static final String URI = "/files/%s";
 
     /**
-     * 
-     * Initializes a new {@link PreflightCheckRequest}.
+     * Initializes a new {@link LockRequest}.
      * 
      * @param config
      * @param parser
-     * @param filename
-     * @param filesize
      * @param fileId
-     * @param requestObject
      * @throws BoxRestException
      */
-    public PreflightCheckRequest(IBoxConfig config, IBoxJSONParser parser, PreflightCheckRequestObject requestObject) throws BoxRestException {
-        super(config, parser, NEW_UPLOAD_URI, RestMethod.OPTIONS, requestObject);
-        setExpectedResponseCode(HttpStatus.SC_OK);
-    }
-
-    /**
-     * 
-     * Initializes a new {@link PreflightCheckRequest}.
-     * 
-     * @param config
-     * @param parser
-     * @param filename
-     * @param filesize
-     * @param fileId
-     * @param parentId
-     * @param requestObject
-     * @throws BoxRestException
-     */
-    public PreflightCheckRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, PreflightCheckRequestObject requestObject) throws BoxRestException {
-        super(config, parser, String.format(UPDATE_UPLOAD_URI, fileId), RestMethod.OPTIONS, requestObject);
+    public LockRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, boolean lock) throws BoxRestException {
+        super(config, parser, String.format(URI, fileId), RestMethod.PUT, new LockRequestObject(lock));
         setExpectedResponseCode(HttpStatus.SC_OK);
     }
 }
