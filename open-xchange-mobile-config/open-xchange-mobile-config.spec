@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 5
+%define        ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -87,11 +87,13 @@ Build for patch 2014-12-10
 * Fri Dec 12 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fourth candidate for 7.6.2 release
 * Mon Dec 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2014-12-15
-* Mon Dec 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-12-10
 * Mon Dec 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-12-15
+* Mon Dec 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-12-15
+* Mon Dec 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-12-10
 * Fri Dec 05 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Third candidate for 7.6.2 release
 * Thu Dec 04 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
@@ -118,6 +120,8 @@ Build for patch 2014-11-17
 Build for patch 2014-11-17
 * Mon Nov 10 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-11-17
+* Wed Nov 05 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for 7.6.2 release
 * Tue Nov 04 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-11-10
 * Fri Oct 31 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
@@ -162,8 +166,6 @@ Build for patch 2014-10-06
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-09-23
-* Wed Sep 17 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-prepare for 7.6.2 release
 * Tue Sep 16 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
