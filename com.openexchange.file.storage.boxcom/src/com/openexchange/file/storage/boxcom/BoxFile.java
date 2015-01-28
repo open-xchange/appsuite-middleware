@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.boxcom;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -126,25 +127,15 @@ public final class BoxFile extends DefaultFile {
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
 
                 if (set.contains(Field.CREATED)) {
-                    String createdAt = file.getCreatedAt();
-                    if (null != createdAt) {
-                        try {
-                            setCreated(ISO8601DateParser.parse(createdAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
-                            logger.warn("Could not parse date from: {}", createdAt, e);
-                        }
+                    Date parsed = parseISO8601(file.getCreatedAt());
+                    if (parsed != null) {
+                        setCreated(parsed);
                     }
                 }
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-                    String modifiedAt = file.getModifiedAt();
-                    if (null != modifiedAt) {
-                        try {
-                            setLastModified(ISO8601DateParser.parse(modifiedAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
-                            logger.warn("Could not parse date from: {}", modifiedAt, e);
-                        }
+                    Date parsed = parseISO8601(file.getModifiedAt());
+                    if (parsed != null) {
+                        setLastModified(parsed);
                     }
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
@@ -179,6 +170,16 @@ public final class BoxFile extends DefaultFile {
                 if (set.contains(Field.VERSION_COMMENT)) {
                     setVersionComment(null);
                 }
+                if (set.contains(Field.LOCKED_UNTIL)) {
+                    if (file.getLock() != null) {
+                        Date parsed = parseISO8601(file.getLock().getExpiresAt());
+                        if (parsed != null) {
+                            setLockedUntil(parsed);
+                        } else {
+                            setLockedUntil(new Date(Long.MAX_VALUE)); //indefinite
+                        }
+                    }
+                }
             } catch (final RuntimeException e) {
                 throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
@@ -186,4 +187,21 @@ public final class BoxFile extends DefaultFile {
         return this;
     }
 
+    /**
+     * Parses an ISO8601 formatted date into a {@link java.util.Date} object.
+     * 
+     * @param date The ISO8601 formatted date
+     * @return The date
+     */
+    private Date parseISO8601(String date) {
+        if (null != date) {
+            try {
+                return ISO8601DateParser.parse(date);
+            } catch (ParseException e) {
+                Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
+                logger.warn("Could not parse date from: {}", date, e);
+            }
+        }
+        return null;
+    }
 }
