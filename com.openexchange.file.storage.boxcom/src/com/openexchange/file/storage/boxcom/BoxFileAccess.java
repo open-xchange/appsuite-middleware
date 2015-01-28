@@ -165,7 +165,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected Boolean doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
-
                     BoxFile file = boxClient.getFilesManager().getFile(id, customRequestObject(Arrays.asList(BoxFile.FIELD_ID)));
                     checkFileValidity(file);
                     return Boolean.TRUE;
@@ -192,7 +191,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected File doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
-                    final int versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, null).size();
+                    final int versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, customRequestObject(Arrays.asList(BoxFile.FIELD_NAME))).size();
 
                     BoxFile file = boxClient.getFilesManager().getFile(id, defaultBoxRequest());
                     checkFileValidity(file);
@@ -221,7 +220,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 protected IDTuple doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                     try {
                         BoxClient boxClient = boxAccess.getBoxClient();
-                        BoxFile boxfile = boxClient.getFilesManager().getFile(file.getId(), null);
+                        BoxFile boxfile = boxClient.getFilesManager().getFile(file.getId(), customRequestObject(Arrays.asList(BoxFile.FIELD_TYPE)));
                         checkFileValidity(boxfile);
 
                         BoxFileRequestObject requestObject = BoxFileRequestObject.getRequestObject();
@@ -229,6 +228,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         requestObject.setName(file.getFileName());
                         requestObject.setDescription(file.getDescription());
                         boxfile = boxClient.getFilesManager().updateFileInfo(file.getId(), requestObject);
+                        
                         return new IDTuple(file.getFolderId(), boxfile.getId());
                     } catch (final BoxServerException e) {
                         throw handleHttpResponseError(file.getId(), e);
@@ -415,9 +415,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     String id = file.getId();
                     String boxFolderId = toBoxFolderId(file.getFolderId());
 
+                    //TODO: pre-flight check
+                    
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, file.getFileName(), data);
                         BoxFile boxFile = boxClient.getFilesManager().uploadFile(reqObj);
+                        BoxFileRequestObject req = new BoxFileRequestObject();
+                        req.setDescription(file.getDescription());
+                        boxClient.getFilesManager().updateFileInfo(boxFile.getId(), req);
                         return new IDTuple(file.getFolderId(), boxFile.getId());
                     } else {
                         BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
