@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -49,7 +49,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/lib/oxfunctions.sh
 
 %changelog
-* Tue Jan 27 2015 Carsten Hoeger <choeger@open-xchange.com>
+* Wed Jan 28 2015 Carsten Hoeger <choeger@open-xchange.com>
 Fifth candidate for 7.6.2 release
 * Mon Jan 26 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-01-26
@@ -75,8 +75,6 @@ Second candidate for 7.6.2 release
 Build for patch 2014-11-20
 * Mon Nov 10 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-11-17
-* Wed Nov 05 2014 Carsten Hoeger <choeger@open-xchange.com>
-prepare for 7.6.2 release
 * Fri Oct 31 2014 Carsten Hoeger <choeger@open-xchange.com>
 First candidate for 7.6.2 release
 * Mon Oct 27 2014 Carsten Hoeger <choeger@open-xchange.com>
@@ -89,6 +87,8 @@ Fifth candidate for 7.6.1 release
 Fourth candidate for 7.6.1 release
 * Thu Oct 02 2014 Carsten Hoeger <choeger@open-xchange.com>
 Third release candidate for 7.6.1
+* Wed Sep 17 2014 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.6.2 release
 * Tue Sep 16 2014 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 7.6.1
 * Fri Sep 05 2014 Carsten Hoeger <choeger@open-xchange.com>
