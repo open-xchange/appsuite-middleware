@@ -301,8 +301,9 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                     DriveUtils.getFileID(copiedFile), copiedFile.getVersion(), copiedFile.getSequenceNumber(), sourceVersion.getChecksum()));
                 action.setResultingVersion(new ServerFileVersion(copiedFile, insertedFileChecksum));
             } catch (OXException e) {
-                if ("FLS-0017".equals(e.getErrorCode()) || "DROPBOX-0005".equals(e.getErrorCode())) {
-                    // not found
+                if ("FLS-0017".equals(e.getErrorCode()) || "DROPBOX-0005".equals(e.getErrorCode()) ||
+                    "FILE_STORAGE-0026".equals(e.getErrorCode()) || "FILE_STORAGE-0039".equals(e.getErrorCode())) {
+                    // not found, remove checksum to be safe
                     session.getChecksumStore().removeFileChecksums(Collections.singletonList(sourceVersion.getFileChecksum()));
                 }
                 throw e;
