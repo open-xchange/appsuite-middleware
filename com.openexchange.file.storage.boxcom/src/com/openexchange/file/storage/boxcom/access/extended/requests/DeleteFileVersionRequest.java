@@ -47,63 +47,35 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access.extended;
+package com.openexchange.file.storage.boxcom.access.extended.requests;
 
-import com.box.boxjavalibv2.dao.BoxFile;
-import com.box.boxjavalibv2.dao.BoxFolder;
-import com.box.boxjavalibv2.dao.BoxItem;
-import com.box.boxjavalibv2.jsonentities.MapJSONStringEntity;
-import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
+import org.apache.http.HttpStatus;
+import com.box.boxjavalibv2.IBoxConfig;
+import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
+import com.box.restclientv2.RestMethod;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.requestsbase.DefaultBoxRequest;
 
 /**
- * {@link PreflightCheckRequestObject}
+ * {@link DeleteFileVersionRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PreflightCheckRequestObject extends BoxDefaultRequestObject {
+public class DeleteFileVersionRequest extends DefaultBoxRequest {
+
+    public static final String URI = "/files/%s/versions/%s";
 
     /**
-     * Initializes a new {@link PreflightCheckRequestObject}.
-     */
-    public PreflightCheckRequestObject(String name, String parentId, long size) {
-        super();
-        setName(name);
-        setParent(parentId);
-        setSize(size);
-    }
-
-    /**
-     * Set the name of the file
+     * Initializes a new {@link DeleteFileVersionRequest}.
      * 
-     * @param name the name of the file
-     * @return
+     * @param config The IBoxConfig
+     * @param parser The parser
+     * @param fileId the file identifier
+     * @param version the version identifier
+     * @throws BoxRestException
      */
-    private PreflightCheckRequestObject setName(String name) {
-        put(BoxFile.FIELD_NAME, name);
-        return this;
-    }
-
-    /**
-     * Set the parent folder of the file.
-     * 
-     * @param parentId the identifier of the parent folder
-     * @return
-     */
-    private PreflightCheckRequestObject setParent(String parentId) {
-        MapJSONStringEntity entity = new MapJSONStringEntity();
-        entity.put(BoxFolder.FIELD_ID, parentId);
-        put(BoxItem.FIELD_PARENT, entity);
-        return this;
-    }
-
-    /**
-     * Set the size of the file in bytes
-     * 
-     * @param size the size of the file in bytes
-     * @return
-     */
-    private PreflightCheckRequestObject setSize(long size) {
-        put(BoxFile.FIELD_SIZE, size);
-        return this;
+    public DeleteFileVersionRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, String version) throws BoxRestException {
+        super(config, parser, String.format(URI, fileId, version), RestMethod.DELETE, null);
+        setExpectedResponseCode(HttpStatus.SC_NO_CONTENT);
     }
 }
