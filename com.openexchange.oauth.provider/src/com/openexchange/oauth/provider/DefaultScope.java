@@ -77,7 +77,7 @@ public class DefaultScope implements Scope {
     /**
      * Parses the scope from specified string representation.
      *
-     * @param scopeStr The sscope's string representation
+     * @param scopeStr The scope's string representation
      * @return The parsed scope or <code>null</code> if string is {@link Strings#isEmpty(String) empty}
      */
     public static DefaultScope parseScope(String scopeStr) {

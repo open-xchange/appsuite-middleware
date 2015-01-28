@@ -113,9 +113,21 @@ public interface OAuthProviderService extends OAuthProviderConstants {
 
     // ------------------------------------ Access Code Handling ----------------------------------- \\
 
+
+
     OAuthGrant redeemRefreshToken(Client client, String refreshToken);
 
+    // --------------------------------------- Helper methods -------------------------------------- \\
 
+    /**
+     * Checks if the given scope instance contains only scopes which are registered
+     * as {@link OAuthScopeProvider}s.
+     *
+     * @param scope The scope to check
+     * @return <code>true</code> if the instance contains more than one scope and all scopes belong
+     * to registered providers. Otherwise <code>false</code>.
+     */
+    boolean isValidScope(Scope scope);
 
 
     // ---------------------------------------------------------------------------------------------

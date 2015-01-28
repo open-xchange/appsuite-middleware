@@ -63,8 +63,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.authentication.Authenticated;
@@ -101,9 +99,6 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class AuthorizationEndpoint extends HttpServlet {
 
-    /**
-     *
-     */
     private static final String ATTR_OAUTH_CSRF_TOKEN = "oauth-csrf-token";
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationEndpoint.class);
@@ -135,93 +130,88 @@ public class AuthorizationEndpoint extends HttpServlet {
             // Check for CSRF
             // Respond with JSON errors w/o redirect
             if (isInvalidReferer(request)) {
-                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"request contains no or invalid referer header\",\"error\":\"invalid_request\"}");
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained no or invalid referer header");
                 return;
             }
 
             // Set JSESSIONID cookie and generate CSRF token
             if (isInvalidCSRFToken(request)) {
-                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"request contains no or invalid CSRF token. Ensure that cookies are allowed.\",\"error\":\"invalid_request\"}");
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained no or invalid CSRF token. Ensure that cookies are allowed.");
                 return;
             }
 
             // Check & validate client, redirect URI and state
-            // Respond with JSON errors w/o redirect
+            // Respond with error pages
             String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
             if (Strings.isEmpty(clientId)) {
-                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_CLIENT_ID+"\",\"error\":\"invalid_request\"}");
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
 
             Client client = oAuthProvider.getClientById(clientId);
             if (client == null) {
-                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_CLIENT_ID).put("error", "invalid_request").toString());
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained an invalid value for parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
 
             String redirectURI = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
             if (Strings.isEmpty(redirectURI)) {
-                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_REDIRECT_URI+"\",\"error\":\"invalid_request\"}");
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_REDIRECT_URI);
                 return;
             }
 
             if (!client.hasRedirectURI(redirectURI)) {
-                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, new JSONObject(2).put("error_description", "invalid parameter value: " + OAuthProviderConstants.PARAM_REDIRECT_URI).put("error", "invalid_request").toString());
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained an invalid value for parameter: " + OAuthProviderConstants.PARAM_REDIRECT_URI);
                 return;
             }
 
             String state = request.getParameter(OAuthProviderConstants.PARAM_STATE);
             if (Strings.isEmpty(state)) {
-                sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"missing required parameter: "+OAuthProviderConstants.PARAM_STATE+"\",\"error\":\"invalid_request\"}");
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_STATE);
                 return;
             }
 
             // Client identifier, redirect URI and state are valid
-
             // Now respond with error redirects
             // If successful: YOUR_REDIRECT_URI/?code=AUTHORIZATION_CODE&state=STATE
-            // If not: YOUR_REDIRECT_URI/?error=<error-code>&error_description=<error-desc>&state=<state>
+            // If not: error page or YOUR_REDIRECT_URI/?error=<error-code>&error_description=<error-desc>&state=<state>
 
             // Check if user aborted process
-            {
-                String accessDenied = request.getParameter(OAuthProviderConstants.PARAM_ACCESS_DENIED);
-                if (Boolean.parseBoolean(accessDenied)) {
-                    // YOUR_REDIRECT_URI/?error=access_denied&error_description=the+user+denied+your+request&state=STATE
-                    response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "access_denied", "the user denied your request", OAuthProviderConstants.PARAM_STATE, state));
-                    return;
-                }
+            String accessDenied = request.getParameter(OAuthProviderConstants.PARAM_ACCESS_DENIED);
+            if (Boolean.parseBoolean(accessDenied)) {
+                // YOUR_REDIRECT_URI/?error=access_denied&error_description=the+user+denied+your+request&state=STATE
+                response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "access_denied", "the user denied your request", OAuthProviderConstants.PARAM_STATE, state));
+                return;
             }
 
             // Check user credentials
             String login = request.getParameter(OAuthProviderConstants.PARAM_USER_LOGIN);
             if (Strings.isEmpty(login)) {
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_request", "missing required parameter: "+OAuthProviderConstants.PARAM_USER_LOGIN, OAuthProviderConstants.PARAM_STATE, state));
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_USER_LOGIN);
                 return;
             }
 
             String password = request.getParameter(OAuthProviderConstants.PARAM_USER_PASSWORD);
             if (Strings.isEmpty(password)) {
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_request", "missing required parameter: "+OAuthProviderConstants.PARAM_USER_PASSWORD, OAuthProviderConstants.PARAM_STATE, state));
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_USER_PASSWORD);
                 return;
             }
 
             // Check response type
-            {
-                String responseType = request.getParameter(OAuthProviderConstants.PARAM_RESPONSE_TYPE);
-                if (Strings.isEmpty(responseType)) {
-                    response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_request", "missing required parameter: "+OAuthProviderConstants.PARAM_RESPONSE_TYPE, OAuthProviderConstants.PARAM_STATE, state));
-                    return;
-                }
-                if (!"code".equals(responseType)) {
-                    response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "unsupported_response_type", "response type not supported: "+responseType, OAuthProviderConstants.PARAM_STATE, state));
-                    return;
-                }
+            String responseType = request.getParameter(OAuthProviderConstants.PARAM_RESPONSE_TYPE);
+            if (Strings.isEmpty(responseType)) {
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_RESPONSE_TYPE);
+                return;
+            }
+            if (!"code".equals(responseType)) {
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained an invalid value for parameter: " + OAuthProviderConstants.PARAM_RESPONSE_TYPE);
+                return;
             }
 
             // Check scope
             String sScope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
             if (Strings.isEmpty(sScope)) {
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_request", "missing required parameter: " + OAuthProviderConstants.PARAM_SCOPE, OAuthProviderConstants.PARAM_STATE, state));
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_SCOPE);
                 return;
             }
 
@@ -244,6 +234,7 @@ public class AuthorizationEndpoint extends HttpServlet {
                 }
 
                 if (null == authed) {
+                    // TODO: redirect to login form again and set error message?
                     response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_grant", "invalid resource owner credentials", OAuthProviderConstants.PARAM_STATE, state));
                     return;
                 }
@@ -262,7 +253,6 @@ public class AuthorizationEndpoint extends HttpServlet {
 
                 // Everything OK, do the redirect with authorization code & state
                 // YOUR_REDIRECT_URI/?code=AUTHORIZATION_CODE&state=STATE
-
                 String code = oAuthProvider.generateAuthorizationCodeFor(clientId, scope, user.getId(), ctx.getContextId());
                 response.sendRedirect(URLHelper.getRedirectLocation(redirectURI, OAuthProviderConstants.PARAM_CODE, code, OAuthProviderConstants.PARAM_STATE, state));
             } catch (OXException e) {
@@ -273,9 +263,6 @@ public class AuthorizationEndpoint extends HttpServlet {
             }
 
         } catch (OXException e) {
-            LOG.error("Authorization request failed", e);
-            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
-        } catch (JSONException e) {
             LOG.error("Authorization request failed", e);
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
@@ -456,12 +443,11 @@ public class AuthorizationEndpoint extends HttpServlet {
         return (Tools.considerSecure(request) ? "https://" : "http://") + hostName + servletPrefix + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
     }
 
-    /**
-     * @param sScope
-     * @return
-     */
-    private static Scope convertRequestedScope(String sScope) {
+    private Scope convertRequestedScope(String sScope) {
         DefaultScope scope = DefaultScope.parseScope(sScope);
+        if (!oAuthProvider.isValidScope(scope)) {
+            return null;
+        }
         /*
          * - Do all of the requested scopes exist?
          */

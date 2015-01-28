@@ -73,7 +73,7 @@ import com.openexchange.server.ServiceLookup;
  * {@link OAuthProviderServiceImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.8.0
  */
 public class OAuthProviderServiceImpl implements OAuthProviderService {
 
@@ -213,6 +213,12 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     public Client updateClient(String clientId, ClientData clientData) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public boolean isValidScope(Scope scope) {
+        // FIXME
+        return true;
     }
 
 }
