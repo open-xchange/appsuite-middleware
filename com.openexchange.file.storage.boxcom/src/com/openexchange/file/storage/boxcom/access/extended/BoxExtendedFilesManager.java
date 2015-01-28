@@ -64,9 +64,8 @@ import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 import com.box.restclientv2.requestsbase.DefaultBoxRequest;
 
 /**
- * {@link BoxExtendedFilesManager} 
- * Extends the functionality of the {@link BoxFilesManagerImpl} over a missing deleteFileVersion method.
- * The next <a link="https://github.com/box/box-java-sdk">major</a> release of the Box.com Java SDK will 
+ * {@link BoxExtendedFilesManager} Extends the functionality of the {@link BoxFilesManagerImpl} over a missing deleteFileVersion method.
+ * The next <a link="https://github.com/box/box-java-sdk">major</a> release of the Box.com Java SDK will
  * include that functionality, though it is still in beta right now. So, we have to live with this ugly hack.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -93,6 +92,48 @@ public class BoxExtendedFilesManager extends BoxFilesManagerImpl {
         }
     }
 
+    private class PreflightCheckRequest extends DefaultBoxRequest {
+
+        public static final String NEW_UPLOAD_URI = "/files/content";
+
+        public static final String UPDATE_UPLOAD_URI = "/files/%s/content";
+
+        /**
+         * 
+         * Initializes a new {@link PreflightCheckRequest}.
+         * 
+         * @param config
+         * @param parser
+         * @param filename
+         * @param filesize
+         * @param fileId
+         * @param requestObject
+         * @throws BoxRestException
+         */
+        public PreflightCheckRequest(IBoxConfig config, IBoxJSONParser parser, PreflightCheckRequestObject requestObject) throws BoxRestException {
+            super(config, parser, NEW_UPLOAD_URI, RestMethod.OPTIONS, requestObject);
+            setExpectedResponseCode(HttpStatus.SC_OK);
+        }
+
+        /**
+         * 
+         * Initializes a new {@link PreflightCheckRequest}.
+         * 
+         * @param config
+         * @param parser
+         * @param filename
+         * @param filesize
+         * @param fileId
+         * @param parentId
+         * @param requestObject
+         * @throws BoxRestException
+         */
+        public PreflightCheckRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, PreflightCheckRequestObject requestObject) throws BoxRestException {
+            super(config, parser, String.format(UPDATE_UPLOAD_URI, fileId), RestMethod.OPTIONS, requestObject);
+            setExpectedResponseCode(HttpStatus.SC_OK);
+        }
+    }
+
     /**
      * Initializes a new {@link BoxExtendedFilesManager}.
      * 
@@ -108,6 +149,38 @@ public class BoxExtendedFilesManager extends BoxFilesManagerImpl {
 
     public void deleteFileVersion(final String fileId, final String version, final BoxDefaultRequestObject requestObject) throws BoxRestException, BoxServerException, AuthFatalFailureException {
         DeleteFileVersionRequest request = new DeleteFileVersionRequest(getConfig(), getJSONParser(), fileId, version, requestObject);
+        executeRequestWithNoResponseBody(request);
+    }
+
+    /**
+     * Pre-flight check for an existing item.
+     * 
+     * @param filename
+     * @param filesize
+     * @param fileId
+     * @throws BoxRestException
+     * @throws BoxServerException
+     * @throws AuthFatalFailureException
+     */
+    public void preflightCheck(String fileId, PreflightCheckRequestObject requestObject) throws BoxRestException, BoxServerException, AuthFatalFailureException {
+        PreflightCheckRequest request = new PreflightCheckRequest(getConfig(), getJSONParser(), fileId, requestObject);
+        executeRequestWithNoResponseBody(request);
+    }
+
+    /**
+     * Pre-flight check for a new item.
+     * 
+     * @param filename
+     * @param filesize
+     * @param fileId
+     * @param parentId
+     * @param requestObject
+     * @throws BoxRestException
+     * @throws BoxServerException
+     * @throws AuthFatalFailureException
+     */
+    public void preflightCheck(PreflightCheckRequestObject requestObject) throws BoxRestException, BoxServerException, AuthFatalFailureException {
+        PreflightCheckRequest request = new PreflightCheckRequest(getConfig(), getJSONParser(), requestObject);
         executeRequestWithNoResponseBody(request);
     }
 }
