@@ -81,9 +81,7 @@ public class IndexedFoldersCreateTableService extends AbstractCreateTableImpl {
                   "timestamp bigint(64) NOT NULL," +
                   "locked tinyint(1) unsigned NOT NULL," +
                   "indexed tinyint(1) unsigned NOT NULL," +
-                  "PRIMARY KEY (cid,uid,module,account,folder)," +
-                  "KEY module (cid,uid,module)," +
-                  "KEY account (cid,uid,module,account)" +
+                  "PRIMARY KEY (cid,uid,module,account,folder)" +
               ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
         };
     }

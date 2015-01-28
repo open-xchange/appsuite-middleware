@@ -71,7 +71,6 @@ public class CreateMailSyncTable extends AbstractCreateTableImpl {
         "timestamp bigint(64) NOT NULL," +
         "sync tinyint(3) unsigned NOT NULL," +
         "PRIMARY KEY (cid, user, accountId, fullName)," +
-        "INDEX accountIndex (cid, user, accountId)," +
         "INDEX timestampIndex (cid, user, accountId, timestamp)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 

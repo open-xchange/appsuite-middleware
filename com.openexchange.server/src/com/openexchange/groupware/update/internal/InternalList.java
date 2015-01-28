@@ -78,6 +78,7 @@ import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTa
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DropDuplicateEntryFromUpdateTaskTable;
+import com.openexchange.groupware.update.tasks.DropRendundantIndicesUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
@@ -770,6 +771,9 @@ public final class InternalList {
 
         // Extends "user" table by the (`cid`, `guestCreatedBy`) index
         list.add(new com.openexchange.groupware.update.tasks.AddGuestCreatedByIndexForUserTable());
+
+        // Drop redundant indices
+        list.add(new DropRendundantIndicesUpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

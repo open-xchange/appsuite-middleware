@@ -71,7 +71,6 @@ public final class OAuthProviderCreateTableService extends AbstractCreateTableIm
         " `accessToken` varchar(255) DEFAULT NULL," +
         " `tokenSecret` varchar(255) NOT NULL," +
         " PRIMARY KEY (`cid`,`user`,`consumerId`)," +
-        " KEY `userIndex` (`cid`,`user`)," +
         " KEY `consumerIndex` (`consumerId`,`providerId`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 

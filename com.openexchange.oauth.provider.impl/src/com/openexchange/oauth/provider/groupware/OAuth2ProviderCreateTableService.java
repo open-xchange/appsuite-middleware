@@ -75,7 +75,6 @@ public final class OAuth2ProviderCreateTableService extends AbstractCreateTableI
         " `scope` varchar(255) DEFAULT NULL," +
         " `state` varchar(255) DEFAULT NULL," +
         " PRIMARY KEY (`cid`,`user`,`clientId`)," +
-        " KEY `userIndex` (`cid`,`user`)," +
         " KEY `consumerIndex` (`clientId`,`providerId`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
