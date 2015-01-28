@@ -64,6 +64,7 @@ import com.box.boxjavalibv2.dao.BoxCollection;
 import com.box.boxjavalibv2.dao.BoxFile;
 import com.box.boxjavalibv2.dao.BoxFileVersion;
 import com.box.boxjavalibv2.dao.BoxFolder;
+import com.box.boxjavalibv2.dao.BoxLock;
 import com.box.boxjavalibv2.dao.BoxThumbnail;
 import com.box.boxjavalibv2.dao.BoxTypedObject;
 import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
@@ -84,11 +85,12 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
-import com.openexchange.file.storage.boxcom.access.extended.PreflightCheckRequestObject;
+import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.PreflightCheckRequestObject;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.mime.MimeTypeMap;
@@ -101,7 +103,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageVersionedFileAccess {
+public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageVersionedFileAccess, FileStorageLockedFileAccess {
 
     private static final String THUMBNAIL_EXTENSION = "png";
 
@@ -731,7 +733,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
                 for (String version : versions) {
                     try {
-                        boxAccess.getExtendedBoxClient().getFilesManager().deleteFileVersion(id, version, null);
+                        boxAccess.getExtendedBoxClient().getFilesManager().deleteFileVersion(id, version);
                     } catch (BoxServerException e) {
                         undeletable.add(version);
                         logger.warn("Could not delete version: {}", version, e);
@@ -791,6 +793,25 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         });
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageLockedFileAccess#unlock(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void unlock(String folderId, String id) throws OXException {}
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageLockedFileAccess#lock(java.lang.String, java.lang.String, long)
+     */
+    @Override
+    public void lock(String folderId, String id, long diff) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
     /**
      * Create a default request
      * 
@@ -847,5 +868,4 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         }
         return customRequestObject;
     }
-
 }
