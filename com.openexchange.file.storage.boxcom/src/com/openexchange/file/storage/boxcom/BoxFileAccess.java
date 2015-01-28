@@ -417,23 +417,23 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     //TODO: pre-flight check
                     
+                    final BoxFile boxFile;
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, file.getFileName(), data);
-                        BoxFile boxFile = boxClient.getFilesManager().uploadFile(reqObj);
-                        BoxFileRequestObject req = new BoxFileRequestObject();
-                        req.setDescription(file.getDescription());
-                        boxClient.getFilesManager().updateFileInfo(boxFile.getId(), req);
+                        boxFile = boxClient.getFilesManager().uploadFile(reqObj);
                         return new IDTuple(file.getFolderId(), boxFile.getId());
                     } else {
                         BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
                         checkFileValidity(boxfile);
-
-                        //String prevVersion = boxfile.getVersionNumber();
-
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, id, data);
-                        BoxFile boxFile = boxClient.getFilesManager().uploadNewVersion(id, reqObj);
-                        return new IDTuple(file.getFolderId(), boxFile.getId());
+                        boxFile = boxClient.getFilesManager().uploadNewVersion(id, reqObj);
                     }
+                    
+                    BoxFileRequestObject req = new BoxFileRequestObject();
+                    req.setDescription(file.getDescription());
+                    boxClient.getFilesManager().updateFileInfo(boxFile.getId(), req);
+                    
+                    return new IDTuple(file.getFolderId(), boxFile.getId());
                 } catch (BoxJSONException e) {
                     throw BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
                 } catch (InterruptedException e) {
