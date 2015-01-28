@@ -428,7 +428,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, file.getFileName(), data);
                         boxFile = boxClient.getFilesManager().uploadFile(reqObj);
-                        return new IDTuple(file.getFolderId(), boxFile.getId());
                     } else {
                         BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
                         checkFileValidity(boxfile);
