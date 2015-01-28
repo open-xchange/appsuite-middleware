@@ -233,7 +233,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 storageFolder,
                 UserServiceHolder.requireUserService(),
                 transactionManager.getConnection());
-            
+
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {
@@ -270,12 +270,12 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Check for forbidden public mail folder
                  */
-                {
+                if (CONTENT_TYPE_MAIL.equals(storageFolder.getContentType().toString())) {
                     boolean started = newRealParentStorage.startTransaction(storageParameters, true);
                     boolean rollback = true;
                     try {
                         Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
-                        if (isPublicPimFolder(newParent) && CONTENT_TYPE_MAIL.equals(storageFolder.getContentType().toString())) {
+                        if (isPublicPimFolder(newParent)) {
                             throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
                         }
                         if (started) {
@@ -435,7 +435,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Gather all sub-folders that the current user has administrative rights.
-     * 
+     *
      * @param folder The folder
      * @param storage The folder storage
      * @param treeId The tree identifier
@@ -457,7 +457,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Cascade folder permissions
-     * 
+     *
      * @param folder The folder
      * @param storage The folder storage
      * @param treeId The tree identifier
