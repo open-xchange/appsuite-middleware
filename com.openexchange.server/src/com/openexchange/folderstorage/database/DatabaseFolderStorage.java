@@ -74,19 +74,25 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -113,6 +119,7 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
+import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.type.DocumentsType;
 import com.openexchange.folderstorage.type.MusicType;
@@ -134,6 +141,7 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Collators;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -1376,14 +1384,95 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system infostore folder
                  */
-                final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userPermissionBits, ctx, altNames, storageParameters.getSession(), con);
-                final int size = subfolderIds.size();
-                final List<SortableId> list = new ArrayList<SortableId>(size);
-                for (int i = 0; i < size; i++) {
-                    final String[] sa = subfolderIds.get(i);
-                    list.add(new DatabaseId(sa[0], i, sa[1]));
+                final Session s = storageParameters.getSession();
+
+                List<String[]> l = null;
+                if (REAL_TREE_ID.equals(treeId)) {
+                    /*
+                     * File storage accounts
+                     */
+                    final Queue<FileStorageAccount> fsAccounts = new ConcurrentLinkedQueue<FileStorageAccount>();
+                    final FileStorageServiceRegistry fsr = Services.getService(FileStorageServiceRegistry.class);
+                    if (null == fsr) {
+                        // Do nothing
+                    } else {
+                        CompletionService<Void> completionService = new CallerRunsCompletionService<Void>();
+                        int taskCount = 0;
+                        try {
+                            final List<FileStorageService> allServices = fsr.getAllServices();
+                            for (final FileStorageService fsService : allServices) {
+                                Callable<Void> task = new Callable<Void>() {
+
+                                    @Override
+                                    public Void call() throws Exception {
+                                        /*
+                                         * Check if file storage service provides a root folder
+                                         */
+                                        List<FileStorageAccount> userAccounts = null;
+                                        if (fsService instanceof AccountAware) {
+                                            userAccounts = ((AccountAware) fsService).getAccounts(s);
+                                        }
+                                        if (null == userAccounts) {
+                                            userAccounts = fsService.getAccountManager().getAccounts(s);
+                                        }
+                                        for (final FileStorageAccount userAccount : userAccounts) {
+                                            if ("infostore".equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
+                                                // Ignore infostore file storage and default account
+                                                continue;
+                                            }
+                                            fsAccounts.add(userAccount);
+                                        }
+                                        return null;
+                                    }
+                                };
+                                completionService.submit(task);
+                                taskCount++;
+                            }
+                        } catch (final OXException e) {
+                            LOG.error("", e);
+                        }
+                        for (int i = taskCount; i-- > 0;) {
+                            completionService.take();
+                        }
+                        if (fsAccounts.isEmpty()) {
+                            // Do nothing
+                        } else {
+                            l = new LinkedList<String[]>();
+                            List<FileStorageAccount> accountList = new ArrayList<FileStorageAccount>(fsAccounts);
+                            Collections.sort(accountList, new FileStorageAccountComparator(user.getLocale()));
+                            final int sz = accountList.size();
+                            final String fid = FileStorageFolder.ROOT_FULLNAME;
+                            for (int i = 0; i < sz; i++) {
+                                final FileStorageAccount fsa = accountList.get(i);
+                                final String serviceId;
+                                if (fsa instanceof com.openexchange.file.storage.ServiceAware) {
+                                    serviceId = ((com.openexchange.file.storage.ServiceAware) fsa).getServiceId();
+                                } else {
+                                    final FileStorageService tmp = fsa.getFileStorageService();
+                                    serviceId = null == tmp ? null : tmp.getId();
+                                }
+                                FolderID folderID = new FolderID(serviceId, fsa.getId(), fid);
+                                l.add(new String[] { folderID.toUniqueID(), fsa.getDisplayName() });
+                            }
+                        }
+                    }
                 }
+
+                boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+                List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userPermissionBits, ctx, altNames, storageParameters.getSession(), con);
+
+                List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size() + (null == l ? 0 : l.size()));
+                int in = 0;
+                for (String[] sa : subfolderIds) {
+                    list.add(new DatabaseId(sa[0], in++, sa[1]));
+                }
+
+                if (null != l) {
+                    for (String[] sa : l) {
+                        list.add(new DatabaseId(sa[0], in++, sa[1]));
+                    }
+                }
+
                 return list.toArray(new SortableId[list.size()]);
             }
 
@@ -1483,8 +1572,10 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 list.add(new DatabaseId(folderObject.getObjectID(), i, folderObject.getFolderName()));
             }
             return list.toArray(new SortableId[size]);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (InterruptedException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
         }
@@ -2141,6 +2232,22 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         }
 
     } // End of FolderNameComparator
+
+    private static final class FileStorageAccountComparator implements Comparator<FileStorageAccount> {
+
+        private final Collator collator;
+
+        public FileStorageAccountComparator(final Locale locale) {
+            super();
+            collator = Collators.getSecondaryInstance(locale);
+        }
+
+        @Override
+        public int compare(final FileStorageAccount o1, final FileStorageAccount o2) {
+            return collator.compare(o1.getDisplayName(), o2.getDisplayName());
+        }
+
+    } // End of FileStorageAccountComparator
 
     public static final class ConnectionMode {
 

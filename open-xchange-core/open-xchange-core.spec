@@ -1143,6 +1143,9 @@ if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatIn
 EOF
 fi
 
+# SoftwareChange_Request-2353
+ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
+
 # SoftwareChange_Request-2379
 ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
@@ -1186,6 +1189,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Jan 28 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth candidate for 7.6.2 release
 * Mon Jan 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-26
 * Wed Jan 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1203,13 +1208,11 @@ Build for patch 2014-12-10
 * Fri Dec 12 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.6.2 release
 * Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-12-10
-* Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-12-15
-* Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-15
 * Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-10
+* Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-15
 * Fri Dec 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.6.2 release
 * Thu Dec 04 2014 Marcus Klein <marcus.klein@open-xchange.com>

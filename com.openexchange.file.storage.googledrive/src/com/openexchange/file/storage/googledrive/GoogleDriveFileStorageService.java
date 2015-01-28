@@ -417,6 +417,11 @@ public final class GoogleDriveFileStorageService implements AccountAware, OAuthU
         }
 
         @Override
+        public Set<String> getParameterNames() {
+            return parameters.keySet();
+        }
+
+        @Override
         public String getAuthId() {
             return null;
         }

@@ -118,4 +118,10 @@ public class ScribeHTTPMultipartPostRequestBuilder extends
         return null;
     }
 
+    @Override
+    public HTTPMultipartPostRequestBuilder part(String string, InputStream stream, String contentType, long length, String realName) throws OXException {
+     // Nothing to do
+        return null;
+    }
+
 }

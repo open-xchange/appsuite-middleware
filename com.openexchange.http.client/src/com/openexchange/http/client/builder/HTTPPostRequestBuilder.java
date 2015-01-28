@@ -57,4 +57,10 @@ public interface HTTPPostRequestBuilder extends HTTPGenericRequestBuilder<HTTPPo
      */
     void setRequestEntity(String requestEntity, String contentType);
 
+    /**
+     * @param parameter
+     * @param value
+     */
+    void urlParameter(String parameter, String value);
+
 }

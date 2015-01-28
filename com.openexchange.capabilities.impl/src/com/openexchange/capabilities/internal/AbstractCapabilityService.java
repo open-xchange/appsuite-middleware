@@ -1103,5 +1103,4 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             return parameters.keySet();
         }
     }
-
 }

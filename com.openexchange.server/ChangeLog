@@ -1,6 +1,17 @@
+* 2015-01-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35733: List existing (external) file storage accounts below "InfoStore" folder in classic folder tree view
+ - Fix for bug 36291: Made number of run-loops configurable
+ - Fix for bug 35381: Avoid WARN logging at backend when retrieving all visible mail folders using Outlook-style folder tree
+
 * 2015-01-26 - marcus.klein@open-xchange.com
 
  - Fix for bug 35426: Execute SessionEnhancement earlier, so parameters added through this get populated with the session in the cluster.
+
+* 2015-01-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36279: Stick to Java's internal ConcurrentHashMap implementation to orderly free up occupied Heap
+ - Fix for bug 36275: Only apply string normalizing to URL sections to prevent from IDN homographical attacks
 
 * 2015-01-24 - thorben.betten@open-xchange.com
 

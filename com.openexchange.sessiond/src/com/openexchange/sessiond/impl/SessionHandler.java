@@ -515,11 +515,10 @@ public final class SessionHandler {
      * @param hash The hash string
      * @param client The client identifier
      * @param tranzient Whether the session is meant to be transient/volatile; typically the session gets dropped soon
-     * @param callback The optional call-back that might modify the {@code SessionImpl} instance
      * @return The newly created {@code SessionImpl} instance
      * @throws OXException If create attempt fails
      */
-    public static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
+    private static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
         // Generate identifier, secret, and random
         SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
         String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);

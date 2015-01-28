@@ -4,6 +4,12 @@ open-xchange-realtime-json (7.8.0-0) unstable; urgency=medium
 
  -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 05 Nov 2014 09:41:13 +0100
 
+open-xchange-realtime-json (7.6.2-5) stable; urgency=low
+
+  * Fifth candidate for 7.6.2 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 28 Jan 2015 12:29:12 +0100
+
 open-xchange-realtime-json (7.6.2-4) stable; urgency=low
 
   * Fourth candidate for 7.6.2 release

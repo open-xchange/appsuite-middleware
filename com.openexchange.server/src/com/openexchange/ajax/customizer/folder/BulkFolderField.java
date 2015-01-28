@@ -75,7 +75,7 @@ public class BulkFolderField implements AdditionalFolderField {
      *
      * @param delegate The delegate field
      */
-    public BulkFolderField(final AdditionalFolderField delegate) {
+    public BulkFolderField(AdditionalFolderField delegate) {
         super();
         values = new HashMap<String, Object>();
         this.delegate = delegate;
@@ -92,7 +92,7 @@ public class BulkFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public Object getValue(final FolderObject f, final ServerSession session) {
+    public Object getValue(FolderObject f, ServerSession session) {
         String fn = f.getFullName();
         if (fn == null) {
             fn = Integer.toString(f.getObjectID());
@@ -100,15 +100,15 @@ public class BulkFolderField implements AdditionalFolderField {
         if (!values.containsKey(fn)) {
             getValues(Collections.singletonList(f), session);
         }
-        final Object value = values.get(fn);
+        Object value = values.get(fn);
         return NULL == value ? null : value;
     }
 
     @Override
-    public List<Object> getValues(final List<FolderObject> folders, final ServerSession session) {
-        final List<FolderObject> fl = new ArrayList<FolderObject>(folders.size());
-        for (final FolderObject f : folders) {
-            final String fn = f.getFullName();
+    public List<Object> getValues(List<FolderObject> folders, ServerSession session) {
+        List<FolderObject> fl = new ArrayList<FolderObject>(folders.size());
+        for (FolderObject f : folders) {
+            String fn = f.getFullName();
             if (!values.containsKey(fn == null ? Integer.toString(f.getObjectID()) : fn)) {
                 fl.add(f);
             }
@@ -116,17 +116,17 @@ public class BulkFolderField implements AdditionalFolderField {
         if (!fl.isEmpty()) {
             warmUp(fl, session);
         }
-        final List<Object> vals = new ArrayList<Object>(folders.size());
-        for (final FolderObject f : folders) {
-            final String fn = f.getFullName();
-            final Object value = values.get(fn == null ? Integer.toString(f.getObjectID()) : fn);
+        List<Object> vals = new ArrayList<Object>(folders.size());
+        for (FolderObject f : folders) {
+            String fn = f.getFullName();
+            Object value = values.get(fn == null ? Integer.toString(f.getObjectID()) : fn);
             vals.add(NULL == value ? null : value);
         }
         return vals;
     }
 
     @Override
-    public Object renderJSON(final Object value) {
+    public Object renderJSON(Object value) {
         return delegate.renderJSON(value);
     }
 
@@ -136,12 +136,12 @@ public class BulkFolderField implements AdditionalFolderField {
      * @param folders The folders
      * @param session The session
      */
-    public void warmUp(final List<FolderObject> folders, final ServerSession session) {
-        final List<Object> vals = delegate.getValues(folders, session);
+    public void warmUp(List<FolderObject> folders, ServerSession session) {
+        List<Object> vals = delegate.getValues(folders, session);
         int i = 0;
-        for (final FolderObject f : folders) {
-            final String fn = f.getFullName();
-            final Object value = vals.get(i++);
+        for (FolderObject f : folders) {
+            String fn = f.getFullName();
+            Object value = vals.get(i++);
             values.put(fn == null ? Integer.toString(f.getObjectID()) : fn, null == value ? NULL : value);
         }
     }

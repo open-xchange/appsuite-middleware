@@ -545,10 +545,24 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
         final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
-            final SortableId[] ret = folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters);
+            SortableId[] ret = folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters);
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
+
+            if (MailContentType.getInstance().toString().equals(contentType.toString())) {
+                // No primary account root folder for Outlook-style tree
+                List<SortableId> tmp = new ArrayList<SortableId>(ret.length);
+                String id = PREPARED_FULLNAME_DEFAULT;
+                int in = 0;
+                for (SortableId sortableId : ret) {
+                    if (!id.equals(sortableId.getId())) {
+                        tmp.add(new OutlookId(sortableId.getId(), in++, sortableId.getName()));
+                    }
+                }
+                ret = tmp.toArray(new SortableId[tmp.size()]);
+            }
+
             return ret;
         } catch (final OXException e) {
             if (started) {

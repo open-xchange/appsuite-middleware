@@ -67,4 +67,6 @@ public interface HTTPMultipartPostRequestBuilder extends
 	public HTTPMultipartPostRequestBuilder part(String fieldName, String s, String contentType) throws OXException;
 
 	public HTTPMultipartPostRequestBuilder stringPart(String fieldName, String fieldValue);
+
+    public HTTPMultipartPostRequestBuilder part(String string, InputStream stream, String contentType, long length, String realName) throws OXException;
 }

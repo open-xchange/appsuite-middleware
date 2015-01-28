@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,6 +62,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import org.osgi.framework.Constants;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
@@ -73,9 +76,11 @@ import com.openexchange.realtime.cleanup.RealtimeCleanup;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.osgi.RealtimeServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.realtime.util.RealtimeReloadable;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -88,10 +93,10 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 /*
  * @startuml doc-files/HandleIncomingStanza.png
- * 
+ *
  * (*) -> "Stanza arrives in
  * SyntheticChannel#send()"
- * 
+ *
  * if "Addressed ComponentHandle exists" then
  *   --> [true] "Update access time"
  *   --> "Find RunLoop assigned
@@ -107,14 +112,48 @@ import com.openexchange.threadpool.ThreadPoolService;
  *   --> [false] "Throw RealtimeException"
  *   --> (*)
  * endif
- * 
+ *
  * @enduml
- * 
+ *
  */
 
 public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel, Runnable {
 
-    private static final int NUMBER_OF_RUNLOOPS = 16;
+    private static volatile Integer numberOfRunLoops;
+    private static int numberOfRunLoops() {
+        Integer tmp = numberOfRunLoops;
+        if (null == tmp) {
+            synchronized (SyntheticChannel.class) {
+                tmp = numberOfRunLoops;
+                if (null == tmp) {
+                    int defaultValue = 16;
+                    ConfigurationService service = RealtimeServiceRegistry.SERVICES.get().getOptionalService(ConfigurationService.class);
+                    if (null == service) {
+                        // Not yet fully initialized
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.realtime.numberOfRunLoops", defaultValue));
+                    numberOfRunLoops = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    static {
+        RealtimeReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                numberOfRunLoops = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
 
     public static final String PROTOCOL = "synthetic";
 
@@ -137,7 +176,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
     // Each @NotThreadSafe ComponentHandle is fed by a single RunLoop to guarantee singlethreaded Stanza delivery
     private final ConcurrentHashMap<ID, SyntheticChannelRunLoop> runLoopsPerID = new ConcurrentHashMap<ID, SyntheticChannelRunLoop>();
 
-    private final List<SyntheticChannelRunLoop> runLoops = new ArrayList<SyntheticChannelRunLoop>(NUMBER_OF_RUNLOOPS);
+    private final List<SyntheticChannelRunLoop> runLoops;
 
     private final ConcurrentHashMap<ID, Long> lastAccess = new ConcurrentHashMap<ID, Long>();
 
@@ -150,7 +189,9 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
     public SyntheticChannel(ServiceLookup services, LocalRealtimeCleanup localRealtimeCleanup) {
         JANITOR_PROPERTIES.put(Constants.SERVICE_RANKING, RealtimeJanitor.RANKING_SYNTHETIC_CHANNEL);
         this.localRealtimeCleanup = localRealtimeCleanup;
-        for (int i = 0; i < NUMBER_OF_RUNLOOPS; i++) {
+        int numberOfRunLoops = numberOfRunLoops();
+        runLoops = new ArrayList<SyntheticChannelRunLoop>(numberOfRunLoops);
+        for (int i = 0; i < numberOfRunLoops; i++) {
             SyntheticChannelRunLoop rl = new SyntheticChannelRunLoop("message-handler-" + i);
             runLoops.add(rl);
             services.getService(ThreadPoolService.class).getExecutor().execute(rl);
@@ -201,7 +242,8 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
         }
 
         handles.put(id, handle);
-        runLoopsPerID.put(id, runLoops.get(loadBalancer.nextInt(NUMBER_OF_RUNLOOPS)));
+
+        runLoopsPerID.put(id, runLoops.get(loadBalancer.nextInt(numberOfRunLoops())));
 
         setUpEviction(component.getEvictionPolicy(), handle, id);
 
@@ -313,7 +355,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
                 /*
                  * Lock conjure so no new GroupDispatcher is created until we finished cleanup. A second clean for the same id will either:
                  *  - wait for this lock and do nothin after it got the lock
-                 *  - do nothing as the handle for that id was already removed 
+                 *  - do nothing as the handle for that id was already removed
                  */
                 id.getLock(CONJURELOCK);
                 LOG.debug("Cleanup for ID: {}. Removing  ComponentHandle and RunLoop mappings.", id);
@@ -345,7 +387,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
     /**
      * Try to get the cluster wide GlobalRealtimeCleanup service first. If that fails get the LocalRealtimeCleanup service that is provided
      * by this bundle and thus should always be available.
-     * 
+     *
      * @return the first available RealtimeCleanup service
      */
     private RealtimeCleanup getRealtimeCleanup() {
