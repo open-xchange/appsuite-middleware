@@ -446,10 +446,6 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
             return false;
         }
 
-        @Override
-        public Set<String> getParameterNames() {
-            return parameters.keySet();
-        }
     }
 
 }

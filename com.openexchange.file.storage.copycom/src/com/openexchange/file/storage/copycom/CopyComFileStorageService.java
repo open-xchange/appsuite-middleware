@@ -422,11 +422,6 @@ public final class CopyComFileStorageService implements AccountAware, OAuthUtili
         }
 
         @Override
-        public Set<String> getParameterNames() {
-            return parameters.keySet();
-        }
-
-        @Override
         public String getAuthId() {
             return null;
         }
