@@ -1,0 +1,60 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -n";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    print "yes\n";
+    exit 0;
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Memory BufferPool Direct\n";
+    print "graph_args --base 1024 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    
+    print "direct-buffers-in-pool-count.label direct-buffers-in-pool-count \n";
+    print "direct-buffers-in-pool-count.draw LINE1\n";
+    print "direct-buffers-in-pool-count.type GAUGE\n";
+    print "direct-buffers-in-pool-count.min 0\n";
+
+    print "memory-used.label memory-used\n";
+    print "memory-used.draw LINE1\n";
+    print "memory-used.type GAUGE\n";
+    print "memory-used.min 0\n";
+
+    print "total-capacity.label total-capacity\n";
+    print "total-capacity.draw LINE1\n";
+    print "total-capacity.type GAUGE\n";
+    print "total-capacity.min 0\n";
+}
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
+
+while (<SHOWRUNTIME>) {
+    if ( $_ =~ /java.nio:name=direct,type=BufferPool,MemoryUsed/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "memory-used.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /java.nio:name=direct,type=BufferPool,TotalCapacity/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "total-capacity.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /java.nio:name=direct,type=BufferPool,Count/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "direct-buffers-in-pool-count.value $val\n";
+        next;
+    }
+
+}
