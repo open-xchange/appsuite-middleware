@@ -150,7 +150,7 @@ public class OAuthSession extends AJAXSession {
         HttpResponse loginFormResponse = client.execute(getLoginForm);
         assertEquals(HttpStatus.SC_OK, loginFormResponse.getStatusLine().getStatusCode());
         String loginForm = EntityUtils.toString(loginFormResponse.getEntity());
-        Map<String, String> hiddenFormParams = getHiddenFormParams(loginForm);
+        Map<String, String> hiddenFormParams = getHiddenFormFields(loginForm);
 
         LinkedList<NameValuePair> authFormParams = new LinkedList<>();
         authFormParams.add(new BasicNameValuePair("user_login", login));
@@ -225,9 +225,15 @@ public class OAuthSession extends AJAXSession {
         return accessToken;
     }
 
-    private static Map<String, String> getHiddenFormParams(String loginForm) {
+    /**
+     * Returns all hidden form fields from an HTML form as name-value pairs.
+     *
+     * @param form The HTML form as String
+     * @return A map of fields
+     */
+    public static Map<String, String> getHiddenFormFields(String form) {
         final Map<String, String> params = new HashMap<>();
-        HtmlParser.parse(loginForm, new HtmlHandler() {
+        HtmlParser.parse(form, new HtmlHandler() {
 
             @Override
             public void handleXMLDeclaration(String version, Boolean standalone, String encoding) {

@@ -55,6 +55,7 @@ import junit.framework.TestSuite;
 import com.openexchange.ajax.find.FindTestSuite;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
 import com.openexchange.ajax.share.ShareAJAXSuite;
+import com.openexchange.oauth2.OAuthTests;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -134,6 +135,7 @@ public final class InterfaceTests {
         tests.addTest(ShareAJAXSuite.suite());
         // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
         // tests.addTest(ManifestsTestSuite.suite());
+        tests.addTest(new JUnit4TestAdapter(OAuthTests.class));
         return tests;
     }
 }
