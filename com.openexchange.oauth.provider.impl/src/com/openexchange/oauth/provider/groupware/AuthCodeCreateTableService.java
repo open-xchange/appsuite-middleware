@@ -66,6 +66,7 @@ public final class AuthCodeCreateTableService extends AbstractCreateTableImpl {
         " `cid` INT4 unsigned NOT NULL," +
         " `user` INT4 unsigned NOT NULL," +
         " `clientId` varchar(255) NOT NULL," +
+        " `redirectURI` varchar(767) NOT NULL," +
         " `scope` varchar(512) NOT NULL," +
         " `nanos` BIGINT(64) NOT NULL," +
         " PRIMARY KEY (`code`)," +

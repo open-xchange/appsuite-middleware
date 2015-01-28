@@ -253,7 +253,7 @@ public class AuthorizationEndpoint extends HttpServlet {
 
                 // Everything OK, do the redirect with authorization code & state
                 // YOUR_REDIRECT_URI/?code=AUTHORIZATION_CODE&state=STATE
-                String code = oAuthProvider.generateAuthorizationCodeFor(clientId, scope, user.getId(), ctx.getContextId());
+                String code = oAuthProvider.generateAuthorizationCodeFor(clientId, redirectURI, scope, user.getId(), ctx.getContextId());
                 response.sendRedirect(URLHelper.getRedirectLocation(redirectURI, OAuthProviderConstants.PARAM_CODE, code, OAuthProviderConstants.PARAM_STATE, state));
             } catch (OXException e) {
                 // Special handling for OXException after client identifier and redirect URI have been validated

@@ -81,6 +81,7 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableService;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableTask;
 import com.openexchange.oauth.provider.groupware.AuthCodeDeleteListener;
@@ -261,6 +262,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         }
 
         trackService(HostnameService.class);
+        track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
         openTrackers();
 
         try {

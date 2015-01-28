@@ -153,23 +153,6 @@ public class TokenEndpoint extends HttpServlet {
     }
 
     private void handleAuthorizationCode(Client client, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException, OXException {
-        /*
-         * The contained auth code must be invalidated even in error cases to
-         * prevent replay attacks. Therefore it must be checked before any other
-         * parameters.
-         */
-        String authCode = req.getParameter(OAuthProviderConstants.PARAM_CODE);
-        if (authCode == null) {
-            failWithMissingParameter(resp, OAuthProviderConstants.PARAM_CODE);
-            return;
-        }
-
-        OAuthGrant token = oAuthProvider.redeemAuthCode(client, authCode);
-        if (token == null) {
-            failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CODE);
-            return;
-        }
-
         String redirectUri = req.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
         if (redirectUri == null) {
             failWithMissingParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
@@ -180,6 +163,22 @@ public class TokenEndpoint extends HttpServlet {
             failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_REDIRECT_URI);
             return;
         }
+
+        String authCode = req.getParameter(OAuthProviderConstants.PARAM_CODE);
+        if (authCode == null) {
+            failWithMissingParameter(resp, OAuthProviderConstants.PARAM_CODE);
+            return;
+        }
+
+        OAuthGrant token = oAuthProvider.redeemAuthCode(client, redirectUri, authCode);
+        if (token == null) {
+            failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CODE);
+            return;
+        }
+
+
+
+
 
         respondWithToken(token, resp);
     }

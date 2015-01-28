@@ -55,6 +55,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.Client;
@@ -146,14 +148,14 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException {
-        return authCodeProvider.generateAuthorizationCodeFor(clientId, scope, userId, contextId);
+    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException {
+        return authCodeProvider.generateAuthorizationCodeFor(clientId, redirectURI, scope, userId, contextId);
     }
 
     @Override
-    public OAuthGrant redeemAuthCode(Client client, String authCode) throws OXException {
+    public OAuthGrant redeemAuthCode(Client client, String redirectURI, String authCode) throws OXException {
         AuthCodeInfo authCodeInfo = authCodeProvider.redeemAuthCode(client, authCode);
-        if (authCodeInfo == null) {
+        if (authCodeInfo == null || !isValidAuthCode(authCodeInfo, client.getId(), redirectURI)) {
             return null;
         }
 
@@ -163,6 +165,27 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         String refreshToken = new UserizedToken(userId, contextId).getToken();
         Date expirationDate = new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION);
         return persistGrant(authCodeInfo, accessToken, refreshToken, expirationDate);
+    }
+
+    /**
+     * Checks validity of passed value in comparison to given time stamp (and session).
+     *
+     * @param value The value to check
+     * @param clientId The client identifier
+     * @param redirectURI The redirect URI
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    private boolean isValidAuthCode(AuthCodeInfo authCodeInfo, String clientId, String redirectURI) {
+        if (!clientId.equals(authCodeInfo.getClientId())) {
+            return false;
+        }
+
+        if (!redirectURI.equals(authCodeInfo.getRedirectURI())) {
+            return false;
+        }
+
+        long now = System.nanoTime();
+        return TimeUnit.NANOSECONDS.toMillis(now - authCodeInfo.getNanos()) <= OAuthProviderService.AUTH_CODE_TIMEOUT_MILLIS;
     }
 
     private OAuthGrant persistGrant(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) throws OXException {
@@ -217,7 +240,17 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public boolean isValidScope(Scope scope) {
-        // FIXME
+        Set<String> scopes = scope.getScopes();
+        if (scopes.isEmpty()) {
+            return false;
+        }
+
+        for (String s : scopes) {
+            if (!ScopeRegistry.getInstance().hasScopeProvider(s)) {
+                return false;
+            }
+        }
+
         return true;
     }
 

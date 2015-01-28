@@ -66,6 +66,7 @@ public class PortableAuthCodeInfo implements CustomPortable {
     public static final int CLASS_ID = 19;
 
     public static final String PARAMETER_CLIENT_ID = "clientId";
+    private static final String PARAMETER_REDIRECT_URI = "redirectURI";
     public static final String PARAMETER_SCOPE = "scope";
     public static final String PARAMETER_USER_ID = "userId";
     public static final String PARAMETER_CONTEXT_ID = "contextId";
@@ -74,6 +75,7 @@ public class PortableAuthCodeInfo implements CustomPortable {
     // --------------------------------------------------------------------------------------------------------------------
 
     private String clientId;
+    private String redirectURI;
     private String scope;
     private int userId;
     private int contextId;
@@ -89,9 +91,10 @@ public class PortableAuthCodeInfo implements CustomPortable {
     /**
      * Initializes a new {@link PortableAuthCodeInfo}.
      */
-    public PortableAuthCodeInfo(String clientId, Scope scope, int userId, int contextId, long nanos) {
+    public PortableAuthCodeInfo(String clientId, String redirectURI, Scope scope, int userId, int contextId, long nanos) {
         super();
         this.clientId = clientId;
+        this.redirectURI = redirectURI;
         this.scope = null == scope ? "" : scope.scopeString();
         this.userId = userId;
         this.contextId = contextId;
@@ -111,6 +114,7 @@ public class PortableAuthCodeInfo implements CustomPortable {
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
         writer.writeUTF(PARAMETER_CLIENT_ID, clientId);
+        writer.writeUTF(PARAMETER_REDIRECT_URI, redirectURI);
         writer.writeUTF(PARAMETER_SCOPE, scope);
         writer.writeInt(PARAMETER_USER_ID, userId);
         writer.writeInt(PARAMETER_CONTEXT_ID, contextId);
@@ -120,6 +124,7 @@ public class PortableAuthCodeInfo implements CustomPortable {
     @Override
     public void readPortable(PortableReader reader) throws IOException {
         clientId = reader.readUTF(PARAMETER_CLIENT_ID);
+        redirectURI = reader.readUTF(PARAMETER_REDIRECT_URI);
         scope = reader.readUTF(PARAMETER_SCOPE);
         userId = reader.readInt(PARAMETER_USER_ID);
         contextId = reader.readInt(PARAMETER_CONTEXT_ID);
@@ -133,6 +138,15 @@ public class PortableAuthCodeInfo implements CustomPortable {
      */
     public String getClientId() {
         return clientId;
+    }
+
+    /**
+     * Gets the redirectURI
+     *
+     * @return The redirectURI
+     */
+    public String getRedirectURI() {
+        return redirectURI;
     }
 
     /**

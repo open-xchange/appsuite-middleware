@@ -49,74 +49,45 @@
 
 package com.openexchange.oauth.provider.internal;
 
-import java.util.Date;
-import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.Scope;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
+
 
 /**
- * {@link AbstractToken}
+ * {@link ScopeRegistry}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public abstract class AbstractToken implements OAuthGrant {
+public class ScopeRegistry {
 
-    private int contextID;
-    private int userID;
-    private String token;
-    private Date expirationDate;
-    private Scope scope;
+    private static final ScopeRegistry INSTANCE = new ScopeRegistry();
 
-    public AbstractToken(int contextId, int userId, String token, Long lifetime, Scope scope) {
-        this.contextID = contextId;
-        this.userID = userId;
-        this.token = token;
-        this.expirationDate = new Date(System.currentTimeMillis() + lifetime);
-        this.scope = scope;
+    private final ConcurrentMap<String, OAuthScopeProvider> providers = new ConcurrentHashMap<>();
+
+    private ScopeRegistry() {
+        super();
     }
 
-    @Override
-    public int getContextId() {
-        return contextID;
+    public static ScopeRegistry getInstance() {
+        return INSTANCE;
     }
 
-    @Override
-    public int getUserId() {
-        return userID;
+    public void addScopeProvider(OAuthScopeProvider provider) {
+        providers.put(provider.getId(), provider);
     }
 
-    @Override
-    public String getAccessToken() {
-        return token;
+    public void removeScopeProvider(OAuthScopeProvider provider) {
+        providers.remove(provider.getId(), provider);
     }
 
-    @Override
-    public Date getExpirationDate() {
-        return expirationDate;
+    public OAuthScopeProvider getProvider(String scope) {
+        return providers.get(scope);
     }
 
-    @Override
-    public Scope getScope() {
-        return scope;
-    }
-
-    public void setContextID(int contextID) {
-        this.contextID = contextID;
-    }
-
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
-    public void setScope(Scope scope) {
-        this.scope = scope;
+    public boolean hasScopeProvider(String scope) {
+        return providers.containsKey(scope);
     }
 
 }

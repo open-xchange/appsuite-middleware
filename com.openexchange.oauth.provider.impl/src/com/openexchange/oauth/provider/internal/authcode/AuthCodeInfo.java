@@ -58,6 +58,7 @@ package com.openexchange.oauth.provider.internal.authcode;
 public class AuthCodeInfo {
 
     private String clientId;
+    private String redirectURI;
     private String scope;
     private int userId;
     private int contextId;
@@ -74,14 +75,16 @@ public class AuthCodeInfo {
      * Initializes a new {@link AuthCodeInfo}.
      *
      * @param clientId The client identifier
+     * @param redirectURI The redirect URI
      * @param scope The scope identifier
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param nanos The nanos
      */
-    public AuthCodeInfo(String clientId, String scope, int userId, int contextId, long nanos) {
+    public AuthCodeInfo(String clientId, String redirectURI, String scope, int userId, int contextId, long nanos) {
         super();
         this.clientId = clientId;
+        this.redirectURI = redirectURI;
         this.scope = scope;
         this.userId = userId;
         this.contextId = contextId;
@@ -104,6 +107,24 @@ public class AuthCodeInfo {
      */
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+
+    /**
+     * Gets the redirectURI
+     *
+     * @return The redirectURI
+     */
+    public String getRedirectURI() {
+        return redirectURI;
+    }
+
+    /**
+     * Sets the redirectURI
+     *
+     * @param redirectURI The redirectURI to set
+     */
+    public void setRedirectURI(String redirectURI) {
+        this.redirectURI = redirectURI;
     }
 
     /**

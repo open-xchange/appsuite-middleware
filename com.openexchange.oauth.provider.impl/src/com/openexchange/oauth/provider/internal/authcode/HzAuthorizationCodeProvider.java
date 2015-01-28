@@ -113,7 +113,7 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException {
+    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException {
         if (notActive.get()) {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
@@ -127,7 +127,7 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         // Continue...
         String authCode = RandomStringUtils.randomAlphabetic(64);
         long now = System.nanoTime();
-        map.put(authCode, new PortableAuthCodeInfo(clientId, scope, userId, contextId, now));
+        map.put(authCode, new PortableAuthCodeInfo(clientId, redirectURI, scope, userId, contextId, now));
         return authCode;
     }
 
@@ -154,23 +154,8 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         int contextId = value.getContextId();
         int userId = value.getUserId();
         String sScope = value.getScope();
-        AuthCodeInfo authCodeInfo = new AuthCodeInfo(value.getClientId(), sScope, userId, contextId, value.getNanos());
-        if (false == validValue(authCodeInfo, now, client.getId())) {
-            return null;
-        }
-
+        AuthCodeInfo authCodeInfo = new AuthCodeInfo(value.getClientId(), value.getRedirectURI(), sScope, userId, contextId, value.getNanos());
         return authCodeInfo;
-
-        // Valid
-        // FIXME: remove
-//        DefaultOAuthToken token = new DefaultOAuthToken();
-//        token.setScope("null".equals(sScope) ? null : DefaultScope.parseScope(sScope));
-//        token.setContextId(contextId);
-//        token.setUserId(userId);
-//        token.setAccessToken(new UserizedToken(userId, contextId).getToken());
-//        token.setRefreshToken(new UserizedToken(userId, contextId).getToken());
-//        token.setExpirationDate(new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION));
-//        return token;
     }
 
 }

@@ -49,10 +49,8 @@
 
 package com.openexchange.oauth.provider.internal.authcode;
 
-import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.Scope;
 import com.openexchange.server.ServiceLookup;
 
@@ -76,20 +74,8 @@ public abstract class AbstractAuthorizationCodeProvider {
         this.services = services;
     }
 
-    public abstract String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException;
+    public abstract String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException;
 
     public abstract AuthCodeInfo redeemAuthCode(Client client, String authCode) throws OXException;
-
-    /**
-     * Checks validity of passed value in comparison to given time stamp (and session).
-     *
-     * @param value The value to check
-     * @param now The current time stamp nano seconds
-     * @param clientId The client identifier
-     * @return <code>true</code> if valid; otherwise <code>false</code>
-     */
-    protected boolean validValue(AuthCodeInfo value, long now, String clientId) {
-        return (TimeUnit.NANOSECONDS.toMillis(now - value.getNanos()) <= OAuthProviderService.AUTH_CODE_TIMEOUT_MILLIS) && clientId.equals(value.getClientId());
-    }
 
 }

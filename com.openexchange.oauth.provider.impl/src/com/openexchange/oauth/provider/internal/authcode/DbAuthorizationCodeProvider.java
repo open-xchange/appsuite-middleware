@@ -61,8 +61,6 @@ import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.Scope;
 import com.openexchange.oauth.provider.tools.UserizedToken;
-import com.openexchange.osgi.Tools;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -86,28 +84,29 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId) throws OXException {
+    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
         try {
-            return generateAuthorizationCodeFor(clientId, scope, userId, contextId, con);
+            return generateAuthorizationCodeFor(clientId, redirectURI, scope, userId, contextId, con);
         } finally {
             dbService.backWritable(contextId, con);
         }
     }
 
-    private String generateAuthorizationCodeFor(String clientId, Scope scope, int userId, int contextId, Connection con) throws OXException {
+    private String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId, Connection con) throws OXException {
         String authCode = new UserizedToken(userId, contextId).getToken();
         long now = System.nanoTime();
 
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO authCode (code, cid, user, clientId, scope, nanos) VALUES (?, ?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO authCode (code, cid, user, clientId, redirectURI, scope, nanos) VALUES (?, ?, ?, ?, ?, ?, ?)");
             int pos = 1;
             stmt.setString(pos++, authCode);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setString(pos++, clientId);
+            stmt.setString(pos++, redirectURI);
             if (null == scope) {
                 stmt.setNull(pos++, java.sql.Types.VARCHAR);
             } else {
@@ -162,8 +161,10 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, user, clientId, scope, nanos FROM authCode WHERE code=?");
-            stmt.setString(1, authCode.getToken());
+            stmt = con.prepareStatement("SELECT cid, user, clientId, redirectURI, scope, nanos FROM authCode WHERE cid = ? AND user = ? AND code = ?");
+            stmt.setInt(1, authCode.getContextId());
+            stmt.setInt(2, authCode.getUserId());
+            stmt.setString(3, authCode.getToken());
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return null;
@@ -173,8 +174,9 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             int contextId = rs.getInt(1);
             int userId = rs.getInt(2);
             String clientId = rs.getString(3);
-            String sScope = rs.getString(4);
-            long nanos = rs.getLong(5);
+            String redirectURI = rs.getString(4);
+            String sScope = rs.getString(5);
+            long nanos = rs.getLong(6);
 
             // Delete entry
             if (false == dropAuthorizationCodeFor(authCode, con)) {
@@ -183,18 +185,7 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             }
 
             // Perform check
-            long now = System.nanoTime();
-            AuthCodeInfo authCodeInfo = new AuthCodeInfo(clientId, sScope, userId, contextId, nanos);
-            if (false == super.validValue(authCodeInfo, now, client.getId())) {
-                return null;
-            }
-            if (authCode.getContextId() != contextId) {
-                return null;
-            }
-            if (authCode.getUserId() != userId) {
-                return null;
-            }
-
+            AuthCodeInfo authCodeInfo = new AuthCodeInfo(clientId, redirectURI, sScope, userId, contextId, nanos);
             return authCodeInfo;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());

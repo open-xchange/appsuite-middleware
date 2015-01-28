@@ -47,33 +47,48 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.osgi;
 
-import java.util.Set;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
+import com.openexchange.oauth.provider.internal.ScopeRegistry;
 
 
 /**
- * {@link Scope}
+ * {@link OAuthScopeProviderTracker}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface Scope {
+public class OAuthScopeProviderTracker implements ServiceTrackerCustomizer<OAuthScopeProvider, OAuthScopeProvider> {
 
-    boolean has(String scope);
+    private final BundleContext context;
 
-    /**
-     * Gets the string identifier for this scope
-     *
-     * @return The string identifier
-     */
-    String scopeString();
+    public OAuthScopeProviderTracker(BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-    /**
-     * Gets an immutable set of all scope identifiers
-     *
-     * @return The scope IDs
-     */
-    Set<String> getScopes();
+    @Override
+    public OAuthScopeProvider addingService(ServiceReference<OAuthScopeProvider> reference) {
+        OAuthScopeProvider service = context.getService(reference);
+        if (service != null) {
+            ScopeRegistry.getInstance().addScopeProvider(service);
+        }
+
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<OAuthScopeProvider> reference, OAuthScopeProvider service) {
+
+    }
+
+    @Override
+    public void removedService(ServiceReference<OAuthScopeProvider> reference, OAuthScopeProvider service) {
+        ScopeRegistry.getInstance().removeScopeProvider(service);
+    }
 
 }

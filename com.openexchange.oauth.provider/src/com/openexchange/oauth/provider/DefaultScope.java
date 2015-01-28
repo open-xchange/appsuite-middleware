@@ -149,6 +149,11 @@ public class DefaultScope implements Scope {
     }
 
     @Override
+    public Set<String> getScopes() {
+        return Collections.unmodifiableSet(scopes);
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
