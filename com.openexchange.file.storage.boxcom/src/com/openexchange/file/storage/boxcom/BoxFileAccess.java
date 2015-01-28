@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,6 +101,8 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageVersionedFileAccess {
+
+    private static final String THUMBNAIL_EXTENSION = "png";
 
     private final BoxAccountAccess accountAccess;
     final int userId;
@@ -162,7 +165,8 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected Boolean doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
-                    BoxFile file = boxClient.getFilesManager().getFile(id, null);
+
+                    BoxFile file = boxClient.getFilesManager().getFile(id, customRequestObject(Arrays.asList(BoxFile.FIELD_ID)));
                     checkFileValidity(file);
                     return Boolean.TRUE;
                 } catch (final BoxRestException e) {
@@ -360,7 +364,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
 
-                    BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
+                    BoxFile boxfile = boxClient.getFilesManager().getFile(id, defaultBoxRequest());
                     checkFileValidity(boxfile);
 
                     BoxDefaultRequestObject versionRequest = new BoxDefaultRequestObject();
@@ -381,11 +385,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected InputStream doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
-                    BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
-                    checkFileValidity(boxfile);
 
                     BoxImageRequestObject reqObj = BoxImageRequestObject.pagePreviewRequestObject(1, 64, 128, 64, 128);
-                    BoxThumbnail thumbnail = boxClient.getFilesManager().getThumbnail(id, null, reqObj);
+                    BoxThumbnail thumbnail = boxClient.getFilesManager().getThumbnail(id, THUMBNAIL_EXTENSION, reqObj);
 
                     return thumbnail.getContent();
                 } catch (final BoxServerException e) {
@@ -807,9 +809,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         fields.add(BoxFile.FIELD_MODIFIED_AT); //convert to utc
         //fields.add(BoxFile.FIELD_VERSION_NUMBER);
 
-        BoxDefaultRequestObject requestObject = new BoxDefaultRequestObject();
-        requestObject.getRequestExtras().addFields(fields);
-        return requestObject;
+        return customRequestObject(fields);
     }
 
     /**
@@ -817,17 +817,24 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
      * 
      * @return
      */
-    private static BoxDefaultRequestObject versionRequestObject() {
-        BoxDefaultRequestObject versionReqObj = new BoxDefaultRequestObject();
-        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_VERSION_NUMBER);
-        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_NAME);
-        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_MODIFIED_AT);
-        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_ID);
-        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_SIZE);
-        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_COMMENT_COUNT);
-        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_CREATED_BY);
-        versionReqObj.getRequestExtras().addField(BoxFile.FIELD_SEQUENCE_ID);
-        return versionReqObj;
+    private static BoxDefaultRequestObject versionsRequestObject() {
+        return customRequestObject(Arrays.asList(BoxFile.FIELD_NAME, BoxFile.FIELD_MODIFIED_AT, BoxFile.FIELD_ID,
+            BoxFile.FIELD_SIZE, BoxFile.FIELD_COMMENT_COUNT, BoxFile.FIELD_CREATED_BY, BoxFile.FIELD_SEQUENCE_ID, BoxFile.FIELD_SHA1, BoxFile.FIELD_TRASHED_AT));
+
+    }
+
+    /**
+     * Create a custom request object with the specified fields
+     * 
+     * @param fields The fields to request
+     * @return A request object with the specified fields
+     */
+    private static BoxDefaultRequestObject customRequestObject(List<String> fields) {
+        BoxDefaultRequestObject customRequestObject = new BoxDefaultRequestObject();
+        for (String field : fields) {
+            customRequestObject.getRequestExtras().addField(field);
+        }
+        return customRequestObject;
     }
 
 }
