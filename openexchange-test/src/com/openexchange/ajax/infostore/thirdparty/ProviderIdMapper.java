@@ -47,45 +47,58 @@
  *
  */
 
-package com.openexchange.ajax.infostore.thirdparty.googledrive;
+package com.openexchange.ajax.infostore.thirdparty;
+
+import com.openexchange.ajax.oauth.provider.actions.AuthenticationProvider;
+
 
 /**
- * {@link LifecycleTest}
+ * {@link ProviderIdMapper}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class LifecycleTest extends AbstractInfostoreThirdpartyTest {
+public class ProviderIdMapper {
+    private AuthenticationProvider authProvider;
+    private String infostoreId;
 
-    private String googleId;
+    public AuthenticationProvider getAuthProvider() {
+        return authProvider;
+    }
 
-    /**
-     * Initializes a new {@link LifecycleTest}.
-     *
-     * @param name
-     */
-    public LifecycleTest(String name) {
-        super(name);
+    public void setAuthProvider(AuthenticationProvider authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public String getInfostoreId() {
+        return infostoreId;
+    }
+
+    public void setInfostoreId(String infostoreId) {
+        this.infostoreId = infostoreId;
     }
 
     @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    public int hashCode() {
+        return authProvider.getOAuthServiceId().hashCode();
     }
 
     @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ProviderIdMapper other = (ProviderIdMapper) obj;
+        if (authProvider.getProvider() != other.authProvider.getProvider()) {
+            return false;
+        }
+        return true;
     }
 
-    public void testListFiles() {
 
-    }
-
-    public void testUpload() throws Exception {}
-
-    public void testGetFile() {};
-
-    public void testUpdateFile() {};
-
-    public void testDeleteFile() throws Exception {}
 }

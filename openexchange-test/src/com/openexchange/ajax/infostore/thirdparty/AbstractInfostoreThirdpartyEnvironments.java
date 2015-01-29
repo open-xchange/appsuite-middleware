@@ -50,6 +50,8 @@
 package com.openexchange.ajax.infostore.thirdparty;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -65,27 +67,47 @@ import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
 
 /**
- * {@link AbstractInfostoreThirdpartyEnvironment}
+ * {@link AbstractInfostoreThirdpartyEnvironments}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public abstract class AbstractInfostoreThirdpartyEnvironment {
+public abstract class AbstractInfostoreThirdpartyEnvironments {
     protected AJAXClient ajaxClient;
 
-    private final AuthenticationProvider authProvider;
+    private final List<AuthenticationProvider> authProviders;
 
-    private int accountId = -1;
+    private List<Integer> accountIds;
 
     private String filestoreId;
 
     /**
-     * Initializes a new {@link AbstractSubscribeTestEnvironment}.
+     * Initializes a new {@link AbstractSubscribeTestEnvironment} for
      *
-     * @param authProvider The authentication provider
+     * @param authProviders
      */
-    protected AbstractInfostoreThirdpartyEnvironment(AuthenticationProvider authProvider) {
-        this.authProvider = authProvider;
+    protected AbstractInfostoreThirdpartyEnvironments() {
+        super();
+        AuthenticationProvider[] auth = AuthenticationProvider.values();
+        this.authProviders = new ArrayList<AuthenticationProvider>(auth.length);
+
+        for(AuthenticationProvider authProvider : auth) {
+            this.authProviders.add(authProvider);
+        }
+
     }
+
+    /**
+     * Initializes a new {@link AbstractSubscribeTestEnvironment}. for a set of auth providers
+     *
+     * @param authProviders The authentication provider
+     */
+    protected AbstractInfostoreThirdpartyEnvironments(List<AuthenticationProvider> authProvider) {
+        if(authProvider == null || authProvider.isEmpty()) {
+            throw new IllegalArgumentException("No thirdparty authentication provider found to initialize a filestorage");
+        }
+        this.authProviders = authProvider;
+    }
+
 
     /**
      * Initialize the test environment
@@ -95,10 +117,30 @@ public abstract class AbstractInfostoreThirdpartyEnvironment {
     public void init() {
         try {
             initAJAXClient();
-            initEnvironment(authProvider);
+            initEnvironments(authProviders);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    /**
+     * Clean up
+     *
+     * @throws Exception
+     */
+    public void cleanup() throws Exception {
+        if(authProviders != null && false == authProviders.isEmpty()) {
+            for(AuthenticationProvider auth : authProviders) {
+                deleteFilestorageFor(auth);
+            }
+        }
+
+        if(accountIds != null && false == accountIds.isEmpty()) {
+            for(int accountId : accountIds) {
+                deleteOAuthAccount(accountId);
+            }
+        }
+
+        logout();
     }
 
     /**
@@ -113,14 +155,38 @@ public abstract class AbstractInfostoreThirdpartyEnvironment {
     }
 
     /**
-     * Clean up
+     * Initializes the oauth accounts and filestorages for the providers
+     *
      * @throws Exception
      */
-    public void cleanup() throws Exception {
-        deleteFilestorageFor(authProvider);
-        deleteOAuthAccount();
-        logout();
+    private void initEnvironments(List<AuthenticationProvider> authProviders) throws Exception {
+        this.accountIds = new ArrayList<Integer>(authProviders.size());
+
+        for(AuthenticationProvider authProvider : authProviders) {
+            int currentOAuthAccount = initOAuthAccountFor(authProvider);
+            createFilestorageFor(authProvider, currentOAuthAccount);
+            accountIds.add(currentOAuthAccount);
+        }
     }
+
+    private int initOAuthAccountFor(AuthenticationProvider auth) throws Exception {
+        InitOAuthAccountRequest req = new InitOAuthAccountRequest(auth);
+        InitOAuthAccountResponse resp = ajaxClient.execute(req);
+        JSONObject json = (JSONObject) resp.getData();
+        Integer account = (Integer) json.get("accountId");
+        return account;
+    }
+
+    private void createFilestorageFor(AuthenticationProvider authProvider, int account) throws Exception {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("account", String.valueOf(account));
+        NewFileaccountRequest nfReq = new NewFileaccountRequest(authProvider.name(), authProvider.getFilestorageService(), jsonObject);
+        NewFileaccountResponse nfResp = ajaxClient.execute(nfReq);
+        String filestoreId = (String) nfResp.getData();
+        this.filestoreId = filestoreId;
+    }
+
+
 
     /**
      * Logout the client
@@ -136,42 +202,15 @@ public abstract class AbstractInfostoreThirdpartyEnvironment {
     }
 
     /**
-     * Delete the test oauth account
+     * Delete the oauth account
      *
      * @throws JSONException
      * @throws IOException
      * @throws OXException
      */
-    private void deleteOAuthAccount() throws OXException, IOException, JSONException {
+    private void deleteOAuthAccount(int accountId) throws OXException, IOException, JSONException {
         DeleteOAuthAccountRequest req = new DeleteOAuthAccountRequest(accountId);
         ajaxClient.execute(req);
-    }
-
-    /**
-     * If you need any extra initialization, implement this method
-     * @throws Exception
-     */
-    private void initEnvironment(AuthenticationProvider auth) throws Exception {
-        int accountId = initOAuthAccountFor(auth);
-        createFilestorageFor(auth, accountId);
-    }
-
-    private int initOAuthAccountFor(AuthenticationProvider auth) throws Exception {
-        InitOAuthAccountRequest req = new InitOAuthAccountRequest(auth);
-        InitOAuthAccountResponse resp = ajaxClient.execute(req);
-        JSONObject json = (JSONObject) resp.getData();
-        Integer account = (Integer) json.get("accountId");
-        this.accountId = account;
-        return account;
-    }
-
-    private void createFilestorageFor(AuthenticationProvider authProvider, int account) throws Exception {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("account", String.valueOf(account));
-        NewFileaccountRequest nfReq = new NewFileaccountRequest(authProvider.name(), authProvider.getFilestorageService(), jsonObject);
-        NewFileaccountResponse nfResp = ajaxClient.execute(nfReq);
-        String filestoreId = (String) nfResp.getData();
-        this.filestoreId = filestoreId;
     }
 
     private void deleteFilestorageFor(AuthenticationProvider authProvider) throws Exception {

@@ -47,36 +47,31 @@
  *
  */
 
-package com.openexchange.ajax.infostore.thirdparty.googledrive;
+package com.openexchange.ajax.infostore.thirdparty.actions;
 
-import com.openexchange.ajax.infostore.thirdparty.AbstractInfostoreThirdpartyEnvironment;
-import com.openexchange.ajax.oauth.provider.actions.AuthenticationProvider;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link AbstractInfostoreThirdpartyEnvironment}
+ * {@link NewFileParser}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GoogleTestEnvironment extends AbstractInfostoreThirdpartyEnvironment {
-
-    private static final GoogleTestEnvironment INSTANCE = new GoogleTestEnvironment();
+public class NewFileParser extends AbstractAJAXParser<NewFileResponse> {
 
     /**
-     * Get the instance of the environment
+     * Initializes a new {@link NewFileParser}.
      *
-     * @return the instance
+     * @param failOnError
      */
-    public static final GoogleTestEnvironment getInstance() {
-        return INSTANCE;
+    public NewFileParser(boolean failOnError) {
+        super(failOnError);
     }
 
-    // -------------------------------------------------------------------------------------------------- //
-
-    /**
-     * Initializes a new {@link GoogleTestEnvironment}.
-     * @param serviceId
-     */
-    protected GoogleTestEnvironment() {
-        super(AuthenticationProvider.GOOGLE);
+    @Override
+    protected NewFileResponse createResponse(Response response) throws JSONException {
+        return new NewFileResponse(response);
     }
+
 }

@@ -47,59 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.infostore.thirdparty.googledrive;
+package com.openexchange.ajax.infostore.thirdparty.actions;
 
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
-import com.openexchange.test.FolderTestManager;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link AbstractInfostoreThirdpartyTest}
+ * {@link DeleteFolderRequest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
-    /**
-     * Initializes a new {@link AbstractInfostoreThirdpartyTest}.
-     * @param name
-     */
-    public AbstractInfostoreThirdpartyTest(String name) {
-        super(name);
-    }
+public class DeleteFolderRequest extends AbstractFolderRequest<DeleteFolderResponse> {
+    private final int tree;
+    private final String folderId;
 
-    public FolderTestManager fMgr;
-    public InfostoreTestManager infoMgr;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        fMgr = new FolderTestManager(getClient());
-        infoMgr = new InfostoreTestManager(getClient());
+    public DeleteFolderRequest(String folderId, int tree) {
+        super(true);
+        this.folderId = folderId;
+        this.tree = tree;
     }
 
     @Override
-    protected void tearDown() throws Exception {
-        infoMgr.cleanUp();
-        fMgr.cleanUp();
-        super.tearDown();
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.PUT;
     }
 
-//    protected String getExternalInfostoreId(AuthenticationProvider authProvider) {
-//        int[] columns = new int[] {  1, 20, 3030 };
-//
-//        FolderObject[] fObjs = fMgr.listFoldersOnServer(1, columns);
-//
-//        String folderId = null;
-//        for(FolderObject fObj : fObjs) {
-//            if(fObj.getFullName() != null) {
-//                if(fObj.getFullName().startsWith(authProvider.getFilestorageService())) {
-//                    folderId = fObj.getFullName();
-//                }
-//            }
-//        }
-//        System.out.println("folderID " + folderId);
-//
-//        return folderId;
-//    }
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> list = new ArrayList<Parameter>();
+        list.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
+        list.add(new URLParameter("tree", tree));
+        list.add(new URLParameter("failOnError", true));
+        return list.toArray(new Parameter[list.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends DeleteFolderResponse> getParser() {
+        return new DeleteFolderParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.put(folderId);
+        return jsonArray;
+    }
 }

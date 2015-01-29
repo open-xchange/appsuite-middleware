@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,30 @@
  *
  */
 
-package com.openexchange.ajax.infostore.thirdparty.googledrive;
+package com.openexchange.ajax.infostore.thirdparty.actions;
 
-import com.openexchange.ajax.infostore.thirdparty.AbstractInfostoreThirdpartyEnvironment;
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link AbstractInfostoreThirdpartyEnvironment}
+ * {@link CreateFolderParser}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GoogleInfostoreTestSuite extends AbstractInfostoreThirdpartyTest {
+public class CreateFolderParser extends AbstractAJAXParser<CreateFolderResponse> {
+
     /**
-     * Initializes a new {@link GoogleInfostoreTestSuite}.
-     * @param name
+     * Initializes a new {@link CreateFolderParser}.
+     *
+     * @param failOnError
      */
-    public GoogleInfostoreTestSuite(String name) {
-        super(name);
+    protected CreateFolderParser(boolean failOnError) {
+        super(failOnError);
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.ajax.infostore.thirdparty.googledrive.GoogleInfostoreTestSuite");
-        suite.addTestSuite(LifecycleTest.class);
-
-        TestSetup setup = new TestSetup(suite) {
-            @Override
-            protected void setUp() {
-                GoogleTestEnvironment.getInstance().init();
-            }
-            @Override
-            protected void tearDown() throws Exception {
-                GoogleTestEnvironment.getInstance().cleanup();
-            }
-        };
-        return setup;
+    @Override
+    protected CreateFolderResponse createResponse(Response response) throws JSONException {
+        return new CreateFolderResponse(response);
     }
 }
