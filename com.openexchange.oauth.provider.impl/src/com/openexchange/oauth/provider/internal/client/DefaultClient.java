@@ -47,10 +47,12 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal.client;
 
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.internal.URIValidator;
 
 /**
  * {@link DefaultClient} - The default {@link Client} implementation.
@@ -100,7 +102,17 @@ public class DefaultClient implements Client {
 
     @Override
     public boolean hasRedirectURI(String uri) {
-        return redirectURIs.contains(uri);
+        if (!URIValidator.isValidRedirectURI(uri)) {
+            return false;
+        }
+
+        for (String storedURI : redirectURIs) {
+            if (URIValidator.urisEqual(storedURI, uri)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

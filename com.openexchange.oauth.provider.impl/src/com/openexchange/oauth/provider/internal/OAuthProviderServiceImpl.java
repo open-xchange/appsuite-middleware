@@ -61,13 +61,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
-import com.openexchange.oauth.provider.DefaultClient;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
+import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.Scope;
 import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
+import com.openexchange.oauth.provider.internal.client.DefaultClient;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
 
@@ -101,6 +102,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         client.setName("Example App");
         client.setDescription("An app that provides funny example stuff");
         client.addRedirectURI("http://localhost:8080");
+        client.addRedirectURI("http://localhost/oauth2/redirect");
         clients.put(client.getId(), client);
     }
 
@@ -117,6 +119,10 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         client.setName(clientData.getName());
         client.setDescription(clientData.getDescription());
         for (String uri : clientData.getRedirectURIs()) {
+            if (!URIValidator.isValidRedirectURI(uri)) {
+                throw OAuthProviderExceptionCodes.INVALID_REDIRECT_URI.create(uri);
+            }
+
             client.addRedirectURI(uri);
         }
 
@@ -180,7 +186,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
             return false;
         }
 
-        if (!redirectURI.equals(authCodeInfo.getRedirectURI())) {
+        if (!URIValidator.urisEqual(authCodeInfo.getRedirectURI(), redirectURI)) {
             return false;
         }
 
