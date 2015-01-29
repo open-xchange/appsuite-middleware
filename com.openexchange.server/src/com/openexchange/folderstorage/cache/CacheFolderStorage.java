@@ -1393,6 +1393,10 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
          * Get folder from appropriate storage
          */
         String newFolderId = folder.getID();
+        if (null == newFolderId) {
+            // cancel cache invalidations if no folder identifier set
+            return;
+        }
         /*
          * Refresh/Invalidate folder
          */
