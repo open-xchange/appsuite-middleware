@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,57 @@
  *
  */
 
-package com.openexchange.oauth.provider.osgi;
+package com.openexchange.oauth.provider;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.oauth.provider.internal.db.migration.osgi.OAuthProviderDbMigrationActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
+import java.io.InputStream;
+import javax.activation.MimeType;
 
 
 /**
- * {@link MainActivator}
+ * {@link Icon}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class MainActivator extends CompositeBundleActivator {
+public class Icon {
 
-    /**
-     * Initializes a new {@link MainActivator}.
-     */
-    public MainActivator() {
+    private final MimeType mimeType;
+
+    private final int height;
+
+    private final int width;
+
+    private final int size;
+
+    private final InputStream inputStream;
+
+    public Icon(MimeType mimeType, int height, int width, int size, InputStream inputStream) {
         super();
+        this.mimeType = mimeType;
+        this.height = height;
+        this.width = width;
+        this.size = size;
+        this.inputStream = inputStream;
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new OAuthProviderActivator(), new OAuthProviderDbMigrationActivator() };
+    public MimeType getMimeType() {
+        return mimeType;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public InputStream getInputStream() {
+        return inputStream;
     }
 
 }

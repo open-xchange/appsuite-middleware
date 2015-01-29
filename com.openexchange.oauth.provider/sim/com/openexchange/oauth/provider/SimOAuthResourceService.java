@@ -140,6 +140,18 @@ public class SimOAuthResourceService implements OAuthResourceService {
                 return null;
             }
 
+            @Override
+            public Icon getIcon() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public Date getRegistrationDate() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
         };
     }
 

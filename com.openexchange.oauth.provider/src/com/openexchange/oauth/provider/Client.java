@@ -50,6 +50,7 @@
 package com.openexchange.oauth.provider;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 
@@ -63,6 +64,13 @@ import java.util.List;
 public interface Client extends Serializable {
 
     /**
+     * Gets the client's name
+     *
+     * @return The name
+     */
+    String getName();
+
+    /**
      * Gets the client's description
      *
      * @return The description
@@ -70,11 +78,17 @@ public interface Client extends Serializable {
     String getDescription();
 
     /**
-     * Gets the client's name
-     *
-     * @return The name
+     * Gets the
+     * @return
      */
-    String getName();
+    Icon getIcon();
+
+    /**
+     * Gets the date of this clients registration.
+     *
+     * @return The date
+     */
+    Date getRegistrationDate();
 
     /**
      * Gets the client's public identifier

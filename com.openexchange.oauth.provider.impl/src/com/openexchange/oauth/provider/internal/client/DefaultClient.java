@@ -49,9 +49,11 @@
 
 package com.openexchange.oauth.provider.internal.client;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.Icon;
 import com.openexchange.oauth.provider.internal.URIValidator;
 
 /**
@@ -71,6 +73,8 @@ public class DefaultClient implements Client {
     private final List<String> redirectURIs;
     private String owner;
     private String contactAddress;
+    private Icon icon;
+    private Date registrationDate;
 
     /**
      * Initializes a new {@link DefaultClient}.
@@ -186,6 +190,36 @@ public class DefaultClient implements Client {
     @Override
     public List<String> getRedirectURIs() {
         return redirectURIs;
+    }
+
+    @Override
+    public Icon getIcon() {
+        return icon;
+    }
+
+
+    /**
+     * Sets the icon
+     *
+     * @param icon The icon to set
+     */
+    public void setIcon(Icon icon) {
+        this.icon = icon;
+    }
+
+    @Override
+    public Date getRegistrationDate() {
+        return registrationDate;
+    }
+
+
+    /**
+     * Sets the registrationDate
+     *
+     * @param registrationDate The registrationDate to set
+     */
+    public void setRegistrationDate(Date registrationDate) {
+        this.registrationDate = registrationDate;
     }
 
 }

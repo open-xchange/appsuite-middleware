@@ -90,6 +90,55 @@
 			<dropTable tableName="guest2context" />
 		</rollback>
 	</changeSet>
+	
+	<!--changeSet id="7.8.0:oauth_client:create" author="steffen.templin@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="oauth_client" schemaName="configdb" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'oauth_client' to persist OAuth 2.0 client registrations
+        </comment>
+        <sql>
+            CREATE TABLE oauth_client (
+                id VARCHAR(255) NOT NULL,
+                secret VARCHAR(255) NOT NULL,
+                name VARCHAR(255) UNIQUE NOT NULL,
+                description TEXT DEFAULT NULL,
+                icon_reference VARCHAR(255) DEFAULT NULL,
+                default_scope VARCHAR(767) DEFAULT NULL,
+                contact_address VARCHAR(255) DEFAULT NULL,
+                website VARCHAR(255) DEFAULT NULL,
+                enabled TINYINT UNSIGNED NOT NULL,
+                PRIMARY KEY(`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="oauth_client"/>
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="7.8.0:oauth_client_uri:create" author="steffen.templin@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="oauth_client_uri" schemaName="configdb" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'oauth_client_uri' to persist OAuth 2.0 client redirect URIs
+        </comment>
+        <sql>
+            CREATE TABLE oauth_client_uri (
+                client VARCHAR(255) NOT NULL,
+                uri VARCHAR(767) NOT NULL,
+                PRIMARY KEY(`client`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="oauth_client_uri"/>
+        </rollback>
+    </changeSet-->
 
 	<changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
 		<tagDatabase tag="7.8.0-milestone" />

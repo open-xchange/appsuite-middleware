@@ -49,9 +49,6 @@
 
 package com.openexchange.oauth.provider;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -62,8 +59,8 @@ import java.util.Set;
  */
 public class ClientData {
 
-    private String owner;
-    private boolean bOwner;
+    private Icon icon;
+    private boolean bIcon;
 
     private String name;
     private boolean bName;
@@ -71,158 +68,111 @@ public class ClientData {
     private String description;
     private boolean bDescription;
 
+    private Scope defaultScope;
+    private boolean bDefaultScope;
+
+    private Set<String> redirectURIs;
+    private boolean bRedirectURIs;
+
     private String contactAddress;
     private boolean bContactAddress;
 
-    private final Set<String> redirectURIs;
-    private boolean bRedirectURIs;
+    private String website;
+    private boolean bWebsite;
 
-    /**
-     * Initializes a new {@link ClientData}.
-     */
     public ClientData() {
         super();
-        redirectURIs = new LinkedHashSet<String>();
     }
 
-    /**
-     * Gets the owner
-     *
-     * @return The owner
-     */
-    public String getOwner() {
-        return owner;
+    public Icon getIcon() {
+        return icon;
     }
 
-    /**
-     * Sets the owner
-     *
-     * @param owner The owner
-     */
-    public void setOwner(String owner) {
-        this.owner = owner;
-        bOwner = true;
+    public void setIcon(Icon icon) {
+        this.icon = icon;
+        bIcon = true;
     }
 
-    /**
-     * Gets the name
-     *
-     * @return The name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Sets the name
-     *
-     * @param name The name
-     */
     public void setName(String name) {
         this.name = name;
         bName = true;
     }
 
-    /**
-     * Gets the description
-     *
-     * @return The description
-     */
     public String getDescription() {
         return description;
     }
 
-    /**
-     * Sets the description
-     *
-     * @param The description
-     */
     public void setDescription(String description) {
         this.description = description;
         bDescription = true;
     }
 
-    /**
-     * Gets the contact address
-     *
-     * @return The contact address
-     */
+    public Scope getDefaultScope() {
+        return defaultScope;
+    }
+
+    public void setDefaultScope(Scope defaultScope) {
+        this.defaultScope = defaultScope;
+        bDefaultScope = true;
+    }
+
+    public Set<String> getRedirectURIs() {
+        return redirectURIs;
+    }
+
+    public void setRedirectURIs(Set<String> redirectURIs) {
+        this.redirectURIs = redirectURIs;
+        bRedirectURIs = true;
+    }
+
     public String getContactAddress() {
         return contactAddress;
     }
 
-    /**
-     * Sets the contact address
-     *
-     * @param The contact address
-     */
     public void setContactAddress(String contactAddress) {
         this.contactAddress = contactAddress;
         bContactAddress = true;
     }
 
-    /**
-     * Gets the redirectUris
-     *
-     * @return The redirectUris
-     */
-    public List<String> getRedirectURIs() {
-        return new ArrayList<String>(redirectURIs);
+    public String getWebsite() {
+        return website;
     }
 
-    /**
-     * Adds given redirect URI
-     *
-     * @param uri The URI to add
-     */
-    public void addRedirectURI(String uri) {
-        redirectURIs.add(uri);
-        bRedirectURIs = true;
+    public void setWebsite(String website) {
+        this.website = website;
+        bWebsite = true;
     }
 
-    /**
-     * Checks if this client data contains owner information
-     *
-     * @return <code>true</code> if this client data contains owner information; otherwise <code>false</code>
-     */
-    public boolean containsOwner() {
-        return bOwner;
+    public boolean containsIcon() {
+        return bIcon;
     }
 
-    /**
-     * Checks if this client data contains the name
-     *
-     * @return <code>true</code> if this client data contains the name; otherwise <code>false</code>
-     */
     public boolean containsName() {
         return bName;
     }
 
-    /**
-     * Checks if this client data contains a description
-     *
-     * @return <code>true</code> if this client data contains a description; otherwise <code>false</code>
-     */
     public boolean containsDescription() {
         return bDescription;
     }
 
-    /**
-     * Checks if this client data contains a contact address
-     *
-     * @return <code>true</code> if this client data contains a contact address; otherwise <code>false</code>
-     */
+    public boolean containsDefaultScope() {
+        return bDefaultScope;
+    }
+
+    public boolean containsRedirectURIs() {
+        return bRedirectURIs;
+    }
+
     public boolean containsContactAddress() {
         return bContactAddress;
     }
 
-    /**
-     * Checks if this client data contains redirect URIs
-     *
-     * @return <code>true</code> if this client data contains redirect URIs; otherwise <code>false</code>
-     */
-    public boolean containsRedirectURIs() {
-        return bRedirectURIs;
+    public boolean containsWebsite() {
+        return bWebsite;
     }
 
 }
