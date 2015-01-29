@@ -24,7 +24,6 @@ Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Extensions for integration with Parallels
 Autoreqprov:    no
 Requires:       open-xchange-admin-soap >= @OXVERSION@
-Requires:       open-xchange-rest >= @OXVERSION@
 Requires:       open-xchange-spamhandler
 Provides:       open-xchange-authentication
 Provides:       open-xchange-custom-parallels = %{version}
