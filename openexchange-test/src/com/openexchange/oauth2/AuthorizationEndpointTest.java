@@ -82,8 +82,6 @@ import com.openexchange.java.util.UUIDs;
  */
 public class AuthorizationEndpointTest extends EndpointTest {
 
-    private static final String AUTHORIZATION_ENDPOINT = "/ajax/o/oauth2/authorization";
-
     private String csrfState;
 
     @Override

@@ -143,9 +143,7 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             return null;
         }
 
-        long now = System.nanoTime();
         PortableAuthCodeInfo value = map.remove(authCode);
-
         if (null == value) {
             return null;
         }

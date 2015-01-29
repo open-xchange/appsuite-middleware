@@ -83,7 +83,7 @@ public class TokenEndpointTest extends EndpointTest {
         HttpPost redeemToken = new HttpPost(new URIBuilder()
             .setScheme("http")
             .setHost(hostname)
-            .setPath("/ajax/o/oauth2/accessToken")
+            .setPath(TOKEN_ENDPOINT)
             .build());
         redeemToken.setEntity(new UrlEncodedFormEntity(tokenParams));
 
@@ -158,7 +158,7 @@ public class TokenEndpointTest extends EndpointTest {
         HttpPost redeemToken = new HttpPost(new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
-            .setPath("/ajax/o/oauth2/accessToken")
+            .setPath(TOKEN_ENDPOINT)
             .build());
         redeemToken.setEntity(new UrlEncodedFormEntity(requestParams));
         HttpResponse tokenResponse = client.execute(redeemToken);
@@ -188,7 +188,7 @@ public class TokenEndpointTest extends EndpointTest {
         redeemToken = new HttpPost(new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
-            .setPath("/ajax/o/oauth2/accessToken")
+            .setPath(TOKEN_ENDPOINT)
             .build());
         tokenResponse = client.execute(redeemToken);
         responseBody = EntityUtils.toString(tokenResponse.getEntity());
@@ -224,7 +224,7 @@ public class TokenEndpointTest extends EndpointTest {
         HttpPost redeemToken = new HttpPost(new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
-            .setPath("/ajax/o/oauth2/accessToken")
+            .setPath(TOKEN_ENDPOINT)
             .build());
         redeemToken.setEntity(new UrlEncodedFormEntity(requestParams));
         HttpResponse tokenResponse = client.execute(redeemToken);
@@ -254,7 +254,7 @@ public class TokenEndpointTest extends EndpointTest {
         redeemToken = new HttpPost(new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
-            .setPath("/ajax/o/oauth2/accessToken")
+            .setPath(TOKEN_ENDPOINT)
             .build());
         tokenResponse = client.execute(redeemToken);
         responseBody = EntityUtils.toString(tokenResponse.getEntity());

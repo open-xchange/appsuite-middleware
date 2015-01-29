@@ -110,7 +110,11 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Concurrent attempt to revoke secret for client %1$s
      */
-    CONCURRENT_SECRET_REVOKE("Concurrent attempt to revoke secret for client %1$s", OAuthProviderExceptionMessages.CONCURRENT_SECRET_REVOKE_MSG, Category.CATEGORY_ERROR, 12)
+    CONCURRENT_SECRET_REVOKE("Concurrent attempt to revoke secret for client %1$s", OAuthProviderExceptionMessages.CONCURRENT_SECRET_REVOKE_MSG, Category.CATEGORY_ERROR, 12),
+    /**
+     * '%1$s' is not a valid redirect URI.
+     */
+    INVALID_REDIRECT_URI("'%1$s' is not a valid redirect URI.", "'%1$s' is not a valid redirect URI.", Category.CATEGORY_USER_INPUT, 13);
     ;
 
     /**

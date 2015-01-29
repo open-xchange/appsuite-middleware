@@ -63,7 +63,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     AuthorizationEndpointTest.class,
-    TokenEndpointTest.class
+    TokenEndpointTest.class,
+    ProtocolFlowTest.class
 })
 public class OAuthTests {
 

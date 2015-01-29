@@ -83,6 +83,10 @@ import com.openexchange.exception.OXException;
  */
 public abstract class EndpointTest {
 
+    protected static final String AUTHORIZATION_ENDPOINT = "/ajax/o/oauth2/authorization";
+
+    protected static final String TOKEN_ENDPOINT = "/ajax/o/oauth2/accessToken";
+
     protected static String hostname;
     protected static String login;
     protected static String password;

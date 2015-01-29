@@ -176,10 +176,6 @@ public class TokenEndpoint extends HttpServlet {
             return;
         }
 
-
-
-
-
         respondWithToken(token, resp);
     }
 
