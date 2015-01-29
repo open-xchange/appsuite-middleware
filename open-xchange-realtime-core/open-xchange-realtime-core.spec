@@ -60,6 +60,9 @@ if [ ${1:-0} -eq 2 ]; then
     if ox_exists_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile; then
        ox_remove_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile
     fi
+
+    # SoftwareChange_Request-2393
+    ox_add_property com.openexchange.realtime.numberOfRunLoops 16 /opt/open-xchange/etc/realtime.properties
 fi
 
 %clean
