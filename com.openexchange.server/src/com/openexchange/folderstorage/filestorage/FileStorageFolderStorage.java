@@ -55,23 +55,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -125,26 +121,78 @@ public final class FileStorageFolderStorage implements FolderStorage {
      */
     private static final String INFOSTORE = Integer.toString(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
 
-    private static final String SERVICE_INFOSTORE = "infostore";
-
     // --------------------------------------------------------------------------------------------------------------------------- //
 
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link FileStorageFolderStorage}.
+     *
+     * @param services A service lookup reference
      */
     public FileStorageFolderStorage(ServiceLookup services) {
         super();
         this.services = services;
     }
 
-    private IDBasedFolderAccess getFolderAccess(final StorageParameters storageParameters) throws OXException {
-        final IDBasedFolderAccess folderAccess = storageParameters.getParameter(FileStorageFolderType.getInstance(), PARAM);
-        if (null == folderAccess) {
-            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
+    @Override
+    public boolean startTransaction(StorageParameters parameters, boolean modify) throws OXException {
+        /*
+         * initialize ID based file access if necessary
+         */
+        if (null == parameters.getParameter(getFolderType(), PARAM)) {
+            /*
+             * ensure the session is present
+             */
+            if (null == parameters.getSession()) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create();
+            }
+            /*
+             * create access via factory
+             */
+            IDBasedFolderAccessFactory factory = services.getService(IDBasedFolderAccessFactory.class);
+            if (null == factory) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
+            }
+            IDBasedFolderAccess folderAccess = factory.createAccess(parameters.getSession());
+            if (parameters.putParameterIfAbsent(getFolderType(), PARAM, folderAccess)) {
+                /*
+                 * enqueue in managed transaction if possible, otherwise signal that we started the transaction ourselves
+                 */
+                if (false == TransactionManager.isManagedTransaction(parameters)) {
+                    return true;
+                }
+                TransactionManager.getTransactionManager(parameters).transactionStarted(this);
+            }
         }
-        return folderAccess;
+        return false;
+    }
+
+    @Override
+    public void rollback(StorageParameters storageParameters) {
+        IDBasedFolderAccess folderAccess = storageParameters.getParameter(getFolderType(), PARAM);
+        if (null != folderAccess) {
+            try {
+                folderAccess.rollback();
+            } catch (Exception e) {
+                // Ignore
+                org.slf4j.LoggerFactory.getLogger(FileStorageFolderStorage.class).warn("Unexpected error during rollback: {}", e.getMessage(), e);
+            } finally {
+                storageParameters.putParameter(getFolderType(), PARAM, null);
+            }
+        }
+    }
+
+    @Override
+    public void commitTransaction(StorageParameters storageParameters) throws OXException {
+        IDBasedFolderAccess folderAccess = storageParameters.getParameter(getFolderType(), PARAM);
+        if (null != folderAccess) {
+            try {
+                folderAccess.commit();
+            } finally {
+                storageParameters.putParameter(getFolderType(), PARAM, null);
+            }
+        }
     }
 
     @Override
@@ -183,18 +231,6 @@ public final class FileStorageFolderStorage implements FolderStorage {
     @Override
     public ContentType getDefaultContentType() {
         return FileStorageContentType.getInstance();
-    }
-
-    @Override
-    public void commitTransaction(final StorageParameters storageParameters) throws OXException {
-        final IDBasedFolderAccess folderAccess = storageParameters.getParameter(FileStorageFolderType.getInstance(), PARAM);
-        if (null != folderAccess) {
-            try {
-                folderAccess.commit();
-            } finally {
-                storageParameters.putParameter(FileStorageFolderType.getInstance(), PARAM, null);
-            }
-        }
     }
 
     @Override
@@ -270,15 +306,14 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
     @Override
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
-        final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
-
-        folderAccess.clearFolder(folderId, true);
+        boolean hardDelete = StorageParametersUtility.getBoolParameter("hardDelete", storageParameters);
+        getFolderAccess(storageParameters).clearFolder(folderId, hardDelete);
     }
 
     @Override
-    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
-        final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
-        folderAccess.deleteFolder(folderId, true);
+    public void deleteFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
+        boolean hardDelete = StorageParametersUtility.getBoolParameter("hardDelete", storageParameters);
+        getFolderAccess(storageParameters).deleteFolder(folderId, hardDelete);
     }
 
     @Override
@@ -313,10 +348,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
     }
 
     @Override
-    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
-        final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
-
-        return folderAccess.getFolder(folderId).getFileCount() <= 0;
+    public boolean isEmpty(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
+        return 1 > getFolderAccess(storageParameters).getFolder(folderId).getFileCount();
     }
 
     @Override
@@ -452,45 +485,6 @@ public final class FileStorageFolderStorage implements FolderStorage {
             list.add(new FileStorageId(cur.getId(), j, cur.getName()));
         }
         return list.toArray(new SortableId[list.size()]);
-    }
-
-    @Override
-    public void rollback(final StorageParameters storageParameters) {
-        final IDBasedFolderAccess folderAccess = storageParameters.getParameter(FileStorageFolderType.getInstance(), PARAM);
-        if (null != folderAccess) {
-            try {
-                folderAccess.rollback();
-            } catch (final Exception e) {
-                // Ignore
-            } finally {
-                storageParameters.putParameter(FileStorageFolderType.getInstance(), PARAM, null);
-            }
-        }
-    }
-
-    @Override
-    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
-        /*
-         * Ensure session is present
-         */
-        if (null == parameters.getSession()) {
-            throw FolderExceptionErrorMessage.MISSING_SESSION.create();
-        }
-        /*
-         * Put map
-         */
-        final IDBasedFolderAccessFactory factory = services.getService(IDBasedFolderAccessFactory.class);
-        if (null == factory) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
-        }
-
-        boolean started = parameters.putParameterIfAbsent(FileStorageFolderType.getInstance(), PARAM, factory.createAccess(parameters.getSession()));
-        if (started && TransactionManager.isManagedTransaction(parameters)) {
-            TransactionManager.getTransactionManager(parameters).transactionStarted(this);
-            return false;
-        }
-
-        return started;
     }
 
     @Override
@@ -755,40 +749,20 @@ public final class FileStorageFolderStorage implements FolderStorage {
         }
     }
 
-    private static final class FileStorageAccountComparator implements Comparator<FileStorageAccount> {
-
-        private final Collator collator;
-
-        FileStorageAccountComparator(final Locale locale) {
-            super();
-            collator = Collators.getSecondaryInstance(locale);
+    /**
+     * Gets the ID based folder access reference from the supplied storage parameters, throwing an appropriate exception in case it is
+     * absent.
+     *
+     * @param storageParameters The storage parameters to get the folder access from
+     * @return The folder access
+     */
+    private IDBasedFolderAccess getFolderAccess(final StorageParameters storageParameters) throws OXException {
+        IDBasedFolderAccess folderAccess = storageParameters.getParameter(FileStorageFolderType.getInstance(), PARAM);
+        if (null == folderAccess) {
+            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
         }
-
-        @Override
-        public int compare(final FileStorageAccount o1, final FileStorageAccount o2) {
-            /*-
-             *
-            if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
-                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
-                    return 0;
-                }
-                return -1;
-            } else if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
-                return 1;
-            }
-            if (0 == o1.getId()) {
-                if (0 == o2.getId()) {
-                    return 0;
-                }
-                return -1;
-            } else if (0 == o2.getId()) {
-                return 1;
-            }
-             */
-            return collator.compare(o1.getDisplayName(), o2.getDisplayName());
-        }
-
-    } // End of FileStorageAccountComparator
+        return folderAccess;
+    }
 
     private static final class SimpleFileStorageFolderComparator implements Comparator<FileStorageFolder> {
 
@@ -804,55 +778,5 @@ public final class FileStorageFolderStorage implements FolderStorage {
             return collator.compare(o1.getName(), o2.getName());
         }
     } // End of SimpleFileStorageFolderComparator
-
-    private static final class FileStorageFolderComparator implements Comparator<FileStorageFolder> {
-
-        private final Map<String, Integer> indexMap;
-
-        private final Collator collator;
-
-        private final Integer na;
-
-        FileStorageFolderComparator(final String[] names, final Locale locale) {
-            super();
-            indexMap = new HashMap<String, Integer>(names.length);
-            for (int i = 0; i < names.length; i++) {
-                indexMap.put(names[i], Integer.valueOf(i));
-            }
-            na = Integer.valueOf(names.length);
-            collator = Collators.getSecondaryInstance(locale);
-        }
-
-        private Integer getNumberOf(final String name) {
-            final Integer ret = indexMap.get(name);
-            if (null == ret) {
-                return na;
-            }
-            return ret;
-        }
-
-        @Override
-        public int compare(final FileStorageFolder o1, final FileStorageFolder o2) {
-            if (o1.isDefaultFolder()) {
-                if (o2.isDefaultFolder()) {
-                    return getNumberOf(o1.getId()).compareTo(getNumberOf(o2.getId()));
-                }
-                return -1;
-            }
-            if (o2.isDefaultFolder()) {
-                return 1;
-            }
-            return collator.compare(o1.getName(), o2.getName());
-        }
-    } // End of FileStorageFolderComparator
-
-    private static void addWarnings(final StorageParameters storageParameters, final WarningsAware warningsAware) {
-        final List<OXException> list = warningsAware.getAndFlushWarnings();
-        if (null != list && !list.isEmpty()) {
-            for (final OXException warning : list) {
-                storageParameters.addWarning(warning);
-            }
-        }
-    }
 
 }
