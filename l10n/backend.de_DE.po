@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-01-19 12:31+0100\n"
+"PO-Revision-Date: 2015-01-29 11:30+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -2439,6 +2439,16 @@ msgstr "ZIP-Archiv übersteigt die maximal zulässige Größe von %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
 msgid "The file storage account is currently not accessible."
 msgstr "Der Dateispeicher-Account ist derzeit nicht verfügbar."
+
+#. The folder \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
+msgid "The folder \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "Der Ordner \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
+
+#. The file \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
+msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "Die Datei \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -5548,6 +5558,13 @@ msgstr ""
 msgid "Could not connect to the context storage."
 msgstr "Verbindung zum Kontext-Speicher fehlgeschlagen"
 
+#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+#. This should happen in very rare conditions and is not visible to the client.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
+msgid "Denied concurrent update of user attributes."
+msgstr "Gleichzeitige Aktualisierung von Benutzerattributen verweigert."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
 msgstr "System"
@@ -7329,12 +7346,6 @@ msgid ""
 msgstr ""
 "Das neue Passwort fehlt. Bitte geben Sie Ihr neues Passwort ein und "
 "versuchen Sie es erneut."
-
-#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
-#. This should happen in very rare conditions and is not visible to the client.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
-msgid "Denied concurrent update of user attributes."
-msgstr "Gleichzeitige Aktualisierung von Benutzerattributen verweigert."
 
 #. *
 #. * User is missing for the reminder.
