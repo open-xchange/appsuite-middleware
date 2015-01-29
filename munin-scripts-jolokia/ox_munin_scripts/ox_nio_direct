@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+
+use LWP;
+use JSON;
+
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    print "yes\n";
+    exit 0;
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Memory BufferPool Direct\n";
+    print "graph_args --base 1024 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    
+    print "direct-buffers-in-pool-count.label direct-buffers-in-pool-count \n";
+    print "direct-buffers-in-pool-count.draw LINE1\n";
+    print "direct-buffers-in-pool-count.type GAUGE\n";
+    print "direct-buffers-in-pool-count.min 0\n";
+
+    print "memory-used.label memory-used\n";
+    print "memory-used.draw LINE1\n";
+    print "memory-used.type GAUGE\n";
+    print "memory-used.min 0\n";
+
+    print "total-capacity.label total-capacity\n";
+    print "total-capacity.draw LINE1\n";
+    print "total-capacity.type GAUGE\n";
+    print "total-capacity.min 0\n";
+}
+
+my $url = $ENV{oxJolokiaUrl};
+my $username = $ENV{oxJolokiaUser};
+my $password = $ENV{oxJolokiaPassword};
+
+callUrl("direct-buffers-in-pool-count","/read/java.nio:type=BufferPool,name=direct/Count");
+callUrl("memory-used","/read/java.nio:type=BufferPool,name=direct/MemoryUsed");
+callUrl("total-capacity", "/read/java.nio:type=BufferPool,name=direct/TotalCapacity");
+
+sub callUrl {
+        my $ua = LWP::UserAgent->new();
+        my $req = HTTP::Request->new(GET => "$url$_[1]");
+        $req->authorization_basic($username,$password);
+
+        $req->header('Accept', => 'text/html');
+
+        my $response = $ua->request($req);
+
+        if ($response->is_success) {
+                my $json = decode_json($response->decoded_content);
+                if (defined $json->{value}){
+                        print "$_[0].value ";
+                        print $json->{value},"\n";
+                }
+        }
+        else {
+                my $status = $response->status_line;
+                if ($status == 404) {
+                        die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+                }
+                elsif ($status == 401) {
+                        die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+                }
+                else {
+                        die "Something went wrong:\n",$status;
+                }
+        }
+}
