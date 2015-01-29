@@ -280,7 +280,10 @@ public abstract class AbstractPerformer {
      * @param warning The warning to add
      */
     protected void addWarning(final OXException warning) {
-        warning.addCategory(Category.CATEGORY_WARNING);
+        if (false == Category.CATEGORY_WARNING.equals(warning.getCategory()) &&
+            (null == warning.getCategories() || false == warning.getCategories().contains(Category.CATEGORY_WARNING))) {
+            warning.addCategory(Category.CATEGORY_WARNING);
+        }
         warnings.put(warning, PRESENT);
     }
 
