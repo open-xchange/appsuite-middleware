@@ -94,6 +94,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.mail.autoconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.mail.autoconfig.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.mailmapping"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.management.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.message.timeline"/>
@@ -159,6 +160,5 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,org.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,org.xmlpull"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,oxscripts"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.mailmapping"/>
 </provider>
 </psf>

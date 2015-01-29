@@ -1,3 +1,7 @@
+* 2015-01-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36359: Defined correct dependencies on Debian packages according to moved files.
+
 * 2015-01-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 35733: List existing (external) file storage accounts below "InfoStore" folder in classic folder tree view
