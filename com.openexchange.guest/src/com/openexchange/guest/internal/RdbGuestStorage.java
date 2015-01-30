@@ -50,15 +50,14 @@
 package com.openexchange.guest.internal;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.GuestExceptionCodes;
 import com.openexchange.guest.storage.GuestStorage;
@@ -116,7 +115,7 @@ public class RdbGuestStorage extends GuestStorage {
     /**
      * SQL statement to insert a new guest for an unknown mail address
      */
-    protected static final String INSERT_GUEST = "INSERT INTO guest (id, mail_address) VALUES (?, ?)";
+    protected static final String INSERT_GUEST = "INSERT INTO guest (mail_address) VALUES (?)";
 
     /**
      * SQL statement for deleting a guest assignment based on the context and user id.
@@ -137,27 +136,27 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public int addGuest(String mailAddress, Connection connection) throws OXException {
+    public long addGuest(String mailAddress, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
-        int guestId = NOT_FOUND;
+        long guestId = NOT_FOUND;
         try {
-            guestId = IDGenerator.getId(connection);
-            connection.commit();
-
-            statement = connection.prepareStatement(INSERT_GUEST);
-            statement.setInt(1, guestId);
-            statement.setString(2, mailAddress);
-            int affectedRows = statement.executeUpdate();
+            statement = connection.prepareStatement(INSERT_GUEST, Statement.RETURN_GENERATED_KEYS);
+            statement.setString(1, mailAddress);
+            long affectedRows = statement.executeUpdate();
 
             if (affectedRows == 0) {
                 throw GuestExceptionCodes.SQL_ERROR.create("Not able to create guest with mail address '" + mailAddress + "' as desired!");
             }
-            if (guestId == NOT_FOUND) {
-                throw GuestExceptionCodes.SQL_ERROR.create("Creating guest with mail address '" + mailAddress + "' failed, no ID obtained!");
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    guestId = generatedKeys.getLong(1);
+                } else {
+                    throw GuestExceptionCodes.SQL_ERROR.create("Creating guest with mail address '" + mailAddress + "' failed, no ID obtained!");
+                }
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -172,7 +171,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public void addGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException {
+    public void addGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
@@ -180,11 +179,11 @@ public class RdbGuestStorage extends GuestStorage {
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(INSERT_GUEST_ASSIGNMENT);
-            statement.setInt(1, guestId);
+            statement.setLong(1, guestId);
             statement.setInt(2, contextId);
             statement.setInt(3, userId);
 
-            int affectedRows = statement.executeUpdate();
+            long affectedRows = statement.executeUpdate();
 
             if (affectedRows != 1) {
                 LOG.error("There have been " + affectedRows + " changes for adding guest assignment but there should only be 1. Executed SQL: " + statement.toString());
@@ -200,20 +199,20 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public int getGuestId(String mailAddress, Connection connection) throws OXException {
+    public long getGuestId(String mailAddress, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
         ResultSet result = null;
-        int guestId = NOT_FOUND;
+        long guestId = NOT_FOUND;
         try {
             statement = connection.prepareStatement(RESOLVE_GUEST_ID_BY_MAIL);
             statement.setString(1, mailAddress);
             result = statement.executeQuery();
             if (result.next()) {
-                guestId = result.getInt(1);
+                guestId = result.getLong(1);
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -228,21 +227,21 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public int getGuestId(int contextId, int userId, Connection connection) throws OXException {
+    public long getGuestId(int contextId, int userId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
         ResultSet result = null;
-        int guestId = NOT_FOUND;
+        long guestId = NOT_FOUND;
         try {
             statement = connection.prepareStatement(RESOLVE_GUEST_ID_BY_CONTEXT_AND_USER);
             statement.setInt(1, contextId);
             statement.setInt(2, userId);
             result = statement.executeQuery();
             if (result.next()) {
-                guestId = result.getInt(1);
+                guestId = result.getLong(1);
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -257,7 +256,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public void removeGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException {
+    public void removeGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
@@ -265,10 +264,10 @@ public class RdbGuestStorage extends GuestStorage {
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(DELETE_GUEST_ASSIGNMENT);
-            statement.setInt(1, guestId);
+            statement.setLong(1, guestId);
             statement.setInt(2, contextId);
             statement.setInt(3, userId);
-            int affectedRows = statement.executeUpdate();
+            long affectedRows = statement.executeUpdate();
 
             if (affectedRows != 1) {
                 LOG.error("There have been " + affectedRows + " changes for removing a guest assignment but there should only be 1. Executed SQL: " + statement.toString());
@@ -285,7 +284,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public void removeGuest(int guestId, Connection connection) throws OXException {
+    public void removeGuest(long guestId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
@@ -293,12 +292,12 @@ public class RdbGuestStorage extends GuestStorage {
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(DELETE_GUEST);
-            statement.setInt(1, guestId);
-            int affectedRows = statement.executeUpdate();
+            statement.setLong(1, guestId);
+            long affectedRows = statement.executeUpdate();
 
             if (affectedRows > 1) {
                 LOG.error("There have been " + affectedRows + " guests removed but there should max be 1. Executed SQL: " + statement.toString());
-                throw GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED.create(Integer.toString(affectedRows), statement.toString());
+                throw GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED.create(Long.toString(affectedRows), statement.toString());
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -312,12 +311,12 @@ public class RdbGuestStorage extends GuestStorage {
     * {@inheritDoc}
     */
    @Override
-   public List<Integer> resolveGuestAssignments(int contextId, Connection connection) throws OXException {
+   public List<Long> resolveGuestAssignments(int contextId, Connection connection) throws OXException {
        if (connection == null) {
            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
        }
 
-       List<Integer> guestIdsAssigmentsRemovedFor = new ArrayList<Integer>();
+       List<Long> guestIdsAssigmentsRemovedFor = new ArrayList<Long>();
 
        PreparedStatement statement = null;
        try {
@@ -326,7 +325,7 @@ public class RdbGuestStorage extends GuestStorage {
            ResultSet result = statement.executeQuery();
 
            while (result.next()) {
-               int guestId = result.getInt(1);
+               long guestId = result.getLong(1);
                guestIdsAssigmentsRemovedFor.add(guestId);
            }
        } catch (final SQLException e) {
@@ -342,13 +341,13 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public int removeGuestAssignments(int contextId, Connection connection) throws OXException {
+    public long removeGuestAssignments(int contextId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
         PreparedStatement statement = null;
-        int affectedRows = NOT_FOUND;
+        long affectedRows = NOT_FOUND;
         try {
             statement = connection.prepareStatement(DELETE_GUEST_ASSIGNMENTS);
             statement.setInt(1, contextId);
@@ -366,17 +365,17 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public int getNumberOfAssignments(int guestId, Connection connection) throws OXException {
+    public long getNumberOfAssignments(long guestId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
-        int guestAssignments = 0;
+        long guestAssignments = 0;
         PreparedStatement statement = null;
         ResultSet result = null;
         try {
             statement = connection.prepareStatement(RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID);
-            statement.setInt(1, guestId);
+            statement.setLong(1, guestId);
             result = statement.executeQuery();
             if (result.next()) {
                 guestAssignments = result.getInt(1);
@@ -394,7 +393,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public boolean isAssignmentExisting(int guestId, int contextId, int userId, Connection connection) throws OXException {
+    public boolean isAssignmentExisting(long guestId, int contextId, int userId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
@@ -405,7 +404,7 @@ public class RdbGuestStorage extends GuestStorage {
             statement = connection.prepareStatement(RESOLVE_GUEST_ASSIGNMENT);
             statement.setInt(1, contextId);
             statement.setInt(2, userId);
-            statement.setInt(3, guestId);
+            statement.setLong(3, guestId);
             result = statement.executeQuery();
             if (result.next()) {
                 return true;
@@ -423,17 +422,17 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public List<Serializable> getGuestAssignments(int guestId, Connection connection) throws OXException {
+    public List<GuestAssignment> getGuestAssignments(long guestId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
 
-        final List<Serializable> guestAssignments = new ArrayList<Serializable>();
+        final List<GuestAssignment> guestAssignments = new ArrayList<GuestAssignment>();
         PreparedStatement statement = null;
         ResultSet result = null;
         try {
             statement = connection.prepareStatement(RESOLVE_GUEST_ASSIGNMENTS);
-            statement.setInt(1, guestId);
+            statement.setLong(1, guestId);
             result = statement.executeQuery();
             while (result.next()) {
                 int cid = result.getInt(1);

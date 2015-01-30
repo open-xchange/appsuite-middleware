@@ -7,9 +7,12 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.guest.osgi.GuestActivator
 Bundle-ClassPath: .
 Import-Package: com.openexchange.caching,
+ com.openexchange.contact.storage,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.groupware.contact.helpers,
+ com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.impl,

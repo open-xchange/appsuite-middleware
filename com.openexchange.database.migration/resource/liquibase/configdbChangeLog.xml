@@ -53,7 +53,7 @@
 		</comment>
 		<sql>
 			CREATE TABLE guest (
-				id INT4 UNSIGNED NOT NULL,
+				id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				mail_address VARCHAR(255) NOT NULL,
 				PRIMARY KEY (id),
 				INDEX (mail_address),
@@ -62,7 +62,7 @@
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 		</sql>
 		<rollback>
-			<dropTable tableName="guest"/>
+			<dropTable tableName="guest" />
 		</rollback>
 	</changeSet>
 
@@ -77,17 +77,17 @@
 		</comment>
 		<sql>
 			CREATE TABLE guest2context (
-			    guest_id INT4 UNSIGNED NOT NULL,
-			    cid INT4 UNSIGNED NOT NULL,
-			    uid INT4 UNSIGNED NOT NULL,
-			    PRIMARY KEY(`guest_id`, `cid`,`uid`),
-			    FOREIGN KEY(`cid`) REFERENCES context (`cid`),
-			    FOREIGN KEY(`guest_id`) REFERENCES guest (`id`),
-			    INDEX (guest_id)
+				guest_id BIGINT UNSIGNED NOT NULL,
+				cid INT4 UNSIGNED NOT NULL,
+				uid INT4 UNSIGNED NOT NULL,
+				PRIMARY KEY(`guest_id`, `cid`,`uid`),
+				FOREIGN KEY(`cid`) REFERENCES context(`cid`),
+				FOREIGN KEY(`guest_id`) REFERENCES guest (`id`),
+				INDEX(guest_id)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 		</sql>
 		<rollback>
-			<dropTable tableName="guest2context"/>
+			<dropTable tableName="guest2context" />
 		</rollback>
 	</changeSet>
 
