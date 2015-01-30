@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -129,6 +129,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Fri Jan 30 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Sixth candidate for 7.6.2 release
 * Wed Jan 28 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Fifth candidate for 7.6.2 release
 * Mon Jan 26 2015 Steffen Templin <marcus.klein@open-xchange.com>

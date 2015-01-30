@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -66,6 +66,8 @@ done
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
+* Fri Jan 30 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Sixth candidate for 7.6.2 release
 * Wed Jan 28 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Fifth candidate for 7.6.2 release
 * Mon Jan 26 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
