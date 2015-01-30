@@ -87,6 +87,8 @@ public class LoginFields {
     public static final String APPSECRET = "secret";
 
     public static final String REDIRECT_URL = "redirectUrl";
+    
+    public static final String SHARE_TOKEN = "share";
 
     private LoginFields() {
         super();

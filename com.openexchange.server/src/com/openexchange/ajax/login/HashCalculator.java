@@ -57,7 +57,12 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -71,6 +76,8 @@ public class HashCalculator {
 
     private static final String USER_AGENT = LoginFields.USER_AGENT;
     private static final String CLIENT_PARAM = LoginFields.CLIENT_PARAM;
+    private static final String SHARE_TOKEN = LoginFields.SHARE_TOKEN;
+    
 
     private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
 
@@ -149,6 +156,9 @@ public class HashCalculator {
             md.update((null == userAgent ? parseClientUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
             if (null != client) {
                 md.update(client.getBytes(Charsets.UTF_8));
+            }
+            if (null == additionals) {
+                additionals = getShareInformation(req);
             }
             if (null != additionals && 0 < additionals.length) {
                 for (String value : additionals) {
@@ -242,6 +252,23 @@ public class HashCalculator {
             return "";
         }
         return header;
+    }
+    
+    private static String[] getShareInformation(HttpServletRequest req) {
+        String token = req.getParameter(SHARE_TOKEN);
+        ShareService shareService = ServerServiceRegistry.getInstance().getService(ShareService.class);
+        if (null == shareService || null == token || isEmpty(token)) {
+            return null;
+        }
+        try {
+            final GuestShare share = shareService.resolveToken(token);
+            int contextId = share.getGuest().getContextID();
+            int guestId = share.getGuest().getGuestID();
+            return new String[] { String.valueOf(contextId), String.valueOf(guestId) };
+        } catch (OXException e) {
+            LOG.error("Could not resolve share {} for hash calculator.", token);
+            return null;
+        }
     }
 
 }
