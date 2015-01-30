@@ -63,6 +63,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.PushbackInputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
@@ -86,6 +87,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import org.apache.james.mime4j.field.contenttype.parser.ContentTypeParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,6 +95,7 @@ import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -1192,7 +1195,26 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 retval.setFileName(fileName);
                 mimeType = MimeType2ExtMap.getContentType(fileName, null);
             }
-            retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
+            // Set associated MIME type
+            {
+                // Check if we are forced to select the MIME type as signaled by file item
+                String forcedMimeType = item.getHeaders().getHeader("X-Forced-MIME-Type");
+                if (null == forcedMimeType) {
+                    retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
+                } else if (AJAXRequestDataTools.parseBoolParameter(forcedMimeType)) {
+                    retval.setContentType(item.getContentType());
+                } else {
+                    // Valid MIME type specified?
+                    try {
+                        ContentTypeParser parser = new ContentTypeParser(new StringReader(forcedMimeType));
+                        parser.parseAll();
+                        retval.setContentType(new StringBuilder(parser.getType()).append('/').append(parser.getSubType()).toString());
+                    } catch (Exception e) {
+                        // Assume invalid value
+                        retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
+                    }
+                }
+            }
             final long size = item.getSize();
             retval.setSize(size);
             final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
