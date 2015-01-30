@@ -1768,14 +1768,18 @@ public class Contact extends CommonObject {
 
     public void setNumberOfDistributionLists(final DistributionListEntryObject[] dleos) {
         dlists = dleos;
-        number_of_dlists = dleos.length;
+        if (dleos != null) {
+            number_of_dlists = dleos.length;
+        }
         b_number_of_dlists = true;
         markAsDistributionlist();
     }
 
     public void setDistributionList(final DistributionListEntryObject[] dleo) {
         dlists = dleo;
-        number_of_dlists = dleo.length;
+        if (dleo != null) {
+            number_of_dlists = dleo.length;
+        }
         b_number_of_dlists = true;
         markAsDistributionlist();
     }

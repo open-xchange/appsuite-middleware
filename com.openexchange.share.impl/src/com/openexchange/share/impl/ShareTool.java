@@ -75,6 +75,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceLookup;
@@ -91,7 +92,6 @@ import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
-
 
 /**
  * {@link ShareTool}
@@ -151,13 +151,13 @@ public class ShareTool {
      */
     public static AuthenticationMode getAuthenticationMode(ShareRecipient recipient) {
         switch (recipient.getType()) {
-        case ANONYMOUS:
-            return Strings.isEmpty(((AnonymousRecipient)recipient).getPassword()) ?
-                AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
-        case GUEST:
-            return AuthenticationMode.GUEST_PASSWORD;
-        default:
-            return null;
+            case ANONYMOUS:
+                return Strings.isEmpty(((AnonymousRecipient) recipient).getPassword()) ?
+                    AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
+            case GUEST:
+                return AuthenticationMode.GUEST_PASSWORD;
+            default:
+                return null;
         }
     }
 
@@ -287,10 +287,19 @@ public class ShareTool {
      * @throws OXException
      */
     private static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, GuestRecipient recipient) throws OXException {
+        GuestService guestService = services.getService(GuestService.class);
+        String mailAddress = recipient.getEmailAddress();
+
+        UserImpl user = guestService.createUserCopy(mailAddress);
+        if (user != null) {
+            UserImpl preparedGuestUser = prepareGuestUser(sharingUser, user);
+            return preparedGuestUser;
+        }
+
         UserImpl guestUser = prepareGuestUser(sharingUser);
         guestUser.setDisplayName(recipient.getDisplayName());
-        guestUser.setMail(recipient.getEmailAddress());
-        guestUser.setLoginInfo(recipient.getEmailAddress());
+        guestUser.setMail(mailAddress);
+        guestUser.setLoginInfo(mailAddress);
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
         String password = Strings.isEmpty(recipient.getPassword()) ? PasswordUtility.generate() : recipient.getPassword();
         try {
@@ -343,18 +352,48 @@ public class ShareTool {
     }
 
     /**
+     * Prepares a guest user instance based on a "parent" sharing user.
+     *
+     * @param sharingUser The sharing user
+     * @param guestUser The existing guest user to prepare
+     * @return The guest user
+     */
+    private static UserImpl prepareGuestUser(User sharingUser, UserImpl guestUser) {
+        if (guestUser == null) {
+            return prepareGuestUser(sharingUser);
+        }
+        guestUser.setCreatedBy(sharingUser.getId());
+        guestUser.setPreferredLanguage(sharingUser.getPreferredLanguage());
+        guestUser.setTimeZone(sharingUser.getTimeZone());
+        guestUser.setMailEnabled(true);
+        ShareToken.assignBaseToken(guestUser);
+        return guestUser;
+    }
+
+    /**
      * Prepares a user contact for a guest user.
      *
+     * @param services
+     * @param contextId
      * @param sharingUser The sharing user
      * @param guestUser The guest user
      * @return
+     * @throws OXException
      */
-    public static Contact prepareGuestContact(User sharingUser, User guestUser) {
+    public static Contact prepareGuestContact(ServiceLookup services, int contextId, User sharingUser, User guestUser) throws OXException {
+        GuestService guestService = services.getService(GuestService.class);
+        String mailAddress = guestUser.getMail();
+
+        Contact contactCopied = guestService.createContactCopy(mailAddress, contextId, sharingUser.getId());
+        if (contactCopied != null) {
+            return contactCopied;
+        }
+
         Contact contact = new Contact();
         contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
         contact.setCreatedBy(sharingUser.getId());
         contact.setDisplayName(guestUser.getDisplayName());
-        contact.setEmail1(guestUser.getMail());
+        contact.setEmail1(mailAddress);
         return contact;
     }
 

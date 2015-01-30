@@ -49,7 +49,6 @@
 
 package com.openexchange.guest.storage;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.util.List;
 import com.openexchange.exception.OXException;
@@ -77,7 +76,7 @@ public abstract class GuestStorage {
     /**
      * Will be returned if a guest cannot be found through its mail address.
      */
-    public static final int NOT_FOUND = -1;
+    public static final long NOT_FOUND = -1;
 
     /**
      * Creates an instance implementing the context storage.
@@ -113,7 +112,7 @@ public abstract class GuestStorage {
      * @return the internal id of the guest
      * @throws OXException
      */
-    public abstract int addGuest(String mailAddress, Connection connection) throws OXException;
+    public abstract long addGuest(String mailAddress, Connection connection) throws OXException;
 
     /**
      * Adds a new assignment for an already existing guest.
@@ -124,7 +123,7 @@ public abstract class GuestStorage {
      * @param Connection - existing connection that should be used to create the guest assignment.
      * @throws OXException
      */
-    public abstract void addGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException;
+    public abstract void addGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException;
 
     /**
      * Removes the guest with the given internal id
@@ -133,7 +132,7 @@ public abstract class GuestStorage {
      * @param Connection - existing connection that should be used to remove the guest.
      * @throws OXException
      */
-    public abstract void removeGuest(int guestId, Connection connection) throws OXException;
+    public abstract void removeGuest(long guestId, Connection connection) throws OXException;
 
     /**
      * Removes the guests assignments for the given context
@@ -143,7 +142,7 @@ public abstract class GuestStorage {
      * @return int - number of assignments that have been removed
      * @throws OXException
      */
-    public abstract int removeGuestAssignments(int contextId, Connection connection) throws OXException;
+    public abstract long removeGuestAssignments(int contextId, Connection connection) throws OXException;
 
     /**
      * Returns the internal guest ids that currently have assignments for the given context.
@@ -153,7 +152,7 @@ public abstract class GuestStorage {
      * @return List with Integer containing internal guest ids to be able to check if there still are assignments existing or if the guest should be removed.
      * @throws OXException
      */
-    public abstract List<Integer> resolveGuestAssignments(int contextId, Connection connection) throws OXException;
+    public abstract List<Long> resolveGuestAssignments(int contextId, Connection connection) throws OXException;
 
     /**
      * Removes the assignment of the guest based on the given internal guestId, context and user id
@@ -164,7 +163,7 @@ public abstract class GuestStorage {
      * @param Connection - existing connection that should be used to remove the guest assignment.
      * @throws OXException
      */
-    public abstract void removeGuestAssignment(int guestId, int contextId, int userId, Connection connection) throws OXException;
+    public abstract void removeGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException;
 
     /**
      * Returns the {@link GuestAssignment}s the guest (with the given mail address) is currently registered for.
@@ -174,7 +173,7 @@ public abstract class GuestStorage {
      * @return List with {@link GuestAssignment}s
      * @throws OXException
      */
-    public abstract List<Serializable> getGuestAssignments(final int guestId, Connection connection) throws OXException;
+    public abstract List<GuestAssignment> getGuestAssignments(final long guestId, Connection connection) throws OXException;
 
     /**
      * Checks if exactly this mapping (user with mail address to context and user) is already existing
@@ -186,7 +185,7 @@ public abstract class GuestStorage {
      * @return <code>true</code> if existing, otherwise <code>false</code>
      * @throws OXException
      */
-    public abstract boolean isAssignmentExisting(int guestId, int contextId, int userId, Connection connection) throws OXException;
+    public abstract boolean isAssignmentExisting(long guestId, int contextId, int userId, Connection connection) throws OXException;
 
     /**
      * Returns the number of currently available context/user assignments to the given internal guest id.
@@ -196,7 +195,7 @@ public abstract class GuestStorage {
      * @return int with the number of assignments
      * @throws OXException
      */
-    public abstract int getNumberOfAssignments(int guestId, Connection connection) throws OXException;
+    public abstract long getNumberOfAssignments(long guestId, Connection connection) throws OXException;
 
     /**
      * Returns the internally used guest id associated to the given mail address or -1 if the guest does not exist
@@ -206,7 +205,7 @@ public abstract class GuestStorage {
      * @return int with the internal guest id or -1 if the guest does currently not exist
      * @throws OXException
      */
-    public abstract int getGuestId(String mailAddress, Connection connection) throws OXException;
+    public abstract long getGuestId(String mailAddress, Connection connection) throws OXException;
 
     /**
      * Returns the internally used guest id associated to the given context id/user id tuple or -1 if the guest does not exist.
@@ -217,7 +216,7 @@ public abstract class GuestStorage {
      * @return int with the internal guest id or -1 if the guest does currently not exist
      * @throws OXException
      */
-    public abstract int getGuestId(int contextId, int userId, Connection connection) throws OXException;
+    public abstract long getGuestId(int contextId, int userId, Connection connection) throws OXException;
 
     /**
      * Internal start-up routine invoked in {@link #start()}

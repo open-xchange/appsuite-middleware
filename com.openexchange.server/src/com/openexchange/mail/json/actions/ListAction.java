@@ -71,6 +71,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -144,6 +145,10 @@ public final class ListAction extends AbstractMailAction {
     }
 
     private static final Map<String, List<String>> fillMapByArray(final JSONArray idArray) throws JSONException, OXException {
+        if (null == idArray) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
         final int length = idArray.length();
         if (length <= 0) {
             return Collections.emptyMap();

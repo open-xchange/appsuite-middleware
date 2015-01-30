@@ -49,7 +49,11 @@
 
 package com.openexchange.guest;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -99,4 +103,43 @@ public interface GuestService {
      * @throws OXException
      */
     void setPassword(String mailAddress, String password) throws OXException;
+
+    /**
+     * Updates all guest users and its contacts based on the given {@link User}. That means all {@link User} and {@link Contact} in different contexts will be updated to the user with the given information.
+     *
+     * @param user - {@link User} that will be copied to all existing guests
+     * @param contextId - context id the user that should be copied to the guest user is assigned to.
+     * @throws OXException
+     */
+    void updateGuest(User user, int contextId) throws OXException;
+
+    /**
+     * Returns the {@link GuestAssignment}s the given mail address is registered for as a guest which means that the new guest is already known.
+     *
+     * @param mailAddress - the mail address to get the {@link GuestAssignment}s from different contexts
+     * @return List with all assignments the user is currently known as a guest
+     * @throws OXException
+     */
+    List<GuestAssignment> getExistingAssignments(String mailAddress) throws OXException;
+
+    /**
+     * Tries to copy user information to the provided {@link UserImpl} param if there is an existing User for the given mail address within a different context. Returns true if the user object has been changed. Otherwise false
+     *
+     * @param userToUpdate - the {@link User} to enrich with existing information from users in other contexts that are registered for the given mail address
+     * @param mailAddress - the mail address to verify if there is already a user in a different context existing
+     * @return UserImpl copy if there is an existing one that could be copied based on the given mail address or <code>null</code>
+     * @throws OXException
+     */
+    UserImpl createUserCopy(String mailAddress) throws OXException;
+
+    /**
+     * Tries to copy contact information to the provided {@link Contact} param if there is an existing contact for the given mail address within a different context. Returns true if the contact object has been changed. Otherwise false
+     *
+     * @param mailAddress - the mail address to verify if there is already a contact in a different context existing
+     * @param contextId - the context id the new contact should be in
+     * @param createdById - the user id of the share creator
+     * @return {@link Contact} copy created based on the given mail address or null if no contact could be found
+     * @throws OXException
+     */
+    Contact createContactCopy(String mailAddress, int contextId, int createdById) throws OXException;
 }

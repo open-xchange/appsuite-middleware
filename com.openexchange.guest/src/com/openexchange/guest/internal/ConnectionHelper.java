@@ -67,9 +67,10 @@ import com.openexchange.server.ServiceLookup;
 public class ConnectionHelper {
 
     private final ServiceLookup services;
-    private final boolean ownsConnection;
     private final Connection connection;
     private boolean committed;
+    private final boolean writableConnection;
+    private int contextId = -1;
 
     /**
      * Initializes a new {@link ConnectionHelper}.
@@ -83,7 +84,16 @@ public class ConnectionHelper {
         this.services = services;
         DatabaseService dbService = services.getService(DatabaseService.class);
         this.connection = needsWritable ? dbService.getWritable() : dbService.getReadOnly();
-        this.ownsConnection = true;
+        this.writableConnection = needsWritable;
+    }
+
+    public ConnectionHelper(ServiceLookup services, boolean needsWritable, int contextId) throws OXException {
+        super();
+        this.services = services;
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        this.connection = needsWritable ? dbService.getWritable(contextId) : dbService.getReadOnly(contextId);
+        this.writableConnection = needsWritable;
+        this.contextId = contextId;
     }
 
     /**
@@ -101,12 +111,10 @@ public class ConnectionHelper {
      * @throws OXException
      */
     public void start() throws OXException {
-        if (ownsConnection) {
-            try {
-                Databases.startTransaction(connection);
-            } catch (SQLException e) {
-                throw GuestExceptionCodes.DB_ERROR.create(e, e.getMessage());
-            }
+        try {
+            Databases.startTransaction(connection);
+        } catch (SQLException e) {
+            throw GuestExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -116,14 +124,12 @@ public class ConnectionHelper {
      * @throws OXException
      */
     public void commit() throws OXException {
-        if (ownsConnection) {
-            try {
-                connection.commit();
-            } catch (SQLException e) {
-                throw GuestExceptionCodes.DB_ERROR.create(e, e.getMessage());
-            }
-            committed = true;
+        try {
+            connection.commit();
+        } catch (SQLException e) {
+            throw GuestExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
+        committed = true;
     }
 
     /**
@@ -132,12 +138,22 @@ public class ConnectionHelper {
      * @throws OXException
      */
     public void finish() {
-        if (ownsConnection) {
-            if (false == committed) {
-                Databases.rollback(connection);
+        if (false == committed) {
+            Databases.rollback(connection);
+        }
+        Databases.autocommit(connection);
+        if (writableConnection) {
+            if (contextId != -1) {
+                services.getService(DatabaseService.class).backWritable(contextId, connection);
+            } else {
+                services.getService(DatabaseService.class).backWritable(connection);
             }
-            Databases.autocommit(connection);
-            services.getService(DatabaseService.class).backWritable(connection);
+        } else {
+            if (contextId != -1) {
+                services.getService(DatabaseService.class).backReadOnly(contextId, connection);
+            } else {
+                services.getService(DatabaseService.class).backReadOnly(connection);
+            }
         }
     }
 }

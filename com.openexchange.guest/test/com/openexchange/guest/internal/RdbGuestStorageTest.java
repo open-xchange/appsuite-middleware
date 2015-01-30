@@ -49,11 +49,11 @@
 
 package com.openexchange.guest.internal;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,11 +65,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.storage.GuestStorage;
 import com.openexchange.test.mock.MockUtils;
@@ -81,7 +79,6 @@ import com.openexchange.test.mock.MockUtils;
  * @since 7.8.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ IDGenerator.class })
 public class RdbGuestStorageTest {
 
     @InjectMocks
@@ -98,7 +95,7 @@ public class RdbGuestStorageTest {
 
     private static final String GUEST_MAIL_ADDRESS = "hotte@example.com";
 
-    private static final int GUEST_ID = 77;
+    private static final long GUEST_ID = 77;
     private static final int CONTEXT_ID = 1;
     private static final int USER_ID = 11;
 
@@ -111,22 +108,20 @@ public class RdbGuestStorageTest {
 
         Mockito.when(connection.prepareStatement(Matchers.anyString())).thenReturn(preparedStatement);
         Mockito.when(connection.prepareStatement(Matchers.anyString(), Matchers.anyInt())).thenReturn(preparedStatement);
-
-        PowerMockito.mockStatic(IDGenerator.class);
-        PowerMockito.when(IDGenerator.getId((Connection) Matchers.any())).thenReturn(GUEST_ID);
+        Mockito.when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
     }
 
     @Test
     public void testAddGuest_guestAdded_returnNewGuestId() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
         Mockito.when(resultSet.next()).thenReturn(true, false);
-        Mockito.when(resultSet.getInt(Matchers.anyInt())).thenReturn(GUEST_ID);
+        Mockito.when(resultSet.getLong(Matchers.anyInt())).thenReturn(GUEST_ID);
 
-        int addGuest = rdbGuestStorage.addGuest(GUEST_MAIL_ADDRESS, connection);
+        long addGuest = rdbGuestStorage.addGuest(GUEST_MAIL_ADDRESS, connection);
 
         Assert.assertEquals(GUEST_ID, addGuest);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
-        Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.INSERT_GUEST);
+        Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.INSERT_GUEST, Statement.RETURN_GENERATED_KEYS);
     }
 
     @Test(expected = OXException.class)
@@ -140,11 +135,11 @@ public class RdbGuestStorageTest {
     public void testGetGuestAssignments_noResultFound_returnEmptyList() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
 
-        List<Serializable> guestAssignments = rdbGuestStorage.getGuestAssignments(GUEST_ID, connection);
+        List<GuestAssignment> guestAssignments = rdbGuestStorage.getGuestAssignments(GUEST_ID, connection);
 
         Assert.assertEquals(0, guestAssignments.size());
 
-        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
+        Mockito.verify(preparedStatement, Mockito.times(1)).setLong(1, GUEST_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeQuery();
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ASSIGNMENTS);
     }
@@ -158,15 +153,15 @@ public class RdbGuestStorageTest {
 
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
 
-        List<Serializable> guestAssignments = rdbGuestStorage.getGuestAssignments(GUEST_ID, connection);
+        List<GuestAssignment> guestAssignments = rdbGuestStorage.getGuestAssignments(GUEST_ID, connection);
 
         Assert.assertEquals(2, guestAssignments.size());
-        Assert.assertEquals(1, ((GuestAssignment) guestAssignments.get(0)).getContextId());
-        Assert.assertEquals(11, ((GuestAssignment) guestAssignments.get(0)).getUserId());
-        Assert.assertEquals(2, ((GuestAssignment) guestAssignments.get(1)).getContextId());
-        Assert.assertEquals(12, ((GuestAssignment) guestAssignments.get(1)).getUserId());
+        Assert.assertEquals(1, guestAssignments.get(0).getContextId());
+        Assert.assertEquals(11, guestAssignments.get(0).getUserId());
+        Assert.assertEquals(2, guestAssignments.get(1).getContextId());
+        Assert.assertEquals(12, guestAssignments.get(1).getUserId());
 
-        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
+        Mockito.verify(preparedStatement, Mockito.times(1)).setLong(1, GUEST_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeQuery();
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ASSIGNMENTS);
     }
@@ -182,7 +177,7 @@ public class RdbGuestStorageTest {
 
         rdbGuestStorage.addGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
 
-        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
+        Mockito.verify(preparedStatement, Mockito.times(1)).setLong(1, GUEST_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(2, CONTEXT_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(3, USER_ID);
     }
@@ -192,7 +187,7 @@ public class RdbGuestStorageTest {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(false);
 
-        int guestId = rdbGuestStorage.getGuestId(GUEST_MAIL_ADDRESS, connection);
+        long guestId = rdbGuestStorage.getGuestId(GUEST_MAIL_ADDRESS, connection);
 
         Assert.assertEquals(GuestStorage.NOT_FOUND, guestId);
 
@@ -204,9 +199,9 @@ public class RdbGuestStorageTest {
     public void testGetGuestIdViaMail_guestFound_returnId() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(true);
-        Mockito.when(resultSet.getInt(1)).thenReturn(GUEST_ID);
+        Mockito.when(resultSet.getLong(1)).thenReturn(GUEST_ID);
 
-        int guestId = rdbGuestStorage.getGuestId(GUEST_MAIL_ADDRESS, connection);
+        long guestId = rdbGuestStorage.getGuestId(GUEST_MAIL_ADDRESS, connection);
 
         Assert.assertEquals(GUEST_ID, guestId);
 
@@ -219,7 +214,7 @@ public class RdbGuestStorageTest {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(false);
 
-        int guestId = rdbGuestStorage.getGuestId(CONTEXT_ID, USER_ID, connection);
+        long guestId = rdbGuestStorage.getGuestId(CONTEXT_ID, USER_ID, connection);
 
         Assert.assertEquals(GuestStorage.NOT_FOUND, guestId);
 
@@ -232,9 +227,9 @@ public class RdbGuestStorageTest {
     public void testGetGuestIdViaContextUserId_guestFound_returnId() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(true);
-        Mockito.when(resultSet.getInt(1)).thenReturn(GUEST_ID);
+        Mockito.when(resultSet.getLong(1)).thenReturn(GUEST_ID);
 
-        int guestId = rdbGuestStorage.getGuestId(CONTEXT_ID, USER_ID, connection);
+        long guestId = rdbGuestStorage.getGuestId(CONTEXT_ID, USER_ID, connection);
 
         Assert.assertEquals(GUEST_ID, guestId);
 
@@ -248,11 +243,11 @@ public class RdbGuestStorageTest {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(false);
 
-        int numberOfAssignments = rdbGuestStorage.getNumberOfAssignments(GUEST_ID, connection);
+        long numberOfAssignments = rdbGuestStorage.getNumberOfAssignments(GUEST_ID, connection);
 
         Assert.assertEquals(0, numberOfAssignments);
 
-        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
+        Mockito.verify(preparedStatement, Mockito.times(1)).setLong(1, GUEST_ID);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID);
     }
 
@@ -262,11 +257,11 @@ public class RdbGuestStorageTest {
         Mockito.when(resultSet.next()).thenReturn(true);
         Mockito.when(resultSet.getInt(1)).thenReturn(10);
 
-        int numberOfAssignments = rdbGuestStorage.getNumberOfAssignments(GUEST_ID, connection);
+        long numberOfAssignments = rdbGuestStorage.getNumberOfAssignments(GUEST_ID, connection);
 
         Assert.assertEquals(10, numberOfAssignments);
 
-        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, GUEST_ID);
+        Mockito.verify(preparedStatement, Mockito.times(1)).setLong(1, GUEST_ID);
         Mockito.verify(resultSet, Mockito.times(1)).getInt(1);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID);
     }
@@ -283,7 +278,7 @@ public class RdbGuestStorageTest {
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ASSIGNMENT);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, CONTEXT_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(2, USER_ID);
-        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(3, GUEST_ID);
+        Mockito.verify(preparedStatement, Mockito.times(1)).setLong(3, GUEST_ID);
     }
 
     @Test
@@ -298,7 +293,7 @@ public class RdbGuestStorageTest {
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ASSIGNMENT);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(1, CONTEXT_ID);
         Mockito.verify(preparedStatement, Mockito.times(1)).setInt(2, USER_ID);
-        Mockito.verify(preparedStatement, Mockito.times(1)).setInt(3, GUEST_ID);
+        Mockito.verify(preparedStatement, Mockito.times(1)).setLong(3, GUEST_ID);
     }
 
     @Test(expected = OXException.class)
@@ -362,9 +357,9 @@ public class RdbGuestStorageTest {
     public void testResolveGuests_notYetImplemented() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
         Mockito.when(resultSet.next()).thenReturn(true, false);
-        Mockito.when(resultSet.getInt(Matchers.anyInt())).thenReturn(GUEST_ID);
+        Mockito.when(resultSet.getLong(Matchers.anyInt())).thenReturn(GUEST_ID);
 
-        List<Integer> resolveGuestAssignments = rdbGuestStorage.resolveGuestAssignments(CONTEXT_ID, connection);
+        List<Long> resolveGuestAssignments = rdbGuestStorage.resolveGuestAssignments(CONTEXT_ID, connection);
 
         Assert.assertEquals(GUEST_ID, resolveGuestAssignments.get(0).intValue());
     }
