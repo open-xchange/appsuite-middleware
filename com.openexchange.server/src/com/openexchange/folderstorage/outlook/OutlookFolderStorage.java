@@ -663,19 +663,30 @@ public final class OutlookFolderStorage implements FolderStorage {
             return false;
         }
         /*
-         * Check
+         * check presence in real storage
          */
-        final FolderStorage dedicatedFolderStorage = folderStorageRegistry.getDedicatedFolderStorage(realTreeId, folderId);
-        if (!dedicatedFolderStorage.containsFolder(realTreeId, folderId, storageType, storageParameters)) {
-            return false;
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
         }
-
-        // Exclude unsupported folders like infostore folders
-        // final Folder folder = dedicatedFolderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageType, storageParameters);
-        // if (InfostoreContentType.getInstance().equals(folder.getContentType())) {
-        // return false;
-        // }
-        return true;
+        boolean started = folderStorage.startTransaction(storageParameters, false);
+        try {
+            boolean contains = folderStorage.containsFolder(realTreeId, folderId, storageType, storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+            return contains;
+        } catch (OXException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (Exception e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
