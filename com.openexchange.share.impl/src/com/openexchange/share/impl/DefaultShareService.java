@@ -774,11 +774,6 @@ public class DefaultShareService implements ShareService {
     private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient) throws OXException {
         UserService userService = services.getService(UserService.class);
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
-        GuestService guestService = services.getService(GuestService.class);
-        if (guestService == null) {
-            LOG.error("Required service GuestService absent");
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("GuestService");
-        }
 
         if (GuestRecipient.class.isInstance(recipient)) {
             /*
@@ -806,7 +801,6 @@ public class DefaultShareService implements ShareService {
                  */
                 guestRecipient.setPassword(null);
 
-                guestService.addGuest(existingGuestUser.getMail(), context.getContextId(), existingGuestUser.getId());
                 return existingGuestUser;
             }
         }
@@ -830,7 +824,13 @@ public class DefaultShareService implements ShareService {
         if (AnonymousRecipient.class.isInstance(recipient)) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {
+            GuestService guestService = services.getService(GuestService.class);
+            if (guestService == null) {
+                LOG.error("Required service GuestService absent");
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("GuestService");
+            }
             guestService.addGuest(guestUser.getMail(), context.getContextId(), guestID);
+
             LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), permissionBits, context.getContextId(), guestID);
         }
 

@@ -236,7 +236,6 @@ public class DefaultGuestServiceTest {
 
         Mockito.verify(userService, Mockito.never()).updateUser((User) Matchers.any(), (Context) Matchers.any());
         Mockito.verify(guestStorage, Mockito.never()).getGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any());
-        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test(expected = OXException.class)
@@ -258,7 +257,6 @@ public class DefaultGuestServiceTest {
 
         Mockito.verify(userService, Mockito.times(1)).updateUser((User) Matchers.any(), (Context) Matchers.any());
         Mockito.verify(guestStorage, Mockito.times(1)).getGuestAssignments(GUEST_ID, connection);
-        Mockito.verify(databaseService, Mockito.times(1)).backWritable(connection);
     }
 
     @Test
