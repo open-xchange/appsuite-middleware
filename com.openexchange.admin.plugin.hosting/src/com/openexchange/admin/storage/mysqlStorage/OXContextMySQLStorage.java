@@ -718,11 +718,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e.getMessage(), e);
         }
 
-        ContextSearcher[] searchers = null;
-        searchers = new ContextSearcher[] {
-            new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern),
-            new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern),
-            new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern) };
+        List<ContextSearcher> searchers = new ArrayList<ContextSearcher>();
+        searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
+        searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
+        try {
+            Integer.parseInt(sqlPattern);
+            searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern));
+        } catch (NumberFormatException e) {
+            // Ignore and do nothing, because we are not including that query to the searcher
+            // since the specified sqlPattern does not solely consists out of numbers.
+        }
+        
         final CompletionFuture<Collection<Integer>> completion = threadPoolS.invoke(searchers);
         final Set<Integer> cids = new HashSet<Integer>();
         try {
