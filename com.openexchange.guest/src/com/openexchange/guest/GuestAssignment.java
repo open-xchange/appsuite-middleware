@@ -74,7 +74,7 @@ public class GuestAssignment implements Serializable {
     /**
      * The mail address the user is registered with
      */
-    private final int guestId;
+    private final long guestId;
 
     /**
      * Initializes a new {@link GuestAssignment}.
@@ -83,7 +83,7 @@ public class GuestAssignment implements Serializable {
      * @param contextId - context id the user is in
      * @param userId - user id in the context
      */
-    public GuestAssignment(int guestId, int contextId, int userId) {
+    public GuestAssignment(long guestId, int contextId, int userId) {
         this.guestId = guestId;
         this.contextId = contextId;
         this.userId = userId;
@@ -112,8 +112,7 @@ public class GuestAssignment implements Serializable {
      *
      * @return The guestId
      */
-    public int getGuestId() {
+    public long getGuestId() {
         return guestId;
     }
-
 }

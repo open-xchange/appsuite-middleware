@@ -805,7 +805,6 @@ public class DefaultShareService implements ShareService {
                  * messages
                  */
                 guestRecipient.setPassword(null);
-
                 guestService.addGuest(existingGuestUser.getMail(), context.getContextId(), existingGuestUser.getId());
                 return existingGuestUser;
             }
@@ -814,7 +813,7 @@ public class DefaultShareService implements ShareService {
          * create new guest user & contact
          */
         UserImpl guestUser = ShareTool.prepareGuestUser(services, sharingUser, recipient);
-        Contact contact = ShareTool.prepareGuestContact(sharingUser, guestUser);
+        Contact contact = ShareTool.prepareGuestContact(services, context.getContextId(), sharingUser, guestUser);
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
         guestUser.setContactId(contactId);
         int guestID = userService.createUser(connection, context, guestUser);

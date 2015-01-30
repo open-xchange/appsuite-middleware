@@ -49,7 +49,6 @@
 
 package com.openexchange.guest.internal;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +62,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -88,7 +88,7 @@ public class DefaultGuestServiceTest {
 
     private static final String GUEST_MAIL_ADDRESS = "hotte@example.com";
     private static final String GUEST_PASSWORD = "myToppiPasswordi";
-    private static final int GUEST_ID = 77;
+    private static final long GUEST_ID = 77;
     private static final int CONTEXT_ID = 1;
     private static final int USER_ID = 11;
 
@@ -99,6 +99,9 @@ public class DefaultGuestServiceTest {
 
     @Mock
     private ContextService contextService;
+
+    @Mock
+    private ContactUserStorage contactUserStorage;
 
     @Mock
     private Connection connection;
@@ -131,7 +134,7 @@ public class DefaultGuestServiceTest {
         PowerMockito.mockStatic(Databases.class);
         PowerMockito.doNothing().when(Databases.class, "startTransaction", (Connection) Matchers.any());
 
-        this.defaultGuestService = new DefaultGuestService(userService, contextService);
+        this.defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage);
     }
 
     @Test
@@ -185,7 +188,7 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testRemoveGuest_assignmentStillExisting_doNotDeleteUser() throws OXException {
-        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(10);
+        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(10L);
 
         defaultGuestService.removeGuest(CONTEXT_ID, USER_ID);
 
@@ -196,7 +199,7 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testRemoveGuest_noAssignment_deleteUser() throws OXException {
-        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(0);
+        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(0L);
 
         defaultGuestService.removeGuest(CONTEXT_ID, USER_ID);
 
@@ -238,7 +241,7 @@ public class DefaultGuestServiceTest {
 
     @Test(expected = OXException.class)
     public void testSetPassword_userFoundWithoutAssignment_doNotUpdate() throws OXException {
-        final List<Serializable> guestAssignments = new ArrayList<Serializable>();
+        final List<GuestAssignment> guestAssignments = new ArrayList<GuestAssignment>();
         Mockito.when(guestStorage.getGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(guestAssignments);
 
         defaultGuestService.setPassword(GUEST_MAIL_ADDRESS, GUEST_PASSWORD);
@@ -246,7 +249,7 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testSetPassword_userFoundWithAssignment_updateUser() throws OXException {
-        final List<Serializable> guestAssignments = new ArrayList<Serializable>();
+        final List<GuestAssignment> guestAssignments = new ArrayList<GuestAssignment>();
         guestAssignments.add(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID));
         Mockito.when(guestStorage.getGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(guestAssignments);
         Mockito.when(userService.getUser(Matchers.anyInt(), Matchers.anyInt())).thenReturn(new UserImpl());
@@ -260,12 +263,12 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testremoveGuestAssignments_assignmentRemovedButAssignmentStillAvailable_doNotRemoveGuest() throws OXException {
-        List<Integer> removedGuests = new ArrayList<Integer>();
-        removedGuests.add(22);
-        removedGuests.add(44);
-        removedGuests.add(66);
+        List<Long> removedGuests = new ArrayList<Long>();
+        removedGuests.add(22L);
+        removedGuests.add(44L);
+        removedGuests.add(66L);
         Mockito.when(guestStorage.resolveGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(removedGuests);
-        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(2);
+        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(2L);
 
         defaultGuestService.removeGuests(CONTEXT_ID);
 
@@ -275,12 +278,12 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testremoveGuestAssignments_assignmentRemovedButAssignmentNotAvailable_RemoveGuest() throws OXException {
-        List<Integer> removedGuests = new ArrayList<Integer>();
-        removedGuests.add(22);
-        removedGuests.add(44);
-        removedGuests.add(66);
+        List<Long> removedGuests = new ArrayList<Long>();
+        removedGuests.add(22L);
+        removedGuests.add(44L);
+        removedGuests.add(66L);
         Mockito.when(guestStorage.resolveGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(removedGuests);
-        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(0);
+        Mockito.when(guestStorage.getNumberOfAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(0L);
 
         defaultGuestService.removeGuests(CONTEXT_ID);
 
@@ -290,7 +293,7 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testremoveGuestAssignments_noGuestRemoved() throws OXException {
-        List<Integer> removedGuests = new ArrayList<Integer>();
+        List<Long> removedGuests = new ArrayList<Long>();
         Mockito.when(guestStorage.resolveGuestAssignments(Matchers.anyInt(), (Connection) Matchers.any())).thenReturn(removedGuests);
 
         defaultGuestService.removeGuests(CONTEXT_ID);

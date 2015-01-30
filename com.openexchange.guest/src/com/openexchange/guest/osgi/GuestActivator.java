@@ -50,6 +50,7 @@
 package com.openexchange.guest.osgi;
 
 import com.openexchange.caching.CacheService;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -59,7 +60,6 @@ import com.openexchange.guest.internal.GuestDeleteListenerImpl;
 import com.openexchange.guest.internal.GuestStorageServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
-
 
 /**
  * {@link GuestActivator}
@@ -75,7 +75,7 @@ public class GuestActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            UserService.class, ContextService.class, DatabaseService.class, CacheService.class
+            UserService.class, ContextService.class, DatabaseService.class, CacheService.class, ContactUserStorage.class
         };
     }
 
@@ -89,7 +89,7 @@ public class GuestActivator extends HousekeepingActivator {
 
         GuestStorageServiceLookup.set(this);
 
-        DefaultGuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContextService.class));
+        DefaultGuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContextService.class), getService(ContactUserStorage.class));
         registerService(GuestService.class, guestService);
 
         registerService(DeleteListener.class, new GuestDeleteListenerImpl(guestService));
