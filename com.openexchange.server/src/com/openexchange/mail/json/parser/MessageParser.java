@@ -657,7 +657,7 @@ public final class MessageParser {
                     byte[] content;
                     try {
                         /*
-                         * UI delivers HTML content in any case. Generate well-formed HTML for further processing dependent on given content
+                         * UI provides HTML content in any case. Generate well-formed HTML for further processing dependent on given content
                          * type.
                          */
                         HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
