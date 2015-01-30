@@ -1,3 +1,7 @@
+* 2015-01-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35147: Remove -XX:MaxPermSize from JAVA_XTRAOPTS if Java 8 is in use.
+
 * 2015-01-29 - marcus.klein@open-xchange.com
 
  - Fix for bug 36359: Defined correct dependencies on Debian packages according to moved files.
