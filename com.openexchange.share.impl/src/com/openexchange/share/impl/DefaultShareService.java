@@ -805,6 +805,7 @@ public class DefaultShareService implements ShareService {
                  * messages
                  */
                 guestRecipient.setPassword(null);
+
                 guestService.addGuest(existingGuestUser.getMail(), context.getContextId(), existingGuestUser.getId());
                 return existingGuestUser;
             }
@@ -829,10 +830,9 @@ public class DefaultShareService implements ShareService {
         if (AnonymousRecipient.class.isInstance(recipient)) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {
+            guestService.addGuest(guestUser.getMail(), context.getContextId(), guestID);
             LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), permissionBits, context.getContextId(), guestID);
         }
-
-        guestService.addGuest(guestUser.getMail(), context.getContextId(), guestID);
 
         return guestUser;
     }

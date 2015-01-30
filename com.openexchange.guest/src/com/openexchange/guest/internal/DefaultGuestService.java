@@ -106,6 +106,11 @@ public class DefaultGuestService implements GuestService {
      */
     @Override
     public void addGuest(String mailAddress, int contextId, int userId) throws OXException {
+        if (Strings.isEmpty(mailAddress)) {
+            LOG.info("Cannot add user with id {} in context {} as a guest as the provided mail address is empty.", userId, contextId);
+            return;
+        }
+
         check(mailAddress);
 
         ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
@@ -410,18 +415,12 @@ public class DefaultGuestService implements GuestService {
         ContactField[] contactFields = ContactField.values();
         Contact existingContact = contactUserStorage.getGuestContact(existingAssignment.getContextId(), existingAssignment.getUserId(), contactFields);
 
-        Contact contact = new Contact();
-        for (int column : Contact.ALL_COLUMNS) {
-            if (existingContact.contains(column)) {
-                contact.set(column, existingContact.get(column));
-            }
-        }
+        Contact contactCopy = existingContact.clone();
+        contactCopy.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        contactCopy.setCreatedBy(createdById);
+        contactCopy.setContextId(contextId);
+        contactCopy.setEmail1(mailAddress);
 
-        contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
-        contact.setCreatedBy(createdById);
-        contact.setContextId(contextId);
-        contact.setEmail1(mailAddress);
-
-        return contact;
+        return contactCopy;
     }
 }
