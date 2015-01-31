@@ -1272,7 +1272,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                             size += Streams.countInputStream(in);
                             throw new FileSizeLimitExceededException("File size exceeded", size, maxFileSize);
                         }
-                    } else if (maxOverallSize > 0) {
+                    }
+                    if (maxOverallSize > 0) {
                         if ((current + size) > maxOverallSize) {
                             // Close resources and count remaining bytes
                             Streams.close(out);
