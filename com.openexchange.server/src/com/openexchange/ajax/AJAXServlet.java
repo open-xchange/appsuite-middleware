@@ -1082,58 +1082,62 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         // Get file upload
         ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize);
         FileItemIterator iter = null;
+
+        // Parse the upload request
         try {
-            // Parse the upload request
-            try {
-                // Check request's character encoding
-                if (null == req.getCharacterEncoding()) {
-                    String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
-                    try {
-                        // Might be ineffective if already fully parsed
-                        req.setCharacterEncoding(defaultEnc);
-                    } catch (Exception e) { /* Ignore */ }
-                    upload.setHeaderEncoding(defaultEnc);
+            // Check request's character encoding
+            if (null == req.getCharacterEncoding()) {
+                String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
+                try {
+                    // Might be ineffective if already fully parsed
+                    req.setCharacterEncoding(defaultEnc);
+                } catch (Exception e) { /* Ignore */
                 }
-                // Parse multipart request
-                iter = upload.getItemIterator(req);
-            } catch (FileSizeLimitExceededException e) {
-                throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-            } catch (SizeLimitExceededException e) {
-                throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-            } catch (FileUploadException e) {
-                Throwable cause = e.getCause();
-                if (cause instanceof IOException) {
-                    String message = cause.getMessage();
-                    if (null != message && message.startsWith("Max. byte count of ")) {
-                        // E.g. Max. byte count of 10240 exceeded.
-                        int pos = message.indexOf(" exceeded", 19 + 1);
-                        String limit = message.substring(19, pos);
-                        throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
-                    }
-                } else if (cause instanceof EOFException) {
-                    // Stream closed/ended unexpectedly
-                    throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
-                }
-                throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
-            } catch (IOException e) {
-                throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                upload.setHeaderEncoding(defaultEnc);
             }
+            // Parse multipart request
+            iter = upload.getItemIterator(req);
+        } catch (FileSizeLimitExceededException e) {
+            throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+        } catch (SizeLimitExceededException e) {
+            throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+        } catch (FileUploadException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                String message = cause.getMessage();
+                if (null != message && message.startsWith("Max. byte count of ")) {
+                    // E.g. Max. byte count of 10240 exceeded.
+                    int pos = message.indexOf(" exceeded", 19 + 1);
+                    String limit = message.substring(19, pos);
+                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
+                }
+            } else if (cause instanceof EOFException) {
+                // Stream closed/ended unexpectedly
+                throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
+            }
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
+        } catch (IOException e) {
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+        }
 
-            // Create the upload event
-            UploadEvent uploadEvent = new UploadEvent();
-            uploadEvent.setAction(action);
+        // Create the upload event
+        UploadEvent uploadEvent = new UploadEvent();
+        uploadEvent.setAction(action);
+        uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
 
-            // Set affiliation to mail upload
-            uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
-
+        boolean error = true;
+        try {
             // Fill upload event instance
             String charEnc;
             {
                 String rce = req.getCharacterEncoding();
                 charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
             }
+
             String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
             String fileName = req.getParameter("filename");
+            long current = 0L;
+
             while (iter.hasNext()) {
                 try {
                     FileItemStream item = iter.next();
@@ -1142,7 +1146,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     } else {
                         String name = item.getName();
                         if (!isEmpty(name)) {
-                            uploadEvent.addUploadFile(processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName));
+                            UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, current, maxFileSize, maxOverallSize);
+                            current += uf.getSize();
+                            uploadEvent.addUploadFile(uf);
                         }
                     }
                 } catch (UnsupportedCharsetException e) {
@@ -1153,14 +1159,41 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                 }
             }
+            if (maxOverallSize > 0 && current > maxOverallSize) {
+                throw UploadSizeExceededException.create(current, maxOverallSize, true);
+            }
             if (uploadEvent.getAffiliationId() < 0) {
                 throw UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action);
             }
+
+            // Everything went well
+            error = false;
             return uploadEvent;
+        } catch (FileSizeLimitExceededException e) {
+            throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+        } catch (SizeLimitExceededException e) {
+            throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
         } catch (FileUploadException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                String message = cause.getMessage();
+                if (null != message && message.startsWith("Max. byte count of ")) {
+                    // E.g. Max. byte count of 10240 exceeded.
+                    int pos = message.indexOf(" exceeded", 19 + 1);
+                    String limit = message.substring(19, pos);
+                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
+                }
+            } else if (cause instanceof EOFException) {
+                // Stream closed/ended unexpectedly
+                throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
+            }
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
         } catch (IOException e) {
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+        } finally {
+            if (error) {
+                uploadEvent.cleanUp();
+            }
         }
     }
 
@@ -1170,7 +1203,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     private static final int BUFLEN = 65536;
 
-    private static final UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName) throws IOException {
+    private static final UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, long current, long maxFileSize, long maxOverallSize) throws IOException, FileUploadException {
         UploadFile retval = new UploadFileImpl();
         retval.setFieldName(item.getFieldName());
         retval.setFileName(fileName);
@@ -1199,6 +1232,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             }
         }
 
+        // Track size
+        long size = 0;
+
+        // Check if overall size is already exceeded
+        if (maxOverallSize > 0 && current > maxOverallSize) {
+            // Count current bytes
+            size = Streams.countInputStream(item.openStream());
+            retval.setSize(size);
+            return retval;
+        }
+
         // Create temporary file
         File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
         tmpFile.deleteOnExit();
@@ -1206,7 +1250,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         // Write to temporary file
         InputStream in = null;
         OutputStream out = null;
-        long size = 0;
         try {
             in = Streams.getNonEmpty(item.openStream());
             // Check if readable...
@@ -1220,6 +1263,25 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
                     out.write(buf, 0, read);
                     size += read;
+
+                    if (maxFileSize > 0) {
+                        if (size > maxFileSize) {
+                            // Close resources and count remaining bytes
+                            Streams.close(out);
+                            tmpFile.delete();
+                            size += Streams.countInputStream(in);
+                            throw new FileSizeLimitExceededException("File size exceeded", size, maxFileSize);
+                        }
+                    } else if (maxOverallSize > 0) {
+                        if ((current + size) > maxOverallSize) {
+                            // Close resources and count remaining bytes
+                            Streams.close(out);
+                            tmpFile.delete();
+                            size += Streams.countInputStream(in);
+                            retval.setSize(size);
+                            return retval;
+                        }
+                    }
                 }
                 out.flush();
             }

@@ -102,6 +102,30 @@ public class Streams {
         }
     };
 
+    /** An output stream that just discards passed bytes. */
+    public static final OutputStream EMPTY_OUTPUT_STREAM = new OutputStream() {
+
+        @Override
+        public void write(int b) throws IOException {
+            // Nothing
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            // Nothing
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            // Nothing
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // Nothing
+        }
+    };
+
     /**
      * Checks if specified stream is empty.
      * <p>
