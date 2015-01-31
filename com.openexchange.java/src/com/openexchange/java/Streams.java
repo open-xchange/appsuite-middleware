@@ -103,6 +103,33 @@ public class Streams {
     };
 
     /**
+     * Checks if specified stream is empty.
+     * <p>
+     * If <code>null</code> is returned, the given stream is ensured to be closed.
+     *
+     * @param is The stream to check
+     * @return The stream if not empty; otherwise <code>null</code> if empty
+     * @throws IOException If an I/O error occurs
+     */
+    public static InputStream getNonEmpty(InputStream is) throws IOException {
+        if (null == is) {
+            return null;
+        }
+
+        // Try to read first byte
+        PushbackInputStream pis = new PushbackInputStream(is);
+        int check = pis.read();
+        if (check < 0) {
+            Streams.close(pis);
+            return null;
+        }
+
+        // ... then push back to non-empty stream
+        pis.unread(check);
+        return pis;
+    }
+
+    /**
      * Returns a buffered {@link InputStream} for specified stream.
      *
      * @param in The stream
@@ -132,6 +159,32 @@ public class Streams {
             return out;
         }
         return new BufferedOutputStream(out, 65536);
+    }
+
+    /**
+     * Gets the specified stream's string representation using given character encoding.
+     *
+     * @param is The stream to read from
+     * @param charset The character encoding
+     * @return The string
+     * @throws IOException If an I/O error occurs
+     */
+    public static String stream2string(InputStream is, String charset) throws IOException {
+        if (null == is) {
+            return null;
+        }
+        try {
+            @SuppressWarnings("resource")
+            UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream(4096);
+            int buflen = 2048;
+            byte[] buf = new byte[buflen];
+            for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
+                bos.write(buf, 0, read);
+            }
+            return bos.toString(Charsets.forName(charset));
+        } finally {
+            close(is);
+        }
     }
 
     /**

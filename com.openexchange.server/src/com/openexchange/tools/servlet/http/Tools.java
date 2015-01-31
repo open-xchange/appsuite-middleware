@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.servlet.http;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -607,18 +608,12 @@ public final class Tools {
      * @param request The request to be evaluated.
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
-    public static final boolean isMultipartContent(final HttpServletRequest request) {
+    public static final boolean isMultipartContent(HttpServletRequest request) {
         if (null == request) {
             return false;
         }
-        final String contentType = request.getContentType();
-        if (contentType == null) {
-            return false;
-        }
-        if (toLowerCase(contentType).startsWith(MULTIPART)) {
-            return true;
-        }
-        return false;
+        String contentType = request.getContentType();
+        return null != contentType && asciiLowerCase(contentType).startsWith(MULTIPART);
     }
 
     /**
@@ -671,16 +666,4 @@ public final class Tools {
         return new AuthCookie(cookie);
     }
 
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
 }
