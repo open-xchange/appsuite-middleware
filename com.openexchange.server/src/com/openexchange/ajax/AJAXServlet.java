@@ -1079,12 +1079,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(action);
         }
 
-        // Get file upload
-        ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize);
-        FileItemIterator iter = null;
-
         // Parse the upload request
+        FileItemIterator iter;
         try {
+            // Get file upload
+            ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize);
             // Check request's character encoding
             if (null == req.getCharacterEncoding()) {
                 String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
@@ -1139,24 +1138,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             long current = 0L;
 
             while (iter.hasNext()) {
-                try {
-                    FileItemStream item = iter.next();
-                    if (item.isFormField()) {
-                        uploadEvent.addFormField(item.getFieldName(), Streams.stream2string(item.openStream(), charEnc));
-                    } else {
-                        String name = item.getName();
-                        if (!isEmpty(name)) {
-                            UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, current, maxFileSize, maxOverallSize);
-                            current += uf.getSize();
-                            uploadEvent.addUploadFile(uf);
-                        }
+                FileItemStream item = iter.next();
+                if (item.isFormField()) {
+                    uploadEvent.addFormField(item.getFieldName(), Streams.stream2string(item.openStream(), charEnc));
+                } else {
+                    String name = item.getName();
+                    if (!isEmpty(name)) {
+                        UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, current, maxFileSize, maxOverallSize);
+                        current += uf.getSize();
+                        uploadEvent.addUploadFile(uf);
                     }
-                } catch (UnsupportedCharsetException e) {
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-                } catch (IOException e) {
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-                } catch (RuntimeException e) {
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                 }
             }
             if (maxOverallSize > 0 && current > maxOverallSize) {
@@ -1189,6 +1180,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             }
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
         } catch (IOException e) {
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+        } catch (RuntimeException e) {
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         } finally {
             if (error) {
