@@ -109,7 +109,7 @@ public class ResponseInputStream {
 	    }
 
 	    if (b == -1)
-		throw new IOException("Connection dropped by server?");
+		throw new IOException("Received EOF from IMAP server. Connection dropped by server?");
 
 	    // Now lets check for literals : {<digits>}CRLF
 	    // Note: index needs to >= 5 for the above sequence to occur
@@ -138,7 +138,7 @@ public class ResponseInputStream {
 		int avail = buffer.length - idx; // available space in buffer
 		if (count + incrementSlop > avail) {
 		    // need count-avail more bytes
-		    ba.grow(minIncrement > count + incrementSlop - avail ? 
+		    ba.grow(minIncrement > count + incrementSlop - avail ?
 			    minIncrement : count + incrementSlop - avail);
 		    buffer = ba.getBytes();
 		}
