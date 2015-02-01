@@ -50,20 +50,12 @@
 package com.openexchange.ajax;
 
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
-import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
-import static com.openexchange.java.Strings.isEmpty;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
@@ -79,13 +71,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;
-import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.james.mime4j.field.contenttype.parser.ContentTypeParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,33 +79,24 @@ import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadFileImpl;
-import com.openexchange.groupware.upload.impl.UploadFileSizeExceededException;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
-import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
-import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -886,7 +863,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return The action parameter's value
      * @throws OXException If action parameter is missing in specified servlet request
      */
-    protected static String getAction(HttpServletRequest req) throws OXException {
+    public static String getAction(HttpServletRequest req) throws OXException {
         String action = req.getParameter(PARAMETER_ACTION);
         if (action == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
@@ -1023,17 +1000,20 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return A new {@code ServletFileUpload} instance
      */
     public static ServletFileUpload newFileUploadBase(long maxFileSize, long maxOverallSize) {
-        // Create a new file upload handler
-        final ServletFileUpload sfu = new ServletFileUpload();
-        // Set the maximum allowed size of a single uploaded file
-        sfu.setFileSizeMax(maxFileSize);
-        // Set overall request size constraint
-        sfu.setSizeMax(maxOverallSize);
-        return sfu;
+        return UploadUtility.newFileUploadBase(maxFileSize, maxOverallSize);
     }
 
-    private static final Set<String> UPLOAD_ACTIONS =
-        new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_ADDFILE, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY, "import"));
+    private static final Set<String> UPLOAD_ACTIONS = new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_ADDFILE, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY, "import", "CSV", "VCARD","ICAL", "OUTLOOK_CSV"));
+
+    /**
+     * Checks if given action is supposed to pass an incoming upload request.
+     *
+     * @param action The action to check
+     * @return <code>true</code> if upload is allowed; otherwise <code>false</code>
+     */
+    protected static boolean mayUpload(String action) {
+        return UPLOAD_ACTIONS.contains(action);
+    }
 
     /**
      * (Statically) Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
@@ -1056,237 +1036,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @throws OXException Id processing the upload fails
      */
     public static final UploadEvent processUploadStatic(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException {
-        if (!Tools.isMultipartContent(req)) {
-            // No multipart content
-            throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
-        }
-
-        // Check action parameter existence
-        String action;
-        try {
-            action = getAction(req);
-        } catch (OXException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e);
-        }
-        /*-
-         * Check proper action value
-         *
-         * ###########################################################################################################
-         * ######################### ENSURE YOUR ACTION IS CONTAINED IN UPLOAD_ACTIONS ! ! ! #########################
-         * ###########################################################################################################
-         */
-        if (!mayUpload(action)) {
-            throw UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(action);
-        }
-
-        // Parse the upload request
-        FileItemIterator iter;
-        try {
-            // Get file upload
-            ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize);
-            // Check request's character encoding
-            if (null == req.getCharacterEncoding()) {
-                String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
-                try {
-                    // Might be ineffective if already fully parsed
-                    req.setCharacterEncoding(defaultEnc);
-                } catch (Exception e) { /* Ignore */
-                }
-                upload.setHeaderEncoding(defaultEnc);
-            }
-            // Parse multipart request
-            iter = upload.getItemIterator(req);
-        } catch (FileSizeLimitExceededException e) {
-            throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-        } catch (SizeLimitExceededException e) {
-            throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-        } catch (FileUploadException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                String message = cause.getMessage();
-                if (null != message && message.startsWith("Max. byte count of ")) {
-                    // E.g. Max. byte count of 10240 exceeded.
-                    int pos = message.indexOf(" exceeded", 19 + 1);
-                    String limit = message.substring(19, pos);
-                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
-                }
-            } else if (cause instanceof EOFException) {
-                // Stream closed/ended unexpectedly
-                throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
-            }
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
-        } catch (IOException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-        }
-
-        // Create the upload event
-        UploadEvent uploadEvent = new UploadEvent();
-        uploadEvent.setAction(action);
-        uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
-
-        boolean error = true;
-        try {
-            // Fill upload event instance
-            String charEnc;
-            {
-                String rce = req.getCharacterEncoding();
-                charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
-            }
-
-            String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
-            String fileName = req.getParameter("filename");
-            long current = 0L;
-
-            while (iter.hasNext()) {
-                FileItemStream item = iter.next();
-                if (item.isFormField()) {
-                    uploadEvent.addFormField(item.getFieldName(), Streams.stream2string(item.openStream(), charEnc));
-                } else {
-                    String name = item.getName();
-                    if (!isEmpty(name)) {
-                        UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, current, maxFileSize, maxOverallSize);
-                        current += uf.getSize();
-                        uploadEvent.addUploadFile(uf);
-                    }
-                }
-            }
-            if (maxOverallSize > 0 && current > maxOverallSize) {
-                throw UploadSizeExceededException.create(current, maxOverallSize, true);
-            }
-            if (uploadEvent.getAffiliationId() < 0) {
-                throw UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action);
-            }
-
-            // Everything went well
-            error = false;
-            return uploadEvent;
-        } catch (FileSizeLimitExceededException e) {
-            throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-        } catch (SizeLimitExceededException e) {
-            throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-        } catch (FileUploadException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                String message = cause.getMessage();
-                if (null != message && message.startsWith("Max. byte count of ")) {
-                    // E.g. Max. byte count of 10240 exceeded.
-                    int pos = message.indexOf(" exceeded", 19 + 1);
-                    String limit = message.substring(19, pos);
-                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
-                }
-            } else if (cause instanceof EOFException) {
-                // Stream closed/ended unexpectedly
-                throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
-            }
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
-        } catch (IOException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-        } catch (RuntimeException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-        } finally {
-            if (error) {
-                uploadEvent.cleanUp();
-            }
-        }
-    }
-
-    protected static boolean mayUpload(String action) {
-        return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL", "OUTLOOK_CSV").contains(action); //Boo! Bad hack to get importer/export bundle working
-    }
-
-    private static final int BUFLEN = 65536;
-
-    private static final UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, long current, long maxFileSize, long maxOverallSize) throws IOException, FileUploadException {
-        UploadFile retval = new UploadFileImpl();
-        retval.setFieldName(item.getFieldName());
-        retval.setFileName(fileName);
-
-        // Deduce MIME type from passed file name
-        String mimeType = MimeType2ExtMap.getContentType(fileName, null);
-
-        // Set associated MIME type
-        {
-            // Check if we are forced to select the MIME type as signaled by file item
-            String forcedMimeType = item.getHeaders().getHeader("X-Forced-MIME-Type");
-            if (null == forcedMimeType) {
-                retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
-            } else if (AJAXRequestDataTools.parseBoolParameter(forcedMimeType)) {
-                retval.setContentType(item.getContentType());
-            } else {
-                // Valid MIME type specified?
-                try {
-                    ContentTypeParser parser = new ContentTypeParser(new StringReader(forcedMimeType));
-                    parser.parseAll();
-                    retval.setContentType(new StringBuilder(parser.getType()).append('/').append(parser.getSubType()).toString());
-                } catch (Exception e) {
-                    // Assume invalid value
-                    retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
-                }
-            }
-        }
-
-        // Track size
-        long size = 0;
-
-        // Check if overall size is already exceeded
-        if (maxOverallSize > 0 && current > maxOverallSize) {
-            // Count current bytes
-            size = Streams.countInputStream(item.openStream());
-            retval.setSize(size);
-            return retval;
-        }
-
-        // Create temporary file
-        File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
-        tmpFile.deleteOnExit();
-
-        // Write to temporary file
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            in = Streams.getNonEmpty(item.openStream());
-            // Check if readable...
-            if (null == in) {
-                // Empty file item...
-                LOG.warn("Detected empty upload file {}.", retval.getFileName());
-            } else {
-                out = new FileOutputStream(tmpFile, false);
-                int buflen = BUFLEN;
-                byte[] buf = new byte[buflen];
-                for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
-                    out.write(buf, 0, read);
-                    size += read;
-
-                    if (maxFileSize > 0) {
-                        if (size > maxFileSize) {
-                            // Close resources and count remaining bytes
-                            Streams.close(out);
-                            tmpFile.delete();
-                            size += Streams.countInputStream(in);
-                            throw new FileSizeLimitExceededException("File size exceeded", size, maxFileSize);
-                        }
-                    }
-                    if (maxOverallSize > 0) {
-                        if ((current + size) > maxOverallSize) {
-                            // Close resources and count remaining bytes
-                            Streams.close(out);
-                            tmpFile.delete();
-                            size += Streams.countInputStream(in);
-                            retval.setSize(size);
-                            return retval;
-                        }
-                    }
-                }
-                out.flush();
-            }
-        } finally {
-            Streams.close(in, out);
-        }
-
-        // Apply temporary file and its size
-        retval.setSize(size);
-        retval.setTmpFile(tmpFile);
-        return retval;
+        return UploadUtility.processUpload(req, maxFileSize, maxOverallSize);
     }
 
     @Override
@@ -1295,7 +1045,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             for (UploadListener uploadListener : uploadListeners) {
                 try {
                     uploadListener.action(uploadEvent);
-                } catch (OXException e) {
+                } catch (Exception e) {
                     LOG.error("Failed upload listener: {}", uploadListener.getClass(), e);
                 }
             }
