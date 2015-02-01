@@ -432,28 +432,40 @@ public final class IMAPSort {
                         return matches;
                     }
                 });
+            } catch (FolderClosedException e) {
+                Exception cause = e.getNextException();
+                if (cause instanceof com.sun.mail.iap.ConnectionException) {
+                    // SORT RETURN PARTIAL command failed...
+                    LOG.warn("SORT RETURN PARTIAL command failed. Fall-back to normal SORT command.", cause);
+                    return null;
+                }
+                throw e;
+            } catch (StoreClosedException e) {
+                Exception cause = e.getNextException();
+                if (cause instanceof com.sun.mail.iap.ConnectionException) {
+                    // SORT RETURN PARTIAL command failed...
+                    LOG.warn("SORT RETURN PARTIAL command failed. Fall-back to normal SORT command.", cause);
+                    return null;
+                }
+                throw e;
             } catch (MessagingException e) {
                 Exception cause = e.getNextException();
                 if (cause instanceof WrappingProtocolException) {
                     throw ((WrappingProtocolException) cause).getMessagingException();
                 }
-
-                // Re-throw as is
                 throw e;
             }
-            rangeApplied = true;
-        } else {
-            seqNums = (int[]) imapFolder.doCommand(new ProtocolCommand() {
 
-                @Override
-                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
-                    try {
-                        return protocol.sort(sortTerms, jmsSearchTerm);
-                    } catch (SearchException e) {
-                        throw new ProtocolException(e.getMessage(), e);
-                    }
-                }
-            });
+            // Check result
+            if (null == seqNums) {
+                // Apparently, SORT RETURN PARTIAL command failed
+                seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
+            } else {
+                // SORT RETURN PARTIAL command succeeded
+                rangeApplied = true;
+            }
+        } else {
+            seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
         }
 
         final int umlautFilterThreshold = IMAPSearch.umlautFilterThreshold();
@@ -465,6 +477,20 @@ public final class IMAPSort {
         }
 
         return new ImapSortResult(seqNums, rangeApplied);
+    }
+
+    private static int[] sort(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IMAPFolder imapFolder) throws MessagingException {
+        return (int[]) imapFolder.doCommand(new ProtocolCommand() {
+
+            @Override
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                try {
+                    return protocol.sort(sortTerms, jmsSearchTerm);
+                } catch (SearchException e) {
+                    throw new ProtocolException(e.getMessage(), e);
+                }
+            }
+        });
     }
 
     /**
