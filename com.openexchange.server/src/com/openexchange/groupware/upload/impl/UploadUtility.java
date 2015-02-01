@@ -50,6 +50,8 @@
 package com.openexchange.groupware.upload.impl;
 
 import static com.openexchange.java.Strings.isEmpty;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,9 +62,11 @@ import java.io.StringReader;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;
 import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.james.mime4j.field.contenttype.parser.ContentTypeParser;
 import org.slf4j.Logger;
@@ -75,8 +79,6 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.servlet.http.Tools;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link UploadUtility} - Utility class for uploads.
@@ -167,7 +169,47 @@ public final class UploadUtility {
     // ----------------------------------------------- Parse/process an upload request -----------------------------------------------------
 
     /**
+     * 1MB threshold.
+     */
+    private static final int SIZE_THRESHOLD = 1048576;
+
+    /**
+     * Creates a new {@code ServletFileUpload} instance using {@link ServerConfig.Property#UploadDirectory} for
+     * uploaded files that exceed the threshold of 1MB.
+     * <p>
+     * The returned <code>ServletFileUpload</code> instance is suitable to for
+     * {@link FileUploadBase#parseRequest(org.apache.commons.fileupload.RequestContext) parseRequest()} invocation.
+     *
+     * @param maxFileSize The maximum allowed size of a single uploaded file
+     * @param maxOverallSize The maximum allowed size of a complete request
+     * @return A new {@code ServletFileUpload} instance
+     */
+    public static ServletFileUpload newThresholdFileUploadBase(long maxFileSize, long maxOverallSize) {
+        // Create the upload event
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        // Set factory constraints; threshold for single files
+        factory.setSizeThreshold(SIZE_THRESHOLD);
+        factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+        // Create a new file upload handler
+        ServletFileUpload sfu = new ServletFileUpload(factory);
+        // Set the maximum allowed size of a single uploaded file
+        sfu.setFileSizeMax(maxFileSize);
+        // Set overall request size constraint
+        sfu.setSizeMax(maxOverallSize);
+        return sfu;
+    }
+
+    /**
      * Creates a new {@code ServletFileUpload} instance.
+     * <p>
+     * The returned <code>ServletFileUpload</code> instance is <b>only</b> suitable to for
+     * {@link FileUploadBase#getItemIterator(org.apache.commons.fileupload.RequestContext) getItemIterator()} invocation.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>NOTE</b>:<br>
+     * An attempt calling {@link FileUploadBase#parseRequest(org.apache.commons.fileupload.RequestContext) parseRequest()} with the returned
+     * <code>ServletFileUpload</code> instance will throw a {@link NullPointerException}.
+     * </div>
      *
      * @param maxFileSize The maximum allowed size of a single uploaded file
      * @param maxOverallSize The maximum allowed size of a complete request
@@ -175,7 +217,7 @@ public final class UploadUtility {
      */
     public static ServletFileUpload newFileUploadBase(long maxFileSize, long maxOverallSize) {
         // Create a new file upload handler
-        final ServletFileUpload sfu = new ServletFileUpload();
+        ServletFileUpload sfu = new ServletFileUpload();
         // Set the maximum allowed size of a single uploaded file
         sfu.setFileSizeMax(maxFileSize);
         // Set overall request size constraint
