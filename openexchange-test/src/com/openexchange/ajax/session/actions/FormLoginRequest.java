@@ -100,7 +100,7 @@ public class FormLoginRequest extends AbstractRequest<FormLoginResponse> {
 
     @Override
     public FormLoginParser getParser() {
-        return new FormLoginParser(cookiesNeeded, true);
+        return new FormLoginParser(cookiesNeeded);
     }
 
     /**

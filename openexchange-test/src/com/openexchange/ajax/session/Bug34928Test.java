@@ -202,7 +202,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         return null;
     }
 
-    private String extractSessionID(HttpAuthResponse httpAuthResponse) {
+    private static String extractSessionID(HttpAuthResponse httpAuthResponse) {
         String location = httpAuthResponse.getLocation();
         assertNotNull("Location is missing in response", location);
         int sessionStart = location.indexOf("session=");
