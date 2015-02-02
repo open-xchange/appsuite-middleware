@@ -150,6 +150,15 @@ public enum ITipAction {
      * If ORGANIZER: Send an ADD mail
      * If Attendee: Send a REPLY
      */
-    CREATE
+    CREATE;
 
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }
