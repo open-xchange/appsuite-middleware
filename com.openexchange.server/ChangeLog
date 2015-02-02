@@ -1,3 +1,7 @@
+* 2015-02-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36401: Automatically enhance filename in CIFS files storage to avoid conflicts with existing files
+
 * 2015-02-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 36401: Drop superfluous <div> tags from HTML content on message composition

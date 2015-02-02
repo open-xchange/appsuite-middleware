@@ -68,6 +68,7 @@ import jcifs.smb.SmbFileFilter;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
@@ -75,7 +76,9 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.file.storage.search.FieldCollectorVisitor;
@@ -216,41 +219,53 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         return new IDTuple(file.getFolderId(), smbFile.getName());
     }
 
+    /**
+     * Creates a new SMB file or updates an existing one, applying the supplied metadata.
+     *
+     * @param file The file metadata to apply
+     * @param modifiedFields The modified fields to take over, or <code>null</code> to apply all known metadata
+     * @return The SMB file reference
+     */
     private SmbFile createSmbFile(final File file, final List<Field> modifiedFields) throws OXException {
         try {
-            final Set<Field> set =
-                null == modifiedFields || modifiedFields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(modifiedFields);
+            Set<Field> set = null == modifiedFields || modifiedFields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(modifiedFields);
             /*
-             * Check
+             * check & create SMB file reference
              */
-            final String folderId = checkFolderId(file.getFolderId(), rootUrl);
-            final String id;
-            {
-                final String fid = file.getId();
-                if (null == fid) {
-                    String name = file.getFileName();
+            String folderId = checkFolderId(file.getFolderId(), rootUrl);
+            SmbFile smbFile;
+            if (FileStorageFileAccess.NEW == file.getId()) {
+                /*
+                 * create new file
+                 */
+                String name = file.getFileName();
+                if (isEmpty(name)) {
+                    name = file.getTitle();
                     if (isEmpty(name)) {
-                        name = file.getTitle();
-                        if (isEmpty(name)) {
-                            throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
-                        }
+                        throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
                     }
-                    id = name;
-                    file.setId(id);
-                } else {
-                    id = fid;
+                }
+                smbFile = getSmbFile(folderId + name);
+                /*
+                 * ensure filename uniqueness in target folder
+                 */
+                for (int i = 1; exists(smbFile); i++) {
+                    name = FileStorageUtility.enhance(name, i);
+                    smbFile = getSmbFile(folderId + name);
+                }
+                smbFile.createNewFile();
+            } else {
+                /*
+                 * use existing file reference
+                 */
+                smbFile = getSmbFile(folderId + file.getId());
+                if (false == smbFile.exists()) {
+                    throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(file.getId(), folderId);
                 }
             }
             /*
-             * Convert file to SMB representation
+             * apply supplied metadata to SMB file
              */
-            SmbFile smbFile = getSmbFile(folderId + id);
-            /*
-             * Create if non-existent
-             */
-            if (!exists(smbFile)) {
-                smbFile.createNewFile();
-            }
             final long now = System.currentTimeMillis();
             if (false == set.contains(Field.CREATED) || null == file.getCreated()) {
                 smbFile.setCreateTime(now);
@@ -275,7 +290,8 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * Check for filename
              */
-            if (set.contains(Field.FILENAME) && false == isEmpty(file.getFileName()) && false == file.getFileName().equals(smbFile.getName())) {
+            if (FileStorageFileAccess.NEW != file.getId() && set.contains(Field.FILENAME) &&
+                false == isEmpty(file.getFileName()) && false == file.getFileName().equals(smbFile.getName())) {
                 final SmbFile renamedFile = getSmbFile(folderId + file.getFileName());
                 smbFile.renameTo(renamedFile);
                 smbFile = renamedFile;
@@ -321,7 +337,14 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             if (isEmpty(targetFileName)) {
                 throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
             }
-            final SmbFile dest = getSmbFile(checkFolderId(destFolder, rootUrl) + targetFileName);
+            /*
+             * create target SMB file
+             */
+            String targetFolderID = checkFolderId(destFolder, rootUrl);
+            DefaultFile targetFile = new DefaultFile();
+            targetFile.setFileName(targetFileName);
+            targetFile.setFolderId(targetFolderID);
+            SmbFile dest = createSmbFile(targetFile, null);
             /*
              * Perform COPY
              */
@@ -343,7 +366,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * Return
              */
-            return new IDTuple(destFolder, targetFileName);
+            return new IDTuple(destFolder, dest.getName());
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
