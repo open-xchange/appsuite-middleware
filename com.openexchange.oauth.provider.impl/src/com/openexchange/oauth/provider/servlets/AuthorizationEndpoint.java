@@ -51,6 +51,7 @@ package com.openexchange.oauth.provider.servlets;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorPage;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
@@ -67,8 +68,9 @@ import org.slf4j.Logger;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.service.Authentication;
-import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -85,8 +87,8 @@ import com.openexchange.oauth.provider.DefaultScope;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.Scope;
+import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.URLHelper;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -150,6 +152,11 @@ public class AuthorizationEndpoint extends HttpServlet {
 
             Client client = oAuthProvider.getClientById(clientId);
             if (client == null) {
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained an invalid value for parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
+                return;
+            }
+
+            if (!client.isEnabled()) {
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained an invalid value for parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }
@@ -243,13 +250,15 @@ public class AuthorizationEndpoint extends HttpServlet {
                 Context ctx = findContext(authed.getContextInfo());
                 User user = findUser(ctx, authed.getUserInfo());
 
-                // Checks if something is deactivated.
-                final AuthorizationService authService = Authorization.getService();
-                if (null == authService) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthorizationService.class.getName());
-                }
                 // Authorize
+                AuthorizationService authService = requireService(AuthorizationService.class, services);
                 authService.authorizeUser(ctx, user);
+
+                // Checks if something is deactivated.
+                ConfigView configView = requireService(ConfigViewFactory.class, services).getView(user.getId(), ctx.getContextId());
+                if (!configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue()) {
+                    sendErrorPage(response, HttpServletResponse.SC_FORBIDDEN, "You are not allowed to grant access via OAuth to 3rd party applications.");
+                }
 
                 // Everything OK, do the redirect with authorization code & state
                 // YOUR_REDIRECT_URI/?code=AUTHORIZATION_CODE&state=STATE
@@ -353,6 +362,12 @@ public class AuthorizationEndpoint extends HttpServlet {
 
             Client client = oAuthProvider.getClientById(clientId);
             if (client == null) {
+                // Send error page
+                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_CLIENT_ID);
+                return;
+            }
+
+            if (!client.isEnabled()) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;

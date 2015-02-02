@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,21 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal.client;
+package com.openexchange.oauth.provider.internal;
 
-import static com.openexchange.java.Strings.isEmpty;
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
+ * {@link OAuthProviderProperties}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class Obfuscator {
+public class OAuthProviderProperties {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Obfuscator.class);
+    public static final String ENABLED = "com.openexchange.oauth.provider.enabled";
 
-    private final String obfuscationKey;
-    private final ServiceLookup services;
+    public static final String AUTHCODE_TYPE = "com.openexchange.oauth.provider.authcode.type";
 
-    /**
-     * Initializes a new {@link Obfuscator}.
-     *
-     * @param obfuscationKey The key used to (un)obfuscate secret data
-     */
-    public Obfuscator(String obfuscationKey, ServiceLookup services) {
-        super();
-        this.services = services;
-        this.obfuscationKey = obfuscationKey;
-    }
-
-    public String obfuscate(String string) {
-        if (isEmpty(string)) {
-            return string;
-        }
-        try {
-            return services.getService(CryptoService.class).encrypt(string, obfuscationKey);
-        } catch (OXException e) {
-            LOG.error("Could not obfuscate string", e);
-            return string;
-        }
-    }
-
-    public String unobfuscate(String string) {
-        if (isEmpty(string)) {
-            return string;
-        }
-        try {
-            return services.getService(CryptoService.class).decrypt(string, obfuscationKey);
-        } catch (OXException e) {
-            LOG.error("Could not unobfuscate string", e);
-            return string;
-        }
-    }
+    public static final String ENCRYPTION_KEY = "com.openexchange.oauth.provider.encryptionKey";
 
 }

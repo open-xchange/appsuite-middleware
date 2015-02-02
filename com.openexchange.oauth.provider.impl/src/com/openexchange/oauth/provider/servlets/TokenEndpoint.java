@@ -95,13 +95,6 @@ public class TokenEndpoint extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        /*
-         * https://www.superduperhosting.com/appsuite/api/oauth2/accessToken?grant_type=authorization_code
-                                           &code=AUTHORIZATION_CODE
-                                           &redirect_uri=YOUR_REDIRECT_URI
-                                           &client_id=YOUR_API_KEY
-                                           &client_secret=YOUR_SECRET_KEY
-         */
         try {
             if (!Tools.considerSecure(request)) {
                 response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
@@ -117,6 +110,11 @@ public class TokenEndpoint extends HttpServlet {
 
             Client client = oAuthProvider.getClientById(clientId);
             if (client == null) {
+                failWithInvalidParameter(response, OAuthProviderConstants.PARAM_CLIENT_ID);
+                return;
+            }
+
+            if (!client.isEnabled()) {
                 failWithInvalidParameter(response, OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }

@@ -71,6 +71,7 @@ import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.DefaultScope;
 import com.openexchange.oauth.provider.Icon;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
+import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -93,9 +94,9 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     public RdbOAuthClientStorage(ServiceLookup services) throws BundleException {
         super(services);
         ConfigurationService service = services.getService(ConfigurationService.class);
-        String key = service.getProperty("com.openexchange.oauth.provider.encryptionKey");
+        String key = service.getProperty(OAuthProviderProperties.ENCRYPTION_KEY);
         if (Strings.isEmpty(key)) {
-            throw new BundleException("Missing \"com.openexchange.oauth.provider.encryptionKey\" property", BundleException.ACTIVATOR_ERROR);
+            throw new BundleException("Missing \"" + OAuthProviderProperties.ENCRYPTION_KEY + "\" property", BundleException.ACTIVATOR_ERROR);
         }
         obfuscator = new Obfuscator(key, services);
     }
