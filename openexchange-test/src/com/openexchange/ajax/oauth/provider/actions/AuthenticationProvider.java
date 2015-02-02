@@ -57,7 +57,8 @@ package com.openexchange.ajax.oauth.provider.actions;
  */
 public enum AuthenticationProvider {
     GOOGLE("google", "com.openexchange.oauth.google", "com.openexchange.file.storage.googledrive"),
-    DROPBOX("dropbox", "com.openexchange.oauth.dropbox", "com.openexchange.file.storage.dropbox");
+    DROPBOX("dropbox", "com.openexchange.oauth.dropbox", "com.openexchange.file.storage.dropbox"),
+    BOXCOM("box_com", "com.openexchange.oauth.boxcom", "com.openexchange.file.storage.boxcom");
 
     private String provider;
     private String oAuthServiceId;
