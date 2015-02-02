@@ -64,6 +64,13 @@ import java.util.List;
 public interface Client extends Serializable {
 
     /**
+     * Gets the client's public identifier
+     *
+     * @return The public identifier
+     */
+    String getId();
+
+    /**
      * Gets the client's name
      *
      * @return The name
@@ -91,11 +98,26 @@ public interface Client extends Serializable {
     Date getRegistrationDate();
 
     /**
-     * Gets the client's public identifier
+     * Gets the contact address
      *
-     * @return The public identifier
+     * @return The address
      */
-    String getId();
+    String getContactAddress();
+
+    /**
+     * Gets the website
+     *
+     * @return The website
+     */
+    String getWebsite();
+
+    /**
+     * Gets the default scope that should be assumed when the authorization request does not
+     * specify a certain scope.
+     *
+     * @return The default scope
+     */
+    Scope getDefaultScope();
 
     /**
      * Gets the client's secret identifier
@@ -120,17 +142,11 @@ public interface Client extends Serializable {
     boolean hasRedirectURI(String uri);
 
     /**
-     * Gets the owner
+     * Returns whether this client is enabled or not.
      *
-     * @return The owner
+     * @return <code>true</code> if the client is enabled
      */
-    String getOwner();
+    boolean isEnabled();
 
-    /**
-     * Gets the contact address
-     *
-     * @return The address
-     */
-    String getContactAddress();
 
 }

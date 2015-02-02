@@ -105,12 +105,14 @@
                 id VARCHAR(255) NOT NULL,
                 secret VARCHAR(255) NOT NULL,
                 name VARCHAR(255) UNIQUE NOT NULL,
-                description TEXT DEFAULT NULL,
-                icon_reference VARCHAR(255) DEFAULT NULL,
-                default_scope VARCHAR(767) DEFAULT NULL,
-                contact_address VARCHAR(255) DEFAULT NULL,
-                website VARCHAR(255) DEFAULT NULL,
+                description TEXT NOT NULL,
+                icon MEDIUMBLOB NOT NULL,
+                icon_mime_type VARCHAR(32) NOT NULL,
+                default_scope VARCHAR(767) NOT NULL,
+                contact_address VARCHAR(255) NOT NULL,
+                website VARCHAR(255) NOT NULL,
                 enabled TINYINT UNSIGNED NOT NULL,
+                registration_date BIGINT(64) UNSIGNED NOT NULL,
                 PRIMARY KEY(`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
         </sql>

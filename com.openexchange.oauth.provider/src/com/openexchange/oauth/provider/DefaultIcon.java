@@ -49,36 +49,52 @@
 
 package com.openexchange.oauth.provider;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 /**
- * {@link Icon}
+ * {@link DefaultIcon}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface Icon {
+public class DefaultIcon implements Icon {
 
-    /**
-     * Gets the size of this icon in bytes.
-     *
-     * @return The size
-     */
-    int getSize();
+    private String mimeType = null;
 
-    /**
-     * Gets the mime type of this icon (e.g. image/png).
-     *
-     * @return The mime type
-     */
-    String getMimeType();
+    private int size = -1;
 
-    /**
-     * Gets an {@link InputStream} for the icons data. Every subsequent call returns
-     * a new stream.
-     *
-     * @return An input stream to the icons data
-     */
-    InputStream getInputStream();
+    private byte[] data;
+
+    public DefaultIcon() {
+        super();
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
+    @Override
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    @Override
+    public int getSize() {
+        return size;
+    }
+
+    @Override
+    public InputStream getInputStream() {
+        return new ByteArrayInputStream(data);
+    }
 
 }

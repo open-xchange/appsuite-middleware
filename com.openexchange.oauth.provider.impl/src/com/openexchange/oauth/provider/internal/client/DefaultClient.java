@@ -54,6 +54,7 @@ import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.Icon;
+import com.openexchange.oauth.provider.Scope;
 import com.openexchange.oauth.provider.internal.URIValidator;
 
 /**
@@ -67,14 +68,16 @@ public class DefaultClient implements Client {
     private static final long serialVersionUID = 8478439580309382857L;
 
     private String id;
-    private String description;
-    private String name;
     private String secret;
-    private final List<String> redirectURIs;
-    private String owner;
-    private String contactAddress;
+    private String name;
+    private String description;
     private Icon icon;
+    private String website;
+    private String contactAddress;
+    private final List<String> redirectURIs;
+    private Scope defaultScope;
     private Date registrationDate;
+    private boolean enabled;
 
     /**
      * Initializes a new {@link DefaultClient}.
@@ -85,8 +88,13 @@ public class DefaultClient implements Client {
     }
 
     @Override
-    public String getDescription() {
-        return description;
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getSecret() {
+        return secret;
     }
 
     @Override
@@ -95,13 +103,28 @@ public class DefaultClient implements Client {
     }
 
     @Override
-    public String getId() {
-        return id;
+    public String getDescription() {
+        return description;
     }
 
     @Override
-    public String getSecret() {
-        return secret;
+    public Icon getIcon() {
+        return icon;
+    }
+
+    @Override
+    public String getWebsite() {
+        return website;
+    }
+
+    @Override
+    public String getContactAddress() {
+        return contactAddress;
+    }
+
+    @Override
+    public List<String> getRedirectURIs() {
+        return redirectURIs;
     }
 
     @Override
@@ -119,92 +142,9 @@ public class DefaultClient implements Client {
         return false;
     }
 
-    /**
-     * Sets the identifier
-     *
-     * @param id The identifier to set
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * Sets the description
-     *
-     * @param description The description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * Sets the name
-     *
-     * @param name The name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Sets the secret
-     *
-     * @param secret The secret to set
-     */
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
-
-    public void addRedirectURI(String uri) {
-        redirectURIs.add(uri);
-    }
-
     @Override
-    public String getOwner() {
-        return owner;
-    }
-
-    /**
-     * Sets the owner
-     *
-     * @param owner The owner to set
-     */
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    @Override
-    public String getContactAddress() {
-        return contactAddress;
-    }
-
-    /**
-     * Sets the contact address
-     *
-     * @param contactAddress The contact address to set
-     */
-    public void setContactAddress(String contactAddress) {
-        this.contactAddress = contactAddress;
-    }
-
-    @Override
-    public List<String> getRedirectURIs() {
-        return redirectURIs;
-    }
-
-    @Override
-    public Icon getIcon() {
-        return icon;
-    }
-
-
-    /**
-     * Sets the icon
-     *
-     * @param icon The icon to set
-     */
-    public void setIcon(Icon icon) {
-        this.icon = icon;
+    public Scope getDefaultScope() {
+        return defaultScope;
     }
 
     @Override
@@ -212,14 +152,53 @@ public class DefaultClient implements Client {
         return registrationDate;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-    /**
-     * Sets the registrationDate
-     *
-     * @param registrationDate The registrationDate to set
-     */
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setIcon(Icon icon) {
+        this.icon = icon;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public void setContactAddress(String contactAddress) {
+        this.contactAddress = contactAddress;
+    }
+
+    public void addRedirectURI(String uri) {
+        redirectURIs.add(uri);
+    }
+
+    public void setDefaultScope(Scope defaultScope) {
+        this.defaultScope = defaultScope;
+    }
+
     public void setRegistrationDate(Date registrationDate) {
         this.registrationDate = registrationDate;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
 }

@@ -129,12 +129,6 @@ public class SimOAuthResourceService implements OAuthResourceService {
             }
 
             @Override
-            public String getOwner() {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
             public String getContactAddress() {
                 // TODO Auto-generated method stub
                 return null;
@@ -150,6 +144,24 @@ public class SimOAuthResourceService implements OAuthResourceService {
             public Date getRegistrationDate() {
                 // TODO Auto-generated method stub
                 return null;
+            }
+
+            @Override
+            public String getWebsite() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public Scope getDefaultScope() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public boolean isEnabled() {
+                // TODO Auto-generated method stub
+                return true;
             }
 
         };

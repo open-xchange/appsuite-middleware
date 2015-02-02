@@ -53,6 +53,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.osgi.framework.BundleException;
 import com.openexchange.config.ConfigurationService;
@@ -63,6 +68,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
+import com.openexchange.oauth.provider.DefaultScope;
+import com.openexchange.oauth.provider.Icon;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -124,7 +131,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT name, description, secret, owner, contact_address FROM oauth_client WHERE id=?");
+            stmt = con.prepareStatement("SELECT name, description, secret, default_scope, contact_address, website, enabled, registration_date FROM oauth_client WHERE id = ?");
             stmt.setString(1, clientId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -134,13 +141,34 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             DefaultClient client = new DefaultClient();
             client.setId(clientId);
             client.setName(rs.getString(1));
-            client.setDescription(rs.getString(2));
+
+            String description = rs.getString(2);
+            if (!rs.wasNull()) {
+                client.setDescription(description);
+            }
+
             client.setSecret(obfuscator.unobfuscate(rs.getString(3)));
-            client.setOwner(rs.getString(4));
-            client.setContactAddress(rs.getString(5));
+
+            String defaultScope = rs.getString(4);
+            if (!rs.wasNull()) {
+                client.setDefaultScope(new DefaultScope(defaultScope));
+            }
+
+            String contactAddress = rs.getString(5);
+            if (!rs.wasNull()) {
+                client.setContactAddress(contactAddress);
+            }
+
+            String website = rs.getString(6);
+            if (!rs.wasNull()) {
+                client.setWebsite(website);
+            }
+
+            client.setEnabled(rs.getBoolean(7));
+            client.setRegistrationDate(new Date(rs.getLong(8)));
 
             Databases.closeSQLStuff(rs, stmt);
-            stmt = con.prepareStatement("SELECT uri FROM oauth_client_uri WHERE id=?");
+            stmt = con.prepareStatement("SELECT uri FROM oauth_client_uri WHERE client = ?");
             stmt.setString(1, clientId);
             rs = stmt.executeQuery();
             while (rs.next()) {
@@ -148,6 +176,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                 client.addRedirectURI(uri);
             }
 
+            client.setIcon(new LazyIcon(clientId, getDbService()));
             return client;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -190,71 +219,66 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
      * @throws OXException If create operation fails
      */
     public Client registerClient(ClientData clientData, Connection con) throws OXException {
-        return null;
-//        PreparedStatement stmt = null;
-//        try {
-//            String clientId = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
-//            String secret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
-//
-//            DefaultClient client = new DefaultClient();
-//            client.setId(clientId);
-//            client.setSecret(secret);
-//            client.setName(clientData.getName());
-//
-//            stmt = con.prepareStatement("INSERT INTO oauth_client (id, secret, name, description, owner, contact_address) VALUES (?, ?, ?, ?, ?, ?)");
-//            stmt.setString(1, clientId);
-//            stmt.setString(2, obfuscator.obfuscate(secret));
-//            stmt.setString(3, clientData.getName());
-//            {
-//                String desc = clientData.getDescription();
-//                if (Strings.isEmpty(desc)) {
-//                    stmt.setNull(4, Types.VARCHAR);
-//                    client.setDescription(null);;
-//                } else {
-//                    stmt.setString(4, desc);
-//                    client.setDescription(desc);
-//                }
-//            }
-//            {
-//                String owner = clientData.getOwner();
-//                if (Strings.isEmpty(owner)) {
-//                    stmt.setNull(5, Types.VARCHAR);
-//                    client.setOwner(null);
-//                } else {
-//                    stmt.setString(5, owner);
-//                    client.setOwner(owner);
-//                }
-//            }
-//            {
-//                String ca = clientData.getContactAddress();
-//                if (Strings.isEmpty(ca)) {
-//                    stmt.setNull(6, Types.VARCHAR);
-//                    client.setContactAddress(null);
-//                } else {
-//                    stmt.setString(6, ca);
-//                    client.setContactAddress(ca);
-//                }
-//            }
-//            stmt.executeUpdate();
-//
-//            Databases.closeSQLStuff(stmt);
-//            stmt = con.prepareStatement("INSERT INTO oauth_client_uri (id, uri) VALUES (?, ?)");
-//            stmt.setString(1, clientId);
-//            for (String uri : clientData.getRedirectURIs()) {
-//                stmt.setString(2, uri);
-//                stmt.addBatch();
-//                client.addRedirectURI(uri);
-//            }
-//            stmt.executeBatch();
-//
-//            return client;
-//        } catch (SQLException e) {
-//            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-//        } finally {
-//            Databases.closeSQLStuff(stmt);
-//        }
+        PreparedStatement stmt = null;
+        try {
+            // TODO: move generation out of storage layer
+            String clientId = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
+            String secret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
+
+            stmt = con.prepareStatement("INSERT INTO oauth_client (id, secret, name, description, icon, icon_mime_type, default_scope, contact_address, website, enabled, registration_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt.setString(1, clientId);
+            stmt.setString(2, obfuscator.obfuscate(secret));
+            stmt.setString(3, clientData.getName());
+            stmt.setString(4, clientData.getDescription());
+
+            Icon icon = clientData.getIcon();
+            stmt.setBlob(5, icon.getInputStream());
+            stmt.setString(6, icon.getMimeType());
+            stmt.setString(7, clientData.getDefaultScope().scopeString());
+            stmt.setString(8, clientData.getContactAddress());
+            stmt.setString(9, clientData.getWebsite());
+            stmt.setBoolean(10, true);
+            long now = System.currentTimeMillis();
+            stmt.setLong(10, now);
+
+            stmt.executeUpdate();
+
+            Databases.closeSQLStuff(stmt);
+            stmt = con.prepareStatement("INSERT INTO oauth_client_uri (client, uri) VALUES (?, ?)");
+            stmt.setString(1, clientId);
+            for (String uri : clientData.getRedirectURIs()) {
+                stmt.setString(2, uri);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+
+
+            DefaultClient client = toClient(clientData);
+            client.setRegistrationDate(new Date(now));
+            client.setEnabled(true);
+            client.setId(clientId);
+            client.setSecret(secret);
+            return client;
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
+    private static DefaultClient toClient(ClientData clientData) {
+        DefaultClient client = new DefaultClient();
+        client.setName(clientData.getName());
+        client.setDescription(clientData.getDescription());
+        client.setDefaultScope(clientData.getDefaultScope());
+        client.setContactAddress(clientData.getContactAddress());
+        client.setWebsite(clientData.getWebsite());
+        for (String uri : clientData.getRedirectURIs()) {
+            client.addRedirectURI(uri);
+        }
+
+        return client;
+    }
 
 
     @Override
@@ -292,92 +316,99 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
      * @throws OXException If update operation fails
      */
     public Client updateClient(String clientId, ClientData clientData, Connection con) throws OXException {
-        return null;
-//        PreparedStatement stmt = null;
-//        try {
-//            class TypedObject {
-//                final int type;
-//                final Object object;
-//
-//                TypedObject(Object object, int type) {
-//                    super();
-//                    this.object = object;
-//                    this.type = type;
-//                }
-//            }
-//
-//            List<TypedObject> values = new LinkedList<TypedObject>();
-//
-//            StringBuilder sql = new StringBuilder(128);
-//            sql.append("UPDATE oauth_client SET");
-//
-//            if (clientData.containsContactAddress()) {
-//                sql.append(" contact_address = ?,");
-//                values.add(new TypedObject(clientData.getContactAddress(), Types.VARCHAR));
-//            }
-//
-//            if (clientData.containsDescription()) {
-//                sql.append(" description = ?,");
-//                values.add(new TypedObject(clientData.getDescription(), Types.VARCHAR));
-//            }
-//
-//            if (clientData.containsName()) {
-//                sql.append(" name = ?,");
-//                values.add(new TypedObject(clientData.getName(), Types.VARCHAR));
-//            }
-//
-//            if (clientData.containsOwner()) {
-//                sql.append(" owner = ?,");
-//                values.add(new TypedObject(clientData.getOwner(), Types.VARCHAR));
-//            }
-//
-//            if (!values.isEmpty()) {
-//                sql.setLength(sql.length() - 1); // Delete last character
-//                sql.append(" WHERE id=?");
-//                stmt = con.prepareStatement(sql.toString());
-//                int pos = 1;
-//                for (TypedObject value : values) {
-//                    Object obj = value.object;
-//                    if (null == obj) {
-//                        stmt.setNull(pos, value.type);
-//                    } else {
-//                        stmt.setObject(pos++, obj, value.type);
-//                    }
-//                }
-//                stmt.setString(pos, clientId);
-//                int result = stmt.executeUpdate();
-//                if (result <= 0) {
-//                    throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(clientId);
-//                }
-//            }
-//
-//            if (clientData.containsRedirectURIs()) {
-//                Databases.closeSQLStuff(stmt);
-//                stmt = con.prepareStatement("DELETE FROM oauth_client_uri WHERE id=?");
-//                stmt.setString(1, clientId);
-//                stmt.executeUpdate();
-//
-//                List<String> redirectURIs = clientData.getRedirectURIs();
-//                if (!redirectURIs.isEmpty()) {
-//                    Databases.closeSQLStuff(stmt);
-//                    stmt = con.prepareStatement("INSERT INTO oauth_client_uri (id, uri) VALUES (?, ?)");
-//                    stmt.setString(1, clientId);
-//                    for (String uri : redirectURIs) {
-//                        stmt.setString(2, uri);
-//                        stmt.addBatch();
-//                    }
-//                    stmt.executeBatch();
-//                }
-//            }
-//            Databases.closeSQLStuff(stmt);
-//            stmt = null;
-//
-//            return getClientById(clientId, con);
-//        } catch (SQLException e) {
-//            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-//        } finally {
-//            Databases.closeSQLStuff(stmt);
-//        }
+        PreparedStatement stmt = null;
+        try {
+            class TypedObject {
+                final int type;
+                final Object object;
+
+                TypedObject(Object object, int type) {
+                    super();
+                    this.object = object;
+                    this.type = type;
+                }
+            }
+
+            List<TypedObject> values = new LinkedList<TypedObject>();
+
+            StringBuilder sql = new StringBuilder(128);
+            sql.append("UPDATE oauth_client SET");
+
+            if (clientData.containsContactAddress()) {
+                sql.append(" contact_address = ?,");
+                values.add(new TypedObject(clientData.getContactAddress(), Types.VARCHAR));
+            }
+
+            if (clientData.containsDescription()) {
+                sql.append(" description = ?,");
+                values.add(new TypedObject(clientData.getDescription(), Types.VARCHAR));
+            }
+
+            if (clientData.containsName()) {
+                sql.append(" name = ?,");
+                values.add(new TypedObject(clientData.getName(), Types.VARCHAR));
+            }
+
+            if (clientData.containsWebsite()) {
+                sql.append(" website = ?,");
+                values.add(new TypedObject(clientData.getWebsite(), Types.VARCHAR));
+            }
+
+            if (clientData.containsIcon()) {
+                sql.append(" icon = ?, icon_mime_type = ?,");
+
+                Icon icon = clientData.getIcon();
+                values.add(new TypedObject(icon.getInputStream(), Types.BLOB));
+                values.add(new TypedObject(icon.getMimeType(), Types.VARCHAR));
+            }
+
+            if (!values.isEmpty()) {
+                sql.setLength(sql.length() - 1); // Delete last character
+                sql.append(" WHERE id = ?");
+                stmt = con.prepareStatement(sql.toString());
+                int pos = 1;
+                for (TypedObject value : values) {
+                    Object obj = value.object;
+                    if (null == obj) {
+                        stmt.setNull(pos, value.type);
+                    } else {
+                        stmt.setObject(pos++, obj, value.type);
+                    }
+                }
+                stmt.setString(pos, clientId);
+                int result = stmt.executeUpdate();
+                if (result <= 0) {
+                    throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(clientId);
+                }
+            }
+
+            if (clientData.containsRedirectURIs()) {
+                Databases.closeSQLStuff(stmt);
+                stmt = con.prepareStatement("DELETE FROM oauth_client_uri WHERE client = ?");
+                stmt.setString(1, clientId);
+                stmt.executeUpdate();
+
+                Set<String> redirectURIs = clientData.getRedirectURIs();
+                if (!redirectURIs.isEmpty()) {
+                    Databases.closeSQLStuff(stmt);
+                    stmt = con.prepareStatement("INSERT INTO oauth_client_uri (client, uri) VALUES (?, ?)");
+                    stmt.setString(1, clientId);
+                    for (String uri : redirectURIs) {
+                        stmt.setString(2, uri);
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                }
+            }
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            return getClientById(clientId, con);
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
     @Override
