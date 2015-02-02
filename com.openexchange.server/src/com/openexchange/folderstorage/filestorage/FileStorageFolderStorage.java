@@ -547,8 +547,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
         IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
         DefaultFileStorageFolder folderToUpdate = getFileStorageFolder(folder);
         FileStorageFolder originalFolder = folderAccess.getFolder(folder.getID());
-        boolean move = false == originalFolder.getParentId().equals(folderToUpdate.getParentId());
-        boolean rename = false == originalFolder.getName().equals(folderToUpdate.getName());
+        boolean move = null != folderToUpdate.getParentId() && false == originalFolder.getParentId().equals(folderToUpdate.getParentId());
+        boolean rename = null != folderToUpdate.getName() && false == originalFolder.getName().equals(folderToUpdate.getName());
         boolean permissions = null != folderToUpdate.getPermissions() && 0 < folderToUpdate.getPermissions().size() &&
             false == folderToUpdate.getPermissions().equals(originalFolder.getPermissions());
         /*
