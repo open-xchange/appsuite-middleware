@@ -56,14 +56,24 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AdditionalFieldsUtils}
+ * {@link AdditionalFieldsUtils} - Utility class for <code>AdditionalFolderField</code>s.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AdditionalFieldsUtils {
-    public static List<Object> bulk(AdditionalFolderField field, List<FolderObject> folder, ServerSession session) {
-        List<Object> retval = new ArrayList<Object>(folder.size());
-        for(FolderObject f : folder) {
+
+    /**
+     * Performs a bulk retrieval of passed field's values for given folders.
+     *
+     * @param field The field from which to retrieve the values
+     * @param folders The folders for which to retrieve the values
+     * @param session The associated session
+     * @return The values for given folders
+     */
+    public static List<Object> bulk(AdditionalFolderField field, List<FolderObject> folders, ServerSession session) {
+        List<Object> retval = new ArrayList<Object>(folders.size());
+        for(FolderObject f : folders) {
             retval.add(field.getValue(f, session));
         }
 
