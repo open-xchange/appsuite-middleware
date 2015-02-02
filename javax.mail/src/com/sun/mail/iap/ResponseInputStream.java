@@ -109,7 +109,7 @@ public class ResponseInputStream {
 	    }
 
 	    if (b == -1)
-		throw new IOException("Received EOF from IMAP server. Connection dropped by server?");
+		throw new ByeIOException("Received EOF from IMAP server. Connection dropped by server?");
 
 	    // Now lets check for literals : {<digits>}CRLF
 	    // Note: index needs to >= 5 for the above sequence to occur
