@@ -2,6 +2,7 @@
 
  - Fix for bug 36401: Drop superfluous <div> tags from HTML content on message composition
  - Fix for bug 36347: Lowered log level in case folder column 3040 cannot be served due to missing "METADATA" capability from IMAP server
+ - Fix for bug 36320: Improved detection of transfer-encoding from a message part
 
 * 2015-01-31 - thorben.betten@open-xchange.com
 
