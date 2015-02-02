@@ -57,6 +57,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -293,18 +294,17 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    HttpMove method = new HttpMove(buildUri(toOneDriveFolderId(toCreate.getParentId()), null));
-                    request = method;
-                    method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
+                    HttpPost method = new HttpPost(buildUri(toOneDriveFolderId(toCreate.getParentId()), initiateQueryString()));
                     method.setHeader("Content-Type", "application/json");
-                    method.setEntity(asHttpEntity(new JSONObject(2).put("name", toCreate.getName())));
-
+                    method.setEntity(asHttpEntity(new JSONObject(1).put("name", toCreate.getName())));
+                    request = method;
                     JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
                     return jResponse.getString("id");
+                } catch (HttpResponseException e) {
+                    throw handleHttpResponseError(toCreate.getParentId(), e);
                 } finally {
                     reset(request);
                 }
-
             }
         });
     }
