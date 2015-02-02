@@ -93,10 +93,8 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 /*
  * @startuml doc-files/HandleIncomingStanza.png
- *
  * (*) -> "Stanza arrives in
  * SyntheticChannel#send()"
- *
  * if "Addressed ComponentHandle exists" then
  *   --> [true] "Update access time"
  *   --> "Find RunLoop assigned
@@ -112,9 +110,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  *   --> [false] "Throw RealtimeException"
  *   --> (*)
  * endif
- *
  * @enduml
- *
  */
 
 public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel, Runnable {
