@@ -177,16 +177,6 @@ public class MimeMessageFiller {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessageFiller.class);
 
-    private static final String EMPTY_HTML_DOCUMENT =
-        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" +
-        "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
-        " <head>\n" +
-        "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
-        " </head>\n" +
-        " <body>\n" +
-        " </body>\n" +
-        "</html>";
-
     private static final String HDR_ORGANIZATION = MessageHeaders.HDR_ORGANIZATION;
     private static final String HDR_X_MAILER = MessageHeaders.HDR_X_MAILER;
     private static final String HDR_X_ORIGINATING_CLIENT = MessageHeaders.HDR_X_ORIGINATING_CLIENT;
@@ -206,15 +196,6 @@ public class MimeMessageFiller {
     private static final String MP_ALTERNATIVE = "alternative";
 
     private static final String MP_RELATED = "related";
-
-    /*
-     * Patterns for common MIME text types
-     */
-    private static final String REPLACE_CS = "#CS#";
-
-    private static final String PAT_TEXT_CT = "text/plain; charset=#CS#";
-
-    private static final String PAT_HTML_CT = "text/html; charset=#CS#";
 
     /*
      * Fields
@@ -1731,7 +1712,7 @@ public class MimeMessageFiller {
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset)));
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/plain; charset=").append(charset).toString());
         return text;
     }
 
@@ -1749,7 +1730,7 @@ public class MimeMessageFiller {
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
         try {
-            final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset));
+            final String contentType = new StringBuilder("\"text/html; charset=").append(charset).toString();
             final MimeBodyPart html = new MimeBodyPart();
             if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
                 html.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType)));
