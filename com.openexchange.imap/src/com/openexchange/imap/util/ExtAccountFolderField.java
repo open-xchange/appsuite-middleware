@@ -303,9 +303,6 @@ public class ExtAccountFolderField implements AdditionalFolderField {
 
                         return null;
                     } else if (response.isBAD()) {
-                        if (ImapUtility.isInvalidMessageset(response)) {
-                            return Long.valueOf(0);
-                        }
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
@@ -318,7 +315,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                     } else {
                         protocol.handleResult(response);
                     }
-                    return Long.valueOf(-1L);
+                    return null;
                 }
             });
             return results;
