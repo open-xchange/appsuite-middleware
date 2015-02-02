@@ -60,6 +60,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import javax.mail.FetchProfile;
+import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -344,6 +345,8 @@ public final class IMAPSort {
             // Check result
             if (null == seqNums) {
                 // Apparently, SORT RETURN PARTIAL command failed
+                try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
+                try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
                 seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
             } else {
                 // SORT RETURN PARTIAL command succeeded
