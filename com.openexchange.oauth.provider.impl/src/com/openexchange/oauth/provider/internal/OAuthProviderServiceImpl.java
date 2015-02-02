@@ -103,6 +103,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         client.setDescription("An app that provides funny example stuff");
         client.addRedirectURI("http://localhost:8080");
         client.addRedirectURI("http://localhost/oauth2/redirect");
+        client.setEnabled(true);
         clients.put(client.getId(), client);
     }
 

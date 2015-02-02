@@ -49,28 +49,28 @@
 
 package com.openexchange.oauth.provider;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
 
 /**
- * {@link DefaultScopeProvider}
+ * {@link AbstractScopeProvider}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class DefaultScopeProvider implements OAuthScopeProvider {
+public abstract class AbstractScopeProvider implements OAuthScopeProvider {
 
     private final String scopeId;
+    private final String description;
 
     /**
-     * Initializes a new {@link DefaultScopeProvider}.
+     * Initializes a new {@link AbstractScopeProvider}.
      *
      * @param scopeId The scopes unique ID
+     * @param description The scopes description as localizable string
      */
-    public DefaultScopeProvider(String scopeId) {
+    public AbstractScopeProvider(String scopeId, String description) {
         super();
         this.scopeId = scopeId;
+        this.description = description;
     }
 
     @Override
@@ -80,12 +80,7 @@ public class DefaultScopeProvider implements OAuthScopeProvider {
 
     @Override
     public String getDescription() {
-        return "Read access for getting contact data.";
-    }
-
-    @Override
-    public boolean canBeGranted(Session session) throws OXException {
-        return true;
+        return description;
     }
 
 }
