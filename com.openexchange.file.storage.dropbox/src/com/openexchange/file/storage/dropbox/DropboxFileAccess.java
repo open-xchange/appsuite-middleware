@@ -72,6 +72,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
@@ -88,7 +89,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider/*, FileStorageVersionedFileAccess*/ {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess {
 
     private final DropboxAccountAccess accountAccess;
     private final int userId;
@@ -386,7 +387,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-//    @Override
+    @Override
     public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
         /*
          * Dropbox API does not support removing revisions of a file
@@ -466,17 +467,17 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
-//    @Override
+    @Override
     public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
         return getVersions(folderId, id, null);
     }
 
-//    @Override
+    @Override
     public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
         return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
     }
 
-//    @Override
+    @Override
     public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
         String path = toPath(folderId, id);
         try {
