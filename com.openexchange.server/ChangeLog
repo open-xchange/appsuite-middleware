@@ -46,6 +46,7 @@
 
 * 2015-02-02 - thorben.betten@open-xchange.com
 
+ - Fix for bug 36320: Improved detection of transfer-encoding from a message part
  - Fix for bug 36412: Proper handling of weird pseudo CSS attributes in HTML elements
 
 * 2015-02-02 - marcus.klein@open-xchange.com
