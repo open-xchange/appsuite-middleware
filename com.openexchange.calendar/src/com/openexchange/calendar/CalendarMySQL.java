@@ -2521,7 +2521,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         int folderType = cdao.getFolderType();
                         if (folderType == FolderObject.SHARED && up.getIdentifier() == cdao.getSharedFolderOwner()) {
                             cdao.setAlarm(up.getAlarmMinutes());
-                        } else if ((folderType == FolderObject.PRIVATE || folderType == FolderObject.PUBLIC) && up.getIdentifier() == uid) {
+                        } else if ((folderType == FolderObject.PRIVATE || folderType == FolderObject.PUBLIC || folderType == -1) && up.getIdentifier() == uid) {
                             cdao.setAlarm(up.getAlarmMinutes());
                         }
                     }
