@@ -118,7 +118,9 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             jsonObject.put("path", session.getStorage().getPath(folderID));
             jsonObject.put("created", folder.getCreationDate().getTime());
             jsonObject.put("modified", folder.getLastModifiedDate().getTime());
-            jsonObject.put("default", folder.isDefaultFolder());
+            if (folder.isDefaultFolder()) {
+                jsonObject.put("default_folder", true);
+            }
             if (TypeAware.class.isInstance(folder)) {
                 switch (((TypeAware) folder).getType()) {
                     case DOCUMENTS_FOLDER:
