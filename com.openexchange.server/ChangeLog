@@ -1,3 +1,7 @@
+* 2015-02-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36401: Drop superfluous <div> tags from HTML content on message composition
+
 * 2015-01-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 36343: Use Apache FileUpload's streaming capability to avoid duplicate file resource creation for an uploaded file
