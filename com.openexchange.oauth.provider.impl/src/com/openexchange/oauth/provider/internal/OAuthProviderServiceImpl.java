@@ -49,26 +49,23 @@
 
 package com.openexchange.oauth.provider.internal;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.Scope;
 import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
-import com.openexchange.oauth.provider.internal.client.DefaultClient;
+import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
 
@@ -84,74 +81,44 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     private final AbstractAuthorizationCodeProvider authCodeProvider;
 
-    private final Map<String, DefaultClient> clients;
-
     private final List<OAuthGrantImpl> grants;
 
+    private final OAuthClientStorage clientStorage;
 
-    public OAuthProviderServiceImpl(ServiceLookup services, AbstractAuthorizationCodeProvider authCodeProvider) {
+
+    public OAuthProviderServiceImpl(ServiceLookup services, AbstractAuthorizationCodeProvider authCodeProvider) throws OXException {
         super();
         this.services = services;
         this.authCodeProvider = authCodeProvider;
-        clients = new HashMap<>();
+        clientStorage = requireService(OAuthClientStorage.class, services);
         grants = new LinkedList<>();
-
-        DefaultClient client = new DefaultClient();
-        client.setId("983e78b3e76d423988ed09c345364f05");
-        client.setSecret("a1dd1c62735f4e61b80b6aa2b29df37d");
-        client.setName("Example App");
-        client.setDescription("An app that provides funny example stuff");
-        client.addRedirectURI("http://localhost:8080");
-        client.addRedirectURI("http://localhost/oauth2/redirect");
-        client.setEnabled(true);
-        clients.put(client.getId(), client);
     }
 
     @Override
     public Client getClientById(String clientId) throws OXException {
-        return clients.get(clientId);
+        return clientStorage.getClientById(clientId);
     }
 
     @Override
     public Client registerClient(ClientData clientData) throws OXException {
-        DefaultClient client = new DefaultClient();
-        client.setId(UUIDs.getUnformattedStringFromRandom());
-        client.setSecret(UUIDs.getUnformattedStringFromRandom());
-        client.setName(clientData.getName());
-        client.setDescription(clientData.getDescription());
-        for (String uri : clientData.getRedirectURIs()) {
-            if (!URIValidator.isValidRedirectURI(uri)) {
-                throw OAuthProviderExceptionCodes.INVALID_REDIRECT_URI.create(uri);
-            }
-
-            client.addRedirectURI(uri);
-        }
-
-        clients.put(client.getId(), client);
-        return client;
+        return clientStorage.registerClient(clientData);
     }
 
     @Override
     public boolean unregisterClient(String clientId) throws OXException {
-        DefaultClient client = clients.remove(clientId);
-        if (client == null) {
-            return false;
-        }
-
         deleteGrantsForClient(clientId);
-        return true;
+        return clientStorage.unregisterClient(clientId);
     }
 
     @Override
     public Client revokeClientSecret(String clientId) throws OXException {
-        DefaultClient client = clients.get(clientId);
-        if (client == null) {
-            return null;
-        }
-
-        client.setSecret(UUIDs.getUnformattedStringFromRandom());
         deleteGrantsForClient(clientId);
-        return client;
+        return clientStorage.revokeClientSecret(clientId);
+    }
+
+    @Override
+    public Client updateClient(String clientId, ClientData clientData) throws OXException {
+        return clientStorage.updateClient(clientId, clientData);
     }
 
     @Override
@@ -236,12 +203,6 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
             }
         }
 
-        return null;
-    }
-
-    @Override
-    public Client updateClient(String clientId, ClientData clientData) throws OXException {
-        // TODO Auto-generated method stub
         return null;
     }
 

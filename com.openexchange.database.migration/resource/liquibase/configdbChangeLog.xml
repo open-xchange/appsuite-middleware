@@ -91,7 +91,7 @@
 		</rollback>
 	</changeSet>
 	
-	<!--changeSet id="7.8.0:oauth_client:create" author="steffen.templin@open-xchange.com">
+	<changeSet id="7.8.0:oauth_client:create" author="steffen.templin@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="oauth_client" schemaName="configdb" />
@@ -132,15 +132,17 @@
         </comment>
         <sql>
             CREATE TABLE oauth_client_uri (
+                id INT4 NOT NULL AUTO_INCREMENT,
                 client VARCHAR(255) NOT NULL,
                 uri VARCHAR(767) NOT NULL,
-                PRIMARY KEY(`client`)
+                PRIMARY KEY(`id`),
+                INDEX(`client`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
         </sql>
         <rollback>
             <dropTable tableName="oauth_client_uri"/>
         </rollback>
-    </changeSet-->
+    </changeSet>
 
 	<changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
 		<tagDatabase tag="7.8.0-milestone" />

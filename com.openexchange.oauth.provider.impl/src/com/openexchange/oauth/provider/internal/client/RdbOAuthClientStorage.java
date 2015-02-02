@@ -448,7 +448,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     public boolean unregisterClient(String clientId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM oauth_client WHERE id=?");
+            stmt = con.prepareStatement("DELETE FROM oauth_client WHERE id = ?");
             stmt.setString(1, clientId);
             int result = stmt.executeUpdate();
             if (result <= 0) {
@@ -456,7 +456,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             }
 
             Databases.closeSQLStuff(stmt);
-            stmt = con.prepareStatement("DELETE FROM oauth_client_uri WHERE id=?");
+            stmt = con.prepareStatement("DELETE FROM oauth_client_uri WHERE client = ?");
             stmt.setString(1, clientId);
             stmt.executeUpdate();
 
@@ -505,7 +505,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT secret FROM oauth_client WHERE id=?");
+            stmt = con.prepareStatement("SELECT secret FROM oauth_client WHERE id = ?");
             stmt.setString(1, clientId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -515,7 +515,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             String plainNewSecret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
 
             Databases.closeSQLStuff(rs, stmt);
-            stmt = con.prepareStatement("UPDATE oauth_client SET secret = ? WHERE id=? AND secret=?");
+            stmt = con.prepareStatement("UPDATE oauth_client SET secret = ? WHERE id = ? AND secret = ?");
             stmt.setString(1, obfuscator.obfuscate(plainNewSecret));
             stmt.setString(2, clientId);
             stmt.setString(3, obfusOldSecret);
