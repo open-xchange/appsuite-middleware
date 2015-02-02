@@ -470,12 +470,6 @@ public final class IMAPSort {
             }
             throw e;
         } catch (StoreClosedException e) {
-            Exception cause = e.getNextException();
-            if (cause instanceof com.sun.mail.iap.ConnectionException) {
-                // SORT RETURN PARTIAL command failed...
-                LOG.warn("SORT RETURN PARTIAL command failed. Fall-back to normal SORT command.", cause);
-                return null;
-            }
             throw e;
         } catch (MessagingException e) {
             Exception cause = e.getNextException();
