@@ -60,7 +60,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import javax.mail.FetchProfile;
-import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -464,9 +463,11 @@ public final class IMAPSort {
         } catch (FolderClosedException e) {
             Exception cause = e.getNextException();
             if (cause instanceof com.sun.mail.iap.ConnectionException) {
-                // SORT RETURN PARTIAL command failed...
-                LOG.warn("SORT RETURN PARTIAL command failed. Fall-back to normal SORT command.", cause);
-                return null;
+                if (cause.getCause() instanceof com.sun.mail.iap.ByeIOException) {
+                    // SORT RETURN PARTIAL command failed...
+                    LOG.warn("SORT RETURN PARTIAL command failed. Fall-back to normal SORT command.", cause);
+                    return null;
+                }
             }
             throw e;
         } catch (StoreClosedException e) {
