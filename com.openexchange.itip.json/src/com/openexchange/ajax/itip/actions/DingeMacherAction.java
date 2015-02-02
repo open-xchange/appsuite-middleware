@@ -85,12 +85,6 @@ public class DingeMacherAction extends AbstractITipAction {
         ITipAnalysis analysisToProcess = analysis.get(index);
         ITipDingeMacherFactoryService factory = services.getService(ITipDingeMacherFactoryService.class);
         ITipAction action = ITipAction.valueOf(request.getParameter("action").toUpperCase());
-        if (request.containsParameter("message")) {
-            String message = request.getParameter("message", String.class);
-            if (message != null && !message.trim().equals("")) {
-                action.setMessage(message);
-            }
-        }
         ITipDingeMacher macher = factory.getMacher(action);
         List<Appointment> list = macher.perform(action, analysisToProcess, session);
 
