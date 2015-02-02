@@ -4,6 +4,12 @@ open-xchange-authentication-ldap (7.8.0-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:40:42 +0100
 
+open-xchange-authentication-ldap (7.6.2-6) stable; urgency=low
+
+  * Sixth candidate for 7.6.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 30 Jan 2015 16:12:22 +0100
+
 open-xchange-authentication-ldap (7.6.2-5) stable; urgency=low
 
   * Fifth candidate for 7.6.2 release

@@ -481,7 +481,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		keepConnectionAlive(false);
 	    } catch (ConnectionException cex) {
 		// Oops, lost connection
-		throw new FolderClosedException(this, cex.getMessage());
+		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -835,7 +835,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		try {
 		    keepConnectionAlive(true);
 		} catch (ConnectionException cex) {
-		    throw new FolderClosedException(this, cex.getMessage());
+		    throw new FolderClosedException(this, cex.getMessage(), cex);
 		} catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
 		}
@@ -1264,7 +1264,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    try {
 		r = getProtocol().fetch(msgsets, command.toString());
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(this, cex.getMessage());
+		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (CommandFailedException cfx) {
 		// Ignore these, as per RFC 2180
 	    } catch (ProtocolException pex) {
@@ -1394,7 +1394,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 					"Messages have been removed");
 		p.storeFlags(ms, flag, value);
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(this, cex.getMessage());
+		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -1684,7 +1684,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		keepConnectionAlive(true);
 		return total;
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(this, cex.getMessage());
+		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -1734,7 +1734,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		keepConnectionAlive(true);
 		return recent;
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(this, cex.getMessage());
+		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -1776,7 +1776,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		return matches.length; // NOTE: 'matches' is never null
 	    }
 	} catch (ConnectionException cex) {
-	    throw new FolderClosedException(this, cex.getMessage());
+	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // Shouldn't happen
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -1805,7 +1805,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		return matches.length; // NOTE: 'matches' is never null
 	    }
 	} catch (ConnectionException cex) {
-	    throw new FolderClosedException(this, cex.getMessage());
+	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // Shouldn't happen
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2031,7 +2031,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    else
 			throw new MessagingException(cfx.getMessage(), cfx);
 		} catch (ConnectionException cex) {
-		    throw new FolderClosedException(this, cex.getMessage());
+		    throw new FolderClosedException(this, cex.getMessage(), cex);
 		} catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
 	    	}
@@ -2146,7 +2146,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    else
 			throw new MessagingException(cfx.getMessage(), cfx);
 		} catch (ConnectionException cex) {
-		    throw new FolderClosedException(this, cex.getMessage());
+		    throw new FolderClosedException(this, cex.getMessage(), cex);
 		} catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
 	    	}
@@ -2202,7 +2202,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		else
 		    throw new MessagingException(cfx.getMessage(), cfx);
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(this, cex.getMessage());
+		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		// Bad bad server ..
 		throw new MessagingException(pex.getMessage(), pex);
@@ -2288,7 +2288,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		throw sex;
 	    return super.search(term);
 	} catch (ConnectionException cex) {
-	    throw new FolderClosedException(this, cex.getMessage());
+	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // bug in our IMAP layer ?
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2334,7 +2334,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // too complex for IMAP
 	    return super.search(term, msgs);
 	} catch (ConnectionException cex) {
-	    throw new FolderClosedException(this, cex.getMessage());
+	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // bug in our IMAP layer ?
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2399,7 +2399,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // too complex for IMAP
 	    throw new MessagingException(sex.getMessage(), sex);
 	} catch (ConnectionException cex) {
-	    throw new FolderClosedException(this, cex.getMessage());
+	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // bug in our IMAP layer ?
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2535,7 +2535,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		}
 	    }
 	} catch(ConnectionException cex) {
-	    throw new FolderClosedException(this, cex.getMessage());
+	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
@@ -2576,7 +2576,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		}
 	    }
 	} catch(ConnectionException cex) {
-	    throw new FolderClosedException(this, cex.getMessage());
+	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
@@ -2635,7 +2635,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		return msgs;
 	    }
 	} catch(ConnectionException cex) {
-	    throw new FolderClosedException(this, cex.getMessage());
+	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
@@ -2677,7 +2677,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    uidTable.put(Long.valueOf(uid), m);
 		}
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(this, cex.getMessage());
+		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -2777,7 +2777,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    msgs[i] = getMessageBySeqNumber(nums[i]);
 	    }
 	} catch(ConnectionException cex) {
-	    throw new FolderClosedException(this, cex.getMessage());
+	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}

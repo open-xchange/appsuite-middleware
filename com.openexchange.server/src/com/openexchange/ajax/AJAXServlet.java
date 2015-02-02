@@ -50,18 +50,11 @@
 package com.openexchange.ajax;
 
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
-import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
-import static com.openexchange.java.Strings.isEmpty;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
@@ -70,7 +63,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -79,13 +71,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;
-import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,30 +81,22 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadFileImpl;
-import com.openexchange.groupware.upload.impl.UploadFileSizeExceededException;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
-import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
-import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -482,11 +460,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param session The server session
      * @return The locale
      */
-    protected static Locale localeFrom(final ServerSession session) {
+    protected static Locale localeFrom(ServerSession session) {
         if (null == session) {
             return Locale.US;
         }
-        final User user = session.getUser();
+        User user = session.getUser();
         if (null != user) {
             return user.getLocale();
         }
@@ -505,7 +483,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param session The session
      * @return The locale
      */
-    public static Locale localeFrom(final Session session) {
+    public static Locale localeFrom(Session session) {
         if (null == session) {
             return Locale.US;
         }
@@ -528,7 +506,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * balancer environment this container is temporarily dead and redirects requests to other containers. This will kill the users session.
      */
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
         // We already have a tracking id...
         // LogProperties.putProperty(LogProperties.Name.AJAX_REQUEST_NUMBER, Long.toString(REQUEST_NUMBER.incrementAndGet()));
@@ -559,11 +537,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 resp.setHeader(RETRY_AFTER, Integer.toString(retryAfter));
             }
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             OXException oxe = new OXException(e);
             LOG.error("", oxe);
 
-            final ServletException se = new ServletException(e.getMessage());
+            ServletException se = new ServletException(e.getMessage());
             se.initCause(oxe);
             throw se;
         } finally {
@@ -588,7 +566,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.AJAX);
     }
 
-    public static boolean containsParameter(final HttpServletRequest req, final String name) {
+    public static boolean containsParameter(HttpServletRequest req, String name) {
         return (req.getParameter(name) != null);
     }
 
@@ -596,7 +574,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static int getMaxBodySize() {
         try {
             return ServerConfig.getInt(ServerConfig.Property.MAX_BODY_SIZE);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return Integer.parseInt(ServerConfig.Property.MAX_BODY_SIZE.getDefaultValue());
         }
     }
@@ -620,7 +598,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return The reader
      * @throws IOException If an I/O error occurs
      */
-    public static Reader getReaderFor(final HttpServletRequest req) throws IOException {
+    public static Reader getReaderFor(HttpServletRequest req) throws IOException {
         String charEnc = req.getCharacterEncoding();
         if (charEnc == null) {
             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
@@ -636,7 +614,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @throws IOException If an I/O error occurs
      * @throws JSONException If a JSON error occurs
      */
-    public static JSONValue getBodyAsJsonValue(final HttpServletRequest req) throws IOException, JSONException {
+    public static JSONValue getBodyAsJsonValue(HttpServletRequest req) throws IOException, JSONException {
         String charEnc = req.getCharacterEncoding();
         if (charEnc == null) {
             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
@@ -645,7 +623,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         try {
             reader = new BufferedReader(new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc)), BUF_SIZE);
             return JSONObject.parse(reader);
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             /*
              * Should never occur
              */
@@ -663,7 +641,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return A string with the complete body.
      * @throws IOException If an error occurs while reading the body or body size exceeded configured max. size (see "MAX_BODY_SIZE" property)
      */
-    public static String getBody(final HttpServletRequest req) throws IOException {
+    public static String getBody(HttpServletRequest req) throws IOException {
         return BYTE_BASED_READING ? byteBasedBodyReading(req) : decoderBasedBodyReading(req);
     }
 
@@ -674,14 +652,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return The reader's content
      * @throws IOException If an I/O error occurs
      */
-    public static String readFrom(final Reader reader) throws IOException {
+    public static String readFrom(Reader reader) throws IOException {
         if (null == reader) {
             return null;
         }
-        final int buflen = BUF_SIZE;
-        final char[] cbuf = new char[buflen];
-        final StringBuilder builder = new StringBuilder(SB_SIZE);
-        final int maxBodySize = getMaxBodySize();
+        int buflen = BUF_SIZE;
+        char[] cbuf = new char[buflen];
+        StringBuilder builder = new StringBuilder(SB_SIZE);
+        int maxBodySize = getMaxBodySize();
         if (maxBodySize > 0) {
             int count = 0;
             for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
@@ -702,22 +680,24 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return builder.toString();
     }
 
-    private static String decoderBasedBodyReading(final HttpServletRequest req) throws IOException {
+    private static String decoderBasedBodyReading(HttpServletRequest req) throws IOException {
         String charEnc = req.getCharacterEncoding();
         if (charEnc == null) {
             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
         }
-        final Reader reader = new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc));
+        Reader reader = new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc));
         try {
-            final int buflen = BUF_SIZE;
-            final char[] cbuf = new char[buflen];
-            final StringBuilder builder = new StringBuilder(SB_SIZE);
-            final int maxBodySize = getMaxBodySize();
+            int buflen = BUF_SIZE;
+            char[] cbuf = new char[buflen];
+            StringBuilder builder = new StringBuilder(SB_SIZE);
+            int maxBodySize = getMaxBodySize();
             if (maxBodySize > 0) {
                 int count = 0;
                 for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
                     count += read;
                     if (count > maxBodySize) {
+                        Streams.close(reader);
+                        reader = null;
                         throw new IOException("Max. body size (" + UploadUtility.getSize(maxBodySize, 2, false, true) + ") exceeded.");
                     }
                     builder.append(cbuf, 0, read);
@@ -728,7 +708,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 }
             }
             return builder.toString();
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             /*
              * Should never occur
              */
@@ -739,13 +719,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
-    private static String byteBasedBodyReading(final HttpServletRequest req) throws IOException {
-        final ServletInputStream inputStream = req.getInputStream();
+    private static String byteBasedBodyReading(HttpServletRequest req) throws IOException {
+        ServletInputStream inputStream = req.getInputStream();
         try {
-            final int buflen = BUF_SIZE;
-            final byte[] buf = new byte[buflen];
-            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(SB_SIZE);
-            final int maxBodySize = getMaxBodySize();
+            int buflen = BUF_SIZE;
+            byte[] buf = new byte[buflen];
+            ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(SB_SIZE);
+            int maxBodySize = getMaxBodySize();
             if (maxBodySize > 0) {
                 int count = 0;
                 for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
@@ -766,7 +746,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
                 }
                 return baos.toString(charEnc);
-            } catch (final UnsupportedCharsetException e) {
+            } catch (UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in request", e);
                 return baos.toString("ISO-8859-1");
             }
@@ -781,7 +761,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param req the request that url should be parsed
      * @return the URI part after the path to your servlet.
      */
-    public static String getServletSpecificURI(final HttpServletRequest req) {
+    public static String getServletSpecificURI(HttpServletRequest req) {
         String uri;
         {
             String characterEncoding = req.getCharacterEncoding();
@@ -793,8 +773,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             }
             uri = AJAXUtility.decodeUrl(req.getRequestURI(), characterEncoding);
         }
-        final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
-        final int pos = uri.indexOf(path);
+        String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
+        int pos = uri.indexOf(path);
         if (pos >= 0) {
             uri = uri.substring(pos + path.length());
         }
@@ -808,7 +788,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @deprecated Use {@link AJAXUtility#encodeUrl(String)} instead
      */
     @Deprecated
-    public static String encodeUrl(final String s) {
+    public static String encodeUrl(String s) {
         return AJAXUtility.encodeUrl(s);
     }
 
@@ -820,7 +800,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @deprecated Use {@link AJAXUtility#encodeUrl(String,boolean)} instead
      */
     @Deprecated
-    public static String encodeUrl(final String s, final boolean forAnchor) {
+    public static String encodeUrl(String s, boolean forAnchor) {
         return AJAXUtility.encodeUrl(s, forAnchor);
     }
 
@@ -832,7 +812,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @deprecated Use {@link AJAXUtility#encodeUrl(String,boolean,boolean)} instead
      */
     @Deprecated
-    public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation) {
+    public static String encodeUrl(String s, boolean forAnchor, boolean forLocation) {
         return AJAXUtility.encodeUrl(s, forAnchor, forLocation);
     }
 
@@ -844,7 +824,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @deprecated Use {@link AJAXUtility#encodeUrl(String,boolean,boolean,String)} instead
      */
     @Deprecated
-    public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation, final String charsetName) {
+    public static String encodeUrl(String s, boolean forAnchor, boolean forLocation, String charsetName) {
         return AJAXUtility.encodeUrl(s, forAnchor, forLocation, charsetName);
     }
 
@@ -873,7 +853,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @deprecated Use {@link AJAXUtility#decodeUrl(String,String)} instead
      */
     @Deprecated
-    public static String decodeUrl(final String s, final String charset) {
+    public static String decodeUrl(String s, String charset) {
         return AJAXUtility.decodeUrl(s, charset);
     }
 
@@ -884,8 +864,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return The action parameter's value
      * @throws OXException If action parameter is missing in specified servlet request
      */
-    protected static String getAction(final HttpServletRequest req) throws OXException {
-        final String action = req.getParameter(PARAMETER_ACTION);
+    public static String getAction(HttpServletRequest req) throws OXException {
+        String action = req.getParameter(PARAMETER_ACTION);
         if (action == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
         }
@@ -902,25 +882,25 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @deprecated use {@link Response}.
      */
     @Deprecated
-    protected static void sendErrorAsJS(final HttpServletResponse resp, final String errorMessage) throws IOException, ServletException {
+    protected static void sendErrorAsJS(HttpServletResponse resp, String errorMessage) throws IOException, ServletException {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            final PrintWriter w = resp.getWriter();
-            final JSONWriter jw = new JSONWriter(w);
+            PrintWriter w = resp.getWriter();
+            JSONWriter jw = new JSONWriter(w);
             jw.object();
             jw.key(STR_ERROR);
             jw.value(errorMessage);
             jw.endObject();
             w.flush();
-        } catch (final JSONException e1) {
-            final ServletException se = new ServletException(e1.getMessage(), e1);
+        } catch (JSONException e1) {
+            ServletException se = new ServletException(e1.getMessage(), e1);
             se.initCause(e1);
             throw se;
         }
     }
 
-    public static void sendError(final HttpServletResponse resp) throws IOException {
+    public static void sendError(HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
@@ -928,24 +908,24 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @deprecated
      */
     @Deprecated
-    protected static void sendErrorAsJSHTML(final HttpServletResponse res, final String error, final String action) throws IOException {
+    protected static void sendErrorAsJSHTML(HttpServletResponse res, String error, String action) throws IOException {
         res.setContentType("text/html");
         PrintWriter w = null;
         try {
             w = res.getWriter();
-            final JSONObject obj = new JSONObject();
+            JSONObject obj = new JSONObject();
             obj.put(STR_ERROR, error);
             obj.put(STR_ERROR_PARAMS, Collections.emptyList());
             w.write(substituteJS(obj.toString(), action));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("", e);
         } finally {
             close(w);
         }
     }
 
-    protected void unknownColumn(final HttpServletResponse res, final String parameter, final String columnId, final boolean html, final String action) throws IOException, ServletException {
-        final String msg = "Unknown column in " + parameter + " :" + columnId;
+    protected void unknownColumn(HttpServletResponse res, String parameter, String columnId, boolean html, String action) throws IOException, ServletException {
+        String msg = "Unknown column in " + parameter + " :" + columnId;
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
             return;
@@ -953,8 +933,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         sendErrorAsJS(res, msg);
     }
 
-    protected void invalidParameter(final HttpServletResponse res, final String parameter, final String value, final boolean html, final String action) throws IOException, ServletException {
-        final String msg = "Invalid Parameter " + parameter + " :" + value;
+    protected void invalidParameter(HttpServletResponse res, String parameter, String value, boolean html, String action) throws IOException, ServletException {
+        String msg = "Invalid Parameter " + parameter + " :" + value;
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
             return;
@@ -962,8 +942,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         sendErrorAsJS(res, msg);
     }
 
-    protected void missingParameter(final String parameter, final HttpServletResponse res, final boolean html, final String action) throws IOException, ServletException {
-        final String msg = "Missing Parameter: " + parameter;
+    protected void missingParameter(String parameter, HttpServletResponse res, boolean html, String action) throws IOException, ServletException {
+        String msg = "Missing Parameter: " + parameter;
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
             return;
@@ -971,8 +951,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         sendErrorAsJS(res, msg);
     }
 
-    protected void unknownAction(final String method, final String action, final HttpServletResponse res, final boolean html) throws IOException, ServletException {
-        final String msg = "The action " + action + " isn't even specified yet. At least not for the method: " + method;
+    protected void unknownAction(String method, String action, HttpServletResponse res, boolean html) throws IOException, ServletException {
+        String msg = "The action " + action + " isn't even specified yet. At least not for the method: " + method;
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
             return;
@@ -980,7 +960,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         sendErrorAsJS(res, msg);
     }
 
-    public static String substituteJS(final String json, final String action) {
+    public static String substituteJS(String json, String action) {
         return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**",
             action);
     }
@@ -995,7 +975,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @throws OXException Id processing the upload fails
      */
     @Override
-    public UploadEvent processUpload(final HttpServletRequest req) throws OXException {
+    public UploadEvent processUpload(HttpServletRequest req) throws OXException {
         return processUpload(req, -1, -1);
     }
 
@@ -1003,11 +983,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException {
         return processUploadStatic(req, maxFileSize, maxOverallSize);
     }
-
-    /**
-     * 1MB threshold.
-     */
-    private static final int SIZE_THRESHOLD = 1048576;
 
     /**
      * Creates a new {@code ServletFileUpload} instance.
@@ -1026,22 +1001,20 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return A new {@code ServletFileUpload} instance
      */
     public static ServletFileUpload newFileUploadBase(long maxFileSize, long maxOverallSize) {
-        // Create the upload event
-        final DiskFileItemFactory factory = new DiskFileItemFactory();
-        // Set factory constraints; threshold for single files
-        factory.setSizeThreshold(SIZE_THRESHOLD);
-        factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
-        // Create a new file upload handler
-        final ServletFileUpload sfu = new ServletFileUpload(factory);
-        // Set the maximum allowed size of a single uploaded file
-        sfu.setFileSizeMax(maxFileSize);
-        // Set overall request size constraint
-        sfu.setSizeMax(maxOverallSize);
-        return sfu;
+        return UploadUtility.newFileUploadBase(maxFileSize, maxOverallSize);
     }
 
-    private static final Set<String> UPLOAD_ACTIONS =
-        new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_ADDFILE, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY, "import"));
+    private static final Set<String> UPLOAD_ACTIONS = new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_ADDFILE, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY, "import", "CSV", "VCARD","ICAL", "OUTLOOK_CSV"));
+
+    /**
+     * Checks if given action is supposed to pass an incoming upload request.
+     *
+     * @param action The action to check
+     * @return <code>true</code> if upload is allowed; otherwise <code>false</code>
+     */
+    protected static boolean mayUpload(String action) {
+        return UPLOAD_ACTIONS.contains(action);
+    }
 
     /**
      * (Statically) Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
@@ -1064,180 +1037,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @throws OXException Id processing the upload fails
      */
     public static final UploadEvent processUploadStatic(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException {
-        if (!Tools.isMultipartContent(req)) {
-            // No multipart content
-            throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
-        }
-        /*
-         * Check action parameter existence
-         */
-        final String action;
-        try {
-            action = getAction(req);
-        } catch (final OXException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e);
-        }
-        /*-
-         * Check proper action value
-         *
-         * ###########################################################################################################
-         * ######################### ENSURE YOUR ACTION IS CONTAINED IN UPLOAD_ACTIONS ! ! ! #########################
-         * ###########################################################################################################
-         */
-        if (!mayUpload(action)) {
-            throw UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(action);
-        }
-        // Get file upload
-        final ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize);
-        List<FileItem> items = null;
-        try {
-            /*
-             * Parse the upload request
-             */
-            try {
-                // Check request's character encoding
-                if (null == req.getCharacterEncoding()) {
-                    String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
-                    try {
-                        // Might be ineffective if already fully parsed
-                        req.setCharacterEncoding(defaultEnc);
-                    } catch (final Exception e) {
-                        // Ignore
-                    }
-                    upload.setHeaderEncoding(defaultEnc);
-                }
-                // Parse multipart request
-                items = upload.parseRequest(new ServletRequestContext(req));
-            } catch (FileSizeLimitExceededException e) {
-                throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-            } catch (SizeLimitExceededException e) {
-                throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-            } catch (FileUploadException e) {
-                final Throwable cause = e.getCause();
-                if (cause instanceof IOException) {
-                    final String message = cause.getMessage();
-                    if (null != message && message.startsWith("Max. byte count of ")) {
-                        // E.g. Max. byte count of 10240 exceeded.
-                        final int pos = message.indexOf(" exceeded", 19 + 1);
-                        final String limit = message.substring(19, pos);
-                        throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
-                    }
-                } else if (cause instanceof EOFException) {
-                    // Stream closed/ended unexpectedly
-                    throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
-                }
-                throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
-            }
-            // Create the upload event
-            final UploadEvent uploadEvent = new UploadEvent();
-            uploadEvent.setAction(action);
-            // Set affiliation to mail upload
-            uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
-            // Fill upload event instance
-            final String charEnc;
-            {
-                final String rce = req.getCharacterEncoding();
-                charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
-            }
-            final String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
-            final String fileName = req.getParameter("filename");
-            for (final FileItem fileItem : items) {
-                try {
-                    if (fileItem.isFormField()) {
-                        uploadEvent.addFormField(fileItem.getFieldName(), new String(fileItem.get(), Charsets.forName(charEnc)));
-                    } else {
-                        if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
-                            uploadEvent.addUploadFile(processUploadedFile(fileItem, uploadDir, fileName));
-                        }
-                    }
-                } catch (final UnsupportedCharsetException e) {
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-                } catch (final IOException e) {
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-                } catch (final RuntimeException e) {
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-                }
-            }
-            if (uploadEvent.getAffiliationId() < 0) {
-                throw UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action);
-            }
-            return uploadEvent;
-        } finally {
-            if (null != items) {
-                for (final FileItem fileItem : items) {
-                    try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
-                }
-            }
-        }
-    }
-
-    protected static boolean mayUpload(final String action) {
-        return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL", "OUTLOOK_CSV").contains(action); //Boo! Bad hack to get importer/export bundle working
-    }
-
-    private static final int BUFLEN = 65536;
-
-    private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws IOException, OXException {
-        try {
-            final UploadFile retval = new UploadFileImpl();
-            retval.setFieldName(item.getFieldName());
-            String mimeType = null;
-            if (isEmpty(fileName)) {
-                String name = item.getName();
-                retval.setFileName(name);
-                // Deduce MIME type from passed file name
-                if (!isEmpty(name)) {
-                    mimeType = MimeType2ExtMap.getContentType(name, null);
-                }
-            } else {
-                retval.setFileName(fileName);
-                mimeType = MimeType2ExtMap.getContentType(fileName, null);
-            }
-            retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
-            final long size = item.getSize();
-            retval.setSize(size);
-            final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
-            tmpFile.deleteOnExit();
-            // Write to tmp file
-            if (size != 0) {
-                PushbackInputStream in = null;
-                OutputStream out = null;
-                try {
-                    in = new PushbackInputStream(item.getInputStream());
-                    // Check if readable...
-                    final int check = in.read();
-                    if (check >= 0) {
-                        // ... then push back to stream
-                        in.unread(check);
-                        out = new FileOutputStream(tmpFile, false);
-                        final int buflen = BUFLEN;
-                        final byte[] buf = new byte[buflen];
-                        for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
-                            out.write(buf, 0, read);
-                        }
-                        out.flush();
-                    } else {
-                        // Empty file item...
-                        LOG.warn("Detected empty upload file {}.", retval.getFileName());
-                    }
-                } finally {
-                    Streams.close(in, out);
-                }
-            }
-            retval.setTmpFile(tmpFile);
-            return retval;
-        } finally {
-            item.delete();
-        }
+        return UploadUtility.processUpload(req, maxFileSize, maxOverallSize);
     }
 
     @Override
-    public void fireUploadEvent(final UploadEvent uploadEvent, final Collection<UploadListener> uploadListeners) throws OXException {
+    public void fireUploadEvent(UploadEvent uploadEvent, Collection<UploadListener> uploadListeners) throws OXException {
         try {
-            for (final UploadListener uploadListener : uploadListeners) {
+            for (UploadListener uploadListener : uploadListeners) {
                 try {
                     uploadListener.action(uploadEvent);
-                } catch (final OXException e) {
+                } catch (Exception e) {
                     LOG.error("Failed upload listener: {}", uploadListener.getClass(), e);
                 }
             }
@@ -1246,12 +1055,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
-    public static void startResponse(final JSONWriter jsonwriter) throws JSONException {
+    public static void startResponse(JSONWriter jsonwriter) throws JSONException {
         jsonwriter.object();
         jsonwriter.key("data");
     }
 
-    public static void endResponse(final JSONWriter jsonwriter, final Date timestamp, final String error) throws JSONException {
+    public static void endResponse(JSONWriter jsonwriter, Date timestamp, String error) throws JSONException {
         if (timestamp != null) {
             jsonwriter.key("timestamp");
             jsonwriter.value(timestamp.getTime());
@@ -1267,11 +1076,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         jsonwriter.endObject();
     }
 
-    protected boolean checkRequired(final HttpServletRequest req, final HttpServletResponse res, final boolean html, final String action, final String... parameters) throws IOException, ServletException {
+    protected boolean checkRequired(HttpServletRequest req, HttpServletResponse res, boolean html, String action, String... parameters) throws IOException, ServletException {
         if (html) {
             res.setContentType("text/html; charset=UTF-8");
         }
-        for (final String param : parameters) {
+        for (String param : parameters) {
             if (req.getParameter(param) == null) {
                 missingParameter(param, res, html, action);
                 return false;
@@ -1280,7 +1089,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return true;
     }
 
-    protected static void close(final Writer w) {
+    protected static void close(Writer w) {
         LOG.trace("Called close() with writer{}", w);
     }
 
@@ -1292,11 +1101,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param optSession The optional session; pass <code>null</code> if not appropriate
      * @throws IOException If an I/O error occurs
      */
-    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, final Session optSession) throws IOException {
+    protected void writeResponse(Response response, HttpServletResponse servletResponse, Session optSession) throws IOException {
         servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(optSession));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(servletResponse);
         }
@@ -1308,7 +1117,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param req The HTTP Servlet request
      * @return <code>true</code> if Internet Explorer; otherwise <code>false</code>
      */
-    protected final boolean isIE(final HttpServletRequest req) {
+    protected final boolean isIE(HttpServletRequest req) {
         return req.getHeader("User-Agent").contains("MSIE");
     }
 
@@ -1318,7 +1127,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param req The HTTP Servlet request
      * @return <code>true</code> if Internet Explorer 7; otherwise <code>false</code>
      */
-    protected final boolean isIE7(final HttpServletRequest req) {
+    protected final boolean isIE7(HttpServletRequest req) {
         return req.getHeader("User-Agent").contains("MSIE 7");
     }
 
@@ -1329,7 +1138,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param objectId The identifier of associated object
      * @return The module's string representation
      */
-    public static final String getModuleString(final int module, final int objectId) {
+    public static final String getModuleString(int module, int objectId) {
         String moduleStr = null;
         switch (module) {
         case FolderObject.TASK:
@@ -1373,8 +1182,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param moduleStr The module's string representation
      * @return The module's <code>int</code> representation
      */
-    public static final int getModuleInteger(final String moduleStr) {
-        final int module;
+    public static final int getModuleInteger(String moduleStr) {
+        int module;
         if (MODULE_TASK.equalsIgnoreCase(moduleStr)) {
             module = FolderObject.TASK;
         } else if (MODULE_CONTACT.equalsIgnoreCase(moduleStr)) {

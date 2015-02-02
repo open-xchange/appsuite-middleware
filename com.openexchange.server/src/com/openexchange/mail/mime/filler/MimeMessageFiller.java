@@ -92,6 +92,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -113,6 +115,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -1300,6 +1303,53 @@ public class MimeMessageFiller {
     }
 
     private static final String MIME_MESSAGE_RFC822 = MimeTypes.MIME_MESSAGE_RFC822;
+    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+    private static final String MIME_MULTIPART_OCTET = MimeTypes.MIME_MULTIPART_OCTET;
+
+    private static volatile Set<String> octetExtensions;
+    private static Set<String> octetExtensions() {
+        Set<String> tmp = octetExtensions;
+        if (null == tmp) {
+            synchronized (MimeMessageFiller.class) {
+                tmp = octetExtensions;
+                if (null == tmp) {
+                    String defaultValue = "pgp";
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return new HashSet<String>(Arrays.asList(defaultValue));
+                    }
+                    String csv = service.getProperty("com.openexchange.mail.octetExtensions", defaultValue);
+                    tmp = new HashSet<String>(Arrays.asList(Strings.splitByComma(csv)));
+                    octetExtensions = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                octetExtensions = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
+    private static String extensionFor(String fileName) {
+        if (null == fileName) {
+            return null;
+        }
+
+        int pos = fileName.lastIndexOf('.');
+        return Strings.asciiLowerCase(pos > 0 ? fileName.substring(pos + 1) : fileName);
+    }
 
     protected final void addMessageBodyPart(Multipart mp, MailPart part, boolean inline) throws MessagingException, OXException {
         if (part.getContentType().startsWith(MIME_MESSAGE_RFC822)) {
@@ -1308,19 +1358,19 @@ public class MimeMessageFiller {
             addNestedMessage(part, null, mp, sb);
             return;
         }
-        /*
-         * A non-message attachment
-         */
+
+        // A non-message attachment
         String fileName = part.getFileName();
         ContentType ct = part.getContentType();
-        if ((ct.startsWith(MimeTypes.MIME_APPL_OCTET) || ct.startsWith(MimeTypes.MIME_MULTIPART_OCTET)) && fileName != null) {
-            /*
-             * Try to determine MIME type
-             */
-            String ct2 = MimeType2ExtMap.getContentType(fileName);
-            int pos = ct2.indexOf('/');
-            ct.setPrimaryType(ct2.substring(0, pos));
-            ct.setSubType(ct2.substring(pos + 1));
+        if (fileName != null && (ct.startsWith(MIME_APPL_OCTET) || ct.startsWith(MIME_MULTIPART_OCTET))) {
+            // Only "allowed" for certain files
+            if (!octetExtensions().contains(extensionFor(fileName))) {
+                // Try to determine MIME type
+                String ct2 = MimeType2ExtMap.getContentType(fileName);
+                int pos = ct2.indexOf('/');
+                ct.setPrimaryType(ct2.substring(0, pos));
+                ct.setSubType(ct2.substring(pos + 1));
+            }
         }
         MimeBodyPart messageBodyPart = new MimeBodyPart();
         messageBodyPart.setDataHandler(part.getDataHandler());
@@ -1329,14 +1379,11 @@ public class MimeMessageFiller {
         }
         messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
         if (!inline) {
-            /*
-             * Force base64 encoding to keep data as it is
-             */
+            // Force base64 encoding to keep data as it is
             messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
         }
-        /*
-         * Disposition
-         */
+
+        // Disposition
         String disposition = messageBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
         ContentDisposition cd;
         if (disposition == null) {
@@ -1349,9 +1396,8 @@ public class MimeMessageFiller {
             cd.setFilenameParameter(fileName);
         }
         messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
-        /*
-         * Content-ID
-         */
+
+        // Content-ID
         String contentId = part.getContentId();
         if (contentId != null) {
             if (contentId.charAt(0) == '<') {
@@ -1360,23 +1406,18 @@ public class MimeMessageFiller {
                 messageBodyPart.setContentID(new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString());
             }
         }
-        /*
-         * Part identifier
-         */
+
+        // Part identifier
         String partId = part.getFirstHeader(MessageHeaders.HDR_X_PART_ID);
         if (partId == null) {
             messageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, UUIDs.getUnformattedStringFromRandom());
-            /*
-             * Add to parental multipart
-             */
+            // Add to parental multipart
             mp.addBodyPart(messageBodyPart);
         } else {
             messageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, partId);
             // Check if part is already present in new mail
             if (!contains(partId, MessageHeaders.HDR_X_PART_ID, mp)) {
-                /*
-                 * Add to parental multipart
-                 */
+                // Add to parental multipart
                 mp.addBodyPart(messageBodyPart);
             }
         }

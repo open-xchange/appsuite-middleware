@@ -99,6 +99,7 @@ public final class MeAction extends AbstractUserAction {
             JSONObject jReturn = new JSONObject(8);
             jReturn.put("context_id", session.getContextId());
             jReturn.put("user_id", session.getUserId());
+            jReturn.put("context_admin", context.getMailadmin());
             jReturn.put("is_context_admin", session.getUserId() == context.getMailadmin());
             String str = session.getLoginName();
             jReturn.put("login_name", str == null ? "<unknown>" : str);

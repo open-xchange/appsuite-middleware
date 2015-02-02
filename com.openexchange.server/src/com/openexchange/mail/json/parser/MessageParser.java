@@ -94,6 +94,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -140,6 +141,7 @@ public final class MessageParser {
     private static final String CONTENT_TYPE = MailJSONField.CONTENT_TYPE.getKey();
     private static final String CONTENT = MailJSONField.CONTENT.getKey();
     private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
+    private static final String ATTACHMENT_FILE_NAME = MailJSONField.ATTACHMENT_FILE_NAME.getKey();
 
     /**
      * No instantiation
@@ -395,12 +397,12 @@ public final class MessageParser {
                      */
                     String sContent;
                     {
-                        JSONObject tmp = attachmentArray.getJSONObject(0);
-                        sContent = tmp.getString(CONTENT);
+                        JSONObject jTextBody = attachmentArray.getJSONObject(0);
+                        sContent = jTextBody.getString(CONTENT);
                         TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
-                        String contentType = parseContentType(tmp.getString(CONTENT_TYPE));
+                        String contentType = parseContentType(jTextBody.getString(CONTENT_TYPE));
                         part.setContentType(contentType);
-                        if (contentType.startsWith("text/plain") && tmp.optBoolean("raw", false)) {
+                        if (contentType.startsWith("text/plain") && jTextBody.optBoolean("raw", false)) {
                             part.setPlainText(sContent);
                         }
                         transportMail.setContentType(part.getContentType());
@@ -633,12 +635,12 @@ public final class MessageParser {
 
     private static final String FILE_PREFIX = "file://";
 
-    private static void parseReferencedParts(TransportProvider provider, Session session, int accountId, MailPath transportMailMsgref, IAttachmentHandler attachmentHandler, JSONArray attachmentArray, Set<String> contentIds, boolean prepare4Transport) throws OXException, JSONException {
-        int len = attachmentArray.length();
+    private static void parseReferencedParts(TransportProvider provider, Session session, int accountId, MailPath transportMailMsgref, IAttachmentHandler attachmentHandler, JSONArray jAttachments, Set<String> contentIds, boolean prepare4Transport) throws OXException, JSONException {
+        int len = jAttachments.length();
         /*
          * Group referenced parts by referenced mails' paths
          */
-        Map<String, ReferencedMailPart> groupedReferencedParts = groupReferencedParts(provider, session, transportMailMsgref, attachmentArray, contentIds, prepare4Transport);
+        Map<String, ReferencedMailPart> groupedReferencedParts = groupReferencedParts(provider, session, transportMailMsgref, jAttachments, contentIds, prepare4Transport);
         /*
          * Iterate attachments array
          */
@@ -646,25 +648,29 @@ public final class MessageParser {
         try {
             ManagedFileManagement management = null;
             NextAttachment: for (int i = 1; i < len; i++) {
-                JSONObject attachment = attachmentArray.getJSONObject(i);
-                String seqId = attachment.optString(MailListField.ID.getKey(), null);
-                if (null == seqId && attachment.hasAndNotNull(CONTENT)) {
+                JSONObject jAttachment = jAttachments.getJSONObject(i);
+                String seqId = jAttachment.optString(MailListField.ID.getKey(), null);
+                if (null == seqId && jAttachment.hasAndNotNull(CONTENT)) {
                     /*
                      * A direct attachment, as data part
                      */
-                    String contentType = parseContentType(attachment.getString(CONTENT_TYPE));
+                    String contentType = parseContentType(jAttachment.getString(CONTENT_TYPE));
                     String charsetName = "UTF-8";
                     byte[] content;
                     try {
                         /*
-                         * UI delivers HTML content in any case. Generate well-formed HTML for further processing dependent on given content
+                         * UI provides HTML content in any case. Generate well-formed HTML for further processing dependent on given content
                          * type.
                          */
                         HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                         if (MimeTypes.MIME_TEXT_PLAIN.equals(contentType)) {
-                            content = htmlService.html2text(attachment.getString(CONTENT), true).getBytes(charsetName);
+                            if (jAttachment.optBoolean("raw", false)) {
+                                content = jAttachment.getString(CONTENT).getBytes(charsetName);
+                            } else {
+                                content = htmlService.html2text(jAttachment.getString(CONTENT), true).getBytes(charsetName);
+                            }
                         } else {
-                            String conformHTML = htmlService.getConformHTML(attachment.getString(CONTENT), "ISO-8859-1");
+                            String conformHTML = htmlService.getConformHTML(jAttachment.getString(CONTENT), "ISO-8859-1");
                             content = conformHTML.getBytes(charsetName);
                         }
 
@@ -678,6 +684,12 @@ public final class MessageParser {
                     properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType);
                     properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(content.length));
                     properties.put(DataProperties.PROPERTY_CHARSET, charsetName);
+                    {
+                        String fileName = jAttachment.optString(ATTACHMENT_FILE_NAME, null);
+                        if (!Strings.isEmpty(fileName)) {
+                            properties.put(DataProperties.PROPERTY_NAME, fileName);
+                        }
+                    }
                     Data<byte[]> data = new SimpleData<byte[]>(content, properties);
                     DataMailPart dataMailPart = provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
                     attachmentHandler.addAttachment(dataMailPart);
@@ -696,8 +708,8 @@ public final class MessageParser {
                     MailPath msgref;
                     boolean isMail;
                     String msgrefKey = MailJSONField.MSGREF.getKey();
-                    if (attachment.hasAndNotNull(msgrefKey)) {
-                        msgref = new MailPath(attachment.get(msgrefKey).toString());
+                    if (jAttachment.hasAndNotNull(msgrefKey)) {
+                        msgref = new MailPath(jAttachment.get(msgrefKey).toString());
                         isMail = true;
                     } else {
                         msgref = transportMailMsgref;
@@ -745,15 +757,15 @@ public final class MessageParser {
         }
     }
 
-    private static Map<String, ReferencedMailPart> groupReferencedParts(TransportProvider provider, Session session, MailPath parentMsgRef, JSONArray attachmentArray, Set<String> contentIds, boolean prepare4Transport) throws OXException, JSONException {
+    private static Map<String, ReferencedMailPart> groupReferencedParts(TransportProvider provider, Session session, MailPath parentMsgRef, JSONArray jAttachments, Set<String> contentIds, boolean prepare4Transport) throws OXException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
-        int len = attachmentArray.length();
+        int len = jAttachments.length();
         Map<String, String> groupedSeqIDs = new HashMap<String, String>(len);
         NextAttachment: for (int i = 1; i < len; i++) {
-            JSONObject attachment = attachmentArray.getJSONObject(i);
-            String seqId = attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
+            JSONObject jAttachment = jAttachments.getJSONObject(i);
+            String seqId = jAttachment.hasAndNotNull(MailListField.ID.getKey()) ? jAttachment.getString(MailListField.ID.getKey()) : null;
             if (seqId == null || seqId.startsWith(FILE_PREFIX, 0)) {
                 /*
                  * A file reference
@@ -763,8 +775,8 @@ public final class MessageParser {
             /*
              * If MSGREF is defined in attachment itself, the MSGREF's mail is meant to be attached and not a nested attachment
              */
-            if (!attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
-                Object cid = attachment.opt(MailJSONField.CID.getKey());
+            if (!jAttachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
+                Object cid = jAttachment.opt(MailJSONField.CID.getKey());
                 groupedSeqIDs.put(seqId, null == cid ? "" : cid.toString());
             }
         }

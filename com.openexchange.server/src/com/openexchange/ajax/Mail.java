@@ -108,6 +108,8 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -3924,16 +3926,33 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 task = new AppenderTask(mailInterface, folder, force, flags, queue);
                 try {
-                    UserSettingMail usm = session.getUserSettingMail();
-                    long maxFileSize = usm.getUploadQuotaPerFile();
-                    if (maxFileSize <= 0) {
-                        maxFileSize = -1L;
+                    FileItemIterator iter;
+                    {
+                        UserSettingMail usm = session.getUserSettingMail();
+                        long maxFileSize = usm.getUploadQuotaPerFile();
+                        if (maxFileSize <= 0) {
+                            maxFileSize = -1L;
+                        }
+                        long maxSize = usm.getUploadQuota();
+                        if (maxSize <= 0) {
+                            maxSize = -1L;
+                        }
+                        ServletFileUpload upload = newFileUploadBase(maxFileSize, maxSize);
+
+                        // Check request's character encoding
+                        if (null == req.getCharacterEncoding()) {
+                            String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
+                            try {
+                                req.setCharacterEncoding(defaultEnc);
+                            } catch (final Exception e) {
+                                // Ignore
+                            }
+                            upload.setHeaderEncoding(defaultEnc);
+                        }
+
+                        iter = upload.getItemIterator(req);
                     }
-                    long maxSize = usm.getUploadQuota();
-                    if (maxSize <= 0) {
-                        maxSize = -1L;
-                    }
-                    final FileItemIterator iter = newFileUploadBase(maxFileSize, maxSize).getItemIterator(req);
+
                     if (iter.hasNext()) {
                         future = service.submit(task);
                     }
