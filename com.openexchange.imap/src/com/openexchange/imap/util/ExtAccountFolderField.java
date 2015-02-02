@@ -161,17 +161,17 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         }
 
         try {
-            FolderInfo extAccountInfo = getExternalAccountFolders(session).get(fa.getFullName());
-            if (null == extAccountInfo) {
+            FolderInfo folderInfo = getExternalAccountFolders(session).get(fa.getFullName());
+            if (null == folderInfo) {
                 return JSONObject.NULL;
             }
 
             JSONObject jResult = new JSONObject(2);
-            if (null != extAccountInfo.alias) {
-                jResult.put("alias", extAccountInfo.alias);
+            if (null != folderInfo.alias) {
+                jResult.put("alias", folderInfo.alias);
             }
-            if (null != extAccountInfo.externalAccount) {
-                jResult.put("externalAccount", extAccountInfo.externalAccount);
+            if (null != folderInfo.externalAccount) {
+                jResult.put("externalAccount", folderInfo.externalAccount);
             }
             return jResult;
         } catch (Exception e) {
