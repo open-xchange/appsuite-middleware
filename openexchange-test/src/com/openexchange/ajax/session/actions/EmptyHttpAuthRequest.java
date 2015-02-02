@@ -81,6 +81,7 @@ public class EmptyHttpAuthRequest extends HttpAuthRequest {
             public String checkResponse(HttpResponse resp) throws ParseException, IOException {
                 setStatusCode(resp.getStatusLine().getStatusCode());
                 setReasonPhrase(resp.getStatusLine().getReasonPhrase());
+                parseLocationHeader(resp);
                 if (HttpServletResponse.SC_MOVED_TEMPORARILY == getStatusCode()) {
                     return EntityUtils.toString(resp.getEntity());
                 }
