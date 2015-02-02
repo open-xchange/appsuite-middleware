@@ -244,7 +244,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                 public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                     if (!protocol.hasCapability("METADATA")) {
                         // No support for METADATA extension
-                        LOG.warn("METADATA not supported by IMAP server {}", protocol.getHost());
+                        LOG.debug("METADATA not supported by IMAP server {}", protocol.getHost());
                         return null;
                     }
 
