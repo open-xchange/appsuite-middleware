@@ -77,7 +77,6 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
@@ -96,7 +95,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageIgnorableVersionFileAccess, FileStorageAdvancedSearchFileAccess/*, FileStorageSequenceNumberProvider*/ {
+public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageAdvancedSearchFileAccess/*, FileStorageSequenceNumberProvider*/ {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class);
 
@@ -478,12 +477,6 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        return saveDocument0(file, data, modifiedFields);
-    }
-
-    @Override
-    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
-        // CIFS/SMB does not support versioning
         return saveDocument0(file, data, modifiedFields);
     }
 
