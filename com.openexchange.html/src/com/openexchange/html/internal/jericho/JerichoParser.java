@@ -160,7 +160,7 @@ public final class JerichoParser {
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("^\\s*(<[^?][^>]+)(>?)\\s*$");
+    private static final Pattern FIX_START_TAG = Pattern.compile("^\\s*(<[^?][^>]+)(>?)\\s*$", Pattern.MULTILINE);
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -266,25 +266,39 @@ public final class JerichoParser {
             CharacterReference characterReference = (CharacterReference) segment;
             handler.handleCharacterReference(characterReference);
         } else {
-            /*
-             * Safety re-parse
-             */
+            // Safety re-parse
             if (fixStartTags && contains('<', segment)) {
                 Matcher m = FIX_START_TAG.matcher(segment);
                 if (m.find()) {
-                    /*
-                     * Re-parse start tag
-                     */
+                    // Re-parse start tag
+
                     int start = m.start();
                     if (start > 0) {
                         handler.handleSegment(segment.subSequence(0, start));
                     }
 
-                    StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(m.group(2)));
+                    String startTag = m.group(1);
+                    String remainder = null;
+
+                    int end = m.end();
+                    if (end < segment.length()) {
+                        remainder = segment.subSequence(end, segment.length()).toString();
+                        int pos = remainder.indexOf('>');
+                        if (pos >= 0) {
+                            startTag = startTag + remainder.substring(0, pos + 1);
+                            remainder = remainder.substring(pos + 1);
+                        }
+                    }
+
+                    StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag));
                     Thread thread = Thread.currentThread();
                     for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
                         Segment nestedSegment = iter.next();
                         handleSegment(handler, nestedSegment, false);
+                    }
+
+                    if (null != remainder) {
+                        handler.handleSegment(remainder);
                     }
                 } else {
                     handler.handleSegment(segment);
@@ -326,12 +340,12 @@ public final class JerichoParser {
         if (null == toCheck) {
             return false;
         }
-        final int len = toCheck.length();
+        int len = toCheck.length();
         if (len <= 0) {
             return false;
         }
-        for (int i = 0; i < len; i++) {
-            if (c == toCheck.charAt(i)) {
+        for (int k = len, index = 0; k-- > 0; index++) {
+            if (c == toCheck.charAt(index)) {
                 return true;
             }
         }
