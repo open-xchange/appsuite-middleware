@@ -58,12 +58,14 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.DefaultWarningsAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
@@ -75,12 +77,13 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractCompositingIDBasedAccess extends AbstractService<Transaction> {
+public abstract class AbstractCompositingIDBasedAccess extends AbstractService<Transaction> implements WarningsAware {
 
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
 
     protected final Session session;
+    private final WarningsAware warningsAware;
 
     /**
      * Initializes a new {@link AbstractCompositingIDBasedAccess}.
@@ -90,8 +93,29 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     protected AbstractCompositingIDBasedAccess(Session session) {
         super();
         this.session = session;
+        this.warningsAware = new DefaultWarningsAware();
         connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
         accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
+    }
+
+    @Override
+    public List<OXException> getWarnings() {
+        return warningsAware.getWarnings();
+    }
+
+    @Override
+    public List<OXException> getAndFlushWarnings() {
+        return warningsAware.getAndFlushWarnings();
+    }
+
+    @Override
+    public void addWarning(OXException warning) {
+        warningsAware.addWarning(warning);
+    }
+
+    @Override
+    public void removeWarning(OXException warning) {
+        warningsAware.removeWarning(warning);
     }
 
     @Override
@@ -129,6 +153,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         super.startTransaction();
         connectedAccounts.get().clear();
         accessesToClose.get().clear();
+        warningsAware.getAndFlushWarnings();
     }
 
     @Override
@@ -136,6 +161,14 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         connectedAccounts.get().clear();
         List<FileStorageAccountAccess> accesses = accessesToClose.get();
         for (FileStorageAccountAccess access : accesses) {
+            if (WarningsAware.class.isInstance(access)) {
+                List<OXException> warnings = ((WarningsAware) access).getAndFlushWarnings();
+                if (null != warnings && 0 < warnings.size()) {
+                    for (OXException warning : warnings) {
+                        warningsAware.addWarning(warning);
+                    }
+                }
+            }
             access.close();
         }
         accesses.clear();
@@ -233,7 +266,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
 
     /**
      * Gets a list of all file storage account accesses.
-     * 
+     *
      * @return The account accesses.
      */
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
@@ -268,7 +301,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
                     throw FileStorageExceptionCodes.ACCOUNT_NOT_ACCESSIBLE.create(e, accountAccess.getAccountId(), accountAccess.getService().getId(), session.getUserId(), session.getContextId());
                 }
                 throw e;
-            }            
+            }
             accounts.put(id, accountAccess);
             accessesToClose.get().add(accountAccess);
         }

@@ -51,12 +51,12 @@ package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withRelativeID;
 import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withUniqueID;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import org.osgi.service.event.Event;
@@ -133,7 +133,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(parentFolderID.getFolderId());
         String newID = folderAccess.createFolder(withRelativeID(toCreate));
         FolderID newFolderID = new FolderID(parentFolderID.getService(), parentFolderID.getAccountId(), newID);
-        fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(newFolderID, path)));
+        fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
         return newFolderID.toUniqueID();
     }
 
@@ -144,7 +144,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
         String newID = folderAccess.updateFolder(folderID.getFolderId(), withRelativeID(toUpdate));
         FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), newID);
-        fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(newFolderID, path)));
+        fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
         return newFolderID.toUniqueID();
     }
 
@@ -155,9 +155,14 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
+        return moveFolder(folderId, newParentId, newName, false);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName, boolean ignoreWarnings) throws OXException {
         FolderID sourceFolderID = new FolderID(folderId);
         FolderID targetParentFolderID = new FolderID(newParentId);
-        if (sourceFolderID.getAccountId().equals(targetParentFolderID.getAccountId()) && sourceFolderID.getService().equals(targetParentFolderID.getService())) {
+        if (isSameAccount(sourceFolderID, targetParentFolderID)) {
             /*
              * move within same storage
              */
@@ -166,19 +171,51 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
             String newID = folderAccess.moveFolder(sourceFolderID.getFolderId(), targetParentFolderID.getFolderId(), newName);
             FolderID newFolderID = new FolderID(sourceFolderID.getService(), sourceFolderID.getAccountId(), newID);
             FileStorageFolder[] newPath = folderAccess.getPath2DefaultFolder(newID);
-            fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(sourceFolderID, sourcePath)));
-            fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(newFolderID, newPath)));
+            fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(session, sourceFolderID, sourcePath)));
+            fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, newPath)));
 
             // TODO: events for nested files & folders ?
 
             return newFolderID.toUniqueID();
         }
         /*
-         * move across storages not yet supported...
+         * transfer folder(-tree) to target storage recursively
          */
-        FileStorageFolder sourceFolder = getFolderAccess(sourceFolderID).getFolder(sourceFolderID.getFolderId());
-        FileStorageFolder targetFolder = getFolderAccess(targetParentFolderID).getFolder(targetParentFolderID.getFolderId());
-        throw FileStorageExceptionCodes.FOLDER_MOVE_NOT_SUPPORTED.create(sourceFolder.getName(), targetFolder.getName());
+        boolean dryRun = false == ignoreWarnings;
+        StorageTransfer storageTransfer = new StorageTransfer(this, sourceFolderID, targetParentFolderID, newName);
+        TransferResult transferResult = storageTransfer.run(dryRun);
+        if (dryRun && 0 == transferResult.getWarnings(true).size()) {
+            dryRun = false;
+            transferResult = storageTransfer.run(dryRun);
+        }
+        if (false == dryRun) {
+            /*
+             * delete folder in source storage (including all descendants)
+             */
+            getFolderAccess(sourceFolderID).deleteFolder(sourceFolderID.getFolderId());
+            /*
+             * fire appropriate events
+             */
+            EventAdmin eventAdmin = getEventAdmin();
+            if (null != eventAdmin) {
+                for (Event createEvent : transferResult.buildCreateEvents(session)) {
+                    eventAdmin.postEvent(createEvent);
+                }
+                for (Event deleteEvent : transferResult.buildDeleteEvents(session)) {
+                    eventAdmin.postEvent(deleteEvent);
+                }
+            }
+        }
+        /*
+         * take over any warnings
+         */
+        List<OXException> warnings = transferResult.getWarnings(true);
+        if (null != warnings && 0 < warnings.size()) {
+            for (OXException warning : warnings) {
+                this.addWarning(warning);
+            }
+        }
+        return dryRun ? null : transferResult.getTargetFolderID().toUniqueID();
     }
 
     @Override
@@ -188,7 +225,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
         String newID = folderAccess.renameFolder(folderID.getFolderId(), newName);
         FolderID newFolderID =new FolderID(folderID.getService(), folderID.getAccountId(), newID);
-        fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(newFolderID, path)));
+        fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
         return newFolderID.toUniqueID();
     }
 
@@ -203,7 +240,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
         folderAccess.deleteFolder(folderID.getFolderId(), hardDelete);
-        Dictionary<String, Object> eventProperties = getEventProperties(folderID, path);
+        Dictionary<String, Object> eventProperties = getEventProperties(session, folderID, path);
         eventProperties.put(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
         fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, eventProperties));
         return folderID.toUniqueID();
@@ -321,22 +358,6 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         return accountAccesses;
     }
 
-    private Dictionary<String, Object> getEventProperties(FolderID folderID, FileStorageFolder[] path) {
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
-        properties.put(FileStorageEventConstants.SESSION, session);
-        properties.put(FileStorageEventConstants.ACCOUNT_ID, folderID.getAccountId());
-        properties.put(FileStorageEventConstants.SERVICE, folderID.getService());
-        properties.put(FileStorageEventConstants.FOLDER_ID, folderID.toUniqueID());
-        if (null != path) {
-            String[] parentFolderIDs = new String[path.length];
-            for (int i = 0; i < path.length; i++) {
-                parentFolderIDs[i] = new FolderID(folderID.getService(), folderID.getAccountId(), path[i].getId()).toUniqueID();
-            }
-            properties.put(FileStorageEventConstants.FOLDER_PATH, parentFolderIDs);
-        }
-        return properties;
-    }
-
     private void fire(final Event event) {
         EventAdmin eventAdmin = getEventAdmin();
         if (null != eventAdmin) {
@@ -358,6 +379,17 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
                 .toString();
         }
         return null;
+    }
+
+    /**
+     * Gets a value indicating whether the folders identified by the given identifiers are located in the same folder storage or not.
+     *
+     * @param folderID1 The first folder ID to check
+     * @param folderID2 The first folder ID to check
+     * @return <code>true</code> if both folders are located within the same folder storage, <code>false</code>, otherwise
+     */
+    private static boolean isSameAccount(FolderID folderID1, FolderID folderID2) {
+        return folderID1.getService().equals(folderID2.getService()) && folderID1.getAccountId().equals(folderID2.getAccountId());
     }
 
     private static final class AccessWrapper {

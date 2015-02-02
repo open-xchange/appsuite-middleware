@@ -49,11 +49,13 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.Collection;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -64,9 +66,14 @@ import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -159,16 +166,43 @@ public final class UpdateAction extends AbstractFolderAction {
         /*
          * Update
          */
+        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request, false);
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions"))
             .put("altNames", request.getParameter("altNames")).put("autorename", request.getParameter("autorename")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
-            .put("cascadePermissions", cascadePermissions).put(id, folderService));
-
+            .put("cascadePermissions", cascadePermissions).put("ignoreWarnings", Boolean.valueOf(ignoreWarnings)).put(id, folderService));
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier
          */
         final String newId = folder.getID();
-        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(response.getWarnings());
+        Date lastModified = null != newId ? folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC() : null;
+        AJAXRequestResult result = new AJAXRequestResult(newId, lastModified);
+        Collection<OXException> warnings = response.getWarnings();
+        result.addWarnings(warnings);
+        if (null == newId && null != warnings && 0 < warnings.size() && false == ignoreWarnings) {
+            result.setException(FolderExceptionErrorMessage.FOLDER_UPDATE_ABORTED.create(
+                getFolderNameSafe(session, folder, id, treeId, folderService), id));
+        }
+        return result;
+    }
+
+    private static String getFolderNameSafe(Session session, Folder folder, String folderID, String treeID, FolderService folderService) {
+        if (null != folder && false == Strings.isEmpty(folder.getName())) {
+            return folder.getName();
+        }
+        String id = null != folderID ? folderID : null != folder ? folder.getID() : null;
+        if (null != id && null != folderService) {
+            String tree = null != treeID ? treeID : getDefaultTreeIdentifier();
+            try {
+                UserizedFolder userizedFolder = folderService.getFolder(tree, id, session, null);
+                if (null != userizedFolder) {
+                    return userizedFolder.getName();
+                }
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(UpdateAction.class).debug("Error getting name for folder {}: {}", id, e.getMessage(), e);
+            }
+        }
+        return "";
     }
 
 }

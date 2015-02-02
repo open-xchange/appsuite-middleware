@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.filestorage;
 
+import java.sql.Connection;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,15 +63,11 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -98,7 +95,6 @@ import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -162,7 +158,10 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 if (false == TransactionManager.isManagedTransaction(parameters)) {
                     return true;
                 }
-                TransactionManager.getTransactionManager(parameters).transactionStarted(this);
+                TransactionManager transactionManager = TransactionManager.getTransactionManager(parameters);
+                Session session = parameters.getSession();
+                session.setParameter(Connection.class.getName(), transactionManager.getConnection());
+                transactionManager.transactionStarted(this);
             }
         }
         return false;
@@ -179,7 +178,12 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 org.slf4j.LoggerFactory.getLogger(FileStorageFolderStorage.class).warn("Unexpected error during rollback: {}", e.getMessage(), e);
             } finally {
                 storageParameters.putParameter(getFolderType(), PARAM, null);
+                Session session = storageParameters.getSession();
+                if (null != session && session.containsParameter(Connection.class.getName())) {
+                    session.setParameter(Connection.class.getName(), null);
+                }
             }
+            addWarnings(storageParameters, folderAccess);
         }
     }
 
@@ -191,7 +195,12 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 folderAccess.commit();
             } finally {
                 storageParameters.putParameter(getFolderType(), PARAM, null);
+                Session session = storageParameters.getSession();
+                if (null != session && session.containsParameter(Connection.class.getName())) {
+                    session.setParameter(Connection.class.getName(), null);
+                }
             }
+            addWarnings(storageParameters, folderAccess);
         }
     }
 
@@ -531,152 +540,48 @@ public final class FileStorageFolderStorage implements FolderStorage {
     }
 
     @Override
-    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
-        final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
-        final DefaultFileStorageFolder fsFolder = new DefaultFileStorageFolder();
-        fsFolder.setExists(true);
-        // Identifier
-        fsFolder.setId(folder.getID());
-        // TODO: fsFolder.setAccountId(accountId);
-        // Parent
-        if (null != folder.getParentID()) {
-            fsFolder.setParentId(folder.getParentID());
+    public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
+        /*
+         * convert supplied folder & determine required updates in storage
+         */
+        IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
+        DefaultFileStorageFolder folderToUpdate = getFileStorageFolder(folder);
+        FileStorageFolder originalFolder = folderAccess.getFolder(folder.getID());
+        boolean move = false == originalFolder.getParentId().equals(folderToUpdate.getParentId());
+        boolean rename = false == originalFolder.getName().equals(folderToUpdate.getName());
+        boolean permissions = null != folderToUpdate.getPermissions() && 0 < folderToUpdate.getPermissions().size() &&
+            false == folderToUpdate.getPermissions().equals(originalFolder.getPermissions());
+        /*
+         * perform move and/or rename operation
+         */
+        if (move) {
+            boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
+            String newName = rename ? folderToUpdate.getName() : null;
+            String newID = folderAccess.moveFolder(folderToUpdate.getId(), folderToUpdate.getParentId(), newName, ignoreWarnings);
+            folderToUpdate.setId(newID);
+        } else if (rename) {
+            String newID = folderAccess.renameFolder(folderToUpdate.getId(), folderToUpdate.getName());
+            folderToUpdate.setId(newID);
         }
-        // Name
-        if (null != folder.getName()) {
-            fsFolder.setName(folder.getName());
-        }
-        // Subscribed
-        if (folder instanceof SetterAwareFolder) {
-            if (((SetterAwareFolder) folder).containsSubscribed()) {
-                fsFolder.setSubscribed(folder.isSubscribed());
-            }
-        } else {
-            fsFolder.setSubscribed(folder.isSubscribed());
-        }
-        // Permissions
-        FileStoragePermission[] fsPermissions = null;
-        {
-            final Permission[] permissions = folder.getPermissions();
-            if (null != permissions && permissions.length > 0) {
-                fsPermissions = new FileStoragePermission[permissions.length];
-                final Session session = storageParameters.getSession();
-                if (null == session) {
-                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-                }
-                for (int i = 0; i < permissions.length; i++) {
-                    final Permission permission = permissions[i];
-                    final FileStoragePermission dmp = DefaultFileStoragePermission.newInstance();
-                    dmp.setEntity(permission.getEntity());
-                    dmp.setAllPermissions(
-                        permission.getFolderPermission(),
-                        permission.getReadPermission(),
-                        permission.getWritePermission(),
-                        permission.getDeletePermission());
-                    dmp.setAdmin(permission.isAdmin());
-                    dmp.setGroup(permission.isGroup());
-                    fsPermissions[i] = dmp;
-                }
-                fsFolder.setPermissions(Arrays.asList(fsPermissions));
+        /*
+         * update permissions separately if needed
+         */
+        if (permissions) {
+            String newID = folderAccess.updateFolder(folderToUpdate.getId(), folderToUpdate);
+            folderToUpdate.setId(newID);
+            if (StorageParametersUtility.isHandDownPermissions(storageParameters)) {
+                handDown(folderToUpdate.getId(), folderToUpdate.getPermissions(), folderAccess);
             }
         }
         /*
-         * Load storage version
+         * take over updated identifiers in passed folder reference
          */
-        final String oldParent;
-        final String oldName;
-        {
-            final FileStorageFolder storageVersion = folderAccess.getFolder(folder.getID());
-            oldParent = storageVersion.getParentId();
-            oldName = storageVersion.getName();
-        }
-
-        // Here we go------------------------------------------------------------------------
-        // TODO: Allow differing service identifiers in provided parent ID?
-
-        final String newName = fsFolder.getName();
-
-        boolean movePerformed = false;
-        {
-            /*
-             * Check if a move shall be performed
-             */
-            final String newParent = fsFolder.getParentId();
-            if (newParent != null) {
-                FolderID newParentID = new FolderID(newParent);
-                FolderID folderID = new FolderID(folder.getID());
-                if (folderID.getAccountId().equals(newParentID.getAccountId())) {
-                    /*
-                     * Move to another parent in the same account
-                     */
-                    if (!newParent.equals(oldParent)) {
-                        /*
-                         * Check for possible duplicate folder
-                         */
-                        final boolean rename = (null != newName) && !newName.equals(oldName);
-                        check4DuplicateFolder(folderAccess, newParent, rename ? newName : oldName);
-                        /*
-                         * Perform move operation
-                         */
-                        String movedFolder = folderAccess.moveFolder(fsFolder.getId(), newParent);
-                        if (rename) {
-                            /*
-                             * Perform rename
-                             */
-                            movedFolder = folderAccess.renameFolder(movedFolder, newName);
-                        }
-                        folder.setID(movedFolder);
-                        fsFolder.setId(movedFolder);
-                        movePerformed = true;
-                    }
-                } else {
-                    // Move to another account
-                    // Check if parent folder exists
-                    final FileStorageFolder p = folderAccess.getFolder(newParent);
-                    // Check permission on new parent
-                    final FileStoragePermission ownPermission = p.getOwnPermission();
-                    if (ownPermission.getFolderPermission() < FileStoragePermission.CREATE_SUB_FOLDERS) {
-                        throw FileStorageExceptionCodes.NO_CREATE_ACCESS.create(newParent);
-                    }
-                    // Check for duplicate
-                    check4DuplicateFolder(folderAccess, newParent, null == newName ? oldName : newName);
-                    // Copy
-                    final String destFullname = fullCopy(folderAccess, folder.getID(), newParent, storageParameters.getUserId(), supportsPermissions(p), storageParameters.getSession());
-                    // Delete source
-                    folderAccess.deleteFolder(folder.getID(), true);
-                    // Perform other updates
-                    String updatedId = folderAccess.updateFolder(destFullname, fsFolder);
-                    fsFolder.setId(updatedId);
-                    folder.setID(updatedId);
-                }
-            }
-        }
-        /*
-         * Check if a rename shall be performed
-         */
-        if (!movePerformed && newName != null && !newName.equals(oldName)) {
-            String updatedId = folderAccess.renameFolder(fsFolder.getId(), newName);
-            folder.setID(updatedId);
-            fsFolder.setId(updatedId);
-        }
-        /*
-         * Handle update of permission or subscription
-         */
-        folderAccess.updateFolder(fsFolder.getId(), fsFolder);
-        /*
-         * Is hand-down?
-         */
-        if ((null != fsPermissions) && StorageParametersUtility.isHandDownPermissions(storageParameters)) {
-            handDown(fsFolder.getId(), fsPermissions, folderAccess);
-        }
+        folder.setID(folderToUpdate.getId());
+        folder.setParentID(folderToUpdate.getParentId());
+        folder.setLastModified(folderToUpdate.getLastModifiedDate());
     }
 
-    private boolean supportsPermissions(final FileStorageFolder p) {
-        Set<String> capabilities = p.getCapabilities();
-        return null != capabilities && capabilities.contains(FileStorageFolder.CAPABILITY_PERMISSIONS);
-    }
-
-    private static void handDown(final String parentId, final FileStoragePermission[] fsPermissions, final IDBasedFolderAccess folderAccess) throws OXException {
+    private static void handDown(final String parentId, final List<FileStoragePermission> fsPermissions, final IDBasedFolderAccess folderAccess) throws OXException {
         final FileStorageFolder[] subfolders = folderAccess.getSubfolders(parentId, true);
         for (final FileStorageFolder subfolder : subfolders) {
             final DefaultFileStorageFolder fsFolder = new DefaultFileStorageFolder();
@@ -684,68 +589,10 @@ public final class FileStorageFolderStorage implements FolderStorage {
             // Full name
             final String id = subfolder.getId();
             fsFolder.setId(id);
-            fsFolder.setPermissions(Arrays.asList(fsPermissions));
+            fsFolder.setPermissions(fsPermissions);
             folderAccess.updateFolder(id, fsFolder);
             // Recursive
             handDown(id, fsPermissions, folderAccess);
-        }
-    }
-
-    private void check4DuplicateFolder(final IDBasedFolderAccess folderAccess, final String parentId, final String name2check) throws OXException {
-        final FileStorageFolder[] subfolders = folderAccess.getSubfolders(parentId, true);
-        for (final FileStorageFolder subfolder : subfolders) {
-            if (name2check.equals(subfolder.getName())) {
-                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(name2check, parentId);
-            }
-        }
-    }
-
-    private String fullCopy(IDBasedFolderAccess folderAccess, String srcFullname, String destParent, int user, boolean hasPermissions, Session session) throws OXException {
-        boolean error = true;
-        String destFullName = null;
-        try {
-            // Create folder
-            {
-                FileStorageFolder source = folderAccess.getFolder(srcFullname);
-                DefaultFileStorageFolder mfd = new DefaultFileStorageFolder();
-                mfd.setName(source.getName());
-                mfd.setParentId(destParent);
-                mfd.setSubscribed(source.isSubscribed());
-                if (hasPermissions) {
-                    // Copy permissions
-                    List<FileStoragePermission> perms = source.getPermissions();
-                    for (FileStoragePermission perm : perms) {
-                        mfd.addPermission((FileStoragePermission) perm.clone());
-                    }
-                }
-                destFullName = folderAccess.createFolder(mfd);
-            }
-
-            // Copy files
-            {
-                IDBasedFileAccessFactory factory = services.getService(IDBasedFileAccessFactory.class);
-                if (null == factory) {
-                    throw ServiceExceptionCode.absentService(IDBasedFileAccessFactory.class);
-                }
-                IDBasedFileAccess fileAccess = factory.createAccess(session);
-
-                for (SearchIterator<File> documents = fileAccess.getDocuments(srcFullname, Collections.singletonList(Field.ID)).results(); documents.hasNext();) {
-                    String fileId = documents.next().getId();
-                    fileAccess.copy(fileId, FileStorageFileAccess.CURRENT_VERSION, destFullName, null, null, Collections.<Field>emptyList());
-                }
-            }
-
-            // Iterate subfolders
-            for (FileStorageFolder element : folderAccess.getSubfolders(srcFullname, true)) {
-                fullCopy(folderAccess, element.getId(), destFullName, user, hasPermissions, session);
-            }
-
-            error = false;
-            return destFullName;
-        } finally {
-            if (error && null != destFullName) {
-                folderAccess.deleteFolder(destFullName, true);
-            }
         }
     }
 
@@ -756,7 +603,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
      * @param storageParameters The storage parameters to get the folder access from
      * @return The folder access
      */
-    private IDBasedFolderAccess getFolderAccess(final StorageParameters storageParameters) throws OXException {
+    private static IDBasedFolderAccess getFolderAccess(StorageParameters storageParameters) throws OXException {
         IDBasedFolderAccess folderAccess = storageParameters.getParameter(FileStorageFolderType.getInstance(), PARAM);
         if (null == folderAccess) {
             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
@@ -778,5 +625,72 @@ public final class FileStorageFolderStorage implements FolderStorage {
             return collator.compare(o1.getName(), o2.getName());
         }
     } // End of SimpleFileStorageFolderComparator
+
+    /**
+     * Create a file storage folder equivalent to the supplied folder.
+     *
+     * @param folder the folder to create the file storage folder for
+     * @return The file storage folder
+     */
+    private static DefaultFileStorageFolder getFileStorageFolder(Folder folder) {
+        DefaultFileStorageFolder fileStorageFolder = new DefaultFileStorageFolder();
+        fileStorageFolder.setExists(true);
+        fileStorageFolder.setId(folder.getID());
+        fileStorageFolder.setParentId(folder.getParentID());
+        fileStorageFolder.setName(folder.getName());
+        if (false == SetterAwareFolder.class.isInstance(fileStorageFolder) || ((SetterAwareFolder) folder).containsSubscribed()) {
+            fileStorageFolder.setSubscribed(folder.isSubscribed());
+        }
+        fileStorageFolder.setPermissions(getfFileStoragePermissions(folder.getPermissions()));
+        return fileStorageFolder;
+    }
+
+    /**
+     * Create file storage permissions equivalent to the supplied permissions.
+     *
+     * @param permissions The permissions to create the file storage permissions for
+     * @return The file storage permissions, or <code>null</code> if passed array was <code>null</code> or empty
+     */
+    private static List<FileStoragePermission> getfFileStoragePermissions(Permission[] permissions) {
+        if (null != permissions && 0 < permissions.length) {
+            List<FileStoragePermission> fileStoragePermissions = new ArrayList<FileStoragePermission>(permissions.length);
+            for (Permission permission : permissions) {
+                fileStoragePermissions.add(getfFileStoragePermissions(permission));
+            }
+            return fileStoragePermissions;
+        }
+        return null;
+    }
+
+    /**
+     * Creates a file storage permission equivalent to the supplied permission.
+     *
+     * @param permission The permission to create the file storage permission for
+     * @return The file storage permission
+     */
+    private static FileStoragePermission getfFileStoragePermissions(Permission permission) {
+        FileStoragePermission fileStoragePermission = DefaultFileStoragePermission.newInstance();
+        fileStoragePermission.setEntity(permission.getEntity());
+        fileStoragePermission.setAllPermissions(
+            permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission());
+        fileStoragePermission.setAdmin(permission.isAdmin());
+        fileStoragePermission.setGroup(permission.isGroup());
+        return fileStoragePermission;
+    }
+
+    /**
+     * Adds any present warnings from the supplied {@link WarningsAware} reference to the storage parameters warnings list.
+     *
+     * @param storageParameters The storage parameters to add the warnings to
+     * @param warningsAware The warnings aware to get and flush the warnings from
+     */
+    private static void addWarnings(StorageParameters storageParameters, WarningsAware warningsAware) {
+        List<OXException> list = warningsAware.getAndFlushWarnings();
+        if (null != list && false == list.isEmpty()) {
+            for (OXException warning : list) {
+                storageParameters.addWarning(warning);
+            }
+        }
+    }
 
 }

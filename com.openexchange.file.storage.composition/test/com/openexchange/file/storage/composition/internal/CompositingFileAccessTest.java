@@ -608,7 +608,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
-        move(file, EMPTY_INPUT_STREAM, 1337, null);
+        move(file, EMPTY_INPUT_STREAM, 1337, null, true);
 
         verifyAccount(); // Store on destination account then
         verifyAccount2(); // Remove from source account
@@ -650,7 +650,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
-        move(file, EMPTY_INPUT_STREAM, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
+        move(file, EMPTY_INPUT_STREAM, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID), true); // Title and FolderID have been changed
 
         fileAccess.assertAllWereCalled();
 
@@ -690,7 +690,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
-        move(file, null, 1337, null);
+        move(file, null, 1337, null, true);
 
         fileAccess.assertAllWereCalled();
 
@@ -732,7 +732,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
-        move(file, null, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
+        move(file, null, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID), true); // Title and FolderID have been changed
 
         fileAccess.assertAllWereCalled();
 

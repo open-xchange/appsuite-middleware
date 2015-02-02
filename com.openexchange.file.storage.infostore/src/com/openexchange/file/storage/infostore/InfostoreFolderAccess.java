@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.infostore;
 
+import static com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;
+import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -61,21 +63,20 @@ import com.openexchange.file.storage.infostore.folder.FolderWriter;
 import com.openexchange.file.storage.infostore.folder.ParsedFolder;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.type.DocumentsType;
 import com.openexchange.folderstorage.type.MusicType;
 import com.openexchange.folderstorage.type.PicturesType;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link InfostoreFolderAccess}
@@ -86,194 +87,121 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     private static final String INFOSTORE_FOLDER_ID = "9";
 
-    private static final String REAL_TREE_ID = FolderStorage.REAL_TREE_ID;
-
     private final ServerSession session;
     private final InfostoreFacade infostore;
 
     /**
      * Initializes a new {@link InfostoreFolderAccess}.
-     * @param session
+     *
+     * @param session The session
+     * @param infostore A reference to the underlying infostore facade
      */
-    public InfostoreFolderAccess(final ServerSession session, final InfostoreFacade infostore) {
+    public InfostoreFolderAccess(ServerSession session, InfostoreFacade infostore) {
         super();
         this.session = session;
         this.infostore = infostore;
     }
 
     @Override
-    public void clearFolder(final String folderId) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        service.clearFolder(REAL_TREE_ID, folderId, session);
+    public void clearFolder(String folderId) throws OXException {
+        clearFolder(folderId, false);
     }
 
     @Override
-    public void clearFolder(final String folderId, final boolean hardDelete) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        service.clearFolder(REAL_TREE_ID, folderId, session);
+    public void clearFolder(String folderId, boolean hardDelete) throws OXException {
+        getFolderService().clearFolder(REAL_TREE_ID, folderId, session);
     }
 
     @Override
-    public String createFolder(final FileStorageFolder toCreate) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        final FolderResponse<String> response = service.createFolder(FolderParser.parseFolder(toCreate), session, null);
-        return response.getResponse();
+    public String createFolder(FileStorageFolder toCreate) throws OXException {
+        return getFolderService().createFolder(FolderParser.parseFolder(toCreate), session, initDecorator()).getResponse();
     }
 
     @Override
-    public String deleteFolder(final String folderId) throws OXException {
+    public String deleteFolder(String folderId) throws OXException {
         return deleteFolder(folderId, false);
     }
 
     @Override
-    public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
-        Services.getService(FolderService.class).deleteFolder(REAL_TREE_ID, folderId, null, session,
-            new FolderServiceDecorator().put("hardDelete", String.valueOf(hardDelete)));
+    public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
+        getFolderService().deleteFolder(REAL_TREE_ID, folderId, null, session, initDecorator().put("hardDelete", String.valueOf(hardDelete))).getResponse();
         return folderId;
     }
 
     @Override
-    public boolean exists(final String folderId) throws OXException {
+    public boolean exists(String folderId) throws OXException {
         try {
-            final FolderService service = Services.getService(FolderService.class);
-            service.getFolder(REAL_TREE_ID, folderId, session, null);
+            getFolderService().getFolder(REAL_TREE_ID, folderId, session, initDecorator());
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
     }
 
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        return FolderWriter.writeFolder(service.getFolder(REAL_TREE_ID, folderId, session, null));
+        return FolderWriter.writeFolder(getFolderService().getFolder(REAL_TREE_ID, folderId, session, initDecorator()));
     }
 
     @Override
     public FileStorageFolder getPersonalFolder() throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        return FolderWriter.writeFolder(service.getDefaultFolder(
-            session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), session, null));
+        return getDefaultFolder(PublicType.getInstance());
     }
 
     @Override
     public FileStorageFolder getTrashFolder() throws OXException {
-        FolderService service = Services.getService(FolderService.class);
-        try {
-            return FolderWriter.writeFolder(service.getDefaultFolder(
-                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), TrashType.getInstance(), session, null));
-        } catch (OXException e) {
-            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
-                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
-            }
-            throw e;
-        }
+        return getDefaultFolder(TrashType.getInstance());
     }
 
     @Override
     public FileStorageFolder getPicturesFolder() throws OXException {
-        FolderService service = Services.getService(FolderService.class);
-        try {
-            return FolderWriter.writeFolder(service.getDefaultFolder(
-                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), PicturesType.getInstance(), session, null));
-        } catch (OXException e) {
-            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
-                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
-            }
-            throw e;
-        }
+        return getDefaultFolder(PicturesType.getInstance());
     }
 
     @Override
     public FileStorageFolder getDocumentsFolder() throws OXException {
-        FolderService service = Services.getService(FolderService.class);
-        try {
-            return FolderWriter.writeFolder(service.getDefaultFolder(
-                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), DocumentsType.getInstance(), session, null));
-        } catch (OXException e) {
-            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
-                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
-            }
-            throw e;
-        }
+        return getDefaultFolder(DocumentsType.getInstance());
     }
 
     @Override
     public FileStorageFolder getTemplatesFolder() throws OXException {
-        FolderService service = Services.getService(FolderService.class);
-        try {
-            return FolderWriter.writeFolder(service.getDefaultFolder(
-                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), TemplatesType.getInstance(), session, null));
-        } catch (OXException e) {
-            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
-                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
-            }
-            throw e;
-        }
+        return getDefaultFolder(TemplatesType.getInstance());
     }
 
     @Override
     public FileStorageFolder getMusicFolder() throws OXException {
-        FolderService service = Services.getService(FolderService.class);
-        try {
-            return FolderWriter.writeFolder(service.getDefaultFolder(
-                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), MusicType.getInstance(), session, null));
-        } catch (OXException e) {
-            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
-                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
-            }
-            throw e;
-        }
+        return getDefaultFolder(MusicType.getInstance());
     }
 
     @Override
     public FileStorageFolder getVideosFolder() throws OXException {
-        FolderService service = Services.getService(FolderService.class);
-        try {
-            return FolderWriter.writeFolder(service.getDefaultFolder(
-                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), VideosType.getInstance(), session, null));
-        } catch (OXException e) {
-            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
-                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
-            }
-            throw e;
-        }
+        return getDefaultFolder(VideosType.getInstance());
     }
 
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        final UserizedFolder[] subfolders = service.getSubfolders(REAL_TREE_ID, "15", true, session, null).getResponse();
-        final FileStorageFolder[] ret = new FileStorageFolder[subfolders.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = FolderWriter.writeFolder(subfolders[i]);
-        }
-        return ret;
+        UserizedFolder[] subfolders = getFolderService().getSubfolders(REAL_TREE_ID, "15", true, session, initDecorator()).getResponse();
+        return FolderWriter.writeFolders(subfolders);
     }
 
     @Override
-    public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        final UserizedFolder[] folders = service.getPath(REAL_TREE_ID, folderId, session, null).getResponse();
-        final FileStorageFolder[] ret = new FileStorageFolder[folders.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = FolderWriter.writeFolder(folders[i]);
-        }
-        return ret;
+    public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
+        UserizedFolder[] folders = getFolderService().getPath(REAL_TREE_ID, folderId, session, initDecorator()).getResponse();
+        return FolderWriter.writeFolders(folders);
     }
 
     @Override
-    public Quota getFileQuota(final String folderId) throws OXException {
+    public Quota getFileQuota(String folderId) throws OXException {
         return infostore.getFileQuota(session);
     }
 
     @Override
-    public Quota getStorageQuota(final String folderId) throws OXException {
+    public Quota getStorageQuota(String folderId) throws OXException {
         return infostore.getStorageQuota(session);
     }
 
     @Override
-    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
+    public Quota[] getQuotas(String folder, Type[] types) throws OXException {
         if (null == types) {
             return null;
         }
@@ -297,7 +225,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
     public FileStorageFolder getRootFolder() throws OXException {
         try {
             return getFolder(INFOSTORE_FOLDER_ID);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
                 return null;
             }
@@ -306,36 +234,31 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
     }
 
     @Override
-    public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        final UserizedFolder[] subfolders = service.getSubfolders(REAL_TREE_ID, parentIdentifier, all, session, null).getResponse();
-        final FileStorageFolder[] ret = new FileStorageFolder[subfolders.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = FolderWriter.writeFolder(subfolders[i]);
-        }
-        return ret;
+    public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
+        UserizedFolder[] subfolders = getFolderService().getSubfolders(REAL_TREE_ID, parentIdentifier, all, session, initDecorator()).getResponse();
+        return FolderWriter.writeFolders(subfolders);
     }
 
     @Override
-    public String moveFolder(final String folderId, final String newParentId) throws OXException {
+    public String moveFolder(String folderId, String newParentId) throws OXException {
         return moveFolder(folderId, newParentId, null);
     }
 
     @Override
-    public String moveFolder(final String folderId, final String newParentId, String newName) throws OXException {
+    public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
         return moveFolder(folderId, newParentId, newName, null);
     }
 
     @Override
-    public String renameFolder(final String folderId, final String newName) throws OXException {
+    public String renameFolder(String folderId, String newName) throws OXException {
         return moveFolder(folderId, null, newName, null);
     }
 
     @Override
-    public String updateFolder(final String identifier, final FileStorageFolder toUpdate) throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        final Folder parsedFolder = FolderParser.parseFolder(toUpdate);
-        service.updateFolder(parsedFolder, null, session, null);
+    public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
+        Folder parsedFolder = FolderParser.parseFolder(toUpdate);
+        parsedFolder.setID(identifier);
+        getFolderService().updateFolder(parsedFolder, null, session, initDecorator()).getResponse();
         return parsedFolder.getNewID();
     }
 
@@ -350,7 +273,6 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
      * @throws OXException
      */
     private String moveFolder(final String folderId, final String newParentId, String newName, FolderServiceDecorator decorator) throws OXException {
-        FolderService service = Services.getService(FolderService.class);
         ParsedFolder folder = new ParsedFolder();
         folder.setTreeID(REAL_TREE_ID);
         folder.setID(folderId);
@@ -360,8 +282,37 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
         if (null != newName) {
             folder.setName(newName);
         }
-        service.updateFolder(folder, null, session, decorator);
+        getFolderService().updateFolder(folder, null, session, initDecorator());
         return null == folder.getNewID() ? folderId : folder.getNewID();
+    }
+
+    private FileStorageFolder getDefaultFolder(com.openexchange.folderstorage.Type type) throws OXException {
+        try {
+            return FolderWriter.writeFolder(getFolderService().getDefaultFolder(
+                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), type, session, initDecorator()));
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
+            }
+            throw e;
+        }
+    }
+
+    private FolderService getFolderService() throws OXException {
+        FolderService folderService = Services.getService(FolderService.class);
+        if (null == folderService) {
+            throw ServiceExceptionCode.absentService(FolderService.class);
+        }
+        return folderService;
+    }
+
+    private FolderServiceDecorator initDecorator() {
+        FolderServiceDecorator decorator = new FolderServiceDecorator();
+        Object connection = session.getParameter(Connection.class.getName());
+        if (null != connection) {
+            decorator.put(Connection.class.getName(), connection);
+        }
+        return decorator;
     }
 
 }

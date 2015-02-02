@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.tx.TransactionAware;
 
 /**
@@ -65,7 +66,7 @@ import com.openexchange.tx.TransactionAware;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface IDBasedFolderAccess extends TransactionAware {
+public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
 
     /**
      * Checks if a folder exists whose identifier matches given <code>identifier</code>
@@ -224,6 +225,25 @@ public interface IDBasedFolderAccess extends TransactionAware {
      * @throws OXException If either folder does not exist or cannot be moved
      */
     String moveFolder(String folderId, String newParentId, String newName) throws OXException;
+
+    /**
+     * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>, renaming
+     * it to the supplied new name.
+     * <p>
+     * E.g.:
+     *
+     * <pre>
+     * my.path.to.folder -&gt; my.newpath.to.newName
+     * </pre>
+     *
+     * @param folderId The folder identifier
+     * @param newParentId The identifier of the new parent to move to
+     * @param newName The new name to use for the folder, or <code>null</code> to keep the existing name
+     * @param ignoreWarnings <code>true</code> to force the folder move even if warnings regarding potential data loss are detected, <code>false</code>, otherwise
+     * @return The new identifier where the folder has been moved
+     * @throws OXException If either folder does not exist or cannot be moved
+     */
+    String moveFolder(String folderId, String newParentId, String newName, boolean ignoreWarnings) throws OXException;
 
     /**
      * Renames the folder identified through given identifier to the specified new name.

@@ -55,6 +55,7 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -70,7 +71,7 @@ import com.openexchange.tx.TransactionAware;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface IDBasedFileAccess extends TransactionAware {
+public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
 
     /**
      * Gets a value indicating whether a specific account supports one or more capabilities.
@@ -123,6 +124,18 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     String saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
+
+    /**
+     * Saves metadata for a file.
+     *
+     * @param document The metadata to save
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @param ignoreWarnings <code>true</code> to force a file update even if warnings regarding potential data loss are detected, <code>false</code>, otherwise
+     * @return The (fully qualified) unique identifier of the saved file
+     * @throws OXException If operation fails
+     */
+    String saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreWarnings) throws OXException ;
 
     /**
      * Copies a file from the source to the destination.

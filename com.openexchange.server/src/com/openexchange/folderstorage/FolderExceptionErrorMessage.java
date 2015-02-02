@@ -219,6 +219,10 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * Failed to delete following folder/s: %1$s
      */
     FOLDER_DELETION_FAILED(FolderExceptionErrorMessage.FOLDER_DELETION_FAILED_MSG, Category.CATEGORY_ERROR, 1037, FolderExceptionMessages.FOLDER_DELETION_FAILED_MSG_DISPLAY),
+    /**
+     * Folder updated aborted: %2$s
+     */
+    FOLDER_UPDATE_ABORTED(FolderExceptionErrorMessage.FOLDER_UPDATE_ABORTED_MSG, Category.CATEGORY_CONFLICT, 1038, FolderExceptionMessages.FOLDER_UPDATE_ABORTED_MSG_DISPLAY),
     ;
 
     private static final String PREFIX = "FLD";
@@ -334,6 +338,9 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
 
     // Specified session is invalid: %1$s
     private static final String INVALID_SESSION_MSG = "Specified session is invalid: %1$s";
+
+    // Folder update aborted: %1$s
+    private static final String FOLDER_UPDATE_ABORTED_MSG = "Folder update aborted: %2$s";
 
     /**
      * The prefix for this error codes.

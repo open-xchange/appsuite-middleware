@@ -215,6 +215,30 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * File version %1$s of file %2$s not found in folder %3$s.
      */
     FILE_VERSION_NOT_FOUND("File version %1$s of file %2$s not found in folder %3$s.", Category.CATEGORY_USER_INPUT, 39, FileStorageExceptionMessages.FILE_VERSION_NOT_EXISTS_MSG),
+    /**
+     * The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+     */
+    LOSS_OF_NOTES("Metadata of file \"%4$s\" not supported in target folder \"%5$s\"", CATEGORY_WARNING, 40, FileStorageExceptionMessages.LOSS_OF_NOTES_MSG),
+    /**
+     * All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+     */
+    LOSS_OF_VERSIONS("Metadata of file \"%4$s\" not supported in target folder \"%5$s\"", CATEGORY_WARNING, 41, FileStorageExceptionMessages.LOSS_OF_VERSIONS_MSG),
+    /**
+     * The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+     */
+    LOSS_OF_CATEGORIES("Metadata of file \"%4$s\" not supported in target folder \"%5$s\"", CATEGORY_WARNING, 42, FileStorageExceptionMessages.LOSS_OF_CATEGORIES_MSG),
+    /**
+     * The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
+     */
+    LOSS_OF_FILE_SHARES("Metadata of file \"%4$s\" not supported in target folder \"%5$s\"", CATEGORY_WARNING, 43, FileStorageExceptionMessages.LOSS_OF_FILE_SHARES_MSG),
+    /**
+     * The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
+     */
+    LOSS_OF_FOLDER_SHARES("Metadata of folder \"%3$s\" not supported in target folder \"%4$s\"", CATEGORY_WARNING, 44, FileStorageExceptionMessages.LOSS_OF_FOLDER_SHARES_MSG),
+    /**
+     * File update aborted: %2$s
+     */
+    FILE_UPDATE_ABORTED("File update aborted: %2$s", Category.CATEGORY_CONFLICT, 45, FileStorageExceptionMessages.FILE_UPDATE_ABORTED_MSG),
 
     ;
 

@@ -198,7 +198,7 @@ public class FileEventTest {
                 }
             }
         });
-        fileAccess.move(moved, null, 0, null);
+        fileAccess.move(moved, null, 0, null, true);
     }
 
     @Test

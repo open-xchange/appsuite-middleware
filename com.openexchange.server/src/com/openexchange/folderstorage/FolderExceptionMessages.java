@@ -101,6 +101,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // Failed to delete following folder/s: %1$s
     public static final String FOLDER_DELETION_FAILED_MSG_DISPLAY = "Failed to delete following folder/s: %1$s";
 
+    // The folder \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
+    public static final String FOLDER_UPDATE_ABORTED_MSG_DISPLAY = "The folder \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

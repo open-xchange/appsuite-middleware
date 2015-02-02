@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -251,16 +252,28 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                  * Move folder dependent on folder is virtual or not
                  */
                 final String newParentId = folder.getParentID();
-                final FolderStorage newRealParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
+                FolderStorage newRealParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
                 if (null == newRealParentStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, newParentId);
                 }
-
-                final FolderStorage realParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, oldParentId);
+                FolderStorage realParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, oldParentId);
                 if (null == realParentStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, oldParentId);
                 }
-
+                FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+                if (null == realStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+                }
+                /*
+                 * ensure FileStorageFolderStorage is used for move operations to/from a file storage
+                 */
+                if (FileStorageContentType.getInstance().equals(realParentStorage.getDefaultContentType())) {
+                    newRealParentStorage = realParentStorage;
+                    realStorage = realParentStorage;
+                } else if (FileStorageContentType.getInstance().equals(newRealParentStorage.getDefaultContentType())) {
+                    realParentStorage = newRealParentStorage;
+                    realStorage = newRealParentStorage;
+                }
                 /*
                  * Check for a folder with the same name below parent
                  */
@@ -298,7 +311,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
                     movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
                 } else {
-                    movePerformer.doMoveVirtual(folder, storage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
+                    movePerformer.doMoveVirtual(folder, storage, realStorage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
                 }
             } else if (rename) {
                 folder.setParentID(oldParentId);

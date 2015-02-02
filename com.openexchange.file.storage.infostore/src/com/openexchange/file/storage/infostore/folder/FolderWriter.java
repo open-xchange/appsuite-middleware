@@ -86,4 +86,22 @@ public final class FolderWriter {
         }
     }
 
+    /**
+     * Converts an array of userized folders into their file storage folder equivalents.
+     *
+     * @param folders The userized folders to convert
+     * @return The file storage folders
+     * @throws OXException
+     */
+    public static FileStorageFolder[] writeFolders(UserizedFolder[] folders) throws OXException {
+        if (null == folders) {
+            return null;
+        }
+        FileStorageFolder[] fileStorageFolders = new FileStorageFolder[folders.length];
+        for (int i = 0; i < folders.length; i++) {
+            fileStorageFolders[i] = writeFolder(folders[i]);
+        }
+        return fileStorageFolders;
+    }
+
 }

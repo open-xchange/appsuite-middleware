@@ -52,6 +52,8 @@ package com.openexchange.file.storage.composition.internal;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -64,6 +66,8 @@ import com.openexchange.file.storage.FileStorageEventHelper.EventProperty;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
@@ -73,7 +77,9 @@ import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileStorageCapability;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.log.LogProperties;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 
@@ -221,6 +227,86 @@ public class FileStorageTools {
             return new EventProperty("remoteAddress", serverName.toString());
         }
         return null;
+    }
+
+    /**
+     * Creates an array of folder identifiers for the supplied file storage folder path array.
+     *
+     * @param path The folders to get the path for
+     * @param serviceID The service identifier
+     * @param accountID The account identifier
+     * @return The path of folder identifiers
+     */
+    public static FolderID[] getPath(FileStorageFolder[] path, String serviceID, String accountID) {
+        if (null == path) {
+            return null;
+        }
+        FolderID[] folderIDs = new FolderID[path.length];
+        for (int i = 0; i < path.length; i++) {
+            folderIDs[i] = new FolderID(serviceID, accountID, path[i].getId());
+        }
+        return folderIDs;
+    }
+
+    /**
+     * Builds a dictionary to be used with common file storage folder events.
+     *
+     * @param session The session
+     * @param folderID The identifier of the folder to get the event properties for
+     * @param path The folder path to include
+     * @return The event properties
+     */
+    public static Dictionary<String, Object> getEventProperties(Session session, FolderID folderID, FileStorageFolder[] path) {
+        return getEventProperties(session, folderID, getPath(path, folderID.getService(), folderID.getAccountId()));
+    }
+
+    /**
+     * Builds a dictionary to be used with common file storage folder events.
+     *
+     * @param session The session
+     * @param folderID The identifier of the folder to get the event properties for
+     * @param path The folder path to include
+     * @return The event properties
+     */
+    public static Dictionary<String, Object> getEventProperties(Session session, FolderID folderID, FolderID[] path) {
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
+        properties.put(FileStorageEventConstants.SESSION, session);
+        properties.put(FileStorageEventConstants.ACCOUNT_ID, folderID.getAccountId());
+        properties.put(FileStorageEventConstants.SERVICE, folderID.getService());
+        properties.put(FileStorageEventConstants.FOLDER_ID, folderID.toUniqueID());
+        if (null != path) {
+            String[] parentFolderIDs = new String[path.length];
+            for (int i = 0; i < path.length; i++) {
+                parentFolderIDs[i] = path[i].toUniqueID();
+            }
+            properties.put(FileStorageEventConstants.FOLDER_PATH, parentFolderIDs);
+        }
+        return properties;
+    }
+
+    /**
+     * Gets a readable path string containing all folder names separated by the path separator character <code>/</code>.
+     *
+     * @param path The file storage folders on the path in reverse order, i.e. the root folder is the last one
+     * @param additionalFolders Additional folders to append at the end of the path
+     * @return The path string
+     */
+    public static String getPathString(FileStorageFolder[] path, FileStorageFolder...additionalFolders) {
+        if ((null == path || 0 == path.length) && (null == additionalFolders || 0 == additionalFolders.length)) {
+            return "/";
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        if (null != path) {
+            for (int i = path.length - 1; i >= 0; i--) {
+                stringBuilder.append('/').append(path[i].getName());
+            }
+        }
+        if (null != additionalFolders) {
+            for (int i = 0; i < additionalFolders.length; i++) {
+                stringBuilder.append('/').append(additionalFolders[i].getName());
+            }
+        }
+        return stringBuilder.toString();
     }
 
 }

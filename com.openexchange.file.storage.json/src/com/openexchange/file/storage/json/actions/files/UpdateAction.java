@@ -49,6 +49,9 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.Collection;
+import java.util.Date;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -56,6 +59,7 @@ import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStorageCapability;
@@ -91,24 +95,65 @@ public class UpdateAction extends AbstractWriteAction {
         if (file.getId() == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
+        FileID id = new FileID(file.getId());
 
-        String result;
         IDBasedFileAccess fileAccess = request.getFileAccess();
         if (request.hasUploads()) {
-            if (request.getBoolParameter("ignoreVersion")) {
-                FileID id = new FileID(file.getId());
-                if (fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION)) {
-                    result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
-                } else {
-                    result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
-                }
+            String result;
+            if (request.getBoolParameter("ignoreVersion") &&
+                fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION)) {
+                result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
             } else {
                 result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
             }
+            return request.extendedResponse() ? result(fileAccess.getFileMetadata(result, FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
         } else {
-            result = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
+            /*
+             * save file metadata without binary payload
+             */
+            boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
+            String newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns(), ignoreWarnings);
+            /*
+             * construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
+             */
+            AJAXRequestResult result;
+            if (null != newId && request.extendedResponse()) {
+                 result = result(fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION), request);
+            } else {
+                result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
+            }
+            Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
+            result.addWarnings(warnings);
+            if (null == newId && null != warnings && 0 < warnings.size() && false == ignoreWarnings) {
+                result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(file, id, fileAccess), id.toUniqueID()));
+            }
+            return result;
         }
-        return request.extendedResponse() ? result(fileAccess.getFileMetadata(result, FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
+    }
+
+    private static String getFilenameSave(File file, FileID id, IDBasedFileAccess fileAccess) {
+        String name = file.getFileName();
+        if (null != name) {
+            return name;
+        }
+        name = file.getTitle();
+        if (null != name) {
+            return name;
+        }
+        if (null != id && null != fileAccess) {
+            try {
+                File metadata = fileAccess.getFileMetadata(id.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+                if (null != metadata) {
+                    name = metadata.getFileName();
+                    if (null == name) {
+                        name = metadata.getTitle();
+                    }
+                }
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(UpdateAction.class).debug("Error getting name for file {}: {}", id, e.getMessage(), e);
+            }
+        }
+        return name;
     }
 
 }

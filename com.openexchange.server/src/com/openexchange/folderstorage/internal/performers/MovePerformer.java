@@ -193,7 +193,7 @@ final class MovePerformer extends AbstractPerformer {
         folderStorage.updateFolder(folder, storageParameters);
     }
 
-    void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final Collection<FolderStorage> openedStorages) throws OXException {
+    void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final Collection<FolderStorage> openedStorages) throws OXException {
         /*
          * Check permission on folder
          */
@@ -206,14 +206,6 @@ final class MovePerformer extends AbstractPerformer {
                     getContextInfo4Error());
             }
         }
-        /*
-         * Get subfolders
-         */
-        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(realTreeId, folder.getID());
-        if (null == realStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folder.getID());
-        }
-        checkOpenedStorage(realStorage, openedStorages);
         /*
          * Special handling for mail folders on root level
          */
@@ -319,30 +311,32 @@ final class MovePerformer extends AbstractPerformer {
                     checkOpenedStorage(realStorage, openedStorages);
                     realStorage.updateFolder(folder, storageParameters);
                     final String newId = folder.getID();
-                    if (!parentEquality) {
-                        /*
-                         * Delete in virtual storage
-                         */
-                        virtualStorage.deleteFolder(treeId, oldId, storageParameters);
-                    }
-                    /*
-                     * Generate map
-                     */
-                    final FolderInfo newFolderInfo = new FolderInfo(newId, folder.getName());
-                    gatherSubfolders(treeId, newFolderInfo, storageParameters, realStorage, false);
-                    final Map<String, String> parentIDMap = generateParentIDMap(oldFolderInfo, newFolderInfo);
-                    final Map<String, String> idMap = generateIDMap(oldFolderInfo, newFolderInfo);
-                    for (final Entry<String, String> entry : parentIDMap.entrySet()) {
-                        final Folder up = new UpdateFolder();
-                        final String id = entry.getKey();
-                        up.setID(id);
-                        up.setParentID(entry.getValue());
-                        up.setTreeID(treeId);
-                        final String newIdent = idMap.get(id);
-                        if (null != newIdent) {
-                            up.setNewID(newIdent);
+                    if (null != newId) {
+                        if (!parentEquality) {
+                            /*
+                             * Delete in virtual storage
+                             */
+                            virtualStorage.deleteFolder(treeId, oldId, storageParameters);
                         }
-                        virtualStorage.updateFolder(up, storageParameters);
+                        /*
+                         * Generate map
+                         */
+                        final FolderInfo newFolderInfo = new FolderInfo(newId, folder.getName());
+                        gatherSubfolders(treeId, newFolderInfo, storageParameters, realStorage, false);
+                        final Map<String, String> parentIDMap = generateParentIDMap(oldFolderInfo, newFolderInfo);
+                        final Map<String, String> idMap = generateIDMap(oldFolderInfo, newFolderInfo);
+                        for (final Entry<String, String> entry : parentIDMap.entrySet()) {
+                            final Folder up = new UpdateFolder();
+                            final String id = entry.getKey();
+                            up.setID(id);
+                            up.setParentID(entry.getValue());
+                            up.setTreeID(treeId);
+                            final String newIdent = idMap.get(id);
+                            if (null != newIdent) {
+                                up.setNewID(newIdent);
+                            }
+                            virtualStorage.updateFolder(up, storageParameters);
+                        }
                     }
                 } else {
                     /*
