@@ -56,6 +56,7 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.kerberos.KerberosTicket;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
@@ -74,8 +75,13 @@ public final class KerberosUtils {
     private static final int MIN_LIFETIME_SECONDS = 1 * 60;
 
     public static final String SESSION_SUBJECT = "kerberosSubject";
-
     public static final String SESSION_PRINCIPAL = "kerberosPrincipal";
+
+    /**
+     * This event is emitted if a session gets a new Kerberos ticket. This happens if a session is migrated between backend hosts or if the
+     * ticket lifetime expired.
+     */
+    public static final String TOPIC_TICKET_READDED = "com/openexchange/authentication/kerberos/ticket/readded";
 
     public static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(KerberosUtils.class);
 
@@ -121,6 +127,14 @@ public final class KerberosUtils {
             }
             return remaining - MIN_LIFETIME_SECONDS;
         }
+        final Set<KerberosTicket> tickets = subject.getPrivateCredentials(KerberosTicket.class);
+        for (KerberosTicket ticket : tickets) {
+            int remaining = (int) ((ticket.getEndTime().getTime() - System.currentTimeMillis()) / 1000);
+            if (remaining <= MIN_LIFETIME_SECONDS) {
+                return 0;
+            }
+            return remaining - MIN_LIFETIME_SECONDS;
+        }
         throw KerberosExceptionCodes.NO_CREDENTIALS.create(getName(subject));
     }
 
@@ -149,6 +163,18 @@ public final class KerberosUtils {
             sb.append('\n');
         }
         LOG.info(sb.toString());
+    }
+
+    public static void disposeSubject(Subject subject) {
+        if (null != subject) {
+            for (final GSSCredential credential : subject.getPrivateCredentials(GSSCredential.class)) {
+                try {
+                    credential.dispose();
+                } catch (GSSException e) {
+                    LOG.error("", e);
+                }
+            }
+        }
     }
 
     public static Oid getKerberosName() throws GSSException {

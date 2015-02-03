@@ -50,6 +50,7 @@
 package com.openexchange.kerberos.osgi;
 
 import org.osgi.framework.BundleActivator;
+import com.openexchange.ajax.osgi.KerberosAJAXActivator;
 import com.openexchange.authentication.kerberos.osgi.AuthenticationActivator;
 import com.openexchange.osgi.CompositeBundleActivator;
 
@@ -68,7 +69,8 @@ public final class Activator extends CompositeBundleActivator {
     protected BundleActivator[] getActivators() {
         return new BundleActivator[] {
             new KDCActivator(),
-            new AuthenticationActivator()
+            new AuthenticationActivator(),
+            new KerberosAJAXActivator()
         };
     }
 }

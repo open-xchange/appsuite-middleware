@@ -59,6 +59,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,6 +79,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
@@ -140,6 +142,8 @@ public final class SessionHandler {
     private static volatile ScheduledTimerTask shortSessionContainerRotator;
 
     private static volatile ScheduledTimerTask longSessionContainerRotator;
+
+    private static List<SessionSerializationInterceptor> interceptors = Collections.synchronizedList(new LinkedList<SessionSerializationInterceptor>());
 
     /**
      * Initializes a new {@link SessionHandler session handler}
@@ -475,7 +479,10 @@ public final class SessionHandler {
         checkAuthId(login, authId);
 
         // Create new session instance
-        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, enhancement);
+        SessionImpl newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient);
+        if (null != enhancement) {
+            enhancement.enhanceSession(newSession);
+        }
 
         // Either add session or yield short-time token for it
         SessionImpl addedSession;
@@ -515,7 +522,7 @@ public final class SessionHandler {
      * @return The newly created {@code SessionImpl} instance
      * @throws OXException If create attempt fails
      */
-    public static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, SessionEnhancement enhancement) throws OXException {
+    public static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
         // Generate identifier, secret, and random
         SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
         String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
@@ -524,9 +531,7 @@ public final class SessionHandler {
 
         // Create the instance
         SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient);
-        if (null != enhancement) {
-            enhancement.enhanceSession(newSession);
-        }
+
         // Return...
         return newSession;
     }
@@ -541,6 +546,9 @@ public final class SessionHandler {
         if (useSessionStorage(session)) {
             SessionStorageService sessionStorageService = SessiondServiceRegistry.getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
+                for (SessionSerializationInterceptor interceptor : interceptors) {
+                    interceptor.serialize(session);
+                }
                 if (asyncPutToSessionStorage) {
                     // Enforced asynchronous put
                     storeSessionAsync(session, sessionStorageService, false);
@@ -1055,7 +1063,7 @@ public final class SessionHandler {
      * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise <code>false</code>
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
-    protected static SessionControl getSession(final String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
+    static SessionControl getSession(final String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
         LOG.debug("getSession <{}>", sessionId);
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
@@ -1070,6 +1078,12 @@ public final class SessionHandler {
                     SessionImpl unwrappedSession = getSessionFrom(sessionId, timeout(), storageService);
                     if (null != unwrappedSession) {
                         SessionControl sc = sessionData.addSession(unwrappedSession, noLimit, true);
+                        if (unwrappedSession == sc.getSession()) {
+                            // we restored the session first
+                            for (SessionSerializationInterceptor interceptor : interceptors) {
+                                interceptor.deserialize(unwrappedSession);
+                            }
+                        }
                         SessionControl retval = null == sc ? new SessionControl(unwrappedSession) : sc;
 
                         // Post event for restored session
@@ -1554,6 +1568,14 @@ public final class SessionHandler {
         if (null != sessionData) {
             sessionData.removeTimerService();
         }
+    }
+
+    public static void addSessionSerializationInterceptor(SessionSerializationInterceptor interceptor) {
+        interceptors.add(interceptor);
+    }
+
+    public static void removeSessionSerializationInterceptor(SessionSerializationInterceptor interceptor) {
+        interceptors.remove(interceptor);
     }
 
     private static SessionControl sessionToSessionControl(final Session session) {

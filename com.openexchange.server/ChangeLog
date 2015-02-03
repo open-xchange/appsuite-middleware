@@ -2,6 +2,11 @@
 
  - Fix for bug 35426: Execute SessionEnhancement earlier, so parameters added through this get populated with the session in the cluster.
 
+* 2015-01-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35182: Schedule a timer for Kerberos ticket renewal removing the ticket from the session. Additionally a ticket reload from
+   the client through SPNEGO or a new ticket authorization against KDC is triggered.
+
 * 2015-01-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 36141: Do proper url-encoding in composed redirect URI
@@ -87,15 +92,34 @@
  - Fix for bug 34465: Check for a POP3 account by mail account data fetched from storage. Do no longer rely on valid data sent by client
  - Fix for bug 35261: Enum for client parameters passed to IMAp store
 
+* 2014-10-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34517: Create a new TGT for sessions created with login and password. Request a new forwarded TGT from the client for
+   sessions created with a forwarded TGT.
+
 * 2014-10-23 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35168: Consider '#' as literals and not as comments when inside of double quotes
+
+* 2014-10-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35129: Do not throw any misleading log messages if client comes to HTTP auth URL without Authorization header.
+
+* 2014-10-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35109: Do not dispose kerberos tickets when sessions are moved over to long term session container.
+ - Fix for bug 35103: Synchronized multiple threads on IMAP login if a Kerberos subject is used to authenticate the user.
 
 * 2014-10-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 34706: Do not consult session storage in case session look-up is performed by alternative identifier and
                       ensure a timed-out (but still pending) session storage query get orderly interrupted to relieve pressure on Hazelcast
  - Fix for bug 35023: Orderly deal with absent user permission bits
+ - Fix for bug 34947: Check for a possible unrecoverable socket error when attempting to load mail settings (esp. standard folders); signal an empty value instead of throwing an error
+
+* 2014-10-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 34928: Try to lookup existing stored session if http-auth.autologin is enabled
 
 * 2014-10-16 - thorben.betten@open-xchange.com
 

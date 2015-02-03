@@ -58,11 +58,23 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class HttpAuthResponse extends AbstractAJAXResponse {
 
+    private final int statusCode;
+    private final String reasonPhrase;
     private final String location;
 
-    public HttpAuthResponse(String location) {
+    public HttpAuthResponse(int statusCode, String reasonPhrase, String location) {
         super(null);
+        this.statusCode = statusCode;
+        this.reasonPhrase = reasonPhrase;
         this.location = location;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public String getReasonPhrase() {
+        return reasonPhrase;
     }
 
     public String getLocation() {
