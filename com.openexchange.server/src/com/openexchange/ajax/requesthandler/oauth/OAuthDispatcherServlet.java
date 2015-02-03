@@ -155,8 +155,8 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
         }
 
-        OAuthGrant token = (OAuthGrant) httpRequest.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
-        if (token == null) {
+        OAuthGrant grant = (OAuthGrant) httpRequest.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
+        if (grant == null) {
             LOG.warn("OAuthToken was not contained in servlet request attributes!", new Exception());
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
         }
@@ -167,7 +167,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get(), httpResponse);
         requestData.setModule(module);
         requestData.setSession(session);
-        requestData.setProperty(OAuthConstants.PARAM_OAUTH_GRANT, token);
+        requestData.setProperty(OAuthConstants.PARAM_OAUTH_GRANT, grant);
 
         AJAXActionServiceFactory factory = dispatcher.lookupFactory(module);
         if (factory == null || !factory.getClass().isAnnotationPresent(OAuthModule.class)) {

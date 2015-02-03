@@ -118,7 +118,7 @@ public interface Client extends Serializable {
      *
      * @return The default scope
      */
-    Scope getDefaultScope();
+    Scopes getDefaultScope();
 
     /**
      * Gets the client's secret identifier

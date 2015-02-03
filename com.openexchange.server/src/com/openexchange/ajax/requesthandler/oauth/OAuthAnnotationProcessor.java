@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcesso
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -79,12 +80,28 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
         }
 
         OAuthAction oAuthAction = action.getClass().getAnnotation(OAuthAction.class);
-        String requiredScope = oAuthAction.value();
+        String requiredScope = oAuthAction.scope();
         if (!OAuthAction.GRANT_ALL.equals(requiredScope)) {
-            if (!grant.getScope().has(requiredScope)) {
-                throw new OAuthInsufficientScopeException(requiredScope);
+            if (!includesScope(grant.getScopes(), requiredScope, oAuthAction.readOnly())) {
+                if (oAuthAction.readOnly()) {
+                    throw new OAuthInsufficientScopeException("r_" + requiredScope);
+                } else {
+                    throw new OAuthInsufficientScopeException("rw_" + requiredScope);
+                }
             }
         }
+    }
+
+    private static boolean includesScope(Scopes scopes, String scope, boolean readOnly) {
+        if (scopes.getScopes().contains(scope)) {
+            if (readOnly) {
+                return true;
+            } else {
+                return !scopes.isReadOnly(scope);
+            }
+        }
+
+        return false;
     }
 
 }

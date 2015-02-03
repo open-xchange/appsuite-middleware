@@ -71,7 +71,7 @@ public class ClientData implements Serializable {
     private String description;
     private boolean bDescription;
 
-    private Scope defaultScope;
+    private Scopes defaultScope;
     private boolean bDefaultScope;
 
     private Set<String> redirectURIs;
@@ -114,11 +114,11 @@ public class ClientData implements Serializable {
         bDescription = true;
     }
 
-    public Scope getDefaultScope() {
+    public Scopes getDefaultScope() {
         return defaultScope;
     }
 
-    public void setDefaultScope(Scope defaultScope) {
+    public void setDefaultScope(Scopes defaultScope) {
         this.defaultScope = defaultScope;
         bDefaultScope = true;
     }

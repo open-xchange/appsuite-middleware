@@ -69,6 +69,6 @@ public interface OAuthGrant {
 
     Date getExpirationDate();
 
-    Scope getScope();
+    Scopes getScopes();
 
 }

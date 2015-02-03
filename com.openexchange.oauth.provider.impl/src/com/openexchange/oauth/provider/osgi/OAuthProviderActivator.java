@@ -69,6 +69,7 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -284,6 +285,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(HostnameService.class);
         trackService(ConfigViewFactory.class);
         trackService(AuthorizationService.class);
+        trackService(CapabilityService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
         openTrackers();
 

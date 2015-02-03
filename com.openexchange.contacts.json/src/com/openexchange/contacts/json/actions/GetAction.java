@@ -74,7 +74,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "id", description = "Object ID of the requested contact."),
     @Parameter(name = "folder", description = "Object ID of the contact's folder.")
 }, responseDescription = "Response with timestamp: An object containing all data of the requested contact. The fields of the object are listed in Common object data and Detailed contact data. The field id is not included.")
-@OAuthAction("r_contacts")
+@OAuthAction(scope = "contacts", readOnly = true)
 public class GetAction extends ContactAction {
 
     public GetAction(final ServiceLookup serviceLookup) {

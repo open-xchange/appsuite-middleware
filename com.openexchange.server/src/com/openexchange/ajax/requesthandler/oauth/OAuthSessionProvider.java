@@ -65,16 +65,16 @@ import com.openexchange.tools.session.ServerSession;
 public interface OAuthSessionProvider {
 
     /**
-     * Gets a valid {@link ServerSession} according to the passed access token. A validation of
-     * the token does not take place here, it must be performed before calling this method. An
-     * implementation may decide to cache sessions across multiple calls to this method (i.e.
+     * Gets a valid {@link ServerSession} according to the passed OAuth grant. A validation of
+     * the grants token does not take place here, it must be performed before calling this method.
+     * An implementation may decide to cache sessions across multiple calls to this method (i.e.
      * across multiple OAuth requests).
      *
-     * @param token The access token
+     * @param grant The grant
      * @param httpRequest The servlet request
      * @return The session
      * @throws OXException If an internal error occurs
      */
-    Session getSession(OAuthGrant token, HttpServletRequest httpRequest) throws OXException;
+    Session getSession(OAuthGrant grant, HttpServletRequest httpRequest) throws OXException;
 
 }

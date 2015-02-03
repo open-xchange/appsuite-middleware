@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface OAuthProviderService extends OAuthProviderConstants {
+public interface OAuthProviderService {
 
     // -------------------------------------- Client Handling -------------------------------------- \\
 
@@ -88,19 +88,19 @@ public interface OAuthProviderService extends OAuthProviderConstants {
     public static final long AUTH_CODE_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
 
     /**
-     * Generates a new authorization code that is bound to the given client identifier, redirect URI andscope.
+     * Generates a new authorization code that is bound to the given client identifier, redirect URI and scope.
      *
      * @param contextId The context ID
      * @param user The user ID
      * @param clientId The client identifier
      * @param redirectURI The redirect URI
-     * @param scope The scope
+     * @param scope The scope string, must have been validated before
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return A new authorization code
      * @throws OXException If operation fails
      */
-    String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException;
+    String generateAuthorizationCodeFor(String clientId, String redirectURI, String scopeString, int userId, int contextId) throws OXException;
 
     /**
      * Redeems the passed authorization code for an access token.
@@ -122,13 +122,12 @@ public interface OAuthProviderService extends OAuthProviderConstants {
     // --------------------------------------- Helper methods -------------------------------------- \\
 
     /**
-     * Checks if the given scope instance contains only scopes which are registered
-     * as {@link OAuthScopeProvider}s.
+     * Checks if the given scope string is valid in terms of syntax and server-side provided scopes.
      *
-     * @param scope The scope to check
-     * @return <code>true</code> if the instance contains more than one scope and all scopes belong
+     * @param scopeString The scope string to check
+     * @return <code>true</code> if the scope string contains at least one scope and all scopes belong
      * to registered providers. Otherwise <code>false</code>.
      */
-    boolean isValidScope(Scope scope);
+    boolean isValidScopeString(String scopeString);
 
 }

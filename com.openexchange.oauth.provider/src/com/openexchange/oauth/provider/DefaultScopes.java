@@ -50,7 +50,9 @@
 package com.openexchange.oauth.provider;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,98 +61,155 @@ import com.openexchange.java.Strings;
 
 
 /**
- * {@link DefaultScope}
+ * {@link DefaultScopes}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DefaultScope implements Scope {
+public class DefaultScopes implements Scopes {
+
+    private static final long serialVersionUID = -544112321774479825L;
 
     /*
-     * From https://tools.ietf.org/html/rfc6749#section-3.3:
+     * Allowed chars taken from https://tools.ietf.org/html/rfc6749#section-3.3:
      *   scope       = scope-token *( SP scope-token )
      *   scope-token = 1*( %x21 / %x23-5B / %x5D-7E )
      */
-    private static final Pattern PREFIXED_OAUTH_SCOPE = Pattern.compile("(r_|w_|rw_)([\\x21\\x23-\\x5b\\x5d-\\x7e]+)");
+    private static final Pattern OAUTH_SCOPE_STRING = Pattern.compile("([\\x21\\x23-\\x5b\\x5d-\\x7e]+)((\\s([\\x21\\x23-\\x5b\\x5d-\\x7e]+))?)+");
+
+    /*
+     * We decide between read-only and writeable access. Therefore the scopes
+     * requested by clients are qualified  with an 'r_' or 'rw_' prefix.
+     */
+    private static final Pattern QUALIFIED_OAUTH_SCOPE = Pattern.compile("(r_|rw_)([\\x21\\x23-\\x5b\\x5d-\\x7e]+)");
 
     /**
      * Parses the scope from specified string representation.
+     * A passed string must be valid. You probably want to check
+     * it via {@link #isValidScopeString(String)} before.
      *
-     * @param scopeStr The scope's string representation
-     * @return The parsed scope or <code>null</code> if string is {@link Strings#isEmpty(String) empty}
+     * @param scopeString The scopes string representation
+     * @return The parsed scope
+     * @throws IllegalArgumentException if the scope string is invalid
      */
-    public static DefaultScope parseScope(String scopeStr) {
-        if (Strings.isEmpty(scopeStr)) {
-            return new DefaultScope();
+    public static DefaultScopes parseScope(String scopeString) {
+        if (Strings.isEmpty(scopeString)) {
+            return new DefaultScopes();
         }
 
-        return new DefaultScope(Strings.splitByWhitespaces(scopeStr));
+        return new DefaultScopes(Strings.splitByWhitespaces(scopeString));
+    }
+
+    /**
+     * Checks if the given scope string is valid in terms of its syntax.
+     *
+     * @param scopeString The scope string to check
+     * @return <code>true</code> if the string is valid
+     */
+    public static boolean isValidScopeString(String scopeString) {
+        if (OAUTH_SCOPE_STRING.matcher(scopeString).matches()) {
+            for (String scope : Strings.splitByWhitespaces(scopeString)) {
+                Matcher matcher = QUALIFIED_OAUTH_SCOPE.matcher(scope);
+                if (!matcher.matches()) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
 
-    /** The scope set */
-    private final Set<String> scopes;
+    /** The scopes mapped from base scope -> qualified scope **/
+    private final Map<String, String> scopes;
 
     /**
-     * Initializes a new {@link DefaultScope}.
+     * Initializes a new {@link DefaultScopes}.
      *
      * @param scopes The scopes
      */
-    public DefaultScope(String... scopes) {
+    public DefaultScopes(String... scopes) {
         super();
-        Set<String> set = new HashSet<>();
+        this.scopes = new HashMap<>();
         if (scopes != null) {
             for (String scope : scopes) {
                 if (scope != null) {
-                    set.add(scope);
+                    Matcher matcher = QUALIFIED_OAUTH_SCOPE.matcher(scope);
+                    if (matcher.matches()) {
+                        this.scopes.put(matcher.group(2), scope);
+                    } else {
+                        throw new IllegalArgumentException("Invalid scope: " + scope);
+                    }
                 }
             }
         }
-        this.scopes = set;
     }
 
     /**
-     * Initializes a new {@link DefaultScope}.
+     * Initializes a new {@link DefaultScopes}.
      *
      * @param scopes The scope set
      */
-    public DefaultScope(Set<String> scopes) {
+    public DefaultScopes(Map<String, String> scopes) {
         super();
-        this.scopes = null == scopes ? Collections.<String> emptySet() : scopes;
+        this.scopes = null == scopes ? Collections.<String, String> emptyMap() : scopes;
     }
 
     @Override
-    public boolean has(String requiredScope) {
-        if (scopes.contains(requiredScope)) {
-            return true;
+    public Set<String> getScopes() {
+        return Collections.unmodifiableSet(scopes.keySet());
+    }
+
+    @Override
+    public Set<String> getQualifiedScopes() {
+        return Collections.unmodifiableSet(new HashSet<>(scopes.values()));
+    }
+
+    @Override
+    public String getQualifiedScope(String scope) {
+        String qualifiedScope = scopes.get(scope);
+        if (qualifiedScope == null) {
+            throw new IllegalArgumentException("The passed scope does not exist within this instance: " + scope);
         }
 
-        // Given scope is not literally contained; check for others that might include it
-        Matcher prefixedScopeMatcher = PREFIXED_OAUTH_SCOPE.matcher(requiredScope);
-        if (prefixedScopeMatcher.matches()) {
-            String prefix = prefixedScopeMatcher.group(1);
-            String scope = prefixedScopeMatcher.group(2);
-            switch (prefix) {
-                case "r_":
-                    // Do also check for "rw_" which includes "r"
-                    return scopes.contains("rw_" + scope);
-                case "w_":
-                    // Do also check for "rw_" which includes "w"
-                    return scopes.contains("rw_" + scope);
-                case "rw_":
-                    // Do also for separate "r" and "w"
-                    return scopes.contains("r_" + scope) && scopes.contains("w_" + scope);
-            }
+        return qualifiedScope;
+    }
+
+    @Override
+    public boolean isReadOnly(String scope) {
+        String qualifiedScope = scopes.get(scope);
+        if (qualifiedScope == null) {
+            throw new IllegalArgumentException("The passed scope does not exist within this instance: " + scope);
+        }
+
+        Matcher matcher = QUALIFIED_OAUTH_SCOPE.matcher(qualifiedScope);
+        if (matcher.matches()) {
+            return matcher.group(1).equals("r_");
         }
 
         return false;
     }
 
     @Override
-    public Set<String> getScopes() {
-        return Collections.unmodifiableSet(scopes);
+    public String scopeString() {
+        if (null == scopes || scopes.isEmpty()) {
+            return "";
+        }
+
+        StringAppender sa = new StringAppender(' ');
+        for (String scope : scopes.values()) {
+            sa.append(scope);
+        }
+        return sa.toString();
+    }
+
+    @Override
+    public int size() {
+        return scopes.size();
     }
 
     @Override
@@ -166,10 +225,10 @@ public class DefaultScope implements Scope {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof DefaultScope)) {
+        if (!(obj instanceof DefaultScopes)) {
             return false;
         }
-        DefaultScope other = (DefaultScope) obj;
+        DefaultScopes other = (DefaultScopes) obj;
         if (scopes == null) {
             if (other.scopes != null) {
                 return false;
@@ -183,20 +242,6 @@ public class DefaultScope implements Scope {
     @Override
     public String toString() {
         return scopeString();
-    }
-
-    @Override
-    public String scopeString() {
-        Set<String> scopes = this.scopes;
-        if (null == scopes || scopes.isEmpty()) {
-            return "";
-        }
-
-        StringAppender sa = new StringAppender(' ');
-        for (String scope : scopes) {
-            sa.append(scope);
-        }
-        return sa.toString();
     }
 
 }

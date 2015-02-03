@@ -153,7 +153,7 @@ public class SimOAuthResourceService implements OAuthResourceService {
             }
 
             @Override
-            public Scope getDefaultScope() {
+            public Scopes getDefaultScope() {
                 // TODO Auto-generated method stub
                 return null;
             }

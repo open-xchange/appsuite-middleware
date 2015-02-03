@@ -51,18 +51,22 @@ package com.openexchange.oauth.provider.internal;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
+import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.Scope;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
 import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
@@ -122,8 +126,21 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException {
-        return authCodeProvider.generateAuthorizationCodeFor(clientId, redirectURI, scope, userId, contextId);
+    public String generateAuthorizationCodeFor(String clientId, String redirectURI, String scopeString, int userId, int contextId) throws OXException {
+        // Adjust scope based on users permissions
+        CapabilityService capabilityService = requireService(CapabilityService.class, services);
+        CapabilitySet capabilities = capabilityService.getCapabilities(userId, contextId);
+        Set<String> finalScopes = new HashSet<>();
+
+        DefaultScopes scopes = DefaultScopes.parseScope(scopeString);
+        for (String scope : scopes.getScopes()) {
+            OAuthScopeProvider provider = ScopeRegistry.getInstance().getProvider(scope);
+            if (provider != null && provider.canBeGranted(capabilities, scopes.isReadOnly(scope))) {
+                finalScopes.add(scopes.getQualifiedScope(scope));
+            }
+        }
+
+        return authCodeProvider.generateAuthorizationCodeFor(clientId, redirectURI, new DefaultScopes(finalScopes.toArray(new String[0])), userId, contextId);
     }
 
     @Override
@@ -207,19 +224,23 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     }
 
     @Override
-    public boolean isValidScope(Scope scope) {
-        Set<String> scopes = scope.getScopes();
-        if (scopes.isEmpty()) {
-            return false;
-        }
-
-        for (String s : scopes) {
-            if (!ScopeRegistry.getInstance().hasScopeProvider(s)) {
+    public boolean isValidScopeString(String scopeString) {
+        if (DefaultScopes.isValidScopeString(scopeString)) {
+            DefaultScopes scopes = DefaultScopes.parseScope(scopeString);
+            if (scopes.size() == 0) {
                 return false;
             }
+
+            for (String scope : scopes.getScopes()) {
+                if (!ScopeRegistry.getInstance().hasScopeProvider(scope)) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 
 }

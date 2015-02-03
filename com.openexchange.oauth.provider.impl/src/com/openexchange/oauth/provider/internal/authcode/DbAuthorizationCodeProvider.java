@@ -59,7 +59,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.Scope;
+import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
 
@@ -84,7 +84,7 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException {
+    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scopes scope, int userId, int contextId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
         try {
@@ -94,7 +94,7 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         }
     }
 
-    private String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId, Connection con) throws OXException {
+    private String generateAuthorizationCodeFor(String clientId, String redirectURI, Scopes scope, int userId, int contextId, Connection con) throws OXException {
         String authCode = new UserizedToken(userId, contextId).getToken();
         long now = System.nanoTime();
 

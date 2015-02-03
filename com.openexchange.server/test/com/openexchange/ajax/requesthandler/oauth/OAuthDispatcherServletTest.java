@@ -87,8 +87,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
-import com.openexchange.oauth.provider.DefaultScope;
-import com.openexchange.oauth.provider.DefaultToken;
+import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.OAuthInvalidRequestException;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException;
@@ -96,6 +95,7 @@ import com.openexchange.oauth.provider.OAuthRequestException;
 import com.openexchange.oauth.provider.OAuthResourceService;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
+import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.SimOAuthResourceService;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -122,7 +122,7 @@ public class OAuthDispatcherServletTest {
     @OAuthModule
     private static final class TestFactory implements AJAXActionServiceFactory {
 
-        @OAuthAction(OAuthAction.GRANT_ALL)
+        @OAuthAction(scope = OAuthAction.GRANT_ALL)
         private final class GrantAllAction implements AJAXActionService {
             @Override
             public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
@@ -130,7 +130,7 @@ public class OAuthDispatcherServletTest {
             }
         }
 
-        @OAuthAction("r_test")
+        @OAuthAction(scope = "test", readOnly = true)
         private final class ReadAction implements AJAXActionService {
             @Override
             public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
@@ -138,15 +138,7 @@ public class OAuthDispatcherServletTest {
             }
         }
 
-        @OAuthAction("w_test")
-        private final class WriteAction implements AJAXActionService {
-            @Override
-            public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-                return RESULT;
-            }
-        }
-
-        @OAuthAction("rw_test")
+        @OAuthAction(scope = "test")
         private final class ReadWriteAction implements AJAXActionService {
             @Override
             public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
@@ -159,7 +151,6 @@ public class OAuthDispatcherServletTest {
         private TestFactory() {
             super();
             services.put("read", new ReadAction());
-            services.put("write", new WriteAction());
             services.put("readwrite", new ReadWriteAction());
             services.put("unprivileged", new GrantAllAction());
         }
@@ -175,13 +166,62 @@ public class OAuthDispatcherServletTest {
         }
     }
 
+    public class TestGrant implements OAuthGrant {
+
+        private final int contextId;
+        private final int userId;
+        private final String accessToken;
+        private final String refreshToken;
+        private final Date expirationDate;
+        private final Scopes scopes;
+
+        public TestGrant(int contextId, int userId, String accessToken, String refreshToken, Date expirationDate, Scopes scopes) {
+            super();
+            this.contextId = contextId;
+            this.userId = userId;
+            this.accessToken = accessToken;
+            this.refreshToken = refreshToken;
+            this.expirationDate = expirationDate;
+            this.scopes = scopes;
+        }
+
+        @Override
+        public int getContextId() {
+            return contextId;
+        }
+
+        @Override
+        public int getUserId() {
+            return userId;
+        }
+
+        @Override
+        public String getAccessToken() {
+            return accessToken;
+        }
+
+        @Override
+        public String getRefreshToken() {
+            return refreshToken;
+        }
+
+        @Override
+        public Date getExpirationDate() {
+            return expirationDate;
+        }
+
+        @Override
+        public Scopes getScopes() {
+            return scopes;
+        }
+    }
+
     private OAuthDispatcherServlet servlet;
     private SimHttpServletRequest request;
     private SimHttpServletResponse response;
     private ByteArrayOutputStream responseStream;
     private SimOAuthResourceService resourceService;
     private String readToken;
-    private String writeToken;
     private String readWriteToken;
     private String expiredToken;
     private String scopelessToken;
@@ -199,23 +239,19 @@ public class OAuthDispatcherServletTest {
     @Before
     public void setUp() throws Exception {
         resourceService = new SimOAuthResourceService();
-        DefaultToken readToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("r_test"));
+        TestGrant readToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScopes("r_test"));
         resourceService.addToken(readToken);
         this.readToken = readToken.getAccessToken();
 
-        DefaultToken writeToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("w_test"));
-        resourceService.addToken(writeToken);
-        this.writeToken = writeToken.getAccessToken();
-
-        DefaultToken readWriteToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope("rw_test"));
+        TestGrant readWriteToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScopes("rw_test"));
         resourceService.addToken(readWriteToken);
         this.readWriteToken = readWriteToken.getAccessToken();
 
-        DefaultToken expiredToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() - 1L), new DefaultScope("rw_test"));
+        TestGrant expiredToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() - 1L), new DefaultScopes("rw_test"));
         resourceService.addToken(expiredToken);
         this.expiredToken = expiredToken.getAccessToken();
 
-        DefaultToken scopelessToken = new DefaultToken(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScope());
+        TestGrant scopelessToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScopes());
         resourceService.addToken(scopelessToken);
         this.scopelessToken = scopelessToken.getAccessToken();
 
@@ -305,16 +341,7 @@ public class OAuthDispatcherServletTest {
 
     @Test
     public void testInsufficientScope1() throws Exception {
-        prepareRequest("write", readToken);
-        servlet.service(request, response);
-        assertStatus(HttpServletResponse.SC_FORBIDDEN);
-        OAuthInsufficientScopeException expectedException = new OAuthInsufficientScopeException("w_test");
-        assertErrorResponse(expectedException);
-    }
-
-    @Test
-    public void testInsufficientScope2() throws Exception {
-        prepareRequest("readwrite", writeToken);
+        prepareRequest("readwrite", readToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_FORBIDDEN);
         OAuthInsufficientScopeException expectedException = new OAuthInsufficientScopeException("rw_test");
@@ -347,13 +374,6 @@ public class OAuthDispatcherServletTest {
     @Test
     public void testScope1() throws Exception {
         prepareRequest("read", readToken);
-        servlet.service(request, response);
-        assertStatus(HttpServletResponse.SC_OK);
-    }
-
-    @Test
-    public void testScope2() throws Exception {
-        prepareRequest("write", writeToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_OK);
     }

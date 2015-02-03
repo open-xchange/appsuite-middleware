@@ -49,31 +49,69 @@
 
 package com.openexchange.oauth.provider;
 
+import java.io.Serializable;
 import java.util.Set;
 
 
 /**
- * {@link Scope}
+ * A container that carries all scopes of an {@link OAuthGrant}. Granted scopes are
+ * qualified, which means they carry a prefix that is either 'r_' or 'rw_' to denote
+ * read-only or write permissions.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface Scope {
-
-    boolean has(String scope);
+public interface Scopes extends Serializable {
 
     /**
-     * Gets the string identifier for this scope
+     * Gets the string representation of the contained scopes
+     * as defined in RFC 6749.
      *
-     * @return The string identifier
+     * @return The scope string
      */
     String scopeString();
 
     /**
-     * Gets an immutable set of all scope identifiers
+     * Returns all contained scopes in their qualified representation,
+     * i.e. like they have been requested during the OAuth grant flow.
      *
-     * @return The scope IDs
+     * @return An immutable set of qualified scopes
+     */
+    Set<String> getQualifiedScopes();
+
+    /**
+     * Gets the contained qualified representation of the passed base scope.
+     *
+     * @param scope The un-qualified scope
+     * @return The qualified representation
+     * @throws IllegalArgumentException if the passed scope is not contained
+     */
+    String getQualifiedScope(String scope);
+
+    /**
+     * Gets all contained scopes in their base representation,
+     * i.e. they have now prefix prepended.
+     *
+     * @return An immutable set of un-qualified scopes
      */
     Set<String> getScopes();
+
+    /**
+     * Checks whether a given un-qualified scope is contained in it's
+     * read-only representation.
+     *
+     * @param scope The un-qualified scope. Must be contained in the result
+     * of {@link #getScopes()}.
+     * @return <code>true</code> if the scope is read-only
+     * @throws IllegalArgumentException if the passed scope is not contained
+     */
+    boolean isReadOnly(String scope);
+
+    /**
+     * Gets the number of contained scopes.
+     *
+     * @return The number of scopes
+     */
+    int size();
 
 }

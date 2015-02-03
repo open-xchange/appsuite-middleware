@@ -69,15 +69,9 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
  * </p>
  * <p>
  * Before an action is called, the used access token is verified in terms of the
- * needed OAuth 2.0 scope. The required scope to call an action is defined via
- * the annotations value, i.e. the result of {@link OAuthAction#value()}. It is
- * considered best practice to use the modules name prefixed by 'r_', 'w_' or 'rw_'
- * to require read, write or combined access (e.g. 'rw_contacts'). Scopes that follow
- * this notation are automatically considered as satisfied, if an access token has
- * the same or a higher scope (i.e. 'r_contacts' and 'w_contacts' are satisfied if
- * a request is authorized in scope 'rw_contacts'). If no certain scope is required,
- * the annotations value does not need to be set. In that case {@link OAuthAction#GRANT_ALL}
- * is returned.
+ * provided and needed OAuth 2.0 scopes. The required scope to call an action is defined via
+ * the annotations {@link OAuthAction#scope()} attribute. If no certain scope is required,
+ * {@link OAuthAction#GRANT_ALL} must be set.
  * </p>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -94,6 +88,14 @@ public @interface OAuthAction {
      * @return The scope. If all requests are authorized to call this action
      * {@link OAuthAction#GRANT_ALL} must be returned.
      */
-    String value();
+    String scope();
+
+    /**
+     * Indicates that this action performs no write operations which manipulate
+     * the persistent data of the module.
+     *
+     * @return <code>true</code> if read-only access is sufficient to call this action.
+     */
+    boolean readOnly() default false;
 
 }

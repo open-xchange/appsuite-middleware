@@ -68,7 +68,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
-import com.openexchange.oauth.provider.DefaultScope;
+import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.Icon;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
@@ -220,7 +220,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
 
             String defaultScope = rs.getString(4);
             if (!rs.wasNull()) {
-                client.setDefaultScope(new DefaultScope(defaultScope));
+                client.setDefaultScope(new DefaultScopes(defaultScope));
             }
 
             String contactAddress = rs.getString(5);

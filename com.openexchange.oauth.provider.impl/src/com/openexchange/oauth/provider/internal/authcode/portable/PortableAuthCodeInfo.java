@@ -53,7 +53,7 @@ import java.io.IOException;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.oauth.provider.Scope;
+import com.openexchange.oauth.provider.Scopes;
 
 /**
  * {@link PortableAuthCodeInfo}
@@ -91,7 +91,7 @@ public class PortableAuthCodeInfo implements CustomPortable {
     /**
      * Initializes a new {@link PortableAuthCodeInfo}.
      */
-    public PortableAuthCodeInfo(String clientId, String redirectURI, Scope scope, int userId, int contextId, long nanos) {
+    public PortableAuthCodeInfo(String clientId, String redirectURI, Scopes scope, int userId, int contextId, long nanos) {
         super();
         this.clientId = clientId;
         this.redirectURI = redirectURI;

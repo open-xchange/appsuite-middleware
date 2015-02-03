@@ -58,7 +58,7 @@ import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.Scope;
+import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -113,7 +113,7 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException {
+    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scopes scope, int userId, int contextId) throws OXException {
         if (notActive.get()) {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }

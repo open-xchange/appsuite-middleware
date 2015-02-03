@@ -83,10 +83,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.DefaultScope;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.Scope;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.URLHelper;
 import com.openexchange.server.ServiceLookup;
@@ -216,20 +214,19 @@ public class AuthorizationEndpoint extends HttpServlet {
             }
 
             // Check scope
-            String sScope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
-            if (Strings.isEmpty(sScope)) {
+            String scope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
+            if (Strings.isEmpty(scope)) {
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_SCOPE);
                 return;
             }
 
-            try {
-                // Validate scope
-                Scope scope = convertRequestedScope(sScope);
-                if (null == scope) {
-                    response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_scope", "invalid parameter value:" + OAuthProviderConstants.PARAM_SCOPE, OAuthProviderConstants.PARAM_STATE, state));
-                    return;
-                }
+            // Validate scope
+            if (!oAuthProvider.isValidScopeString(scope)) {
+                response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_scope", "invalid parameter value:" + OAuthProviderConstants.PARAM_SCOPE, OAuthProviderConstants.PARAM_STATE, state));
+                return;
+            }
 
+            try {
                 // Authenticate
                 Authenticated authed = null;
                 try {
@@ -275,61 +272,6 @@ public class AuthorizationEndpoint extends HttpServlet {
             LOG.error("Authorization request failed", e);
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
-    }
-
-    private static boolean isInvalidCSRFToken(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return true;
-        }
-
-        String csrfToken = (String) session.getAttribute(ATTR_OAUTH_CSRF_TOKEN);
-        session.removeAttribute(ATTR_OAUTH_CSRF_TOKEN); // not necessary anymore
-        if (csrfToken == null) {
-            return true;
-        }
-
-        String actualToken = request.getParameter(OAuthProviderConstants.PARAM_CSRF_TOKEN);
-        if (actualToken == null) {
-            return true;
-        }
-
-        if (!csrfToken.equals(actualToken)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private static boolean isInvalidReferer(HttpServletRequest request) throws OXException {
-        String referer = request.getHeader(HttpHeaders.REFERER);
-        if (Strings.isEmpty(referer)) {
-            return true;
-        }
-
-        try {
-            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
-            URI actualReferer = new URI(referer);
-            if (!expectedReferer.getScheme().equals(actualReferer.getScheme())) {
-                return true;
-            }
-
-            if (!expectedReferer.getHost().equals(actualReferer.getHost())) {
-                return true;
-            }
-
-            if (expectedReferer.getPort() != actualReferer.getPort()) {
-                return true;
-            }
-
-            if (!expectedReferer.getPath().equals(actualReferer.getPath())) {
-                return true;
-            }
-        } catch (URISyntaxException e) {
-            return true;
-        }
-
-        return false;
     }
 
     @Override
@@ -387,15 +329,14 @@ public class AuthorizationEndpoint extends HttpServlet {
                 return;
             }
 
-            String sScope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
-            if (Strings.isEmpty(sScope)) {
+            String scope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
+            if (Strings.isEmpty(scope)) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "missing required parameter: "+OAuthProviderConstants.PARAM_SCOPE);
                 return;
             }
 
-            Scope scope = convertRequestedScope(sScope);
-            if (null == scope) {
+            if (!oAuthProvider.isValidScopeString(scope)) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_SCOPE);
                 return;
@@ -429,7 +370,7 @@ public class AuthorizationEndpoint extends HttpServlet {
             sb.append("<p><label for=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\">Password:  </label><input name=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\" type=\"password\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CLIENT_ID).append("\" type=\"hidden\" value=\"").append(clientId).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_REDIRECT_URI).append("\" type=\"hidden\" value=\"").append(redirectURI).append("\">").append(lineSep);
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_SCOPE).append("\" type=\"hidden\" value=\"").append((null == scope ? "" : scope.scopeString())).append("\">").append(lineSep);
+            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_SCOPE).append("\" type=\"hidden\" value=\"").append(scope).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_STATE).append("\" type=\"hidden\" value=\"").append(state).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CSRF_TOKEN).append("\" type=\"hidden\" value=\"").append(csrfToken).append("\">").append(lineSep);
             sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_RESPONSE_TYPE).append("\" type=\"hidden\" value=\"").append(responseType).append("\">").append(lineSep);
@@ -458,15 +399,59 @@ public class AuthorizationEndpoint extends HttpServlet {
         return (Tools.considerSecure(request) ? "https://" : "http://") + hostName + servletPrefix + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
     }
 
-    private Scope convertRequestedScope(String sScope) {
-        DefaultScope scope = DefaultScope.parseScope(sScope);
-        if (!oAuthProvider.isValidScope(scope)) {
-            return null;
+    private static boolean isInvalidCSRFToken(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return true;
         }
-        /*
-         * - Do all of the requested scopes exist?
-         */
-        return scope;
+
+        String csrfToken = (String) session.getAttribute(ATTR_OAUTH_CSRF_TOKEN);
+        session.removeAttribute(ATTR_OAUTH_CSRF_TOKEN); // not necessary anymore
+        if (csrfToken == null) {
+            return true;
+        }
+
+        String actualToken = request.getParameter(OAuthProviderConstants.PARAM_CSRF_TOKEN);
+        if (actualToken == null) {
+            return true;
+        }
+
+        if (!csrfToken.equals(actualToken)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean isInvalidReferer(HttpServletRequest request) throws OXException {
+        String referer = request.getHeader(HttpHeaders.REFERER);
+        if (Strings.isEmpty(referer)) {
+            return true;
+        }
+
+        try {
+            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
+            URI actualReferer = new URI(referer);
+            if (!expectedReferer.getScheme().equals(actualReferer.getScheme())) {
+                return true;
+            }
+
+            if (!expectedReferer.getHost().equals(actualReferer.getHost())) {
+                return true;
+            }
+
+            if (expectedReferer.getPort() != actualReferer.getPort()) {
+                return true;
+            }
+
+            if (!expectedReferer.getPath().equals(actualReferer.getPath())) {
+                return true;
+            }
+        } catch (URISyntaxException e) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

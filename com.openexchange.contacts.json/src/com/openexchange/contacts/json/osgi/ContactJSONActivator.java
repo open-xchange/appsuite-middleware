@@ -51,14 +51,14 @@ package com.openexchange.contacts.json.osgi;
 
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
-import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.oauth.provider.AbstractScopeProvider;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
@@ -76,12 +76,24 @@ public class ContactJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerModule(new ContactActionFactory(this), "contacts");
         registerService(ResultConverter.class, new ContactJSONResultConverter());
-        registerService(OAuthScopeProvider.class, new AbstractScopeProvider("r_contacts", "Read access for getting contact data.") {
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider("contacts", OAuthScopeDescription.READ_ONLY, OAuthScopeDescription.WRITABLE) {
             @Override
-            public boolean canBeGranted(Session session) throws OXException {
-                return ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasContact();
+            public boolean canBeGranted(CapabilitySet capabilities, boolean writeable) {
+                return capabilities.contains(Permission.CONTACTS.getCapabilityName());
             }
         });
+    }
+
+    private static final class OAuthScopeDescription implements LocalizableStrings {
+        // Application 'xyz' requires following permissions:
+        //  - See all your contacts.
+        //  - ...
+        public static final String READ_ONLY = "See all your contacts.";
+
+        // Application 'xyz' requires following permissions:
+        //  - See all your contacts, create new ones and modify existing ones.
+        //  - ...
+        public static final String WRITABLE = "See all your contacts, create new ones and modify existing ones.";
     }
 
 }

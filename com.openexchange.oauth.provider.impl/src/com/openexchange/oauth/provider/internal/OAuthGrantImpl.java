@@ -50,9 +50,9 @@
 package com.openexchange.oauth.provider.internal;
 
 import java.util.Date;
-import com.openexchange.oauth.provider.DefaultScope;
+import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.Scope;
+import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
 
 
@@ -66,7 +66,7 @@ public class OAuthGrantImpl implements OAuthGrant {
 
     private final AuthCodeInfo authCodeInfo;
 
-    private final DefaultScope scope;
+    private final DefaultScopes scopes;
 
     private String accessToken;
 
@@ -78,7 +78,7 @@ public class OAuthGrantImpl implements OAuthGrant {
     public OAuthGrantImpl(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) {
         super();
         this.authCodeInfo = authCodeInfo;
-        scope = DefaultScope.parseScope(authCodeInfo.getScope());
+        scopes = DefaultScopes.parseScope(authCodeInfo.getScope());
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.expirationDate = expirationDate;
@@ -110,8 +110,8 @@ public class OAuthGrantImpl implements OAuthGrant {
     }
 
     @Override
-    public Scope getScope() {
-        return scope;
+    public Scopes getScopes() {
+        return scopes;
     }
 
     public AuthCodeInfo getAuthCodeInfo() {

@@ -59,17 +59,20 @@ package com.openexchange.oauth.provider;
 public abstract class AbstractScopeProvider implements OAuthScopeProvider {
 
     private final String scopeId;
+    private final String readOnlyDescription;
     private final String description;
 
     /**
      * Initializes a new {@link AbstractScopeProvider}.
      *
      * @param scopeId The scopes unique ID
-     * @param description The scopes description as localizable string
+     * @param readOnlyDescription The description for read-only access
+     * @param description The scopes description for write access
      */
-    public AbstractScopeProvider(String scopeId, String description) {
+    public AbstractScopeProvider(String scopeId, String readOnlyDescription, String description) {
         super();
         this.scopeId = scopeId;
+        this.readOnlyDescription = readOnlyDescription;
         this.description = description;
     }
 
@@ -79,7 +82,11 @@ public abstract class AbstractScopeProvider implements OAuthScopeProvider {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(boolean readOnly) {
+        if (readOnly) {
+            return readOnlyDescription;
+        }
+
         return description;
     }
 

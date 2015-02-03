@@ -49,8 +49,8 @@
 
 package com.openexchange.oauth.provider;
 
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 
 /**
@@ -66,34 +66,37 @@ import com.openexchange.session.Session;
 public interface OAuthScopeProvider {
 
     /**
-     * The scopes ID. Must be unique within the whole application. It is
-     * considered best practice to use the modules name prefixed by 'r_', 'w_' or 'rw_'
-     * to require read, write or combined access (e.g. 'rw_contacts'). Scopes that follow
-     * this notation are automatically considered as satisfied, if an access token has
-     * the same or a higher scope (i.e. 'r_contacts' and 'w_contacts' are satisfied if
-     * a request is authorized in scope 'rw_contacts').
+     * Gets the scopes ID. Must be unique within the whole application Allowed characters are
+     * %x21 / %x23-5B / %x5D-7E.
      *
-     * Allowed characters are %x21 / %x23-5B / %x5D-7E
      * @return The scopes ID
      */
     String getId();
 
     /**
      * A localizable string that describes the impact of granting the denoted scope
-     * to an external application.
+     * to an external application. The string is shown to the user requesting OAuth
+     * access.
      *
+     * Example:
+     * Application 'example' requires the following permissions:
+     * - Read your contacts
+     * - Create / modify appointments
+     *
+     * @param readOnly If read-only access is requested
      * @return The description
      */
-    String getDescription();
+    String getDescription(boolean readOnly);
 
     /**
-     * Checks whether the denoted scope can be granted for the passed sessions user
-     * based on his permissions/capabilities.
+     * Checks whether the denoted scope can be granted for the passed session users
+     * capabilities.
      *
-     * @param session The session to check
+     * @param capabilities The capabilities to check
+     * @param readOnly If read-only access is requested
      * @return <code>true</code> if the scope can be granted, <code>false</code> if not.
      * @throws OXException If an error occurs during the permission check.
      */
-    boolean canBeGranted(Session session) throws OXException;
+    boolean canBeGranted(CapabilitySet capabilities, boolean readOnly);
 
 }
