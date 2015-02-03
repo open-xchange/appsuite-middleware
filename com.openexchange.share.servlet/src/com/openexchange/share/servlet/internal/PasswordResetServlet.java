@@ -162,7 +162,6 @@ public class PasswordResetServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.flushBuffer();
             } else {
-                confirm = URLEncoder.encode(confirm, "UTF-8");
                 // Try to set new password
                 if (confirm.equals(hash)) {
                     String password = PasswordUtility.generate();
