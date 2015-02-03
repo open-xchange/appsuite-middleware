@@ -294,13 +294,13 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
     /**
      * Invokes the MBean's method.
      *
-     * @param option The options
+     * @param options The options
      * @param cmd The command line providing parameters/options
      * @param optRmiHostName The optional RMI host name
      * @return The return value
      * @throws Exception If invocation fails
      */
-    protected abstract R invoke(Options option, CommandLine cmd, String optRmiHostName) throws Exception;
+    protected abstract R invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception;
 
     /**
      * Gets the specified RMI reference/stub for given name using default RMI host.
