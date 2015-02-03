@@ -71,6 +71,7 @@ public enum Module {
     UNBOUND("unbound", FolderObject.UNBOUND, null),
     MAIL("mail", FolderObject.MAIL, Permission.WEBMAIL),
     INFOSTORE("infostore", FolderObject.INFOSTORE, Permission.INFOSTORE),
+    FILES("files", FolderObject.INFOSTORE, Permission.INFOSTORE),
     SYSTEM("system", FolderObject.SYSTEM_MODULE, null);
 
     private final String name;
