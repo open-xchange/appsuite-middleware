@@ -268,12 +268,9 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      * @param password The administrator password
      * @param cmd The command line providing options
      * @param authenticator The authenticator stub
-     * @throws NotBoundException If name is not currently bound
-     * @throws RemoteException If registry could not be contacted
-     * @throws AccessException If this operation is not permitted
-     * @throws MalformedURLException If the name is not an appropriately formatted URL
+     * @throws RemoteException If operation fails
      */
-    protected abstract void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws MalformedURLException, RemoteException, NotBoundException;
+    protected abstract void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException;
 
     /**
      * Adds this command-line tool's options.
