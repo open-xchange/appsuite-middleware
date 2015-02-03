@@ -1330,6 +1330,25 @@ msgstr ""
 msgid "Address (other)"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:79
+msgid "contacts"
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - See all your contacts.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:91
+msgid "See all your contacts."
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - See all your contacts, create new ones and modify existing ones.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:96
+msgid "See all your contacts, create new ones and modify existing ones."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:61
 msgid "The type %1$s of the provided file is not supported."
 msgstr ""
