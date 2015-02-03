@@ -645,9 +645,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("", e);
                 }
             }
-            final boolean certainPassword = false; //("10.20.30.205".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainPassword = ("in8.test.dovecot.fi".equals(config.getServer()) && 17 == session.getUserId());
             if (certainPassword) {
-                tmpPass = "secret";
+                tmpPass = "testpass";
             }
             final String proxyDelimiter = MailAccount.DEFAULT_ID == accountId ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
             /*
