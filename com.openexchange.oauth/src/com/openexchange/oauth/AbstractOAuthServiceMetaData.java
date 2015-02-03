@@ -52,6 +52,7 @@ package com.openexchange.oauth;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -63,10 +64,17 @@ import com.openexchange.session.Session;
  * {@link AbstractOAuthServiceMetaData} - The default {@link OAuthServiceMetaData} implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaData {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractOAuthServiceMetaData.class);
+
+    protected enum OAuthPropertyID {
+        apiKey, apiSecret, consumerKey, consumerSecret, redirectUrl
+    };
+
+    private Map<OAuthPropertyID, OAuthConfigurationProperty> properties;
 
     protected String id;
     protected String displayName;
@@ -85,6 +93,41 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      */
     protected AbstractOAuthServiceMetaData() {
         super();
+        properties = new ConcurrentHashMap<OAuthPropertyID, OAuthConfigurationProperty>(OAuthPropertyID.values().length);
+    }
+
+    /**
+     * Add an OAuthProperty
+     * 
+     * @param prop The property's name
+     * @param value The property's value
+     */
+    protected void addOAuthProperty(OAuthPropertyID prop, OAuthConfigurationProperty value) {
+        properties.put(prop, value);
+    }
+
+    /**
+     * Get the specified OAuthProperty
+     * 
+     * @param prop The property's name
+     * @return The property's value or null
+     */
+    protected OAuthConfigurationProperty getOAuthProperty(OAuthPropertyID prop) {
+        return properties.get(prop);
+    }
+
+    /**
+     * Get the configuration properties' names
+     * 
+     * @return The configuration properties' names
+     */
+    protected String[] getConfigurationPropertyNames() {
+        String[] propNames = new String[properties.size()];
+        int i = 0;
+        for (OAuthConfigurationProperty prop : properties.values()) {
+            propNames[i++] = prop.getName();
+        }
+        return propNames;
     }
 
     @Override
@@ -138,7 +181,6 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         this.apiKeyName = apiKeyName;
     }
 
-
     /**
      * Used to look up the apiSecret in the config cascade
      *
@@ -150,6 +192,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Used to look up the consumerKey in the confic cascade
+     * 
      * @param consumerKeyName
      */
     public void setConsumerKeyName(final String consumerKeyName) {
@@ -187,7 +230,6 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         }
         return apiSecret;
     }
-
 
     @Override
     public String getAPISecret(final Session session) throws OXException {
@@ -244,6 +286,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Sets the API Key
+     * 
      * @deprecated: Implement {@link #getAPIKey(Session)} instead
      * @param apiKey The API Key to set
      */
@@ -303,7 +346,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     @Override
     public boolean registerTokenBasedDeferrer() {
-    	return false;
+        return false;
     }
 
     @Override
