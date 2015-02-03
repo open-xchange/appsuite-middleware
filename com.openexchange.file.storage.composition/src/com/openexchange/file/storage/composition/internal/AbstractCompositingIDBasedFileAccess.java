@@ -1070,7 +1070,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveFileMetadata(final File document, final long sequenceNumber) throws OXException {
-        return saveFileMetadata(document, sequenceNumber, null);
+        return save(document, null, sequenceNumber, null, new TransactionAwareFileAccessDelegation<IDTuple>() {
+
+            @Override
+            protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
+                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(access, document, null);
+                IDTuple result = access.saveFileMetadata(document, sequenceNumber);
+                document.setFolderId(result.getFolder());
+                document.setId(result.getId());
+                return ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+            }
+        });
     }
 
     @Override

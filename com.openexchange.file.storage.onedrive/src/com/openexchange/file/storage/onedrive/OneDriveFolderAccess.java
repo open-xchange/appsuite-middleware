@@ -504,22 +504,50 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     }
 
     @Override
-    public Quota getStorageQuota(final String folderId) throws OXException {
-        return Type.STORAGE.getUnlimited();
+    public Quota getStorageQuota(String folderId) throws OXException {
+        return perform(new OneDriveClosure<Quota>() {
+
+            @Override
+            protected Quota doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                HttpGet request = null;
+                try {
+                    request = new HttpGet(buildUri("me/skydrive/quota", initiateQueryString()));
+                    com.openexchange.file.storage.onedrive.rest.Quota quota = handleHttpResponse(
+                        execute(request, httpClient), com.openexchange.file.storage.onedrive.rest.Quota.class);
+                    return new Quota(quota.getQuota(), quota.getQuota() - quota.getAvailable(), Type.STORAGE);
+                } finally {
+                    if (null != request) {
+                        request.releaseConnection();
+                    }
+                }
+            }
+        });
     }
 
     @Override
-    public Quota getFileQuota(final String folderId) throws OXException {
+    public Quota getFileQuota(String folderId) throws OXException {
         return Type.FILE.getUnlimited();
     }
 
     @Override
-    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
-        final Quota[] ret = new Quota[types.length];
-        for (int i = 0; i < types.length; i++) {
-            ret[i] = types[i].getUnlimited();
+    public Quota[] getQuotas(String folder, Type[] types) throws OXException {
+        if (null == types) {
+            return null;
         }
-        return ret;
+        Quota[] quotas = new Quota[types.length];
+        for (int i = 0; i < types.length; i++) {
+            switch (types[i]) {
+            case FILE:
+                quotas[i] = getFileQuota(folder);
+                break;
+            case STORAGE:
+                quotas[i] = getStorageQuota(folder);
+                break;
+            default:
+                throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Quota " + types[i]);
+            }
+        }
+        return quotas;
     }
 
 }
