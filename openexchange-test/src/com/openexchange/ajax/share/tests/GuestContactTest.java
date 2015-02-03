@@ -104,7 +104,7 @@ public class GuestContactTest extends ShareTest {
     private List<ParsedShare> shares;
     private final long now = System.currentTimeMillis();
     private final String GUEST_DISPLAYNAME = "Test Guest Contact " + now;
-    private final String GUEST_MAIL = "testGuestContact@" + now + ".invalid";
+    private final String GUEST_MAIL = "testGuestContact@" + now + ".example.org";
     private final String GUEST_PASSWORD = String.valueOf(now);
 
 
