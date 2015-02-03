@@ -8,7 +8,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-portunif-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-portunif-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-rcm-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-rcm-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-websockets-2.2.22-SNAPSHOT.jar" sourcepath="lib/source/grizzly-websockets-2.2.22-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gmbal-3.0.0-b023.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gmbal-3.0.0-b023.jar" sourcepath="lib/source/gmbal-source-3.0.0-b023.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/management-api-3.0.0-b012.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>

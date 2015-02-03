@@ -47,36 +47,59 @@
  *
  */
 
-package com.openexchange.ajax.redirect.actions;
+package com.openexchange.html;
 
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
- * {@link RedirectResponse}
+ * {@link Bug36412Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class RedirectResponse extends AbstractAJAXResponse {
+public class Bug36412Test {
 
-    private final int statusCode;
-    private final String reasonPhrase, location;
+    private HtmlService service;
 
-    RedirectResponse(int statusCode, String reasonPhrase, String location) {
-        super(null);
-        this.statusCode = statusCode;
-        this.reasonPhrase = reasonPhrase;
-        this.location = location;
+    public Bug36412Test() {
+        super();
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
     }
 
-    public String getReasonPhrase() {
-        return reasonPhrase;
+    @After
+    public void tearDown() {
+        service = null;
     }
 
-    public String getLocation() {
-        return location;
+    @Test
+    public void testKeepUnicode() {
+        String content = "              <tr>\n" +
+            "                            <td border=\"1\" class=\"webseminare\"\n" +
+            "                              font-size:14px;=\"\" line-height:=\"\"\n" +
+            "                              18px;\"=\"\" height=\"39\" valign=\"middle\"\n" +
+            "                              align=\"center\" bgcolor=\"#346897\">Web Seminare</td>\n" +
+            "                          </tr>";
+        String test = service.sanitize(content, null, true, null, null);
+
+        Assert.assertTrue("Unexpected return value.", test.indexOf("<td class=\"webseminare\" height=\"39\" valign=\"middle\" align=\"center\" bgcolor=\"#346897\">") > 0);
+        Assert.assertTrue("Unexpected return value.", test.indexOf("Web Seminare") > 0);
     }
 }

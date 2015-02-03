@@ -52,7 +52,9 @@ package com.openexchange.imap.sort;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
+import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -412,7 +414,7 @@ public final class IMAPSort {
 
                     // Grab all SORT responses
                     if (response.isOK()) { // command successful
-                        List<Integer> v = new ArrayList<Integer>(r.length);
+                        TIntList v = new TIntArrayList(r.length);
 
                         for (int i = 0, len = r.length; i < len; i++) {
                             if (!(r[i] instanceof IMAPResponse)) {
@@ -435,10 +437,10 @@ public final class IMAPSort {
                                         int start = Integer.parseInt(snum.substring(0, pos));
                                         int end = Integer.parseInt(snum.substring(pos + 1));
                                         for (int num = start; num <= end; num++) {
-                                            v.add(Integer.valueOf(num));
+                                            v.add(num);
                                         }
                                     } else {
-                                        v.add(Integer.valueOf(snum));
+                                        v.add(Integer.parseInt(snum));
                                     }
                                 }
 
@@ -447,11 +449,7 @@ public final class IMAPSort {
                         }
 
                         // Copy the vector into 'matches'
-                        int vsize = v.size();
-                        matches = new int[vsize];
-                        for (int i = 0; i < vsize; i++) {
-                            matches[i] = v.get(i).intValue();
-                        }
+                        matches = v.toArray();
                     }
 
                     // dispatch remaining untagged responses

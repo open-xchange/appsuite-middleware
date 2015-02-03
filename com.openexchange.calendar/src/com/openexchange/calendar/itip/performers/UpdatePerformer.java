@@ -210,7 +210,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case CREATE: confirm = CalendarObject.ACCEPT; break;
         case DECLINE: confirm = CalendarObject.DECLINE; break;
         case TENTATIVE: confirm = CalendarObject.TENTATIVE; break;
-        case UPDATE: confirm = getCurrentConfirmation(currentAppointment, owner);
+        case UPDATE: confirm = getCurrentConfirmation(currentAppointment, owner); break;
         default: confirm = -1;
         }
         String message = null;

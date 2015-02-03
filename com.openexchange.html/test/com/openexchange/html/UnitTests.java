@@ -160,6 +160,7 @@ import com.openexchange.html.vulntests.Bug35982VulTest;
     Bug35982VulTest.class,
     Bug36024Test.class,
     Bug36275Test.class,
+    Bug36412Test.class,
     CSSMatcherTest.class,
     ConformHtmlTest.class,
     HtmlServiceImplTest.class,

@@ -51,6 +51,7 @@ package com.openexchange.html.internal;
 
 import static com.openexchange.java.Strings.isEmpty;
 import gnu.inet.encoding.IDNAException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -69,6 +70,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.Attributes;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
@@ -105,6 +111,7 @@ import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
@@ -631,6 +638,7 @@ public final class HtmlServiceImpl implements HtmlService {
             // Replace HTML entities
             html = keepUnicodeForEntities(html);
             htmlSanitizeResult.setContent(html);
+
             return htmlSanitizeResult;
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized.", e);
@@ -1446,18 +1454,17 @@ public final class HtmlServiceImpl implements HtmlService {
     @Override
     public String getConformHTML(final String htmlContent, final String charset, final boolean replaceUrls) {
         if (null == htmlContent || 0 == htmlContent.length()) {
-            /*
-             * Nothing to do...
-             */
+            // Nothing to do...
             return htmlContent;
         }
-        /*
-         * Validate
-         */
-        String html = validate(htmlContent);
-        /*
-         * Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
-         */
+
+        // Drop superfluous <div> tags from sanitizing
+        String html = dropSuperfluousDivTags(htmlContent);
+
+        // Validate
+        html = validate(html);
+
+        // Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
         final int headTagLen = TAG_S_HEAD.length();
         final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
         if (start >= headTagLen) {
@@ -1484,15 +1491,52 @@ public final class HtmlServiceImpl implements HtmlService {
             }
         }
         html = processDownlevelRevealedConditionalComments(html);
-        /*
-         * Check URLs
-         */
+
+        // Check URLs
         if (replaceUrls) {
             UrlReplacerJerichoHandler handler = new UrlReplacerJerichoHandler(html.length());
             JerichoParser.getInstance().parse(html, handler);
             html = handler.getHTML();
         }
+
         return html;
+    }
+
+    /**
+     * Drops superfluous <code>&lt;div&gt;</code> tags from given HTML content that were yielded from previous sanitizing.
+     * <p>
+     * E.g.
+     * <p>
+     * <code>"&lt;div id="ox-7bf62dbb34"&gt;&lt;p&gt;Some text&lt;/p&gt;&lt;/div&gt;"</code>
+     * &nbsp;&nbsp;---&gt;&nbsp;&nbsp;&nbsp;
+     * <code>"&lt;p&gt;Some text&lt;/p&gt;"</code>
+     *
+     * @param htmlContent The HTML content to process
+     * @return The processed HTML content
+     */
+    private static String dropSuperfluousDivTags(final String htmlContent) {
+        Source source = new Source(htmlContent);
+        source.fullSequentialParse();
+        OutputDocument outputDocument = new OutputDocument(source);
+
+        List<Element> divElements = source.getAllElements(HTMLElementName.DIV);
+        if (null != divElements && !divElements.isEmpty()) {
+            // Iterate <div> tags
+            for (Element divElement : divElements) {
+                Attributes attributes = divElement.getAttributes();
+                if (null != attributes && attributes.size() == 1) {
+                    Attribute idAttribute = attributes.get("id");
+                    if (null != idAttribute) {
+                        String idValue = idAttribute.getValue();
+                        if (null != idValue && idValue.startsWith("ox-")) {
+                            outputDocument.replace(divElement, divElement.getContent());
+                        }
+                    }
+                }
+            }
+        }
+
+        return outputDocument.toString();
     }
 
     private static boolean occursWithin(final String str, final int start, final int end, final boolean ignorecase, final String... searchStrings) {
@@ -1964,6 +2008,25 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             LOG.warn("HtmlCleaner library failed to pretty-print HTML content", rte);
             return htmlContent;
+        }
+    }
+
+    /**
+     * Writes given string to specified file
+     *
+     * @param str The string to write
+     * @param file The file to write to
+     */
+    protected static void writeTo(String str, String file) {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file, false);
+            fos.write(str.getBytes(Charsets.UTF_8));
+            fos.flush();
+        } catch (Exception x) {
+            // Ignore
+        } finally {
+            Streams.close(fos);
         }
     }
 

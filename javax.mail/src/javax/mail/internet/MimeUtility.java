@@ -371,17 +371,18 @@ public class MimeUtility {
      */
     public static InputStream decode(InputStream is, String encoding)
 		throws MessagingException {
-	if (encoding.equalsIgnoreCase("base64"))
+    String enc = encoding.trim();
+	if (enc.equalsIgnoreCase("base64"))
 	    return new BASE64DecoderStream(is);
-	else if (encoding.equalsIgnoreCase("quoted-printable"))
+	else if (enc.equalsIgnoreCase("quoted-printable"))
 	    return new QPDecoderStream(is);
-	else if (encoding.equalsIgnoreCase("uuencode") ||
-		 encoding.equalsIgnoreCase("x-uuencode") ||
-		 encoding.equalsIgnoreCase("x-uue"))
+	else if (enc.equalsIgnoreCase("uuencode") ||
+		 enc.equalsIgnoreCase("x-uuencode") ||
+		 enc.equalsIgnoreCase("x-uue"))
 	    return new UUDecoderStream(is);
-	else if (encoding.equalsIgnoreCase("binary") ||
-		 encoding.equalsIgnoreCase("7bit") ||
-		 encoding.equalsIgnoreCase("8bit"))
+	else if (enc.equalsIgnoreCase("binary") ||
+		 enc.equalsIgnoreCase("7bit") ||
+		 enc.equalsIgnoreCase("8bit"))
 	    return is;
 	else {
 	    if (!ignoreUnknownEncoding)

@@ -235,4 +235,11 @@ public class HtmlServiceImplTest {
         HtmlSanitizeResult htmlFormat = htmlServiceImpl.htmlFormat(plainText, false, "", 11111);
         Assert.assertFalse(htmlFormat.isTruncated());
     }
+
+    @Test
+    public void testDropSuperfluousDivTags() {
+        String html = "<div id=\"ox-7bf62dbb34\"><p>Some text</p></div>";
+        String test = htmlServiceImpl.getConformHTML(html, "UTF-8");
+        Assert.assertTrue(test.indexOf("<div") < 0);
+    }
 }

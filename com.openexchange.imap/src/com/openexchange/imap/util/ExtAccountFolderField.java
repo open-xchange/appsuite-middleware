@@ -161,17 +161,17 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         }
 
         try {
-            FolderInfo extAccountInfo = getExternalAccountFolders(session).get(fa.getFullName());
-            if (null == extAccountInfo) {
+            FolderInfo folderInfo = getExternalAccountFolders(session).get(fa.getFullName());
+            if (null == folderInfo) {
                 return JSONObject.NULL;
             }
 
             JSONObject jResult = new JSONObject(2);
-            if (null != extAccountInfo.alias) {
-                jResult.put("alias", extAccountInfo.alias);
+            if (null != folderInfo.alias) {
+                jResult.put("alias", folderInfo.alias);
             }
-            if (null != extAccountInfo.externalAccount) {
-                jResult.put("externalAccount", extAccountInfo.externalAccount);
+            if (null != folderInfo.externalAccount) {
+                jResult.put("externalAccount", folderInfo.externalAccount);
             }
             return jResult;
         } catch (Exception e) {
@@ -244,7 +244,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                 public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                     if (!protocol.hasCapability("METADATA")) {
                         // No support for METADATA extension
-                        LOG.warn("METADATA not supported by IMAP server {}", protocol.getHost());
+                        LOG.debug("METADATA not supported by IMAP server {}", protocol.getHost());
                         return null;
                     }
 
@@ -303,9 +303,6 @@ public class ExtAccountFolderField implements AdditionalFolderField {
 
                         return null;
                     } else if (response.isBAD()) {
-                        if (ImapUtility.isInvalidMessageset(response)) {
-                            return Long.valueOf(0);
-                        }
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
@@ -318,7 +315,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                     } else {
                         protocol.handleResult(response);
                     }
-                    return Long.valueOf(-1L);
+                    return null;
                 }
             });
             return results;

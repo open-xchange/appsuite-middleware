@@ -70,7 +70,6 @@ import com.openexchange.tools.servlet.http.Tools;
 public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
 
     private final boolean cookiesNeeded;
-    private final boolean failOnNonRedirect;
     private String location;
     private int statusCode;
     private String reasonPhrase;
@@ -80,13 +79,8 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
     }
 
     protected AbstractRedirectParser(boolean cookiesNeeded) {
-        this(cookiesNeeded, true);
-    }
-
-    protected AbstractRedirectParser(boolean cookiesNeeded, boolean failOnNonRedirect) {
         super(true);
         this.cookiesNeeded = cookiesNeeded;
-        this.failOnNonRedirect = failOnNonRedirect;
     }
 
     protected int getStatusCode() {
@@ -105,6 +99,14 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
         this.reasonPhrase = reasonPhrase;
     }
 
+    protected void setLocation(String location) {
+        this.location = location;
+    }
+
+    protected String getLocation() {
+        return location;
+    }
+
     @Override
     protected Response getResponse(String body) throws JSONException {
         throw new JSONException("Method not supported when parsing redirect responses.");
@@ -114,17 +116,8 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
     public String checkResponse(HttpResponse resp) throws ParseException, IOException {
         statusCode = resp.getStatusLine().getStatusCode();
         reasonPhrase = resp.getStatusLine().getReasonPhrase();
-        if (failOnNonRedirect) {
-            assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
-        } else {
-            if (statusCode >= HttpServletResponse.SC_BAD_REQUEST) {
-                return Integer.toString(statusCode) + (null == reasonPhrase ? "" : reasonPhrase);
-            }
-        }
-        Header[] headers = resp.getHeaders("Location");
-        assertEquals("There should be exactly one Location header.", 1, headers.length);
-        location = headers[0].getValue();
-        assertNotNull("Location for redirect is missing.", location);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
+        parseLocationHeader(resp);
         if (cookiesNeeded) {
             boolean oxCookieFound = false;
             boolean jsessionIdCookieFound = false;
@@ -146,9 +139,19 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
         return EntityUtils.toString(resp.getEntity());
     }
 
+    protected final void parseLocationHeader(HttpResponse resp) {
+        Header[] headers = resp.getHeaders("Location");
+        assertEquals("There should be exactly one Location header.", 1, headers.length);
+        location = headers[0].getValue();
+        assertNotNull("Location for redirect is missing.", location);
+    }
+
     @Override
-    public final T parse(String body) throws JSONException {
-        return createResponse(null == location ? body : location);
+    public T parse(String body) throws JSONException {
+        if (null == location) {
+            throw new JSONException("Location for redirect is missing. Ensure to call method parseLocationHeader(HttpResponse) when overwriting checkResponse(HttpResponse).");
+        }
+        return createResponse(location);
     }
 
     @Override

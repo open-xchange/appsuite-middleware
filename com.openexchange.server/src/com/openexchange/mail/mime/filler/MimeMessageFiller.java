@@ -180,15 +180,6 @@ public class MimeMessageFiller {
     private static final String MP_RELATED = "related";
 
     /*
-     * Patterns for common MIME text types
-     */
-    private static final String REPLACE_CS = "#CS#";
-
-    private static final String PAT_TEXT_CT = "text/plain; charset=#CS#";
-
-    private static final String PAT_HTML_CT = "text/html; charset=#CS#";
-
-    /*
      * Fields
      */
     protected int accountId;
@@ -1570,7 +1561,7 @@ public class MimeMessageFiller {
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset)));
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/plain; charset=").append(charset).toString());
         return text;
     }
 
@@ -1588,7 +1579,7 @@ public class MimeMessageFiller {
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
         try {
-            final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset));
+            final String contentType = new StringBuilder("\"text/html; charset=").append(charset).toString();
             final MimeBodyPart html = new MimeBodyPart();
             if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
                 html.setDataHandler(new DataHandler(new MessageDataSource(

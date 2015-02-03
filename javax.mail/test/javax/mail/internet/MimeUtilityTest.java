@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,43 @@
  *
  */
 
-package com.openexchange.ajax.redirect.actions;
+package javax.mail.internet;
 
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.mail.MessagingException;
+import org.junit.Assert;
+import org.junit.Test;
+
 
 /**
- * {@link RedirectResponse}
+ * {@link MimeUtilityTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RedirectResponse extends AbstractAJAXResponse {
+public class MimeUtilityTest {
 
-    private final int statusCode;
-    private final String reasonPhrase, location;
-
-    RedirectResponse(int statusCode, String reasonPhrase, String location) {
-        super(null);
-        this.statusCode = statusCode;
-        this.reasonPhrase = reasonPhrase;
-        this.location = location;
+    /**
+     * Initializes a new {@link MimeUtilityTest}.
+     */
+    public MimeUtilityTest() {
+        super();
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    @Test
+    public void testImprovedDetectionOfTransferEncoding() throws MessagingException, IOException {
+        ByteArrayInputStream in = new ByteArrayInputStream("U29tZSB0ZXN0IHRleHQ=".getBytes());
+        InputStream decodedStream = MimeUtility.decode(in, "base64 ");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream(64);
+        for (int b; (b = decodedStream.read()) > 0;) {
+            out.write(b);
+        }
+        String test = out.toString("US-ASCII");
+
+        Assert.assertEquals("Base64 decoding failed.", "Some test text", test);
     }
 
-    public String getReasonPhrase() {
-        return reasonPhrase;
-    }
-
-    public String getLocation() {
-        return location;
-    }
 }
