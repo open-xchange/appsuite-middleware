@@ -201,4 +201,44 @@ public class DefaultClient implements Client {
         this.enabled = enabled;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DefaultClient [");
+        if (getId() != null) {
+            builder.append("id").append(getId()).append(", ");
+        }
+        if (getSecret() != null) {
+            builder.append("secret=").append(getSecret()).append(", ");
+        }
+        if (getName() != null) {
+            builder.append("name=").append(getName()).append(", ");
+        }
+        if (getDescription() != null) {
+            builder.append("description=").append(getDescription()).append(", ");
+        }
+        if (getIcon() != null) {
+            builder.append("icon=").append(getIcon()).append(", ");
+        }
+        if (getWebsite() != null) {
+            builder.append("website=").append(getWebsite()).append(", ");
+        }
+        if (getContactAddress() != null) {
+            builder.append("contact-address=").append(getContactAddress()).append(", ");
+        }
+        if (getRedirectURIs() != null) {
+            builder.append("redirect-URIs=").append(getRedirectURIs()).append(", ");
+        }
+        if (getDefaultScope() != null) {
+            builder.append("default-scope=").append(getDefaultScope()).append(", ");
+        }
+        if (getRegistrationDate() != null) {
+            builder.append("registration-date=").append(getRegistrationDate()).append(", ");
+        }
+        builder.append("enabled=").append(isEnabled()).append("]");
+        return builder.toString();
+    }
+
+
+
 }
