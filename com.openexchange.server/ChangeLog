@@ -36,6 +36,10 @@
 
  - Fix for bug 36484: In case of a negative IP check, invalidate the previous session and continue with the form-login procedure
 
+* 2015-02-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36420: Do not change OAuth configuration anymore for RPM based distros.
+
 * 2015-02-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 36412: Proper handling of weird pseudo CSS attributes in HTML elements
