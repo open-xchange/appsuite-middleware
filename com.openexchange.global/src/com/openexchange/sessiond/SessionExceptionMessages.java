@@ -66,6 +66,7 @@ public final class SessionExceptionMessages implements LocalizableStrings {
     public static final String CONTEXT_LOCKED_MSG = "The account \"%2$s\" is currently not enabled. Please try again later.";
     public static final String MAX_SESSION_PER_CLIENT_EXCEPTION_MSG = "The maximum number of sessions is exceeded for client %1$s. Please logout from other clients and try again.";
     public static final String NO_SESSION_FOR_TOKENS_MSG = "The session is no longer available. Please try again.";
+    public static final String KERBEROS_TICKET_MISSING_MSG = "Kerberos ticket in session is missing. Pleasy try again.";
 
     private SessionExceptionMessages() {
         super();

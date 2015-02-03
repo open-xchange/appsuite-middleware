@@ -50,6 +50,7 @@
 package com.openexchange.authentication.kerberos.impl;
 
 import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
+import static com.openexchange.kerberos.KerberosUtils.disposeSubject;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.service.event.Event;
@@ -57,6 +58,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.kerberos.ClientPrincipal;
 import com.openexchange.kerberos.KerberosService;
+import com.openexchange.kerberos.KerberosUtils;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
@@ -69,6 +71,8 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class DelegationTicketLifecycle implements LoginHandlerService, EventHandler {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DelegationTicketLifecycle.class);
 
     private final KerberosService kerberosService;
     private final TimerService timerService;
@@ -83,6 +87,10 @@ public final class DelegationTicketLifecycle implements LoginHandlerService, Eve
     @Override
     public void handleLogin(LoginResult result) throws OXException {
         Session session = result.getSession();
+        scheduleTicketRenewal(session);
+    }
+
+    private void scheduleTicketRenewal(Session session) throws OXException {
         TicketRenewalTimer kt = new TicketRenewalTimer(session, kerberosService, timerService);
         kt.start();
         timers.put(session.getSessionID(), kt);
@@ -90,10 +98,7 @@ public final class DelegationTicketLifecycle implements LoginHandlerService, Eve
 
     @Override
     public void handleLogout(LoginResult logout) {
-        TicketRenewalTimer kt = timers.remove(logout.getSession().getSessionID());
-        if (null != kt) {
-            kt.cancel();
-        }
+        removeTicketRenewalTimer(logout.getSession().getSessionID());
     }
 
     public void stopAll() {
@@ -106,32 +111,38 @@ public final class DelegationTicketLifecycle implements LoginHandlerService, Eve
     @Override
     public void handleEvent(Event event) {
         final String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-            @SuppressWarnings("unchecked")
-            final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-            for (final Session session : container.values()) {
-                handleRemovedSession(session);
-            }
-        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-            handleRemovedSession(session);
+        if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+            handleRemovedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
         } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
             @SuppressWarnings("unchecked")
             final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
             for (final Session session : container.values()) {
                 handleRemovedSession(session);
             }
+        } else if (KerberosUtils.TOPIC_TICKET_READDED.equals(topic)) {
+            // a new ticket was transferred to the backend through action ticketReload after it expired. Now schedule to expire the new
+            // ticket.
+            try {
+                scheduleTicketRenewal((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+            } catch (OXException e) {
+                LOG.error("Can not schedule ticket renewal.", e);
+            }
         }
     }
 
     private void handleRemovedSession(Session session) {
-        final TicketRenewalTimer timer = timers.remove(session.getSessionID());
-        if (null != timer) {
-            timer.cancel();
-        }
+        removeTicketRenewalTimer(session.getSessionID());
         final ClientPrincipal principal = (ClientPrincipal) session.getParameter(SESSION_PRINCIPAL);
         if (null != principal) {
-            principal.dispose();
+            disposeSubject(principal.getClientSubject());
+            disposeSubject(principal.getDelegateSubject());
+        }
+    }
+
+    private void removeTicketRenewalTimer(String sessionId) {
+        final TicketRenewalTimer timer = timers.remove(sessionId);
+        if (null != timer) {
+            timer.cancel();
         }
     }
 }

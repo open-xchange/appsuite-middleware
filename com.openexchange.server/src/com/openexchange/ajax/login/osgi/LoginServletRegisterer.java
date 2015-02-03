@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.login.osgi;
 
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_ACTION;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletException;
@@ -61,6 +65,7 @@ import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -81,6 +86,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
+    private final Map<String, LoginRequestHandler> handlers = new ConcurrentHashMap<String, LoginRequestHandler>();
 
     private ConfigurationService configService;
     private HttpService httpService;
@@ -108,9 +114,8 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
                 httpService = (HttpService) obj;
             }
             if (obj instanceof DispatcherPrefixService) {
-            	prefixService = (DispatcherPrefixService) obj;
+                prefixService = (DispatcherPrefixService) obj;
             }
-
             needsRegistration = null != configService && null != httpService && login == null && prefixService != null;
             if (needsRegistration) {
                 login = new LoginServlet();
@@ -118,7 +123,21 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         } finally {
             lock.unlock();
         }
+        if (obj instanceof LoginRequestHandler) {
+            Object tmp = reference.getProperty(PARAMETER_ACTION);
+            if (null != tmp && tmp instanceof String) {
+                String action = (String) tmp;
+                LoginRequestHandler handler = (LoginRequestHandler) obj;
+                handlers.put(action, handler);
+                if (null != login) {
+                    login.addRequestHandler(action, handler);
+                }
+            }
+        }
         if (needsRegistration) {
+            for (Entry<String, LoginRequestHandler> entry : handlers.entrySet()) {
+                login.addRequestHandler(entry.getKey(), entry.getValue());
+            }
             final Dictionary<String, String> params = new Hashtable<String, String>(32);
             addProperty(params, Property.UI_WEB_PATH);
             addProperty(params, Property.COOKIE_HASH);
@@ -145,7 +164,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, ConfigurationProperty.RANDOM_TOKEN);
             try {
                 LOG.info("Registering login servlet.");
-                httpService.registerServlet(prefixService.getPrefix() + SERVLET_PATH_APPENDIX, new LoginServlet(), params, null);
+                httpService.registerServlet(prefixService.getPrefix() + SERVLET_PATH_APPENDIX, login, params, null);
             } catch (final ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
             } catch (final NamespaceException e) {
@@ -183,6 +202,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
     @Override
     public void removedService(final ServiceReference<Object> reference, final Object service) {
         HttpService unregister = null;
+        String removeAction = null;
         lock.lock();
         try {
             if (service instanceof ConfigurationService) {
@@ -195,8 +215,20 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
                 }
                 httpService = null;
             }
+            if (service instanceof LoginRequestHandler) {
+                Object tmp = reference.getProperty(PARAMETER_ACTION);
+                if (null != tmp && tmp instanceof String) {
+                    removeAction = (String) tmp;
+                }
+            }
         } finally {
             lock.unlock();
+        }
+        if (null != removeAction) {
+            handlers.remove(removeAction);
+            if (null != login) {
+                login.removeRequestHandler(removeAction);
+            }
         }
         if (null != unregister) {
             LOG.info("Unregistering login servlet.");

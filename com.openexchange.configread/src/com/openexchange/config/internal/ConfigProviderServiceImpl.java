@@ -134,11 +134,12 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     }
 
     private void initSettings(final ConfigurationService config) throws OXException {
-        final Properties propertiesInFolder = config.getPropertiesInFolder(SETTINGS);
-        for(final Object propName : propertiesInFolder.keySet()) {
-            final ServerProperty serverProperty = get((String) propName, -1, -1);
-            serverProperty.set(PREFRENCE_PATH, (String) propName);
-            if(serverProperty.get(PROTECTED) == null) {
+        Properties propertiesInFolder = config.getPropertiesInFolder(SETTINGS);
+        for (Object propKey : propertiesInFolder.keySet()) {
+            String propName = propKey.toString();
+            ServerProperty serverProperty = get(propName, -1, -1);
+            serverProperty.set(PREFRENCE_PATH, propName);
+            if (serverProperty.get(PROTECTED) == null) {
                 serverProperty.set(PROTECTED, TRUE);
             }
 
@@ -148,10 +149,10 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
 
     private void initStructuredObjects(final ConfigurationService config) throws OXException {
         Map<String, Object> yamlInFolder = config.getYamlInFolder(SETTINGS);
-        for(Object yamlContent: yamlInFolder.values()) {
+        for (Object yamlContent : yamlInFolder.values()) {
             if (yamlContent instanceof Map) {
                 Map<String, Object> entries = (Map<String, Object>) yamlContent;
-                for(Map.Entry<String, Object> entry: entries.entrySet()) {
+                for (Map.Entry<String, Object> entry : entries.entrySet()) {
                     String namespace = entry.getKey();
                     Object subkeys = entry.getValue();
                     recursivelyInitStructuredObjects(namespace, subkeys);
@@ -163,7 +164,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     private void recursivelyInitStructuredObjects(String namespace, Object subkeys) throws OXException {
         if (subkeys instanceof Map) {
             Map<String, Object> entries = (Map<String, Object>) subkeys;
-            for(Map.Entry<String, Object> entry: entries.entrySet()) {
+            for (Map.Entry<String, Object> entry : entries.entrySet()) {
                 recursivelyInitStructuredObjects(namespace + "/" + entry.getKey(), entry.getValue());
             }
         } else {
@@ -172,7 +173,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
             serverProperty.set(PREFRENCE_PATH, namespace);
             serverProperty.set(subkeys.toString());
             serverProperty.setDefined(true);
-            if(serverProperty.get(PROTECTED) == null) {
+            if (serverProperty.get(PROTECTED) == null) {
                 serverProperty.set(PROTECTED, TRUE);
             }
         }
@@ -181,23 +182,24 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     private void initMetadata(final ConfigurationService config) throws OXException {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigProviderService.class);
         final Map<String, Object> yamlInFolder = config.getYamlInFolder(META);
-        for(final Object o : yamlInFolder.values()) {
+        for (final Object o : yamlInFolder.values()) {
             if (false == checkMap(o, logger)) {
                 continue;
             }
             @SuppressWarnings("unchecked")
-            final Map<String, Object> metadataDef = (Map<String, Object>) o;
-            for(final Map.Entry<String, Object> entry : metadataDef.entrySet()) {
+            Map<String, Object> metadataDef = (Map<String, Object>) o;
+            for (final Map.Entry<String, Object> entry : metadataDef.entrySet()) {
                 final String propertyName = entry.getKey();
                 final Object value2 = entry.getValue();
                 if (false == checkMap(value2, logger)) {
                     continue;
                 }
+
                 @SuppressWarnings("unchecked")
-                final Map<String, Object> metadata = (Map<String, Object>) value2;
+                Map<String, Object> metadata = (Map<String, Object>) value2;
                 final ServerProperty basicProperty = get(propertyName, -1, -1);
-                for(final Map.Entry<String, Object> metadataProp : metadata.entrySet()) {
-                    if(metadataProp.getValue() != null) {
+                for (final Map.Entry<String, Object> metadataProp : metadata.entrySet()) {
+                    if (metadataProp.getValue() != null) {
                         basicProperty.set(metadataProp.getKey(), metadataProp.getValue().toString());
                     }
                 }

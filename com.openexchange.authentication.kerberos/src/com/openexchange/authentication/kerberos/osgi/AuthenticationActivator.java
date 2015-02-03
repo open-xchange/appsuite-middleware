@@ -60,6 +60,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.kerberos.KerberosService;
 import com.openexchange.osgi.Tools;
+import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
@@ -79,8 +80,8 @@ public class AuthenticationActivator implements BundleActivator {
     public void start(BundleContext context) throws InvalidSyntaxException {
         Filter filter = generateServiceFilter(context, KerberosService.class, ContextService.class, UserService.class, ConfigurationService.class);
         trackers.push(new ServiceTracker<Object, Object>(context, filter, new AuthenticationRegisterer(context)));
-//        filter = generateServiceFilter(context, TimerService.class, KerberosService.class);
-//        trackers.push(new ServiceTracker(context, filter, new RenewalLoginHandlerRegisterer(context)));
+        filter = generateServiceFilter(context, TimerService.class, KerberosService.class);
+        trackers.push(new ServiceTracker<Object, Object>(context, filter, new RenewalLoginHandlerRegisterer(context)));
         Tools.open(trackers);
     }
 

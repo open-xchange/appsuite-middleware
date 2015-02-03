@@ -1,3 +1,9 @@
+open-xchange-drive (7.6.1-17) stable; urgency=low
+
+  * Build for patch 2014-10-27
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 26 Jan 2015 18:21:17 +0100
+
 open-xchange-drive (7.6.1-16) stable; urgency=low
 
   * Build for patch 2015-01-26

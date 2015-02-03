@@ -154,6 +154,7 @@ public final class LoginPerformer {
      * @return The login providing login information
      * @throws OXException If login fails
      */
+    @SuppressWarnings("static-method")
     public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
         sanityChecks(request);
         final LoginResultImpl retval = new LoginResultImpl();
@@ -301,6 +302,7 @@ public final class LoginPerformer {
      * @param sessionId The session ID
      * @throws OXException If logout fails
      */
+    @SuppressWarnings("static-method")
     public Session doLogout(final String sessionId) throws OXException {
         // Drop the session
         SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();

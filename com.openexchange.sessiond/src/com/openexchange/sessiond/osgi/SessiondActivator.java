@@ -71,6 +71,7 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondService;
@@ -170,6 +171,7 @@ public final class SessiondActivator extends HousekeepingActivator {
                     context.ungetService(reference);
                 }
             });
+            track(SessionSerializationInterceptor.class, new SessionSerializationInterceptorTracker(context));
             openTrackers();
 
             final SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();
