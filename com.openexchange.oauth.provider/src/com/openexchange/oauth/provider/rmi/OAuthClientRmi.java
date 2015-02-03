@@ -56,7 +56,7 @@ import com.openexchange.oauth.provider.ClientData;
 
 
 /**
- * {@link OAuthClientRmi}
+ * {@link OAuthClientRmi} - The RMI stub for OAuth Client management.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
