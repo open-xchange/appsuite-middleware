@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.session;
 
+import static com.openexchange.java.Autoboxing.I;
+import static javax.servlet.http.HttpServletResponse.SC_FOUND;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.params.ClientPNames;
@@ -112,7 +116,8 @@ public class Bug34928Test extends AbstractAJAXSession {
          * perform second HTTP Auth login (without providing authorization headers)
          */
         client.getSession().setId(null);
-        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false));
+        assertThat("Second authentication with cookies failed.", I(SC_FOUND), equalTo(I(httpAuthResponse.getStatusCode())));
         String secondSessionID = extractSessionID(httpAuthResponse);
         assertNotNull("No session ID", secondSessionID);
         assertEquals("Different session IDs", firstSessionID, secondSessionID);

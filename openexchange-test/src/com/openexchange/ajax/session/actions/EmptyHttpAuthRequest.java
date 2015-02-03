@@ -91,6 +91,11 @@ public class EmptyHttpAuthRequest extends HttpAuthRequest {
                 setReasonPhrase(resp.getStatusLine().getReasonPhrase());
                 if (locationNeeded) {
                     parseLocationHeader(resp);
+                } else {
+                    org.apache.http.Header[] headers = resp.getHeaders("Location");
+                    if (headers.length > 0) {
+                        setLocation(headers[0].getValue());
+                    }
                 }
                 if (HttpServletResponse.SC_MOVED_TEMPORARILY == getStatusCode()) {
                     return EntityUtils.toString(resp.getEntity());
