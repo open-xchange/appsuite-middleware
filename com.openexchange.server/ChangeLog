@@ -57,6 +57,11 @@
  - Fix for bug 36076: Serve "Range" requests for inline download requests
  - Fix for bug 36235: Deduce the MIME type for uploaded files by their file names (if available)
 
+* 2015-01-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35182: Schedule a timer for Kerberos ticket renewal removing the ticket from the session. Additionally a ticket reload from
+   the client through SPNEGO or a new ticket authorization against KDC is triggered.
+
 * 2015-01-19 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 36095: Be more strict about the 'Reply-To' header while parsing
@@ -343,6 +348,11 @@
 * 2014-10-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 34998: Restored previous default value for "com.openexchange.servlet.maxRate" property
+
+* 2014-10-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34517: Create a new TGT for sessions created with login and password. Request a new forwarded TGT from the client for
+   sessions created with a forwarded TGT.
 
 * 2014-10-23 - ioannis.chouklis@open-xchange.com
 

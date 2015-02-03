@@ -656,6 +656,14 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
     }
 
+    public void addRequestHandler(String action, LoginRequestHandler handler) {
+        handlerMap.put(action, handler);
+    }
+
+    public void removeRequestHandler(String action) {
+        handlerMap.remove(action);
+    }
+
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
