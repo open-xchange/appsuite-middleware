@@ -103,6 +103,10 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
         this.location = location;
     }
 
+    protected String getLocation() {
+        return location;
+    }
+
     @Override
     protected Response getResponse(String body) throws JSONException {
         throw new JSONException("Method not supported when parsing redirect responses.");

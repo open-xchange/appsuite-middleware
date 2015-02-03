@@ -134,7 +134,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         BasicClientCookie cookie = findCookie(LoginServlet.SECRET_PREFIX);
         String correctSecret = cookie.getValue();
         cookie.setValue("wrongsecret");
-        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false));
         assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
@@ -155,7 +155,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         BasicClientCookie cookie = findCookie(LoginServlet.SESSION_PREFIX);
         String correctSession = cookie.getValue();
         cookie.setValue("wrongsecret");
-        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false));
         assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
@@ -173,7 +173,7 @@ public class Bug34928Test extends AbstractAJAXSession {
          * perform second HTTP Auth login
          */
         client.getSession().setId(null);
-        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false));
         assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
