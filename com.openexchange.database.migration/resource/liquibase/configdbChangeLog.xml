@@ -90,7 +90,7 @@
 			<dropTable tableName="guest2context" />
 		</rollback>
 	</changeSet>
-	
+
 	<changeSet id="7.8.0:oauth_client:create" author="steffen.templin@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -113,14 +113,14 @@
                 website VARCHAR(255) NOT NULL,
                 enabled TINYINT UNSIGNED NOT NULL,
                 registration_date BIGINT(64) UNSIGNED NOT NULL,
-                PRIMARY KEY(`id`)
+                PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
         </sql>
         <rollback>
             <dropTable tableName="oauth_client"/>
         </rollback>
     </changeSet>
-    
+
     <changeSet id="7.8.0:oauth_client_uri:create" author="steffen.templin@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -135,8 +135,8 @@
                 id INT4 NOT NULL AUTO_INCREMENT,
                 client VARCHAR(255) NOT NULL,
                 uri VARCHAR(767) NOT NULL,
-                PRIMARY KEY(`id`),
-                INDEX(`client`)
+                PRIMARY KEY (`id`),
+                INDEX `client_index` (`client`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
         </sql>
         <rollback>
