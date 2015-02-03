@@ -3757,6 +3757,21 @@ msgstr ""
 msgid "Another process already revoked the secret of your client"
 msgstr ""
 
+#. '%1$s' is not a valid redirect URI.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:69
+msgid "'%1$s' is not a valid redirect URI."
+msgstr ""
+
+#. The client '%1$s' could not be enabled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:72
+msgid "The client '%1$s' could not be enabled."
+msgstr ""
+
+#. The client '%1$s' could not be disabled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:75
+msgid "The client '%1$s' could not be disabled."
+msgstr ""
+
 #. Account not found with identifier %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
 msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
