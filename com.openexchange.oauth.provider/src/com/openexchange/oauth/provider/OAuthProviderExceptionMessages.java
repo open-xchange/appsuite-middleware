@@ -65,6 +65,15 @@ public final class OAuthProviderExceptionMessages implements LocalizableStrings 
     // Another process already revoked the secret for a client
     public static final String CONCURRENT_SECRET_REVOKE_MSG = "Another process already revoked the secret of your client";
 
+    // '%1$s' is not a valid redirect URI.
+    public static final String INVALID_REDIRECT_URI_MSG = "'%1$s' is not a valid redirect URI.";
+
+    // The client '%1$s' could not be enabled.
+    public static final String FAILED_ENABLEMENT_MSG = "The client '%1$s' could not be enabled.";
+
+    // The client '%1$s' could not be disabled.
+    public static final String FAILED_DISABLEMENT_MSG = "The client '%1$s' could not be disabled.";
+
     /**
      * Initializes a new {@link OAuthProviderExceptionMessages}.
      */

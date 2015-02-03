@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -57,7 +58,9 @@ import java.util.Set;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ClientData {
+public class ClientData implements Serializable {
+
+    private static final long serialVersionUID = 8228091377828967016L;
 
     private Icon icon;
     private boolean bIcon;

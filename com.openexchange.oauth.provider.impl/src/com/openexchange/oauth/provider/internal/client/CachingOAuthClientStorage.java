@@ -119,6 +119,18 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
+    public void enableClient(String clientId) throws OXException {
+        delegate.enableClient(clientId);
+        invalidateClient(clientId);
+    }
+
+    @Override
+    public void disableClient(String clientId) throws OXException {
+        delegate.disableClient(clientId);
+        invalidateClient(clientId);
+    }
+
+    @Override
     public Client updateClient(String clientId, ClientData clientData) throws OXException {
         Client updatedClient = delegate.updateClient(clientId, clientData);
 

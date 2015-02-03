@@ -94,7 +94,7 @@ public interface OAuthClientStorage {
      *
      * @param clientId The client identifier
      * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
-     * @throws OXException
+     * @throws OXException If un-registration fails
      */
     boolean unregisterClient(String clientId) throws OXException;
 
@@ -106,6 +106,22 @@ public interface OAuthClientStorage {
      * @throws OXException If revoke operation fails
      */
     Client revokeClientSecret(String clientId) throws OXException;
+
+    /**
+     * Enables denoted client
+     *
+     * @param clientId The client identifier
+     * @throws OXException If client could not be enabled
+     */
+    void enableClient(String clientId) throws OXException;
+
+    /**
+     * Disables denoted client
+     *
+     * @param clientId The client identifier
+     * @throws OXException If client could not be disabled
+     */
+    void disableClient(String clientId) throws OXException;
 
     /**
      * Invalidates denoted client from cache

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,107 +47,87 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.rmi;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.ClientData;
 
 
 /**
- * {@link Client} - Represents an OAuth client.
+ * {@link OAuthClientRmi}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Client extends Serializable {
+public interface OAuthClientRmi extends Remote {
 
     /**
-     * Gets the client's public identifier
-     *
-     * @return The public identifier
+     * RMI name to be used in the naming lookup.
      */
-    String getId();
+    public static final String RMI_NAME = OAuthClientRmi.class.getSimpleName();
 
     /**
-     * Gets the client's name
+     * Gets the client identified by the given identifier.
      *
-     * @return The name
+     * @param clientId The clients identifier
+     * @return The client or <code>null</code> if there is no such client
+     * @throws RemoteException If operation fails
      */
-    String getName();
+    Client getClientById(String clientId) throws RemoteException;
 
     /**
-     * Gets the client's description
+     * Registers (adds) a client according to given client data.
      *
-     * @return The description
+     * @param clientData The client data to create the client from
+     * @return The newly created client
+     * @throws RemoteException If create operation fails
      */
-    String getDescription();
+    Client registerClient(ClientData clientData) throws RemoteException;
 
     /**
-     * Gets the icon
+     * Updates an existing client's attributes according to given client data.
      *
-     * @return The icon
+     * @param clientId The client identifier
+     * @param clientData The client data
+     * @return The updated client
+     * @throws RemoteException If update operation fails
      */
-    Icon getIcon();
+    Client updateClient(String clientId, ClientData clientData) throws RemoteException;
 
     /**
-     * Gets the date of this clients registration.
+     * Unregisters an existing client
      *
-     * @return The date
+     * @param clientId The client identifier
+     * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
+     * @throws RemoteException If un-registration fails
      */
-    Date getRegistrationDate();
+    boolean unregisterClient(String clientId) throws RemoteException;
 
     /**
-     * Gets the contact address
+     * Revokes a client's current secret and generates a new one.
      *
-     * @return The address
+     * @param clientId The client identifier
+     * @return The client with revoked/new secret
+     * @throws RemoteException If revoke operation fails
      */
-    String getContactAddress();
+    Client revokeClientSecret(String clientId) throws RemoteException;
 
     /**
-     * Gets the website
+     * Enables denoted client
      *
-     * @return The website
+     * @param clientId The client identifier
+     * @throws RemoteException If client could not be enabled
      */
-    String getWebsite();
+    void enableClient(String clientId) throws RemoteException;
 
     /**
-     * Gets the default scope that should be assumed when the authorization request does not
-     * specify a certain scope.
+     * Disables denoted client
      *
-     * @return The default scope
+     * @param clientId The client identifier
+     * @throws RemoteException If client could not be disabled
      */
-    Scope getDefaultScope();
-
-    /**
-     * Gets the client's secret identifier
-     *
-     * @return The secret identifier
-     */
-    String getSecret();
-
-    /**
-     * Gets the redirect URIs
-     *
-     * @return The URIs
-     */
-    List<String> getRedirectURIs();
-
-    /**
-     * Checks if given redirect URI is contained in registered redirect URIs for this client
-     *
-     * @param uri The URI to check
-     * @return <code>true</code> if contained; otherwise <code>false</code>
-     */
-    boolean hasRedirectURI(String uri);
-
-    /**
-     * Returns whether this client is enabled or not.
-     *
-     * @return <code>true</code> if the client is enabled
-     */
-    boolean isEnabled();
-
+    void disableClient(String clientId) throws RemoteException;
 
 }

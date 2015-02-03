@@ -74,12 +74,11 @@ import com.openexchange.oauth.provider.Icon;
  */
 public class LazyIcon implements Icon {
 
+    private static final long serialVersionUID = 4458877977630523049L;
+
     private final Lock lock = new ReentrantLock();
-
     private final String clientId;
-
     private final DatabaseService dbService;
-
     private Icon delegate;
 
     /**
@@ -145,6 +144,37 @@ public class LazyIcon implements Icon {
         }
 
         return delegate;
+    }
+
+    /**
+     * The writeObject method is responsible for writing the state of the object for its particular class so that the corresponding
+     * readObject method can restore it. The default mechanism for saving the Object's fields can be invoked by calling
+     * <code>ObjectOutputStream.defaultWriteObject()</code>. The method does not need to concern itself with the state belonging to its
+     * super classes or subclasses. State is saved by writing the individual fields to the ObjectOutputStream using the writeObject method
+     * or by using the methods for primitive data types supported by <code>DataOutput</code> .
+     *
+     * @param out The object output stream
+     * @throws IOException If an I/O error occurs
+     */
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        out.writeObject(getDelegate());
+    }
+
+    /**
+     * The readObject method is responsible for reading from the stream and restoring the classes fields. It may call in.defaultReadObject
+     * to invoke the default mechanism for restoring the object's non-static and non-transient fields. The
+     * <code>ObjectInputStream.defaultReadObject</code> method uses information in the stream to assign the fields of the object saved in
+     * the stream with the correspondingly named fields in the current object. This handles the case when the class has evolved to add new
+     * fields. The method does not need to concern itself with the state belonging to its super classes or subclasses. State is saved by
+     * writing the individual fields to the ObjectOutputStream using the writeObject method or by using the methods for primitive data types
+     * supported by <code>DataOutput</code>.
+     *
+     * @param in The object input stream
+     * @throws IOException If an I/O error occurs
+     * @throws ClassNotFoundException If a casting fails
+     */
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        this.delegate = (Icon) in.readObject();
     }
 
 }

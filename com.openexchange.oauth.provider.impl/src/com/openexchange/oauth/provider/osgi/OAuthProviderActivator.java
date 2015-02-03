@@ -51,6 +51,9 @@ package com.openexchange.oauth.provider.osgi;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.io.ByteArrayInputStream;
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Map;
 import javax.servlet.ServletException;
 import org.osgi.framework.BundleContext;
@@ -96,6 +99,8 @@ import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCo
 import com.openexchange.oauth.provider.internal.client.CachingOAuthClientStorage;
 import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
 import com.openexchange.oauth.provider.internal.client.RdbOAuthClientStorage;
+import com.openexchange.oauth.provider.internal.rmi.OAuthClientRmiImpl;
+import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 import com.openexchange.oauth.provider.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.servlets.TokenEndpoint;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -280,6 +285,12 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
         openTrackers();
 
+        // Register update task, create table job and delete listener
+        registerService(CreateTableService.class, new AuthCodeCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(this)));
+        registerService(DeleteListener.class, new AuthCodeDeleteListener());
+
+        // Initialize OAuthClientStorage
         try {
             String regionName = CachingOAuthClientStorage.REGION_NAME;
             byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
@@ -304,10 +315,11 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             throw new IllegalStateException(x);
         }
 
-        // Register update task, create table job and delete listener
-        registerService(CreateTableService.class, new AuthCodeCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(this)));
-        registerService(DeleteListener.class, new AuthCodeDeleteListener());
+        {
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put("RMIName", OAuthClientRmi.RMI_NAME);
+            registerService(Remote.class, new OAuthClientRmiImpl(this), props);
+        }
 
     }
 

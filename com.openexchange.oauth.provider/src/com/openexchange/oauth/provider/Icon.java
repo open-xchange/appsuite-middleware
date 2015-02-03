@@ -50,14 +50,15 @@
 package com.openexchange.oauth.provider;
 
 import java.io.InputStream;
+import java.io.Serializable;
 
 /**
- * {@link Icon}
+ * {@link Icon} - Represents an icon for a OAuth client.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface Icon {
+public interface Icon extends Serializable {
 
     /**
      * Gets the size of this icon in bytes.

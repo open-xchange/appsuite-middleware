@@ -49,8 +49,8 @@
 
 package com.openexchange.oauth.provider;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import com.openexchange.java.Streams;
 
 /**
  * {@link DefaultIcon}
@@ -60,12 +60,15 @@ import java.io.InputStream;
  */
 public class DefaultIcon implements Icon {
 
+    private static final long serialVersionUID = 1951072419974173720L;
+
     private String mimeType = null;
-
     private int size = -1;
-
     private byte[] data;
 
+    /**
+     * Initializes a new {@link DefaultIcon}.
+     */
     public DefaultIcon() {
         super();
     }
@@ -94,7 +97,7 @@ public class DefaultIcon implements Icon {
 
     @Override
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(data);
+        return Streams.newByteArrayInputStream(data);
     }
 
 }

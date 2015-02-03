@@ -110,6 +110,74 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
+    public void enableClient(String clientId) throws OXException {
+        DatabaseService dbService = getDbService();
+        Connection con = dbService.getWritable();
+        try {
+            enableClient(clientId, con);
+        } finally {
+            dbService.backWritable(con);
+        }
+    }
+
+    /**
+     * Enables denoted client
+     *
+     * @param clientId The client identifier
+     * @param con The connection to use
+     * @throws OXException If client could not be enabled
+     */
+    public void enableClient(String clientId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE oauth_client SET enabled=1 WHERE id = ? AND enabled = 0");
+            stmt.setString(1, clientId);
+            int result = stmt.executeUpdate();
+            if (result <= 0) {
+                throw OAuthProviderExceptionCodes.FAILED_ENABLEMENT.create(clientId);
+            }
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public void disableClient(String clientId) throws OXException {
+        DatabaseService dbService = getDbService();
+        Connection con = dbService.getWritable();
+        try {
+            disableClient(clientId, con);
+        } finally {
+            dbService.backWritable(con);
+        }
+    }
+
+    /**
+     * Disables denoted client
+     *
+     * @param clientId The client identifier
+     * @param con The connection to use
+     * @throws OXException If client could not be disabled
+     */
+    public void disableClient(String clientId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE oauth_client SET enabled=0 WHERE id = ? AND enabled = 1");
+            stmt.setString(1, clientId);
+            int result = stmt.executeUpdate();
+            if (result <= 0) {
+                throw OAuthProviderExceptionCodes.FAILED_DISABLEMENT.create(clientId);
+            }
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
     public Client getClientById(String clientId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getReadOnly();
@@ -123,7 +191,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     /**
      * Gets the client identified by the given identifier.
      *
-     * @param clientId The clients identifier
+     * @param clientId The client identifier
      * @param con The connection to use
      * @return The client or <code>null</code> if there is no such client
      * @throws OXException If operation fails

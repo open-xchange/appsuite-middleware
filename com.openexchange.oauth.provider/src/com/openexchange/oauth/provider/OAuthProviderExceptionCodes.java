@@ -114,7 +114,16 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * '%1$s' is not a valid redirect URI.
      */
-    INVALID_REDIRECT_URI("'%1$s' is not a valid redirect URI.", "'%1$s' is not a valid redirect URI.", Category.CATEGORY_USER_INPUT, 13);
+    INVALID_REDIRECT_URI("'%1$s' is not a valid redirect URI.", OAuthProviderExceptionMessages.INVALID_REDIRECT_URI_MSG, Category.CATEGORY_USER_INPUT, 13),
+    /**
+     * The client '%1$s' could not be enabled.
+     */
+    FAILED_ENABLEMENT("The client '%1$s' could not be enabled.", OAuthProviderExceptionMessages.FAILED_ENABLEMENT_MSG, Category.CATEGORY_USER_INPUT, 14),
+    /**
+     * The client '%1$s' could not be disabled.
+     */
+    FAILED_DISABLEMENT("The client '%1$s' could not be disabled.", OAuthProviderExceptionMessages.FAILED_DISABLEMENT_MSG, Category.CATEGORY_USER_INPUT, 15),
+
     ;
 
     /**
