@@ -802,9 +802,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             // Search by pattern
             List<File> files = new LinkedList<File>();
             {
-                Drive.Files.List list = drive.files().list();
-                list.setFields("kind,nextPageToken,items("+GoogleDriveConstants.FIELDS_DEFAULT+")");
-
+                Drive.Files.List list = drive.files().list().setFields("kind,nextPageToken,items(" + getFields(ALL_FIELDS) + ")");
                 {
                     StringBuilder qBuilder = new StringBuilder(128);
                     qBuilder.append('\'').append(fid).append("' in parents and ");
