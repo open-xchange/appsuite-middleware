@@ -1579,7 +1579,7 @@ public class MimeMessageFiller {
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
         try {
-            final String contentType = new StringBuilder("\"text/html; charset=").append(charset).toString();
+            final String contentType = new StringBuilder("text/html; charset=").append(charset).toString();
             final MimeBodyPart html = new MimeBodyPart();
             if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
                 html.setDataHandler(new DataHandler(new MessageDataSource(

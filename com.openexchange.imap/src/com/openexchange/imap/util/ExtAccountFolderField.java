@@ -79,7 +79,6 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.iap.BadCommandException;
-import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
@@ -108,6 +107,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         super();
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, FolderInfo> getExternalAccountFolders(ServerSession session) throws OXException {
         CacheService cacheService = Services.getService(CacheService.class);
         Cache cache = cacheService.getCache(REGION_NAME);
@@ -123,9 +123,19 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         {
             IMAPFolderStorage folderStorage = null;
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            boolean doClose = true;
             try {
-                mailAccess = MailAccess.getInstance(session, MailAccount.DEFAULT_ID);
-                mailAccess.connect();
+                {
+                    Object param = session.getParameter(MailAccess.PARAM_MAIL_ACCESS);
+                    if ((param instanceof MailAccess)) {
+                        mailAccess = (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>) param;
+                        doClose = false;
+                    } else {
+                        mailAccess = MailAccess.getInstance(session, MailAccount.DEFAULT_ID);
+                        mailAccess.connect();
+                    }
+                }
+
 
                 folderStorage = getImapFolderStorage(mailAccess);
                 IMAPStore imapStore = folderStorage.getImapStore();
@@ -134,7 +144,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
             } catch (MessagingException e) {
                 throw folderStorage.handleMessagingException(e);
             } finally {
-                if (null != mailAccess) {
+                if (doClose && (null != mailAccess)) {
                     mailAccess.close(true);
                 }
             }
@@ -197,6 +207,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
     // -------------------------------------------------------------------------------------------------------------
 
     private static final class FolderInfo {
+
         final String externalAccount;
         final String alias;
 
@@ -204,6 +215,16 @@ public class ExtAccountFolderField implements AdditionalFolderField {
             super();
             this.externalAccount = externalAccount;
             this.alias = alias;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(48);
+            builder.append('{');
+            builder.append("externalAccount=").append(externalAccount).append(", ");
+            builder.append("alias=").append(alias);
+            builder.append('}');
+            return builder.toString();
         }
     }
 
@@ -254,7 +275,8 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                     int mlen = r.length - 1;
                     com.sun.mail.iap.Response response = r[mlen];
 
-                    if (response.isOK()) {
+                    // Also consider NO responses here
+                    if (response.isOK() || response.isNO()) {
                         String cMetadata = "METADATA";
                         for (int i = 0; i < mlen; i++) {
                             if (!(r[i] instanceof IMAPResponse)) {
@@ -280,12 +302,20 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                                     if ("/shared/vendor/vendor.dovecot/ext-account".equals(name)) {
                                         String value = metadatas[index++];
                                         if (!"NIL".equalsIgnoreCase(value)) {
-                                            extAccount = metadatas[index++];
+                                            if (value.startsWith("{")) {
+                                                extAccount = metadatas[index++];
+                                            } else {
+                                                extAccount = value;
+                                            }
                                         }
                                     } else if ("/shared/vendor/vendor.dovecot/alias".equals(name)) {
                                         String value = metadatas[index++];
                                         if (!"NIL".equalsIgnoreCase(value)) {
-                                            alias = metadatas[index++];
+                                            if (value.startsWith("{")) {
+                                                alias = metadatas[index++];
+                                            } else {
+                                                alias = value;
+                                            }
                                         }
                                     }
                                 }
@@ -299,16 +329,10 @@ public class ExtAccountFolderField implements AdditionalFolderField {
 
                         // Dispatch remaining untagged responses
                         protocol.notifyResponseHandlers(r);
-                        protocol.handleResult(response);
 
                         return null;
                     } else if (response.isBAD()) {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
-                    } else if (response.isNO()) {
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
                             ImapUtility.appendCommandInfo(response.toString(), imapFolder)));

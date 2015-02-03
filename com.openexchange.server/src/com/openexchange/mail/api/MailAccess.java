@@ -87,6 +87,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSession;
@@ -141,6 +142,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             return this;
         }
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------- //
+
+    /** The session parameter that may hold the established {@link MailAccess} instance for the <b>primary</b> mail account */
+    public static final String PARAM_MAIL_ACCESS = "__mailaccess";
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -708,6 +714,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 checkDefaultFolderOnConnect();
             }
         }
+        if ((MailAccount.DEFAULT_ID == accountId) && (session instanceof PutIfAbsent)) {
+            ((PutIfAbsent) session).setParameterIfAbsent(PARAM_MAIL_ACCESS, this);
+        }
         if (isTrackable() && false == tracked) {
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
@@ -825,6 +834,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             // Close mail connection
             closeInternal();
         } finally {
+            if (MailAccount.DEFAULT_ID == accountId) {
+                session.setParameter(PARAM_MAIL_ACCESS, null);
+            }
             // Remove from watcher no matter if cached or closed
             if (tracked) {
                 MailAccessWatcher.removeMailAccess(this);
