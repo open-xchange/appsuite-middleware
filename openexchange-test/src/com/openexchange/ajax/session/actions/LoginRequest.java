@@ -80,16 +80,23 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
      * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      * @return The login request
      */
-    public static LoginRequest createGuestLoginRequest(String share, String target, String login, String password, boolean failOnError) {
+    public static LoginRequest createGuestLoginRequest(String share, String target, String login, String password, String client, boolean failOnError) {
         List<Parameter> parameters = new ArrayList<Parameter>();
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "guest"));
         parameters.add(new URLParameter("share", share));
         if (null != target) {
             parameters.add(new URLParameter("target", target));
         }
+        if (null != client && !client.isEmpty()) {
+            parameters.add(new URLParameter(LoginFields.CLIENT_PARAM, client));
+        }
         parameters.add(new FieldParameter(PARAM_NAME, login));
         parameters.add(new FieldParameter(PARAM_PASSWORD, password));
         return new LoginRequest(parameters.toArray(new Parameter[parameters.size()]), failOnError);
+    }
+
+    public static LoginRequest createGuestLoginRequest(String share, String target, String login, String password, boolean failOnError) {
+        return createGuestLoginRequest(share, target, login, password, null, failOnError);
     }
 
     /**
