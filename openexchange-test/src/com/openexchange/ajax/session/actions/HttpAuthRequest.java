@@ -51,8 +51,6 @@ package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.tools.encoding.Base64;
-
-
 /**
  * {@link HttpAuthRequest}
  *

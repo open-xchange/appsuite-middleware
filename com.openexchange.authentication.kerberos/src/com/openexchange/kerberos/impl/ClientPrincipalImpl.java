@@ -111,4 +111,9 @@ public final class ClientPrincipalImpl implements ClientPrincipal {
     public byte[] getClientTicket() {
         return clientTicket;
     }
+
+    @Override
+    public boolean isSPNEGO() {
+        return null != clientTicket;
+    }
 }

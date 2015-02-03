@@ -49,12 +49,6 @@
 
 package com.openexchange.ajax.session.actions;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
 import com.openexchange.ajax.framework.Header;
 
 /**
@@ -83,28 +77,6 @@ public class EmptyHttpAuthRequest extends HttpAuthRequest {
 
     @Override
     public HttpAuthParser getParser() {
-        return new HttpAuthParser() {
-
-            @Override
-            public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-                setStatusCode(resp.getStatusLine().getStatusCode());
-                setReasonPhrase(resp.getStatusLine().getReasonPhrase());
-                if (locationNeeded) {
-                    parseLocationHeader(resp);
-                }
-                if (HttpServletResponse.SC_MOVED_TEMPORARILY == getStatusCode()) {
-                    return EntityUtils.toString(resp.getEntity());
-                }
-                return null;
-            }
-
-            @Override
-            public HttpAuthResponse parse(String body) throws JSONException {
-                if (locationNeeded) {
-                    return super.parse(body);
-                }
-                return createResponse(getLocation());
-            }
-        };
+        return new HttpAuthParser(locationNeeded);
     }
 }

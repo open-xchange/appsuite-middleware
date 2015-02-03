@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
-import org.json.JSONException;
 import com.openexchange.ajax.framework.AbstractRedirectParser;
 
 /**
@@ -64,8 +63,6 @@ import com.openexchange.ajax.framework.AbstractRedirectParser;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ResolveShareParser extends AbstractRedirectParser<ResolveShareResponse> {
-
-    private int statusCode;
 
     /**
      * Initializes a new {@link ResolveShareParser}.
@@ -85,15 +82,14 @@ public class ResolveShareParser extends AbstractRedirectParser<ResolveShareRespo
 
     @Override
     public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-        this.statusCode = resp.getStatusLine().getStatusCode();
         return super.checkResponse(resp);
     }
 
     @Override
-    protected ResolveShareResponse createResponse(String location) throws JSONException {
+    protected ResolveShareResponse createResponse(String location) {
         int fragIndex = location.indexOf('#');
         if (-1 == fragIndex) {
-            return new ResolveShareResponse(statusCode, location, Collections.<String, String>emptyMap());
+            return new ResolveShareResponse(getStatusCode(), location, Collections.<String, String>emptyMap());
         }
         String path = location.substring(0, fragIndex);
         String[] params = location.substring(fragIndex + 1).split("&");
@@ -106,7 +102,6 @@ public class ResolveShareParser extends AbstractRedirectParser<ResolveShareRespo
                 map.put(param.substring(0, assignPos), param.substring(assignPos + 1));
             }
         }
-        return new ResolveShareResponse(statusCode, path, map);
+        return new ResolveShareResponse(getStatusCode(), path, map);
     }
-
 }

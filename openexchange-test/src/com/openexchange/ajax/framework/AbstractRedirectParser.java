@@ -69,7 +69,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
 
-    private final boolean cookiesNeeded;
+    private final boolean cookiesNeeded, locationNeeded;
     private String location;
     private int statusCode;
     private String reasonPhrase;
@@ -79,8 +79,13 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
     }
 
     protected AbstractRedirectParser(boolean cookiesNeeded) {
+        this(cookiesNeeded, true);
+    }
+
+    protected AbstractRedirectParser(boolean cookiesNeeded, boolean locationNeeded) {
         super(true);
         this.cookiesNeeded = cookiesNeeded;
+        this.locationNeeded = locationNeeded;
     }
 
     protected int getStatusCode() {
@@ -112,6 +117,10 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
         throw new JSONException("Method not supported when parsing redirect responses.");
     }
 
+    protected boolean isCookiesNeeded() {
+        return cookiesNeeded;
+    }
+
     @Override
     public String checkResponse(HttpResponse resp) throws ParseException, IOException {
         statusCode = resp.getStatusLine().getStatusCode();
@@ -119,36 +128,44 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
         assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
         parseLocationHeader(resp);
         if (cookiesNeeded) {
-            boolean oxCookieFound = false;
-            boolean jsessionIdCookieFound = false;
-            HeaderElementIterator iter = new BasicHeaderElementIterator(resp.headerIterator("Set-Cookie"));
-            while (iter.hasNext()) {
-                HeaderElement element = iter.nextElement();
-                if (element.getName().startsWith(LoginServlet.SECRET_PREFIX)) {
-                    oxCookieFound = true;
-                    continue;
-                }
-                if (Tools.JSESSIONID_COOKIE.equals(element.getName())) {
-                    jsessionIdCookieFound = true;
-                    continue;
-                }
-            }
-            assertTrue("Session cookie is missing.", oxCookieFound);
-            assertTrue("JSESSIONID cookie is missing.", jsessionIdCookieFound);
+            parseCookies(resp);
         }
         return EntityUtils.toString(resp.getEntity());
     }
 
+    protected static final void parseCookies(HttpResponse resp) {
+        boolean oxCookieFound = false;
+        boolean jsessionIdCookieFound = false;
+        HeaderElementIterator iter = new BasicHeaderElementIterator(resp.headerIterator("Set-Cookie"));
+        while (iter.hasNext()) {
+            HeaderElement element = iter.nextElement();
+            if (element.getName().startsWith(LoginServlet.SECRET_PREFIX)) {
+                oxCookieFound = true;
+                continue;
+            }
+            if (Tools.JSESSIONID_COOKIE.equals(element.getName())) {
+                jsessionIdCookieFound = true;
+                continue;
+            }
+        }
+        assertTrue("Session cookie is missing.", oxCookieFound);
+        assertTrue("JSESSIONID cookie is missing.", jsessionIdCookieFound);
+    }
+
     protected final void parseLocationHeader(HttpResponse resp) {
         Header[] headers = resp.getHeaders("Location");
-        assertEquals("There should be exactly one Location header.", 1, headers.length);
-        location = headers[0].getValue();
-        assertNotNull("Location for redirect is missing.", location);
+        if (headers.length > 0) {
+            location = headers[0].getValue();
+        }
+        if (locationNeeded) {
+            assertEquals("There should be exactly one Location header.", 1, headers.length);
+            assertNotNull("Location for redirect is missing.", location);
+        }
     }
 
     @Override
     public T parse(String body) throws JSONException {
-        if (null == location) {
+        if (locationNeeded && null == location) {
             throw new JSONException("Location for redirect is missing. Ensure to call method parseLocationHeader(HttpResponse) when overwriting checkResponse(HttpResponse).");
         }
         return createResponse(location);

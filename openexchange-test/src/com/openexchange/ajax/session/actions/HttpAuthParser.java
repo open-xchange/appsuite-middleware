@@ -59,7 +59,11 @@ import com.openexchange.ajax.framework.AbstractRedirectParser;
 public class HttpAuthParser extends AbstractRedirectParser<HttpAuthResponse> {
 
     public HttpAuthParser() {
-        super();
+        this(true);
+    }
+
+    public HttpAuthParser(boolean locationNeeded) {
+        super(true, locationNeeded);
     }
 
     @Override

@@ -77,6 +77,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondService;
@@ -263,6 +264,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             track(TimerService.class, new TimerServiceTracker(context));
             track(SessionStorageService.class, new SessionStorageServiceTracker(this, context));
             trackService(ContextService.class);
+            track(SessionSerializationInterceptor.class, new SessionSerializationInterceptorTracker(context));
             openTrackers();
 
             final SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();

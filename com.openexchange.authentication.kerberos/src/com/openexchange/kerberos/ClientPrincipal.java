@@ -69,4 +69,6 @@ public interface ClientPrincipal extends Serializable {
 
     byte[] getClientTicket();
 
+    boolean isSPNEGO();
+
 }
