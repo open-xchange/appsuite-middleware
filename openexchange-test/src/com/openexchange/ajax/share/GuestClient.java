@@ -125,6 +125,7 @@ public class GuestClient extends AJAXClient {
     private final String module;
     private final String item;
     private final String folder;
+    private final String client;
 
     /**
      * Initializes a new {@link GuestClient}.
@@ -223,11 +224,16 @@ public class GuestClient extends AJAXClient {
      * @throws Exception
      */
     public GuestClient(AJAXSession ajaxSession, String url, String username, String password, boolean failOnNonRedirect, boolean mustLogout) throws Exception {
+        this(ajaxSession, url, username, password, null, failOnNonRedirect, mustLogout);
+    }
+
+    public GuestClient(AJAXSession ajaxSession, String url, String username, String password, String client, boolean failOnNonRedirect, boolean mustLogout) throws Exception {
         super(ajaxSession, mustLogout);
         prepareClient(getHttpClient(), username, password);
+        this.client = client;
         shareResponse = Executor.execute(this, new ResolveShareRequest(url, failOnNonRedirect));
         if (null != shareResponse.getLoginType()) {
-            loginResponse = login(shareResponse, password);
+            loginResponse = login(shareResponse, password, client);
             getSession().setId(loginResponse.getSessionId());
             if (false == loginResponse.hasError()) {
                 JSONObject data = (JSONObject) loginResponse.getData();
@@ -249,17 +255,21 @@ public class GuestClient extends AJAXClient {
         }
     }
 
-    private LoginResponse login(ResolveShareResponse shareResponse, String password) throws Exception {
+    private LoginResponse login(ResolveShareResponse shareResponse, String password, String client) throws Exception {
         LoginRequest loginRequest = null;
         if ("guest".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createGuestLoginRequest(
-                shareResponse.getShare(), shareResponse.getTarget(), shareResponse.getLoginName(), password, false);
+                shareResponse.getShare(), shareResponse.getTarget(), shareResponse.getLoginName(), password, client, false);
         } else if ("anonymous".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), password, false);
         } else {
             Assert.fail("unknown login type: " + shareResponse.getLoginType());
         }
         return Executor.execute(this, loginRequest);
+    }
+
+    private LoginResponse login(ResolveShareResponse shareResponse, String password) throws Exception {
+        return login(shareResponse, password, this.client);
     }
 
     private static void prepareClient(DefaultHttpClient httpClient, String username, String password) {
