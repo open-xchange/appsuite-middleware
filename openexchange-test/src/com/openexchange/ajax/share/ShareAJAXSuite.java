@@ -64,6 +64,7 @@ import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderTransactionTest;
 import com.openexchange.ajax.share.tests.GetALinkTest;
 import com.openexchange.ajax.share.tests.GetTest;
+import com.openexchange.ajax.share.tests.GuestAutologinTest;
 import com.openexchange.ajax.share.tests.GuestContactTest;
 import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.InviteTest;
@@ -110,6 +111,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(MailNotificationTest.class);
         tests.addTestSuite(StoreMetaInformationTest.class);
         tests.addTestSuite(GetTest.class);
+        tests.addTestSuite(GuestAutologinTest.class);
         return tests;
     }
 
