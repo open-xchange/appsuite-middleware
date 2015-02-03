@@ -115,7 +115,6 @@ import com.openexchange.user.UserService;
 public final class OAuthProviderActivator extends HousekeepingActivator {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthProviderActivator.class);
-    private boolean providerEnabled;
 
     private static final class HzConfigTracker implements ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> {
 
@@ -241,6 +240,8 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     // ---------------------------------------------------------------------------------------------
 
+    private volatile boolean providerEnabled;
+
     /**
      * Initializes a new {@link OAuthProviderActivator}.
      */
@@ -259,7 +260,8 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         final BundleContext context = this.context;
 
         ConfigurationService configService = getService(ConfigurationService.class);
-        providerEnabled = configService.getBoolProperty(OAuthProviderProperties.ENABLED, false);
+        boolean providerEnabled = configService.getBoolProperty(OAuthProviderProperties.ENABLED, false);
+        this.providerEnabled = providerEnabled;
         if (!providerEnabled) {
             LOG.info("OAuth provider is disabled by configuration.");
             return;
