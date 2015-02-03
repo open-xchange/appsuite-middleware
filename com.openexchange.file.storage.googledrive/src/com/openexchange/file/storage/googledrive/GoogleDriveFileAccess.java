@@ -706,10 +706,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
         try {
             // Search by pattern
-            List<File> files = searchByFileNamePattern(pattern, folderId);
-
-            // Sort collection
-            sort(files, sort, order);
+            List<File> files = searchByFileNamePattern(pattern, folderId, fields, sort, order);
 
             // Start, end...
             if ((start != NOT_SET) && (end != NOT_SET)) {
@@ -757,89 +754,64 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         return sequenceNumbers;
     }
 
-    private List<File> searchByFileNamePattern(String pattern, String folderId) throws OXException {
+    /**
+     * Searches for files whose filename matches the supplied pattern.
+     *
+     * @param pattern The pattern to search for
+     * @param folderId The parent folder identifier to restrict the search to, or <code>null</code> to search all folders
+     * @param fields The fields to retrieve
+     * @param sort The field to use to sort the results
+     * @param order The sort order to apply
+     * @return The found files
+     */
+    private List<File> searchByFileNamePattern(String pattern, String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
-            String fid = null == folderId ? null : toGoogleDriveFolderId(folderId);
-
-            if (isEmpty(pattern)) {
-                // Get all files
-                List<File> files = new LinkedList<File>();
-                {
-                    Drive.Files.List list = drive.files().list();
-                    {
-                        StringBuilder qBuilder = new StringBuilder(128).append(QUERY_STRING_FILES_ONLY);
-                        if (null != fid) {
-                            qBuilder.append(" and '").append(fid).append("' in parents");
-                        }
-                        list.setQ(qBuilder.toString());
-                    }
-
-                    FileList fileList = list.execute();
-                    if (!fileList.getItems().isEmpty()) {
-                        for (com.google.api.services.drive.model.File file : fileList.getItems()) {
-                            files.add(createFile(folderId, file.getId(), file, null));
-                        }
-
-                        String nextPageToken = fileList.getNextPageToken();
-                        while (!isEmpty(nextPageToken)) {
-                            list.setPageToken(nextPageToken);
-                            fileList = list.execute();
-                            if (!fileList.getItems().isEmpty()) {
-                                for (com.google.api.services.drive.model.File file : fileList.getItems()) {
-                                    files.add(createFile(folderId, file.getId(), file, null));
-                                }
-                            }
-
-                            nextPageToken = fileList.getNextPageToken();
-                        }
-                    }
-                }
-
-                return files;
+            List<File> files = new ArrayList<File>();
+            /*
+             * build search query
+             */
+            StringBuilder stringBuilder = new StringBuilder(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
+            if (null != folderId) {
+                stringBuilder.append(" and '").append(toGoogleDriveFolderId(folderId)).append("' in parents");
             }
-
-            // Search by pattern
-            List<File> files = new LinkedList<File>();
-            {
-                Drive.Files.List list = drive.files().list().setFields("kind,nextPageToken,items(" + getFields(ALL_FIELDS) + ")");
-                {
-                    StringBuilder qBuilder = new StringBuilder(128);
-                    qBuilder.append('\'').append(fid).append("' in parents and ");
-                    qBuilder.append("title contains '").append(pattern).append("' and ").append(QUERY_STRING_FILES_ONLY);
-                    if (null != fid) {
-                        qBuilder.append(" and '").append(fid).append("' in parents");
-                    }
-                    list.setQ(qBuilder.toString());
-                }
-
-                FileList fileList = list.execute();
-                if (!fileList.getItems().isEmpty()) {
-                    for (com.google.api.services.drive.model.File child : fileList.getItems()) {
-                        files.add(createFile(folderId, child.getId(), child, null));
-                    }
-
-                    String nextPageToken = fileList.getNextPageToken();
-                    while (!isEmpty(nextPageToken)) {
-                        list.setPageToken(nextPageToken);
-                        fileList = list.execute();
-                        if (!fileList.getItems().isEmpty()) {
-                            for (com.google.api.services.drive.model.File child : fileList.getItems()) {
-                                files.add(createFile(folderId, child.getId(), child, null));
-                            }
-                        }
-
-                        nextPageToken = fileList.getNextPageToken();
-                    }
-                }
+            if (null != pattern) {
+                stringBuilder.append(" and title contains '").append(escape(pattern)).append('\'');
             }
-
+            /*
+             * build request based on query
+             */
+            com.google.api.services.drive.Drive.Files.List listRequest = drive.files().list().setQ(stringBuilder.toString())
+                .setFields("kind,nextPageToken,items(" + getFields(fields, sort) + ')');
+            /*
+             * execute as often as needed & parse files
+             */
+            FileList fileList;
+            do {
+                fileList = listRequest.execute();
+                for (com.google.api.services.drive.model.File file : fileList.getItems()) {
+                    GoogleDriveFile metadata = createFile(folderId, file.getId(), file, fields);
+                    if (null == fields || fields.contains(Field.VERSION) || fields.contains(Field.NUMBER_OF_VERSIONS)) {
+                        List<Revision> revisions = drive.revisions().list(metadata.getId()).setFields("items/id").execute().getItems();
+                        if (null != revisions && 0 < revisions.size()) {
+                            metadata.setNumberOfVersions(revisions.size());
+                            metadata.setVersion(revisions.get(revisions.size() - 1).getId());
+                        }
+                    }
+                    files.add(metadata);
+                }
+                listRequest.setPageToken(fileList.getNextPageToken());
+            } while (null != fileList.getNextPageToken());
+            /*
+             * return sorted timed result
+             */
+            sort(files, sort, order);
             return files;
-        } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(null, e);
-        } catch (final IOException e) {
+        } catch (HttpResponseException e) {
+            throw handleHttpResponseError(folderId, e);
+        } catch (IOException e) {
             throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -963,13 +935,16 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     /**
      * Creates a {@link GoogleDriveFile} based on a {@link com.google.api.services.drive.model.File}.
      *
-     * @param folderId The folder identifier to apply
+     * @param folderId The folder identifier to apply, or <code>null</code> to get the parent folder from the file
      * @param fileId The file identifier to apply
      * @param file The file
      * @param fields The fields to assign, or <code>null</code> to set all fields
      * @return The file
      */
     private GoogleDriveFile createFile(String folderId, String fileId, com.google.api.services.drive.model.File file, List<Field> fields) throws OXException {
+        if (null == folderId && null != file && null != file.getParents() && 0 < file.getParents().size()) {
+            folderId = file.getParents().get(0).getId();
+        }
         return new GoogleDriveFile(folderId, fileId, userId, getRootFolderId()).parseGoogleDriveFile(file, fields);
     }
 
@@ -1061,11 +1036,26 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             Set<Field> fieldSet = new HashSet<Field>(requestedFields);
             if (null != additionalFields && 0 < additionalFields.length) {
                 for (Field additionalField : additionalFields) {
-                    fieldSet.add(additionalField);
+                    if (null != additionalField) {
+                        fieldSet.add(additionalField);
+                    }
                 }
             }
             return fieldSet;
         }
+    }
+
+    /**
+     * Escapes a pattern string to be used in Google Drive queries.
+     *
+     * @param pattern The pattern to escape
+     * @return The escaped pattern
+     */
+    private static String escape(String pattern) {
+        if (null == pattern) {
+            return pattern;
+        }
+        return pattern.replace("'", "\\'");
     }
 
 }
