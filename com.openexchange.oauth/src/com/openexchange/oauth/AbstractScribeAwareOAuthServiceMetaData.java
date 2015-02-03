@@ -124,8 +124,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         // Basic URL encoding
         OAuthConfigurationProperty redirectUrl = getOAuthProperty(OAuthPropertyID.redirectUrl);
         if (redirectUrl != null) {
-            String r = redirectUrl.getValue();
-            r.replaceAll(":", "%3A").replaceAll("/", "%2F");
+            String r = redirectUrl.getValue().replaceAll(":", "%3A").replaceAll("/", "%2F");
             addOAuthProperty(OAuthPropertyID.redirectUrl, new OAuthConfigurationProperty(redirectUrl.getName(), r));
         }
     }
