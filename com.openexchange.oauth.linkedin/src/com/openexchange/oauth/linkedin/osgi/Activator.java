@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -89,7 +90,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{ OAuthService.class, ConfigViewFactory.class, CapabilityService.class };
+        return new Class<?>[]{ OAuthService.class, ConfigurationService.class, ConfigViewFactory.class, CapabilityService.class };
     }
 
     @Override
