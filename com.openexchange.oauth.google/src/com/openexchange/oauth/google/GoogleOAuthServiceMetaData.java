@@ -54,7 +54,7 @@ import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.Google2Api;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class GoogleOAuthServiceMetaData extends AbstractScribeAwareOAuthServiceMetaData {
+public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     /**
      * Initializes a new {@link GoogleOAuthServiceMetaData}.
