@@ -57,7 +57,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,40 +66,33 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.FacebookApi;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.facebook.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataFacebookImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
-
-    private final DeferringURLService deferrer;
-
-    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.facebook.apiKey",
-        "com.openexchange.oauth.facebook.apiSecret"};
+public class OAuthServiceMetaDataFacebookImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataFacebookImpl}.
+     * 
      * @param configurationService
      */
     public OAuthServiceMetaDataFacebookImpl(final DeferringURLService deferrer) {
-        super();
-        this.deferrer = deferrer;
-        setAPIKeyName("com.openexchange.facebook.apiKey");
-        setAPISecretName("com.openexchange.facebook.secretKey");
+        super(Services.getServiceLookup(), "com.openexchange.oauth.facebook", "Facebook");
     }
 
     @Override
@@ -124,25 +118,26 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 
         if (restrictive) {
             return "offline_access,publish_stream,status_update,friends_about_me," +
-            		"friends_activities,friends_birthday," +
-            		"friends_education_history,friends_events,friends_hometown," +
-            		"friends_interests,friends_likes,friends_location," +
-            		"friends_photos,friends_relationships," +
-            		"friends_relationship_details,friends_status,friends_videos," +
-            		"friends_website,friends_work_history,email";
+                "friends_activities,friends_birthday," +
+                "friends_education_history,friends_events,friends_hometown," +
+                "friends_interests,friends_likes,friends_location," +
+                "friends_photos,friends_relationships," +
+                "friends_relationship_details,friends_status,friends_videos," +
+                "friends_website,friends_work_history,email";
         }
 
         return "offline_access,publish_stream,read_stream,status_update,user_about_me,friends_about_me," +
-                "user_activities,friends_activities,user_birthday,friends_birthday,user_education_history," +
-                "friends_education_history,user_events,friends_events,user_hometown,friends_hometown," +
-                "user_interests,friends_interests,user_likes,friends_likes,user_location,friends_location," +
-                "user_photos,friends_photos,user_relationships,friends_relationships,user_relationship_details," +
-                "friends_relationship_details,user_status,friends_status,user_videos,friends_videos," +
-                "user_website,friends_website,user_work_history,friends_work_history,email";
+            "user_activities,friends_activities,user_birthday,friends_birthday,user_education_history," +
+            "friends_education_history,user_events,friends_events,user_hometown,friends_hometown," +
+            "user_interests,friends_interests,user_likes,friends_likes,user_location,friends_location," +
+            "user_photos,friends_photos,user_relationships,friends_relationships,user_relationship_details," +
+            "friends_relationship_details,user_status,friends_status,user_videos,friends_videos," +
+            "user_website,friends_website,user_work_history,friends_work_history,email";
     }
 
     @Override
     public String modifyCallbackURL(final String callbackUrl, String currentHost, Session session) {
+        DeferringURLService deferrer = services.getService(DeferringURLService.class);
         if (deferrer == null) {
             return callbackUrl;
         }
@@ -161,8 +156,8 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) {
         final String code = parameter.get("code");
         arguments.put(OAuthConstants.ARGUMENT_PIN, code);
-        final String callbackUrl = (String)state.get(OAuthConstants.ARGUMENT_CALLBACK);
-        final String currentHost = (String)state.get(OAuthConstants.ARGUMENT_CURRENT_HOST);
+        final String callbackUrl = (String) state.get(OAuthConstants.ARGUMENT_CALLBACK);
+        final String currentHost = (String) state.get(OAuthConstants.ARGUMENT_CURRENT_HOST);
         final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         arguments.put(OAuthConstants.ARGUMENT_CALLBACK, modifyCallbackURL(callbackUrl, currentHost, session));
     }
@@ -265,7 +260,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     private OAuthToken parseResponse(final String string) {
         final Matcher matcher = EXTRACTOR.matcher(string);
         String token = null;
-        if(matcher.matches()) {
+        if (matcher.matches()) {
             token = matcher.group(1);
             token = checkToken(token);
         }
@@ -288,37 +283,34 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         return sb.toString();
     }
 
-	@Override
-	public API getAPI() {
-		return API.FACEBOOK;
-	}
+    @Override
+    public API getAPI() {
+        return API.FACEBOOK;
+    }
 
     @Override
     public Class<? extends Api> getScribeService() {
         return FacebookApi.class;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getPropertyId()
+     */
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        String apiKey = configService.getProperty(apiKeyName);
-        String secretKey = configService.getProperty(apiSecretName);
-
-        if (apiKey.isEmpty()) {
-            throw new IllegalStateException("Missing following property in configuration: " + apiKeyName);
-        }
-        if (secretKey.isEmpty()) {
-            throw new IllegalStateException("Missing following property in configuration: " + apiSecretName);
-        }
-
-        this.apiKey = apiKey;
-        this.apiSecret = secretKey;
+    protected String getPropertyId() {
+        return "facebook";
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getExtraPropertyNames()
+     */
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("facebookoauth.properties", PROPERTIES);
-        return map;
+    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
+        return Collections.emptyList();
     }
 
 }
