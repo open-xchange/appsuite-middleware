@@ -119,17 +119,20 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%dir /opt/open-xchange/etc/settings/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/boxcomoauth.properties
+%config(noreplace) /opt/open-xchange/etc/deferrer.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/dropboxoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
+%config(noreplace) /opt/open-xchange/etc/oauth.properties
+%config(noreplace) /opt/open-xchange/etc/twitteroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/flickroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
-%config(noreplace) /opt/open-xchange/etc/*
-%dir /opt/open-xchange/etc/settings/
-%config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
 * Fri Jan 30 2015 Steffen Templin <marcus.klein@open-xchange.com>

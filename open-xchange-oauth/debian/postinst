@@ -19,7 +19,7 @@ set -e
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
-PROTECT="facebookoauth.properties linkedinoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+PROTECT="boxcomoauth.properties dropboxoauth.properties facebookoauth.properties googleoauth.properties linkedinoauth.properties msliveconnectoauth.properties xingoauth.properties yahoooauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
 
 postFix() {
     local version=${1%-*}

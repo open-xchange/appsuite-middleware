@@ -1,3 +1,7 @@
+* 2015-02-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35902: Corrected configuration files marker and configuration files permissions of package open-xchange-oauth.
+
 * 2015-02-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 36431: Fixed typo in message's Content-Type header
