@@ -51,14 +51,12 @@ package com.openexchange.drive.impl.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.drive.impl.storage.StorageOperation;
-import com.openexchange.drive.impl.storage.filter.FileNameFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.FileStorageCapability;
@@ -102,7 +100,7 @@ public class DownloadHelper {
                 /*
                  * get the file's input stream
                  */
-                File file = discoverFile(path, fileVersion);
+                File file = session.getStorage().getFileByName(path, fileVersion.getName(), true);
                 if (null == file || false == ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
                     throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
                 }
@@ -116,30 +114,6 @@ public class DownloadHelper {
                 return new DriveFileHolder(session, inputStream, fileVersion.getName(), file.getFileMIMEType());
             }
         });
-    }
-
-    /**
-     * Discovers the file referenced by the supplied file version.
-     *
-     * @param path The path the file is located in
-     * @param fileVersion The file version to discover
-     * @return The file
-     */
-    private File discoverFile(String path, FileVersion fileVersion) throws OXException {
-        /*
-         * get file by name
-         */
-        File file = session.getStorage().getFileByName(path, fileVersion.getName(), true);
-        if (null == file && false == session.getStorage().supports(FileStorageCapability.SEARCH_BY_TERM)) {
-            /*
-             * also search file by listing the directory's contents as fallback for limited storages
-             */
-            List<File> files = session.getStorage().getFilesInFolder(session.getStorage().getFolderID(path));
-            if (null != files && 0 < files.size()) {
-                file = FileNameFilter.byName(fileVersion.getName(), true).find(files);
-            }
-        }
-        return file;
     }
 
     private InputStream getInputStream(File file, long offset, long length) throws OXException {

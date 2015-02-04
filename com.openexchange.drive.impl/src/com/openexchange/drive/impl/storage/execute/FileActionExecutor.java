@@ -174,7 +174,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                 download(action);
             } catch (OXException e) {
                 LOG.warn("Got exception during server-side execution of download action: {}\nSession: {}, path: {}, action: {}",
-                    e.getMessage(), session, path, action);
+                    e.getMessage(), session, path, action, e);
                 if (DriveUtils.indicatesQuotaExceeded(e)) {
                     /*
                      * quota exceeded
@@ -195,7 +195,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                 edit(action);
             } catch (OXException e) {
                 LOG.warn("Got exception during server-side execution of edit action: {}\nSession: {}, path: {}, action: {}",
-                    e.getMessage(), session, path, action);
+                    e.getMessage(), session, path, action, e);
                 if ("IFO-0100".equals(e.getErrorCode())) {
                     /*
                      * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors

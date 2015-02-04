@@ -639,6 +639,12 @@ public class DriveStorage {
             return new DriveMetadata(session, getFolder(path, false));
         }
         List<File> files = FileNameFilter.byName(name, normalizeFileNames).findAll(getDocuments(getFolderID(path), name, fields));
+        if (null == files || 0 == files.size() && false == supports(FileStorageCapability.SEARCH_BY_TERM)) {
+            /*
+             * also search file by listing the directory's contents as fallback for limited storages
+             */
+            files = getFilesInFolder(session.getStorage().getFolderID(path));
+        }
         return selectFile(files, name);
     }
 
