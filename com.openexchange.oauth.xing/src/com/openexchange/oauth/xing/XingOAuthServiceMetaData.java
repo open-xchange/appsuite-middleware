@@ -56,7 +56,7 @@ import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.server.ServiceLookup;
 
@@ -66,7 +66,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class XingOAuthServiceMetaData extends AbstractScribeAwareOAuthServiceMetaData {
+public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
