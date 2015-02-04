@@ -53,11 +53,16 @@ import static com.openexchange.folderstorage.outlook.sql.Utility.debugSQL;
 import static com.openexchange.folderstorage.outlook.sql.Utility.getDatabaseService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -76,37 +81,132 @@ public final class Delete {
         super();
     }
 
-    private static final String SQL_DELETE_SUBS =
-        "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    /**
+     * Hard-deletes given folder
+     *
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The optional user identifier
+     * @param folderId The folder identifier
+     * @param global Whether folder is global or not
+     * @param recursive Whether to delete recursively
+     * @throws OXException If deletion fails
+     */
+    public static void hardDeleteFolder(int cid, int tree, int user, String folderId, boolean global, boolean recursive) throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+        Connection con = databaseService.getWritable(cid);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+            hardDeleteFolder(cid, tree, user, folderId, global, recursive, con);
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con); // ROLLBACK
+            }
+            DBUtils.autocommit(con);
+            databaseService.backWritable(cid, con);
+        }
+    }
 
-    private static final String SQL_GLOBAL_DELETE_SUBS =
-        "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND folderId = ?";
+    /**
+     * Hard-deletes given folder
+     *
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The optional user identifier
+     * @param folderId The folder identifier
+     * @param global Whether folder is global or not
+     * @param recursive Whether to delete recursively
+     * @param con The connection to use
+     * @throws OXException If deletion fails
+     */
+    public static void hardDeleteFolder(int cid, int tree, int user, String folderId, boolean global, boolean recursive, Connection con) throws OXException {
+        if (null == con) {
+            hardDeleteFolder(cid, tree, user, folderId, global, recursive);
+            return;
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (recursive) {
+                stmt = con.prepareStatement(global ? "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND parentId = ?" : "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?");
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                if (!global) {
+                    stmt.setInt(pos++, user);
+                }
+                stmt.setString(pos, folderId);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    List<String> children = new LinkedList<String>();
+                    do {
+                        children.add(rs.getString(1));
+                    } while (rs.next());
+                    Databases.closeSQLStuff(rs, stmt);
 
-    private static final String SQL_DELETE_INSERT_SUBS =
-        "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+                    for (String childId : children) {
+                        boolean nextGlobal = global && (Tools.getUnsignedInteger(childId) > 0);
+                        hardDeleteFolder(cid, tree, user, childId, nextGlobal, true, con);
+                    }
+                } else {
+                    Databases.closeSQLStuff(rs, stmt);
+                }
+            }
 
-    private static final String SQL_GLOBAL_DELETE_INSERT_SUBS =
-        "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND folderId = ?";
+            // Delete subscribe data
+            {
+                stmt = con.prepareStatement(global ? "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND folderId = ?" : "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                if (!global) {
+                    stmt.setInt(pos++, user);
+                }
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+            }
 
-    private static final String SQL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+            // Delete permission data
+            {
+                stmt = con.prepareStatement(global ? "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND folderId = ?" : "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                if (!global) {
+                    stmt.setInt(pos++, user);
+                }
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+            }
 
-    private static final String SQL_GLOBAL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND folderId = ?";
-
-    private static final String SQL_DELETE_INSERT_PERMS =
-        "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-
-    private static final String SQL_GLOBAL_DELETE_INSERT_PERMS =
-        "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND folderId = ?";
-
-    private static final String SQL_DELETE = "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-
-    private static final String SQL_GLOBAL_DELETE = "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND folderId = ?";
-
-    private static final String SQL_DELETE_INSERT =
-        "INSERT INTO virtualBackupTree (cid, tree, user, folderId, parentId, lastModified, modifiedBy, shadow, sortNum) SELECT virtualTree.cid, virtualTree.tree, virtualTree.user, virtualTree.folderId, virtualTree.parentId, virtualTree.lastModified, virtualTree.modifiedBy, virtualTree.shadow, virtualTree.sortNum FROM virtualTree WHERE virtualTree.cid = ? AND virtualTree.tree = ? AND virtualTree.user = ? AND virtualTree.folderId = ?";
-
-    private static final String SQL_GLOBAL_DELETE_INSERT =
-        "INSERT INTO virtualBackupTree (cid, tree, user, folderId, parentId, lastModified, modifiedBy, shadow, sortNum) SELECT virtualTree.cid, virtualTree.tree, virtualTree.user, virtualTree.folderId, virtualTree.parentId, virtualTree.lastModified, virtualTree.modifiedBy, virtualTree.shadow, virtualTree.sortNum FROM virtualTree WHERE virtualTree.cid = ? AND virtualTree.tree = ? AND virtualTree.folderId = ?";
+            // Delete folder data
+            {
+                stmt = con.prepareStatement(global ? "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND folderId = ?" : "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                if (!global) {
+                    stmt.setInt(pos++, user);
+                }
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+            }
+        } catch (SQLException e) {
+            debugSQL(stmt);
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
 
     /**
      * Deletes specified folder.
@@ -166,7 +266,7 @@ public final class Delete {
              * Backup folder data
              */
             try {
-                stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_INSERT : SQL_DELETE_INSERT);
+                stmt = con.prepareStatement(global ? "INSERT INTO virtualBackupTree (cid, tree, user, folderId, parentId, lastModified, modifiedBy, shadow, sortNum) SELECT virtualTree.cid, virtualTree.tree, virtualTree.user, virtualTree.folderId, virtualTree.parentId, virtualTree.lastModified, virtualTree.modifiedBy, virtualTree.shadow, virtualTree.sortNum FROM virtualTree WHERE virtualTree.cid = ? AND virtualTree.tree = ? AND virtualTree.folderId = ?" : "INSERT INTO virtualBackupTree (cid, tree, user, folderId, parentId, lastModified, modifiedBy, shadow, sortNum) SELECT virtualTree.cid, virtualTree.tree, virtualTree.user, virtualTree.folderId, virtualTree.parentId, virtualTree.lastModified, virtualTree.modifiedBy, virtualTree.shadow, virtualTree.sortNum FROM virtualTree WHERE virtualTree.cid = ? AND virtualTree.tree = ? AND virtualTree.user = ? AND virtualTree.folderId = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -189,7 +289,7 @@ public final class Delete {
              * Backup permission data
              */
             try {
-                stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_INSERT_PERMS : SQL_DELETE_INSERT_PERMS);
+                stmt = con.prepareStatement(global ? "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND folderId = ?" : "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -209,7 +309,7 @@ public final class Delete {
              * Backup subscribe data
              */
             try {
-                stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_INSERT_SUBS : SQL_DELETE_INSERT_SUBS);
+                stmt = con.prepareStatement(global ? "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND folderId = ?" : "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -230,7 +330,7 @@ public final class Delete {
          * Delete subscribe data
          */
         try {
-            stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_SUBS : SQL_DELETE_SUBS);
+            stmt = con.prepareStatement(global ? "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND folderId = ?" : "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);
@@ -249,7 +349,7 @@ public final class Delete {
          * Delete permission data
          */
         try {
-            stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE_PERMS : SQL_DELETE_PERMS);
+            stmt = con.prepareStatement(global ? "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND folderId = ?" : "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);
@@ -269,7 +369,7 @@ public final class Delete {
          */
         final boolean success;
         try {
-            stmt = con.prepareStatement(global ? SQL_GLOBAL_DELETE : SQL_DELETE);
+            stmt = con.prepareStatement(global ? "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND folderId = ?" : "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);

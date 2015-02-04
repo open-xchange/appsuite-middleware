@@ -119,7 +119,10 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
+import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.osgi.Services;
+import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -649,34 +652,26 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
     @Override
     public void deleteFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
+        int folderId = Integer.parseInt(folderIdentifier);
+
+        ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
         try {
-            final Connection con = provider.getConnection();
-            final FolderObject fo = new FolderObject();
-            final int folderId = Integer.parseInt(folderIdentifier);
+            Connection con = provider.getConnection();
+            FolderObject fo = new FolderObject();
             fo.setObjectID(folderId);
-            final Session session = storageParameters.getSession();
+            Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
             FolderServiceDecorator decorator = storageParameters.getDecorator();
-            boolean hardDelete = null != decorator && (
-                Boolean.TRUE.equals(decorator.getProperty("hardDelete")) || decorator.getBoolProperty("hardDelete"));
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
-            /*-
-             * TODO: Perform last-modified check?
-            {
-                final Date clientLastModified = storageParameters.getTimeStamp();
-                if (null != clientLastModified && getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(
-                    clientLastModified)) {
-                    throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
-                }
-            }
-             *
-             */
+            boolean hardDelete = null != decorator && (Boolean.TRUE.equals(decorator.getProperty("hardDelete")) || decorator.getBoolProperty("hardDelete"));
+            OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.deleteFolder(fo, true, System.currentTimeMillis(), hardDelete);
 
-            final List<OXException> warnings = folderManager.getWarnings();
+            // Cleanse from other folder storage, too
+            Delete.hardDeleteFolder(session.getContextId(), Tools.getUnsignedInteger(OutlookFolderStorage.OUTLOOK_TREE_ID), session.getUserId(), folderIdentifier, true, true, con);
+
+            List<OXException> warnings = folderManager.getWarnings();
             if (null != warnings) {
                 for (final OXException warning : warnings) {
                     storageParameters.addWarning(warning);
