@@ -109,11 +109,6 @@ public final class BoxComOAuthServiceMetaData extends AbstractScribeAwareOAuthSe
     }
 
     @Override
-    public String getScope() {
-        return null;
-    }
-
-    @Override
     public API getAPI() {
         return API.BOX_COM;
     }

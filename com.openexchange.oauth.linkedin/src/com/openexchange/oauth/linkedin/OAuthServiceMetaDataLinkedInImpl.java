@@ -106,11 +106,6 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthSe
     }
 
     @Override
-    public String processAuthorizationURL(final String authUrl) {
-        return authUrl;
-    }
-
-    @Override
     public API getAPI() {
         return API.LINKEDIN;
     }
