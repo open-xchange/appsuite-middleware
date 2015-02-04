@@ -49,17 +49,14 @@
 
 package com.openexchange.oauth.twitter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Collections;
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.TwitterApi;
 import org.slf4j.Logger;
-import com.openexchange.ajax.AJAXUtility;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -68,25 +65,15 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaData implements Reloadable {
+public class OAuthServiceMetaDataTwitterImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OAuthServiceMetaDataTwitterImpl.class);
-
-    private final static String[] PROPERTIES = new String[] {"com.openexchange.twitter.consumerKey",
-        "com.openexchange.twitter.consumerSecret"};
-
-    // -------------------------------------------------------------------------------------------------------------------------- //
-
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
      */
     public OAuthServiceMetaDataTwitterImpl(ServiceLookup services) {
-        super();
-        this.services = services;
-        setAPIKeyName("com.openexchange.twitter.consumerKey");
-        setAPISecretName("com.openexchange.twitter.consumerSecret");
+        super(services, "com.openexchange.oauth.twitter", "Twitter");
     }
 
     @Override
@@ -100,24 +87,11 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
     }
 
     @Override
-    public void reloadConfiguration(final ConfigurationService configService) {
-        // Nothing to do since AbstractOAuthServiceMetaData is initialized with property names;
-        // Values are read on demand
+    public API getAPI() {
+        return API.TWITTER;
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("twitteroauth.properties", PROPERTIES);
-        return map;
-    }
-
-	@Override
-	public API getAPI() {
-		return API.TWITTER;
-	}
-
-	@Override
     public boolean registerTokenBasedDeferrer() {
         return true;
     }
@@ -140,41 +114,19 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
         return retval;
     }
 
-    private String extractProtocol(final String url) {
-        return Strings.toLowerCase(url).startsWith("https") ? "https" : "http";
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return TwitterApi.class;
     }
 
-    private String deferredURLUsing(final String url, final String domain) {
-        if (url == null) {
-            return null;
-        }
-        if (Strings.isEmpty(domain)) {
-            return url;
-        }
-        String deferrerURL = domain.trim();
-        final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
-        if (!path.startsWith("/")) {
-            path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
-        }
-        if (seemsAlreadyDeferred(url, deferrerURL, path)) {
-            // Already deferred
-            return url;
-        }
-        // Return deferred URL
-        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtility.encodeUrl(url, false, false)).toString();
+    @Override
+    protected String getPropertyId() {
+        return "twitter";
     }
 
-    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {
-        final String str = "://";
-        final int pos1 = url.indexOf(str);
-        final int pos2 = deferrerURL.indexOf(str);
-        if (pos1 > 0 && pos2 > 0) {
-            final String deferrerPrefix = new StringBuilder(deferrerURL.substring(pos2)).append(path).toString();
-            return url.substring(pos1).startsWith(deferrerPrefix);
-        }
-        final String deferrerPrefix = new StringBuilder(deferrerURL).append(path).toString();
-        return url.startsWith(deferrerPrefix);
+    @Override
+    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
+        return Collections.emptyList();
     }
 
 }
