@@ -105,4 +105,11 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
     public Class<? extends Api> getScribeService() {
         return Google2Api.class;
     }
+
+    @Override
+    public String processAuthorizationURL(String authUrl) {
+        StringBuilder authUrlBuilder = new StringBuilder();
+        authUrlBuilder.append(super.processAuthorizationURL(authUrl));
+        return authUrlBuilder.append("&approval_prompt=force").toString();
+    }
 }
