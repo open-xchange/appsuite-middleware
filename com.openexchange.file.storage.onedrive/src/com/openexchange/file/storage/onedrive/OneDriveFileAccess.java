@@ -49,25 +49,24 @@
 
 package com.openexchange.file.storage.onedrive;
 
-import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.file.storage.onedrive.OneDriveConstants.QUERY_PARAM_LIMIT;
+import static com.openexchange.file.storage.onedrive.OneDriveConstants.QUERY_PARAM_OFFSET;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.http.HttpEntity;
+import java.util.Map;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.entity.mime.FormBodyPart;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -76,14 +75,19 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpCopy;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
+import com.openexchange.file.storage.onedrive.rest.Image;
 import com.openexchange.file.storage.onedrive.rest.file.RestFile;
 import com.openexchange.file.storage.onedrive.rest.file.RestFileResponse;
 import com.openexchange.groupware.results.Delta;
@@ -98,21 +102,23 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware {
-
-    private static final String QUERY_PARAM_LIMIT = OneDriveConstants.QUERY_PARAM_LIMIT;
-    private static final String QUERY_PARAM_OFFSET = OneDriveConstants.QUERY_PARAM_OFFSET;
+public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware, FileStorageSequenceNumberProvider {
 
     private final OneDriveAccountAccess accountAccess;
     final int userId;
 
     /**
      * Initializes a new {@link OneDriveFileAccess}.
+     *
+     * @param oneDriveAccess The underlying One Drive access
+     * @param account The underlying account
+     * @param session The session The account access
+     * @param accountAccess The account access
      */
     public OneDriveFileAccess(OneDriveAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess) {
         super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
-        userId = session.getUserId();
+        this.userId = session.getUserId();
     }
 
     @Override
@@ -156,12 +162,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
             @Override
             protected Boolean doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpGet request = null;
                 try {
-                    HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
-                    request = method;
-
-                    HttpResponse response = execute(method, httpClient);
+                    request = new HttpGet(buildUri(id, initiateQueryString()));
+                    HttpResponse response = execute(request, httpClient);
                     return Boolean.valueOf(200 == response.getStatusLine().getStatusCode());
                 } catch (HttpResponseException e) {
                     if (404 == e.getStatusCode()) {
@@ -183,17 +187,13 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
             @Override
             protected File doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpGet request = null;
                 try {
-                    HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
-                    request = method;
-
-                    RestFile restFile = handleHttpResponse(execute(method, httpClient), RestFile.class);
+                    request = new HttpGet(buildUri(id, initiateQueryString()));
+                    RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
                     return new OneDriveFile(folderId, id, userId, getRootFolderId()).parseOneDriveFile(restFile);
                 } finally {
-                    if (null != request) {
-                        request.releaseConnection();
-                    }
+                    reset(request);
                 }
             }
         });
@@ -205,32 +205,47 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     }
 
     @Override
-    public IDTuple saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-            return perform(new OneDriveClosure<IDTuple>() {
+    public IDTuple saveFileMetadata(final File file, long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        return perform(new OneDriveClosure<IDTuple>() {
 
-                @Override
-                protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                    HttpRequestBase request = null;
-                    try {
-                        HttpPost method = new HttpPost(buildUri(file.getId(), null));
-                        request = method;
-                        method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("name", file.getFileName())));
+            @Override
+            protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                HttpPut request = null;
+                try {
+                    if (FileStorageFileAccess.NEW == file.getId()) {
+                        /*
+                         * create new, empty file ("touch")
+                         */
+                        request = new HttpPut(buildUri(toOneDriveFolderId(file.getFolderId()) + "/files/" + file.getFileName(), initiateQueryString()));
 
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        String newFileId = jResponse.getString("id");
-                        return new IDTuple(file.getFolderId(), newFileId);
-                    } catch (HttpResponseException e) {
-                        throw handleHttpResponseError(file.getId(), e);
-                    } finally {
-                        reset(request);
+                    } else {
+                        /*
+                         * rename / description change
+                         */
+                        if (null != modifiedFields && false == modifiedFields.contains(Field.FILENAME) && false == modifiedFields.contains(Field.DESCRIPTION)) {
+                            // no change
+                            return new IDTuple(file.getFolderId(), file.getId());
+                        }
+                        request = new HttpPut(buildUri(file.getId(), initiateQueryString()));
                     }
+                    JSONObject json = new JSONObject(2);
+                    if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+                        json.put("name", file.getFileName());
+                    }
+                    if (null == modifiedFields || modifiedFields.contains(Field.DESCRIPTION)) {
+                        json.put("description", file.getDescription());
+                    }
+                    request.setEntity(asHttpEntity(json));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                    file.setId(jResponse.getString("id"));
+                    return new IDTuple(file.getFolderId(), file.getId());
+                } catch (HttpResponseException e) {
+                    throw handleHttpResponseError(file.getId(), e);
+                } finally {
+                    reset(request);
                 }
-            });
-        }
-        return new IDTuple(file.getFolderId(), file.getId());
+            }
+        });
     }
 
     @Override
@@ -239,61 +254,34 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             // can only copy the current revision
             throw OneDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
-
-        return perform(new OneDriveClosure<IDTuple>() {
+        if (destFolder.equals(source.getFolder()) && null != update && null != update.getFileName()) {
+            /*
+             * special handling to copy within the same folder
+             */
+            InputStream data = null;
+            try {
+                data = getDocument(source.getFolder(), source.getId(), CURRENT_VERSION);
+                DefaultFile toCreate = new DefaultFile(update);
+                toCreate.setId(NEW);
+                toCreate.setFolderId(destFolder);
+                return saveDocument(toCreate, data, UNDEFINED_SEQUENCE_NUMBER);
+            } finally {
+                Streams.close(data);
+            }
+        }
+        /*
+         * perform copy operation
+         */
+        IDTuple result = perform(new OneDriveClosure<IDTuple>() {
 
             @Override
             protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpCopy request = null;
                 try {
-                    String newFileId;
-                    {
-                        HttpCopy method = new HttpCopy(buildUri(source.getId(), null));
-                        request = method;
-                        method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("destination", toOneDriveFolderId(destFolder))));
-
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        newFileId = jResponse.getString("id");
-                        reset(request);
-                        request = null;
-                    }
-
-                    String fileName = null;
-                    if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-                        HttpPost method = new HttpPost(buildUri(newFileId, null));
-                        request = method;
-                        method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        fileName = update.getFileName();
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("name", fileName)));
-
-                        handleHttpResponse(execute(method, httpClient), Void.class);
-                        reset(request);
-                        request = null;
-                    }
-
-                    if (null != newFile) {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("overwrite", "true"));
-
-                        HttpPost method = new HttpPost(buildUri(newFileId, qparams));
-                        request = method;
-
-                        //MimeTypeMap map = Services.getService(MimeTypeMap.class);
-                        //String contentType = map.getContentType(fileName);
-
-                        MultipartEntity multipartEntity = new MultipartEntity();
-                        multipartEntity.addPart(new FormBodyPart("file", new InputStreamBody(newFile, "application/octet-stream", fileName)));
-                        method.setEntity(multipartEntity);
-
-                        handleHttpResponse(execute(method, httpClient), Void.class);
-                        reset(request);
-                        request = null;
-                    }
-
-                    return new IDTuple(destFolder, newFileId);
+                    request = new HttpCopy(buildUri(source.getId(), initiateQueryString()));
+                    request.setEntity(asHttpEntity(new JSONObject(2).put("destination", toOneDriveFolderId(destFolder))));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                    return new IDTuple(destFolder, jResponse.getString("id"));
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(source.getId(), e);
                 } finally {
@@ -301,43 +289,33 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 }
             }
         });
+        /*
+         * update additional metadata as needed
+         */
+        if (null != update) {
+            DefaultFile toUpdate = new DefaultFile(update);
+            toUpdate.setId(result.getId());
+            toUpdate.setFolderId(result.getFolder());
+            result = saveFileMetadata(update, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
+        }
+        return result;
     }
 
     @Override
     public IDTuple move(final IDTuple source, final String destFolder, long sequenceNumber, final File update, final List<File.Field> modifiedFields) throws OXException {
-        return perform(new OneDriveClosure<IDTuple>() {
+        /*
+         * perform move operation
+         */
+        IDTuple result = perform(new OneDriveClosure<IDTuple>() {
 
             @Override
             protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpMove request = null;
                 try {
-                    String newFileId;
-                    {
-                        HttpMove method = new HttpMove(buildUri(source.getId(), null));
-                        request = method;
-                        method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("destination", toOneDriveFolderId(destFolder))));
-
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        newFileId = jResponse.getString("id");
-                        reset(request);
-                        request = null;
-                    }
-
-                    String fileName = null;
-                    if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-                        HttpPost method = new HttpPost(buildUri(newFileId, initiateQueryString()));
-                        request = method;
-                        fileName = update.getFileName();
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("name", fileName)));
-
-                        handleHttpResponse(execute(method, httpClient), Void.class);
-                        reset(request);
-                        request = null;
-                    }
-
-                    return new IDTuple(destFolder, newFileId);
+                    request = new HttpMove(buildUri(source.getId(), initiateQueryString()));
+                    request.setEntity(asHttpEntity(new JSONObject(1).put("destination", toOneDriveFolderId(destFolder))));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                    return new IDTuple(destFolder, jResponse.getString("id"));
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(source.getId(), e);
                 } finally {
@@ -345,6 +323,16 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 }
             }
         });
+        /*
+         * update additional metadata as needed
+         */
+        if (null != update) {
+            DefaultFile toUpdate = new DefaultFile(update);
+            toUpdate.setId(result.getId());
+            toUpdate.setFolderId(result.getFolder());
+            result = saveFileMetadata(update, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
+        }
+        return result;
     }
 
     @Override
@@ -353,13 +341,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
             @Override
             protected InputStream doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpGet request = null;
                 boolean error = true;
                 try {
-                    HttpGet method = new HttpGet(buildUri(id + "/content", initiateQueryString()));
-                    request = method;
-
-                    HttpResponse httpResponse = execute(method, httpClient);
+                    request = new HttpGet(buildUri(id + "/content", initiateQueryString()));
+                    HttpResponse httpResponse = execute(request, httpClient);
                     InputStream content = httpResponse.getEntity().getContent();
                     error = false;
                     return content;
@@ -369,7 +355,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     }
                 }
             }
-
         });
     }
 
@@ -379,36 +364,44 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
             @Override
             protected InputStream doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpGet request = null;
                 boolean error = true;
                 try {
-                    HttpGet method = new HttpGet(buildUri(id, initiateQueryString()));
-                    request = method;
-
-                    RestFileResponse restResponse = handleHttpResponse(execute(method, httpClient), RestFileResponse.class);
-                    RestFile restFile = restResponse.getData().get(0);
-
-                    String thumbnailUrl = (String) restFile.getAdditionalProperties().get("picture");
-                    if (null == thumbnailUrl) {
-                        return null;
-                    }
-
+                    /*
+                     * discover thumbnail image url
+                     */
+                    String thumbnailUrl = null;
+                    request = new HttpGet(buildUri(id, initiateQueryString()));
+                    RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
                     reset(request);
-                    request = null;
-                    method = new HttpGet(thumbnailUrl);
-                    request = method;
-
-                    HttpResponse httpResponse = execute(method, httpClient);
-                    InputStream content = httpResponse.getEntity().getContent();
-                    error = false;
-                    return content;
+                    Image[] images = restFile.getImages();
+                    if (null != images && 0 < images.length) {
+                        String[] imageTypePreference = { "album", "thumbnail", "normal" };
+                        for (int i = 0; i < imageTypePreference.length && null == thumbnailUrl; i++) {
+                            for (Image image : images) {
+                                if (imageTypePreference[i].equals(image.getType())) {
+                                    /*
+                                     * get & return this thumbnail stream
+                                     */
+                                    request = new HttpGet(thumbnailUrl);
+                                    HttpResponse httpResponse = execute(request, httpClient);
+                                    InputStream content = httpResponse.getEntity().getContent();
+                                    error = false;
+                                    return content;
+                                }
+                            }
+                        }
+                    }
+                    /*
+                     * no thumbnail available
+                     */
+                    return null;
                 } finally {
                     if (error) {
                         reset(request);
                     }
                 }
             }
-
         });
     }
 
@@ -419,43 +412,21 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        final String id = file.getId();
-        final String oneDriveFolderId = toOneDriveFolderId(file.getFolderId());
         return perform(new OneDriveClosure<IDTuple>() {
 
             @Override
             protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpPut request = null;
                 try {
-                    if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
-                        HttpPut method = new HttpPut(buildUri(oneDriveFolderId + "/files/" + file.getFileName(), initiateQueryString()));
-                        request = method;
-
-                        HttpEntity entity = new InputStreamEntity(data, -1);
-                        method.setEntity(entity);
-
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        file.setId(jResponse.getString("id"));
-
-                        reset(request);
-                        request = null;
-                        return new IDTuple(file.getFolderId(), file.getId());
-                    } else {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair("overwrite", "true"));
-                        HttpPut method = new HttpPut(buildUri(oneDriveFolderId + "/files/" + file.getFileName(), qparams));
-                        request = method;
-
-                        HttpEntity entity = new InputStreamEntity(data, -1);
-                        method.setEntity(entity);
-
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        file.setId(jResponse.getString("id"));
-
-                        reset(request);
-                        request = null;
-                        return new IDTuple(file.getFolderId(), file.getId());
-                    }
+                    List<NameValuePair> queryParameters = initiateQueryString();
+                    queryParameters.add(new BasicNameValuePair("downsize_photo_uploads", "false"));
+                    String overwrite = FileStorageFileAccess.NEW == file.getId() ? "ChooseNewName" : "true";
+                    queryParameters.add(new BasicNameValuePair("overwrite", overwrite));
+                    request = new HttpPut(buildUri(toOneDriveFolderId(file.getFolderId()) + "/files/" + file.getFileName(), queryParameters));
+                    request.setEntity(new InputStreamEntity(data, -1));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                    file.setId(jResponse.getString("id"));
+                    return new IDTuple(file.getFolderId(), file.getId());
                 } finally {
                     reset(request);
                     Streams.close(data);
@@ -780,6 +751,20 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     @Override
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
+    }
+
+    @Override
+    public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
+        if (null == folderIds || 0 == folderIds.size()) {
+            return Collections.emptyMap();
+        }
+        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
+        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        for (String folderId : folderIds) {
+            Date lastModifiedDate = folderAccess.getFolder(folderId).getLastModifiedDate();
+            sequenceNumbers.put(folderId, null != lastModifiedDate ? Long.valueOf(lastModifiedDate.getTime()) : null);
+        }
+        return sequenceNumbers;
     }
 
     /**

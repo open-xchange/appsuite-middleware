@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.openexchange.file.storage.onedrive.rest.Image;
 import com.openexchange.file.storage.onedrive.rest.SharedInfo;
 import com.openexchange.file.storage.onedrive.rest.User;
 
@@ -36,11 +37,13 @@ import com.openexchange.file.storage.onedrive.rest.User;
     "comments_enabled",
     "is_embeddable",
     "source",
+    "picture",
     "link",
     "type",
     "shared_with",
     "created_time",
-    "updated_time"
+    "updated_time",
+    "images"
 })
 public class RestFile {
 
@@ -66,6 +69,8 @@ public class RestFile {
     private boolean isEmbeddable;
     @JsonProperty("source")
     private String source;
+    @JsonProperty("picture")
+    private String picture;
     @JsonProperty("link")
     private String link;
     @JsonProperty("type")
@@ -76,6 +81,9 @@ public class RestFile {
     private String createdTime;
     @JsonProperty("updated_time")
     private String updatedTime;
+    @JsonProperty("images")
+    private Image[] images;
+
     @JsonIgnore
     private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -198,6 +206,16 @@ public class RestFile {
         this.source = source;
     }
 
+    @JsonProperty("picture")
+    public String getPicture() {
+        return picture;
+    }
+
+    @JsonProperty("picture")
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
+
     @JsonProperty("link")
     public String getLink() {
         return link;
@@ -246,6 +264,16 @@ public class RestFile {
     @JsonProperty("updated_time")
     public void setUpdatedTime(String updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    @JsonProperty("images")
+    public Image[] getImages() {
+        return images;
+    }
+
+    @JsonProperty("images")
+    public void setImages(Image[] images) {
+        this.images = images;
     }
 
     @Override
