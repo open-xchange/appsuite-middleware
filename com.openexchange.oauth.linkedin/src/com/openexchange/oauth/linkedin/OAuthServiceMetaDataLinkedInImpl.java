@@ -49,14 +49,12 @@
 
 package com.openexchange.oauth.linkedin;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -65,23 +63,25 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
-
-    private final ServiceLookup services;
-
-    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.linkedin.apiKey",
-        "com.openexchange.oauth.linkedin.apiSecret" };
+public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
-        super();
-        this.services = services;
-        setAPIKeyName("com.openexchange.socialplugin.linkedin.apikey");
-        setAPISecretName("com.openexchange.socialplugin.linkedin.apisecret");
+        super(services, "com.openexchange.oauth.linkedin", "LinkedIn");
     }
 
     @Override
     public String getDisplayName() {
         return "LinkedIn";
+    }
+
+    @Override
+    protected String getPropertyId() {
+        return "linkedin";
+    }
+
+    @Override
+    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -118,28 +118,4 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     public Class<? extends Api> getScribeService() {
         return LinkedInApi.class;
     }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        String apiKey = configService.getProperty(apiKeyName);
-        String secretKey = configService.getProperty(apiSecretName);
-
-        if (apiKey.isEmpty()) {
-            throw new IllegalStateException("Missing following property in configuration: " + apiKeyName);
-        }
-        if (secretKey.isEmpty()) {
-            throw new IllegalStateException("Missing following property in configuration: " + apiSecretName);
-        }
-
-        this.apiKey = apiKey;
-        this.apiSecret = secretKey;
-    }
-
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("linkedin.properties", PROPERTIES);
-        return map;
-    }
-
 }
