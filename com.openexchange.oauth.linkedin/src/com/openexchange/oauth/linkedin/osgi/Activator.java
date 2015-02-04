@@ -90,7 +90,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{ OAuthService.class, ConfigurationService.class, ConfigViewFactory.class, CapabilityService.class };
+        return new Class<?>[] { ConfigurationService.class, OAuthService.class, ConfigViewFactory.class, CapabilityService.class };
     }
 
     @Override
@@ -107,6 +107,7 @@ public class Activator extends HousekeepingActivator {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "linkedin");
         registerService(CapabilityChecker.class, new CapabilityChecker() {
+
             @Override
             public boolean isEnabled(String capability, Session ses) throws OXException {
                 if ("linkedin".equals(capability)) {
@@ -133,6 +134,5 @@ public class Activator extends HousekeepingActivator {
     public void setOauthService(OAuthService service) {
         this.oauthService = service;
     }
-
 
 }
