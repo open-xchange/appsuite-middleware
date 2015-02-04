@@ -50,6 +50,7 @@
 package com.openexchange.drive.impl.storage.filter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -93,6 +94,18 @@ public abstract class DefaultFileFilter implements FileFilter {
                 }
             } finally {
                 SearchIterators.close(searchIterator);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public File find(Collection<? extends File> collection) throws OXException {
+        if (null != collection) {
+            for (File file : collection) {
+                if (accept(file)) {
+                    return file;
+                }
             }
         }
         return null;

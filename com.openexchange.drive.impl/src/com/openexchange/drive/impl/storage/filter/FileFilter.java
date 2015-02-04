@@ -1,5 +1,6 @@
 package com.openexchange.drive.impl.storage.filter;
 
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -40,5 +41,14 @@ public interface FileFilter {
      * @throws OXException
      */
     File find(SearchIterator<File> searchIterator) throws OXException;
+
+    /**
+     * Finds the first file from the supplied collection that is accepted by this filter.
+     *
+     * @param collection The collection to browse
+     * @return The first accepted file, or <code>null</code> if none was found
+     * @throws OXException
+     */
+    File find(Collection<? extends File> collection) throws OXException;
 
 }
