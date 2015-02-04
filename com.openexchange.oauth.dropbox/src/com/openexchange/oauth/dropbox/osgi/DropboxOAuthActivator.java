@@ -74,7 +74,7 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(getService(ConfigurationService.class));
+        DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(this);
         registerService(OAuthServiceMetaData.class, service);
         registerService(Reloadable.class, service);
     }
