@@ -62,6 +62,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
