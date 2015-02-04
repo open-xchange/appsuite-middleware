@@ -370,20 +370,18 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     /*
                      * discover thumbnail image url
                      */
-                    String thumbnailUrl = null;
                     request = new HttpGet(buildUri(id, initiateQueryString()));
                     RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
                     reset(request);
                     Image[] images = restFile.getImages();
                     if (null != images && 0 < images.length) {
-                        String[] imageTypePreference = { "album", "thumbnail", "normal" };
-                        for (int i = 0; i < imageTypePreference.length && null == thumbnailUrl; i++) {
+                        for (String imageType : new String[] { "album", "thumbnail", "normal" }) {
                             for (Image image : images) {
-                                if (imageTypePreference[i].equals(image.getType())) {
+                                if (imageType.equals(image.getType()) && null != image.getSource()) {
                                     /*
                                      * get & return this thumbnail stream
                                      */
-                                    request = new HttpGet(thumbnailUrl);
+                                    request = new HttpGet(image.getSource());
                                     HttpResponse httpResponse = execute(request, httpClient);
                                     InputStream content = httpResponse.getEntity().getContent();
                                     error = false;
