@@ -72,7 +72,7 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
      * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
      */
     public OAuthServiceMetaDataTwitterImpl(ServiceLookup services) {
-        super(services, "com.openexchange.oauth.twitter", "Twitter");
+        super(services, "com.openexchange.oauth.twitter", "Twitter", true, true);
     }
 
     @Override

@@ -76,6 +76,8 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     protected String id;
     protected String displayName;
+    protected boolean needsRequestToken = true;
+    protected boolean registerTokenBasedDeferrer = false;
 
     /**
      * Initializes a new {@link AbstractOAuthServiceMetaData}.
@@ -233,7 +235,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     @Override
     public boolean needsRequestToken() {
-        return true;
+        return needsRequestToken;
     }
 
     @Override
@@ -258,7 +260,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     @Override
     public boolean registerTokenBasedDeferrer() {
-        return false;
+        return registerTokenBasedDeferrer;
     }
 
     @Override

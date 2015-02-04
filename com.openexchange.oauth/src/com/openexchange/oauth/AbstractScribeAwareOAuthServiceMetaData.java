@@ -80,6 +80,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      * @param displayName The display name
      */
     public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, String id, String displayName) {
+        super();
         this.services = services;
 
         setId(id);
