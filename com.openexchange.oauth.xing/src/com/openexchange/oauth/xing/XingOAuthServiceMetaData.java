@@ -51,15 +51,14 @@ package com.openexchange.oauth.xing;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.OAuthToken;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link XingOAuthServiceMetaData}
@@ -68,8 +67,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class XingOAuthServiceMetaData extends AbstractScribeAwareOAuthServiceMetaData {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(XingOAuthServiceMetaData.class);
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
@@ -92,29 +89,6 @@ public final class XingOAuthServiceMetaData extends AbstractScribeAwareOAuthServ
     }
 
     @Override
-    public boolean registerTokenBasedDeferrer() {
-        return true;
-    }
-
-    @Override
-    public String modifyCallbackURL(final String callbackUrl, final String currentHost, final Session session) {
-        if (null == callbackUrl) {
-            return super.modifyCallbackURL(callbackUrl, currentHost, session);
-        }
-
-        final DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        if (null != deferrer && deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
-            final String retval = deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
-            LOGGER.debug("Initializing XING OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
-            return retval;
-        }
-
-        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).append('/').toString());
-        LOGGER.debug("Initializing XING OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
-        return retval;
-    }
-
-    @Override
     protected String getPropertyId() {
         return "xing";
     }
@@ -127,4 +101,23 @@ public final class XingOAuthServiceMetaData extends AbstractScribeAwareOAuthServ
         return col;
     }
 
+    @Override
+    public String processAuthorizationURL(final String authUrl) {
+        return authUrl;
+    }
+
+    @Override
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
+        // no-op
+    }
+
+    @Override
+    public String getRegisterToken(String authUrl) {
+        return null;
+    }
+
+    @Override
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
+        return null;
+    }
 }

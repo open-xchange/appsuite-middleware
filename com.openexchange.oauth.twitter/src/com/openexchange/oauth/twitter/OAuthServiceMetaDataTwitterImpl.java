@@ -51,23 +51,22 @@ package com.openexchange.oauth.twitter;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
-import org.slf4j.Logger;
-import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.OAuthToken;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataTwitterImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataTwitterImpl extends AbstractScribeAwareOAuthServiceMetaData {
-
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OAuthServiceMetaDataTwitterImpl.class);
+public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
@@ -92,29 +91,6 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractScribeAwareOAuthSer
     }
 
     @Override
-    public boolean registerTokenBasedDeferrer() {
-        return true;
-    }
-
-    @Override
-    public String modifyCallbackURL(final String callbackUrl, final String currentHost, final Session session) {
-        if (null == callbackUrl) {
-            return super.modifyCallbackURL(callbackUrl, currentHost, session);
-        }
-
-        final DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        if (null != deferrer && deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
-            final String retval = deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
-            LOGGER.debug("Initializing Twitter OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
-            return retval;
-        }
-
-        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).append('/').toString());
-        LOGGER.debug("Initializing Twitter OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
-        return retval;
-    }
-
-    @Override
     public Class<? extends Api> getScribeService() {
         return TwitterApi.class;
     }
@@ -129,4 +105,23 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractScribeAwareOAuthSer
         return Collections.emptyList();
     }
 
+    @Override
+    public String processAuthorizationURL(final String authUrl) {
+        return authUrl;
+    }
+
+    @Override
+    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
+        // no-op
+    }
+
+    @Override
+    public String getRegisterToken(String authUrl) {
+        return null;
+    }
+
+    @Override
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
+        return null;
+    }
 }
