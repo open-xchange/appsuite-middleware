@@ -110,6 +110,7 @@ import org.apache.james.mime4j.stream.FieldBuilder;
 import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -462,6 +463,58 @@ public final class MimeMessageUtility {
             ret = ret.substring(0, ret.lastIndexOf(ignorableSuffix));
         }
         return ret;
+    }
+
+    /**
+     * URL-decodes given string
+     *
+     * @param s The string
+     * @return The URL-decoded string
+     */
+    public static String urlDecode(String s) {
+        try {
+            return AJAXUtility.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
+        } catch (final RuntimeException e) {
+            return s;
+        }
+    }
+
+    private static final Pattern PATTERN_CODE_POINT = Pattern.compile("%u00([a-fA-F0-9]{2})");
+
+    private static String replaceURLCodePoints(String s) {
+        Matcher m = PATTERN_CODE_POINT.matcher(s);
+        StringBuffer buffer = new StringBuffer(s.length());
+        while (m.find()) {
+            char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
+            m.appendReplacement(buffer, com.openexchange.java.Strings.quoteReplacement(new String(chars)));
+        }
+        m.appendTail(buffer);
+        return buffer.toString();
+    }
+
+    /** The pattern for matching the <code>src</code> attribute within an &lt;img&gt; tag */
+    public static final Pattern PATTERN_SRC = Pattern.compile("<img[^>]*?src=\"([^\"]+)\"[^>]*/?>", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Yields a blank <code>src</code> attribute for passed &lt;img&gt; tag.
+     *
+     * @param imageTag The &lt;img&gt; tag
+     * @return The &lt;img&gt; tag with a blank <code>src</code> attribute
+     */
+    public static String blankSrc(final String imageTag) {
+        if (isEmpty(imageTag)) {
+            return imageTag;
+        }
+        final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
+        if (!srcMatcher.find()) {
+            return imageTag;
+        }
+        final StringBuffer sb = new StringBuffer(imageTag.length());
+        int st = srcMatcher.start(1);
+        int end = srcMatcher.end(1);
+        srcMatcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageTag.substring(end)));
+        srcMatcher.appendTail(sb);
+        return sb.toString();
     }
 
     private static final String IMAGE_ALIAS_APPENDIX = ImageActionFactory.ALIAS_APPENDIX;

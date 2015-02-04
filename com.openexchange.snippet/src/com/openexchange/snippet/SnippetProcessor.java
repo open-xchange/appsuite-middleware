@@ -52,21 +52,30 @@ package com.openexchange.snippet;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
+import java.util.Set;
 import java.util.regex.Pattern;
+import javax.mail.internet.MimeUtility;
+import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.internal.Services;
+import com.openexchange.version.Version;
 
 /**
  * {@link SnippetProcessor}
@@ -74,6 +83,8 @@ import com.openexchange.snippet.internal.Services;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SnippetProcessor {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SnippetProcessor.class);
 
     private static class InputStreamProviderImpl implements InputStreamProvider {
 
@@ -103,6 +114,8 @@ public class SnippetProcessor {
         }
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------
+
     private final Session session;
     private final Pattern pattern;
 
@@ -130,75 +143,148 @@ public class SnippetProcessor {
             return;
         }
 
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
-
-        ConfigProperty<Integer> maxImageLimitConf = configView.property("com.openexchange.mail.signature.maxImageLimit", Integer.class);
-
-        final Integer maxImageLimit;
-        if (maxImageLimitConf.isDefined()) {
-            maxImageLimit = maxImageLimitConf.get();
-        } else {
-            // Defaults to 3 images
-            maxImageLimit = 3;
-        }
-
-        final long maxImageSize;
+        long maxImageSize;
+        int maxImageLimit;
         {
-            ConfigProperty<Double> misConf = configView.property("com.openexchange.mail.signature.maxImageSize", Double.class);
-            final double mis;
-            if (misConf.isDefined()) {
-                mis = misConf.get();
+            ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+            ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
+            ConfigProperty<Integer> maxImageLimitConf = configView.property("com.openexchange.mail.signature.maxImageLimit", Integer.class);
+
+            if (maxImageLimitConf.isDefined()) {
+                maxImageLimit = maxImageLimitConf.get().intValue();
             } else {
-                // Defaults to 1 MB
-                mis = (1d);
+                // Defaults to 3 images
+                maxImageLimit = 3;
             }
-            maxImageSize = (long) (Math.pow(1024, 2) * mis);
+
+            {
+                ConfigProperty<Double> misConf = configView.property("com.openexchange.mail.signature.maxImageSize", Double.class);
+                final double mis;
+                if (misConf.isDefined()) {
+                    mis = misConf.get();
+                } else {
+                    // Defaults to 1 MB
+                    mis = (1d);
+                }
+                maxImageSize = (long) (Math.pow(1024, 2) * mis);
+            }
         }
 
         Map<String, String> imageTags = new HashMap<String, String>(maxImageLimit);
+        ImageMatcher m = ImageMatcher.matcher(content);
+        StringBuffer sb = new StringBuffer(content.length());
+        if (m.find()) {
+            ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
+            Set<String> trackedIds = new HashSet<String>(4);
+            int count = 0;
+            do {
+                String imageTag = m.group();
+                if (MimeMessageUtility.isValidImageUri(imageTag)) {
+                    String id = m.getManagedFileId();
+                    ManagedFile mf;
+                    if (null != id) {
+                        if (mfm.contains(id)) {
+                            try {
+                                mf = mfm.getByID(id);
+                            } catch (final OXException e) {
+                                LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id, e);
+                                // Anyway, replace image tag
+                                m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
+                                continue;
+                            }
+                        } else {
+                            LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id);
+                            // Anyway, replace image tag
+                            m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
+                            continue;
+                        }
 
-        final ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
-        final ImageMatcher m = ImageMatcher.matcher(content);
-        int count = 0;
-        while (m.find()) {
-            final String imageTag = m.group();
-            if (MimeMessageUtility.isValidImageUri(imageTag)) {
-                if (!imageTag.contains("picture?uid")) {
-                    final String id = m.getManagedFileId();
-                    imageTags.put(id, imageTag);
+                    } else {
+                        LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", m.getImageId());
+                        // Anyway, replace image tag
+                        m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
+                        continue;
+                    }
+                    boolean appendBodyPart = trackedIds.add(id);
+                    // Replace "src" attribute
+
+                    if (++count > maxImageLimit) {
+                        throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(maxImageLimit);
+                    }
+
+                    if (mf.getSize() > maxImageSize) {
+                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(maxImageSize);
+                    }
+
+                    String contentId = processLocalImage(mf, id, appendBodyPart, (DefaultSnippet) snippet);
+                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + contentId + "\""));
+                    iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + Version.NAME + "\"", "");
+                    m.appendLiteralReplacement(sb, iTag);
+                } else {
+                    /*
+                     * Re-append as-is
+                     */
+                    m.appendLiteralReplacement(sb, imageTag);
                 }
-                count++;
+            } while (m.find());
+        }
+        m.appendTail(sb);
+        ((DefaultSnippet) snippet).setContent(sb.toString());
+    }
+
+    /**
+     * Processes a local image and returns its content id
+     *
+     * @param mf The uploaded file
+     * @param id uploaded file's ID
+     * @param appendBodyPart
+     * @param tmp An instance of {@link StringBuilder}
+     * @param snippet The parent snippet
+     * @return the content id
+     * @throws OXException If an error occurs
+     */
+    private final String processLocalImage(ManagedFile mf, String id, boolean appendBodyPart, DefaultSnippet snippet) throws OXException {
+        /*
+         * Determine filename
+         */
+        String fileName = mf.getFileName();
+        if (null == fileName) {
+            /*
+             * Generate dummy file name
+             */
+            List<String> exts = MimeType2ExtMap.getFileExtensions(mf.getContentType().toLowerCase(Locale.ENGLISH));
+            StringBuilder sb = new StringBuilder("image.");
+            if (exts == null) {
+                sb.append("dat");
+            } else {
+                sb.append(exts.get(0));
+            }
+            fileName = sb.toString();
+        } else {
+            /*
+             * Encode image's file name for being mail-safe
+             */
+            try {
+                fileName = MimeUtility.encodeText(fileName, MailProperties.getInstance().getDefaultMimeCharset(), "Q");
+            } catch (UnsupportedEncodingException e) {
+                fileName = mf.getFileName();
             }
         }
-
-        if (count > maxImageLimit) {
-            throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(maxImageLimit);
-        }
-
-        for (String id : imageTags.keySet()) {
-            final ManagedFile mf = mfm.getByID(id);
-
-            if (mf.getSize() > maxImageSize) {
-                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(maxImageSize);
-            }
-
+        /*
+         * ... and cid
+         */
+        if (appendBodyPart) {
             DefaultAttachment att = new DefaultAttachment();
             att.setContentDisposition(mf.getContentDisposition());
             att.setContentType(mf.getContentType());
+            att.setContentId(new StringBuilder(32).append('<').append(id).append('>').toString());
             att.setId(mf.getID());
             att.setSize(mf.getSize());
             att.setStreamProvider(new InputStreamProviderImpl(mf));
             att.setFilename(mf.getFileName());
-
-            DefaultSnippet ds = (DefaultSnippet) snippet;
-            ds.addAttachment(att);
-
-            final String url = mf.constructURL(session);
-            String imageTag = imageTags.get(id);
-            String replacement = pattern.matcher(imageTag).replaceAll(Matcher.quoteReplacement("src=\"" + url + "\""));
-            content = content.replace(imageTag, replacement);
-            ds.setContent(content);
+            snippet.addAttachment(att);
         }
+        return id;
     }
+
 }

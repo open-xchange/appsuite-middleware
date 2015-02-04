@@ -54,6 +54,8 @@ import java.io.InputStream;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -63,6 +65,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.Snippet;
@@ -88,7 +93,7 @@ public class SnippetImageDataSource implements ImageDataSource {
 
     private static final long EXPIRES = ImageDataSource.YEAR_IN_MILLIS * 50;
 
-    private static final String[] ARGS = { "com.openexchange.snippet.id" };
+    private static final String[] ARGS = { "com.openexchange.snippet.id", "com.openexchange.snippet.cid" };
 
     /**
      * Returns the instance
@@ -99,12 +104,54 @@ public class SnippetImageDataSource implements ImageDataSource {
         return INSTANCE;
     }
 
+    private volatile ServiceListing<SnippetService> snippetServices;
+
     /**
      * Initializes a new {@link SnippetImageDataSource}.
      */
     private SnippetImageDataSource() {
         super();
 
+    }
+
+    /**
+     * Applies the service listing
+     *
+     * @param snippetServices The service listing
+     */
+    public void setServiceListing(ServiceListing<SnippetService> snippetServices) {
+        this.snippetServices = snippetServices;
+    }
+
+    /**
+     * Gets the snippet service.
+     *
+     * @param serverSession The server session
+     * @return The snippet service
+     * @throws OXException If appropriate Snippet service cannot be returned
+     */
+    private SnippetService getSnippetService(Session serverSession) throws OXException {
+        ServiceListing<SnippetService> snippetServices = this.snippetServices;
+        if (null == snippetServices) {
+            return null;
+        }
+        CapabilityService capabilityService = Services.optService(CapabilityService.class);
+        for (SnippetService snippetService : snippetServices.getServiceList()) {
+            List<String> neededCapabilities = snippetService.neededCapabilities();
+            if (null == capabilityService || (null == neededCapabilities || neededCapabilities.isEmpty())) {
+                // Either no capabilities signaled or service is absent (thus not able to check)
+                return snippetService;
+            }
+            CapabilitySet capabilities = capabilityService.getCapabilities(serverSession);
+            boolean contained = true;
+            for (int i = neededCapabilities.size(); contained && i-- > 0;) {
+                contained = capabilities.contains(neededCapabilities.get(i));
+            }
+            if (contained) {
+                return snippetService;
+            }
+        }
+        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SnippetService.class.getSimpleName());
     }
 
     @SuppressWarnings("unchecked")
@@ -114,51 +161,57 @@ public class SnippetImageDataSource implements ImageDataSource {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
         }
 
-        final int signId;
-        final String arg = dataArguments.get(ARGS[0]);
-        if (arg == null) {
+        String id = dataArguments.get(ARGS[0]);
+        if (id == null) {
             throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[0]);
         }
-        try {
-            signId = Integer.parseInt(arg);
-        } catch (final NumberFormatException e) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[0], arg);
+
+        String cid = dataArguments.get(ARGS[1]);
+        if (cid == null) {
+            throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[1]);
         }
 
         final DataProperties properties = new DataProperties(4);
 
-        final SnippetService snippetService = Services.getService(SnippetService.class);
-        final SnippetManagement ssManagement = snippetService.getManagement(session);
-        final Snippet snippet = ssManagement.getSnippet(arg);
-        final List<Attachment> attachments = snippet.getAttachments();
-        final byte[] imageBytes;
-
-        if (attachments.size() > 0) {
-            final Attachment attachment = attachments.get(0); // There should only be one embedded image in the attachment
-            try {
-                imageBytes = IOUtils.toByteArray(attachment.getInputStream());
-            } catch (IOException e) {
-                throw DataExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
-
-            properties.put(DataProperties.PROPERTY_ID, arg);
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, attachment.getContentType());
-            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
-            properties.put(DataProperties.PROPERTY_NAME, attachment.getId());
-
-            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
-
-        } else {
-            LOG.warn(
-                "Requested a non-existing image in snippet: snippet-id={} context={} session-user={}\nReturning an empty image as fallback.",
-                signId,
-                session.getContextId(),
-                session.getUserId());
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
-            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-
-            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+        SnippetService snippetService = getSnippetService(session);
+        if (null == snippetService) {
+            throw ServiceExceptionCode.absentService(SnippetService.class);
         }
+
+        SnippetManagement ssManagement = snippetService.getManagement(session);
+        Snippet snippet = ssManagement.getSnippet(id);
+        List<Attachment> attachments = snippet.getAttachments();
+        if (!attachments.isEmpty()) {
+
+            for (Attachment attachment : attachments) {
+                String contentId = attachment.getContentId();
+                if (MimeMessageUtility.equalsCID(cid, contentId)) {
+                    byte[] imageBytes;
+                    try {
+                        imageBytes = IOUtils.toByteArray(attachment.getInputStream());
+                    } catch (IOException e) {
+                        throw DataExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    }
+
+                    properties.put(DataProperties.PROPERTY_ID, id);
+                    properties.put(DataProperties.PROPERTY_CONTENT_TYPE, attachment.getContentType());
+                    properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
+                    properties.put(DataProperties.PROPERTY_NAME, attachment.getId());
+
+                    return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
+                }
+            }
+        }
+
+        LOG.warn(
+            "Requested a non-existing image in snippet: snippet-id={} context={} session-user={}\nReturning an empty image as fallback.",
+            id,
+            session.getContextId(),
+            session.getUserId());
+        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+
+        return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
     }
 
     @Override
