@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse für anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,41 +24,41 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "_return"
+    "_client"
 })
 @XmlRootElement(name = "getClientByIdResponse")
 public class GetClientByIdResponse {
 
-    @XmlElement(name = "return", nillable = true)
-    protected Client _return;
+    @XmlElement(name = "client", nillable = true)
+    protected Client _client;
 
     /**
      * Ruft den Wert der return-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Client }
-     *     
+     *
      */
-    public Client getReturn() {
-        return _return;
+    public Client getClient() {
+        return _client;
     }
 
     /**
      * Legt den Wert der return-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Client }
-     *     
+     *
      */
-    public void setReturn(Client value) {
-        this._return = value;
+    public void setClient(Client value) {
+        this._client = value;
     }
 
 }

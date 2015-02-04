@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "", propOrder = {
     "serviceException"
 })
-@XmlRootElement(name = "OAuthClientServiceServiceException")
-public class OAuthClientServiceServiceException {
+@XmlRootElement(name = "OAuthClientServiceException")
+public class OAuthClientServiceException {
 
     @XmlElement(name = "ServiceException", nillable = true)
     protected ServiceException serviceException;

@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse für anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,41 +24,41 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "args0"
+    "clientData"
 })
 @XmlRootElement(name = "registerClient")
 public class RegisterClient {
 
     @XmlElement(nillable = true)
-    protected ClientData args0;
+    protected ClientData clientData;
 
     /**
      * Ruft den Wert der args0-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ClientData }
-     *     
+     *
      */
-    public ClientData getArgs0() {
-        return args0;
+    public ClientData getClientData() {
+        return clientData;
     }
 
     /**
      * Legt den Wert der args0-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ClientData }
-     *     
+     *
      */
-    public void setArgs0(ClientData value) {
-        this.args0 = value;
+    public void setClientData(ClientData value) {
+        this.clientData = value;
     }
 
 }

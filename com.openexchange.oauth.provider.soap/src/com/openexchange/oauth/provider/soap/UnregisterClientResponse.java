@@ -10,55 +10,55 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse für anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="return" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="success" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "_return"
+    "success"
 })
 @XmlRootElement(name = "unregisterClientResponse")
 public class UnregisterClientResponse {
 
-    @XmlElement(name = "return")
-    protected Boolean _return;
+    @XmlElement(name = "success")
+    protected Boolean success;
 
     /**
      * Ruft den Wert der return-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
-    public Boolean isReturn() {
-        return _return;
+    public Boolean isSuccess() {
+        return success;
     }
 
     /**
      * Legt den Wert der return-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
-    public void setReturn(Boolean value) {
-        this._return = value;
+    public void setSuccess(Boolean value) {
+        this.success = value;
     }
 
 }

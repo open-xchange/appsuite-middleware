@@ -38,6 +38,22 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link OAuthClientServiceException }
+     * 
+     */
+    public OAuthClientServiceException createOAuthClientServiceException() {
+        return new OAuthClientServiceException();
+    }
+
+    /**
+     * Create an instance of {@link ServiceException }
+     * 
+     */
+    public ServiceException createServiceException() {
+        return new ServiceException();
+    }
+
+    /**
      * Create an instance of {@link DisableClient }
      * 
      */
@@ -155,22 +171,6 @@ public class ObjectFactory {
      */
     public RegisterClientResponse createRegisterClientResponse() {
         return new RegisterClientResponse();
-    }
-
-    /**
-     * Create an instance of {@link OAuthClientServiceServiceException }
-     * 
-     */
-    public OAuthClientServiceServiceException createOAuthClientServiceServiceException() {
-        return new OAuthClientServiceServiceException();
-    }
-
-    /**
-     * Create an instance of {@link ServiceException }
-     * 
-     */
-    public ServiceException createServiceException() {
-        return new ServiceException();
     }
 
     /**

@@ -70,6 +70,7 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
 
     public static final String REGION_NAME = "OAuthClientStorage";
 
+    private final String miss;
     private final OAuthClientStorage delegate;
 
     /**
@@ -78,6 +79,7 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
     public CachingOAuthClientStorage(OAuthClientStorage delegate, ServiceLookup services) {
         super(services);
         this.delegate = delegate;
+        miss = "miss";
     }
 
     private Cache optCache() throws OXException {
@@ -93,6 +95,9 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
         }
 
         Object object = cache.get(clientId);
+        if (object == miss) {
+            return null;
+        }
         if (object instanceof Client) {
             return (Client) object;
         }
@@ -100,6 +105,7 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
         Client client = delegate.getClientById(clientId);
         if (null == client) {
             //  No such client
+            cache.put(clientId, miss, false);
             return null;
         }
         cache.put(clientId, client, false);

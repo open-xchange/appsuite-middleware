@@ -2,7 +2,7 @@
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ox="http://soap.provider.oauth.openexchange.com" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://soap.provider.oauth.openexchange.com">
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://soap.provider.oauth.openexchange.com">
-            <xs:element name="OAuthClientServiceServiceException">
+            <xs:element name="OAuthClientServiceException">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="ServiceException" nillable="true" type="ox:ServiceException"/>
@@ -152,8 +152,8 @@
     <wsdl:message name="unregisterClientResponse">
         <wsdl:part name="parameters" element="ox:unregisterClientResponse"/>
     </wsdl:message>
-    <wsdl:message name="OAuthClientServiceServiceException">
-        <wsdl:part name="parameters" element="ox:OAuthClientServiceServiceException"/>
+    <wsdl:message name="OAuthClientServiceException">
+        <wsdl:part name="parameters" element="ox:OAuthClientServiceException"/>
     </wsdl:message>
     <wsdl:message name="revokeClientSecretRequest">
         <wsdl:part name="parameters" element="ox:revokeClientSecret"/>
@@ -195,37 +195,37 @@
         <wsdl:operation name="unregisterClient">
             <wsdl:input message="ox:unregisterClientRequest" wsaw:Action="urn:unregisterClient"/>
             <wsdl:output message="ox:unregisterClientResponse" wsaw:Action="urn:unregisterClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceServiceException" name="OAuthClientServiceServiceException" wsaw:Action="urn:unregisterClientOAuthClientServiceServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:unregisterClientOAuthClientServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="revokeClientSecret">
             <wsdl:input message="ox:revokeClientSecretRequest" wsaw:Action="urn:revokeClientSecret"/>
             <wsdl:output message="ox:revokeClientSecretResponse" wsaw:Action="urn:revokeClientSecretResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceServiceException" name="OAuthClientServiceServiceException" wsaw:Action="urn:revokeClientSecretOAuthClientServiceServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:revokeClientSecretOAuthClientServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="registerClient">
             <wsdl:input message="ox:registerClientRequest" wsaw:Action="urn:registerClient"/>
             <wsdl:output message="ox:registerClientResponse" wsaw:Action="urn:registerClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceServiceException" name="OAuthClientServiceServiceException" wsaw:Action="urn:registerClientOAuthClientServiceServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:registerClientOAuthClientServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="enableClient">
             <wsdl:input message="ox:enableClientRequest" wsaw:Action="urn:enableClient"/>
             <wsdl:output message="ox:enableClientResponse" wsaw:Action="urn:enableClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceServiceException" name="OAuthClientServiceServiceException" wsaw:Action="urn:enableClientOAuthClientServiceServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:enableClientOAuthClientServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getClientById">
             <wsdl:input message="ox:getClientByIdRequest" wsaw:Action="urn:getClientById"/>
             <wsdl:output message="ox:getClientByIdResponse" wsaw:Action="urn:getClientByIdResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceServiceException" name="OAuthClientServiceServiceException" wsaw:Action="urn:getClientByIdOAuthClientServiceServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:getClientByIdOAuthClientServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="updateClient">
             <wsdl:input message="ox:updateClientRequest" wsaw:Action="urn:updateClient"/>
             <wsdl:output message="ox:updateClientResponse" wsaw:Action="urn:updateClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceServiceException" name="OAuthClientServiceServiceException" wsaw:Action="urn:updateClientOAuthClientServiceServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:updateClientOAuthClientServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="disableClient">
             <wsdl:input message="ox:disableClientRequest" wsaw:Action="urn:disableClient"/>
             <wsdl:output message="ox:disableClientResponse" wsaw:Action="urn:disableClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceServiceException" name="OAuthClientServiceServiceException" wsaw:Action="urn:disableClientOAuthClientServiceServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:disableClientOAuthClientServiceException"/>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="OAuthClientServiceSoap11Binding" type="ox:OAuthClientServicePortType">
@@ -238,8 +238,8 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="revokeClientSecret">
@@ -250,8 +250,8 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="registerClient">
@@ -262,8 +262,8 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getClientById">
@@ -274,8 +274,8 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="enableClient">
@@ -286,8 +286,8 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="updateClient">
@@ -298,8 +298,8 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="disableClient">
@@ -310,8 +310,8 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
@@ -325,8 +325,8 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap12:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="revokeClientSecret">
@@ -337,8 +337,8 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap12:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="registerClient">
@@ -349,8 +349,8 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap12:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getClientById">
@@ -361,8 +361,8 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap12:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="enableClient">
@@ -373,8 +373,8 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap12:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="updateClient">
@@ -385,8 +385,8 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap12:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="disableClient">
@@ -397,8 +397,8 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceServiceException"/>
+            <wsdl:fault name="OAuthClientServiceException">
+                <soap12:fault use="literal" name="OAuthClientServiceException"/>
             </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>

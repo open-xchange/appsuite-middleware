@@ -10,83 +10,83 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse für anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="args0" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="args1" type="{http://soap.provider.oauth.openexchange.com}ClientData" minOccurs="0"/>
+ *         &lt;element name="clientId" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="clientData" type="{http://soap.provider.oauth.openexchange.com}ClientData" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "args0",
-    "args1"
+    "clientId",
+    "clientData"
 })
 @XmlRootElement(name = "updateClient")
 public class UpdateClient {
 
     @XmlElement(nillable = true)
-    protected String args0;
+    protected String clientId;
     @XmlElement(nillable = true)
-    protected ClientData args1;
+    protected ClientData clientData;
 
     /**
      * Ruft den Wert der args0-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
-    public String getArgs0() {
-        return args0;
+    public String getClientId() {
+        return clientId;
     }
 
     /**
      * Legt den Wert der args0-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
-    public void setArgs0(String value) {
-        this.args0 = value;
+    public void setClientId(String value) {
+        this.clientId = value;
     }
 
     /**
      * Ruft den Wert der args1-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ClientData }
-     *     
+     *
      */
-    public ClientData getArgs1() {
-        return args1;
+    public ClientData getClientData() {
+        return clientData;
     }
 
     /**
      * Legt den Wert der args1-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ClientData }
-     *     
+     *
      */
-    public void setArgs1(ClientData value) {
-        this.args1 = value;
+    public void setClientData(ClientData value) {
+        this.clientData = value;
     }
 
 }
