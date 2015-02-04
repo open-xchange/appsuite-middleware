@@ -63,21 +63,68 @@ public interface OAuthProviderService {
     // -------------------------------------- Client Handling -------------------------------------- \\
 
     /**
-     * Returns the client identified by the given ID.
+     * Gets the client identified by the given identifier.
      *
-     * @param clientId The clients ID
-     * @return The client or <code>null</code> if the ID is invalid
-     * @throws OXException
+     * @param clientId The clients identifier
+     * @return The client or <code>null</code> if there is no such client
+     * @throws OXException If operation fails
      */
     Client getClientById(String clientId) throws OXException;
 
+    /**
+     * Registers (adds) a client according to given client data.
+     *
+     * @param clientData The client data to create the client from
+     * @return The newly created client
+     * @throws OXException If create operation fails
+     */
     Client registerClient(ClientData clientData) throws OXException;
 
+    /**
+     * Updates an existing client's attributes according to given client data.
+     *
+     * @param clientId The client identifier
+     * @param clientData The client data
+     * @return The updated client
+     * @throws OXException If update operation fails
+     */
     Client updateClient(String clientId, ClientData clientData) throws OXException;
 
+    /**
+     * Unregisters an existing client
+     *
+     * @param clientId The client identifier
+     * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
+     * @throws OXException If un-registration fails
+     */
     boolean unregisterClient(String clientId) throws OXException;
 
+    /**
+     * Revokes a client's current secret and generates a new one.
+     *
+     * @param clientId The client identifier
+     * @return The client with revoked/new secret
+     * @throws OXException If revoke operation fails
+     */
     Client revokeClientSecret(String clientId) throws OXException;
+
+    /**
+     * Enables denoted client
+     *
+     * @param clientId The client identifier
+     * @throws OXException If client could not be enabled
+     */
+    void enableClient(String clientId) throws OXException;
+
+    /**
+     * Disables denoted client
+     *
+     * @param clientId The client identifier
+     * @throws OXException If client could not be disabled
+     */
+    void disableClient(String clientId) throws OXException;
+
+
 
     // -------------------------------- Authorization Code Handling -------------------------------- \\
     //  Manages authorization codes generated for/redeemed by OAuth client applications.

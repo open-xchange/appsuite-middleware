@@ -115,7 +115,8 @@ import com.openexchange.user.UserService;
  */
 public final class OAuthProviderActivator extends HousekeepingActivator {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthProviderActivator.class);
+    /** The logger constant */
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthProviderActivator.class);
 
     private static final class HzConfigTracker implements ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> {
 
@@ -164,6 +165,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
                             registerServlets(activator, oAuthProvider);
                             OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(oAuthProvider);
                             activator.registerService(OAuthResourceService.class, resourceService);
+                            activator.addService(OAuthProviderService.class, oAuthProvider);
                             return hzInstance;
                         } catch (Exception e) {
                             LOG.warn("Couldn't initialize distributed token-session map.", e);
@@ -280,6 +282,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             registerServlets(this, oAuthProvider);
             OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(oAuthProvider);
             registerService(OAuthResourceService.class, resourceService);
+            addService(OAuthProviderService.class, oAuthProvider);
         }
 
         trackService(HostnameService.class);
@@ -354,6 +357,21 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             unregisterServlets(this);
         }
         super.stopBundle();
+    }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 
 }

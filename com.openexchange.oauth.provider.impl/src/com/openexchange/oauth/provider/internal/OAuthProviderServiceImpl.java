@@ -126,6 +126,16 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     }
 
     @Override
+    public void enableClient(String clientId) throws OXException {
+        clientStorage.enableClient(clientId);
+    }
+
+    @Override
+    public void disableClient(String clientId) throws OXException {
+        clientStorage.disableClient(clientId);
+    }
+
+    @Override
     public String generateAuthorizationCodeFor(String clientId, String redirectURI, String scopeString, int userId, int contextId) throws OXException {
         // Adjust scope based on users permissions
         CapabilityService capabilityService = requireService(CapabilityService.class, services);

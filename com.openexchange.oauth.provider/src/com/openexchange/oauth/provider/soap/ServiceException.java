@@ -49,74 +49,58 @@
 
 package com.openexchange.oauth.provider.soap;
 
+
 /**
- * {@link OAuthClientService} - The storage for clients.
+ * {@link ServiceException}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface OAuthClientService {
+public class ServiceException extends Exception {
+
+    private static final long serialVersionUID = 2474560213639031782L;
 
     /**
-     * Gets the client identified by the given identifier.
-     *
-     * @param clientId The clients identifier
-     * @return The client or <code>null</code> if there is no such client
-     * @throws ServiceException If operation fails
+     * Initializes a new {@link ServiceException}.
      */
-    Client getClientById(String clientId) throws ServiceException;
+    public ServiceException() {
+        super();
+    }
 
     /**
-     * Registers (adds) a client according to given client data.
-     *
-     * @param clientData The client data to create the client from
-     * @return The newly created client
-     * @throws ServiceException If create operation fails
+     * Initializes a new {@link ServiceException}.
+     * @param message
      */
-    Client registerClient(ClientData clientData) throws ServiceException;
+    public ServiceException(String message) {
+        super(message);
+    }
 
     /**
-     * Updates an existing client's attributes according to given client data.
-     *
-     * @param clientId The client identifier
-     * @param clientData The client data
-     * @return The updated client
-     * @throws ServiceException If update operation fails
+     * Initializes a new {@link ServiceException}.
+     * @param cause
      */
-    Client updateClient(String clientId, ClientData clientData) throws ServiceException;
+    public ServiceException(Throwable cause) {
+        super(cause);
+    }
 
     /**
-     * Unregisters an existing client
-     *
-     * @param clientId The client identifier
-     * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
-     * @throws ServiceException If un-registration fails
+     * Initializes a new {@link ServiceException}.
+     * @param message
+     * @param cause
      */
-    boolean unregisterClient(String clientId) throws ServiceException;
+    public ServiceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
     /**
-     * Revokes a client's current secret and generates a new one.
-     *
-     * @param clientId The client identifier
-     * @return The client with revoked/new secret
-     * @throws ServiceException If revoke operation fails
+     * Initializes a new {@link ServiceException}.
+     * @param message
+     * @param cause
+     * @param enableSuppression
+     * @param writableStackTrace
      */
-    Client revokeClientSecret(String clientId) throws ServiceException;
-
-    /**
-     * Enables denoted client
-     *
-     * @param clientId The client identifier
-     * @throws ServiceException If client could not be enabled
-     */
-    boolean enableClient(String clientId) throws ServiceException;
-
-    /**
-     * Disables denoted client
-     *
-     * @param clientId The client identifier
-     * @throws ServiceException If client could not be disabled
-     */
-    boolean disableClient(String clientId) throws ServiceException;
+    public ServiceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 
 }

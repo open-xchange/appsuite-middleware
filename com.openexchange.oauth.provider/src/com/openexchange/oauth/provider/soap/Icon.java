@@ -49,74 +49,50 @@
 
 package com.openexchange.oauth.provider.soap;
 
+import com.openexchange.oauth.provider.DefaultIcon;
+
+
 /**
- * {@link OAuthClientService} - The storage for clients.
+ * {@link Icon}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface OAuthClientService {
+public class Icon {
+
+    private String mimeType = null;
+    private int size = -1;
+    private String data;
 
     /**
-     * Gets the client identified by the given identifier.
-     *
-     * @param clientId The clients identifier
-     * @return The client or <code>null</code> if there is no such client
-     * @throws ServiceException If operation fails
+     * Initializes a new {@link DefaultIcon}.
      */
-    Client getClientById(String clientId) throws ServiceException;
+    public Icon() {
+        super();
+    }
 
-    /**
-     * Registers (adds) a client according to given client data.
-     *
-     * @param clientData The client data to create the client from
-     * @return The newly created client
-     * @throws ServiceException If create operation fails
-     */
-    Client registerClient(ClientData clientData) throws ServiceException;
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
 
-    /**
-     * Updates an existing client's attributes according to given client data.
-     *
-     * @param clientId The client identifier
-     * @param clientData The client data
-     * @return The updated client
-     * @throws ServiceException If update operation fails
-     */
-    Client updateClient(String clientId, ClientData clientData) throws ServiceException;
+    public void setSize(int size) {
+        this.size = size;
+    }
 
-    /**
-     * Unregisters an existing client
-     *
-     * @param clientId The client identifier
-     * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
-     * @throws ServiceException If un-registration fails
-     */
-    boolean unregisterClient(String clientId) throws ServiceException;
+    public void setData(String data) {
+        this.data = data;
+    }
 
-    /**
-     * Revokes a client's current secret and generates a new one.
-     *
-     * @param clientId The client identifier
-     * @return The client with revoked/new secret
-     * @throws ServiceException If revoke operation fails
-     */
-    Client revokeClientSecret(String clientId) throws ServiceException;
+    public String getMimeType() {
+        return mimeType;
+    }
 
-    /**
-     * Enables denoted client
-     *
-     * @param clientId The client identifier
-     * @throws ServiceException If client could not be enabled
-     */
-    boolean enableClient(String clientId) throws ServiceException;
+    public int getSize() {
+        return size;
+    }
 
-    /**
-     * Disables denoted client
-     *
-     * @param clientId The client identifier
-     * @throws ServiceException If client could not be disabled
-     */
-    boolean disableClient(String clientId) throws ServiceException;
+    public String getData() {
+        return data;
+    }
 
 }

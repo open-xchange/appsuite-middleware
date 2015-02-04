@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
+import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 import com.openexchange.server.ServiceExceptionCode;
@@ -80,8 +81,8 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
         this.services = services;
     }
 
-    private OAuthClientStorage getClientStorage() throws OXException {
-        OAuthClientStorage service = services.getOptionalService(OAuthClientStorage.class);
+    private OAuthProviderService getProviderService() throws OXException {
+        OAuthProviderService service = services.getOptionalService(OAuthProviderService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(OAuthClientStorage.class);
         }
@@ -91,7 +92,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public Client getClientById(String clientId) throws RemoteException {
         try {
-            return getClientStorage().getClientById(clientId);
+            return getProviderService().getClientById(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -102,7 +103,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public Client registerClient(ClientData clientData) throws RemoteException {
         try {
-            return getClientStorage().registerClient(clientData);
+            return getProviderService().registerClient(clientData);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -113,7 +114,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public Client updateClient(String clientId, ClientData clientData) throws RemoteException {
         try {
-            return getClientStorage().updateClient(clientId, clientData);
+            return getProviderService().updateClient(clientId, clientData);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -124,7 +125,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public boolean unregisterClient(String clientId) throws RemoteException {
         try {
-            return getClientStorage().unregisterClient(clientId);
+            return getProviderService().unregisterClient(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -135,7 +136,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public Client revokeClientSecret(String clientId) throws RemoteException {
         try {
-            return getClientStorage().revokeClientSecret(clientId);
+            return getProviderService().revokeClientSecret(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -146,7 +147,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public void enableClient(String clientId) throws RemoteException {
         try {
-            getClientStorage().enableClient(clientId);
+            getProviderService().enableClient(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -157,7 +158,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public void disableClient(String clientId) throws RemoteException {
         try {
-            getClientStorage().disableClient(clientId);
+            getProviderService().disableClient(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
