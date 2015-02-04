@@ -85,7 +85,7 @@ usage() {
 	echo "  -A,--adminuser <admin_user>                 ? Admin username"
 	echo "  -P,--adminpass <admin_pass>                 ? Admin password"
 	echo "  -i,--in <dump_file>                         * The dump file previously created with dumpschema"
-	echo "  -m,--source-schema <source_schema>          * Source schema name"
+	echo "  -m,--source-schema <source_schema>          * The source schema name (i.e. the schema that was dumped before)"
 	echo "  -t,--target-cluster-id <target_cluster_id>  * The target cluster identifier"
 	echo "  -r,--rmi-host <rmi_host>                      A RMI host address e.g. 192.168.1.25:1099. If no port is given the default RMI port 1099 is taken. Default: rmi://localhost:1099/"
 	echo ""
@@ -177,7 +177,7 @@ if [ $RETVAL -eq 0 ]; then
 	RETVAL=$?
 	
 	if [ $RETVAL -ne 0 ]; then
-		echo "failed!\n"
+		echo "failed!"
 		echo "Failed pumping data into schema '$targetSchema'... "
 		exit $RETVAL;
 	else 
