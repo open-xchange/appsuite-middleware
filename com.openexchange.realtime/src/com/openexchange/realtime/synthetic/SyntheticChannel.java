@@ -52,7 +52,6 @@ package com.openexchange.realtime.synthetic;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -62,6 +61,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import org.osgi.framework.Constants;
+import com.google.common.base.Optional;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -82,7 +82,6 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.realtime.util.RealtimeReloadable;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -169,11 +168,6 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
     // ComponentHandles created by the factories mapped by concrete ID e.q. "synthetic.office://operations/folderId.fileId" -> Connection
     private final ConcurrentHashMap<ID, ComponentHandle> handles = new ConcurrentHashMap<ID, ComponentHandle>();
 
-    // Each @NotThreadSafe ComponentHandle is fed by a single RunLoop to guarantee singlethreaded Stanza delivery
-    private final ConcurrentHashMap<ID, SyntheticChannelRunLoop> runLoopsPerID = new ConcurrentHashMap<ID, SyntheticChannelRunLoop>();
-
-    private final List<SyntheticChannelRunLoop> runLoops;
-
     private final ConcurrentHashMap<ID, Long> lastAccess = new ConcurrentHashMap<ID, Long>();
 
     private final ConcurrentHashMap<ID, TimeoutEviction> timeouts = new ConcurrentHashMap<ID, TimeoutEviction>();
@@ -182,16 +176,16 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
 
     private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
 
+    /*
+     * Each @NotThreadSafe ComponentHandle is fed by a single RunLoop to guarantee singlethreaded Stanza delivery. RunLoops come from a
+     * distinct cluster per Component that created the ComponentHandles. This way they can't influence each others performance.
+     */
+    private final RunLoopManager runLoopManager;
+
     public SyntheticChannel(ServiceLookup services, LocalRealtimeCleanup localRealtimeCleanup) {
         JANITOR_PROPERTIES.put(Constants.SERVICE_RANKING, RealtimeJanitor.RANKING_SYNTHETIC_CHANNEL);
         this.localRealtimeCleanup = localRealtimeCleanup;
-        int numberOfRunLoops = numberOfRunLoops();
-        runLoops = new ArrayList<SyntheticChannelRunLoop>(numberOfRunLoops);
-        for (int i = 0; i < numberOfRunLoops; i++) {
-            SyntheticChannelRunLoop rl = new SyntheticChannelRunLoop("message-handler-" + i);
-            runLoops.add(rl);
-            services.getService(ThreadPoolService.class).getExecutor().execute(rl);
-        }
+        runLoopManager = new RunLoopManager(services);
     }
 
     @Override
@@ -239,7 +233,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
 
         handles.put(id, handle);
 
-        runLoopsPerID.put(id, runLoops.get(loadBalancer.nextInt(numberOfRunLoops())));
+        runLoopManager.getRunLoopForID(id, true);
 
         setUpEviction(component.getEvictionPolicy(), handle, id);
 
@@ -275,12 +269,12 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
         stanza.trace("Updating last access");
         lastAccess.put(stanza.getTo(), System.currentTimeMillis());
 
-        SyntheticChannelRunLoop runLoop = runLoopsPerID.get(recipient);
-        if (runLoop == null) {
+        Optional<SyntheticChannelRunLoop> runLoopForID = runLoopManager.getRunLoopForID(recipient);
+        if (!runLoopForID.isPresent()) {
             throw RealtimeExceptionCodes.STANZA_RECIPIENT_UNAVAILABLE.create(stanza.getTo());
         }
 
-        final boolean taken = runLoop.offer(new MessageDispatch(handle, stanza));
+        final boolean taken = runLoopForID.get().offer(new MessageDispatch(handle, stanza));
         if (!taken) {
             LOG.error("Queue refused offered Stanza");
             throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Queue refused offered Stanza");
@@ -288,11 +282,13 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
     }
 
     public void addComponent(Component component) {
+        runLoopManager.createRunLoops(component, numberOfRunLoops());
         components.put(component.getId(), component);
     }
 
     public void removeComponent(Component component) {
         components.remove(component.getId());
+        runLoopManager.destroyRunLoops(component);
     }
 
     private class TimeoutEviction {
@@ -331,6 +327,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
                 }
             }
         }
+        runLoopManager.destroyRunLoops();
     }
 
     @Override
@@ -355,11 +352,11 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
                  */
                 id.getLock(CONJURELOCK);
                 LOG.debug("Cleanup for ID: {}. Removing  ComponentHandle and RunLoop mappings.", id);
-                SyntheticChannelRunLoop runLoop = runLoopsPerID.remove(id);
+                Optional<SyntheticChannelRunLoop> runLoop = runLoopManager.removeIDFromRunLoop(id);
                 handles.remove(id);
                 lastAccess.remove(id);
                 timeouts.remove(id);
-                if (runLoop == null) {
+                if (!runLoop.isPresent()) {
                     LOG.error("RunLoop to clean was null. This should have been been prevented by mutex.");
                     return;
                 }
