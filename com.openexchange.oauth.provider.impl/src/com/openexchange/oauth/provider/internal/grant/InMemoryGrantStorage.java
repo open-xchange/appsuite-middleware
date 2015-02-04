@@ -47,59 +47,69 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider.internal.grant;
 
-import java.util.Date;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
-import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 
 
 /**
- * {@link OAuthResourceServiceImpl}
+ * {@link InMemoryGrantStorage}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthResourceServiceImpl implements OAuthResourceService {
+public class InMemoryGrantStorage implements OAuthGrantStorage {
 
-    private final OAuthClientStorage clientStorage;
+    private final List<OAuthGrant> grants;
 
-    private final OAuthGrantStorage grantStorage;
-
-    public OAuthResourceServiceImpl(OAuthClientStorage clientStorage, OAuthGrantStorage grantStorage) {
+    public InMemoryGrantStorage() {
         super();
-        this.clientStorage = clientStorage;
-        this.grantStorage = grantStorage;
+        grants = new LinkedList<>();
     }
 
     @Override
-    public OAuthGrant validate(String accessToken) throws OXException {
-        OAuthGrant grant = grantStorage.getGrantByAccessToken(accessToken);
-        if (grant == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-        }
-
-        if (grant.getExpirationDate().before(new Date())) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
-        }
-
-        return grant;
+    public void persistGrant(OAuthGrant grant) {
+        grants.add(grant);
     }
 
     @Override
-    public Client getClient(OAuthGrant grant) throws OXException {
-        Client client = clientStorage.getClientById(grant.getClientId());
-        if (client == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
+    public void deleteGrantsForClient(String clientId) {
+        Iterator<OAuthGrant> it = grants.iterator();
+        while (it.hasNext()) {
+            OAuthGrant grant = it.next();
+            if (clientId.equals(grant.getClientId())) {
+                it.remove();
+            }
+        }
+    }
+
+    @Override
+    public OAuthGrant getGrantByAccessToken(String accessToken) {
+        Iterator<OAuthGrant> it = grants.iterator();
+        while (it.hasNext()) {
+            OAuthGrant grant = it.next();
+            if (grant.getAccessToken().equals(accessToken)) {
+                return grant;
+            }
         }
 
-        return client;
+        return null;
+    }
+
+    @Override
+    public OAuthGrant getGrantByRefreshToken(String refreshToken) {
+        Iterator<OAuthGrant> it = grants.iterator();
+        while (it.hasNext()) {
+            OAuthGrant grant = it.next();
+            if (grant.getRefreshToken().equals(refreshToken)) {
+                return grant;
+            }
+        }
+
+        return null;
     }
 
 }

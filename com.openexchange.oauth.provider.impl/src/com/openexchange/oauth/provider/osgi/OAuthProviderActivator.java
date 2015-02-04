@@ -49,18 +49,10 @@
 
 package com.openexchange.oauth.provider.osgi;
 
-import static com.openexchange.osgi.Tools.requireService;
-import java.io.ByteArrayInputStream;
-import java.rmi.Remote;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Map;
-import javax.servlet.ServletException;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -77,35 +69,19 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
-import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.OAuthResourceService;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableService;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableTask;
 import com.openexchange.oauth.provider.groupware.AuthCodeDeleteListener;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
-import com.openexchange.oauth.provider.internal.OAuthProviderServiceImpl;
-import com.openexchange.oauth.provider.internal.OAuthResourceServiceImpl;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeProvider;
-import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfoFactory;
-import com.openexchange.oauth.provider.internal.client.CachingOAuthClientStorage;
-import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
-import com.openexchange.oauth.provider.internal.client.RdbOAuthClientStorage;
-import com.openexchange.oauth.provider.internal.rmi.OAuthClientRmiImpl;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
-import com.openexchange.oauth.provider.servlets.AuthorizationEndpoint;
-import com.openexchange.oauth.provider.servlets.TokenEndpoint;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
@@ -120,25 +96,25 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     private static final class HzConfigTracker implements ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> {
 
+        final OAuthProvider provider;
         final BundleContext context;
         final OAuthProviderActivator activator;
         private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
 
-        HzConfigTracker(BundleContext context, OAuthProviderActivator activator) {
+        HzConfigTracker(BundleContext context, OAuthProviderActivator activator, OAuthProvider provider) {
             super();
             this.context = context;
             this.activator = activator;
+            this.provider = provider;
         }
 
         @Override
         public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
             final HazelcastConfigurationService hzConfigService = context.getService(reference);
-
-
             try {
                 boolean hzEnabled = hzConfigService.isEnabled();
                 if (false == hzEnabled) {
-                    String msg = "Authorization-Code service is configured to use Hazelcast, but Hazelcast is disabled as per configuration! Start of Authorization-Code service aborted!";
+                    String msg = "OAuth 2.0 provider is configured to use Hazelcast, but Hazelcast is disabled as per configuration! Aborting start of OAuth 2.0 provider!";
                     LOG.error(msg, new Exception(msg));
 
                     context.ungetService(reference);
@@ -151,7 +127,6 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
                     @Override
                     public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
                         HazelcastInstance hzInstance = context.getService(reference);
-
                         try {
                             String hzMapName = discoverHzMapName(hzConfigService.getConfig(), HzAuthorizationCodeProvider.HZ_MAP_NAME, LOG);
                             if (null == hzMapName) {
@@ -161,11 +136,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
                             // Add to service look-up
                             activator.addService(HazelcastInstance.class, hzInstance);
-                            OAuthProviderServiceImpl oAuthProvider = new OAuthProviderServiceImpl(activator, new HzAuthorizationCodeProvider(hzMapName, activator));
-                            registerServlets(activator, oAuthProvider);
-                            OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(oAuthProvider);
-                            activator.registerService(OAuthResourceService.class, resourceService);
-                            activator.addService(OAuthProviderService.class, oAuthProvider);
+                            provider.start(new HzAuthorizationCodeProvider(hzMapName, activator));
                             return hzInstance;
                         } catch (Exception e) {
                             LOG.warn("Couldn't initialize distributed token-session map.", e);
@@ -187,10 +158,9 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
                         logger.info("Unegistering OAuth servlets due to Hazelcast absence");
                         activator.removeService(HazelcastInstance.class);
                         try {
-                            unregisterServlets(activator);
-//                            activator.unregisterService(service); // TODO
+                            provider.stop();
                         } catch (Exception e) {
-                            logger.error("Could not unregister OAuth servlets", e);
+                            LOG.error("Could not orderly shutdown OAuth 2.0 provider", e);
                         }
                         context.ungetService(reference);
                     }
@@ -243,7 +213,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     // ---------------------------------------------------------------------------------------------
 
-    private volatile boolean providerEnabled;
+    private OAuthProvider provider;
 
     /**
      * Initializes a new {@link OAuthProviderActivator}.
@@ -262,27 +232,16 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
 
+        // Register update task, create table job and delete listener
+        registerService(CreateTableService.class, new AuthCodeCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(this)));
+        registerService(DeleteListener.class, new AuthCodeDeleteListener());
+
         ConfigurationService configService = getService(ConfigurationService.class);
         boolean providerEnabled = configService.getBoolProperty(OAuthProviderProperties.ENABLED, false);
-        this.providerEnabled = providerEnabled;
         if (!providerEnabled) {
             LOG.info("OAuth provider is disabled by configuration.");
             return;
-        }
-
-
-        // Create & register portable factory
-        registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory());
-
-        if ("hz".equalsIgnoreCase(configService.getProperty(OAuthProviderProperties.AUTHCODE_TYPE, "hz").trim())) {
-            // Start tracking for Hazelcast
-            track(HazelcastConfigurationService.class, new HzConfigTracker(context, this));
-        } else {
-            OAuthProviderServiceImpl oAuthProvider = new OAuthProviderServiceImpl(this, new DbAuthorizationCodeProvider(this));
-            registerServlets(this, oAuthProvider);
-            OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(oAuthProvider);
-            registerService(OAuthResourceService.class, resourceService);
-            addService(OAuthProviderService.class, oAuthProvider);
         }
 
         trackService(HostnameService.class);
@@ -290,88 +249,22 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(AuthorizationService.class);
         trackService(CapabilityService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
-        openTrackers();
 
-        // Register update task, create table job and delete listener
-        registerService(CreateTableService.class, new AuthCodeCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(this)));
-        registerService(DeleteListener.class, new AuthCodeDeleteListener());
-
-        // Initialize OAuthClientStorage
-        try {
-            String regionName = CachingOAuthClientStorage.REGION_NAME;
-            byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                "jcs.region."+regionName+".cacheattributes.MaxObjects=100000\n" +
-                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
-                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
-                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
-                "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
-                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
-            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
-
-            // Add appropriate OAuthClientStorage into this service look-up instance
-            addService(OAuthClientStorage.class, new CachingOAuthClientStorage(new RdbOAuthClientStorage(this), this));
-        } catch (BundleException x) {
-            throw new IllegalStateException(x);
-        }
-
-        {
-            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-            props.put("RMIName", OAuthClientRmi.RMI_NAME);
-            registerService(Remote.class, new OAuthClientRmiImpl(this), props);
-        }
-
-    }
-
-    static void registerServlets(ServiceLookup services, OAuthProviderService oAuthProvider) throws ServletException, NamespaceException, OXException {
-        AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint(oAuthProvider, services);
-        TokenEndpoint tokenEndpoint = new TokenEndpoint(oAuthProvider);
-
-        HttpService httpService = requireService(HttpService.class, services);
-        DispatcherPrefixService dispatcherPrefixService = requireService(DispatcherPrefixService.class, services);
-        httpService.registerServlet(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS, authorizationEndpoint, null, httpService.createDefaultHttpContext());
-        httpService.registerServlet(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS, tokenEndpoint, null, httpService.createDefaultHttpContext());
-    }
-
-    static void unregisterServlets(ServiceLookup services) {
-        HttpService httpService = services.getOptionalService(HttpService.class);
-        if (null != httpService) {
-            DispatcherPrefixService dispatcherPrefixService = services.getOptionalService(DispatcherPrefixService.class);
-            if (null != dispatcherPrefixService) {
-                httpService.unregister(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS);
-                httpService.unregister(dispatcherPrefixService.getPrefix() + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS);
-            }
+        provider = new OAuthProvider(this, context);
+        if ("hz".equalsIgnoreCase(configService.getProperty(OAuthProviderProperties.AUTHCODE_TYPE, "hz").trim())) {
+            track(HazelcastConfigurationService.class, new HzConfigTracker(context, this, provider));
+            openTrackers();
+        } else {
+            openTrackers();
+            provider.start(new DbAuthorizationCodeProvider(this));
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if (providerEnabled) {
-            unregisterServlets(this);
+        if (provider != null) {
+            provider.stop();
         }
         super.stopBundle();
     }
-
-    @Override
-    public <S> void registerService(Class<S> clazz, S service) {
-        super.registerService(clazz, service);
-    }
-
-    @Override
-    public <S> boolean addService(Class<S> clazz, S service) {
-        return super.addService(clazz, service);
-    }
-
-    @Override
-    public <S> boolean removeService(Class<? extends S> clazz) {
-        return super.removeService(clazz);
-    }
-
 }

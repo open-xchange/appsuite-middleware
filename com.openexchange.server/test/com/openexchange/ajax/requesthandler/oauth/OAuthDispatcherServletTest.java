@@ -186,6 +186,11 @@ public class OAuthDispatcherServletTest {
         }
 
         @Override
+        public String getClientId() {
+            return "1234";
+        }
+
+        @Override
         public int getContextId() {
             return contextId;
         }

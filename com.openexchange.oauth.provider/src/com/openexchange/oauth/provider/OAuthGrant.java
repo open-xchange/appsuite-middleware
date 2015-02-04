@@ -59,6 +59,8 @@ import java.util.Date;
  */
 public interface OAuthGrant {
 
+    String getClientId();
+
     int getContextId();
 
     int getUserId();

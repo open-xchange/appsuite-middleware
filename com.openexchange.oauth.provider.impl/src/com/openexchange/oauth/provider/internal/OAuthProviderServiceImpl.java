@@ -52,9 +52,6 @@ package com.openexchange.oauth.provider.internal;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.capabilities.CapabilityService;
@@ -70,6 +67,8 @@ import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
 import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
+import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
+import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
 
@@ -81,21 +80,21 @@ import com.openexchange.server.ServiceLookup;
  */
 public class OAuthProviderServiceImpl implements OAuthProviderService {
 
-    private final ServiceLookup services;
-
     private final AbstractAuthorizationCodeProvider authCodeProvider;
-
-    private final List<OAuthGrantImpl> grants;
 
     private final OAuthClientStorage clientStorage;
 
+    private final OAuthGrantStorage grantStorage;
 
-    public OAuthProviderServiceImpl(ServiceLookup services, AbstractAuthorizationCodeProvider authCodeProvider) throws OXException {
+    private final ServiceLookup services;
+
+
+    public OAuthProviderServiceImpl(AbstractAuthorizationCodeProvider authCodeProvider, OAuthClientStorage clientStorage, OAuthGrantStorage grantStorage, ServiceLookup services) {
         super();
-        this.services = services;
         this.authCodeProvider = authCodeProvider;
-        clientStorage = requireService(OAuthClientStorage.class, services);
-        grants = new LinkedList<>();
+        this.clientStorage = clientStorage;
+        this.grantStorage = grantStorage;
+        this.services = services;
     }
 
     @Override
@@ -110,13 +109,13 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public boolean unregisterClient(String clientId) throws OXException {
-        deleteGrantsForClient(clientId);
+        grantStorage.deleteGrantsForClient(clientId);
         return clientStorage.unregisterClient(clientId);
     }
 
     @Override
     public Client revokeClientSecret(String clientId) throws OXException {
-        deleteGrantsForClient(clientId);
+        grantStorage.deleteGrantsForClient(clientId);
         return clientStorage.revokeClientSecret(clientId);
     }
 
@@ -132,6 +131,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public void disableClient(String clientId) throws OXException {
+        grantStorage.deleteGrantsForClient(clientId); // TODO: really?
         clientStorage.disableClient(clientId);
     }
 
@@ -165,7 +165,9 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         String accessToken = new UserizedToken(userId, contextId).getToken();
         String refreshToken = new UserizedToken(userId, contextId).getToken();
         Date expirationDate = new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION);
-        return persistGrant(authCodeInfo, accessToken, refreshToken, expirationDate);
+        OAuthGrant grant = new OAuthGrantImpl(authCodeInfo, accessToken, refreshToken, expirationDate);
+        grantStorage.persistGrant(grant);
+        return grant;
     }
 
     /**
@@ -189,49 +191,28 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         return TimeUnit.NANOSECONDS.toMillis(now - authCodeInfo.getNanos()) <= OAuthProviderService.AUTH_CODE_TIMEOUT_MILLIS;
     }
 
-    private OAuthGrant persistGrant(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) throws OXException {
-        OAuthGrantImpl grant = new OAuthGrantImpl(authCodeInfo, accessToken, refreshToken, expirationDate);
-        grants.add(grant);
-        return grant;
-    }
 
-    private void deleteGrantsForClient(String clientId) {
-        Iterator<OAuthGrantImpl> it = grants.iterator();
-        while (it.hasNext()) {
-            OAuthGrantImpl grant = it.next();
-            if (clientId.equals(grant.getAuthCodeInfo().getClientId())) {
-                it.remove();
-            }
-        }
-    }
 
     @Override
-    public OAuthGrant redeemRefreshToken(Client client, String refreshToken) {
-        Iterator<OAuthGrantImpl> it = grants.iterator();
-        while (it.hasNext()) {
-            OAuthGrantImpl grant = it.next();
-            if (client.getId().equals(grant.getAuthCodeInfo().getClientId()) && grant.getRefreshToken().equals(refreshToken)) {
-                grant.setAccessToken(new UserizedToken(grant.getUserId(), grant.getContextId()).getToken());
-                grant.setRefreshToken(new UserizedToken(grant.getUserId(), grant.getContextId()).getToken());
-                grant.setExpirationDate(new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION));
-                return grant;
-            }
+    public OAuthGrant redeemRefreshToken(Client client, String refreshToken) throws OXException {
+        OAuthGrant grant = grantStorage.getGrantByRefreshToken(refreshToken);
+        if (grant == null) {
+            return null;
         }
 
-        return null;
-    }
-
-    public OAuthGrantImpl getGrantByAccessToken(String accessToken) {
-        Iterator<OAuthGrantImpl> it = grants.iterator();
-        while (it.hasNext()) {
-            OAuthGrantImpl grant = it.next();
-            if (grant.getAccessToken().equals(accessToken)) {
-                return grant;
-            }
+        if (!client.getId().equals(grant.getClientId())) {
+            return null;
         }
 
-        return null;
+        OAuthGrantImpl newGrant = new OAuthGrantImpl(grant);
+        newGrant.setAccessToken(new UserizedToken(grant.getUserId(), grant.getContextId()).getToken());
+        newGrant.setRefreshToken(new UserizedToken(grant.getUserId(), grant.getContextId()).getToken());
+        newGrant.setExpirationDate(new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION));
+        grantStorage.persistGrant(newGrant);
+        return newGrant;
     }
+
+
 
     @Override
     public boolean isValidScopeString(String scopeString) {

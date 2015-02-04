@@ -47,32 +47,26 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider.internal.grant;
 
-import java.util.Date;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthGrant;
 
 
 /**
- * {@link OAuthGrant}
+ * {@link OAuthGrantStorage}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthGrant {
+public interface OAuthGrantStorage {
 
-    private int contextId;
+    public void persistGrant(OAuthGrant grant) throws OXException;
 
-    private int userId;
+    public void deleteGrantsForClient(String clientId) throws OXException;
 
-    private String clientId;
+    public OAuthGrant getGrantByAccessToken(String accessToken) throws OXException;
 
-    private String accessToken;
-
-    private String refreshToken;
-
-    private Date expirationDate;
-
-    private String scope;
-
+    public OAuthGrant getGrantByRefreshToken(String refreshToken) throws OXException;
 
 }

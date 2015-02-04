@@ -164,7 +164,7 @@ public interface OAuthProviderService {
 
 
 
-    OAuthGrant redeemRefreshToken(Client client, String refreshToken);
+    OAuthGrant redeemRefreshToken(Client client, String refreshToken) throws OXException;
 
     // --------------------------------------- Helper methods -------------------------------------- \\
 

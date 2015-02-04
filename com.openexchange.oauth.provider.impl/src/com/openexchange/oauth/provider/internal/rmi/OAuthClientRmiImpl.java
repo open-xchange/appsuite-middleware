@@ -55,10 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -71,22 +68,18 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OAuthClientRmiImpl.class);
 
-    private final ServiceLookup services;
+    private final OAuthProviderService oAuthProvider;
 
     /**
      * Initializes a new {@link OAuthClientRmiImpl}.
      */
-    public OAuthClientRmiImpl(ServiceLookup services) {
+    public OAuthClientRmiImpl(OAuthProviderService oAuthProvider) {
         super();
-        this.services = services;
+        this.oAuthProvider = oAuthProvider;
     }
 
     private OAuthProviderService getProviderService() throws OXException {
-        OAuthProviderService service = services.getOptionalService(OAuthProviderService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(OAuthClientStorage.class);
-        }
-        return service;
+        return oAuthProvider;
     }
 
     @Override

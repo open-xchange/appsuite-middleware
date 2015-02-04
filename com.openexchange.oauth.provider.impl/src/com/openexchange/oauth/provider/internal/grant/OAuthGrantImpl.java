@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider.internal.grant;
 
 import java.util.Date;
 import com.openexchange.oauth.provider.DefaultScopes;
@@ -64,9 +64,13 @@ import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
  */
 public class OAuthGrantImpl implements OAuthGrant {
 
-    private final AuthCodeInfo authCodeInfo;
+    private final String clientId;
 
-    private final DefaultScopes scopes;
+    private final int contextId;
+
+    private final int userId;
+
+    private Scopes scopes;
 
     private String accessToken;
 
@@ -77,21 +81,43 @@ public class OAuthGrantImpl implements OAuthGrant {
 
     public OAuthGrantImpl(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) {
         super();
-        this.authCodeInfo = authCodeInfo;
-        scopes = DefaultScopes.parseScope(authCodeInfo.getScope());
+        clientId = authCodeInfo.getClientId();
+        contextId = authCodeInfo.getContextId();
+        userId = authCodeInfo.getUserId();
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.expirationDate = expirationDate;
+        scopes = DefaultScopes.parseScope(authCodeInfo.getScope());
+    }
+
+    /**
+     * Copy constructor
+     */
+    public OAuthGrantImpl(OAuthGrant grant) {
+        super();
+        clientId = grant.getClientId();
+        contextId = grant.getContextId();
+        userId = grant.getUserId();
+        accessToken = grant.getAccessToken();
+        refreshToken = grant.getRefreshToken();
+        expirationDate = grant.getExpirationDate();
+        scopes = grant.getScopes();
+    }
+
+
+    @Override
+    public String getClientId() {
+        return clientId;
     }
 
     @Override
     public int getContextId() {
-        return authCodeInfo.getContextId();
+        return contextId;
     }
 
     @Override
     public int getUserId() {
-        return authCodeInfo.getUserId();
+        return userId;
     }
 
     @Override
@@ -114,10 +140,6 @@ public class OAuthGrantImpl implements OAuthGrant {
         return scopes;
     }
 
-    public AuthCodeInfo getAuthCodeInfo() {
-        return authCodeInfo;
-    }
-
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
@@ -128,6 +150,10 @@ public class OAuthGrantImpl implements OAuthGrant {
 
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public void setScopes(DefaultScopes scopes) {
+        this.scopes = scopes;
     }
 
 }
