@@ -120,4 +120,9 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
         return null;
     }
+    
+    @Override
+    public boolean needsRequestToken() {
+        return true;
+    }
 }
