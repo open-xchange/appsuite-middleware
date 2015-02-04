@@ -1,0 +1,17 @@
+Readme document for proper Axis2's java2wsdl usage:
+
+1. Go to "bin" folder in Axis2 home directory
+
+2. "export JAVA_HOME=<java-home>"
+
+3. ./java2wsdl.sh
+    -o ~/git/backend/com.openexchange.oauth.provider/
+    -cp ~/git/backend/com.openexchange.oauth.provider/build:~/git/backend/com.openexchange.global/build:~/git/backend/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar
+    -sn OAuthClientService
+    -tn http://soap.provider.oauth.openexchange.com
+    -tp ox
+    -stn http://soap.provider.oauth.openexchange.com
+    -stp ox
+    -st jaxb
+    -p2n "[all,http://soap.provider.oauth.openexchange.com]"
+    -cn com.openexchange.oauth.provider.soap.OAuthClientService
