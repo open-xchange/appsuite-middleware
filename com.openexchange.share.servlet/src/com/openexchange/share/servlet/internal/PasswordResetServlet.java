@@ -64,7 +64,10 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
@@ -180,7 +183,11 @@ public class PasswordResetServlet extends HttpServlet {
                         .build();
                     notificationService.send(notification);
 
-//TODO                    ShareServiceLookup.getService(GuestService.class).setPassword(mailAddress, password);
+                    UserImpl user = new UserImpl();
+                    user.setId(guestID);
+                    user.setPasswordMech(guest.getPasswordMech());
+                    user.setUserPassword(PasswordMech.BCRYPT.encode(password));
+                    ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
 
                     setRedirect(guestShare, null, response);
                 } else {

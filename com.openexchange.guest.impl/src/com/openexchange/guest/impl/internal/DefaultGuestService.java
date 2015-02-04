@@ -216,6 +216,10 @@ public class DefaultGuestService implements GuestService {
      */
     @Override
     public void updateGuestUser(User user, int contextId) throws OXException {
+        if (user == null) {
+            throw GuestExceptionCodes.GUEST_UPDATE_ERROR.create();
+        }
+
         List<GuestAssignment> guestAssignments = retrieveGuestAssignments(contextId, user.getId());
 
         if (guestAssignments != null) {
@@ -243,18 +247,12 @@ public class DefaultGuestService implements GuestService {
      */
     @Override
     public void updateGuestContact(Contact contact, int contextId) throws OXException {
-        //TODO validate contact not null
+        if (contact == null) {
+            throw GuestExceptionCodes.GUEST_UPDATE_ERROR.create();
+        }
 
         int userId = contact.getInternalUserId();
         List<GuestAssignment> guestAssignments = retrieveGuestAssignments(contextId, userId);
-
-        //        ContactField[] contactFields = ContactField.values();
-        //        Contact baseContact = contactUserStorage.getGuestContact(contextId, userId, contactFields);
-
-        //        if (baseContact == null) {
-        //            LOG.warn("Unable to update contacts associated to user {} in context {}. Cannot find contact", userId, contextId);
-        //            return;
-        //        }
 
         if (guestAssignments != null) {
             for (GuestAssignment guestAssignment : guestAssignments) {

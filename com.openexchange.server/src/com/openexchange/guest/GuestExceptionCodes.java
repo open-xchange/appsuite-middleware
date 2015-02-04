@@ -88,15 +88,17 @@ public enum GuestExceptionCodes implements DisplayableOXExceptionCode {
 
     GUEST_CREATION_ERROR(GuestExceptionCodes.GUEST_CREATION_ERROR_MSG, Category.CATEGORY_ERROR, 7),
 
-    PASSWORD_RESET_ERROR(GuestExceptionCodes.PASSWORD_RESET_ERROR_MSG, Category.CATEGORY_ERROR, 8),
+    GUEST_UPDATE_ERROR(GuestExceptionCodes.GUEST_UPDATE_ERROR_MSG, Category.CATEGORY_ERROR, 8),
 
-    TOO_MANY_GUESTS_REMOVED(GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED_MSG, Category.CATEGORY_ERROR, 9),
+    PASSWORD_RESET_ERROR(GuestExceptionCodes.PASSWORD_RESET_ERROR_MSG, Category.CATEGORY_ERROR, 9),
 
-    PASSWORD_EMPTY_ERROR(GuestExceptionCodes.PASSWORD_EMPTY_MSG, GuestExceptionMessage.PASSWORD_EMPTY_MSG, Category.CATEGORY_USER_INPUT, 10),
+    TOO_MANY_GUESTS_REMOVED(GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED_MSG, Category.CATEGORY_ERROR, 10),
 
-    GUEST_WITHOUT_ASSIGNMENT_ERROR(GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_MSG, Category.CATEGORY_ERROR, 11),
+    PASSWORD_EMPTY_ERROR(GuestExceptionCodes.PASSWORD_EMPTY_MSG, GuestExceptionMessage.PASSWORD_EMPTY_MSG, Category.CATEGORY_USER_INPUT, 11),
 
-    CONTEXT_GUESTS_DELETION_ERROR(GuestExceptionCodes.CONTEXT_GUESTS_DELETION_ERROR_MSG, Category.CATEGORY_ERROR, 12),
+    GUEST_WITHOUT_ASSIGNMENT_ERROR(GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_MSG, Category.CATEGORY_ERROR, 12),
+
+    CONTEXT_GUESTS_DELETION_ERROR(GuestExceptionCodes.CONTEXT_GUESTS_DELETION_ERROR_MSG, Category.CATEGORY_ERROR, 13),
 
     ;
 
@@ -111,6 +113,8 @@ public enum GuestExceptionCodes implements DisplayableOXExceptionCode {
     private final static String NO_CONNECTION_PROVIDED_TO_CONNECT_TO_GUEST_STORAGE_MSG = "No connection provided to connect to guest storage.";
 
     private final static String GUEST_CREATION_ERROR_MSG = "The guest cannot be created due to an internal server error.";
+
+    private final static String GUEST_UPDATE_ERROR_MSG = "Guest contact/user that should update all related contacts/users in different contexts is null. Cannot update related guests.";
 
     private final static String GUEST_WITHOUT_ASSIGNMENT_MSG = "No assignment for the guest with mail address %1$s found. This might indicate incosistences as there is a guest user without assignments. Guest id: %2$s.";
 
