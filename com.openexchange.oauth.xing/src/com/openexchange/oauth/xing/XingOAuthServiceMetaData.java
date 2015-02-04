@@ -49,20 +49,15 @@
 
 package com.openexchange.oauth.xing;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.AJAXUtility;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -70,17 +65,11 @@ import com.openexchange.session.Session;
  * {@link XingOAuthServiceMetaData}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
+public final class XingOAuthServiceMetaData extends AbstractScribeAwareOAuthServiceMetaData {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XingOAuthServiceMetaData.class);
-
-    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.xing.apiKey",
-        "com.openexchange.oauth.xing.apiSecret", "com.openexchange.oauth.xing.consumerKey", "com.openexchange.oauth.xing.consumerSecret"};
-
-    // -------------------------------------------------------------------------------------------------- //
-
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
@@ -89,42 +78,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
      * @throws IllegalStateException If either API key or secret is missing
      */
     public XingOAuthServiceMetaData(final ServiceLookup services) {
-        super();
-        this.services = services;
-        id = "com.openexchange.oauth.xing";
-        displayName = "XING";
-        setAPIKeyName("com.openexchange.oauth.xing.apiKey");
-        setAPISecretName("com.openexchange.oauth.xing.apiSecret");
-        setConsumerKeyName("com.openexchange.oauth.xing.consumerKey");
-        setConsumerSecretName("com.openexchange.oauth.xing.consumerSecret");
-
-        final ConfigurationService configService = services.getService(ConfigurationService.class);
-        if (null == configService) {
-            throw new IllegalStateException("Missing configuration service");
-        }
-        final String apiKey = configService.getProperty("com.openexchange.oauth.xing.apiKey");
-        if (Strings.isEmpty(apiKey)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiKey");
-        }
-        this.apiKey = apiKey;
-
-        final String apiSecret = configService.getProperty("com.openexchange.oauth.xing.apiSecret");
-        if (Strings.isEmpty(apiSecret)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
-        }
-        this.apiSecret = apiSecret;
-
-        final String consumerKey = configService.getProperty("com.openexchange.oauth.xing.consumerKey");
-        if (Strings.isEmpty(consumerKey)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerKey");
-        }
-        this.consumerKey = consumerKey;
-
-        final String consumerSecret = configService.getProperty("com.openexchange.oauth.xing.consumerSecret");
-        if (Strings.isEmpty(consumerSecret)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerSecret");
-        }
-        this.consumerSecret = consumerSecret;
+        super(services, "com.openexchange.oauth.xing", "XING");
     }
 
     @Override
@@ -135,40 +89,6 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     @Override
     public Class<? extends Api> getScribeService() {
         return XingApi.class;
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        final String apiKey = configService.getProperty("com.openexchange.oauth.xing.apiKey");
-        if (Strings.isEmpty(apiKey)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiKey");
-        }
-        this.apiKey = apiKey;
-
-        final String apiSecret = configService.getProperty("com.openexchange.oauth.xing.apiSecret");
-        if (Strings.isEmpty(apiSecret)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
-        }
-        this.apiSecret = apiSecret;
-
-        final String consumerKey = configService.getProperty("com.openexchange.oauth.xing.consumerKey");
-        if (Strings.isEmpty(consumerKey)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerKey");
-        }
-        this.consumerKey = consumerKey;
-
-        final String consumerSecret = configService.getProperty("com.openexchange.oauth.xing.consumerSecret");
-        if (Strings.isEmpty(consumerSecret)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerSecret");
-        }
-        this.consumerKey = consumerSecret;
-    }
-
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("xingoauth.properties", PROPERTIES);
-        return map;
     }
 
     @Override
@@ -194,41 +114,17 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         return retval;
     }
 
-    private String extractProtocol(final String url) {
-        return Strings.toLowerCase(url).startsWith("https") ? "https" : "http";
+    @Override
+    protected String getPropertyId() {
+        return "xing";
     }
 
-    private String deferredURLUsing(final String url, final String domain) {
-        if (url == null) {
-            return null;
-        }
-        if (Strings.isEmpty(domain)) {
-            return url;
-        }
-        String deferrerURL = domain.trim();
-        final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
-        if (!path.startsWith("/")) {
-            path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
-        }
-        if (seemsAlreadyDeferred(url, deferrerURL, path)) {
-            // Already deferred
-            return url;
-        }
-        // Return deferred URL
-        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtility.encodeUrl(url, false, false)).toString();
-    }
-
-    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {
-        final String str = "://";
-        final int pos1 = url.indexOf(str);
-        final int pos2 = deferrerURL.indexOf(str);
-        if (pos1 > 0 && pos2 > 0) {
-            final String deferrerPrefix = new StringBuilder(deferrerURL.substring(pos2)).append(path).toString();
-            return url.substring(pos1).startsWith(deferrerPrefix);
-        }
-        final String deferrerPrefix = new StringBuilder(deferrerURL).append(path).toString();
-        return url.startsWith(deferrerPrefix);
+    @Override
+    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
+        Collection<OAuthPropertyID> col = new ArrayList<OAuthPropertyID>(2);
+        col.add(OAuthPropertyID.consumerKey);
+        col.add(OAuthPropertyID.consumerSecret);
+        return col;
     }
 
 }
