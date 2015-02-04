@@ -5,7 +5,7 @@
         Symlinks admin reseller RMI client JAR to lib directory.
     </description>
 
-    <import file="build-project.xml"/>    
+    <import file="build-project.xml"/>
 
     <target name="postInstall">
         <mkdir dir="${destDir}/${prefix}/${libDir}"/>
@@ -18,7 +18,7 @@
     <target name="javadoc">
         <!-- property name="printablePath" refid="sourceDirs"/>
         <echo message="${printablePath}"/ -->
-        <javadoc failonerror="true" destdir="javadoc" author="true" public="true" Windowtitle="Open-Xchange Administration Interface">
+        <javadoc failonerror="true" destdir="javadoc" author="true" public="true" Windowtitle="Open-Xchange Administration Interface" additionalparam="-Xdoclint:none">
             <Header><![CDATA[<img src="{@docRoot}/resources/OX_Logo.jpg">]]></Header>
             <sourcepath refid="sourceDirs"/>
             <sourcepath path="${mainSrcDir}"/>
