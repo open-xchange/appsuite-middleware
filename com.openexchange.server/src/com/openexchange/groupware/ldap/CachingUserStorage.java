@@ -279,10 +279,14 @@ public class CachingUserStorage extends UserStorage {
                     doUpdate |= null != user.getPasswordMech() && false == user.getPasswordMech().equals(oldUser.getPasswordMech());
                     doUpdate |= null != user.getUserPassword() && false == user.getUserPassword().equals(oldUser.getUserPassword());
                 }
+            } else {
+                doUpdate = true;
             }
+        } else {
+            doUpdate = true;
         }
         if (doUpdate) {
-            // Only update the user in the database if it differs from the one in the cache.
+            // Only update the user in the database if it differs from the one in the cache, the user is not cached or the service is not available.
             if (con == null) {
                 delegate.updateUser(user, context);
             } else {
