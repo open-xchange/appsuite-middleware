@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.openexchange.oauth.msliveconnect
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.ajax,
- com.openexchange.capabilities,
+Import-Package: com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.database,
  com.openexchange.dispatcher,

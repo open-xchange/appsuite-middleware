@@ -54,8 +54,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
@@ -81,7 +83,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      */
     public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, String id, String displayName) {
         this.services = services;
-        
+
         setId(id);
         setDisplayName(displayName);
 
@@ -92,7 +94,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
 
         // Add the extra properties (if any)
         propertyNames.addAll(getExtraPropertyNames());
-        
+
         // Load configuration
         loadConfiguration();
     }
@@ -134,6 +136,66 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         Map<String, String[]> map = new HashMap<String, String[]>(1);
         map.put(getPropertyId() + "oauth.properties", getConfigurationPropertyNames());
         return map;
+    }
+
+    protected String trimRedirectUri(String redirectUri) {
+        String actual = getOAuthProperty(OAuthPropertyID.redirectUrl).getValue();
+        if (!stripProtocol(redirectUri).startsWith(stripProtocol(actual))) {
+            return redirectUri;
+        }
+        return actual;
+    }
+
+    protected String stripProtocol(String encodedUrl) {
+        if (encodedUrl.startsWith("https")) {
+            return encodedUrl.substring(5);
+        } else if (encodedUrl.startsWith("http")) {
+            return encodedUrl.substring(4);
+        }
+        return encodedUrl;
+    }
+
+    /**
+     * Extracts the protocol from the specified URL
+     * 
+     * @param url The URL
+     * @return The extracted protocol (either http or https)
+     */
+    protected String extractProtocol(final String url) {
+        return Strings.toLowerCase(url).startsWith("https") ? "https" : "http";
+    }
+
+    protected String deferredURLUsing(final String url, final String domain) {
+        if (url == null) {
+            return null;
+        }
+        if (Strings.isEmpty(domain)) {
+            return url;
+        }
+        String deferrerURL = domain.trim();
+        final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
+        String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
+        if (!path.startsWith("/")) {
+            path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
+        }
+        if (seemsAlreadyDeferred(url, deferrerURL, path)) {
+            // Already deferred
+            return url;
+        }
+        // Return deferred URL
+        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtility.encodeUrl(url, false, false)).toString();
+    }
+
+    protected boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {
+        final String str = "://";
+        final int pos1 = url.indexOf(str);
+        final int pos2 = deferrerURL.indexOf(str);
+        if (pos1 > 0 && pos2 > 0) {
+            final String deferrerPrefix = new StringBuilder(deferrerURL.substring(pos2)).append(path).toString();
+            return url.substring(pos1).startsWith(deferrerPrefix);
+        }
+        final String deferrerPrefix = new StringBuilder(deferrerURL).append(path).toString();
+        return url.startsWith(deferrerPrefix);
     }
 
     /**
