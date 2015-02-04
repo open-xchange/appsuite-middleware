@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,29 @@
  *
  */
 
-package com.openexchange.passwordchange.osgi;
+package com.openexchange.guest;
 
-import com.openexchange.guest.GuestService;
-import com.openexchange.guest.osgi.GuestServiceServiceTracker;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.BasicPasswordChangeService;
-import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
-import com.openexchange.user.UserService;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PasswordChangeActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * {@link GuestExceptionMessage}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class PasswordChangeActivator extends HousekeepingActivator {
+public class GuestExceptionMessage implements LocalizableStrings {
+
+    public final static String INVALID_EMAIL_ADDRESS_MSG = "The provided mail address %1$s is invalid! It cannot be added to guest administration.";
+
+    public final static String EMTPY_EMAIL_ADDRESS_MSG = "The provided mail address is empty! It cannot be added to guest administration.";
+
+    public final static String PASSWORD_EMPTY_MSG = "The new password might not be empty! Please provide a password.";
 
     /**
-     * Initializes a new {@link PasswordChangeActivator}.
+     * Initializes a new {@link GuestExceptionMessage}.
      */
-    public PasswordChangeActivator() {
+    private GuestExceptionMessage() {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(BasicPasswordChangeService.class, new DefaultBasicPasswordChangeService());
-
-        track(GuestService.class, new GuestServiceServiceTracker(this.context));
-        openTrackers();
     }
 }

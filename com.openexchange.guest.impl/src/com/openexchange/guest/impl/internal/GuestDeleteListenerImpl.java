@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,53 @@
  *
  */
 
-package com.openexchange.passwordchange.osgi;
+package com.openexchange.guest.impl.internal;
 
+import java.sql.Connection;
+import org.apache.commons.lang.Validate;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.guest.GuestService;
-import com.openexchange.guest.osgi.GuestServiceServiceTracker;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.BasicPasswordChangeService;
-import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
-import com.openexchange.user.UserService;
-
 
 /**
- * {@link PasswordChangeActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * This class handles clean deletion of guests from the mapping tables in case a guest user was deleted.
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class PasswordChangeActivator extends HousekeepingActivator {
+public class GuestDeleteListenerImpl implements DeleteListener {
+
+    private final GuestService guestService;
 
     /**
-     * Initializes a new {@link PasswordChangeActivator}.
+     *
+     * Initializes a new {@link GuestDeleteListenerImpl}.
+     *
+     * @param guestService - to delete the guest
      */
-    public PasswordChangeActivator() {
-        super();
+    public GuestDeleteListenerImpl(GuestService guestService) {
+        Validate.notNull(guestService, "Required service GuestService is absent. Removing guests from mapping table not possible.");
+
+        this.guestService = guestService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
-    }
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+        if (event.getType() == DeleteEvent.TYPE_USER) {
+            final int contextId = event.getContext().getContextId();
+            final int userId = event.getId();
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(BasicPasswordChangeService.class, new DefaultBasicPasswordChangeService());
+            this.guestService.removeGuest(contextId, userId);
+        }
+        if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
+            final int contextId = event.getContext().getContextId();
 
-        track(GuestService.class, new GuestServiceServiceTracker(this.context));
-        openTrackers();
+            this.guestService.removeGuests(contextId);
+        }
     }
 }

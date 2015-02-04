@@ -60,10 +60,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.guest.GuestService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
-
 
 /**
  * {@link DefaultBasicPasswordChangeService}
@@ -73,8 +73,11 @@ import com.openexchange.user.UserService;
  */
 public class DefaultBasicPasswordChangeService extends BasicPasswordChangeService {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultBasicPasswordChangeService.class);
+
     /**
      * Initializes a new {@link DefaultBasicPasswordChangeService}.
+     * @param services
      */
     public DefaultBasicPasswordChangeService() {
         super();
@@ -82,18 +85,17 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
 
     @Override
     protected void update(PasswordChangeEvent event) throws OXException {
-        String encodedPassword;
-        Context ctx = event.getContext();
-        {
-            UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-            if (userService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
-            }
-            User user = userService.getUser(event.getSession().getUserId(), ctx);
 
-            // Get encoded version of new password
-            encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
+        Context ctx = event.getContext();
+
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+        if (userService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
         }
+        User user = userService.getUser(event.getSession().getUserId(), ctx);
+
+        // Get encoded version of new password
+        String encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
 
         // Update database
         Connection writeCon = Database.get(ctx, true);
@@ -116,6 +118,18 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
             autocommit(writeCon);
             Database.back(ctx, true, writeCon);
         }
+
+        userService.invalidateUser(ctx, event.getSession().getUserId());
+        User updatedUser = userService.getUser(event.getSession().getUserId(), ctx);
+
+        if (updatedUser.isGuest()) {
+            GuestService guestService = ServerServiceRegistry.getServize(GuestService.class);
+            if (guestService != null) {
+                guestService.updateGuestUser(updatedUser, ctx.getContextId());
+            } else {
+                LOG.warn("GuestService absent: cannot reset password for all known guest user registered under mail address {}", updatedUser.getMail());
+            }
+        }
     }
 
     private void update(Connection writeCon, String encodedPassword, int userId, int contextId) throws SQLException {
@@ -124,7 +138,7 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
             stmt = writeCon.prepareStatement("UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?");
             int pos = 1;
             stmt.setString(pos++, encodedPassword);
-            stmt.setInt(pos++,(int)(System.currentTimeMillis()/1000));
+            stmt.setInt(pos++, (int) (System.currentTimeMillis() / 1000));
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();

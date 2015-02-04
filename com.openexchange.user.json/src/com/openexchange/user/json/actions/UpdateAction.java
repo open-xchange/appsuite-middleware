@@ -79,6 +79,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.guest.GuestService;
 import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -154,7 +155,6 @@ public final class UpdateAction extends AbstractUserAction {
                 setImageData(request, parsedUserContact);
             }
 
-
             /*
              * Update contact
              */
@@ -179,6 +179,12 @@ public final class UpdateAction extends AbstractUserAction {
             } else {
                 ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
                 contactUserStorage.updateGuestContact(session, contactId, parsedUserContact, parsedUserContact.getLastModified());
+
+                GuestService guestService = services.getService(GuestService.class);
+                if ((guestService != null) && (storageUser.isGuest())) {
+                    Contact updatedGuestContact = contactUserStorage.getGuestContact(session.getContextId(), id, ContactField.values());
+                    guestService.updateGuestContact(updatedGuestContact, session.getContextId());
+                }
             }
             /*
              * Update user, too, if necessary
@@ -192,7 +198,14 @@ public final class UpdateAction extends AbstractUserAction {
                 if (null == parsedLocale) {
                     UserMapper.getInstance().get(UserField.LOCALE).copy(storageUser, parsedUser);
                 }
+
                 userService.updateUser(parsedUser, session.getContext());
+
+                GuestService guestService = services.getService(GuestService.class);
+                if ((guestService != null) && (storageUser.isGuest())) {
+                    User updatedUser = userService.getUser(id, session.getContextId());
+                    guestService.updateGuestUser(updatedUser, session.getContextId());
+                }
             }
             /*
              * Check what has been updated
@@ -234,6 +247,7 @@ public final class UpdateAction extends AbstractUserAction {
         }
 
     }
+
     // Copied from RequestTools in contact module
 
     public static void setImageData(final AJAXRequestData request, final Contact contact) throws OXException {
@@ -303,14 +317,13 @@ public final class UpdateAction extends AbstractUserAction {
         throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
     }
 
-
     private static boolean isImageContentType(String contentType) {
         return null != contentType && contentType.toLowerCase().startsWith("image");
     }
 
     private static long sysconfMaxUpload() {
         final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-        if(null == sizeS) {
+        if (null == sizeS) {
             return 0;
         }
         return Long.parseLong(sizeS);

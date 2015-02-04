@@ -1252,7 +1252,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             QueryFields queryFields = new QueryFields(contactFields, ContactField.CONTEXTID, ContactField.OBJECT_ID);
             contact = executor.selectSingleGuestContact(con, Table.CONTACTS, contextId, guestId, queryFields.getContactDataFields());
             if (null == contact) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(0, contextId);
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(guestId, contextId);
             }
             if (queryFields.hasImageData() && 0 < contact.getNumberOfImages()) {
                 Contact imageData = executor.selectSingle(con, Table.IMAGES, contextId, contact.getObjectID(), queryFields.getImageDataFields());

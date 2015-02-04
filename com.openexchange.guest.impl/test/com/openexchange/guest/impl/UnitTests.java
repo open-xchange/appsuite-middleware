@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,34 @@
  *
  */
 
-package com.openexchange.passwordchange.osgi;
+package com.openexchange.guest.impl;
 
-import com.openexchange.guest.GuestService;
-import com.openexchange.guest.osgi.GuestServiceServiceTracker;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.BasicPasswordChangeService;
-import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
-import com.openexchange.user.UserService;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.guest.impl.internal.DefaultGuestServiceTest;
+import com.openexchange.guest.impl.internal.GuestDeleteListenerImplTest;
+import com.openexchange.guest.impl.internal.RdbGuestStorageTest;
 
 /**
- * {@link PasswordChangeActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * {@link UnitTests}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class PasswordChangeActivator extends HousekeepingActivator {
+@RunWith(Suite.class)
+@SuiteClasses({
+    RdbGuestStorageTest.class,
+    DefaultGuestServiceTest.class,
+    GuestDeleteListenerImplTest.class,
+})
+public class UnitTests {
 
     /**
-     * Initializes a new {@link PasswordChangeActivator}.
+     * Initializes a new {@link UnitTests}.
      */
-    public PasswordChangeActivator() {
+    public UnitTests() {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(BasicPasswordChangeService.class, new DefaultBasicPasswordChangeService());
-
-        track(GuestService.class, new GuestServiceServiceTracker(this.context));
-        openTrackers();
     }
 }

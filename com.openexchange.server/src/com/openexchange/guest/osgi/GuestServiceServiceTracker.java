@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,56 @@
  *
  */
 
-package com.openexchange.passwordchange.osgi;
+package com.openexchange.guest.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.guest.GuestService;
-import com.openexchange.guest.osgi.GuestServiceServiceTracker;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.BasicPasswordChangeService;
-import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
-import com.openexchange.user.UserService;
-
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link PasswordChangeActivator}
+ * Tracker for the {@link GuestService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class PasswordChangeActivator extends HousekeepingActivator {
+public final class GuestServiceServiceTracker implements ServiceTrackerCustomizer<GuestService, GuestService> {
+
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link PasswordChangeActivator}.
+     * Initializes a new {@link GuestService}.
      */
-    public PasswordChangeActivator() {
+    public GuestServiceServiceTracker(final BundleContext context) {
         super();
+        this.context = context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
+    public GuestService addingService(final ServiceReference<GuestService> reference) {
+        final GuestService service = context.getService(reference);
+        ServerServiceRegistry.getInstance().addService(GuestService.class, service);
+        return service;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected void startBundle() throws Exception {
-        registerService(BasicPasswordChangeService.class, new DefaultBasicPasswordChangeService());
+    public void modifiedService(final ServiceReference<GuestService> reference, final GuestService service) {
+        // Ignore
+    }
 
-        track(GuestService.class, new GuestServiceServiceTracker(this.context));
-        openTrackers();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removedService(final ServiceReference<GuestService> reference, final GuestService service) {
+        context.ungetService(reference);
+        ServerServiceRegistry.getInstance().removeService(GuestService.class);
     }
 }

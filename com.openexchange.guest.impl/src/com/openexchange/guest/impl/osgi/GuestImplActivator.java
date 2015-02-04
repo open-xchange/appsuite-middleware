@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,77 +47,60 @@
  *
  */
 
-package com.openexchange.user.json.osgi;
+package com.openexchange.guest.impl.osgi;
 
-import com.openexchange.ajax.anonymizer.AnonymizerService;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.contact.ContactService;
+import com.openexchange.caching.CacheService;
 import com.openexchange.contact.storage.ContactUserStorage;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.guest.GuestService;
-import com.openexchange.share.ShareService;
+import com.openexchange.guest.impl.internal.DefaultGuestService;
+import com.openexchange.guest.impl.internal.GuestDeleteListenerImpl;
+import com.openexchange.guest.impl.internal.GuestStorageServiceLookup;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
-import com.openexchange.user.json.Constants;
-import com.openexchange.user.json.UserContactResultConverter;
-import com.openexchange.user.json.actions.UserActionFactory;
-import com.openexchange.user.json.anonymizer.ContactAnonymizerService;
-import com.openexchange.user.json.anonymizer.UserAnonymizerService;
-import com.openexchange.user.json.actions.UserMeActionFactory;
 
 /**
- * {@link UserJSONActivator} - Activator for JSON user interface.
+ * {@link GuestImplActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class UserJSONActivator extends AJAXModuleActivator {
+public class GuestImplActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link UserJSONActivator}.
+     * {@inheritDoc}
      */
-    public UserJSONActivator() {
-        super();
-    }
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DispatcherPrefixService.class };
+        return new Class<?>[] {
+            UserService.class, ContextService.class, DatabaseService.class, CacheService.class, ContactUserStorage.class
+        };
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void startBundle() throws Exception {
-        try {
-            Services.setServiceLookup(this);
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GuestImplActivator.class);
+        logger.info("Starting bundle: {}", this.context.getBundle().getSymbolicName());
 
-            registerModule(new UserActionFactory(this), Constants.MODULE);
-            registerModule(new UserMeActionFactory(this), Constants.MODULE_ME);
+        GuestStorageServiceLookup.set(this);
 
-            /*
-             * Register result converter
-             */
-            registerService(ResultConverter.class, new UserContactResultConverter());
-            registerService(AnonymizerService.class.getName(), new UserAnonymizerService());
-            registerService(AnonymizerService.class.getName(), new ContactAnonymizerService());
+        DefaultGuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContextService.class), getService(ContactUserStorage.class));
+        registerService(GuestService.class, guestService);
 
-            trackService(DispatcherPrefixService.class);
-            trackService(UserService.class);
-            trackService(ContactService.class);
-            trackService(DatabaseService.class);
-            trackService(ContactUserStorage.class);
-            trackService(ShareService.class);
-            trackService(GuestService.class);
-            openTrackers();
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(UserJSONActivator.class).error("Failed to start bundle {}", context.getBundle().getSymbolicName(), e);
-            throw e;
-        }
+        registerService(DeleteListener.class, new GuestDeleteListenerImpl(guestService));
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
-    }
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GuestImplActivator.class);
+        logger.info("Stopping bundle: {}", this.context.getBundle().getSymbolicName());
 
+        GuestStorageServiceLookup.set(null);
+        super.stopBundle();
+    }
 }

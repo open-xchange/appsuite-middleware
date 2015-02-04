@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,67 @@
  *
  */
 
-package com.openexchange.passwordchange.osgi;
+package com.openexchange.guest.impl.internal;
 
-import com.openexchange.guest.GuestService;
-import com.openexchange.guest.osgi.GuestServiceServiceTracker;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.BasicPasswordChangeService;
-import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
-import com.openexchange.user.UserService;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.guest.impl.storage.GuestStorage;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link PasswordChangeActivator}
+ * ServiceLookup for the {@link GuestStorage}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class PasswordChangeActivator extends HousekeepingActivator {
+public final class GuestStorageServiceLookup {
 
     /**
-     * Initializes a new {@link PasswordChangeActivator}.
+     * Initializes a new {@link GuestStorageServiceLookup}.
      */
-    public PasswordChangeActivator() {
+    private GuestStorageServiceLookup() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(BasicPasswordChangeService.class, new DefaultBasicPasswordChangeService());
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
 
-        track(GuestService.class, new GuestServiceServiceTracker(this.context));
-        openTrackers();
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
+
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
     }
 }
