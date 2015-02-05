@@ -47,7 +47,7 @@
  *
  */
 
-package sessionstorage;
+package com.openexchange.sessionstorage;
 
 import java.util.Collection;
 import java.util.List;
