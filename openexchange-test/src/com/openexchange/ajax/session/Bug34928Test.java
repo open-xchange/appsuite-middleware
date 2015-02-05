@@ -117,7 +117,7 @@ public class Bug34928Test extends AbstractAJAXSession {
          */
         client.getSession().setId(null);
         HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false));
-        assertThat("Second authentication with cookies failed.", I(httpAuthResponse.getStatusCode()), equalTo(I(SC_FOUND)));
+        assertThat("Second authentication with cookies failed. Session " + firstSessionID, I(httpAuthResponse.getStatusCode()), equalTo(I(SC_FOUND)));
         String secondSessionID = extractSessionID(httpAuthResponse);
         assertNotNull("No session ID", secondSessionID);
         assertEquals("Different session IDs", firstSessionID, secondSessionID);
