@@ -53,13 +53,10 @@ import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
 import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -69,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -117,7 +115,6 @@ public class SnippetProcessor {
     // --------------------------------------------------------------------------------------------------------------------------
 
     private final Session session;
-    private final Pattern pattern;
 
     /**
      * Initializes a new {@link SnippetProcessor}.
@@ -128,16 +125,16 @@ public class SnippetProcessor {
     public SnippetProcessor(Session session) {
         super();
         this.session = session;
-        pattern = Pattern.compile("(?i)src=\"[^\"]*\"");
     }
 
     /**
      * Process the images in the snippet, extracts them and convert them to attachments
      *
-     * @param snippet
+     * @param snippet The snippet to process
+     * @param attachments The list to add attachments to
      * @throws OXException
      */
-    public void processImages(final Snippet snippet) throws OXException {
+    public void processImages(DefaultSnippet snippet, List<Attachment> attachments) throws OXException {
         String content = snippet.getContent();
         if (isEmpty(content)) {
             return;
@@ -161,7 +158,7 @@ public class SnippetProcessor {
                 ConfigProperty<Double> misConf = configView.property("com.openexchange.mail.signature.maxImageSize", Double.class);
                 final double mis;
                 if (misConf.isDefined()) {
-                    mis = misConf.get();
+                    mis = misConf.get().doubleValue();
                 } else {
                     // Defaults to 1 MB
                     mis = (1d);
@@ -170,7 +167,6 @@ public class SnippetProcessor {
             }
         }
 
-        Map<String, String> imageTags = new HashMap<String, String>(maxImageLimit);
         ImageMatcher m = ImageMatcher.matcher(content);
         StringBuffer sb = new StringBuffer(content.length());
         if (m.find()) {
@@ -209,14 +205,14 @@ public class SnippetProcessor {
                     // Replace "src" attribute
 
                     if (++count > maxImageLimit) {
-                        throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(maxImageLimit);
+                        throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(Integer.valueOf(maxImageLimit));
                     }
 
                     if (mf.getSize() > maxImageSize) {
-                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(maxImageSize);
+                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
                     }
 
-                    String contentId = processLocalImage(mf, id, appendBodyPart, (DefaultSnippet) snippet);
+                    String contentId = processLocalImage(mf, id, appendBodyPart, attachments);
                     String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + contentId + "\""));
                     iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + Version.NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
@@ -229,21 +225,19 @@ public class SnippetProcessor {
             } while (m.find());
         }
         m.appendTail(sb);
-        ((DefaultSnippet) snippet).setContent(sb.toString());
+        snippet.setContent(sb.toString());
     }
 
     /**
-     * Processes a local image and returns its content id
+     * Processes a local image and returns its content identifier
      *
      * @param mf The uploaded file
-     * @param id uploaded file's ID
-     * @param appendBodyPart
-     * @param tmp An instance of {@link StringBuilder}
-     * @param snippet The parent snippet
-     * @return the content id
-     * @throws OXException If an error occurs
+     * @param id The uploaded file's ID
+     * @param appendBodyPart Whether to actually append the part to the snippet
+     * @param attachments The attachment list
+     * @return The content id
      */
-    private final String processLocalImage(ManagedFile mf, String id, boolean appendBodyPart, DefaultSnippet snippet) throws OXException {
+    private final String processLocalImage(ManagedFile mf, String id, boolean appendBodyPart, List<Attachment> attachments) {
         /*
          * Determine filename
          */
@@ -275,14 +269,19 @@ public class SnippetProcessor {
          */
         if (appendBodyPart) {
             DefaultAttachment att = new DefaultAttachment();
-            att.setContentDisposition(mf.getContentDisposition());
+            {
+                ContentDisposition cd = new ContentDisposition();
+                cd.setInline();
+                cd.setFilenameParameter(fileName);
+                att.setContentDisposition(cd.toString());
+            }
             att.setContentType(mf.getContentType());
             att.setContentId(new StringBuilder(32).append('<').append(id).append('>').toString());
             att.setId(mf.getID());
             att.setSize(mf.getSize());
             att.setStreamProvider(new InputStreamProviderImpl(mf));
             att.setFilename(mf.getFileName());
-            snippet.addAttachment(att);
+            attachments.add(att);
         }
         return id;
     }

@@ -50,6 +50,7 @@
 package com.openexchange.snippet.json.action;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -60,7 +61,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.mime.ContentType;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
@@ -69,7 +69,6 @@ import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -96,7 +95,7 @@ public final class NewAction extends SnippetAction {
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
-        final JSONObject jsonSnippet = (JSONObject) snippetRequest.getRequestData().getData();
+        JSONObject jsonSnippet = (JSONObject) snippetRequest.getRequestData().getData();
         if (null == jsonSnippet) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
@@ -104,8 +103,9 @@ public final class NewAction extends SnippetAction {
         // text/plain would be set as default
         // jsonSnippet.getJSONObject("misc").put("content-type", "text/html");
         // Parse from JSON to snippet
-        final DefaultSnippet snippet = new DefaultSnippet();
+        DefaultSnippet snippet = new DefaultSnippet();
         SnippetJsonParser.parse(jsonSnippet, snippet);
+
         // Check for needed fields
         if (isEmpty(snippet.getDisplayName())) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(Property.DISPLAY_NAME.getPropName());
@@ -116,7 +116,7 @@ public final class NewAction extends SnippetAction {
         if (isEmpty(snippet.getModule())) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(Property.MODULE.getPropName());
         }
-        final List<Attachment> attachments = snippet.getAttachments();
+        List<Attachment> attachments = snippet.getAttachments();
         if (null != attachments) {
             for (final Attachment attachment : attachments) {
                 if (null == attachment.getId()) {
@@ -124,14 +124,20 @@ public final class NewAction extends SnippetAction {
                 }
             }
         }
+
         // Process image in an img HTML tag and add it as an attachment
-        final String contentSubType = getContentSubType(snippet);
-        final SnippetProcessor snippetProcessor = new SnippetProcessor(snippetRequest.getSession());
+        String contentSubType = getContentSubType(snippet);
         if (contentSubType.equals("html")) {
-            snippetProcessor.processImages(snippet);
+            SnippetProcessor snippetProcessor = new SnippetProcessor(snippetRequest.getSession());
+            List<Attachment> parsedAttachments = new LinkedList<Attachment>();
+            snippetProcessor.processImages(snippet, parsedAttachments);
+            for (Attachment attachment : parsedAttachments) {
+                snippet.addAttachment(attachment);
+            }
         }
+
         // Create via management
-        final String id = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession()).createSnippet(snippet);
+        String id = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession()).createSnippet(snippet);
         return new AJAXRequestResult(id, "string");
     }
 

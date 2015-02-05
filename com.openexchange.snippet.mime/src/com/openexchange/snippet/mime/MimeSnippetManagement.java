@@ -95,6 +95,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -660,6 +661,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                         break;
                     }
                 }
+
                 // Copy remaining to updateMessage; this action includes unnamed properties
                 @SuppressWarnings("unchecked") final Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
                 final Set<String> propertyNames = Property.getPropertyNames();
@@ -670,10 +672,13 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     }
                 }
             }
+
             // Check for content
-            final String content;
+            String content;
+            Set<String> contentIds;
             if (properties.contains(Property.CONTENT)) {
                 content = snippet.getContent();
+                contentIds = new HashSet<String>(MimeMessageUtility.getContentIDs(content));
             } else {
                 final MimePart textPart;
                 final ContentType ct;
@@ -686,9 +691,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     ct = storageContentType;
                 }
                 content = MessageUtility.readMimePart(textPart, ct);
+                contentIds = new HashSet<String>(MimeMessageUtility.getContentIDs(content));
             }
+
             // Check for misc
-            final MimePart miscPart;
+            MimePart miscPart;
             if (properties.contains(Property.MISC)) {
                 final Object misc = snippet.getMisc();
 
@@ -698,19 +705,17 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     miscPart = new MimeBodyPart();
                     miscPart.setDataHandler(new DataHandler(new MessageDataSource(misc.toString(), "text/javascript; charset=UTF-8")));
                     miscPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                    miscPart.setHeader(
-                        MessageHeaders.HDR_CONTENT_TYPE,
-                        MimeMessageUtility.foldContentType("text/javascript; charset=UTF-8"));
+                    miscPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("text/javascript; charset=UTF-8"));
                 }
             } else {
                 if (storageContentType.startsWith("multipart/")) {
-                    final Multipart multipart = (Multipart) storageMessage.getContent();
-                    final int length = multipart.getCount();
+                    Multipart multipart = (Multipart) storageMessage.getContent();
+                    int length = multipart.getCount();
                     MimePart mp = null;
                     for (int i = 1; null == mp && i < length; i++) { // skip first
-                        final BodyPart bodyPart = multipart.getBodyPart(i);
-                        final String header = storageMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
-                        if (null != header && header.toLowerCase(Locale.US).startsWith("text/javascript")) {
+                        BodyPart bodyPart = multipart.getBodyPart(i);
+                        String header = Strings.asciiLowerCase(MimeMessageUtility.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null, bodyPart));
+                        if (null != header && header.startsWith("text/javascript")) {
                             mp = (MimePart) bodyPart;
                         }
                     }
@@ -719,23 +724,47 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     miscPart = null;
                 }
             }
+
             // Check for attachments
-            final List<MimeBodyPart> attachmentParts = new ArrayList<MimeBodyPart>();
+            List<MimeBodyPart> attachmentParts = new ArrayList<MimeBodyPart>();
+
             // Add existing
             if (storageContentType.startsWith("multipart/")) {
-                final Multipart multipart = (Multipart) storageMessage.getContent();
-                final int length = multipart.getCount();
+                Multipart storageMultipart = (Multipart) storageMessage.getContent();
+                int length = storageMultipart.getCount();
                 for (int i = 1; i < length; i++) { // skip first
-                    final String header = storageMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
-                    if (null == header || !header.toLowerCase(Locale.US).startsWith("text/javascript")) {
-                        attachmentParts.add((MimeBodyPart) multipart.getBodyPart(i));
+                    MimeBodyPart bodyPart = (MimeBodyPart) storageMultipart.getBodyPart(i);
+                    String header = Strings.asciiLowerCase(MimeMessageUtility.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null, bodyPart));
+                    if (null == header) {
+                        attachmentParts.add(bodyPart);
+                    } else if (!header.startsWith("text/javascript")) {
+                        // Check for inline image attachment
+                        if (header.startsWith("image/")) {
+                            String optContentId = MimeMessageUtility.getHeader(MessageHeaders.HDR_CONTENT_ID, null, bodyPart);
+                            if (null == content) {
+                                attachmentParts.add(bodyPart);
+                            } else {
+                                String disp = MimeMessageUtility.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null, bodyPart);
+                                if (null != disp && Strings.asciiLowerCase(disp).trim().startsWith("inline")) {
+                                    // Still referenced to in HTML content
+                                    if (contentIds.contains(MimeMessageUtility.trimContentId(optContentId))) {
+                                        attachmentParts.add(bodyPart);
+                                    }
+                                } else {
+                                    attachmentParts.add(bodyPart);
+                                }
+                            }
+                        } else {
+                            attachmentParts.add(bodyPart);
+                        }
                     }
                 }
             }
+
             // Removed
             if (notEmpty(removeAttachments)) {
-                for (final Attachment attachment : removeAttachments) {
-                    for (final Iterator<MimeBodyPart> iterator = attachmentParts.iterator(); iterator.hasNext();) {
+                for ( Attachment attachment : removeAttachments) {
+                    for (Iterator<MimeBodyPart> iterator = attachmentParts.iterator(); iterator.hasNext();) {
                         final String header = iterator.next().getHeader("attachmentid", null);
                         if (null != header && header.equals(attachment.getId())) {
                             iterator.remove();
@@ -743,34 +772,39 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     }
                 }
             }
+
             // New ones
             if (notEmpty(addAttachments)) {
-                for (final Attachment attachment : addAttachments) {
+                for (Attachment attachment : addAttachments) {
                     attachmentParts.add(attachment2MimePart(attachment));
                 }
             }
             // Check gathered parts
             if (null != miscPart || notEmpty(attachmentParts)) {
                 // Create a multipart message
-                final Multipart primaryMultipart = new MimeMultipart();
+                Multipart primaryMultipart = new MimeMultipart();
+
                 // Add text part
-                final MimeBodyPart textPart = new MimeBodyPart();
-                final String subType = determineContentSubtype(snippet.getMisc());
+                MimeBodyPart textPart = new MimeBodyPart();
+                String subType = determineContentSubtype(snippet.getMisc());
                 // MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == miscPart ? "plain" :
                 // determineContentSubtype(MessageUtility.readMimePart(miscPart, "UTF-8")), textPart);
                 textPart.setText(sanitizeContent(content), "UTF-8", subType);
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
+
                 // Add attachment parts
                 if (notEmpty(attachmentParts)) {
                     for (final MimeBodyPart mimePart : attachmentParts) {
                         primaryMultipart.addBodyPart(mimePart);
                     }
                 }
+
                 // Add misc part
                 if (null != miscPart) {
                     primaryMultipart.addBodyPart((BodyPart) miscPart);
                 }
+
                 // Apply to message
                 updateMessage.setContent(primaryMultipart);
 
@@ -781,10 +815,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // updateMessage.setText(sanitizeContent(content), "UTF-8", "plain");
                 updateMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             }
+
             // Save to MIME structure...
             updateMessage.saveChanges();
             updateMessage.removeHeader("Message-ID");
             updateMessage.removeHeader("MIME-Version");
+
             // ... and write to byte array
             byte[] byteArray;
             {
@@ -792,11 +828,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 updateMessage.writeTo(outputStream);
                 byteArray = outputStream.toByteArray();
             }
+
             // Create file carrying new MIME data
             newFile = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
             byteArray = null; // Drop immediately
             {
-                final Connection con = databaseService.getWritable(contextId);
+                Connection con = databaseService.getWritable(contextId);
                 PreparedStatement stmt = null;
                 boolean rollback = false;
                 try {
@@ -858,6 +895,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     databaseService.backWritable(contextId, con);
                 }
             }
+
             // Mark as successfully processed
             error = false;
             return identifier;

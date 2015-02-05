@@ -359,6 +359,9 @@ public final class MimeMessageUtility {
 
     /**
      * Gathers all occurring content IDs in HTML content and returns them as a list
+     * <pre>
+     * &lt;img src=&quot;cid:s345asd845@12drg&quot;&gt;
+     * </pre>
      *
      * @param htmlContent The HTML content
      * @return an instance of <code>{@link List}</code> containing all occurring content IDs
@@ -446,6 +449,18 @@ public final class MimeMessageUtility {
             }
         }
         return true;
+    }
+
+    /**
+     * Gets the trimmed Content-ID value
+     * <p>
+     * <tt>"&lt;1234abcd&gt;"</tt> --&gt; <tt>"1234abcd"</tt>
+     *
+     * @param contentId The Content-ID value
+     * @return The trimmed Content-ID value
+     */
+    public static String trimContentId(String contentId) {
+        return trimContentId(contentId, null);
     }
 
     private static String trimContentId(final String contentId, final String ignorableSuffix) {
