@@ -56,7 +56,6 @@ import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -97,14 +96,6 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthDispatcherServlet.class);
 
-    /*
-     * From https://tools.ietf.org/html/rfc6750#section-2.1:
-     *   The syntax for Bearer credentials is as follows:
-     *   b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
-     *   credentials = "Bearer" 1*SP b64token
-     */
-    private static final Pattern TOKEN_PATTERN = Pattern.compile("[\\x41-\\x5a\\x61-\\x7a\\x30-\\x39-._~+/]+=*");
-
     private final ServiceLookup services;
 
     private final OAuthSessionProvider sessionProvider;
@@ -131,13 +122,8 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
             throw new OAuthInvalidTokenException(Reason.INVALID_AUTH_SCHEME);
         }
 
-        String accessToken = authHeader.substring(OAuthConstants.BEARER_SCHEME.length() + 1);
-        if (!TOKEN_PATTERN.matcher(accessToken).matches()) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
-        }
-
         OAuthResourceService oAuthResourceService = requireService(OAuthResourceService.class, services);
-        OAuthGrant grant = oAuthResourceService.validate(accessToken);
+        OAuthGrant grant = oAuthResourceService.validate(authHeader.substring(OAuthConstants.BEARER_SCHEME.length() + 1));
         Session session = sessionProvider.getSession(grant, httpRequest);
         SessionUtility.rememberSession(httpRequest, ServerSessionAdapter.valueOf(session));
         httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_GRANT, grant);

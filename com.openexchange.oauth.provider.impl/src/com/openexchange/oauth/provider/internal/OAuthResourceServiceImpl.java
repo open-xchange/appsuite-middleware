@@ -50,6 +50,7 @@
 package com.openexchange.oauth.provider.internal;
 
 import java.util.Date;
+import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthGrant;
@@ -68,6 +69,14 @@ import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
  */
 public class OAuthResourceServiceImpl implements OAuthResourceService {
 
+    /*
+     * From https://tools.ietf.org/html/rfc6750#section-2.1:
+     *   The syntax for Bearer credentials is as follows:
+     *   b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
+     *   credentials = "Bearer" 1*SP b64token
+     */
+    private static final Pattern TOKEN_PATTERN = Pattern.compile("[\\x41-\\x5a\\x61-\\x7a\\x30-\\x39-._~+/]+=*");
+
     private final OAuthClientStorage clientStorage;
 
     private final OAuthGrantStorage grantStorage;
@@ -80,6 +89,10 @@ public class OAuthResourceServiceImpl implements OAuthResourceService {
 
     @Override
     public OAuthGrant validate(String accessToken) throws OXException {
+        if (!TOKEN_PATTERN.matcher(accessToken).matches()) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
+        }
+
         OAuthGrant grant = grantStorage.getGrantByAccessToken(accessToken);
         if (grant == null) {
             throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
