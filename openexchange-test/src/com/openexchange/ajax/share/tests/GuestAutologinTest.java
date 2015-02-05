@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import org.apache.commons.lang.StringUtils;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -63,6 +64,8 @@ import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link GuestAutologinTest}
@@ -74,6 +77,8 @@ public class GuestAutologinTest extends ShareTest {
 
     private final String EMAIL = randomUID() +"@example.org";
     private final String PASSWORD = "secret";
+    private AJAXSession sharedSession;
+    private ParsedShare share;
 
     /**
      * Initializes a new {@link GuestAutologinTest}.
@@ -84,37 +89,8 @@ public class GuestAutologinTest extends ShareTest {
         super(name);
     }
 
-    public void testAutologin() throws Exception {
-        OCLGuestPermission guestPermission = createNamedGuestPermission(EMAIL, "Test Guest", PASSWORD);
-
-        int module = randomModule();
-        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, module, getDefaultFolder(module));
-        /*
-         * update folder, add permission for guest
-         */
-        folder.addPermission(guestPermission);
-        folder = updateFolder(EnumAPI.OX_NEW, folder);
-        /*
-         * check permissions
-         */
-        OCLPermission matchingPermission = null;
-        for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
-                matchingPermission = permission;
-                break;
-            }
-        }
-        assertNotNull("No matching permission in created folder found", matchingPermission);
-        checkPermissions(guestPermission, matchingPermission);
-        /*
-         * discover & check share
-         */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
-        /*
-         * check access to share, using the same ajax session as the sharing user
-         */
-        AJAXSession sharedSession = getSession();
+    public void testGuestAutologin() throws Exception {
+        create();
         String oldSessionID = sharedSession.getId();
         try {
             sharedSession.setId(null);
@@ -130,6 +106,73 @@ public class GuestAutologinTest extends ShareTest {
         } finally {
             sharedSession.setId(oldSessionID);
         }
+    }
+
+    public void testGuestAutologinWithoutStore() throws Exception {
+        create();
+        String oldSessionID = sharedSession.getId();
+        try {
+            sharedSession.setId(null);
+            GuestClient guestClient = new GuestClient(sharedSession, share.getShareURL(), EMAIL, PASSWORD, AJAXClient.class.getName(),  true, false);
+            AutologinRequest autologin = new AutologinRequest(new AutologinParameters(randomUID(), AJAXClient.class.getName(), AJAXClient.VERSION, share.getToken()), false);
+            AutologinResponse response = guestClient.execute(autologin);
+            assertTrue("Autologin worked without store request", response.hasError());
+            assertEquals(OXJSONExceptionCodes.INVALID_COOKIE.getNumber(), response.getException().getCode());
+        } finally {
+            sharedSession.setId(oldSessionID);
+        }
+    }
+
+    public void testInvalidSharetoken() throws Exception {
+        create();
+        String oldSessionID = sharedSession.getId();
+        try {
+            sharedSession.setId(null);
+            GuestClient guestClient = new GuestClient(sharedSession, share.getShareURL(), EMAIL, PASSWORD, AJAXClient.class.getName(),  true, false);
+            StoreRequest storeRequest = new StoreRequest(sharedSession.getId(), false);
+            StoreResponse storeResponse = guestClient.execute(storeRequest);
+            assertFalse(storeResponse.getErrorMessage(), storeResponse.hasError());
+            AutologinRequest autologin = new AutologinRequest(new AutologinParameters(randomUID(), AJAXClient.class.getName(), AJAXClient.VERSION, StringUtils.reverse(share.getToken())), false);
+            AutologinResponse response = guestClient.execute(autologin);
+            assertTrue("Autologin worked with invalid share token", response.hasError());
+            assertEquals(ShareExceptionCodes.INVALID_TOKEN.getNumber(), response.getException().getCode());
+        } finally {
+            sharedSession.setId(oldSessionID);
+        }
+    }
+
+    private void create() throws Exception {
+        OCLGuestPermission guestPermission = createNamedGuestPermission(EMAIL, "Test Guest", PASSWORD);
+
+        int module = randomModule();
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, module, getDefaultFolder(module));
+        /*
+         * update folder, add permission for guest
+         */
+        folder.addPermission(guestPermission);
+        folder = updateFolder(EnumAPI.OX_NEW, folder);
+        remember(folder);
+        /*
+         * check permissions
+         */
+        OCLPermission matchingPermission = null;
+        for (OCLPermission permission : folder.getPermissions()) {
+            if (permission.getEntity() != client.getValues().getUserId()) {
+                matchingPermission = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created folder found", matchingPermission);
+        checkPermissions(guestPermission, matchingPermission);
+        /*
+         * discover & check share
+         */
+        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
+        checkShare(guestPermission, folder, share);
+        /*
+         * check access to share, using the same ajax session as the sharing user
+         */
+        sharedSession = getSession();
     }
 
 }
