@@ -292,13 +292,12 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
             @Override
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpPost request = null;
                 try {
-                    HttpPost method = new HttpPost(buildUri(toOneDriveFolderId(toCreate.getParentId()), initiateQueryString()));
-                    method.setHeader("Content-Type", "application/json");
-                    method.setEntity(asHttpEntity(new JSONObject(1).put("name", toCreate.getName())));
-                    request = method;
-                    JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
+                    request = new HttpPost(buildUri(toOneDriveFolderId(toCreate.getParentId()), initiateQueryString()));
+                    request.setHeader("Content-Type", "application/json");
+                    request.setEntity(asHttpEntity(new JSONObject(1).put("name", toCreate.getName())));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     return jResponse.getString("id");
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(toCreate.getParentId(), e);
@@ -322,37 +321,17 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public String moveFolder(final String folderId, final String newParentId, final String newName) throws OXException {
-        return perform(new OneDriveClosure<String>() {
+        String id = perform(new OneDriveClosure<String>() {
 
             @Override
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpMove request = null;
                 try {
-                    {
-                        HttpMove method = new HttpMove(buildUri(toOneDriveFolderId(folderId), null));
-                        request = method;
-                        method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("destination", toOneDriveFolderId(newParentId))));
-
-                        handleHttpResponse(execute(method, httpClient), Void.class);
-                        reset(request);
-                        request = null;
-                    }
-
-                    if (null != newName) {
-                        HttpPut method = new HttpPut(buildUri(toOneDriveFolderId(folderId), null));
-                        request = method;
-                        method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("name", newName)));
-
-                        handleHttpResponse(execute(method, httpClient), Void.class);
-                        reset(request);
-                        request = null;
-                    }
-
-                    return folderId;
+                    request = new HttpMove(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
+                    request.setHeader("Content-Type", "application/json");
+                    request.setEntity(asHttpEntity(new JSONObject(1).put("destination", toOneDriveFolderId(newParentId))));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                    return jResponse.getString("id");
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(folderId, e);
                 } finally {
@@ -360,6 +339,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                 }
             }
         });
+        return null != newName ? renameFolder(id, newName) : id;
     }
 
     @Override
@@ -368,19 +348,13 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
             @Override
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpPut request = null;
                 try {
-                    HttpPut method = new HttpPut(buildUri(toOneDriveFolderId(folderId), null));
-                    request = method;
-                    method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                    method.setHeader("Content-Type", "application/json");
-                    method.setEntity(asHttpEntity(new JSONObject(2).put("name", newName)));
-
-                    handleHttpResponse(execute(method, httpClient), Void.class);
-                    reset(request);
-                    request = null;
-
-                    return folderId;
+                    request = new HttpPut(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
+                    request.setHeader("Content-Type", "application/json");
+                    request.setEntity(asHttpEntity(new JSONObject(1).put("name", newName)));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                    return jResponse.getString("id");
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(folderId, e);
                 } finally {
