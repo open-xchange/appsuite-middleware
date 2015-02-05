@@ -79,6 +79,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
@@ -183,6 +184,9 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
+        if (CURRENT_VERSION != version) {
+            throw OneDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+        }
         return perform(new OneDriveClosure<File>() {
 
             @Override
@@ -191,7 +195,11 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 try {
                     request = new HttpGet(buildUri(id, initiateQueryString()));
                     RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
-                    return new OneDriveFile(folderId, id, userId, getRootFolderId()).parseOneDriveFile(restFile);
+                    OneDriveFile file = new OneDriveFile(folderId, id, userId, getRootFolderId()).parseOneDriveFile(restFile);
+                    if (false == file.getFolderId().equals(folderId)) {
+                        throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+                    }
+                    return file;
                 } finally {
                     reset(request);
                 }
@@ -217,7 +225,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                          * create new, empty file ("touch")
                          */
                         request = new HttpPut(buildUri(toOneDriveFolderId(file.getFolderId()) + "/files/" + file.getFileName(), initiateQueryString()));
-
                     } else {
                         /*
                          * rename / description change
@@ -418,9 +425,13 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 try {
                     List<NameValuePair> queryParameters = initiateQueryString();
                     queryParameters.add(new BasicNameValuePair("downsize_photo_uploads", "false"));
-                    String overwrite = FileStorageFileAccess.NEW == file.getId() ? "ChooseNewName" : "true";
-                    queryParameters.add(new BasicNameValuePair("overwrite", overwrite));
-                    request = new HttpPut(buildUri(toOneDriveFolderId(file.getFolderId()) + "/files/" + file.getFileName(), queryParameters));
+                    if (FileStorageFileAccess.NEW == file.getId()) {
+                        queryParameters.add(new BasicNameValuePair("overwrite", "ChooseNewName"));
+                        request = new HttpPut(buildUri(toOneDriveFolderId(file.getFolderId()) + "/files/" + file.getFileName(), queryParameters));
+                    } else {
+                        queryParameters.add(new BasicNameValuePair("overwrite", "true"));
+                        request = new HttpPut(buildUri(file.getId() + "/content/", queryParameters));
+                    }
                     request.setEntity(new InputStreamEntity(data, -1));
                     JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     file.setId(jResponse.getString("id"));
