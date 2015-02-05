@@ -65,6 +65,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceExceptionCode;
@@ -196,7 +199,7 @@ public class SnippetImageDataSource implements ImageDataSource {
                     properties.put(DataProperties.PROPERTY_ID, id);
                     properties.put(DataProperties.PROPERTY_CONTENT_TYPE, attachment.getContentType());
                     properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
-                    properties.put(DataProperties.PROPERTY_NAME, attachment.getId());
+                    properties.put(DataProperties.PROPERTY_NAME, determineFileName(attachment));
 
                     return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
                 }
@@ -212,6 +215,44 @@ public class SnippetImageDataSource implements ImageDataSource {
         properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
 
         return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+    }
+
+    private String determineFileName(Attachment attachment) {
+        String str = attachment.getContentDisposition();
+        if (null != str) {
+            try {
+                ContentDisposition cd = new ContentDisposition(str);
+                String fileName = cd.getFilenameParameter();
+                if (null != fileName) {
+                    return fileName;
+                }
+            } catch (OXException e) {
+                // Invalid Content-Disposition
+            }
+        }
+
+        str = attachment.getContentType();
+        if (null != str) {
+            try {
+                ContentType ct = new ContentType(str);
+                String fileName = ct.getNameParameter();
+                if (null != fileName) {
+                    return fileName;
+                }
+
+                String ext = MimeType2ExtMap.getFileExtension(ct.getBaseType());
+                String prim = ct.getPrimaryType();
+                return ("application".equalsIgnoreCase(prim) ? "file." : prim + ".") + ext;
+            } catch (OXException e) {
+                // Invalid Content-Disposition
+            }
+
+            int pos = str.indexOf(';');
+            String ext = MimeType2ExtMap.getFileExtension((pos > 0 ? str.substring(0, pos) : str).trim());
+            return  "file." + ext;
+        }
+
+        return "file.dat";
     }
 
     @Override

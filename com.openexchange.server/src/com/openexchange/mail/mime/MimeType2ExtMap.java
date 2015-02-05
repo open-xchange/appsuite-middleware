@@ -376,15 +376,26 @@ public final class MimeType2ExtMap {
      * @return The file extension for given MIME type or <code>dat</code> if none found
      */
     public static String getFileExtension(String mimeType) {
+        return getFileExtension(mimeType, DEFAULT_EXT);
+    }
+
+    /**
+     * Gets the file extension for given MIME type.
+     *
+     * @param mimeType The MIME type
+     * @param defaultExt The default extension to return
+     * @return The file extension for given MIME type or <code>defaultExt</code> if none found
+     */
+    public static String getFileExtension(String mimeType, String defaultExt) {
         init();
         if (Strings.isEmpty(mimeType)) {
-            return DEFAULT_EXT;
+            return defaultExt;
         }
         if (!extMap.containsKey(toLowerCase(mimeType))) {
-            return DEFAULT_EXT;
+            return defaultExt;
         }
         final List<String> list = extMap.get(mimeType);
-        return null == list || list.isEmpty() ? DEFAULT_EXT : list.get(0);
+        return null == list || list.isEmpty() ? defaultExt : list.get(0);
     }
 
     /**
