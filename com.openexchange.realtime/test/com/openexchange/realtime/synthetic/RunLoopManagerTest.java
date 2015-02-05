@@ -58,8 +58,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Sets;
@@ -78,11 +76,11 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class RunLoopManagerTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RunLoopManagerTest.class);
     private RunLoopManager runLoopManager;
     private ManagerTestComponent1 component1;
     private ManagerTestComponent2 component2;
-    private final int QUANTITY = 5;
+    private final int LOOP_QUANTITY = 5;
+    private final int HANDLER_QUANTITY = 20;
 
     /**
      * @throws java.lang.Exception
@@ -92,8 +90,8 @@ public class RunLoopManagerTest {
         runLoopManager = new RunLoopManager(new SimServiceLookup());
         component1 = new ManagerTestComponent1();
         component2 = new ManagerTestComponent2();
-        runLoopManager.createRunLoops(component1, QUANTITY);
-        runLoopManager.createRunLoops(component2, QUANTITY);
+        runLoopManager.createRunLoops(component1, LOOP_QUANTITY);
+        runLoopManager.createRunLoops(component2, LOOP_QUANTITY);
     }
 
     /**
@@ -104,11 +102,11 @@ public class RunLoopManagerTest {
     @Test
     public void testCreateRunLoops() throws Exception {
         ListMultimap<String, SyntheticChannelRunLoop> loopClusters = getloopClusters(runLoopManager);
-        assertEquals(QUANTITY * 2, loopClusters.size());
+        assertEquals(LOOP_QUANTITY * 2, loopClusters.size());
         List<SyntheticChannelRunLoop> cluster1 = loopClusters.get(component1.getId());
         List<SyntheticChannelRunLoop> cluster2 = loopClusters.get(component2.getId());
-        assertEquals(QUANTITY, cluster1.size());
-        assertEquals(QUANTITY, cluster2.size());
+        assertEquals(LOOP_QUANTITY, cluster1.size());
+        assertEquals(LOOP_QUANTITY, cluster2.size());
         assertTrue(Sets.intersection(Sets.newHashSet(cluster1), Sets.newHashSet(cluster2)).isEmpty());
     }
 
@@ -150,15 +148,26 @@ public class RunLoopManagerTest {
      */
     @Test
     public void testDestroyRunLoops() throws Exception {
-        for (int x = 0; x < 20; x++) {
+        for (int x = 0; x < HANDLER_QUANTITY; x++) {
             runLoopManager.getRunLoopForID(component1.create().getId(), true);
         }
-        ListMultimap<String, SyntheticChannelRunLoop> loopClusters = getloopClusters(runLoopManager);
-        runLoopManager.destroyRunLoops(component1);
 
-        for (SyntheticChannelRunLoop loop : loopClusters.values()) {
-            LOG.info("loop {} is running: {}", loop, loop.isRunning());
+        assertEquals(HANDLER_QUANTITY, runLoopManager.getNumberOfHandlesInCluster(component1));
+        assertEquals(0, runLoopManager.getNumberOfHandlesInCluster(component2));
+
+        for (int x = 0; x < 20; x++) {
+            runLoopManager.getRunLoopForID(component2.create().getId(), true);
         }
+
+        assertEquals(HANDLER_QUANTITY, runLoopManager.getNumberOfHandlesInCluster(component1));
+        assertEquals(HANDLER_QUANTITY, runLoopManager.getNumberOfHandlesInCluster(component2));
+
+        runLoopManager.destroyRunLoops(component1);
+        assertEquals(0, runLoopManager.getNumberOfHandlesInCluster(component1));
+        assertEquals(HANDLER_QUANTITY, runLoopManager.getNumberOfHandlesInCluster(component2));
+
+        runLoopManager.destroyRunLoops(component2);
+        assertEquals(0, runLoopManager.getNumberOfHandlesInCluster(component2));
     }
 
     //===== helper classes ================================================================================================================
@@ -248,7 +257,6 @@ public class RunLoopManagerTest {
     }
 
     //===== helper methods ================================================================================================================
-    //===== helper methods ==================================================================================================================
     private ConcurrentHashMap<ID, SyntheticChannelRunLoop> getloopMap(RunLoopManager runLoopManager) throws Exception {
         Field loopMap = RunLoopManager.class.getDeclaredField("loopMap");
         loopMap.setAccessible(true);

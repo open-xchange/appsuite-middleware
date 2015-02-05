@@ -49,33 +49,35 @@
 
 package com.openexchange.realtime.synthetic;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import org.apache.commons.lang.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.openexchange.management.ManagementAware;
+import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.ComponentHandle;
+import com.openexchange.realtime.management.RunLoopManagerMBean;
+import com.openexchange.realtime.management.RunLoopManagerManagement;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link RunLoopManager}
+ * {@link RunLoopManager} -
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.2
  */
-public class RunLoopManager {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RunLoopManager.class);
+public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
 
     /**
      * Keep associations from component ids to distinct clusters of runloops for given ids.
@@ -106,6 +108,8 @@ public class RunLoopManager {
 
     private final Random loadBalancer;
 
+    private final RunLoopManagerManagement runLoopManagerManagement;
+
     /**
      * Initializes a new {@link RunLoopManager}.
      *
@@ -114,6 +118,7 @@ public class RunLoopManager {
     public RunLoopManager(ServiceLookup services) {
         this.services = services;
         loadBalancer = new Random();
+        this.runLoopManagerManagement = new RunLoopManagerManagement(this);
     }
 
     /**
@@ -219,11 +224,59 @@ public class RunLoopManager {
                 ID handleId = entry.getKey();
                 SyntheticChannelRunLoop runLoop = entry.getValue();
                 if(removedLoop.equals(runLoop)) {
-                    LOG.info("Removing handleId {} as runLoop {} was removed from cluster for {}", handleId, runLoop, componentId);
                     loopMap.remove(handleId);
                 }
             }
         }
+    }
+
+    /**
+     * Get the number of {@link ComponentHandle}s being mapped by this {@link RunLoopManager} for a specific {@link Component}.
+     *
+     * @param component The {@link Component} that created the {@link ComponentHandle}s
+     * @return The number of handles being mapped by the {@link RunLoopManager}
+     */
+    public int getNumberOfHandlesInCluster(Component component) throws Exception {
+        Validate.notNull(component);
+        int count=0;
+        List<SyntheticChannelRunLoop> loopCluster = loopClusters.get(component.getId());
+        for (Entry<ID, SyntheticChannelRunLoop> entry : loopMap.entrySet()) {
+            if(loopCluster.contains(entry.getValue())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+
+    /**
+     * Get the <code>ids</code> of {@link Component}s that are managed by this instance
+     * @return A Set of <code>ids</code> of {@link Component}s that are managed by this instance
+     */
+    public Set<String> getManagedComponents() {
+        return loopClusters.keySet();
+    }
+
+    /**
+     * Get the {@link ComponentHandle} to {@link SyntheticChannelRunLoop} mappings for a given component
+     * @param componentId The ID of the {@link Component}
+     * @return the {@link ComponentHandle} to {@link SyntheticChannelRunLoop} mappings for a given component
+     */
+    public List<Entry<ID, SyntheticChannelRunLoop>> getHandlesInCluster(String componentId) {
+        Validate.notEmpty(componentId);
+        List<Entry<ID,SyntheticChannelRunLoop>> handlesInCluster = new ArrayList<Entry<ID,SyntheticChannelRunLoop>>();
+        List<SyntheticChannelRunLoop> loopCluster = loopClusters.get(componentId);
+        for (Entry<ID, SyntheticChannelRunLoop> entry : loopMap.entrySet()) {
+            if(loopCluster.contains(entry.getValue())) {
+                handlesInCluster.add(entry);
+            }
+        }
+        return handlesInCluster;
+    }
+
+    @Override
+    public ManagementObject<RunLoopManagerMBean> getManagementObject() {
+        return runLoopManagerManagement;
     }
 
 }

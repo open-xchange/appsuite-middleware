@@ -52,8 +52,6 @@ package com.openexchange.realtime.synthetic;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -62,13 +60,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import org.osgi.framework.Constants;
 import com.google.common.base.Optional;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.ComponentHandle;
+import com.openexchange.realtime.RealtimeConfig;
 import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
@@ -76,11 +73,10 @@ import com.openexchange.realtime.cleanup.RealtimeCleanup;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.osgi.RealtimeServiceRegistry;
+import com.openexchange.realtime.management.ManagementHouseKeeper;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.realtime.util.RealtimeReloadable;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -114,42 +110,6 @@ import com.openexchange.server.ServiceLookup;
 
 public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel, Runnable {
 
-    private static volatile Integer numberOfRunLoops;
-    private static int numberOfRunLoops() {
-        Integer tmp = numberOfRunLoops;
-        if (null == tmp) {
-            synchronized (SyntheticChannel.class) {
-                tmp = numberOfRunLoops;
-                if (null == tmp) {
-                    int defaultValue = 16;
-                    ConfigurationService service = RealtimeServiceRegistry.SERVICES.get().getOptionalService(ConfigurationService.class);
-                    if (null == service) {
-                        // Not yet fully initialized
-                        return defaultValue;
-                    }
-                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.realtime.numberOfRunLoops", defaultValue));
-                    numberOfRunLoops = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
-    }
-
-    static {
-        RealtimeReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                numberOfRunLoops = null;
-            }
-
-            @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
-            }
-        });
-    }
-
     public static final String PROTOCOL = "synthetic";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyntheticChannel.class);
@@ -172,8 +132,6 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
 
     private final ConcurrentHashMap<ID, TimeoutEviction> timeouts = new ConcurrentHashMap<ID, TimeoutEviction>();
 
-    private final Random loadBalancer = new Random();
-
     private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
 
     /*
@@ -186,6 +144,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
         JANITOR_PROPERTIES.put(Constants.SERVICE_RANKING, RealtimeJanitor.RANKING_SYNTHETIC_CHANNEL);
         this.localRealtimeCleanup = localRealtimeCleanup;
         runLoopManager = new RunLoopManager(services);
+        ManagementHouseKeeper.getInstance().addManagementObject(runLoopManager.getManagementObject());
     }
 
     @Override
@@ -282,7 +241,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
     }
 
     public void addComponent(Component component) {
-        runLoopManager.createRunLoops(component, numberOfRunLoops());
+        runLoopManager.createRunLoops(component, RealtimeConfig.getInstance().getNumberOfRunLoops());
         components.put(component.getId(), component);
     }
 

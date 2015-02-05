@@ -184,6 +184,14 @@ public abstract class RunLoop<E> implements Runnable {
         unblock();
     }
 
+    /**
+     * Get the name of this RunLoop
+     * @return the name of this RunLoop
+     */
+    public String getName() {
+        return name;
+    }
+
     protected abstract void handle(E element) throws OXException;
 
     /**

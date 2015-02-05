@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,24 @@
  *
  */
 
-package com.openexchange.realtime.util;
+package com.openexchange.realtime.management;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
+
 
 /**
- * {@link RealtimeReloadable} - Collects reloadables for real-time bundle.
+ * {@link RunLoopManagerMBean}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.2
  */
-public final class RealtimeReloadable implements Reloadable {
-
-    private static final RealtimeReloadable INSTANCE = new RealtimeReloadable();
+public interface RunLoopManagerMBean {
 
     /**
-     * Gets the instance.
+     * Get the mapping of ComponentHandles to RunLoops.
      *
-     * @return The instance
+     * @return the map
      */
-    public static RealtimeReloadable getInstance() {
-        return INSTANCE;
-    }
-
-    // --------------------------------------------------------------------------------------------------- //
-
-    private final List<Reloadable> reloadables;
-
-    /**
-     * Initializes a new {@link RealtimeReloadable}.
-     */
-    private RealtimeReloadable() {
-        super();
-        reloadables = new CopyOnWriteArrayList<Reloadable>();
-    }
-
-    /**
-     * Adds given {@link Reloadable} instance.
-     *
-     * @param reloadable The instance to add
-     */
-    public void addReloadable(Reloadable reloadable) {
-        reloadables.add(reloadable);
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        for (final Reloadable reloadable : reloadables) {
-            reloadable.reloadConfiguration(configService);
-        }
-    }
-
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
-    }
+    public Map<String, Map<String, String>> getComponentHandleMappings();
 
 }
