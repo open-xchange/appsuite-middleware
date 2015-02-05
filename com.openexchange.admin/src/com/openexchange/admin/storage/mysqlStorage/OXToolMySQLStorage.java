@@ -1259,6 +1259,35 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
+    @Override
+    public boolean getIsGuestByUserID(final Context ctx, final int user_id) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForContext(ctx.getId().intValue());
+            return isGuest(con, ctx, user_id);
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox db read connection to pool!", e);
+                }
+            }
+        }
+    }
+
+
     private boolean isGuest(Connection con, Context ctx, int userId) throws SQLException {
         String sql = "SELECT id FROM user WHERE cid = ? AND id = ? AND guestCreatedBy > 0";
         PreparedStatement stmt = null;

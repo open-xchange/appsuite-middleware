@@ -892,6 +892,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 LOGGER.error("", noSuchUserException);
                 throw noSuchUserException;
             }
+            if (tool.getIsGuestByUserID(ctx, userid.intValue())) {
+                final InvalidDataException invalidDataException = new InvalidDataException("User to change (user id "+ userid + " , context id " + ctx.getId() + ") is a guest user. Guests cannot be changed via provisioning.");
+                LOGGER.error("", invalidDataException);
+                throw invalidDataException;
+            }
+
             if (tool.existsDisplayName(ctx, usrdata, i(usrdata.getId()))) {
                 throw new InvalidDataException("The displayname is already used");
             }

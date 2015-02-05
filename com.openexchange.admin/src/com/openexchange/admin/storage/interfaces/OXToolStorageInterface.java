@@ -357,6 +357,8 @@ public abstract class OXToolStorageInterface {
 
     public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
 
+    public abstract boolean getIsGuestByUserID(final Context ctx, final int user_id) throws StorageException;
+
     public abstract boolean isContextAdmin(final Context ctx, final int user_id) throws StorageException;
 
     /**
