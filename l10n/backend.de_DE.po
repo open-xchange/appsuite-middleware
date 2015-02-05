@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-01-29 11:30+0100\n"
+"PO-Revision-Date: 2015-02-05 15:19+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1372,6 +1372,26 @@ msgstr "Adresse (geschäftlich)"
 msgid "Address (other)"
 msgstr "Adresse (weitere)"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:79
+msgid "contacts"
+msgstr "Kontakte"
+
+#. Application 'xyz' requires following permissions:
+#. - See all your contacts.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:91
+#, fuzzy
+msgid "See all your contacts."
+msgstr "Alle Ihre Kontakte sehen."
+
+#. Application 'xyz' requires following permissions:
+#. - See all your contacts, create new ones and modify existing ones.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:96
+msgid "See all your contacts, create new ones and modify existing ones."
+msgstr "Alle Ihre Kontakte sehen, neue anlegen und vorhandene ändern."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:61
 msgid "The type %1$s of the provided file is not supported."
 msgstr "Der Typ %1$s der angegebenen Datei wird nicht unterstützt."
@@ -2386,8 +2406,13 @@ msgstr "Der von Ihnen angeforderte Ordner ist nicht vorhanden."
 msgid "The file you requested does not exist."
 msgstr "Die von Ihnen angeforderte Datei ist nicht vorhanden."
 
-#. A folder named "%1$s" already exists below the parent folder "%2$s".
+#. The file version you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:70
+msgid "The file version you requested does not exist."
+msgstr "Die von Ihnen angeforderte Dateiversion ist nicht vorhanden."
+
+#. A folder named "%1$s" already exists below the parent folder "%2$s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
 msgid ""
 "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
@@ -2397,7 +2422,7 @@ msgstr ""
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
 #. You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:89
 msgid ""
 "You do not have the appropriate permissions to create a subfolder below the "
@@ -2407,7 +2432,7 @@ msgstr ""
 "Unterordners im Ordner \"%1$s\"."
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
@@ -2417,14 +2442,14 @@ msgid ""
 msgstr "Um die Suche durchzuführen, sind mindestens %1$d Zeichen erforderlich."
 
 #. Invalid URL \"%1$s\". Please correct the value and try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:82
 msgid "Invalid URL \"%1$s\". Please correct the value and try again."
 msgstr ""
 "Ungültige URL \"%1$s\". Bitte korrigieren Sie die Eingabe und versuchen Sie "
 "es erneut."
 
 #. The allowed quota is reached. Please delete some items in order to store new ones.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
 msgid ""
 "The allowed quota is reached. Please delete some items in order to store new "
 "ones."
@@ -2433,24 +2458,85 @@ msgstr ""
 "um neue speichern zu können."
 
 #. ZIP archive exceeds max. allowed size of %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
 msgid "ZIP archive exceeds max. allowed size of %1$s"
 msgstr "ZIP-Archiv übersteigt die maximal zulässige Größe von %1$s"
 
 #. The file storage account is currently not accessible.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
 msgid "The file storage account is currently not accessible."
 msgstr "Der Dateispeicher-Account ist derzeit nicht verfügbar."
 
 #. The folder \"%1$s\" cannot be moved to \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
 msgid "The folder \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Der Ordner \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
 
 #. The file \"%1$s\" cannot be moved to \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:97
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Die Datei \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
+
+#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:100
+#, fuzzy
+msgid ""
+"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+"into the account \"%3$s\"."
+msgstr ""
+"Die Notizen zur Datei \"%1$s\" im Ordner \"%2$s\" gehen verloren, wenn die "
+"Datei in den Account \"%3$s\" verschoben wird."
+
+#. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:103
+#, fuzzy
+msgid ""
+"All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when "
+"moving it into the account \"%3$s\"."
+msgstr ""
+"Alle vorherigen Versionen der Datei \"%1$s\" im Ordner \"%2$s\" gehen "
+"verloren, wenn die Datei in den Account \"%3$s\" verschoben wird."
+
+#. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:106
+#, fuzzy
+msgid ""
+"The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost "
+"when moving it into the account \"%3$s\"."
+msgstr ""
+"Die zugewiesenen Kategorien der Datei \"%1$s\" im Ordner \"%2$s\" gehen "
+"verloren, wenn die Datei in den Account \"%3$s\" verschoben wird."
+
+#. The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:109
+#, fuzzy
+msgid ""
+"The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other "
+"users when moving it into the account \"%3$s\"."
+msgstr ""
+"Auf die geteilte Datei \"%1$s\" im Ordner \"%2$s\" kann durch andere "
+"Benutzer nicht mehr zugegriffen werden, wenn sie in den Account \"%3$s\" "
+"verschoben wird."
+
+#. The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:112
+#, fuzzy
+msgid ""
+"The shared folder \"%1$s\" is no longer accessible by other users when "
+"moving it into the account \"%2$s\"."
+msgstr ""
+"Auf den geteilten Ordner \"%1$s\" kann durch andere Benutzer nicht mehr "
+"zugegriffen werden, wenn er in den Account \"%2$s\" verschoben wird."
+
+#. The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:115
+#, fuzzy
+msgid ""
+"The file \"%1$s\" was not updated due to possible data loss. Please review "
+"the warnings for details."
+msgstr ""
+"Die Datei \"%1$s\" wurde wegen möglichen Datenverlusten nicht aktualisiert. "
+"Bitte lesen Sie die Warnhinweise für weitere Informationen."
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3300,6 +3386,12 @@ msgstr ""
 msgid "The session is no longer available. Please try again."
 msgstr "Ihre Sitzung ist abgelaufen. Bitte versuchen Sie es erneut."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:69
+#, fuzzy
+msgid "Kerberos ticket in session is missing. Pleasy try again."
+msgstr ""
+"Das Kerberos-Ticket für die Sitzung fehlt. Bitte versuchen Sie es erneut."
+
 #. No Linked-In account available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
 msgid "No Linked-In account available."
@@ -3941,10 +4033,31 @@ msgstr "Nachricht %1$s nicht im Ordner %2$s gefunden."
 msgid "Invalid OAuth account specified."
 msgstr "Es wurde ein ungültiger OAuth-Account angegeben."
 
-#. Account not found with identifier %1$s for user %2$s in context %3$s.
+#. Account not found.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:63
-msgid "Account not found with identifier %1$s for user %2$s"
-msgstr "Kein Account mit der ID %1$s für Benutzer %2$s gefunden"
+msgid "Account not found"
+msgstr "Der Account wurde nicht gefunden"
+
+#. Another process already revoked the secret for a client
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:66
+msgid "Another process already revoked the secret of your client"
+msgstr ""
+
+#. '%1$s' is not a valid redirect URI.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:69
+#, fuzzy
+msgid "'%1$s' is not a valid redirect URI."
+msgstr "'%1$s' ist keine gültige Weiterleitungs-URI."
+
+#. The client '%1$s' could not be enabled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:72
+msgid "The client '%1$s' could not be enabled."
+msgstr "Der Client '%1$s' konnte nicht aktiviert werden."
+
+#. The client '%1$s' could not be disabled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:75
+msgid "The client '%1$s' could not be disabled."
+msgstr "Der Cient '%1$s' konnte nicht deaktiviert werden."
 
 #. Account not found with identifier %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
@@ -5028,6 +5141,16 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:102
 msgid "Failed to delete following folder/s: %1$s"
 msgstr "Folgende Ordner konnten nicht gelöscht werden: %1$s"
+
+#. The folder \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:105
+#, fuzzy
+msgid ""
+"The folder \"%1$s\" was not updated due to possible data loss. Please review "
+"the warnings for details."
+msgstr ""
+"Der Ordner \"%1$s\" wurde mittlerweile geändert. Bitte aktualisieren Sie die "
+"Ansicht und versuchen Sie es erneut."
 
 #. No group given.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
@@ -7908,6 +8031,31 @@ msgid "Mail settings for user \"%1$s\" could not be found in context %2$d."
 msgstr ""
 "Es konnten keine Mail-Einstellungen für den Benutzer \"%1$s\" im Kontext "
 "%2$d gefunden werden."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:63
+#, fuzzy
+msgid ""
+"The provided mail address %1$s is invalid! It cannot be added to guest "
+"administration."
+msgstr ""
+"Die angegebene E-Mail-Adresse %1$s ist ungültig. Sie kann nicht zur Gast-"
+"Administration hinzugefügt werden."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:65
+#, fuzzy
+msgid ""
+"The provided mail address is empty! It cannot be added to guest "
+"administration."
+msgstr ""
+"Die angegebene E-Mail-Adresse ist leer. Sie kann nicht zur Gast-"
+"Administration hinzugefügt werden."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:67
+#, fuzzy
+msgid "The new password might not be empty! Please provide a password."
+msgstr ""
+"Das neue Passwort ist möglicherweise nicht leer. Bitte geben Sie ein "
+"Passwort an."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:68
 msgid "A messaging error occurred. Please try again later."
@@ -11622,6 +11770,9 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid "Account not found with identifier %1$s for user %2$s"
+#~ msgstr "Kein Account mit der ID %1$s für Benutzer %2$s gefunden"
+
 #~ msgid "Trash infostore"
 #~ msgstr "Gelöschte Dateien"
 
@@ -14577,9 +14728,6 @@ msgstr "Zulu"
 #~ msgid "Unable to load objects. Context %1$d user %2$d"
 #~ msgstr "Objekte können nicht geladen werden. Kontext %1$d Benutzer %2$d"
 
-#~ msgid "The identifier %1$s can not be parsed."
-#~ msgstr "Die ID %1$s kann nicht analysiert werden."
-
 #~ msgid "Cannot resolve mailadmin for context %d."
 #~ msgstr "Mailadmin für Kontext %d kann nicht aufgelöst werden."
 
@@ -16386,9 +16534,6 @@ msgstr "Zulu"
 
 #~ msgid "Could not find encryption key."
 #~ msgstr "Verschlüsselungs-Key konnte nicht gefunden werden"
-
-#~ msgid "All my contacts"
-#~ msgstr "Alle meine Kontakte"
 
 #~ msgid "Connection to pool %1$d can not be returned"
 #~ msgstr "Verbindung kann nicht an Pool %1$d zurückgegeben werden."
