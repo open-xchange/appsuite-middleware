@@ -955,7 +955,7 @@ public class LoginServlet extends AJAXServlet {
              */
             String sessionID = null;
             String secret = null;
-            String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), parseClient(request));
+            String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), parseClient(request), LoginTools.parseShareInformation(request));
             String sessionCookieName = LoginServlet.SESSION_PREFIX + hash;
             String secretCookieName = LoginServlet.SECRET_PREFIX + hash;
             for (int i = 0; i < cookies.length && (null == sessionID || null == secret); i++) {

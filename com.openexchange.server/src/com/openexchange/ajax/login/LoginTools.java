@@ -56,8 +56,10 @@ import static com.openexchange.ajax.fields.LoginFields.CLIENT_IP_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.REDIRECT_URL;
+import static com.openexchange.ajax.fields.LoginFields.SHARE_TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
+import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.util.List;
@@ -75,6 +77,8 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -312,5 +316,17 @@ public final class LoginTools {
                 }
             }
         }
+    }
+
+    public static String[] parseShareInformation(HttpServletRequest req) throws OXException {
+        String token = req.getParameter(SHARE_TOKEN);
+        ShareService shareService = ServerServiceRegistry.getInstance().getService(ShareService.class);
+        if (null == shareService || null == token || isEmpty(token)) {
+            return null;
+        }
+        final GuestShare share = shareService.resolveToken(token);
+        int contextId = share.getGuest().getContextID();
+        int guestId = share.getGuest().getGuestID();
+        return new String[] { String.valueOf(contextId), String.valueOf(guestId) };
     }
 }
