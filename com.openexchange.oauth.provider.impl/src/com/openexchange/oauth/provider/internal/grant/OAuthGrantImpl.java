@@ -90,6 +90,13 @@ public class OAuthGrantImpl implements OAuthGrant {
         scopes = DefaultScopes.parseScope(authCodeInfo.getScope());
     }
 
+    public OAuthGrantImpl(String clientId, int contextId, int userId) {
+        super();
+        this.clientId = clientId;
+        this.contextId = contextId;
+        this.userId = userId;
+    }
+
     /**
      * Copy constructor
      */
