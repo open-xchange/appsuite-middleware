@@ -55,6 +55,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -69,6 +70,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -450,25 +452,17 @@ public final class MimeType2ExtMap {
      *
      * @param url The URL to a MIME type file
      */
-    private static void loadInternal(final URL url) {
+    private static void loadInternal(URL url) {
+        InputStream stream = null;
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(url.openStream(), com.openexchange.java.Charsets.ISO_8859_1));
+            stream = url.openStream();
+            reader = new BufferedReader(new InputStreamReader(stream, com.openexchange.java.Charsets.ISO_8859_1));
             parse(reader);
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("", e);
-        } catch (final FileNotFoundException e) {
-            LOG.error("", e);
-        } catch (final IOException e) {
+        } catch (Exception e) {
             LOG.error("", e);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    LOG.error("", e);
-                }
-            }
+            Streams.close(reader, stream);
         }
     }
 
