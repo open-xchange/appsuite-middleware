@@ -75,6 +75,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.Header;
@@ -94,6 +95,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -679,6 +681,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             if (properties.contains(Property.CONTENT)) {
                 content = snippet.getContent();
                 contentIds = new HashSet<String>(MimeMessageUtility.getContentIDs(content));
+                contentIds.addAll(extractContentIDs(content));
             } else {
                 final MimePart textPart;
                 final ContentType ct;
@@ -692,6 +695,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
                 content = MessageUtility.readMimePart(textPart, ct);
                 contentIds = new HashSet<String>(MimeMessageUtility.getContentIDs(content));
+                contentIds.addAll(extractContentIDs(content));
             }
 
             // Check for misc
@@ -916,6 +920,21 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 deleteSafe(oldFile, fileStorage);
             }
         }
+    }
+
+    private static Set<String> extractContentIDs(String htmlContent) {
+        Matcher matcher = MimeMessageUtility.PATTERN_SRC.matcher(htmlContent);
+        if (!matcher.find()) {
+            return Collections.emptySet();
+        }
+        Set<String> set = new HashSet<String>(2);
+        do {
+            String imageId = ImageUtility.parseImageLocationFrom(matcher.group(1)).getImageId();
+            if (null != imageId) {
+                set.add(imageId);
+            }
+        } while (matcher.find());
+        return set;
     }
 
     private static void deleteSafe(String file, QuotaFileStorage fileStorage) {
