@@ -1,3 +1,7 @@
+* 2015-02-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36484: In case of a negative IP check, invalidate the previous session and continue with the form-login procedure
+
 * 2015-02-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 36431: Fixed typo in message's Content-Type header
