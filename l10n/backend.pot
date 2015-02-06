@@ -829,77 +829,6 @@ msgid ""
 "%1$s which is managed by you."
 msgstr ""
 
-#. No account found with identifier "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:65
-msgid "The account \"%1$s\" was not found."
-msgstr ""
-
-#. Invalid presence packet. A presence packet provides the status as well as the status message; e.g. "Online" + "At work"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:66
-msgid "Invalid presence status."
-msgstr ""
-
-#. A chat with identifier "%1$s" already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:69
-msgid "A chat with identifier \"%1$s\" already exists."
-msgstr ""
-
-#. Chat member "%1$s" already exists in chat "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:72
-msgid "Chat member \"%1$s\" already exists in chat \"%2$s\"."
-msgstr ""
-
-#. No chat found with identifier "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:75
-msgid "Chat with identifier \"%1$s\" does not exist."
-msgstr ""
-
-#. Unknown chat service: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:78
-msgid "The requested chat service \"%1$s\" is unknown."
-msgstr ""
-
-#. No message found with identifier "%1$s" in chat "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:81
-msgid "Message with identifier \"%1$s\" does not exist in chat \"%2$s\"."
-msgstr ""
-
-#. No member found with identifier "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:84
-msgid "Member with identifier \"%1$s\" does not exist."
-msgstr ""
-
-#. Invalid conversation identifier: "%1$s"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:87
-msgid "Invalid chat identifier: \"%1$s\""
-msgstr ""
-
-#. Invalid roster identifier: "%1$s". A roster is the list of chat buddies/contacts that a chat user knows about and about whom he receives frequent updates about their presence/availability.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:90
-msgid "The provided roster identifier \"%1$s\" is invalid."
-msgstr ""
-
-#. Posted message is too long.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:93
-msgid "Posted message is too long."
-msgstr ""
-
-#. Subject is too long and is therefore truncated.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:96
-msgid "Subject is too long and is therefore truncated."
-msgstr ""
-
-#. The chat system message when a user left a chat.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatStrings.java:69
-msgid "%1$s has left the chat"
-msgstr ""
-
-#. The chat system message when a user joined a chat.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatStrings.java:72
-msgid "%1$s has joined the chat"
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
 msgstr ""
@@ -5150,6 +5079,10 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "Could not connect to the context storage."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:65
+msgid "The account \"%1$s\" was not found."
 msgstr ""
 
 #. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
