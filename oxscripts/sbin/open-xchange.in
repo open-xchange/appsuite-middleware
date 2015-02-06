@@ -48,6 +48,11 @@
 #
 #
 
+if [ "$(id -un)" != "open-xchange" ]; then
+    echo "The Open-Xchange backend start script must only be run as user open-xchange. Executing this script as root breaks the installation."
+    exit 1
+fi
+
 OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 OXPREFIX=@prefix@
