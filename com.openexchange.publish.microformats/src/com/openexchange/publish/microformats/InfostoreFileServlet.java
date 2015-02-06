@@ -162,6 +162,9 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     protected DocumentMetadata loadMetadata(final Publication publication, final int infoId) throws OXException {
         try {
+            if (publication == null) {
+                throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create();
+            }
             Session session = new PublicationSession(publication);
             IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
             String id = publication.getEntityId() + '/' + infoId;
