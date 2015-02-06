@@ -52,7 +52,6 @@ package com.openexchange.image;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
-import java.util.Locale;
 import java.util.regex.Pattern;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
@@ -87,7 +86,7 @@ public final class ImageUtility {
 
     private static final String UTF_8 = "UTF-8";
 
-    private static final Pattern SPLIT = Pattern.compile("&");
+    private static final Pattern SPLIT = Pattern.compile("&amp;|&");
 
     /**
      * Parses image location from specified image URI.
@@ -96,28 +95,30 @@ public final class ImageUtility {
      * @return The parsed image location
      * @throws IllegalArgumentException If no such registration name can be found
      */
-    public static ImageLocation parseImageLocationFrom(final String imageUri) {
+    public static ImageLocation parseImageLocationFrom(String imageUri) {
         if (null == imageUri) {
             return null;
         }
-        final int queryStringStart = imageUri.indexOf('?');
+        int queryStringStart = imageUri.indexOf('?');
         if (queryStringStart < 0) {
             return null;
         }
-        final String[] nvps = SPLIT.split(imageUri.substring(queryStringStart + 1/*Consume starting '?'*/), 0);
+
+        String[] nvps = SPLIT.split(imageUri.substring(queryStringStart + 1/*Consume starting '?'*/), 0);
         String accountId = null;
         String folder = null;
         String id = null;
         String imageId = null;
         String timestamp = null;
         String registrationName = null;
+
         for (String nvp : nvps) {
             nvp = nvp.trim();
             if (nvp.length() > 0) {
                 // Look-up character '='
                 final int pos = nvp.indexOf('=');
                 if (pos >= 0) {
-                    final String name = nvp.substring(0, pos).toLowerCase(Locale.US);
+                    final String name = Strings.asciiLowerCase(nvp.substring(0, pos));
                     if ("accountId".equals(name)) {
                         accountId = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_FOLDERID.equals(name)) {
@@ -134,7 +135,8 @@ public final class ImageUtility {
                 }
             }
         }
-        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).build();
+
+        ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).build();
         if (null == registrationName) {
             registrationName = ImageActionFactory.getRegistrationNameFor(imageUri);
             if (null == registrationName) {
