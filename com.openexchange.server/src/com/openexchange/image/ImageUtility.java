@@ -52,6 +52,8 @@ package com.openexchange.image;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
@@ -88,6 +90,58 @@ public final class ImageUtility {
 
     private static final Pattern SPLIT = Pattern.compile("&amp;|&");
 
+    private static interface ValueHandler {
+
+        void handleValue(String value, ImageLocation.Builder builder);
+    }
+
+    private static final Map<String, ValueHandler> NVP_HANDLERS;
+    static {
+        Map<String, ValueHandler> map = new HashMap<String, ValueHandler>(8);
+
+        map.put("accountId", new ValueHandler() {
+
+            @Override
+            public void handleValue(String value, ImageLocation.Builder builder) {
+                builder.accountId(value);
+            }
+        });
+
+        map.put(AJAXServlet.PARAMETER_FOLDERID, new ValueHandler() {
+
+            @Override
+            public void handleValue(String value, ImageLocation.Builder builder) {
+                builder.folder(value);
+            }
+        });
+
+        map.put(AJAXServlet.PARAMETER_ID, new ValueHandler() {
+
+            @Override
+            public void handleValue(String value, ImageLocation.Builder builder) {
+                builder.id(value);
+            }
+        });
+
+        map.put(AJAXServlet.PARAMETER_UID, new ValueHandler() {
+
+            @Override
+            public void handleValue(String value, ImageLocation.Builder builder) {
+                builder.imageId(value);
+            }
+        });
+
+        map.put(AJAXServlet.PARAMETER_TIMESTAMP, new ValueHandler() {
+
+            @Override
+            public void handleValue(String value, ImageLocation.Builder builder) {
+                builder.timestamp(value);
+            }
+        });
+
+        NVP_HANDLERS = map;
+    }
+
     /**
      * Parses image location from specified image URI.
      *
@@ -105,38 +159,24 @@ public final class ImageUtility {
         }
 
         String[] nvps = SPLIT.split(imageUri.substring(queryStringStart + 1/*Consume starting '?'*/), 0);
-        String accountId = null;
-        String folder = null;
-        String id = null;
-        String imageId = null;
-        String timestamp = null;
+        ImageLocation.Builder builder = new ImageLocation.Builder();
         String registrationName = null;
 
         for (String nvp : nvps) {
-            nvp = nvp.trim();
-            if (nvp.length() > 0) {
-                // Look-up character '='
-                final int pos = nvp.indexOf('=');
-                if (pos >= 0) {
-                    final String name = Strings.asciiLowerCase(nvp.substring(0, pos));
-                    if ("accountId".equals(name)) {
-                        accountId = decodeQueryStringValue(nvp.substring(pos + 1));
-                    } else if (AJAXServlet.PARAMETER_FOLDERID.equals(name)) {
-                        folder = decodeQueryStringValue(nvp.substring(pos + 1));
-                    } else if (AJAXServlet.PARAMETER_ID.equals(name)) {
-                        id = decodeQueryStringValue(nvp.substring(pos + 1));
-                    } else if (AJAXServlet.PARAMETER_UID.equals(name)) {
-                        imageId = decodeQueryStringValue(nvp.substring(pos + 1));
-                    } else if (AJAXServlet.PARAMETER_TIMESTAMP.equals(name)) {
-                        timestamp = decodeQueryStringValue(nvp.substring(pos + 1));
-                    } else if ("source".equals(name)) {
-                        registrationName = decodeQueryStringValue(nvp.substring(pos + 1));
-                    }
+            // Look-up character '='
+            int pos = (nvp = nvp.trim()).indexOf('=');
+            if (pos >= 0) {
+                String name = Strings.asciiLowerCase(nvp.substring(0, pos));
+                ValueHandler handler = NVP_HANDLERS.get(name);
+                if (null != handler) {
+                    handler.handleValue(decodeQueryStringValue(nvp.substring(pos + 1)), builder);
+                } else if ("source".equals(name)) {
+                    registrationName = decodeQueryStringValue(nvp.substring(pos + 1));
                 }
             }
         }
 
-        ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).build();
+        ImageLocation il = builder.build();
         if (null == registrationName) {
             registrationName = ImageActionFactory.getRegistrationNameFor(imageUri);
             if (null == registrationName) {

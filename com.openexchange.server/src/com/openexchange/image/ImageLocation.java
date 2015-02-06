@@ -68,7 +68,7 @@ public final class ImageLocation {
      * The builder for a {@link ImageLocation}.
      */
     public static final class Builder {
-        protected final String imageId;
+        protected String imageId;
         protected String accountId;
         protected String folder;
         protected String id;
@@ -82,6 +82,9 @@ public final class ImageLocation {
         public Builder(final String imageId) {
             super();
             this.imageId = imageId;
+        }
+        public Builder imageId(final String imageId) {
+            this.imageId = imageId; return this;
         }
         public Builder accountId(final String accountId) {
             this.accountId = accountId; return this;
