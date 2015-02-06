@@ -167,6 +167,9 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             if (null == factory) {
                 throw ServiceExceptionCode.absentService(IDBasedFileAccessFactory.class);
             }
+            if (publication == null) {
+                throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create();
+            }
             Session session = new PublicationSession(publication);
             IDBasedFileAccess fileAccess = factory.createAccess(session);
             String id = publication.getEntityId() + '/' + infoId;
