@@ -53,7 +53,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
@@ -67,6 +66,7 @@ import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -205,17 +205,17 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     protected static List<String> extractMailAddessesFrom(final Contact contact) {
         List<String> addrs = new ArrayList<String>(3);
         String mailAddress = contact.getEmail1();
-        if (mailAddress != null) {
+        if (!Strings.isEmpty(mailAddress)) {
             addrs.add(mailAddress);
         }
 
         mailAddress = contact.getEmail2();
-        if (mailAddress != null) {
+        if (!Strings.isEmpty(mailAddress)) {
             addrs.add(mailAddress);
         }
 
         mailAddress = contact.getEmail3();
-        if (mailAddress != null) {
+        if (!Strings.isEmpty(mailAddress)) {
             addrs.add(mailAddress);
         }
 
