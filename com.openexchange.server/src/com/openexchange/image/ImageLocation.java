@@ -74,6 +74,7 @@ public final class ImageLocation {
         protected String id;
         protected String timestamp;
         protected String optImageHost;
+        protected String registrationName;
 
         public Builder() {
             super();
@@ -106,6 +107,12 @@ public final class ImageLocation {
         }
         public Builder optImageHost(final String optImageHost) {
             this.optImageHost = optImageHost; return this;
+        }
+        public Builder registrationName(final String registrationName) {
+            this.registrationName = registrationName; return this;
+        }
+        public String getRegistrationName() {
+            return registrationName;
         }
         public ImageLocation build() {
             return new ImageLocation(this);

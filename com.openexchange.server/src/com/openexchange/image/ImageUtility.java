@@ -139,6 +139,14 @@ public final class ImageUtility {
             }
         });
 
+        map.put("source", new ValueHandler() {
+
+            @Override
+            public void handleValue(String value, ImageLocation.Builder builder) {
+                builder.registrationName(value);
+            }
+        });
+
         NVP_HANDLERS = map;
     }
 
@@ -160,7 +168,6 @@ public final class ImageUtility {
 
         String[] nvps = SPLIT.split(imageUri.substring(queryStringStart + 1/*Consume starting '?'*/), 0);
         ImageLocation.Builder builder = new ImageLocation.Builder();
-        String registrationName = null;
 
         for (String nvp : nvps) {
             // Look-up character '='
@@ -170,13 +177,12 @@ public final class ImageUtility {
                 ValueHandler handler = NVP_HANDLERS.get(name);
                 if (null != handler) {
                     handler.handleValue(decodeQueryStringValue(nvp.substring(pos + 1)), builder);
-                } else if ("source".equals(name)) {
-                    registrationName = decodeQueryStringValue(nvp.substring(pos + 1));
                 }
             }
         }
 
         ImageLocation il = builder.build();
+        String registrationName = builder.registrationName;
         if (null == registrationName) {
             registrationName = ImageActionFactory.getRegistrationNameFor(imageUri);
             if (null == registrationName) {
