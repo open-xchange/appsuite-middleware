@@ -307,4 +307,10 @@ public class TestSessionStorageService implements SessionStorageService {
         return 0;
     }
 
+    @Override
+    public List<Session> removeSessions(List<String> sessionIds) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
