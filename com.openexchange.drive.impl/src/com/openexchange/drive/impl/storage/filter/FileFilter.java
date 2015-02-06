@@ -34,6 +34,15 @@ public interface FileFilter {
     List<File> findAll(SearchIterator<File> searchIterator) throws OXException;
 
     /**
+     * Finds all files from the supplied collection that are accepted by this filter.
+     *
+     * @param collection The collection to browse
+     * @return The accepted files, or an empty list of there are none
+     * @throws OXException
+     */
+    List<File> findAll(Collection<? extends File> collection) throws OXException;
+
+    /**
      * Finds the first file from the supplied search iterator that is accepted by this filter.
      *
      * @param searchIterator The search iterator to browse

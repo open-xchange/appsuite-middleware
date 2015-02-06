@@ -313,7 +313,7 @@ public class DriveServiceImpl implements DriveService {
             createdFile = new UploadHelper(syncSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
         } catch (OXException e) {
             LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",
-                e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength);
+                e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength, e);
             if (DriveUtils.indicatesQuotaExceeded(e)) {
                 syncResult.addActionsForClient(DriveUtils.handleQuotaExceeded(syncSession, e, path, originalVersion, newVersion));
             } else if ("IFO-0100".equals(e.getErrorCode())) {

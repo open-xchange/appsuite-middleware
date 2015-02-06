@@ -643,7 +643,7 @@ public class DriveStorage {
             /*
              * also search file by listing the directory's contents as fallback for limited storages
              */
-            files = getFilesInFolder(session.getStorage().getFolderID(path));
+            files = FileNameFilter.byName(name, normalizeFileNames).findAll(getFilesInFolder(session.getStorage().getFolderID(path)));
         }
         return selectFile(files, name);
     }

@@ -83,6 +83,19 @@ public abstract class DefaultFileFilter implements FileFilter {
     }
 
     @Override
+    public List<File> findAll(Collection<? extends File> collection) throws OXException {
+        List<File> files = new ArrayList<File>();
+        if (null != collection) {
+            for (File file : collection) {
+                if (accept(file)) {
+                    files.add(file);
+                }
+            }
+        }
+        return files;
+    }
+
+    @Override
     public File find(SearchIterator<File> searchIterator) throws OXException {
         if (null != searchIterator) {
             try {
