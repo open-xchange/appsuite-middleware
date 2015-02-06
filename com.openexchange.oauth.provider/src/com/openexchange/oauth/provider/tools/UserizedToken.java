@@ -52,9 +52,7 @@ package com.openexchange.oauth.provider.tools;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 
 /**
  * {@link UserizedToken}
@@ -79,49 +77,64 @@ public class UserizedToken {
     private final int contextId;
     private final int userId;
     private final String baseToken;
-    private final int hash;
 
     /**
-     * Initializes a new {@link UserizedToken}, based on the supplied share token. Any appended path fragments are swallowed.
+     * Initializes a new {@link UserizedToken}. Don't generate new base tokens on your own,
+     * always use {@link UserizedToken#generate(int, int)}.
      *
-     * @param token The token
-     * @throws OXException If token is invalid
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param baseToken The base token
      */
-    public UserizedToken(String token) throws OXException {
+    public UserizedToken(int userId, int contextId, String baseToken) {
         super();
-        if (null == token || 48 > token.length() || false == TOKEN_PATTERN.matcher(token.substring(0, 48)).matches()) {
-            throw OAuthProviderExceptionCodes.INVALID_AUTH_CODE.create(token);
-        }
-        baseToken = token.substring(16, 48);
-        contextId = Integer.parseInt(token.substring(0, 8), 16) ^ getContextObfuscator(baseToken);
-        userId = Integer.parseInt(token.substring(8, 16), 16) ^ getUserObfuscator(baseToken);
-
-        int prime = 31;
-        int result = 1;
-        result = prime * result + contextId;
-        result = prime * result + userId;
-        result = prime * result + ((baseToken == null) ? 0 : baseToken.hashCode());
-        hash = result;
+        this.contextId = contextId;
+        this.userId = userId;
+        this.baseToken = baseToken;
     }
 
     /**
-     * Initializes a new {@link UserizedToken}.
+     * Initializes a new {@link UserizedToken}, based on the supplied share token.
+     * See {@link UserizedToken#isValid(String)} for validating tokens before parsing
+     * them.
+     *
+     * @param token The token
+     * @throws IllegalArgumentException If token is invalid
+     */
+    public static UserizedToken parse(String token) {
+        if (!isValid(token)) {
+            throw new IllegalArgumentException("Invalid token string: " + token);
+        }
+
+        String baseToken = token.substring(16, 48);
+        int contextId = Integer.parseInt(token.substring(0, 8), 16) ^ getContextObfuscator(baseToken);
+        int userId = Integer.parseInt(token.substring(8, 16), 16) ^ getUserObfuscator(baseToken);
+        return new UserizedToken(userId, contextId, baseToken);
+    }
+
+    /**
+     * Initializes a new {@link UserizedToken} with a randomly
+     * generated base token.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public UserizedToken(int userId, int contextId) {
-        super();
-        this.contextId = contextId;
-        this.userId = userId;
-        baseToken = UUIDs.getUnformattedString(UUID.randomUUID());
+    public static UserizedToken generate(int userId, int contextId) {
+        return new UserizedToken(userId, contextId, UUIDs.getUnformattedString(UUID.randomUUID()));
+    }
 
-        int prime = 31;
-        int result = 1;
-        result = prime * result + contextId;
-        result = prime * result + userId;
-        result = prime * result + ((baseToken == null) ? 0 : baseToken.hashCode());
-        hash = result;
+    /**
+     * Checks if the given token string is a valid {@link UserizedToken}.
+     *
+     * @param token the token
+     * @return <code>true</code> if the token is valid
+     */
+    public static boolean isValid(String token) {
+        if (null == token || 48 != token.length() || false == TOKEN_PATTERN.matcher(token).matches()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -143,7 +156,7 @@ public class UserizedToken {
     }
 
     /**
-     * Gets the token.
+     * Gets the token with context and user IDs encoded.
      *
      * @return The token
      */
@@ -152,14 +165,12 @@ public class UserizedToken {
     }
 
     /**
-     * Gets a value indicating whether this share token is associated to the supplied guest user or not.
+     * Gets the base token, i.e. the random part of the token without encoded information.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if the guest user matches this token, <code>false</code>, otherwise
+     * @return The token
      */
-    public boolean matches(int userId, int contextId) {
-        return equals(new UserizedToken(userId, contextId));
+    public String getBaseToken() {
+        return baseToken;
     }
 
     @Override

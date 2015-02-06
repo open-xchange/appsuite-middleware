@@ -50,10 +50,9 @@
 package com.openexchange.oauth.provider.groupware;
 
 import static com.openexchange.osgi.Tools.requireService;
+import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -61,25 +60,25 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link OAuthProviderCreateTableTask}
+ * {@link CreateOAuthGrantTableTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class OAuthProviderCreateTableTask extends UpdateTaskAdapter {
+public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link OAuthProviderCreateTableTask}.
+     * Initializes a new {@link CreateOAuthGrantTableTask}.
      *
      * @param dbService
      */
-    public OAuthProviderCreateTableTask(ServiceLookup services) {
+    public CreateOAuthGrantTableTask(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -94,8 +93,8 @@ public class OAuthProviderCreateTableTask extends UpdateTaskAdapter {
         try {
             DBUtils.startTransaction(writeCon); // BEGIN
             rollback = true;
-            final String[] tableNames = OAuthProviderCreateTableService.getTablesToCreate();
-            final String[] createStmts = OAuthProviderCreateTableService.getCreateStmts();
+            final String[] tableNames = CreateOAuthGrantTableService.getTablesToCreate();
+            final String[] createStmts = CreateOAuthGrantTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
                 try {
                     if (tableExists(writeCon, tableNames[i])) {
@@ -130,19 +129,6 @@ public class OAuthProviderCreateTableTask extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[] {};
-    }
-
-    private static final boolean tableExists(final Connection con, final String table) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
-        ResultSet rs = null;
-        boolean retval = false;
-        try {
-            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
-        } finally {
-            DBUtils.closeSQLStuff(rs);
-        }
-        return retval;
     }
 
 }

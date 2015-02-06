@@ -77,7 +77,9 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableService;
 import com.openexchange.oauth.provider.groupware.AuthCodeCreateTableTask;
-import com.openexchange.oauth.provider.groupware.AuthCodeDeleteListener;
+import com.openexchange.oauth.provider.groupware.CreateOAuthGrantTableService;
+import com.openexchange.oauth.provider.groupware.CreateOAuthGrantTableTask;
+import com.openexchange.oauth.provider.groupware.OAuthProviderDeleteListener;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeProvider;
@@ -235,7 +237,9 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         // Register update task, create table job and delete listener
         registerService(CreateTableService.class, new AuthCodeCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AuthCodeCreateTableTask(this)));
-        registerService(DeleteListener.class, new AuthCodeDeleteListener());
+        registerService(CreateTableService.class, new CreateOAuthGrantTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateOAuthGrantTableTask(this)));
+        registerService(DeleteListener.class, new OAuthProviderDeleteListener());
 
         ConfigurationService configService = getService(ConfigurationService.class);
         boolean providerEnabled = configService.getBoolProperty(OAuthProviderProperties.ENABLED, false);

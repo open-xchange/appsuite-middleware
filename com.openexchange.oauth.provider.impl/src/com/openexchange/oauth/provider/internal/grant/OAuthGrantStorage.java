@@ -50,7 +50,7 @@
 package com.openexchange.oauth.provider.internal.grant;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.tools.UserizedToken;
 
 
 /**
@@ -61,12 +61,12 @@ import com.openexchange.oauth.provider.OAuthGrant;
  */
 public interface OAuthGrantStorage {
 
-    public void persistGrant(OAuthGrant grant) throws OXException;
+    public void persistGrant(StoredGrant grant) throws OXException;
 
     public void deleteGrantsForClient(String clientId) throws OXException;
 
-    public OAuthGrant getGrantByAccessToken(String accessToken) throws OXException;
+    public StoredGrant getGrantByAccessToken(UserizedToken accessToken) throws OXException;
 
-    public OAuthGrant getGrantByRefreshToken(String refreshToken) throws OXException;
+    public StoredGrant getGrantByRefreshToken(UserizedToken refreshToken) throws OXException;
 
 }

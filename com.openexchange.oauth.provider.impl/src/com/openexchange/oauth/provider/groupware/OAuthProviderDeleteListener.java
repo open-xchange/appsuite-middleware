@@ -72,41 +72,37 @@ public class OAuthProviderDeleteListener implements DeleteListener {
             deleteUserEntriesFromDB(event, writeCon);
         } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
             deleteContextEntriesFromDB(event, writeCon);
-        } else {
-            return;
         }
     }
 
-    private void deleteContextEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
+    private void deleteContextEntriesFromDB(DeleteEvent event, Connection writeCon) throws OXException {
         final Context context = event.getContext();
         final int contextId = context.getContextId();
         PreparedStatement stmt = null;
         try {
-            final int pos = 1;
-            stmt = writeCon.prepareStatement("DELETE FROM oauthAccessorProperty WHERE cid=?");
-            stmt.setInt(pos, contextId);
+            stmt = writeCon.prepareStatement("DELETE FROM authCode WHERE cid=?");
+            stmt.setInt(1, contextId);
             stmt.executeUpdate();
             DBUtils.closeSQLStuff(stmt);
-
-            stmt = writeCon.prepareStatement("DELETE FROM oauthAccessor WHERE cid = ?");
-            stmt.setInt(pos, contextId);
+            stmt = writeCon.prepareStatement("DELETE FROM oauth_grant WHERE cid=?");
+            stmt.setInt(1, contextId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (RuntimeException e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private void deleteUserEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
+    private void deleteUserEntriesFromDB(DeleteEvent event, Connection writeCon) throws OXException {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
             int pos;
-            final int userId = event.getId();
-            final int admin = event.getContext().getMailadmin();
+            int userId = event.getId();
+            int admin = event.getContext().getMailadmin();
             /*
              * Delete in case of administrator
              */
@@ -117,20 +113,18 @@ public class OAuthProviderDeleteListener implements DeleteListener {
             /*
              * Delete
              */
-            stmt = writeCon.prepareStatement("DELETE FROM oauthAccessorProperty WHERE cid=? AND user=?");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos, userId);
+            stmt = writeCon.prepareStatement("DELETE FROM authCode WHERE cid=? AND user=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
             stmt.executeUpdate();
             DBUtils.closeSQLStuff(stmt);
-            stmt = writeCon.prepareStatement("DELETE FROM oauthAccessor WHERE cid=? AND user=?");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos, userId);
+            stmt = writeCon.prepareStatement("DELETE FROM oauth_grant WHERE cid=? AND user=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (RuntimeException e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);

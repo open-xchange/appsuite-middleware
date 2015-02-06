@@ -52,7 +52,7 @@ package com.openexchange.oauth.provider.internal.grant;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.tools.UserizedToken;
 
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.oauth.provider.OAuthGrant;
  */
 public class InMemoryGrantStorage implements OAuthGrantStorage {
 
-    private final List<OAuthGrant> grants;
+    private final List<StoredGrant> grants;
 
     public InMemoryGrantStorage() {
         super();
@@ -71,15 +71,15 @@ public class InMemoryGrantStorage implements OAuthGrantStorage {
     }
 
     @Override
-    public void persistGrant(OAuthGrant grant) {
+    public void persistGrant(StoredGrant grant) {
         grants.add(grant);
     }
 
     @Override
     public void deleteGrantsForClient(String clientId) {
-        Iterator<OAuthGrant> it = grants.iterator();
+        Iterator<StoredGrant> it = grants.iterator();
         while (it.hasNext()) {
-            OAuthGrant grant = it.next();
+            StoredGrant grant = it.next();
             if (clientId.equals(grant.getClientId())) {
                 it.remove();
             }
@@ -87,10 +87,10 @@ public class InMemoryGrantStorage implements OAuthGrantStorage {
     }
 
     @Override
-    public OAuthGrant getGrantByAccessToken(String accessToken) {
-        Iterator<OAuthGrant> it = grants.iterator();
+    public StoredGrant getGrantByAccessToken(UserizedToken accessToken) {
+        Iterator<StoredGrant> it = grants.iterator();
         while (it.hasNext()) {
-            OAuthGrant grant = it.next();
+            StoredGrant grant = it.next();
             if (grant.getAccessToken().equals(accessToken)) {
                 return grant;
             }
@@ -100,10 +100,10 @@ public class InMemoryGrantStorage implements OAuthGrantStorage {
     }
 
     @Override
-    public OAuthGrant getGrantByRefreshToken(String refreshToken) {
-        Iterator<OAuthGrant> it = grants.iterator();
+    public StoredGrant getGrantByRefreshToken(UserizedToken refreshToken) {
+        Iterator<StoredGrant> it = grants.iterator();
         while (it.hasNext()) {
-            OAuthGrant grant = it.next();
+            StoredGrant grant = it.next();
             if (grant.getRefreshToken().equals(refreshToken)) {
                 return grant;
             }

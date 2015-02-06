@@ -53,39 +53,34 @@ import com.openexchange.database.AbstractCreateTableImpl;
 
 
 /**
- * {@link OAuth2ProviderCreateTableService}
+ * {@link CreateOAuthGrantTableService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public final class OAuth2ProviderCreateTableService extends AbstractCreateTableImpl {
+public final class CreateOAuthGrantTableService extends AbstractCreateTableImpl {
 
-    private static final String TABLE_ACCESSOR_V2 = "oauth2Accessor";
-    private static final String TABLE_ACCESSOR_PROPERTY_V2 = "oauth2AccessorProperty";
-
-    private static final String CREATE_ACCESSOR_V2 = "CREATE TABLE `"+TABLE_ACCESSOR_V2+"` (" +
+    private static final String CREATE_GRANT_TABLE = "CREATE TABLE `oauth_grant` (" +
         " `cid` INT4 unsigned NOT NULL," +
         " `user` INT4 unsigned NOT NULL," +
-        " `clientId` INT4 unsigned NOT NULL," +
-        " `providerId` INT4 unsigned NOT NULL," +
-        " `code` varchar(255) DEFAULT NULL," +
-        " `refreshToken` varchar(255) DEFAULT NULL," +
-        " `accessToken` varchar(255) DEFAULT NULL," +
-        " `expiresIn` varchar(255) DEFAULT NULL," +
-        " `tokenType` varchar(255) DEFAULT NULL," +
-        " `scope` varchar(255) DEFAULT NULL," +
-        " `state` varchar(255) DEFAULT NULL," +
-        " PRIMARY KEY (`cid`,`user`,`clientId`)," +
-        " KEY `consumerIndex` (`clientId`,`providerId`)" +
+        " `refresh_token` VARCHAR(255) NOT NULL," +
+        " `access_token` VARCHAR(255) NOT NULL," +
+        " `client` VARCHAR(255) NOT NULL," +
+        " `expiration_date` BIGINT(64) NOT NULL," +
+        " `scopes` VARCHAR(767) NOT NULL," +
+        " `creation_date` BIGINT(64) NOT NULL," +
+        " `last_modified` BIGINT(64) NOT NULL," +
+        " PRIMARY KEY (`refresh_token`)," +
+        " UNIQUE KEY `access_token` (`access_token`)," +
+        " KEY `client` (`client`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
-    private static final String CREATE_ACCESSOR_PROPERTY_V2 = "CREATE TABLE `"+TABLE_ACCESSOR_PROPERTY_V2+"` (" +
-        " `cid` INT4 unsigned NOT NULL," +
-        " `user` INT4 unsigned NOT NULL," +
-        " `clientId` INT4 unsigned NOT NULL," +
-        " `name` varchar(32) NOT NULL," +
-        " `value` varchar(255) NOT NULL," +
-        " PRIMARY KEY (`cid`,`user`,`clientId`,`name`)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    /**
+     * Initializes a new {@link CreateOAuthGrantTableService}.
+     */
+    public CreateOAuthGrantTableService() {
+        super();
+    }
 
     /**
      * Gets the table names.
@@ -93,7 +88,7 @@ public final class OAuth2ProviderCreateTableService extends AbstractCreateTableI
      * @return The table names.
      */
     public static String[] getTablesToCreate() {
-        return new String[] { TABLE_ACCESSOR_V2, TABLE_ACCESSOR_PROPERTY_V2 };
+        return new String[] { "oauth_grant" };
     }
 
     /**
@@ -102,14 +97,7 @@ public final class OAuth2ProviderCreateTableService extends AbstractCreateTableI
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {
-        return new String[] { CREATE_ACCESSOR_V2, CREATE_ACCESSOR_PROPERTY_V2 };
-    }
-
-    /**
-     * Initializes a new {@link OAuth2ProviderCreateTableService}.
-     */
-    public OAuth2ProviderCreateTableService() {
-        super();
+        return new String[] { CREATE_GRANT_TABLE };
     }
 
     @Override

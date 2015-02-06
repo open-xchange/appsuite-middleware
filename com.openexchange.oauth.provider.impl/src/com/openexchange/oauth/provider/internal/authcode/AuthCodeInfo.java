@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.provider.internal.authcode;
 
+import com.openexchange.oauth.provider.Scopes;
+
 /**
  * {@link AuthCodeInfo}
  *
@@ -57,12 +59,13 @@ package com.openexchange.oauth.provider.internal.authcode;
  */
 public class AuthCodeInfo {
 
+    private String authCode;
     private String clientId;
     private String redirectURI;
-    private String scope;
+    private Scopes scopes;
     private int userId;
     private int contextId;
-    private long nanos;
+    private long timestamp;
 
     /**
      * Initializes a new {@link AuthCodeInfo}.
@@ -74,21 +77,41 @@ public class AuthCodeInfo {
     /**
      * Initializes a new {@link AuthCodeInfo}.
      *
+     * @param authCode The authorization code
      * @param clientId The client identifier
      * @param redirectURI The redirect URI
-     * @param scope The scope identifier
+     * @param scopes The scopes
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param nanos The nanos
      */
-    public AuthCodeInfo(String clientId, String redirectURI, String scope, int userId, int contextId, long nanos) {
+    public AuthCodeInfo(String authCode, String clientId, String redirectURI, Scopes scopes, int userId, int contextId, long timestamp) {
         super();
+        this.authCode = authCode;
         this.clientId = clientId;
         this.redirectURI = redirectURI;
-        this.scope = scope;
+        this.scopes = scopes;
         this.userId = userId;
         this.contextId = contextId;
-        this.nanos = nanos;
+        this.timestamp = timestamp;
+    }
+
+    /**
+     * Gets the authCode
+     *
+     * @return The authCode
+     */
+    public String getAuthCode() {
+        return authCode;
+    }
+
+    /**
+     * Sets the authCode
+     *
+     * @param authCode The authCode to set
+     */
+    public void setAuthCode(String authCode) {
+        this.authCode = authCode;
     }
 
     /**
@@ -128,21 +151,21 @@ public class AuthCodeInfo {
     }
 
     /**
-     * Gets the scope
+     * Gets the scopes
      *
-     * @return The scope
+     * @return The scopes
      */
-    public String getScope() {
-        return scope;
+    public Scopes getScopes() {
+        return scopes;
     }
 
     /**
-     * Sets the scope
+     * Sets the scopes
      *
-     * @param scope The scope to set
+     * @param scopes The scope to set
      */
-    public void setScope(String scope) {
-        this.scope = scope;
+    public void setScopes(Scopes scopes) {
+        this.scopes = scopes;
     }
 
     /**
@@ -182,21 +205,21 @@ public class AuthCodeInfo {
     }
 
     /**
-     * Gets the nanos
+     * Gets the timestamp
      *
-     * @return The nanos
+     * @return The timestamp
      */
-    public long getNanos() {
-        return nanos;
+    public long getTimestamp() {
+        return timestamp;
     }
 
     /**
-     * Sets the nanos
+     * Sets the timestamp
      *
-     * @param nanos The nanos to set
+     * @param timestamp The timestamp to set
      */
-    public void setNanos(long nanos) {
-        this.nanos = nanos;
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
 }

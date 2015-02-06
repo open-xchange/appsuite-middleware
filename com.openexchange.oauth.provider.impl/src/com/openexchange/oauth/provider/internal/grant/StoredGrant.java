@@ -47,75 +47,88 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider.internal.grant;
 
 import java.util.Date;
-import java.util.regex.Pattern;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
-import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
-import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
-import com.openexchange.oauth.provider.internal.grant.StoredGrant;
+import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 
-
 /**
- * {@link OAuthResourceServiceImpl}
+ * {@link StoredGrant}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthResourceServiceImpl implements OAuthResourceService {
+public class StoredGrant {
 
-    /*
-     * From https://tools.ietf.org/html/rfc6750#section-2.1:
-     *   The syntax for Bearer credentials is as follows:
-     *   b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
-     *   credentials = "Bearer" 1*SP b64token
-     */
-    private static final Pattern TOKEN_PATTERN = Pattern.compile("[\\x41-\\x5a\\x61-\\x7a\\x30-\\x39-._~+/]+=*");
+    private int contextId;
 
-    private final OAuthClientStorage clientStorage;
+    private int userId;
 
-    private final OAuthGrantStorage grantStorage;
+    private String clientId;
 
-    public OAuthResourceServiceImpl(OAuthClientStorage clientStorage, OAuthGrantStorage grantStorage) {
-        super();
-        this.clientStorage = clientStorage;
-        this.grantStorage = grantStorage;
+    private UserizedToken accessToken;
+
+    private UserizedToken refreshToken;
+
+    private Scopes scopes;
+
+    private Date expirationDate;
+
+    public int getContextId() {
+        return contextId;
     }
 
-    @Override
-    public OAuthGrant validate(String accessToken) throws OXException {
-        if (!TOKEN_PATTERN.matcher(accessToken).matches() || !UserizedToken.isValid(accessToken)) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
-        }
-
-        StoredGrant grant = grantStorage.getGrantByAccessToken(UserizedToken.parse(accessToken));
-        if (grant == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-        }
-
-        if (grant.getExpirationDate().before(new Date())) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
-        }
-
-        return new OAuthGrantImpl(grant);
+    public void setContextId(int contextId) {
+        this.contextId = contextId;
     }
 
-    @Override
-    public Client getClient(OAuthGrant grant) throws OXException {
-        Client client = clientStorage.getClientById(grant.getClientId());
-        if (client == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-        }
+    public int getUserId() {
+        return userId;
+    }
 
-        return client;
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public UserizedToken getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(UserizedToken accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public UserizedToken getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(UserizedToken refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public Scopes getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(Scopes scopes) {
+        this.scopes = scopes;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
 }

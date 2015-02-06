@@ -57,7 +57,7 @@ import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.tools.UserizedToken;
@@ -84,37 +84,35 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scopes scope, int userId, int contextId) throws OXException {
+    public void put(AuthCodeInfo authCodeInfo) throws OXException {
         DatabaseService dbService = getDbService();
+        int contextId = authCodeInfo.getContextId();
         Connection con = dbService.getWritable(contextId);
         try {
-            return generateAuthorizationCodeFor(clientId, redirectURI, scope, userId, contextId, con);
+            put(authCodeInfo, con);
         } finally {
             dbService.backWritable(contextId, con);
         }
     }
 
-    private String generateAuthorizationCodeFor(String clientId, String redirectURI, Scopes scope, int userId, int contextId, Connection con) throws OXException {
-        String authCode = new UserizedToken(userId, contextId).getToken();
-        long now = System.nanoTime();
-
+    private void put(AuthCodeInfo authCodeInfo, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO authCode (code, cid, user, clientId, redirectURI, scope, nanos) VALUES (?, ?, ?, ?, ?, ?, ?)");
             int pos = 1;
-            stmt.setString(pos++, authCode);
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setString(pos++, clientId);
-            stmt.setString(pos++, redirectURI);
-            if (null == scope) {
+            stmt.setString(pos++, authCodeInfo.getAuthCode());
+            stmt.setInt(pos++, authCodeInfo.getContextId());
+            stmt.setInt(pos++, authCodeInfo.getUserId());
+            stmt.setString(pos++, authCodeInfo.getClientId());
+            stmt.setString(pos++, authCodeInfo.getRedirectURI());
+            Scopes scopes = authCodeInfo.getScopes();
+            if (null == scopes) {
                 stmt.setNull(pos++, java.sql.Types.VARCHAR);
             } else {
-                stmt.setString(pos++, scope.scopeString());
+                stmt.setString(pos++, scopes.scopeString());
             }
-            stmt.setLong(pos, now);
+            stmt.setLong(pos, authCodeInfo.getTimestamp());
             stmt.executeUpdate();
-            return authCode;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -123,20 +121,17 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     }
 
     @Override
-    public AuthCodeInfo redeemAuthCode(Client client, String authCode) throws OXException {
-        UserizedToken token = new UserizedToken(authCode);
-        int contextId = token.getContextId();
+    public AuthCodeInfo remove(String authCode) throws OXException {
         DatabaseService dbService = getDbService();
-
         AuthCodeInfo authCodeInfo = null;
-
-        Connection con = dbService.getWritable(contextId);
+        UserizedToken parsedCode = UserizedToken.parse(authCode);
+        Connection con = dbService.getWritable(parsedCode.getContextId());
         boolean rollback = false;
         try {
             Databases.startTransaction(con);
             rollback = true;
 
-            authCodeInfo = redeemAuthCode(client, token, con);
+            authCodeInfo = redeemAuthCode(parsedCode, con);
 
             con.commit();
             rollback = false;
@@ -150,14 +145,14 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             }
             Databases.autocommit(con);
             if (null == authCodeInfo) {
-                dbService.backWritableAfterReading(contextId, con);
+                dbService.backWritableAfterReading(parsedCode.getContextId(), con);
             } else {
-                dbService.backWritable(contextId, con);
+                dbService.backWritable(parsedCode.getContextId(), con);
             }
         }
     }
 
-    private AuthCodeInfo redeemAuthCode(Client client, UserizedToken authCode, Connection con) throws OXException {
+    private AuthCodeInfo redeemAuthCode(UserizedToken authCode, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -176,7 +171,7 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             String clientId = rs.getString(3);
             String redirectURI = rs.getString(4);
             String sScope = rs.getString(5);
-            long nanos = rs.getLong(6);
+            long timestamp = rs.getLong(6);
 
             // Delete entry
             if (false == dropAuthorizationCodeFor(authCode, con)) {
@@ -185,13 +180,19 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             }
 
             // Perform check
-            AuthCodeInfo authCodeInfo = new AuthCodeInfo(clientId, redirectURI, sScope, userId, contextId, nanos);
+            AuthCodeInfo authCodeInfo = new AuthCodeInfo(authCode.getToken(), clientId, redirectURI, DefaultScopes.parseScope(sScope), userId, contextId, timestamp);
             return authCodeInfo;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+    }
+
+    @Override
+    protected String generateAuthCode(int userId, int contextId) {
+        String token = UserizedToken.generate(userId, contextId).getToken();
+        return token;
     }
 
     private boolean dropAuthorizationCodeFor(UserizedToken authCode, Connection con) throws OXException {

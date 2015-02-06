@@ -77,7 +77,7 @@ import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCo
 import com.openexchange.oauth.provider.internal.client.CachingOAuthClientStorage;
 import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
 import com.openexchange.oauth.provider.internal.client.RdbOAuthClientStorage;
-import com.openexchange.oauth.provider.internal.grant.InMemoryGrantStorage;
+import com.openexchange.oauth.provider.internal.grant.DbGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.rmi.OAuthClientRmiImpl;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
@@ -125,7 +125,7 @@ public class OAuthProvider {
                 registeredServlets = new Stack<>();
 
                 OAuthClientStorage clientStorage = initClientStorage();
-                OAuthGrantStorage grantStorage = new InMemoryGrantStorage();
+                OAuthGrantStorage grantStorage = new DbGrantStorage(activator);
 
                 OAuthProviderServiceImpl oAuthProvider = new OAuthProviderServiceImpl(authCodeProvider, clientStorage, grantStorage, activator);
                 OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(clientStorage, grantStorage);

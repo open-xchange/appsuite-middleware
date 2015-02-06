@@ -50,7 +50,6 @@
 package com.openexchange.oauth.provider.internal.grant;
 
 import java.util.Date;
-import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
@@ -70,13 +69,13 @@ public class OAuthGrantImpl implements OAuthGrant {
 
     private final int userId;
 
-    private Scopes scopes;
-
     private String accessToken;
 
     private String refreshToken;
 
     private Date expirationDate;
+
+    private Scopes scopes;
 
 
     public OAuthGrantImpl(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) {
@@ -87,14 +86,18 @@ public class OAuthGrantImpl implements OAuthGrant {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.expirationDate = expirationDate;
-        scopes = DefaultScopes.parseScope(authCodeInfo.getScope());
+        scopes = authCodeInfo.getScopes();
     }
 
-    public OAuthGrantImpl(String clientId, int contextId, int userId) {
+    public OAuthGrantImpl(StoredGrant storedGrant) {
         super();
-        this.clientId = clientId;
-        this.contextId = contextId;
-        this.userId = userId;
+        clientId = storedGrant.getClientId();
+        contextId = storedGrant.getContextId();
+        userId = storedGrant.getUserId();
+        accessToken = storedGrant.getAccessToken().getToken();
+        refreshToken = storedGrant.getRefreshToken().getToken();
+        expirationDate = storedGrant.getExpirationDate();
+        scopes = storedGrant.getScopes();
     }
 
     /**
@@ -159,7 +162,7 @@ public class OAuthGrantImpl implements OAuthGrant {
         this.expirationDate = expirationDate;
     }
 
-    public void setScopes(DefaultScopes scopes) {
+    public void setScopes(Scopes scopes) {
         this.scopes = scopes;
     }
 

@@ -50,15 +50,13 @@
 package com.openexchange.oauth.provider.internal.authcode;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.lang.RandomStringUtils;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -113,7 +111,7 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scopes scope, int userId, int contextId) throws OXException {
+    protected void put(AuthCodeInfo authCodeInfo) throws OXException {
         if (notActive.get()) {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
@@ -125,14 +123,11 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         }
 
         // Continue...
-        String authCode = RandomStringUtils.randomAlphabetic(64);
-        long now = System.nanoTime();
-        map.put(authCode, new PortableAuthCodeInfo(clientId, redirectURI, scope, userId, contextId, now));
-        return authCode;
+        map.put(authCodeInfo.getAuthCode(), new PortableAuthCodeInfo(authCodeInfo.getClientId(), authCodeInfo.getRedirectURI(), authCodeInfo.getScopes(), authCodeInfo.getUserId(), authCodeInfo.getContextId(), authCodeInfo.getTimestamp()));
     }
 
     @Override
-    public AuthCodeInfo redeemAuthCode(Client client, String authCode) throws OXException {
+    public AuthCodeInfo remove(String authCode) throws OXException {
         if (notActive.get()) {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
@@ -152,7 +147,7 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         int contextId = value.getContextId();
         int userId = value.getUserId();
         String sScope = value.getScope();
-        AuthCodeInfo authCodeInfo = new AuthCodeInfo(value.getClientId(), value.getRedirectURI(), sScope, userId, contextId, value.getNanos());
+        AuthCodeInfo authCodeInfo = new AuthCodeInfo(authCode, value.getClientId(), value.getRedirectURI(), DefaultScopes.parseScope(sScope), userId, contextId, value.getNanos());
         return authCodeInfo;
     }
 

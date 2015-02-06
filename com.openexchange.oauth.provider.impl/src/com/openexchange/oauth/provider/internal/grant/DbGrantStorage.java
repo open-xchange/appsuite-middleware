@@ -54,12 +54,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
+import java.util.Deque;
+import java.util.LinkedList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.DefaultScopes;
-import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
@@ -73,6 +77,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DbGrantStorage implements OAuthGrantStorage {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DbGrantStorage.class);
     private final ServiceLookup services;
 
     public DbGrantStorage(ServiceLookup services) {
@@ -81,39 +86,39 @@ public class DbGrantStorage implements OAuthGrantStorage {
     }
 
     @Override
-    public void persistGrant(OAuthGrant grant) throws OXException {
+    public void persistGrant(StoredGrant grant) throws OXException {
         DatabaseService dbService = requireService(DatabaseService.class, services);
-        Connection con = dbService.getWritable();
+        Connection con = dbService.getWritable(grant.getContextId());
         PreparedStatement select = null;
         PreparedStatement save = null;
         ResultSet rs = null;
         try {
             Databases.startTransaction(con);
-            select = con.prepareStatement("SELECT 1 FROM oauth_grant WHERE cid = ? AND uid = ? AND refresh_token = ? AND client = ? FOR UPDATE");
+            select = con.prepareStatement("SELECT 1 FROM oauth_grant WHERE refresh_token = ? AND client = ? cid = ? AND uid = ? AND FOR UPDATE");
             select.setInt(1, grant.getContextId());
             select.setInt(2, grant.getUserId());
-            select.setString(3, grant.getRefreshToken());
+            select.setString(3, grant.getRefreshToken().getBaseToken());
             select.setString(4, grant.getClientId());
             rs = select.executeQuery();
             long now = System.currentTimeMillis();
             if (rs.next()) {
-                save = con.prepareStatement("UPDATE oauth_grant SET refresh_token = ?, access_token = ?, expiration_date = ?, scopes = ?, last_modified = ? WHERE cid = ? AND uid = ? AND refresh_token = ? AND client = ?");
-                save.setString(1, grant.getRefreshToken());
-                save.setString(2, grant.getAccessToken());
+                save = con.prepareStatement("UPDATE oauth_grant SET refresh_token = ?, access_token = ?, expiration_date = ?, scopes = ?, last_modified = ? WHERE refresh_token = ? AND client = ? AND cid = ? AND uid = ?");
+                save.setString(1, grant.getRefreshToken().getBaseToken());
+                save.setString(2, grant.getAccessToken().getBaseToken());
                 save.setLong(3, grant.getExpirationDate().getTime());
                 save.setString(4, grant.getScopes().scopeString());
                 save.setLong(5, now);
                 save.setInt(6, grant.getContextId());
                 save.setInt(7, grant.getUserId());
-                save.setString(8, grant.getRefreshToken());
+                save.setString(8, grant.getRefreshToken().getBaseToken());
                 save.setString(9, grant.getClientId());
                 save.executeUpdate();
             } else {
                 save = con.prepareStatement("INSERT INTO oauth_grant (cid, user, refresh_token, access_token, client, expiration_date, scopes, creation_date, last_modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 save.setInt(1, grant.getContextId());
                 save.setInt(2, grant.getUserId());
-                save.setString(3, grant.getRefreshToken());
-                save.setString(4, grant.getAccessToken());
+                save.setString(3, grant.getRefreshToken().getBaseToken());
+                save.setString(4, grant.getAccessToken().getBaseToken());
                 save.setString(5, grant.getClientId());
                 save.setLong(6, grant.getExpirationDate().getTime());
                 save.setString(7, grant.getScopes().scopeString());
@@ -131,33 +136,42 @@ public class DbGrantStorage implements OAuthGrantStorage {
             Databases.closeSQLStuff(rs);
             Databases.closeSQLStuff(save);
             Databases.autocommit(con);
-            dbService.backWritable(con);
+            dbService.backWritable(grant.getContextId(), con);
         }
     }
 
     @Override
     public void deleteGrantsForClient(String clientId) throws OXException {
         DatabaseService dbService = requireService(DatabaseService.class, services);
-        Connection con = dbService.getWritable();
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ?");
-            stmt.setString(1, clientId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            dbService.backWritable(con);
+        Deque<SchemaAndWritePool> schemasAndWritePools = getSchemasAndWritePools(dbService);
+        while (!schemasAndWritePools.isEmpty()) {
+            SchemaAndWritePool schemaAndWritePool = schemasAndWritePools.removeFirst();
+            schemaAndWritePool.incRetryCount();
+            Connection con = dbService.get(schemaAndWritePool.getWritePool(), schemaAndWritePool.getSchema());
+            PreparedStatement stmt = null;
+            try {
+                stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ?");
+                stmt.setString(1, clientId);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                if (schemaAndWritePool.getRetryCount() >= 3) {
+                    schemasAndWritePools.addLast(schemaAndWritePool);
+                } else {
+                    LOG.error("Could not delete OAuth grants for client {} in database {} after 3 tries", clientId, schemaAndWritePool, e);
+                }
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                dbService.back(schemaAndWritePool.getWritePool(), con);
+            }
         }
     }
 
     public void deleteGrantsForUserAndClient(int contextId, int userId, String clientId) throws OXException {
         DatabaseService dbService = requireService(DatabaseService.class, services);
-        Connection con = dbService.getWritable();
+        Connection con = dbService.getWritable(contextId);
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE cid = ? AND user = ? AND client = ?");
+            stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ? AND cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, clientId);
@@ -166,39 +180,31 @@ public class DbGrantStorage implements OAuthGrantStorage {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);
-            dbService.backWritable(con);
+            dbService.backWritable(contextId, con);
         }
     }
 
     @Override
-    public OAuthGrant getGrantByAccessToken(String accessToken) throws OXException {
-        UserizedToken userizedToken;
-        try {
-            userizedToken = new UserizedToken(accessToken);
-        } catch (OXException e) {
-            if (OAuthProviderExceptionCodes.INVALID_AUTH_CODE.equals(e)) {
-                return null;
-            }
-
-            throw e;
-        }
-
+    public StoredGrant getGrantByAccessToken(UserizedToken accessToken) throws OXException {
+        int contextId = accessToken.getContextId();
+        int userId = accessToken.getUserId();
         DatabaseService dbService = requireService(DatabaseService.class, services);
-        Connection con = dbService.getReadOnly();
+        Connection con = dbService.getReadOnly(contextId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            int contextId = userizedToken.getContextId();
-            int userId = userizedToken.getUserId();
-            stmt = con.prepareStatement("SELECT client, refresh_token, expiration_date, scopes FROM oauth_grant WHERE cid = ? AND user = ? AND access_token = ?");
+            stmt = con.prepareStatement("SELECT client, refresh_token, expiration_date, scopes FROM oauth_grant WHERE access_token = ? AND cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setString(3, accessToken);
+            stmt.setString(3, accessToken.getBaseToken());
             rs = stmt.executeQuery();
             if (rs.next()) {
-                OAuthGrantImpl grant = new OAuthGrantImpl(rs.getString(1), contextId, userId);
+                StoredGrant grant = new StoredGrant();
+                grant.setContextId(contextId);
+                grant.setUserId(userId);
+                grant.setClientId(rs.getString(1));
                 grant.setAccessToken(accessToken);
-                grant.setRefreshToken(rs.getString(2));
+                grant.setRefreshToken(new UserizedToken(userId, contextId, rs.getString(2)));
                 grant.setExpirationDate(new Date(rs.getLong(3)));
                 grant.setScopes(DefaultScopes.parseScope(rs.getString(4)));
                 return grant;
@@ -209,38 +215,30 @@ public class DbGrantStorage implements OAuthGrantStorage {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            dbService.backReadOnly(con);
+            dbService.backReadOnly(contextId, con);
         }
     }
 
     @Override
-    public OAuthGrant getGrantByRefreshToken(String refreshToken) throws OXException {
-        UserizedToken userizedToken;
-        try {
-            userizedToken = new UserizedToken(refreshToken);
-        } catch (OXException e) {
-            if (OAuthProviderExceptionCodes.INVALID_AUTH_CODE.equals(e)) {
-                return null;
-            }
-
-            throw e;
-        }
-
+    public StoredGrant getGrantByRefreshToken(UserizedToken refreshToken) throws OXException {
+        int contextId = refreshToken.getContextId();
+        int userId = refreshToken.getUserId();
         DatabaseService dbService = requireService(DatabaseService.class, services);
-        Connection con = dbService.getReadOnly();
+        Connection con = dbService.getReadOnly(contextId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            int contextId = userizedToken.getContextId();
-            int userId = userizedToken.getUserId();
-            stmt = con.prepareStatement("SELECT client, access_token, expiration_date, scopes FROM oauth_grant WHERE cid = ? AND user = ? AND refresh_token = ?");
+            stmt = con.prepareStatement("SELECT client, access_token, expiration_date, scopes FROM oauth_grant WHERE refresh_token = ? AND cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
-            stmt.setString(3, refreshToken);
+            stmt.setString(3, refreshToken.getBaseToken());
             rs = stmt.executeQuery();
             if (rs.next()) {
-                OAuthGrantImpl grant = new OAuthGrantImpl(rs.getString(1), contextId, userId);
-                grant.setAccessToken(rs.getString(2));
+                StoredGrant grant = new StoredGrant();
+                grant.setContextId(contextId);
+                grant.setUserId(userId);
+                grant.setClientId(rs.getString(1));
+                grant.setAccessToken(new UserizedToken(userId, contextId, rs.getString(2)));
                 grant.setRefreshToken(refreshToken);
                 grant.setExpirationDate(new Date(rs.getLong(3)));
                 grant.setScopes(DefaultScopes.parseScope(rs.getString(4)));
@@ -252,8 +250,99 @@ public class DbGrantStorage implements OAuthGrantStorage {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
+            dbService.backReadOnly(contextId, con);
+        }
+    }
+
+    private static Deque<SchemaAndWritePool> getSchemasAndWritePools(DatabaseService dbService) throws OXException {
+        Deque<SchemaAndWritePool> schemasAndWritePools = new LinkedList<>();
+        Connection con = dbService.getReadOnly();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.createStatement();
+            rs = stmt.executeQuery("SELECT db_schema, write_db_pool_id FROM context_server2db_pool GROUP BY db_schema");
+            while (rs.next()) {
+                schemasAndWritePools.add(new SchemaAndWritePool(rs.getString(1), rs.getInt(2)));
+            }
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
             dbService.backReadOnly(con);
         }
+
+        return schemasAndWritePools;
+    }
+
+    private static final class SchemaAndWritePool {
+
+        private final String schema;
+
+        private final int writePool;
+
+        private int retryCount = 0;
+
+        public SchemaAndWritePool(String schema, int writePool) {
+            super();
+            this.schema = schema;
+            this.writePool = writePool;
+        }
+
+        public String getSchema() {
+            return schema;
+        }
+
+        public int getWritePool() {
+            return writePool;
+        }
+        public int getRetryCount() {
+            return retryCount;
+        }
+
+        public void incRetryCount() {
+            ++retryCount;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+            result = prime * result + writePool;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            SchemaAndWritePool other = (SchemaAndWritePool) obj;
+            if (schema == null) {
+                if (other.schema != null) {
+                    return false;
+                }
+            } else if (!schema.equals(other.schema)) {
+                return false;
+            }
+            if (writePool != other.writePool) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "{schema=" + schema + ", writePool=" + writePool + "}";
+        }
+
     }
 
 }
