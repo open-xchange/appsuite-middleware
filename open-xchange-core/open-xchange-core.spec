@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 17
+%define        ox_release 18
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -987,6 +987,10 @@ ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" 
 PFILE=/opt/open-xchange/etc/sessiond.properties
 ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
 
+# SoftwareChange_Request-2079
+ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
+ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
+
 # SoftwareChange_Request-2055
 ox_add_property com.openexchange.rest.services.basic-auth.login "" /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.rest.services.basic-auth.password "" /opt/open-xchange/etc/server.properties
@@ -1002,9 +1006,6 @@ fi
 PFILE=/opt/open-xchange/etc/mail.properties
 KEY=com.openexchange.mail.imageHost
 ox_add_property $KEY "" $PFILE
-
-# SoftwareChagne_Request-2110
-ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
 
 # SoftwareChange_Request-2108
 pfile=/opt/open-xchange/etc/mime.types
@@ -1025,12 +1026,11 @@ EOF
    rm -f $ptmp
 fi
 
+# SoftwareChagne_Request-2110
+ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
+
 # SoftwareChange_Request-2148
 ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xchange/etc/mail.properties
-
-# SoftwareChange_Request-2079
-ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
-ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
 
 # SoftwareChange_Request-2171
 PFILE=/opt/open-xchange/etc/server.properties
@@ -1104,6 +1104,12 @@ if [ "500" = "${VALUE}" ]; then
     ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-2249
+ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt/open-xchange/etc/requestwatcher.properties
+
+# SoftwareChange_Request-2250
+ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
+
 # SoftwareChange_Request-2342
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
@@ -1155,6 +1161,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-09
 * Mon Jan 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-27
 * Mon Jan 26 2015 Marcus Klein <marcus.klein@open-xchange.com>

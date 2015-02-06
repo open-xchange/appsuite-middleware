@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.parser.handlers;
 
+import java.io.File;
+import java.io.FileInputStream;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -409,6 +411,59 @@ public class JsonMessageHandlerTest extends TestCase {
             assertTrue("Unexpected Content-Dispostion for " + jAttachment2.getString("id"), jAttachment2.getString("disp").startsWith("attachment"));
 
             // System.out.println(jAttachment2.toString(2));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Ensure that proper TNEF parsing
+     */
+    public void testBug35899() {
+        try {
+
+            final MailMessage mail = MimeMessageConverter.convertMessage(new FileInputStream("./test/com/openexchange/mail/parser/handlers/tnef_oloxproblemmail.eml"));
+
+            // Preps
+
+            ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
+
+            UserSettingMail usm = new UserSettingMail(1, 1);
+            usm.parseBits(627479);
+
+            ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
+
+            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, session, usm, false, 0);
+
+            // Test
+
+            MailMessageParser parser = new MailMessageParser();
+            parser.parseMailMessage(mail, handler);
+
+            JSONObject jMail = handler.getJSONObject();
+            assertNotNull(jMail);
+
+            JSONArray jAttachments = jMail.getJSONArray("attachments");
+            assertNotNull(jAttachments);
+            assertEquals("Unexpected number of attachments", 4, jAttachments.length());
+
+            final JSONObject jAttachment1 = jAttachments.getJSONObject(0);
+            assertNotNull(jAttachment1);
+            final JSONObject jAttachment2 = jAttachments.getJSONObject(1);
+            assertNotNull(jAttachment2);
+            final JSONObject jAttachment3 = jAttachments.getJSONObject(2);
+            assertNotNull(jAttachment3);
+            final JSONObject jAttachment4 = jAttachments.getJSONObject(3);
+            assertNotNull(jAttachment4);
+
+            assertTrue("Unexpected content", jAttachment1.getString("content_type").startsWith("text/plain"));
+            assertTrue("Unexpected content", jAttachment2.getString("content_type").startsWith("application/rtf"));
+            assertTrue("Unexpected content", jAttachment3.getString("content_type").startsWith("application/pdf"));
+            assertTrue("Unexpected content", jAttachment4.getString("content_type").startsWith("image/png"));
+
+            // System.out.println(jMail.toString(2));
 
         } catch (Exception e) {
             e.printStackTrace();

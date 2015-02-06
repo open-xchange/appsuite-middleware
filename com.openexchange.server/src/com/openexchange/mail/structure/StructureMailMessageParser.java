@@ -603,7 +603,7 @@ public final class StructureMailMessageParser {
                 if (s > 0) {
                     final Iterator<?> iter = message.getAttachments().iterator();
                     final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
-                    for (int i = 0; i < s; i++) {
+                    Next: for (int i = 0; i < s; i++) {
                         final Attachment attachment = (Attachment) iter.next();
                         final TNEFBodyPart bodyPart = new TNEFBodyPart();
                         if (attachment.getNestedMessage() == null) {
@@ -618,6 +618,15 @@ public final class StructureMailMessageParser {
                             String contentTypeStr = null;
                             if (attachment.getMAPIProps() != null) {
                                 contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
+                            }
+                            if (null != contentTypeStr) {
+                                final String tmp = contentTypeStr.toLowerCase(Locale.US);
+                                if (tmp.startsWith("multipart/") && tmp.indexOf("boundary=") < 0) {
+                                    final MimeMessage nested = new MimeMessage(MimeDefaultSession.getDefaultSession(), attachment.getRawData());
+                                    parseMailContent(MimeMessageConverter.convertMessage(nested, false), handler, prefix, partCount++);
+                                    // Proceed with next attachment in list
+                                    continue Next;
+                                }
                             }
                             if ((contentTypeStr == null) && (attachFilename != null)) {
                                 contentTypeStr = MimeType2ExtMap.getContentType(attachFilename);
