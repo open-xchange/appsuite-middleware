@@ -1128,6 +1128,33 @@ public class Strings {
         return string;
     }
 
+    /**
+     * Converts specified wildcard string to a regular expression
+     *
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    public static String wildcardToRegex(String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
+                s.append('\\');
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
+    }
+
     private static boolean contains(char c, char[] charArray) {
         for (char character : charArray) {
             if (c == character) {
