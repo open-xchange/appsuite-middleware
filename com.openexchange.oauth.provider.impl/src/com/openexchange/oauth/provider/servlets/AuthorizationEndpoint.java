@@ -149,12 +149,7 @@ public class AuthorizationEndpoint extends HttpServlet {
             }
 
             Client client = oAuthProvider.getClientById(clientId);
-            if (client == null) {
-                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained an invalid value for parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
-                return;
-            }
-
-            if (!client.isEnabled()) {
+            if (client == null || !client.isEnabled()) {
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained an invalid value for parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
             }

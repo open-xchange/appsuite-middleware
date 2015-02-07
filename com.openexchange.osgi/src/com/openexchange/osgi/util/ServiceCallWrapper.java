@@ -49,6 +49,7 @@
 
 package com.openexchange.osgi.util;
 
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -93,7 +94,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public class ServiceCallWrapper {
 
-    static BundleContextProvider BC_PROVIDER = new BundleContextProvider();
+    static final AtomicReference<BundleContextProvider> BC_PROVIDER_REF = new AtomicReference<BundleContextProvider>(new BundleContextProvider());
 
     /**
      * Performs a call to a specified service. The service is requested from the OSGi service registry and passed
@@ -108,7 +109,11 @@ public class ServiceCallWrapper {
      * @throws ServiceException if the service was not available or an error occurred during {@link ServiceUser#call(Object)}.
      */
     public static <S, T> T doServiceCall(Class<?> caller, Class<S> serviceClass, ServiceUser<S, T> serviceUser) throws ServiceException {
-        BundleContext bundleContext = BC_PROVIDER.getBundleContext(caller, serviceClass);
+        BundleContextProvider bundleContextProvider = BC_PROVIDER_REF.get();
+        if (null == bundleContextProvider) {
+            throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
+        }
+        BundleContext bundleContext = bundleContextProvider.getBundleContext(caller, serviceClass);
         ServiceReference<S> serviceReference = bundleContext.getServiceReference(serviceClass);
         if (serviceReference == null) {
             throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
@@ -142,7 +147,11 @@ public class ServiceCallWrapper {
      * @throws ServiceException if an error occurred during {@link ServiceUser#call(Object)}.
      */
     public static <S, T> T tryServiceCall(Class<?> caller, Class<S> serviceClass, ServiceUser<S, T> serviceUser, T defaultValue) throws ServiceException {
-        BundleContext bundleContext = BC_PROVIDER.getBundleContext(caller, serviceClass);
+        BundleContextProvider bundleContextProvider = BC_PROVIDER_REF.get();
+        if (null == bundleContextProvider) {
+            throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
+        }
+        BundleContext bundleContext = bundleContextProvider.getBundleContext(caller, serviceClass);
         ServiceReference<S> serviceReference = bundleContext.getServiceReference(serviceClass);
         if (serviceReference == null) {
             return defaultValue;
@@ -162,7 +171,21 @@ public class ServiceCallWrapper {
         }
     }
 
+    /**
+     * Performs the call to the associated service.
+     *
+     * @param <S> The type of the service; e.g. <code>UserService</code>
+     * @param <T> The type of the return value; e.g. <code>User</code>
+     */
     public static interface ServiceUser<S, T> {
+
+        /**
+         * Performs the call to the associated service.
+         *
+         * @param service The service instance
+         * @return The resulting return value
+         * @throws Exception If invocation fails for any reason
+         */
         T call(S service) throws Exception;
     }
 
@@ -234,24 +257,23 @@ public class ServiceCallWrapper {
          * should always belong to the bundle of the calling class.
          *
          * @param caller The calling class
-         * @param serviceClass The class of the needed service
+         * @param clazz The class of the needed service
          * @return The bundle context, never <code>null</code>
          * @throws ServiceException if no bundle context could be determined
          */
-        BundleContext getBundleContext(Class<?> caller, Class<?> serviceClass) throws ServiceException {
+        BundleContext getBundleContext(Class<?> caller, Class<?> clazz) throws ServiceException {
             Bundle bundle = FrameworkUtil.getBundle(caller);
             if (bundle == null) {
-                throw new ServiceException("Class '" + caller.getName() + "' was loaded outside from OSGi!", serviceClass);
+                throw new ServiceException("Class '" + caller.getName() + "' was loaded outside from OSGi!", clazz);
             }
 
             BundleContext bundleContext = bundle.getBundleContext();
             if (bundleContext == null) {
-                throw new ServiceException("No valid bundle context exists for bundle '" + bundle.getSymbolicName() + "'!", serviceClass);
+                throw new ServiceException("No valid bundle context exists for bundle '" + bundle.getSymbolicName() + "'!", clazz);
             }
 
             return bundleContext;
         }
-
     }
 
 }

@@ -79,19 +79,19 @@ public class ServiceCallWrapperModifier {
 
     public static void initTestRun(Map<Class<?>, Object> availableServices) {
         final BundleContext contextMock = new TestableBundleContext(availableServices);
-        ServiceCallWrapper.BC_PROVIDER = new BundleContextProvider() {
+        ServiceCallWrapper.BC_PROVIDER_REF.set(new BundleContextProvider() {
             @Override
             BundleContext getBundleContext(Class<?> caller, Class<?> serviceClass) throws ServiceException {
                 return contextMock;
             }
-        };
+        });
     }
 
     private static final class TestableBundleContext implements BundleContext {
 
         private final Map<Class<?>, Object> availableServices;
 
-        private TestableBundleContext(Map<Class<?>, Object> availableServices) {
+        TestableBundleContext(Map<Class<?>, Object> availableServices) {
             super();
             this.availableServices = availableServices;
         }
