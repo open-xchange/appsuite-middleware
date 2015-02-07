@@ -56,15 +56,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import com.google.common.io.ByteStreams;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.Icon;
-
 
 /**
  * {@link LazyIcon}
@@ -76,10 +73,9 @@ public class LazyIcon implements Icon {
 
     private static final long serialVersionUID = 4458877977630523049L;
 
-    private final Lock lock = new ReentrantLock();
     private final String clientId;
     private final DatabaseService dbService;
-    private Icon delegate;
+    private volatile Icon delegate;
 
     /**
      * Initializes a new {@link LazyIcon}.
@@ -106,9 +102,10 @@ public class LazyIcon implements Icon {
     }
 
     private Icon getDelegate() {
+        Icon delegate = this.delegate;
         if (delegate == null) {
-            lock.lock();
-            try {
+            synchronized (this) {
+                delegate = this.delegate;
                 if (delegate == null) {
                     Connection con = null;
                     PreparedStatement stmt = null;
@@ -118,19 +115,19 @@ public class LazyIcon implements Icon {
                         stmt = con.prepareStatement("SELECT icon, icon_mime_type FROM oauth_client WHERE id = ?");
                         stmt.setString(1, clientId);
                         rs = stmt.executeQuery();
-                        if (rs.next()) {
-                            Blob blob = rs.getBlob(1);
-                            String mimeType = rs.getString(2);
-                            DefaultIcon defaultIcon = new DefaultIcon();
-                            defaultIcon.setSize((int) blob.length());
-                            defaultIcon.setMimeType(mimeType);
-                            defaultIcon.setData(ByteStreams.toByteArray(blob.getBinaryStream()));
-                            delegate = defaultIcon;
-                        } else {
+                        if (!rs.next()) {
                             throw new IllegalStateException("The client has been removed in the meantime");
                         }
+
+                        Blob blob = rs.getBlob(1);
+                        DefaultIcon defaultIcon = new DefaultIcon();
+                        defaultIcon.setSize((int) blob.length());
+                        defaultIcon.setMimeType(rs.getString(2));
+                        defaultIcon.setData(Streams.stream2bytes(blob.getBinaryStream()));
+                        delegate = defaultIcon;
+                        this.delegate = delegate;
                     } catch (OXException | SQLException | IOException e) {
-                        throw new IllegalStateException("Error while loading the clients icon", e);
+                        throw new IllegalStateException("Error while loading the client's icon", e);
                     } finally {
                         Databases.closeSQLStuff(rs, stmt);
                         if (con != null) {
@@ -138,9 +135,7 @@ public class LazyIcon implements Icon {
                         }
                     }
                 }
-            } finally {
-                lock.unlock();
-            }
+            } // End of synchronized block
         }
 
         return delegate;
