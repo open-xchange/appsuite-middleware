@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.Icon;
+import com.openexchange.oauth.provider.osgi.Services;
 
 /**
  * {@link LazyIcon}
@@ -74,16 +75,16 @@ public class LazyIcon implements Icon {
     private static final long serialVersionUID = 4458877977630523049L;
 
     private final String clientId;
-    private final DatabaseService dbService;
     private volatile Icon delegate;
 
     /**
      * Initializes a new {@link LazyIcon}.
+     *
+     * @param clientId The client identifier
      */
-    public LazyIcon(String clientId, DatabaseService dbService) {
+    public LazyIcon(String clientId) {
         super();
         this.clientId = clientId;
-        this.dbService = dbService;
     }
 
     @Override
@@ -107,10 +108,12 @@ public class LazyIcon implements Icon {
             synchronized (this) {
                 delegate = this.delegate;
                 if (delegate == null) {
+                    DatabaseService dbService = null;
                     Connection con = null;
                     PreparedStatement stmt = null;
                     ResultSet rs = null;
                     try {
+                        dbService = Services.requireService(DatabaseService.class);
                         con = dbService.getReadOnly();
                         stmt = con.prepareStatement("SELECT icon, icon_mime_type FROM oauth_client WHERE id = ?");
                         stmt.setString(1, clientId);
@@ -130,7 +133,7 @@ public class LazyIcon implements Icon {
                         throw new IllegalStateException("Error while loading the client's icon", e);
                     } finally {
                         Databases.closeSQLStuff(rs, stmt);
-                        if (con != null) {
+                        if (con != null && null != dbService) {
                             dbService.backReadOnly(con);
                         }
                     }

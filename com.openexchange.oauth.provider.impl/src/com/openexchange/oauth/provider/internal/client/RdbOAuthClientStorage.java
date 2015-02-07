@@ -245,7 +245,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                 client.addRedirectURI(uri);
             }
 
-            client.setIcon(new LazyIcon(clientId, getDbService()));
+            client.setIcon(new LazyIcon(clientId));
             return client;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());

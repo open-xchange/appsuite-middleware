@@ -213,7 +213,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     // ---------------------------------------------------------------------------------------------
 
-    private OAuthProvider provider;
+    private volatile OAuthProvider provider;
 
     /**
      * Initializes a new {@link OAuthProviderActivator}.
@@ -230,6 +230,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         final BundleContext context = this.context;
 
         // Register update task, create table job and delete listener
@@ -252,7 +253,8 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(CapabilityService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
 
-        provider = new OAuthProvider(this, context);
+        OAuthProvider provider = new OAuthProvider(this, context);
+        this.provider = provider;
         if ("hz".equalsIgnoreCase(configService.getProperty(OAuthProviderProperties.AUTHCODE_TYPE, "hz").trim())) {
             track(HazelcastConfigurationService.class, new HzConfigTracker(context, this, provider));
             openTrackers();
@@ -264,9 +266,12 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        OAuthProvider provider = this.provider;
         if (provider != null) {
             provider.stop();
+            this.provider = null;
         }
+        Services.setServiceLookup(null);
         super.stopBundle();
     }
 }
