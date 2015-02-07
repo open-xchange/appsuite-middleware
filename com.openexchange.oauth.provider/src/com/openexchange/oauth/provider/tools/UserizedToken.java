@@ -72,27 +72,6 @@ public class UserizedToken {
         return Integer.parseInt(baseToken.substring(7, 14), 16);
     }
 
-    // ---------------------------------------------------------------------------------------------------
-
-    private final int contextId;
-    private final int userId;
-    private final String baseToken;
-
-    /**
-     * Initializes a new {@link UserizedToken}. Don't generate new base tokens on your own,
-     * always use {@link UserizedToken#generate(int, int)}.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param baseToken The base token
-     */
-    public UserizedToken(int userId, int contextId, String baseToken) {
-        super();
-        this.contextId = contextId;
-        this.userId = userId;
-        this.baseToken = baseToken;
-    }
-
     /**
      * Initializes a new {@link UserizedToken}, based on the supplied share token.
      * See {@link UserizedToken#isValid(String)} for validating tokens before parsing
@@ -135,6 +114,27 @@ public class UserizedToken {
         }
 
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------------------
+
+    private final int contextId;
+    private final int userId;
+    private final String baseToken;
+
+    /**
+     * Initializes a new {@link UserizedToken}. Don't generate new base tokens on your own,
+     * always use {@link UserizedToken#generate(int, int)}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param baseToken The base token
+     */
+    public UserizedToken(int userId, int contextId, String baseToken) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+        this.baseToken = baseToken;
     }
 
     /**
