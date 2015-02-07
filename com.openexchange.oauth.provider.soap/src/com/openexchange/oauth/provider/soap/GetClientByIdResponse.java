@@ -29,13 +29,13 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "_client"
+    "client"
 })
 @XmlRootElement(name = "getClientByIdResponse")
 public class GetClientByIdResponse {
 
     @XmlElement(name = "client", nillable = true)
-    protected Client _client;
+    protected Client client;
 
     /**
      * Ruft den Wert der return-Eigenschaft ab.
@@ -46,7 +46,7 @@ public class GetClientByIdResponse {
      *
      */
     public Client getClient() {
-        return _client;
+        return client;
     }
 
     /**
@@ -58,7 +58,7 @@ public class GetClientByIdResponse {
      *
      */
     public void setClient(Client value) {
-        this._client = value;
+        this.client = value;
     }
 
 }
