@@ -54,15 +54,19 @@ import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.FileStorageCapability;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.search.DescriptionTerm;
@@ -82,6 +86,7 @@ import com.openexchange.find.common.FolderType;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
@@ -90,6 +95,7 @@ import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -140,43 +146,156 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // Create file access
         IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
 
-        // Yield search term from search request
-        SearchTerm<?> term = prepareSearchTerm(searchRequest);
-        if (term == null) {
-            term = new TitleTerm("*", true, true);
-        }
-
-        // Folder identifiers
+        // Folder identifier
         String folderId = searchRequest.getFolderId();
-        List<String> folderIds;
-        if (folderId == null) {
-            folderIds = Collections.emptyList();
-        } else {
-            folderIds = Collections.singletonList(folderId);
-        }
 
         // Fields
+        int start = searchRequest.getStart();
         List<Field> fields = DEFAULT_FIELDS;
         int[] columns = searchRequest.getColumns();
         if (columns != null) {
             fields = Field.get(columns);
         }
 
-        // Search...
+        // Search by term only if supported
+        if (null != folderId) {
+            FolderID folderID = new FolderID(folderId);
+            if (fileAccess.supports(folderID.getService(), folderID.getAccountId(), FileStorageCapability.SEARCH_BY_TERM)) {
+
+                // Yield search term from search request
+                SearchTerm<?> term = prepareSearchTerm(searchRequest);
+                if (term == null) {
+                    term = new TitleTerm("*", true, true);
+                }
+
+                // Search...
+                SearchIterator<File> it = null;
+                try {
+                    it = fileAccess.search(Collections.singletonList(folderId), term, fields, Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
+                    List<Document> results = new LinkedList<Document>();
+                    while (it.hasNext()) {
+                        final File file = it.next();
+                        results.add(new FileDocument(file));
+                    }
+                    return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
+                } finally {
+                    SearchIterators.close(it);
+                    fileAccess.finish();
+                }
+            }
+        }
+
+        // Search by simple pattern as fallback
+        List<String> queries = searchRequest.getQueries();
+        String pattern = null != queries && 0 < queries.size() ? queries.get(0) : "*";
+        List<File> files = new LinkedList<File>();
         SearchIterator<File> it = null;
         try {
-            int start = searchRequest.getStart();
-            it = fileAccess.search(folderIds, term, fields, File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
-            List<Document> results = new LinkedList<Document>();
+            it = fileAccess.search(pattern, fields, folderId, File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
             while (it.hasNext()) {
-                final File file = it.next();
-                results.add(new FileDocument(file));
+                files.add(it.next());
             }
-            return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
         } finally {
             SearchIterators.close(it);
             fileAccess.finish();
         }
+
+        // Filter according to file type facet if defined
+        String fileType = extractFileType(searchRequest.getActiveFacets(DriveFacetType.FILE_TYPE));
+        if (null != fileType) {
+            files = filter(files, fileType);
+        }
+        List<Document> results = new ArrayList<Document>(files.size());
+        for (File file : files) {
+            results.add(new FileDocument(file));
+        }
+        return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
+    }
+
+    /**
+     * Extracts the file type used in the filter of the supplied active facets.
+     *
+     * @param fileyTypeFacts The active facets holding the defined file type
+     * @return The file type, or <code>null</code> if there is none
+     */
+    private static String extractFileType(List<ActiveFacet> facets) {
+        if (null != facets && 0 < facets.size() && null != facets.get(0)) {
+            ActiveFacet facet = facets.get(0);
+            if (DriveFacetType.FILE_TYPE.equals(facet.getType()) && null != facet.getFilter() && null != facet.getFilter().getQueries() &&
+                0 < facet.getFilter().getQueries().size() && null != facet.getFilter().getQueries().get(0)) {
+                return facet.getFilter().getQueries().get(0);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Filters a list of files based on a specific file type.
+     *
+     * @param files The files to filter
+     * @param fileType The file type identifier
+     * @return The filtered list
+     */
+    private static List<File> filter(List<File> files, String fileType) {
+        if (null != files && 0 < files.size()) {
+            if (FileType.OTHER.getIdentifier().equals(fileType)) {
+                String[] typesToNegate = new String[] {
+                    FileType.AUDIO.getIdentifier(), FileType.IMAGES.getIdentifier(), FileType.DOCUMENTS.getIdentifier(), FileType.VIDEO.getIdentifier()
+                };
+                for (String typeToNegate : typesToNegate) {
+                    for (String regex : getPatternsForFileType(typeToNegate)) {
+                        files = filter(files, regex, true);
+                    }
+                }
+            } else {
+                for (String regex : getPatternsForFileType(fileType)) {
+                    files = filter(files, regex, false);
+                }
+            }
+        }
+        return files;
+    }
+
+    private static List<File> filter(List<File> files, String regex, boolean negate) {
+        Iterator<File> iterator = files.iterator();
+        while (iterator.hasNext()) {
+            File file = iterator.next();
+            String mimeType = null != file.getFileMIMEType() ? file.getFileMIMEType() : MimeType2ExtMap.getContentType(file.getFileName());
+            if (null == file.getFileName() || false == Pattern.matches(regex, mimeType)) {
+                if (false == negate) {
+                    iterator.remove();
+                }
+            } else if (negate) {
+                iterator.remove();
+            }
+        }
+        return files;
+    }
+
+    /**
+     * Creates patterns to match against filenames based on the file types defined by the supplied active facets.
+     *
+     * @param fileyType The file type to get the patterns for
+     * @return The patterns, or an empty array if there are none
+     */
+    private static List<String> getPatternsForFileType(String fileType) {
+        String[] wildcardPatterns;
+        if (FileType.DOCUMENTS.getIdentifier().equals(fileType)) {
+            wildcardPatterns = Constants.FILETYPE_PATTERNS_DOCUMENTS;
+        } else if (FileType.VIDEO.getIdentifier().equals(fileType)) {
+            wildcardPatterns = Constants.FILETYPE_PATTERNS_VIDEO;
+        } else if (FileType.AUDIO.getIdentifier().equals(fileType)) {
+            wildcardPatterns = Constants.FILETYPE_PATTERNS_AUDIO;
+        } else if (FileType.IMAGES.getIdentifier().equals(fileType)) {
+            wildcardPatterns = Constants.FILETYPE_PATTERNS_IMAGES;
+        } else {
+            wildcardPatterns = new String[0];
+        }
+        List<String> patterns = new ArrayList<String>(wildcardPatterns.length);
+        for (String wildcardPattern : wildcardPatterns) {
+            patterns.add(Strings.wildcardToRegex(wildcardPattern));
+        }
+        return patterns;
     }
 
     @Override
