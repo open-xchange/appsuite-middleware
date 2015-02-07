@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -84,45 +83,48 @@ public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
     }
 
     @Override
-    public void perform(final PerformParameters params) throws OXException {
+    public void perform(PerformParameters params) throws OXException {
         DatabaseService dbService = requireService(DatabaseService.class, services);
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
-        PreparedStatement stmt = null;
+        int contextId = params.getContextId();
+
+        Connection con = dbService.getForUpdateTask(contextId);
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(writeCon); // BEGIN
+            DBUtils.startTransaction(con); // BEGIN
             rollback = true;
-            final String[] tableNames = CreateOAuthGrantTableService.getTablesToCreate();
-            final String[] createStmts = CreateOAuthGrantTableService.getCreateStmts();
+            perform(con);
+            con.commit(); // COMMIT
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
+            dbService.backForUpdateTask(contextId, con);
+        }
+    }
+
+    private void perform(Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            String[] tableNames = CreateOAuthGrantTableService.getTablesToCreate();
+            String[] createStmts = CreateOAuthGrantTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
-                try {
-                    if (tableExists(writeCon, tableNames[i])) {
-                        continue;
-                    }
-                    stmt = writeCon.prepareStatement(createStmts[i]);
+                if (!tableExists(con, tableNames[i])) {
+                    stmt = con.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                    DBUtils.closeSQLStuff(stmt);
+                    stmt = null;
                 }
             }
-            writeCon.commit(); // COMMIT
-        } catch (final OXException e) {
-            if (rollback) {
-                DBUtils.rollback(writeCon);
-            }
-            throw e;
-        } catch (final Exception e) {
-            if (rollback) {
-                DBUtils.rollback(writeCon);
-            }
-            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            if (rollback) {
-                DBUtils.autocommit(writeCon);
-            }
-            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 
