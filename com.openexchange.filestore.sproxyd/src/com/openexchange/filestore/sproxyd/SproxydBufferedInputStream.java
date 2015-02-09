@@ -73,8 +73,11 @@ public class SproxydBufferedInputStream extends InputStream {
     private final List<Chunk> documentChunks;
     private final int chunksSize;
     private final SproxydClient client;
+    private Chunk currentChunk;
     private InputStream current;
-    private int pos = 0;
+    private int pos;
+    private long start;
+    private long end;
 
     /**
      * Initializes a new {@link SproxydBufferedInputStream}.
@@ -98,18 +101,78 @@ public class SproxydBufferedInputStream extends InputStream {
         this.documentChunks = documentChunks;
         this.chunksSize = chunksSize;
         this.client = client;
+        pos = 0;
+        start = -1;
+        end = -1;
     }
 
     private InputStream initNext() throws OXException {
         if (pos >= chunksSize) {
             return null;
         }
-        InputStream in = client.get(documentChunks.get(pos++).getScalityId());
+
+        // Next chunk
+        Chunk chunk = documentChunks.get(pos++);
+
+        // Range specified?
+        InputStream in;
+        if (start >= 0 && end > 0 && (chunk.getOffset() + chunk.getLength() > end)) {
+            in = client.get(chunk.getScalityId(), 0L, end - chunk.getOffset());
+        } else {
+            in = client.get(chunk.getScalityId());
+        }
         if (!(in instanceof BufferedInputStream) && !(in instanceof ByteArrayInputStream)) {
             in = new FastBufferedInputStream(in);
         }
+        currentChunk = chunk;
         current = in;
         return in;
+    }
+
+    /**
+     * Applies the given range to this Sproxyd buffered input stream.
+     *
+     * @param start The start (inclusive)
+     * @param end The end (exclusive)
+     * @return This Sproxyd buffered input stream. with range applied
+     * @throws IOException If range cannot be applied
+     */
+    public SproxydBufferedInputStream applyRange(long start, long end) throws IOException {
+        try {
+            // Find appropriate start chunk
+            Chunk startChunk = null;
+            int pos = 0;
+            for (; null == startChunk && pos < chunksSize; pos++) {
+                Chunk c = documentChunks.get(pos);
+                if (c.getOffset() <= start && c.getOffset() + c.getLength() > start) {
+                    startChunk = c;
+                }
+            }
+            if (null == startChunk) {
+                throw new IOException("Start is out of range");
+            }
+
+            // Initialize first chunk
+            InputStream in;
+            if (startChunk.getOffset() + startChunk.getLength() < end || startChunk.getOffset() < start) {
+                long off = start - startChunk.getOffset();
+                long len = end - start;
+                in = client.get(startChunk.getScalityId(), off, len);
+            } else {
+                in = client.get(startChunk.getScalityId());
+            }
+            if (!(in instanceof BufferedInputStream) && !(in instanceof ByteArrayInputStream)) {
+                in = new FastBufferedInputStream(in);
+            }
+            this.pos = pos;
+            currentChunk = startChunk;
+            current = in;
+            this.start = start;
+            this.end = end;
+            return this;
+        } catch (OXException e) {
+           throw toIOException(e);
+        }
     }
 
     @Override
