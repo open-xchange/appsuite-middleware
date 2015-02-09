@@ -128,7 +128,7 @@ public class SproxydFileStorage implements FileStorage {
             Streams.close(chunkedUpload);
             if (false == success) {
                 client.delete(scalityIds);
-                getStorage().deleteDocument(documentId, contextId, userId);
+                getStorage().deleteDocument(documentId, userId, contextId);
             }
         }
         return UUIDs.getUnformattedString(documentId);
@@ -176,8 +176,7 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-//        return 0 < getStorage().deleteChunks(UUIDs.fromUnformattedString(identifier), contextId, userId);
-        return false;
+        return getStorage().deleteDocument(UUIDs.fromUnformattedString(identifier), userId, contextId);
     }
 
     @Override
