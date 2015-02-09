@@ -80,6 +80,7 @@ public class PresenceSubscriptionsTable extends AbstractCreateTableImpl {
             " request TEXT," +
             " timestamp timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
             " uuid BINARY(16) DEFAULT NULL," +
+            " PRIMARY KEY (uuid)," +
             " UNIQUE (fromCid, fromUserId, toCid, toUserId)," +
             " UNIQUE (fromId, toCid, toUserId)," +
             " FOREIGN KEY (fromCid, fromUserId) REFERENCES user(cid, id) ON DELETE CASCADE," +

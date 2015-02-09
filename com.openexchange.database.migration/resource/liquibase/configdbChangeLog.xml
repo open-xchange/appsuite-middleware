@@ -39,4 +39,22 @@
 		</rollback>
 	</changeSet>
 
+	<!-- ******************************************************* -->
+	<!-- ************** Release 7.6.2 starts here ************** -->
+	<!-- ******************************************************* -->
+
+	<changeSet id="7.6.2:changelog:addprimarykey" author="martin.schneider@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<primaryKeyExists tableName="DATABASECHANGELOG" schemaName="configdb" />
+			</not>
+		</preConditions>
+		<comment>Add missing primary key for DATABASECHANGELOG</comment>
+		<addPrimaryKey columnNames="id, author, filename" schemaName="configdb" tableName="DATABASECHANGELOG" />
+	</changeSet>
+
+	<changeSet id="7.6.2:milestone" author="martin.schneider@open-xchange.com">
+		<tagDatabase tag="7.6.2:milestone" />
+	</changeSet>
+
 </databaseChangeLog>
