@@ -313,4 +313,30 @@ public class RdbChunkStorage implements ChunkStorage {
         }
     }
 
+    @Override
+    public boolean deleteDocument(UUID documentId, int userId, int contextId) throws OXException {
+        DatabaseService dbService = getDbService();
+        Connection con = dbService.getWritable(contextId);
+        try {
+            return deleteDocument(documentId, userId, contextId, con);
+        } finally {
+            dbService.backWritable(contextId, con);
+        }
+    }
+
+    private boolean deleteDocument(UUID documentId, int userId, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM scality_filestore WHERE cid=? AND user=? AND uuid=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setBytes(3, UUIDs.toByteArray(documentId));
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw SproxydExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
 }

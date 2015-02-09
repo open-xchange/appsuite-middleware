@@ -126,6 +126,17 @@ public interface ChunkStorage {
     Chunk storeChunk(UUID chunkId, ChunkData chunkData) throws OXException;
 
     /**
+     * Deletes a document and all associated chunks.
+     *
+     * @param documentId The document identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> upon successful deletion; otherwise <code>false</code> if there was no such document
+     * @throws OXException If document cannot be deleted
+     */
+    boolean deleteDocument(UUID documentId, int userId, int contextId) throws OXException;
+
+    /**
      * Deletes a chunk
      *
      * @param chunkId The chunk's identifier in Scality system

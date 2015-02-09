@@ -128,7 +128,7 @@ public class SproxydFileStorage implements FileStorage {
             Streams.close(chunkedUpload);
             if (false == success) {
                 client.delete(scalityIds);
-//                getStorage().deleteChunks(documentId, contextId, userId);
+                getStorage().deleteDocument(documentId, contextId, userId);
             }
         }
         return UUIDs.getUnformattedString(documentId);
