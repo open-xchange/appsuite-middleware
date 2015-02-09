@@ -60,7 +60,20 @@ import com.openexchange.oauth.provider.tools.UserizedToken;
  * @since v7.8.0
  */
 public interface OAuthGrantStorage {
+    
+    /**
+     * The max. number of grants a client may occupy for one user
+     */
+    public static final int MAX_GRANTS_PER_CLIENT = 10;
 
+    /**
+     * Persists the given grant. If the number of existing grants for the according
+     * client-user-combination is equals {@link #MAX_GRANTS_PER_CLIENT}, the oldest
+     * grant is removed to enforce this limit.
+     *
+     * @param grant The grant to persist
+     * @throws OXException When saving fails
+     */
     public void persistGrant(StoredGrant grant) throws OXException;
 
     public void deleteGrantsForClient(String clientId) throws OXException;
@@ -68,5 +81,18 @@ public interface OAuthGrantStorage {
     public StoredGrant getGrantByAccessToken(UserizedToken accessToken) throws OXException;
 
     public StoredGrant getGrantByRefreshToken(UserizedToken refreshToken) throws OXException;
+
+//    public int countAllGrants(int contextId, int userId) throws OXException;
+//
+    public int countGrantsForClient(String clientId, int contextId, int userId) throws OXException;
+
+    /**
+     * Counts all grants for distinct clients of a given user.
+     *
+     * @param contextId The context ID
+     * @param userId The user ID
+     * @return The number of grants (>= 0)
+     */
+    public int countDistinctGrants(int contextId, int userId);
 
 }

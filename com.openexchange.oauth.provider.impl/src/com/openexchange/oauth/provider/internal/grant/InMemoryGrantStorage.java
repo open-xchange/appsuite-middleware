@@ -52,6 +52,7 @@ package com.openexchange.oauth.provider.internal.grant;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 
 
@@ -110,6 +111,18 @@ public class InMemoryGrantStorage implements OAuthGrantStorage {
         }
 
         return null;
+    }
+
+    @Override
+    public int countGrantsForClient(String clientId, int contextId, int userId) throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int countDistinctGrants(int contextId, int userId) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }

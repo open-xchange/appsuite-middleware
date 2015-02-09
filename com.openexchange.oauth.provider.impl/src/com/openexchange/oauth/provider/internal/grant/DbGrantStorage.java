@@ -345,4 +345,16 @@ public class DbGrantStorage implements OAuthGrantStorage {
 
     }
 
+    @Override
+    public int countGrantsForClient(String clientId, int contextId, int userId) throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int countDistinctGrants(int contextId, int userId) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

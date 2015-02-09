@@ -61,6 +61,7 @@ import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
+import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
@@ -79,6 +80,11 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.8.0
  */
 public class OAuthProviderServiceImpl implements OAuthProviderService {
+
+    /**
+     * The max. number of clients that a user is allowed to grant access to
+     */
+    private static final int MAX_CLIENTS_PER_USER = 50;
 
     private final AbstractAuthorizationCodeProvider authCodeProvider;
 
@@ -137,6 +143,14 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public String generateAuthorizationCodeFor(String clientId, String redirectURI, String scopeString, int userId, int contextId) throws OXException {
+        // Check if user is allowed to create more grants
+        int distinctGrants = grantStorage.countDistinctGrants(contextId, userId);
+        if (distinctGrants > MAX_CLIENTS_PER_USER) {
+            // FIXME
+            return null;
+            //throw OAuthProviderExceptionCodes.GRANTS_EXCEEDED.create(MAX_CLIENTS_PER_USER, distinctGrants);
+        }
+        
         // Adjust scope based on users permissions
         CapabilityService capabilityService = requireService(CapabilityService.class, services);
         CapabilitySet capabilities = capabilityService.getCapabilities(userId, contextId);
@@ -198,8 +212,6 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         long now = System.currentTimeMillis();
         return (now - authCodeInfo.getTimestamp()) <= OAuthProviderService.AUTH_CODE_TIMEOUT_MILLIS;
     }
-
-
 
     @Override
     public OAuthGrant redeemRefreshToken(Client client, String refreshTokenString) throws OXException {
