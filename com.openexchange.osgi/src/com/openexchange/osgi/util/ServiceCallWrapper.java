@@ -149,7 +149,7 @@ public class ServiceCallWrapper {
     public static <S, T> T tryServiceCall(Class<?> caller, Class<S> serviceClass, ServiceUser<S, T> serviceUser, T defaultValue) throws ServiceException {
         BundleContextProvider bundleContextProvider = BC_PROVIDER_REF.get();
         if (null == bundleContextProvider) {
-            throw new ServiceException("Service '" + serviceClass.getName() + "' is not available!", serviceClass);
+            return defaultValue;
         }
         BundleContext bundleContext = bundleContextProvider.getBundleContext(caller, serviceClass);
         ServiceReference<S> serviceReference = bundleContext.getServiceReference(serviceClass);
