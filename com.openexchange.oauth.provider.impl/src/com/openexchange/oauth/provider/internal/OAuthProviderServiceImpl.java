@@ -234,6 +234,26 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     }
 
     @Override
+    public boolean revokeByRefreshToken(String refreshTokenString) throws OXException {
+        if (!UserizedToken.isValid(refreshTokenString)) {
+            return false;
+        }
+
+        UserizedToken refreshToken = UserizedToken.parse(refreshTokenString);
+        return grantStorage.deleteGrantByRefreshToken(refreshToken);
+    }
+
+    @Override
+    public boolean revokeByAccessToken(String accessTokenString) throws OXException {
+        if (!UserizedToken.isValid(accessTokenString)) {
+            return false;
+        }
+
+        UserizedToken accessToken = UserizedToken.parse(accessTokenString);
+        return grantStorage.deleteGrantByAccessToken(accessToken);
+    }
+
+    @Override
     public boolean isValidScopeString(String scopeString) {
         if (DefaultScopes.isValidScopeString(scopeString)) {
             DefaultScopes scopes = DefaultScopes.parseScope(scopeString);

@@ -102,4 +102,22 @@ public interface OAuthGrantStorage {
      */
     public int countDistinctGrants(int contextId, int userId) throws OXException;
 
+    /**
+     * Deletes a grant by its refresh token
+     *
+     * @param refreshToken The token
+     * @return <code>true</code> if the grant was revoked, <code>false</code> if no grant existed for the given token
+     * @throws OXException
+     */
+    public boolean deleteGrantByRefreshToken(UserizedToken refreshToken) throws OXException;
+
+    /**
+     * Deletes a grant by its access token
+     *
+     * @param accessToken The token
+     * @return <code>true</code> if the grant was revoked, <code>false</code> if no grant existed for the given token
+     * @throws OXException
+     */
+    public boolean deleteGrantByAccessToken(UserizedToken accessToken) throws OXException;
+
 }

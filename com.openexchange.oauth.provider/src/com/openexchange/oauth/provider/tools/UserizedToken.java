@@ -103,7 +103,9 @@ public class UserizedToken {
     }
 
     /**
-     * Checks if the given token string is a valid {@link UserizedToken}.
+     * Checks if the given token string is a valid {@link UserizedToken} in terms of its syntax.
+     * The existence of an according grant or the validity of the contained user information is
+     * not checked.
      *
      * @param token the token
      * @return <code>true</code> if the token is valid

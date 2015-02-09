@@ -165,11 +165,35 @@ public interface OAuthProviderService {
      */
     OAuthGrant redeemAuthCode(Client client, String redirectURI, String authCode) throws OXException;
 
-    // ------------------------------------ Access Code Handling ----------------------------------- \\
+    // ------------------------------------ Token Handling ----------------------------------- \\
 
 
-
+    /**
+     * Redeems the passed authorization code for a new access token. The
+     * refresh token itself may also be changed due to security reasons.
+     *
+     * @param client The client
+     * @param refreshToken The refresh token
+     * @return The updated grant
+     * @throws OXException If redeem operation fails
+     */
     OAuthGrant redeemRefreshToken(Client client, String refreshToken) throws OXException;
+
+    /**
+     * Revokes a grant by its refresh token.
+     *
+     * @param refreshToken The token
+     * @return <code>true</code> if the grant was revoked, <code>false</code> if no grant existed for the given token
+     */
+    boolean revokeByRefreshToken(String refreshToken) throws OXException;
+
+    /**
+     * Revokes a grant by its access token.
+     *
+     * @param accessToken The token
+     * @return <code>true</code> if the grant was revoked, <code>false</code> if no grant existed for the given token
+     */
+    boolean revokeByAccessToken(String accessToken) throws OXException;
 
     // --------------------------------------- Helper methods -------------------------------------- \\
 

@@ -144,5 +144,4 @@ public class OAuthClient extends AJAXClient {
         Assert.assertFalse(allResponse.hasError());
     }
 
-
 }

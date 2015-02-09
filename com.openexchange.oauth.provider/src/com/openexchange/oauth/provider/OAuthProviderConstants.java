@@ -68,6 +68,11 @@ public interface OAuthProviderConstants {
      */
     public static final String ACCESS_TOKEN_SERVLET_ALIAS = "o/oauth2/accessToken";
 
+    /**
+     * Servlet alias of the endpoint for grant revocation by client applications
+     */
+    public static final String REVOKE_SERVLET_ALIAS = "o/oauth2/revoke";
+
     // -------------------------------------------------------------------------------------------------------
 
     /**
@@ -121,5 +126,6 @@ public interface OAuthProviderConstants {
 
     /** The error description */
     public static final String PARAM_ERROR_DESCRIPTION = "error_description";
+
 
 }

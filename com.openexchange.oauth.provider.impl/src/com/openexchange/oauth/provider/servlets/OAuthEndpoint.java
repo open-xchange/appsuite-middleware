@@ -49,9 +49,16 @@
 
 package com.openexchange.oauth.provider.servlets;
 
+import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
+import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
+import java.io.IOException;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -61,19 +68,38 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class OAuthEndpoint extends HttpServlet {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthEndpoint.class);
+
     private static final long serialVersionUID = 6538319126816587520L;
 
     protected final OAuthProviderService oAuthProvider;
 
-    protected final ServiceLookup services;
-
     /**
      * Initializes a new {@link OAuthEndpoint}.
      */
-    protected OAuthEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
+    protected OAuthEndpoint(OAuthProviderService oAuthProvider) {
         super();
         this.oAuthProvider = oAuthProvider;
-        this.services = services;
+    }
+
+    protected static void failWithMissingParameter(HttpServletResponse httpResponse, String param) throws IOException {
+        fail(httpResponse, HttpServletResponse.SC_BAD_REQUEST, "invalid_request", "missing required parameter: " + param);
+    }
+
+    protected static void failWithInvalidParameter(HttpServletResponse httpResponse, String param) throws IOException {
+        fail(httpResponse, HttpServletResponse.SC_BAD_REQUEST, "invalid_request", "invalid parameter value: " + param);
+    }
+
+    protected static void fail(HttpServletResponse httpResponse, int statusCode, String error, String errorDescription) throws IOException {
+        try {
+            JSONObject result = new JSONObject();
+            result.put("error", error);
+            result.put("error_description", errorDescription);
+            sendErrorResponse(httpResponse, statusCode, result.toString());
+        } catch (JSONException e) {
+            LOG.error("Could not compile error response object", e);
+            sendEmptyErrorResponse(httpResponse, statusCode);
+        }
     }
 
 }

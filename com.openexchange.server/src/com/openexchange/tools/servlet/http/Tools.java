@@ -719,9 +719,7 @@ public final class Tools {
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
         httpResponse.reset();
-
         httpResponse.setContentType(null);
-
         for (Entry<String, String> header : additionalHeaders.entrySet()) {
             httpResponse.setHeader(header.getKey(), header.getValue());
         }

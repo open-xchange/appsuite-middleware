@@ -51,6 +51,7 @@ package com.openexchange.oauth2;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.rmi.Naming;
 import java.util.HashSet;
@@ -82,6 +83,7 @@ import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.DefaultScopes;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
 
@@ -93,14 +95,15 @@ import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
  */
 public abstract class EndpointTest {
 
-    protected static final String AUTHORIZATION_ENDPOINT = "/ajax/o/oauth2/authorization";
+    protected static final String AUTHORIZATION_ENDPOINT = "/ajax/" + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
 
-    protected static final String TOKEN_ENDPOINT = "/ajax/o/oauth2/accessToken";
+    protected static final String TOKEN_ENDPOINT = "/ajax/" + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS;
+
+    protected static final String REVOKE_ENDPOINT = "/ajax/" + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
 
     protected static String hostname;
     protected static String login;
     protected static String password;
-//    protected static RedirectEndpoint redirectEndpoint;
 
     protected DefaultHttpClient client;
 
@@ -112,7 +115,6 @@ public abstract class EndpointTest {
         hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
         login = AJAXConfig.getProperty(User.User1.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
         password = AJAXConfig.getProperty(User.User1.getPassword());
-//        redirectEndpoint = RedirectEndpoint.create();
     }
 
     @Before
@@ -192,6 +194,17 @@ public abstract class EndpointTest {
         clientData.setDefaultScope(new DefaultScopes("r_contacts"));
         clientData.setRedirectURIs(redirectURIs);
         return clientData;
+    }
+
+    protected static void assertNoAccess(OAuthClient client) throws Exception {
+        boolean error = false;
+        try {
+            client.assertAccess();
+        } catch (AssertionError e) {
+            error = true;
+        }
+
+        assertTrue("API access was possible although it should not", error);
     }
 
 }

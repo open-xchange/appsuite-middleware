@@ -82,6 +82,7 @@ import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.rmi.OAuthClientRmiImpl;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 import com.openexchange.oauth.provider.servlets.AuthorizationEndpoint;
+import com.openexchange.oauth.provider.servlets.RevokeEndpoint;
 import com.openexchange.oauth.provider.servlets.TokenEndpoint;
 
 
@@ -180,6 +181,7 @@ public class OAuthProvider {
     private void registerServlets(OAuthProviderService oAuthProvider) throws ServletException, NamespaceException, OXException {
         AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint(oAuthProvider, activator);
         TokenEndpoint tokenEndpoint = new TokenEndpoint(oAuthProvider);
+        RevokeEndpoint revokeEndpoint = new RevokeEndpoint(oAuthProvider);
 
         HttpService httpService = requireService(HttpService.class, activator);
         DispatcherPrefixService dispatcherPrefixService = requireService(DispatcherPrefixService.class, activator);
@@ -189,6 +191,9 @@ public class OAuthProvider {
         String tokenEndpointAlias = dispatcherPrefixService.getPrefix() + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS;
         httpService.registerServlet(tokenEndpointAlias, tokenEndpoint, null, httpService.createDefaultHttpContext());
         registeredServlets.add(tokenEndpointAlias);
+        String revokeEndpointAlias = dispatcherPrefixService.getPrefix() + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
+        httpService.registerServlet(revokeEndpointAlias, revokeEndpoint, null, httpService.createDefaultHttpContext());
+        registeredServlets.add(revokeEndpointAlias);
     }
 
     private void unregisterServlets() {

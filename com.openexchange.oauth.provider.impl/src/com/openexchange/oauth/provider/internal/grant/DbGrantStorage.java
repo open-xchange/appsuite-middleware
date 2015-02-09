@@ -165,6 +165,46 @@ public class DbGrantStorage implements OAuthGrantStorage {
     }
 
     @Override
+    public boolean deleteGrantByRefreshToken(UserizedToken refreshToken) throws OXException {
+        DatabaseService dbService = requireService(DatabaseService.class, services);
+        Connection con = dbService.getWritable(refreshToken.getContextId());
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE refresh_token = ? AND cid = ? AND user = ?");
+            stmt.setString(1, refreshToken.getBaseToken());
+            stmt.setInt(2, refreshToken.getContextId());
+            stmt.setInt(3, refreshToken.getUserId());
+            int numRows = stmt.executeUpdate();
+            return numRows > 0;
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            dbService.backWritable(refreshToken.getContextId(), con);
+        }
+    }
+
+    @Override
+    public boolean deleteGrantByAccessToken(UserizedToken accessToken) throws OXException {
+        DatabaseService dbService = requireService(DatabaseService.class, services);
+        Connection con = dbService.getWritable(accessToken.getContextId());
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE access_token = ? AND cid = ? AND user = ?");
+            stmt.setString(1, accessToken.getBaseToken());
+            stmt.setInt(2, accessToken.getContextId());
+            stmt.setInt(3, accessToken.getUserId());
+            int numRows = stmt.executeUpdate();
+            return numRows > 0;
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            dbService.backWritable(accessToken.getContextId(), con);
+        }
+    }
+
+    @Override
     public void deleteGrantsForClient(String clientId) throws OXException {
         DatabaseService dbService = requireService(DatabaseService.class, services);
         Deque<SchemaAndWritePool> schemasAndWritePools = getSchemasAndWritePools(dbService);

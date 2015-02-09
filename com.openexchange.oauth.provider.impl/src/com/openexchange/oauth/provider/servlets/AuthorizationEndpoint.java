@@ -61,7 +61,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Locale;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -99,7 +98,7 @@ import com.openexchange.tools.servlet.http.Tools;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AuthorizationEndpoint extends HttpServlet {
+public class AuthorizationEndpoint extends OAuthEndpoint {
 
     private static final String ATTR_OAUTH_CSRF_TOKEN = "oauth-csrf-token";
 
@@ -107,16 +106,13 @@ public class AuthorizationEndpoint extends HttpServlet {
 
     private static final long serialVersionUID = 6393806486708501254L;
 
-    private final OAuthProviderService oAuthProvider;
-
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link AuthorizationEndpoint}.
      */
     public AuthorizationEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
-        super();
-        this.oAuthProvider = oAuthProvider;
+        super(oAuthProvider);
         this.services = services;
     }
 
