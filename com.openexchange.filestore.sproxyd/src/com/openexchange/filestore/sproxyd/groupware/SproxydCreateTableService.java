@@ -65,8 +65,8 @@ public class SproxydCreateTableService extends AbstractCreateTableImpl {
     private static final String CREATE_SCALITY_FILESTORE = "CREATE TABLE "+TABLE_SCALITY_FILESTORE+" (" +
         " cid INT4 unsigned NOT NULL," +
         " user INT4 unsigned NOT NULL," +
-        " uuid BINARY(16) NOT NULL NOT NULL," +
-        " scality_id BINARY(16) NOT NULL NOT NULL," +
+        " uuid BINARY(16) NOT NULL," +
+        " scality_id BINARY(16) NOT NULL," +
         " offset BIGINT(64) NOT NULL," +
         " length BIGINT(64) NOT NULL," +
         " PRIMARY KEY (cid, user, uuid)" +
