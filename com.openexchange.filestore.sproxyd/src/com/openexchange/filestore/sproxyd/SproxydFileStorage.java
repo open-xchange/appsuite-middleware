@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.sproxyd.chunkstorage.ChunkData;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
@@ -78,6 +79,7 @@ public class SproxydFileStorage implements FileStorage {
     private final SproxydClient client;
     private final ServiceLookup services;
 
+
     public SproxydFileStorage(ServiceLookup services) {
         super();
         this.services = services;
@@ -93,7 +95,11 @@ public class SproxydFileStorage implements FileStorage {
     }
 
     private void storeChunk(String uuid, String scalityId, long offset, long length) throws OXException {
+        ChunkStorage storage = getStorage();
 
+        ChunkData chunkData = new ChunkData();
+        // TODO:
+        storage.storeChunk(UUIDs.fromUnformattedString(scalityId), chunkData);
     }
 
     private void deleteChunks(String uuid) throws OXException {
