@@ -49,10 +49,24 @@
 
 package com.openexchange.filestore.sproxyd;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.UUID;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
  * {@link S3FileStorage}
@@ -64,6 +78,7 @@ public class SproxydClient {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydClient.class);
 
     private final String baseURL;
+    private final DefaultHttpClient httpClient;
 
     /**
      * Initializes a new {@link SproxydClient}.
@@ -73,6 +88,7 @@ public class SproxydClient {
     public SproxydClient(String baseURL) {
         super();
         this.baseURL = baseURL;
+        this.httpClient = HttpClients.getHttpClient(null);
     }
 
     /**
@@ -82,6 +98,19 @@ public class SproxydClient {
      * @return The file's input stream
      */
     public InputStream get(UUID id) throws OXException {
+
+        HttpGet get = new HttpGet(buildURI(id));
+        try {
+            HttpResponse response = httpClient.execute(get);
+            StatusLine statusLine = response.getStatusLine();
+            return response.getEntity().getContent();
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -89,11 +118,50 @@ public class SproxydClient {
         return null;
     }
 
+    private URI buildURI(UUID id) throws OXException {
+        try {
+            return new URI(baseURL + UUIDs.getUnformattedString(id));
+        } catch (URISyntaxException e) {
+            throw FileStorageCodes.IOERROR.create(e.getMessage(), e);
+        }
+    }
+
     public UUID put(InputStream data, long length) throws OXException {
-        return null;
+        UUID id = UUID.randomUUID();
+        HttpPut put = new HttpPut(buildURI(id));
+        put.setEntity(new InputStreamEntity(data, length));
+        try {
+            HttpResponse response = httpClient.execute(put);
+            StatusLine statusLine = response.getStatusLine();
+
+
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return id;
     }
 
     public boolean delete(UUID id) throws OXException {
+
+        HttpDelete delete = new HttpDelete(buildURI(id));
+        try {
+            HttpResponse response = httpClient.execute(delete);
+            StatusLine statusLine = response.getStatusLine();
+
+            return true;
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         return false;
     }
 

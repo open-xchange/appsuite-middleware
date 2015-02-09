@@ -213,7 +213,7 @@ public class RdbChunkStorage implements ChunkStorage {
             stmt.setInt(2, userId);
             stmt.setBytes(3, UUIDs.toByteArray(documentId));
             stmt.setLong(4, chunk.getOffset() + chunk.getLength());
-
+            rs = stmt.executeQuery();
             if (!rs.next()) {
                 throw SproxydExceptionCode.NO_NEXT_CHUNK.create(UUIDs.getUnformattedString(chunkId));
             }
@@ -240,11 +240,11 @@ public class RdbChunkStorage implements ChunkStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT scality_id, offset, length FROM scality_filestore WHERE cid=? AND user=? AND uuid=? ORDER BY offsetDESC LIMIT 1");
+            stmt = con.prepareStatement("SELECT scality_id, offset, length FROM scality_filestore WHERE cid=? AND user=? AND uuid=? ORDER BY offset DESC LIMIT 1");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setBytes(3, UUIDs.toByteArray(documentId));
-
+            rs = stmt.executeQuery();
             if (!rs.next()) {
                 throw SproxydExceptionCode.NO_LAST_CHUNK.create(UUIDs.getUnformattedString(documentId));
             }

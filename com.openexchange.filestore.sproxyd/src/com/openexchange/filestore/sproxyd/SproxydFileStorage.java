@@ -90,11 +90,11 @@ public class SproxydFileStorage implements FileStorage {
         this.contextId = contextId;
         this.userId = userId;
         this.services = services;
-        this.client = new SproxydClient("http://sproxyd.ox.io/proxy/57462_ctx_store/");
+        this.client = new SproxydClient("" + contextId + '/' + userId + '/');
     }
 
     private ChunkStorage getStorage() throws OXException {
-        ChunkStorage service = services.getOptionalService(ChunkStorage.class);
+        ChunkStorage service = services.getService(ChunkStorage.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(ChunkStorage.class);
         }

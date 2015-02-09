@@ -74,7 +74,7 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
     /**
      * The file storage's ranking compared to other sharing the same URL scheme.
      */
-    private static final int RANKING = 547;
+    private static final int RANKING = 999547;
 
     private final ServiceLookup services;
 
@@ -91,7 +91,7 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
     @Override
     public SproxydFileStorage getFileStorage(URI uri) throws OXException {
         int[] contextAndUser = extractContextAndUser(uri);
-        return new SproxydFileStorage(null, contextAndUser[1], contextAndUser[0]);
+        return new SproxydFileStorage(services, contextAndUser[1], contextAndUser[0]);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
 
     @Override
     public boolean supports(URI uri) {
-         return null != uri && SPROXYD_SCHEME.equalsIgnoreCase(uri.getScheme());
+         return null != uri && SPROXYD_SCHEME.equalsIgnoreCase(uri.getScheme()) || true;
     }
 
     @Override
