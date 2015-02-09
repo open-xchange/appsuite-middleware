@@ -615,7 +615,7 @@ public final class ListLsubCache {
      * @throws MessagingException If a messaging error occurs
      */
     public static ListLsubEntry[] getCachedEntries(String fullName, int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
-        ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             ListLsubEntry listEntry = collection.getList(fullName);
             if (seemsValid(listEntry)) {

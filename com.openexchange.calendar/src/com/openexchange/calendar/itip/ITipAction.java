@@ -151,7 +151,7 @@ public enum ITipAction {
      * If Attendee: Send a REPLY
      */
     CREATE;
-    
+
     private String message;
 
     public String getMessage() {

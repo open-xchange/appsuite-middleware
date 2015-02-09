@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-01-29 11:30+0100\n"
+"PO-Revision-Date: 2015-02-09 16:03+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3287,6 +3287,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:68
 msgid "The session is no longer available. Please try again."
 msgstr "Ihre Sitzung ist abgelaufen. Bitte versuchen Sie es erneut."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:69
+msgid "Kerberos ticket in session is missing. Pleasy try again."
+msgstr ""
+"Das Kerberos-Ticket für die Sitzung fehlt. Bitte versuchen Sie es erneut."
 
 #. No Linked-In account available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63

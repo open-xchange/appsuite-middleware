@@ -18,6 +18,10 @@
 
  - Fix for bug 36420: Do not change OAuth configuration anymore for RPM based distros.
 
+* 2015-02-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35504: Backported software change request 2249 and 2250.
+
 * 2015-02-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 36337: Automatically enhance filename in CIFS files storage to avoid conflicts with existing files
