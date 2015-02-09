@@ -50,9 +50,7 @@
 package com.openexchange.filestore.sproxyd;
 
 import java.io.InputStream;
-import java.io.SequenceInputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -103,17 +101,16 @@ public class SproxydFileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name) throws OXException {
         List<Chunk> chunks = getStorage().getChunks(UUIDs.fromUnformattedString(name), userId, contextId);
-        if (null == chunks || 0 == chunks.size()) {
+        if (null == chunks || chunks.isEmpty()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
-        if (1 == chunks.size()) {
+
+        int size = chunks.size();
+        if (1 == size) {
             return client.get(chunks.get(0).getScalityId());
         }
-        List<InputStream> streams = new ArrayList<InputStream>(chunks.size());
-        for (Chunk chunk : chunks) {
-            streams.add(client.get(chunk.getScalityId()));
-        }
-        return new SequenceInputStream(Collections.enumeration(streams));
+
+        return new SproxydBufferedInputStream(chunks, size, client);
     }
 
     @Override

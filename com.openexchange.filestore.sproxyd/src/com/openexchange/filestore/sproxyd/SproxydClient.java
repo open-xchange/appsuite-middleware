@@ -98,20 +98,16 @@ public class SproxydClient {
      * @return The file's input stream
      */
     public InputStream get(UUID id) throws OXException {
-
         HttpGet get = new HttpGet(buildURI(id));
         try {
             HttpResponse response = httpClient.execute(get);
             StatusLine statusLine = response.getStatusLine();
             return response.getEntity().getContent();
         } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw SproxydExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw SproxydExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
-        return null;
     }
 
     public InputStream get(UUID id, long offset, long length) throws OXException {
