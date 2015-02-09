@@ -73,7 +73,6 @@ public class SproxydBufferedInputStream extends InputStream {
     private final List<Chunk> documentChunks;
     private final int chunksSize;
     private final SproxydClient client;
-    private Chunk currentChunk;
     private InputStream current;
     private int pos;
     private long start;
@@ -124,7 +123,6 @@ public class SproxydBufferedInputStream extends InputStream {
         if (!(in instanceof BufferedInputStream) && !(in instanceof ByteArrayInputStream)) {
             in = new FastBufferedInputStream(in);
         }
-        currentChunk = chunk;
         current = in;
         return in;
     }
@@ -165,7 +163,6 @@ public class SproxydBufferedInputStream extends InputStream {
                 in = new FastBufferedInputStream(in);
             }
             this.pos = pos;
-            currentChunk = startChunk;
             current = in;
             this.start = start;
             this.end = end;
