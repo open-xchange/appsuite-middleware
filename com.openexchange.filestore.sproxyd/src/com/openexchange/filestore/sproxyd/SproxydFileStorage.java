@@ -50,7 +50,9 @@
 package com.openexchange.filestore.sproxyd;
 
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -59,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.file.external.FileStorage;
+import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
  * {@link S3FileStorage}
@@ -82,6 +85,10 @@ public class SproxydFileStorage implements FileStorage {
 
     private void deleteChunks(String uuid) throws OXException {
 
+    }
+
+    private List<SproxydChunk> getChunks(String uuid) throws OXException {
+        return null;
     }
 
     @Override
@@ -120,12 +127,18 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name) throws OXException {
-
-
-
-
-        // TODO Auto-generated method stub
-        return null;
+        List<SproxydChunk> chunks = getChunks(name);
+        if (null == chunks || 0 == chunks.size()) {
+            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+        }
+        if (1 == chunks.size()) {
+            return client.get(chunks.get(0).getId());
+        }
+        List<InputStream> streams = new ArrayList<InputStream>(chunks.size());
+        for (SproxydChunk chunk : chunks) {
+            streams.add(client.get(chunk.getId()));
+        }
+        return new SequenceInputStream(Collections.enumeration(streams));
     }
 
     @Override
@@ -148,8 +161,14 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+        List<SproxydChunk> chunks = getChunks(identifier);
+        if (null == chunks || 0 == chunks.size()) {
+            return false;
+        }
+        for (SproxydChunk chunk : chunks) {
+            client.delete(chunk.getId());
+        }
+        return true;
     }
 
     @Override
