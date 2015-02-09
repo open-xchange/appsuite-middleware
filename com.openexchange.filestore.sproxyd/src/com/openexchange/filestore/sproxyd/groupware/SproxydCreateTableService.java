@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,69 @@
  *
  */
 
-package com.openexchange.filestore.sproxyd.osgi;
+package com.openexchange.filestore.sproxyd.groupware;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableService;
-import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableTask;
-import com.openexchange.filestore.sproxyd.groupware.SproxydDeleteListener;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link SproxydActivator}
+ * {@link SproxydCreateTableService} - The Sproxyd {@link CreateTableService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SproxydActivator extends HousekeepingActivator {
+public class SproxydCreateTableService extends AbstractCreateTableImpl {
 
-    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydActivator.class);
+    private static final String TABLE_SCALITY_FILESTORE = "scality_filestore";
+
+    private static final String CREATE_SCALITY_FILESTORE = "CREATE TABLE "+TABLE_SCALITY_FILESTORE+" (" +
+        " cid INT4 unsigned NOT NULL," +
+        " user INT4 unsigned NOT NULL," +
+        " uuid BINARY(16) NOT NULL NOT NULL," +
+        " scality_id BINARY(16) NOT NULL NOT NULL," +
+        " offset BIGINT(64) NOT NULL," +
+        " length BIGINT(64) NOT NULL," +
+        " PRIMARY KEY (cid, user, uuid)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
-     * Initializes a new {@link SproxydActivator}.
+     * Gets the table names.
+     *
+     * @return The table names.
      */
-    public SproxydActivator() {
+    public static String[] getTablesToCreate() {
+        return new String[] { TABLE_SCALITY_FILESTORE };
+    }
+
+    /**
+     * Gets the CREATE-TABLE statements.
+     *
+     * @return The CREATE statements
+     */
+    public static String[] getCreateStmts() {
+        return new String[] { CREATE_SCALITY_FILESTORE };
+    }
+
+    /**
+     * Initializes a new {@link CapabilityCreateTableService}.
+     */
+    public SproxydCreateTableService() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class };
+    public String[] requiredTables() {
+        return new String[] { "user", "infostore_document" };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.filestore.sproxyd");
-        ConfigurationService configService = getService(ConfigurationService.class);
-        // registerService(FileStorageFactoryCandidate.class, factory);
-
-        // Register update task, create table job and delete listener
-        registerService(CreateTableService.class, new SproxydCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SproxydCreateTableTask(this)));
-        registerService(DeleteListener.class, new SproxydDeleteListener());
+    public String[] tablesToCreate() {
+        return getTablesToCreate();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.filestore.sproxyd");
-        super.stopBundle();
+    protected String[] getCreateStatements() {
+        return getCreateStmts();
     }
+
 }
