@@ -78,6 +78,14 @@ public enum SproxydExceptionCode implements DisplayableOXExceptionCode {
      * No such document: %1$s
      */
     NO_SUCH_DOCUMENT("No such document: %1$s", CATEGORY_ERROR, 4, SproxydExceptionMessages.NO_SUCH_DOCUMENT_MSG),
+    /**
+     * No such chunk: %1$s
+     */
+    NO_SUCH_CHUNK("No such chunk: %1$s", CATEGORY_ERROR, 5, SproxydExceptionMessages.NO_SUCH_CHUNK_MSG),
+    /**
+     * No next chunk for chunk: %1$s
+     */
+    NO_NEXT_CHUNK("No next chunk for chunk: %1$s", CATEGORY_ERROR, 6, SproxydExceptionMessages.NO_NEXT_CHUNK_MSG),
     ;
 
     private static final String PREFIX = "SPROXYD";

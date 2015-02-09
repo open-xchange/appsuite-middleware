@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,71 @@
  *
  */
 
-package com.openexchange.filestore.sproxyd;
+package com.openexchange.filestore.sproxyd.chunkstorage;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.List;
+import java.util.UUID;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link SproxydExceptionMessages} - Exception messages for Sproxyd module that needs to be translated.
+ * {@link ChunkStorage}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SproxydExceptionMessages implements LocalizableStrings {
-
-    // No such document: %1$s
-    public static final String NO_SUCH_DOCUMENT_MSG = "No such document: %1$s";
-
-    // No such chunk: %1$s
-    public static final String NO_SUCH_CHUNK_MSG = "No such chunk: %1$s";
-
-    // No next chunk for chunk: %1$s
-    public static final String NO_NEXT_CHUNK_MSG = "No next chunk for chunk: %1$s";
+public interface ChunkStorage {
 
     /**
-     * Initializes a new {@link SproxydExceptionMessages}.
+     * Gets the chunks for the denoted document.
+     *
+     * @param documentId The document identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The document's chunks
+     * @throws OXException If chunks cannot be returned
      */
-    private SproxydExceptionMessages() {
-        super();
-    }
+    List<Chunk> getChunks(UUID documentId, int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the chunk for the denoted document.
+     *
+     * @param chunkId The chunk's identifier in Scality system
+     * @param contextId The context identifier
+     * @return The chunk or <code>null</code> if there is no such chunk
+     * @throws OXException If chunk cannot be returned
+     */
+    Chunk getChunk(UUID chunkId, int contextId) throws OXException;
+
+    /**
+     * Gets the next chunk following referenced chunk in denoted document.
+     *
+     * @param chunkId The chunk's identifier in Scality system
+     * @param documentId The document identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The next chunk or <code>null</code> if there is no next chunk
+     * @throws OXException If chunk cannot be returned
+     */
+    Chunk getNextChunk(UUID chunkId, UUID documentId, int userId, int contextId) throws OXException;
+
+    /**
+     * Stores a new chunk
+     *
+     * @param chunkId The identifier in Scality system for the new chunk
+     * @param chunkData The chunk data
+     * @return The newly stored chunk
+     * @throws OXException If chunk cannot be stored
+     */
+    Chunk storeChunk(UUID chunkId, ChunkData chunkData) throws OXException;
+
+    /**
+     * Deletes a chunk
+     *
+     * @param chunkId The chunk's identifier in Scality system
+     * @param contextId The context identifier
+     * @return <code>true</code> upon successful deletion; otherwise <code>false</code> if there was no such chunk
+     * @throws OXException If chunk cannot be deleted
+     */
+    boolean deleteChunk(UUID chunkId, int contextId) throws OXException;
 
 }

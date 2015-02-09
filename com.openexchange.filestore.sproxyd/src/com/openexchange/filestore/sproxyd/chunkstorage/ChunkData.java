@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,118 @@
  *
  */
 
-package com.openexchange.filestore.sproxyd;
+package com.openexchange.filestore.sproxyd.chunkstorage;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.util.UUID;
 
 /**
- * {@link SproxydExceptionMessages} - Exception messages for Sproxyd module that needs to be translated.
+ * {@link ChunkData}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SproxydExceptionMessages implements LocalizableStrings {
+public class ChunkData {
 
-    // No such document: %1$s
-    public static final String NO_SUCH_DOCUMENT_MSG = "No such document: %1$s";
-
-    // No such chunk: %1$s
-    public static final String NO_SUCH_CHUNK_MSG = "No such chunk: %1$s";
-
-    // No next chunk for chunk: %1$s
-    public static final String NO_NEXT_CHUNK_MSG = "No next chunk for chunk: %1$s";
+    private UUID documentId;
+    private long offset;
+    private long length;
+    private int contextId;
+    private int userId;
 
     /**
-     * Initializes a new {@link SproxydExceptionMessages}.
+     * Initializes a new {@link ChunkData}.
      */
-    private SproxydExceptionMessages() {
+    public ChunkData() {
         super();
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Sets the user identifier
+     *
+     * @param userId The user identifier to set
+     */
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Sets the context identifier
+     *
+     * @param contextId The context identifier to set
+     */
+    public void setContextId(int contextId) {
+        this.contextId = contextId;
+    }
+
+    /**
+     * Gets the document identifier
+     *
+     * @return The document identifier
+     */
+    public UUID getDocumentId() {
+        return documentId;
+    }
+
+    /**
+     * Sets the document identifier
+     *
+     * @param documentId The document identifier to set
+     */
+    public void setDocumentId(UUID documentId) {
+        this.documentId = documentId;
+    }
+
+    /**
+     * Gets the offset
+     *
+     * @return The offset
+     */
+    public long getOffset() {
+        return offset;
+    }
+
+    /**
+     * Sets the offset
+     *
+     * @param offset The offset to set
+     */
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+
+    /**
+     * Gets the length
+     *
+     * @return The length
+     */
+    public long getLength() {
+        return length;
+    }
+
+    /**
+     * Sets the length
+     *
+     * @param length The length to set
+     */
+    public void setLength(long length) {
+        this.length = length;
     }
 
 }

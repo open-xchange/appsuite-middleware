@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,79 @@
  *
  */
 
-package com.openexchange.filestore.sproxyd;
+package com.openexchange.filestore.sproxyd.chunkstorage;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.util.UUID;
 
 /**
- * {@link SproxydExceptionMessages} - Exception messages for Sproxyd module that needs to be translated.
+ * {@link Chunk} - Represents a chunk for a document.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SproxydExceptionMessages implements LocalizableStrings {
+public class Chunk implements Comparable<Chunk> {
 
-    // No such document: %1$s
-    public static final String NO_SUCH_DOCUMENT_MSG = "No such document: %1$s";
-
-    // No such chunk: %1$s
-    public static final String NO_SUCH_CHUNK_MSG = "No such chunk: %1$s";
-
-    // No next chunk for chunk: %1$s
-    public static final String NO_NEXT_CHUNK_MSG = "No next chunk for chunk: %1$s";
+    private final UUID documentId;
+    private final UUID scalityId;
+    private final long offset;
+    private final long length;
 
     /**
-     * Initializes a new {@link SproxydExceptionMessages}.
+     * Initializes a new {@link Chunk}.
+     *
+     * @param documentId The document identifier
+     * @param scalityId The associated identifier in Scality storage
+     * @param offset This chunk's offset in document
+     * @param length This chunk's length
      */
-    private SproxydExceptionMessages() {
+    public Chunk(UUID documentId, UUID scalityId, long offset, long length) {
         super();
+        this.documentId = documentId;
+        this.scalityId = scalityId;
+        this.offset = offset;
+        this.length = length;
+    }
+
+    /**
+     * Gets the document identifier
+     *
+     * @return The document identifier
+     */
+    public UUID getDocumentId() {
+        return documentId;
+    }
+
+    /**
+     * Gets the scality identifier
+     *
+     * @return The scality identifier
+     */
+    public UUID getScalityId() {
+        return scalityId;
+    }
+
+    /**
+     * Gets the offset
+     *
+     * @return The offset
+     */
+    public long getOffset() {
+        return offset;
+    }
+
+    /**
+     * Gets the length
+     *
+     * @return The length
+     */
+    public long getLength() {
+        return length;
+    }
+
+    @Override
+    public int compareTo(Chunk other) {
+        long thisOffset = this.offset;
+        long otherOffset = other.offset;
+        return (thisOffset < otherOffset ? -1 : (thisOffset == otherOffset ? 0 : 1));
     }
 
 }
