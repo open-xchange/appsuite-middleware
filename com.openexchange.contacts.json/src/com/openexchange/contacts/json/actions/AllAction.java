@@ -55,6 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.oauth.OAuthAction;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
@@ -83,6 +84,7 @@ import com.openexchange.tools.iterator.SearchIterator;
     @Parameter(name = "collation", description = "(preliminary, since 6.20) - allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work."),
     @Parameter(name = "admin", optional=true, type=Type.BOOLEAN, description = "(preliminary, since 6.22) - whether to include the contact representing the admin in the result or not. Defaults to \"true\".")
 }, responseDescription = "Response with timestamp: An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+@OAuthAction(scope = ContactAction.OAUTH_SCOPE, readOnly = true)
 public class AllAction extends ContactAction {
 
     /**

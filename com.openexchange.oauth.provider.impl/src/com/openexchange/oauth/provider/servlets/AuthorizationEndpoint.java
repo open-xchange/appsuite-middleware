@@ -59,6 +59,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -84,6 +85,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
+import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.URLHelper;
@@ -257,10 +259,15 @@ public class AuthorizationEndpoint extends HttpServlet {
                 String code = oAuthProvider.generateAuthorizationCodeFor(clientId, redirectURI, scope, user.getId(), ctx.getContextId());
                 response.sendRedirect(URLHelper.getRedirectLocation(redirectURI, OAuthProviderConstants.PARAM_CODE, code, OAuthProviderConstants.PARAM_STATE, state));
             } catch (OXException e) {
-                // Special handling for OXException after client identifier and redirect URI have been validated
-                LOG.error("Authorization request failed", e);
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "server_error", "internal error", OAuthProviderConstants.PARAM_STATE, state));
-                return;
+                if (OAuthProviderExceptionCodes.GRANTS_EXCEEDED.equals(e)) {
+                    // TODO: nicer error page and maybe localization based on optional uri params
+                    sendErrorPage(response, HttpServletResponse.SC_FORBIDDEN, e.getDisplayMessage(Locale.US));
+                } else {
+                    // Special handling for OXException after client identifier and redirect URI have been validated
+                    LOG.error("Authorization request failed", e);
+                    response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "server_error", "internal error", OAuthProviderConstants.PARAM_STATE, state));
+                    return;
+                }
             }
 
         } catch (OXException e) {

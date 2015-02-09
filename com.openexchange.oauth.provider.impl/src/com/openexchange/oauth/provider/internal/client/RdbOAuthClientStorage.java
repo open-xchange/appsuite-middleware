@@ -68,6 +68,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
+import com.openexchange.oauth.provider.DefaultClient;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.Icon;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
@@ -308,7 +309,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             stmt.setString(9, clientData.getWebsite());
             stmt.setBoolean(10, true);
             long now = System.currentTimeMillis();
-            stmt.setLong(10, now);
+            stmt.setLong(11, now);
 
             stmt.executeUpdate();
 

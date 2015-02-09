@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.oauth.provider.impl
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.io,
+Import-Package: com.google.common.base,
+ com.google.common.collect,
+ com.google.common.io,
  com.google.common.net,
  com.hazelcast.config,
  com.hazelcast.core,

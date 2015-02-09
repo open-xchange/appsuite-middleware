@@ -70,6 +70,7 @@ import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
 import com.openexchange.oauth.provider.internal.grant.StoredGrant;
+import com.openexchange.oauth.provider.tools.URIValidator;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
 
@@ -80,11 +81,6 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.8.0
  */
 public class OAuthProviderServiceImpl implements OAuthProviderService {
-
-    /**
-     * The max. number of clients that a user is allowed to grant access to
-     */
-    private static final int MAX_CLIENTS_PER_USER = 50;
 
     private final AbstractAuthorizationCodeProvider authCodeProvider;
 
@@ -145,12 +141,10 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     public String generateAuthorizationCodeFor(String clientId, String redirectURI, String scopeString, int userId, int contextId) throws OXException {
         // Check if user is allowed to create more grants
         int distinctGrants = grantStorage.countDistinctGrants(contextId, userId);
-        if (distinctGrants > MAX_CLIENTS_PER_USER) {
-            // FIXME
-            return null;
-            //throw OAuthProviderExceptionCodes.GRANTS_EXCEEDED.create(MAX_CLIENTS_PER_USER, distinctGrants);
+        if (distinctGrants >= MAX_CLIENTS_PER_USER) {
+            throw OAuthProviderExceptionCodes.GRANTS_EXCEEDED.create(userId, contextId, MAX_CLIENTS_PER_USER);
         }
-        
+
         // Adjust scope based on users permissions
         CapabilityService capabilityService = requireService(CapabilityService.class, services);
         CapabilitySet capabilities = capabilityService.getCapabilities(userId, contextId);
@@ -188,7 +182,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         storedGrant.setRefreshToken(refreshToken);
         storedGrant.setExpirationDate(expirationDate);
         storedGrant.setScopes(authCodeInfo.getScopes());
-        grantStorage.persistGrant(storedGrant);
+        grantStorage.saveGrant(storedGrant);
         return new OAuthGrantImpl(storedGrant);
     }
 
@@ -234,7 +228,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         storedGrant.setAccessToken(UserizedToken.generate(userId, contextId));
         storedGrant.setRefreshToken(UserizedToken.generate(userId, contextId));
         storedGrant.setExpirationDate(new Date(System.currentTimeMillis() + OAuthProviderConstants.DEFAULT_EXPIRATION));
-        grantStorage.persistGrant(storedGrant);
+        grantStorage.updateGrant(refreshToken, storedGrant);
 
         return new OAuthGrantImpl(storedGrant);
     }

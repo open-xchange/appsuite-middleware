@@ -96,19 +96,28 @@ import com.openexchange.java.util.UUIDs;
  * {@link OAuthSession}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.8.0
  */
 public class OAuthSession extends AJAXSession {
 
-    private static final String REDIRECT_URI = "http://localhost:8080";
+    private final String clientId;
+
+    private final String clientSecret;
+
+    private final String redirectURI;
 
     private String accessToken;
+
+    private String refreshToken;
 
     /**
      * Initializes a new {@link OAuthSession}.
      */
-    public OAuthSession(User user) {
+    public OAuthSession(User user, String clientId, String clientSecret, String redirectURI) {
         super(newWebConversation(), newOAuthHttpClient(), null);
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.redirectURI = redirectURI;
         try {
             AJAXConfig.init();
             obtainAccess(user, getHttpClient());
@@ -142,8 +151,8 @@ public class OAuthSession extends AJAXSession {
             .setHost(hostname)
             .setPath("/ajax/o/oauth2/authorization")
             .setParameter("response_type", "code")
-            .setParameter("client_id", "983e78b3e76d423988ed09c345364f05")
-            .setParameter("redirect_uri", REDIRECT_URI)
+            .setParameter("client_id", clientId)
+            .setParameter("redirect_uri", redirectURI)
             .setParameter("scope", "r_contacts")
             .setParameter("state", csrfState)
             .build());
@@ -173,7 +182,7 @@ public class OAuthSession extends AJAXSession {
         assertEquals(authCodeResponseBody, HttpStatus.SC_MOVED_TEMPORARILY, authCodeResponse.getStatusLine().getStatusCode());
         assertTrue("Location header missing in redirect response", authCodeResponse.containsHeader(HttpHeaders.LOCATION));
         String redirectLocation = authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(REDIRECT_URI));
+        assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(redirectURI));
 
         Map<String, String> redirectParams = new HashMap<>();
         String[] redirectParamPairs = URLDecoder.decode(new URI(redirectLocation).getRawQuery(), "UTF-8").split("&");
@@ -190,10 +199,10 @@ public class OAuthSession extends AJAXSession {
         assertNotNull(code);
 
         LinkedList<NameValuePair> redeemAuthCodeParams = new LinkedList<>();
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_id", "983e78b3e76d423988ed09c345364f05"));
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_secret", "a1dd1c62735f4e61b80b6aa2b29df37d"));
+        redeemAuthCodeParams.add(new BasicNameValuePair("client_id", clientId));
+        redeemAuthCodeParams.add(new BasicNameValuePair("client_secret", clientSecret));
         redeemAuthCodeParams.add(new BasicNameValuePair("grant_type", "authorization_code"));
-        redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", REDIRECT_URI));
+        redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", redirectURI));
         redeemAuthCodeParams.add(new BasicNameValuePair("code", code));
 
         HttpPost redeemAuthCode = new HttpPost(new URIBuilder()
@@ -206,13 +215,14 @@ public class OAuthSession extends AJAXSession {
         HttpResponse accessTokenResponse = client.execute(redeemAuthCode);
         assertEquals(HttpStatus.SC_OK, accessTokenResponse.getStatusLine().getStatusCode());
         JSONObject jAccessTokenResponse = JSONObject.parse(new InputStreamReader(accessTokenResponse.getEntity().getContent(), accessTokenResponse.getEntity().getContentEncoding() == null ? "UTF-8" : accessTokenResponse.getEntity().getContentEncoding().getValue())).toObject();
-        assertNotNull(jAccessTokenResponse.get("token_type"));
+        assertTrue("bearer".equalsIgnoreCase(jAccessTokenResponse.getString("token_type")));
         assertNotNull(jAccessTokenResponse.get("access_token"));
         assertNotNull(jAccessTokenResponse.get("refresh_token"));
         assertNotNull(jAccessTokenResponse.get("scope"));
         assertNotNull(jAccessTokenResponse.get("expires_in"));
 
         accessToken = jAccessTokenResponse.getString("access_token");
+        refreshToken = jAccessTokenResponse.getString("refresh_token");
     }
 
 
@@ -223,6 +233,16 @@ public class OAuthSession extends AJAXSession {
      */
     public String getAccessToken() {
         return accessToken;
+    }
+
+
+    /**
+     * Gets the refreshToken
+     *
+     * @return The refreshToken
+     */
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
     /**

@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.oauth.OAuthAction;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -75,6 +76,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 @Action(method = RequestMethod.PUT, name = "list", description = "Get a list of contacts.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for contacts are defined in Common object data and Detailed contact data. The alias \"list\" uses the predefined columnset [20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569].") }, requestBody = "An array with id.", responseDescription = "Response with timestamp: An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. The alias \"list\" uses the predefined columnset [600, 601, 614, 602, 611, 603, 612, 607, 652, 610, 608, 102].")
+@OAuthAction(scope = ContactAction.OAUTH_SCOPE, readOnly = true)
 public class ListAction extends ContactAction {
 
     /**

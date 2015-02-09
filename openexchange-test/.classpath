@@ -131,5 +131,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessionstorage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth.provider"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth.provider.impl"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -74,6 +74,9 @@ public final class OAuthProviderExceptionMessages implements LocalizableStrings 
     // The client '%1$s' could not be disabled.
     public static final String FAILED_DISABLEMENT_MSG = "The client '%1$s' could not be disabled.";
 
+    // You reached the max. number of %3$d possible grants for 3rd party applications. Please revoke access for the ones you don't longer need.
+    public static final String GRANTS_EXCEEDED_MSG = "You reached the max. number of %3$d possible grants for 3rd party applications. Please revoke access for the ones you don't longer need.";
+
     /**
      * Initializes a new {@link OAuthProviderExceptionMessages}.
      */

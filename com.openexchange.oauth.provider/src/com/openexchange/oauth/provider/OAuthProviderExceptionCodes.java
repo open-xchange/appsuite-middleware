@@ -123,6 +123,10 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
      * The client '%1$s' could not be disabled.
      */
     FAILED_DISABLEMENT("The client '%1$s' could not be disabled.", OAuthProviderExceptionMessages.FAILED_DISABLEMENT_MSG, Category.CATEGORY_USER_INPUT, 15),
+    /**
+     * User %1$d in context %1$d already reached the max. number of possible OAuth grants but tries to acquire another one.
+     */
+    GRANTS_EXCEEDED("User %1$d in context %1$d already reached the max. number of possible OAuth grants (%3$d) but tries to acquire another one.", OAuthProviderExceptionMessages.GRANTS_EXCEEDED_MSG, Category.CATEGORY_CAPACITY, 16),
 
     ;
 

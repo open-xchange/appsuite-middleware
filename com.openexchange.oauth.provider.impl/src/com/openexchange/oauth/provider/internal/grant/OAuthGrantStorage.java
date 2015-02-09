@@ -60,21 +60,31 @@ import com.openexchange.oauth.provider.tools.UserizedToken;
  * @since v7.8.0
  */
 public interface OAuthGrantStorage {
-    
+
     /**
      * The max. number of grants a client may occupy for one user
      */
     public static final int MAX_GRANTS_PER_CLIENT = 10;
 
     /**
-     * Persists the given grant. If the number of existing grants for the according
+     * Saves the given grant. If the number of existing grants for the according
      * client-user-combination is equals {@link #MAX_GRANTS_PER_CLIENT}, the oldest
      * grant is removed to enforce this limit.
      *
-     * @param grant The grant to persist
+     * @param grant The grant to save
      * @throws OXException When saving fails
      */
-    public void persistGrant(StoredGrant grant) throws OXException;
+    public void saveGrant(StoredGrant grant) throws OXException;
+
+    /**
+     * Updates the grant belonging to the passed refresh token. The refresh token is overriden by the
+     * one stored in the grant object during the update.
+     *
+     * @param refreshToken The refresh token to identify the grant
+     * @param grant The updated grant data
+     * @throws OXException When updating fails
+     */
+    public void updateGrant(UserizedToken refreshToken, StoredGrant grant) throws OXException;
 
     public void deleteGrantsForClient(String clientId) throws OXException;
 
@@ -82,17 +92,14 @@ public interface OAuthGrantStorage {
 
     public StoredGrant getGrantByRefreshToken(UserizedToken refreshToken) throws OXException;
 
-//    public int countAllGrants(int contextId, int userId) throws OXException;
-//
-    public int countGrantsForClient(String clientId, int contextId, int userId) throws OXException;
-
     /**
      * Counts all grants for distinct clients of a given user.
      *
      * @param contextId The context ID
      * @param userId The user ID
      * @return The number of grants (>= 0)
+     * @throws OXException
      */
-    public int countDistinctGrants(int contextId, int userId);
+    public int countDistinctGrants(int contextId, int userId) throws OXException;
 
 }

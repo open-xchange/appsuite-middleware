@@ -55,9 +55,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
@@ -67,6 +69,7 @@ import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.update.Tools;
 
 
 /**
@@ -86,56 +89,77 @@ public class DbGrantStorage implements OAuthGrantStorage {
     }
 
     @Override
-    public void persistGrant(StoredGrant grant) throws OXException {
+    public void saveGrant(StoredGrant grant) throws OXException {
         DatabaseService dbService = requireService(DatabaseService.class, services);
         Connection con = dbService.getWritable(grant.getContextId());
-        PreparedStatement select = null;
-        PreparedStatement save = null;
-        ResultSet rs = null;
+        PreparedStatement stmt = null;
         try {
-            Databases.startTransaction(con);
-            select = con.prepareStatement("SELECT 1 FROM oauth_grant WHERE refresh_token = ? AND client = ? cid = ? AND uid = ? AND FOR UPDATE");
-            select.setInt(1, grant.getContextId());
-            select.setInt(2, grant.getUserId());
-            select.setString(3, grant.getRefreshToken().getBaseToken());
-            select.setString(4, grant.getClientId());
-            rs = select.executeQuery();
-            long now = System.currentTimeMillis();
-            if (rs.next()) {
-                save = con.prepareStatement("UPDATE oauth_grant SET refresh_token = ?, access_token = ?, expiration_date = ?, scopes = ?, last_modified = ? WHERE refresh_token = ? AND client = ? AND cid = ? AND uid = ?");
-                save.setString(1, grant.getRefreshToken().getBaseToken());
-                save.setString(2, grant.getAccessToken().getBaseToken());
-                save.setLong(3, grant.getExpirationDate().getTime());
-                save.setString(4, grant.getScopes().scopeString());
-                save.setLong(5, now);
-                save.setInt(6, grant.getContextId());
-                save.setInt(7, grant.getUserId());
-                save.setString(8, grant.getRefreshToken().getBaseToken());
-                save.setString(9, grant.getClientId());
-                save.executeUpdate();
-            } else {
-                save = con.prepareStatement("INSERT INTO oauth_grant (cid, user, refresh_token, access_token, client, expiration_date, scopes, creation_date, last_modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                save.setInt(1, grant.getContextId());
-                save.setInt(2, grant.getUserId());
-                save.setString(3, grant.getRefreshToken().getBaseToken());
-                save.setString(4, grant.getAccessToken().getBaseToken());
-                save.setString(5, grant.getClientId());
-                save.setLong(6, grant.getExpirationDate().getTime());
-                save.setString(7, grant.getScopes().scopeString());
-                save.setLong(8, now);
-                save.setLong(9, now);
-                save.executeUpdate();
+            // ensure space
+            stmt = con.prepareStatement("SELECT last_modified FROM oauth_grant WHERE client = ? AND cid = ? AND user = ? ORDER BY last_modified ASC");
+            stmt.setString(1, grant.getClientId());
+            stmt.setInt(2, grant.getContextId());
+            stmt.setInt(3, grant.getUserId());
+            ResultSet rs = stmt.executeQuery();
+
+            List<Long> lms = new ArrayList<>(MAX_GRANTS_PER_CLIENT);
+            while (rs.next()) {
+                lms.add(rs.getLong(1));
             }
 
-            con.commit();
+            Databases.closeSQLStuff(rs, stmt);
+            if (lms.size() >= MAX_GRANTS_PER_CLIENT) {
+                int index = ((lms.size() - (MAX_GRANTS_PER_CLIENT - 1)) - 1); // Get the most recent last_modified that needs to be deleted (LRU)
+                long minLastModified = lms.get(index);
+                stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ? AND cid = ? AND user = ? AND last_modified <= ?");
+                stmt.setString(1, grant.getClientId());
+                stmt.setInt(2, grant.getContextId());
+                stmt.setInt(3, grant.getUserId());
+                stmt.setLong(4, minLastModified);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+            }
+
+            long now = System.currentTimeMillis();
+            stmt = con.prepareStatement("INSERT INTO oauth_grant (cid, user, refresh_token, access_token, client, expiration_date, scopes, creation_date, last_modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt.setInt(1, grant.getContextId());
+            stmt.setInt(2, grant.getUserId());
+            stmt.setString(3, grant.getRefreshToken().getBaseToken());
+            stmt.setString(4, grant.getAccessToken().getBaseToken());
+            stmt.setString(5, grant.getClientId());
+            stmt.setLong(6, grant.getExpirationDate().getTime());
+            stmt.setString(7, grant.getScopes().scopeString());
+            stmt.setLong(8, now);
+            stmt.setLong(9, now);
+            stmt.executeUpdate();
         } catch (SQLException e) {
-            Databases.rollback(con);
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
-            Databases.closeSQLStuff(select);
-            Databases.closeSQLStuff(rs);
-            Databases.closeSQLStuff(save);
-            Databases.autocommit(con);
+            Databases.closeSQLStuff(stmt);
+            dbService.backWritable(grant.getContextId(), con);
+        }
+    }
+
+    @Override
+    public void updateGrant(UserizedToken refreshToken, StoredGrant grant) throws OXException {
+        DatabaseService dbService = requireService(DatabaseService.class, services);
+        Connection con = dbService.getWritable(grant.getContextId());
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE oauth_grant SET refresh_token = ?, access_token = ?, expiration_date = ?, scopes = ?, last_modified = ? WHERE refresh_token = ? AND client = ? AND cid = ? AND user = ?");
+            stmt.setString(1, grant.getRefreshToken().getBaseToken());
+            stmt.setString(2, grant.getAccessToken().getBaseToken());
+            stmt.setLong(3, grant.getExpirationDate().getTime());
+            stmt.setString(4, grant.getScopes().scopeString());
+            stmt.setLong(5, System.currentTimeMillis());
+            stmt.setString(6, refreshToken.getBaseToken());
+            stmt.setString(7, grant.getClientId());
+            stmt.setInt(8, grant.getContextId());
+            stmt.setInt(9, grant.getUserId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
             dbService.backWritable(grant.getContextId(), con);
         }
     }
@@ -150,9 +174,11 @@ public class DbGrantStorage implements OAuthGrantStorage {
             Connection con = dbService.get(schemaAndWritePool.getWritePool(), schemaAndWritePool.getSchema());
             PreparedStatement stmt = null;
             try {
-                stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ?");
-                stmt.setString(1, clientId);
-                stmt.executeUpdate();
+                if (Tools.tableExists(con, "oauth_grant")) {
+                    stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ?");
+                    stmt.setString(1, clientId);
+                    stmt.executeUpdate();
+                }
             } catch (SQLException e) {
                 if (schemaAndWritePool.getRetryCount() >= 3) {
                     schemasAndWritePools.addLast(schemaAndWritePool);
@@ -172,9 +198,9 @@ public class DbGrantStorage implements OAuthGrantStorage {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ? AND cid = ? AND user = ?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, clientId);
+            stmt.setString(1, clientId);
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
@@ -194,9 +220,9 @@ public class DbGrantStorage implements OAuthGrantStorage {
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT client, refresh_token, expiration_date, scopes FROM oauth_grant WHERE access_token = ? AND cid = ? AND user = ?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, accessToken.getBaseToken());
+            stmt.setString(1, accessToken.getBaseToken());
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 StoredGrant grant = new StoredGrant();
@@ -229,9 +255,9 @@ public class DbGrantStorage implements OAuthGrantStorage {
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT client, access_token, expiration_date, scopes FROM oauth_grant WHERE refresh_token = ? AND cid = ? AND user = ?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, refreshToken.getBaseToken());
+            stmt.setString(1, refreshToken.getBaseToken());
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 StoredGrant grant = new StoredGrant();
@@ -246,6 +272,30 @@ public class DbGrantStorage implements OAuthGrantStorage {
             }
 
             return null;
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            dbService.backReadOnly(contextId, con);
+        }
+    }
+
+    @Override
+    public int countDistinctGrants(int contextId, int userId) throws OXException {
+        DatabaseService dbService = requireService(DatabaseService.class, services);
+        Connection con = dbService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT COUNT(DISTINCT client) FROM oauth_grant WHERE cid = ? AND user = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+            return 0;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
@@ -343,18 +393,6 @@ public class DbGrantStorage implements OAuthGrantStorage {
             return "{schema=" + schema + ", writePool=" + writePool + "}";
         }
 
-    }
-
-    @Override
-    public int countGrantsForClient(String clientId, int contextId, int userId) throws OXException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int countDistinctGrants(int contextId, int userId) {
-        // TODO Auto-generated method stub
-        return 0;
     }
 
 }

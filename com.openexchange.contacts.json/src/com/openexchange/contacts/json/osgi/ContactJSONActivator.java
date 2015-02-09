@@ -54,6 +54,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.LocalizableStrings;
@@ -76,7 +77,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerModule(new ContactActionFactory(this), "contacts");
         registerService(ResultConverter.class, new ContactJSONResultConverter());
-        registerService(OAuthScopeProvider.class, new AbstractScopeProvider("contacts", OAuthScopeDescription.READ_ONLY, OAuthScopeDescription.WRITABLE) {
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ContactAction.OAUTH_SCOPE, OAuthScopeDescription.READ_ONLY, OAuthScopeDescription.WRITABLE) {
             @Override
             public boolean canBeGranted(CapabilitySet capabilities, boolean writeable) {
                 return capabilities.contains(Permission.CONTACTS.getCapabilityName());

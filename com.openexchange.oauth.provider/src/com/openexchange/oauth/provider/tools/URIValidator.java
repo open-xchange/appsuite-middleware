@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider.tools;
 
 import java.net.URI;
 import java.net.URISyntaxException;

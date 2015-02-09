@@ -52,6 +52,9 @@ package com.openexchange.oauth2;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
+import java.rmi.Naming;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
@@ -68,11 +71,18 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.ClientData;
+import com.openexchange.oauth.provider.DefaultIcon;
+import com.openexchange.oauth.provider.DefaultScopes;
+import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
 
 /**
@@ -94,6 +104,8 @@ public abstract class EndpointTest {
 
     protected DefaultHttpClient client;
 
+    protected Client oauthClient;
+
     @BeforeClass
     public static void beforeClass() throws OXException {
         AJAXConfig.init();
@@ -105,6 +117,7 @@ public abstract class EndpointTest {
 
     @Before
     public void before() throws Exception {
+        // prepare http client
         client = new DefaultHttpClient(new PoolingClientConnectionManager());
         HttpParams params = client.getParams();
         int minute = 1 * 60 * 1000;
@@ -114,6 +127,17 @@ public abstract class EndpointTest {
 
         SSLSocketFactory ssf = new SSLSocketFactory(new TrustSelfSignedStrategy(), new AllowAllHostnameVerifier());
         client.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, ssf));
+
+        // register client application
+        ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
+        OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
+        oauthClient = clientProvisioning.registerClient(clientData);
+    }
+
+    @After
+    public void after() throws Exception {
+        OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
+        clientProvisioning.unregisterClient(oauthClient.getId());
     }
 
     protected void expectSecureRedirect(HttpUriRequest request, HttpResponse response) {
@@ -130,19 +154,44 @@ public abstract class EndpointTest {
     }
 
     protected String getScope() {
-        return "r_contacts";
+        return oauthClient.getDefaultScope().scopeString();
     }
 
     protected String getClientId() {
-        return "983e78b3e76d423988ed09c345364f05";
+        return oauthClient.getId();
     }
 
     protected String getClientSecret() {
-        return "a1dd1c62735f4e61b80b6aa2b29df37d";
+        return oauthClient.getSecret();
     }
 
     protected String getRedirectURI() {
-        return "http://localhost:8080";
+        return oauthClient.getRedirectURIs().get(0);
+    }
+
+    protected String getSecondRedirectURI() {
+        return oauthClient.getRedirectURIs().get(1);
+    }
+
+    protected static ClientData prepareClient(String name) {
+        DefaultIcon icon = new DefaultIcon();
+        icon.setData(IconBytes.DATA);
+        icon.setSize(IconBytes.DATA.length);
+        icon.setMimeType("image/jpg");
+
+        Set<String> redirectURIs = new HashSet<>();
+        redirectURIs.add("http://localhost");
+        redirectURIs.add("http://localhost:8080");
+
+        ClientData clientData = new ClientData();
+        clientData.setName(name);
+        clientData.setDescription(name);
+        clientData.setIcon(icon);
+        clientData.setContactAddress("webmaster@example.com");
+        clientData.setWebsite("http://www.example.com");
+        clientData.setDefaultScope(new DefaultScopes("r_contacts"));
+        clientData.setRedirectURIs(redirectURIs);
+        return clientData;
     }
 
 }

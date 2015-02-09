@@ -52,6 +52,7 @@ package com.openexchange.config.json.actions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.oauth.OAuthAction;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -79,6 +80,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "name", description = "The property name.")
 }, responseDescription = "A JSON object providing the property's name and its value")
+@OAuthAction(scope = OAuthAction.GRANT_ALL, readOnly = true)
 public class GetPropertyAction extends AbstractConfigAction {
 
     /**

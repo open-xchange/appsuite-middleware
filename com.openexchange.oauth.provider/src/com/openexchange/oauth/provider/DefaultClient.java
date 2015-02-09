@@ -47,15 +47,12 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal.client;
+package com.openexchange.oauth.provider;
 
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.Icon;
-import com.openexchange.oauth.provider.Scopes;
-import com.openexchange.oauth.provider.internal.URIValidator;
+import com.openexchange.oauth.provider.tools.URIValidator;
 
 /**
  * {@link DefaultClient} - The default {@link Client} implementation.

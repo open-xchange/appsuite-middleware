@@ -60,6 +60,11 @@ import com.openexchange.exception.OXException;
  */
 public interface OAuthProviderService {
 
+    /**
+     * The max. number of clients that a user is allowed to grant access to
+     */
+    public static final int MAX_CLIENTS_PER_USER = 50;
+
     // -------------------------------------- Client Handling -------------------------------------- \\
 
     /**

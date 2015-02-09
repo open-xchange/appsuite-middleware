@@ -52,10 +52,13 @@ package com.openexchange.oauth2;
 import java.io.IOException;
 import org.apache.http.HttpHeaders;
 import org.json.JSONException;
+import org.junit.Assert;
+import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.exception.OXException;
 
@@ -64,16 +67,16 @@ import com.openexchange.exception.OXException;
  * {@link OAuthClient}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.8.0
  */
 public class OAuthClient extends AJAXClient {
 
-    public OAuthClient() {
-        this(User.User1);
+    public OAuthClient(String clientId, String clientSecret, String redirectURI) throws Exception {
+        this(User.User1, clientId, clientSecret, redirectURI);
     }
 
-    public OAuthClient(User user) {
-        super(new OAuthSession(user), false);
+    public OAuthClient(User user, String clientId, String clientSecret, String redirectURI) throws Exception {
+        super(new OAuthSession(user, clientId, clientSecret, redirectURI), false);
     }
 
     @Override
@@ -130,8 +133,15 @@ public class OAuthClient extends AJAXClient {
             newHeaders[headers.length] = new Header.SimpleHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
             return newHeaders;
         }
+    }
 
-
+    /**
+     * Asserts that this client has API access. Will fail if not.
+     */
+    public void assertAccess() throws Exception {
+        int privateContactFolder = getValues().getPrivateContactFolder();
+        CommonAllResponse allResponse = execute(new AllRequest(privateContactFolder, AllRequest.GUI_COLUMNS));
+        Assert.assertFalse(allResponse.hasError());
     }
 
 

@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.oauth.OAuthAction;
 import com.openexchange.config.json.ConfigAJAXRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -75,6 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.GET, name = "config/path", description = "Get configuration data", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "Value of the node specified by path.")
+@OAuthAction(scope = OAuthAction.GRANT_ALL, readOnly = true)
 public final class GETAction extends AbstractConfigAction {
 
     /**
