@@ -93,44 +93,10 @@ public class SproxydFileStorage implements FileStorage {
         this.client = new SproxydClient("" + contextId + '/' + userId + '/');
     }
 
-    private ChunkStorage getStorage() throws OXException {
-        ChunkStorage service = services.getService(ChunkStorage.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(ChunkStorage.class);
-        }
-        return service;
-    }
-
     @Override
     public String saveNewFile(InputStream file) throws OXException {
-        boolean success = false;
         UUID documentId = UUID.randomUUID();
-        ChunkedUpload chunkedUpload = null;
-        List<UUID> scalityIds = new ArrayList<UUID>();
-        try {
-            chunkedUpload = new ChunkedUpload(file);
-            long offset = 0;
-            while (chunkedUpload.hasNext()) {
-                UploadChunk chunk = null;
-                try {
-                    chunk = chunkedUpload.next();
-                    UUID scalityId = client.put(chunk.getData(), chunk.getSize());
-                    scalityIds.add(scalityId);
-                    ChunkData chunkData = new ChunkData(contextId, userId).setLength(chunk.getSize()).setOffset(offset).setDocumentId(documentId);
-                    getStorage().storeChunk(scalityId, chunkData);
-                    offset += chunk.getSize();
-                } finally {
-                    Streams.close(chunk);
-                }
-            }
-            success = true;
-        } finally {
-            Streams.close(chunkedUpload);
-            if (false == success) {
-                client.delete(scalityIds);
-                getStorage().deleteDocument(documentId, userId, contextId);
-            }
-        }
+        upload(documentId, file, 0);
         return UUIDs.getUnformattedString(documentId);
     }
 
@@ -176,7 +142,7 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-        return getStorage().deleteDocument(UUIDs.fromUnformattedString(identifier), userId, contextId);
+        return getStorage().deleteDocument(UUIDs.fromUnformattedString(identifier), contextId, userId);
     }
 
     @Override
@@ -218,11 +184,49 @@ public class SproxydFileStorage implements FileStorage {
         if (offset != currentSize) {
             throw FileStorageCodes.INVALID_OFFSET.create(offset, name, currentSize);
         }
+        return upload(documentId, file, offset);
+    }
+
+    @Override
+    public void setFileLength(long length, String name) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public InputStream getFile(String name, long offset, long length) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * Gets a reference to the chunk storage service.
+     *
+     * @return The chunk storage
+     */
+    private ChunkStorage getStorage() throws OXException {
+        ChunkStorage service = services.getService(ChunkStorage.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(ChunkStorage.class);
+        }
+        return service;
+    }
+
+    /**
+     * Performs a chunk-wise upload of the supplied data.
+     *
+     * @param documentId The identifier of the document
+     * @param data The document data
+     * @param offset The current offset, or <code>0</code> for new files
+     * @return The new total size of the document
+     * @throws OXException
+     */
+    private long upload(UUID documentId, InputStream data, long offset) throws OXException {
         boolean success = false;
         ChunkedUpload chunkedUpload = null;
         List<UUID> scalityIds = new ArrayList<UUID>();
         try {
-            chunkedUpload = new ChunkedUpload(file);
+            chunkedUpload = new ChunkedUpload(data);
             while (chunkedUpload.hasNext()) {
                 UploadChunk chunk = null;
                 try {
@@ -247,18 +251,6 @@ public class SproxydFileStorage implements FileStorage {
             }
         }
         return offset;
-    }
-
-    @Override
-    public void setFileLength(long length, String name) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public InputStream getFile(String name, long offset, long length) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }
