@@ -72,6 +72,18 @@ public class ChunkData {
     }
 
     /**
+     * Initializes a new {@link ChunkData}.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     */
+    public ChunkData(int contextId, int userId) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+    }
+
+    /**
      * Gets the user identifier
      *
      * @return The user identifier
