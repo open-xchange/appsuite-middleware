@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,14 +55,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.rest.client.httpclient.HttpClients;
@@ -92,28 +95,127 @@ public class SproxydClient {
     }
 
     /**
-     * Gets the input stream of a stored file
+     * Stores a new object.
+     *
+     * @param data The content to store
+     * @param length The content length
+     * @return The new identifier of the stored object
+     */
+    public UUID put(InputStream data, long length) throws OXException {
+        UUID id = UUID.randomUUID();
+        HttpResponse response = null;
+        HttpPut request = null;;
+        try {
+            request = new HttpPut(buildURI(id));
+            request.setEntity(new InputStreamEntity(data, length));
+            response = httpClient.execute(request);
+            int status = response.getStatusLine().getStatusCode();
+            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
+                return id;
+            }
+            throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
+        } catch (ClientProtocolException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } finally {
+            close(request, response);
+        }
+    }
+
+    /**
+     * Gets the input stream of a stored file.
      *
      * @param id The identifier of the file
      * @return The file's input stream
      */
     public InputStream get(UUID id) throws OXException {
-        HttpGet get = new HttpGet(buildURI(id));
+        return get(id, 0, -1);
+    }
+
+    /**
+     * Gets the input stream of a stored object.
+     *
+     * @param id The identifier of the object
+     * @param rangeStart The start of the requested byte range, or a value equal or smaller <code>0</code> if not used
+     * @param rangeEnd The end of the requested byte range, or a value equal or smaller <code>0</code> if not used
+     * @return The object's input stream
+     */
+    public InputStream get(UUID id, long rangeStart, long rangeEnd) throws OXException {
+        HttpGet get = null;
+        HttpResponse response = null;
         try {
-            HttpResponse response = httpClient.execute(get);
-            StatusLine statusLine = response.getStatusLine();
-            return response.getEntity().getContent();
+            get = new HttpGet(buildURI(id));
+            if (0 < rangeStart || 0 < rangeEnd) {
+                get.addHeader("Content-Range", rangeStart + "-" + rangeEnd);
+            }
+            response = httpClient.execute(get);
+            int status = response.getStatusLine().getStatusCode();
+            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {
+                InputStream content = response.getEntity().getContent();
+                response = null;
+                return content;
+            }
+            if (HttpServletResponse.SC_NOT_FOUND == status) {
+                throw FileStorageCodes.FILE_NOT_FOUND.create(UUIDs.getUnformattedString(id));
+            }
+            throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
         } catch (ClientProtocolException e) {
-            throw SproxydExceptionCode.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
-            throw SproxydExceptionCode.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } finally {
+            close(get, response);
         }
     }
 
-    public InputStream get(UUID id, long offset, long length) throws OXException {
-        return null;
+    /**
+     * Deletes a stored object.
+     *
+     * @param id The identifier of the object to delete
+     * @return <code>true</code> if the object was deleted successfully, <code>false</code> if it was not found
+     * @throws OXException
+     */
+    public boolean delete(UUID id) throws OXException {
+        HttpDelete delete = null;
+        HttpResponse response = null;
+        try {
+            delete = new HttpDelete(buildURI(id));
+            response = httpClient.execute(delete);
+            int status = response.getStatusLine().getStatusCode();
+            if (HttpServletResponse.SC_OK == status) {
+                return true;
+            }
+            if (HttpServletResponse.SC_NOT_FOUND == status) {
+                return false;
+            }
+            throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
+        } catch (ClientProtocolException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } finally {
+            close(delete, response);
+        }
     }
 
+    /**
+     * Deletes multiple stored objects.
+     *
+     * @param ids The identifier of the objects to delete
+     */
+    public void delete(Collection<UUID> ids) throws OXException {
+        for (UUID id : ids) {
+            delete(id);
+        }
+    }
+
+    /**
+     * Builds an URI for the supplied object identifier.
+     *
+     * @param id The object identifier to build the URI for
+     * @return The URI
+     */
     private URI buildURI(UUID id) throws OXException {
         try {
             return new URI(baseURL + UUIDs.getUnformattedString(id));
@@ -122,46 +224,30 @@ public class SproxydClient {
         }
     }
 
-    public UUID put(InputStream data, long length) throws OXException {
-        UUID id = UUID.randomUUID();
-        HttpPut put = new HttpPut(buildURI(id));
-        put.setEntity(new InputStreamEntity(data, length));
-        try {
-            HttpResponse response = httpClient.execute(put);
-            StatusLine statusLine = response.getStatusLine();
-
-
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+    /**
+     * Closes the supplied HTTP request / response resources silently.
+     *
+     * @param request The HTTP request to reset
+     * @param response The HTTP response to consume and close
+     */
+    private void close(HttpRequestBase request, HttpResponse response) {
+        if (null != response) {
+            HttpEntity entity = response.getEntity();
+            if (null != entity) {
+                try {
+                    EntityUtils.consume(entity);
+                } catch (Exception e) {
+                    LOG.debug("Error consuming HTTP response entity", e);
+                }
+            }
         }
-
-        return id;
-    }
-
-    public boolean delete(UUID id) throws OXException {
-
-        HttpDelete delete = new HttpDelete(buildURI(id));
-        try {
-            HttpResponse response = httpClient.execute(delete);
-            StatusLine statusLine = response.getStatusLine();
-
-            return true;
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        if (null != request) {
+            try {
+                request.reset();
+            } catch (Exception e) {
+                LOG.debug("Error resetting HTTP request", e);
+            }
         }
-
-        return false;
-    }
-
-    public void delete(Collection<UUID> ids) throws OXException {
     }
 
 }

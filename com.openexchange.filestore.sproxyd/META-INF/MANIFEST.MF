@@ -32,6 +32,8 @@ Import-Package: com.openexchange.ajax.container,
  org.apache.http.client.methods,
  org.apache.http.entity,
  org.apache.http.impl.client,
+ org.apache.http.message,
+ org.apache.http.util,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.filestore.sproxyd.osgi.SproxydActivator
