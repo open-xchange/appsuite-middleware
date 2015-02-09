@@ -52,6 +52,7 @@ package com.openexchange.filestore.sproxyd.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.filestore.sproxyd.SproxydFileStorageFactory;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.sproxyd.chunkstorage.RdbChunkStorage;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableService;
@@ -61,6 +62,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 
 /**
  * {@link SproxydActivator}
@@ -86,8 +88,6 @@ public class SproxydActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.filestore.sproxyd");
-        ConfigurationService configService = getService(ConfigurationService.class);
-        // registerService(FileStorageFactoryCandidate.class, factory);
 
         addService(ChunkStorage.class, new RdbChunkStorage(this));
 
@@ -95,6 +95,9 @@ public class SproxydActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new SproxydCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SproxydCreateTableTask(this)));
         registerService(DeleteListener.class, new SproxydDeleteListener());
+
+        // Register factory
+        registerService(FileStorageFactoryCandidate.class, new SproxydFileStorageFactory(this));
     }
 
     @Override

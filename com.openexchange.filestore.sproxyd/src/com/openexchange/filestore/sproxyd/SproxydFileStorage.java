@@ -78,10 +78,14 @@ public class SproxydFileStorage implements FileStorage {
 
     private final SproxydClient client;
     private final ServiceLookup services;
+    private final int contextId;
+    private final int userId;
 
 
-    public SproxydFileStorage(ServiceLookup services) {
+    public SproxydFileStorage(ServiceLookup services, int userId, int contextId) {
         super();
+        this.contextId = contextId;
+        this.userId = userId;
         this.services = services;
         this.client = new SproxydClient("http://sproxyd.ox.io/proxy/57462_ctx_store/");
     }

@@ -50,9 +50,10 @@
 package com.openexchange.filestore.sproxyd;
 
 import java.net.URI;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 
@@ -71,32 +72,26 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
     private static final String SPROXYD_SCHEME = "sproxyd";
 
     /**
-     * The expected pattern for file store names - hard-coded at
-     * com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage.create(Context, User, UserModuleAccess) ,
-     * so expect nothing else.
-     */
-    private static final Pattern CTX_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_store");
-
-    /**
      * The file storage's ranking compared to other sharing the same URL scheme.
      */
     private static final int RANKING = 547;
 
-    private final ConfigurationService configService;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link SproxydFileStorageFactory}.
      *
-     * @param configService The configuration service to use
+     * @param ServiceLookup services service look-up
      */
-    public SproxydFileStorageFactory(ConfigurationService configService) {
+    public SproxydFileStorageFactory(ServiceLookup services) {
         super();
-        this.configService = configService;
+        this.services = services;
     }
 
     @Override
     public SproxydFileStorage getFileStorage(URI uri) throws OXException {
-        return null;
+        int[] contextAndUser = extractContextAndUser(uri);
+        return new SproxydFileStorage(null, contextAndUser[1], contextAndUser[0]);
     }
 
     @Override
@@ -112,6 +107,46 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
     @Override
     public int getRanking() {
         return RANKING;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The expected pattern for file store names associated with a context - defined by
+     * com.openexchange.filestore.FileStorages.getNameForContext(int) ,
+     * so expect nothing else; e.g. <code>"57462_ctx_store"</code>
+     */
+    private static final Pattern CTX_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_store");
+
+    /**
+     * The expected pattern for file store names associated with a user - defined by
+     * com.openexchange.filestore.FileStorages.getNameForUser(int, int) ,
+     * so expect nothing else; e.g. <code>"57462_ctx_5_user_store"</code>
+     */
+    private static final Pattern USER_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_(\\d+)_user_store");
+
+    private int[] extractContextAndUser(URI uri) {
+        String path = uri.getPath();
+        while (0 < path.length() && '/' == path.charAt(0)) {
+            path = path.substring(1);
+        }
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        if (path.endsWith("ctx_store")) {
+            Matcher matcher = CTX_STORE_PATTERN.matcher(path);
+            if (false == matcher.matches()) {
+                throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
+            }
+            return new int[] {Integer.parseInt(matcher.group(1)), 0};
+        }
+
+        // Expect user store identifier
+        Matcher matcher = USER_STORE_PATTERN.matcher(path);
+        if (false == matcher.matches()) {
+            throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\"");
+        }
+        return new int[] {Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))};
     }
 
 }
