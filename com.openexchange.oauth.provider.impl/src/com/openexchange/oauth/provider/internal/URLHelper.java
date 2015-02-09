@@ -57,7 +57,9 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.oauth.provider.osgi.Services;
+import com.openexchange.osgi.util.ServiceCallWrapper;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 
 /**
  * {@link URLHelper}
@@ -80,7 +82,17 @@ public class URLHelper {
      * @throws OXException If determining the host name fails
      */
     public static String getSecureLocation(HttpServletRequest request) throws OXException {
-        String hostname = Services.requireService(HostnameService.class).getHostname(-1, -1);
+        String hostname;
+        try {
+            hostname = ServiceCallWrapper.tryServiceCall(URLHelper.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
+                @Override
+                public String call(HostnameService service) throws Exception {
+                    return service.getHostname(-1, -1);
+                }
+            }, request.getServerName());
+        } catch (ServiceException e) {
+            throw e.toOXException();
+        }
 
         StringBuilder requestURL = new StringBuilder("https://").append(hostname).append(request.getServletPath());
         String pathInfo = request.getPathInfo();
