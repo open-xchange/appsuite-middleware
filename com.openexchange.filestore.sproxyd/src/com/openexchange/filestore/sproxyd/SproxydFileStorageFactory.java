@@ -52,7 +52,10 @@ package com.openexchange.filestore.sproxyd;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
@@ -91,7 +94,8 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
     @Override
     public SproxydFileStorage getFileStorage(URI uri) throws OXException {
         int[] contextAndUser = extractContextAndUser(uri);
-        return new SproxydFileStorage(services, contextAndUser[1], contextAndUser[0]);
+        SproxydClient client = initClient(extractFilestoreID(uri), contextAndUser[0], contextAndUser[1]);
+        return new SproxydFileStorage(services, contextAndUser[1], contextAndUser[0], client);
     }
 
     @Override
@@ -147,6 +151,49 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
             throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\"");
         }
         return new int[] {Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))};
+    }
+
+    /**
+     * Initializes an {@link SproxydClient} as configured by the referenced authority part of the supplied URI.
+     *
+     * @param uri The filestore identifier
+     * @param contextID The context identifier
+     * @param userID The user identifier
+     * @return The client
+     */
+    private SproxydClient initClient(String filestoreID, int contextID, int userID) throws OXException {
+        String baseUrl = requireProperty("com.openexchange.filestore.sproxyd." + filestoreID + ".baseUrl");
+        return new SproxydClient(Strings.trimEnd(baseUrl, '/') + '/' + contextID + '/' + userID + '/');
+    }
+
+    private String requireProperty(String propertyName) throws OXException {
+        String property = services.getService(ConfigurationService.class).getProperty(propertyName);
+        if (Strings.isEmpty(property)) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propertyName);
+        }
+        return property;
+    }
+
+
+    /**
+     * Extracts the filestore ID from the configured file store URI, i.e. the 'authority' part from the URI.
+     *
+     * @param uri The file store URI
+     * @return The filestore ID
+     * @throws IllegalArgumentException If no valid ID could be extracted
+     */
+    private static String extractFilestoreID(URI uri) throws IllegalArgumentException {
+        String authority = uri.getAuthority();
+        if (null == authority) {
+            throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
+        }
+        while (0 < authority.length() && '/' == authority.charAt(0)) {
+            authority = authority.substring(1);
+        }
+        if (0 == authority.length()) {
+            throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
+        }
+        return authority;
     }
 
 }

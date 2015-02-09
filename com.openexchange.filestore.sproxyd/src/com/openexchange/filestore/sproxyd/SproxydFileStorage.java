@@ -52,7 +52,6 @@ package com.openexchange.filestore.sproxyd;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -84,12 +83,12 @@ public class SproxydFileStorage implements FileStorage {
     private final int userId;
 
 
-    public SproxydFileStorage(ServiceLookup services, int userId, int contextId) {
+    public SproxydFileStorage(ServiceLookup services, int userId, int contextId, SproxydClient client) {
         super();
         this.contextId = contextId;
         this.userId = userId;
         this.services = services;
-        this.client = new SproxydClient("" + contextId + '/' + userId + '/');
+        this.client = client;
     }
 
     @Override
@@ -223,45 +222,6 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
-        long rangeStart = offset;
-        long rangeEnd = offset + length;
-
-        UUID documentId = UUIDs.fromUnformattedString(name);
-        List<Chunk> chunks = getStorage().getChunks(documentId, userId, contextId);
-        if (null == chunks || 0 == chunks.size()) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
-        }
-        /*
-         * browse to start chunk
-         */
-        Chunk startChunk = null;
-        Iterator<Chunk> iterator = chunks.iterator();
-        do {
-            Chunk chunk = iterator.next();
-            if (chunk.getOffset() <= rangeStart && rangeStart < chunk.getOffset() + chunk.getLength()) {
-                startChunk = chunk;
-            }
-        } while (null == startChunk && iterator.hasNext());
-        /*
-         * check if range can be satisfied by start chunk solely
-         */
-        if (startChunk.getOffset() + startChunk.getLength() >= rangeEnd) {
-            return client.get(startChunk.getScalityId(), offset - startChunk.getOffset(), length);
-        }
-        /*
-         * browse further & collect data until end chunk, otherwise
-         */
-        List<InputStream> streams = new ArrayList<InputStream>();
-//        streams.add(client.get(startChunk.getScalityId(), offset - startChunk.getOffset(), startChunk.getOffset() + startChunk.getLength() - length));
-//        while (iterator.hasNext()) {
-//            Chunk chunk = iterator.next();
-//
-//            if (chunk.getOffset() + chunk.getLength() > offset + length) {
-//                break;
-//            }
-//        }
-
-
         // TODO Auto-generated method stub
         return null;
     }
