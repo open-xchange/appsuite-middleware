@@ -147,7 +147,7 @@ public class SproxydClient {
         try {
             get = new HttpGet(buildURI(id));
             if (0 < rangeStart || 0 < rangeEnd) {
-                get.addHeader("Content-Range", rangeStart + "-" + rangeEnd);
+                get.addHeader("Range", "bytes=" + rangeStart + "-" + rangeEnd);
             }
             response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();
