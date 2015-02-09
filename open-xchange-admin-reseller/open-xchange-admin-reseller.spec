@@ -78,6 +78,8 @@ done
 %doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
+* Fri Feb 06 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2015-02-09
 * Fri Jan 30 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Sixth candidate for 7.6.2 release
 * Wed Jan 28 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
