@@ -53,11 +53,14 @@ import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.sproxyd.chunkstorage.Chunk;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkData;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.java.Streams;
@@ -98,41 +101,24 @@ public class SproxydFileStorage implements FileStorage {
         return service;
     }
 
-    private void storeChunk(String uuid, String scalityId, long offset, long length) throws OXException {
-        ChunkStorage storage = getStorage();
-
-        ChunkData chunkData = new ChunkData();
-        // TODO:
-        storage.storeChunk(UUIDs.fromUnformattedString(scalityId), chunkData);
-    }
-
-    private void deleteChunks(String uuid) throws OXException {
-
-    }
-
-    private List<SproxydChunk> getChunks(String uuid) throws OXException {
-        return null;
-    }
-
     @Override
     public String saveNewFile(InputStream file) throws OXException {
         boolean success = false;
-        String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+        UUID documentId = UUID.randomUUID();
         ChunkedUpload chunkedUpload = null;
-        List<String> scalityIds = new ArrayList<String>();
+        List<UUID> scalityIds = new ArrayList<UUID>();
         try {
             chunkedUpload = new ChunkedUpload(file);
             long offset = 0;
-            long length = 0;
             while (chunkedUpload.hasNext()) {
                 UploadChunk chunk = null;
                 try {
                     chunk = chunkedUpload.next();
-                    length = chunk.getSize();
-                    String scalityId = client.put(chunk.getData(), length);
+                    UUID scalityId = client.put(chunk.getData(), chunk.getSize());
                     scalityIds.add(scalityId);
-                    storeChunk(uuid, scalityId, offset, length);
-                    offset += length;
+                    ChunkData chunkData = new ChunkData(contextId, userId).setLength(chunk.getSize()).setOffset(offset).setDocumentId(documentId);
+                    getStorage().storeChunk(scalityId, chunkData);
+                    offset += chunk.getSize();
                 } finally {
                     Streams.close(chunk);
                 }
@@ -142,86 +128,126 @@ public class SproxydFileStorage implements FileStorage {
             Streams.close(chunkedUpload);
             if (false == success) {
                 client.delete(scalityIds);
-                deleteChunks(uuid);
+//                getStorage().deleteChunks(documentId, contextId, userId);
             }
         }
-        return uuid;
+        return UUIDs.getUnformattedString(documentId);
     }
 
     @Override
     public InputStream getFile(String name) throws OXException {
-        List<SproxydChunk> chunks = getChunks(name);
+        List<Chunk> chunks = getStorage().getChunks(UUIDs.fromUnformattedString(name), userId, contextId);
         if (null == chunks || 0 == chunks.size()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
         if (1 == chunks.size()) {
-            return client.get(chunks.get(0).getId());
+            return client.get(chunks.get(0).getScalityId());
         }
         List<InputStream> streams = new ArrayList<InputStream>(chunks.size());
-        for (SproxydChunk chunk : chunks) {
-            streams.add(client.get(chunk.getId()));
+        for (Chunk chunk : chunks) {
+            streams.add(client.get(chunk.getScalityId()));
         }
         return new SequenceInputStream(Collections.enumeration(streams));
     }
 
     @Override
     public SortedSet<String> getFileList() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        List<UUID> documentIds = getStorage().getDocuments(userId, contextId);
+        SortedSet<String> fileIds = new TreeSet<String>();
+        for (UUID documentId : documentIds) {
+            fileIds.add(UUIDs.getUnformattedString(documentId));
+        }
+        return fileIds;
     }
 
     @Override
     public long getFileSize(String name) throws OXException {
-        // TODO Auto-generated method stub
-        return 0;
+        Chunk lastChunk = getStorage().getLastChunk(UUIDs.fromUnformattedString(name), userId, contextId);
+        if (null == lastChunk) {
+            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+        }
+        return lastChunk.getOffset() + lastChunk.getLength();
     }
 
     @Override
     public String getMimeType(String name) throws OXException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-        List<SproxydChunk> chunks = getChunks(identifier);
-        if (null == chunks || 0 == chunks.size()) {
-            return false;
-        }
-        for (SproxydChunk chunk : chunks) {
-            client.delete(chunk.getId());
-        }
-        return true;
-    }
-
-    @Override
-    public Set<String> deleteFiles(String[] identifiers) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void remove() throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void recreateStateFile() throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean stateFileIsCorrect() throws OXException {
-        // TODO Auto-generated method stub
+//        return 0 < getStorage().deleteChunks(UUIDs.fromUnformattedString(identifier), contextId, userId);
         return false;
     }
 
     @Override
+    public Set<String> deleteFiles(String[] identifiers) throws OXException {
+        Set<String> notDeleted = new HashSet<String>();
+        for (String identifier : identifiers) {
+            if (false == deleteFile(identifier)) {
+                notDeleted.add(identifier);
+            }
+        }
+        return notDeleted;
+    }
+
+    @Override
+    public void remove() throws OXException {
+        SortedSet<String> fileList = getFileList();
+        deleteFiles(fileList.toArray(new String[fileList.size()]));
+    }
+
+    @Override
+    public void recreateStateFile() throws OXException {
+        // no
+    }
+
+    @Override
+    public boolean stateFileIsCorrect() throws OXException {
+        // yes
+        return true;
+    }
+
+    @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
-        // TODO Auto-generated method stub
-        return 0;
+        UUID documentId = UUIDs.fromUnformattedString(name);
+        Chunk lastChunk = getStorage().getLastChunk(documentId, userId, contextId);
+        if (null == lastChunk) {
+            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+        }
+        long currentSize = lastChunk.getOffset() + lastChunk.getLength();
+        if (offset != currentSize) {
+            throw FileStorageCodes.INVALID_OFFSET.create(offset, name, currentSize);
+        }
+        boolean success = false;
+        ChunkedUpload chunkedUpload = null;
+        List<UUID> scalityIds = new ArrayList<UUID>();
+        try {
+            chunkedUpload = new ChunkedUpload(file);
+            while (chunkedUpload.hasNext()) {
+                UploadChunk chunk = null;
+                try {
+                    chunk = chunkedUpload.next();
+                    UUID scalityId = client.put(chunk.getData(), chunk.getSize());
+                    scalityIds.add(scalityId);
+                    ChunkData chunkData = new ChunkData(contextId, userId).setLength(chunk.getSize()).setOffset(offset).setDocumentId(documentId);
+                    getStorage().storeChunk(scalityId, chunkData);
+                    offset += chunk.getSize();
+                } finally {
+                    Streams.close(chunk);
+                }
+            }
+            success = true;
+        } finally {
+            Streams.close(chunkedUpload);
+            if (false == success) {
+                client.delete(scalityIds);
+                for (UUID scalityId : scalityIds) {
+                    getStorage().deleteChunk(scalityId, contextId);
+                }
+            }
+        }
+        return offset;
     }
 
     @Override

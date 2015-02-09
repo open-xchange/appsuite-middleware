@@ -51,6 +51,7 @@ package com.openexchange.filestore.sproxyd;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.UUID;
 import com.openexchange.exception.OXException;
 
 /**
@@ -64,28 +65,39 @@ public class SproxydClient {
 
     private final String baseURL;
 
+    /**
+     * Initializes a new {@link SproxydClient}.
+     *
+     * @param baseURL The base URL to use
+     */
     public SproxydClient(String baseURL) {
         super();
         this.baseURL = baseURL;
     }
 
-    public InputStream get(String id) throws OXException {
+    /**
+     * Gets the input stream of a stored file
+     *
+     * @param id The identifier of the file
+     * @return The file's input stream
+     */
+    public InputStream get(UUID id) throws OXException {
         return null;
     }
 
-    public InputStream get(String id, long offset, long length) throws OXException {
+    public InputStream get(UUID id, long offset, long length) throws OXException {
         return null;
     }
 
-    public String put(InputStream data, long length) throws OXException {
+    public UUID put(InputStream data, long length) throws OXException {
         return null;
     }
 
-    public boolean delete(String id) throws OXException {
+    public boolean delete(UUID id) throws OXException {
         return false;
     }
 
-    public void delete(Collection<String> ids) throws OXException {
+    public void delete(Collection<UUID> ids) throws OXException {
     }
 
 }
