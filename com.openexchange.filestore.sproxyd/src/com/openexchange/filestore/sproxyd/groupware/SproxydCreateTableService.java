@@ -71,6 +71,7 @@ public class SproxydCreateTableService extends AbstractCreateTableImpl {
         " length BIGINT(64) NOT NULL," +
         " PRIMARY KEY (cid, user, uuid)," +
         " UNIQUE KEY `scality_key` (`scality_id`)," +
+        " INDEX `scality_index` (`cid`, `scality_id`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
