@@ -106,7 +106,7 @@ public class RdbChunkStorage implements ChunkStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT uuid FROM scality_filestore WHERE cid=? AND user=?");
+            stmt = con.prepareStatement("SELECT document_id FROM scality_filestore WHERE cid=? AND user=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
@@ -140,7 +140,7 @@ public class RdbChunkStorage implements ChunkStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT scality_id, offset, length FROM scality_filestore WHERE cid=? AND user=? AND uuid=?");
+            stmt = con.prepareStatement("SELECT scality_id, offset, length FROM scality_filestore WHERE cid=? AND user=? AND document_id=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setBytes(3, UUIDs.toByteArray(documentId));
@@ -176,7 +176,7 @@ public class RdbChunkStorage implements ChunkStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT uuid, offset, length FROM scality_filestore WHERE cid=? AND scality_id=?");
+            stmt = con.prepareStatement("SELECT document_id, offset, length FROM scality_filestore WHERE cid=? AND scality_id=?");
             stmt.setInt(1, contextId);
             stmt.setBytes(2, UUIDs.toByteArray(chunkId));
             rs = stmt.executeQuery();
@@ -208,7 +208,7 @@ public class RdbChunkStorage implements ChunkStorage {
         try {
             Chunk chunk = getChunk(chunkId, contextId, con);
 
-            stmt = con.prepareStatement("SELECT scality_id, offset, length FROM scality_filestore WHERE cid=? AND user=? AND uuid=? AND offset=?");
+            stmt = con.prepareStatement("SELECT scality_id, offset, length FROM scality_filestore WHERE cid=? AND user=? AND document_id=? AND offset=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setBytes(3, UUIDs.toByteArray(documentId));
@@ -240,7 +240,7 @@ public class RdbChunkStorage implements ChunkStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT scality_id, offset, length FROM scality_filestore WHERE cid=? AND user=? AND uuid=? ORDER BY offset DESC LIMIT 1");
+            stmt = con.prepareStatement("SELECT scality_id, offset, length FROM scality_filestore WHERE cid=? AND user=? AND document_id=? ORDER BY offset DESC LIMIT 1");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setBytes(3, UUIDs.toByteArray(documentId));
@@ -271,7 +271,7 @@ public class RdbChunkStorage implements ChunkStorage {
     private Chunk storeChunk(UUID chunkId, ChunkData chunkData, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO scality_filestore (cid, user, uuid, scality_id, offset, length) VALUES (?, ?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO scality_filestore (cid, user, document_id, scality_id, offset, length) VALUES (?, ?, ?, ?, ?, ?)");
             stmt.setInt(1, chunkData.getContextId());
             stmt.setInt(2, chunkData.getUserId());
             stmt.setBytes(3, UUIDs.toByteArray(chunkData.getDocumentId()));
@@ -327,7 +327,7 @@ public class RdbChunkStorage implements ChunkStorage {
     private boolean deleteDocument(UUID documentId, int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM scality_filestore WHERE cid=? AND user=? AND uuid=?");
+            stmt = con.prepareStatement("DELETE FROM scality_filestore WHERE cid=? AND user=? AND document_id=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setBytes(3, UUIDs.toByteArray(documentId));

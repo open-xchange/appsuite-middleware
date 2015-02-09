@@ -65,11 +65,11 @@ public class SproxydCreateTableService extends AbstractCreateTableImpl {
     private static final String CREATE_SCALITY_FILESTORE = "CREATE TABLE "+TABLE_SCALITY_FILESTORE+" (" +
         " cid INT4 unsigned NOT NULL," +
         " user INT4 unsigned NOT NULL," +
-        " uuid BINARY(16) NOT NULL," +
+        " document_id BINARY(16) NOT NULL," +
         " scality_id BINARY(16) NOT NULL," +
         " offset BIGINT(64) NOT NULL," +
         " length BIGINT(64) NOT NULL," +
-        " PRIMARY KEY (cid, user, uuid)," +
+        " PRIMARY KEY (cid, user, document_id, scality_id)," +
         " UNIQUE KEY `scality_key` (`scality_id`)," +
         " INDEX `scality_index` (`cid`, `scality_id`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
