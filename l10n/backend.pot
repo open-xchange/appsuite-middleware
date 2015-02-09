@@ -1259,22 +1259,21 @@ msgstr ""
 msgid "Address (other)"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:78
 msgid "contacts"
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
 #. - See all your contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:92
 msgid "See all your contacts."
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
 #. - See all your contacts, create new ones and modify existing ones.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
 msgid "See all your contacts, create new ones and modify existing ones."
 msgstr ""
 
@@ -3650,6 +3649,13 @@ msgstr ""
 #. The client '%1$s' could not be disabled.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:75
 msgid "The client '%1$s' could not be disabled."
+msgstr ""
+
+#. You reached the max. number of %3$d possible grants for 3rd party applications. Please revoke access for the ones you don't longer need.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:78
+msgid ""
+"You reached the max. number of %3$d possible grants for 3rd party "
+"applications. Please revoke access for the ones you don't longer need."
 msgstr ""
 
 #. Account not found with identifier %1$s for user %2$s in context %3$s.
