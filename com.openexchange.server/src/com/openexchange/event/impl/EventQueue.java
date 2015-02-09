@@ -278,9 +278,9 @@ public final class EventQueue {
         /*
          * ... and proceed with delayed handlers
          */
-        if (noDelay) {
+        if (noDelay || eventObj.isNoDelay()) {
             /*
-             * Invoke delayed handlers immediately due to configuration
+             * Invoke delayed handlers immediately due to configuration or event attributes
              */
             event(eventObj);
         } else {

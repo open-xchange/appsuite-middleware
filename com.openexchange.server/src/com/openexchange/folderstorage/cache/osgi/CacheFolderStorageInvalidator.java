@@ -50,117 +50,87 @@
 package com.openexchange.folderstorage.cache.osgi;
 
 import java.io.Serializable;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.folderstorage.internal.Tools;
 
 
 /**
- * {@link FolderMapInvalidator} - Invalidates folder map.
+ * {@link CacheFolderStorageInvalidator} - Invalidates folder map.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService> {
+public class CacheFolderStorageInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService> {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FolderMapInvalidator.class);
-
-    private static final String REGION = FolderMapManagement.REGION;
-
-    private static final String KEYP_FOLDER_ID = "folderId";
-    private static final String KEYP_TREE_ID = "treeId";
-    private static final String KEYP_USER_ID = "userId";
-    private static final String KEYP_CONTEXT_ID = "contextId";
-
-    /**
-     * Gets the invalidation key for given arguments.
-     *
-     * @param folderId The folder identifier
-     * @param treeId The tree identifier
-     * @param optUser The optional user identifier
-     * @param contextId The context identifier
-     * @return The appropriate invalidation key
-     */
-    public static String keyFor(String folderId, String treeId, int optUser, int contextId) {
-        JSONObject jKey = new JSONObject(6);
-        if (null != folderId) {
-            try { jKey.put(KEYP_FOLDER_ID, folderId); } catch (JSONException e) { /* Cannot occur */ }
-        }
-        if (null != treeId) {
-            try { jKey.put(KEYP_TREE_ID, treeId); } catch (JSONException e) { /* Cannot occur */ }
-        }
-        try { jKey.put(KEYP_USER_ID, optUser); } catch (JSONException e) { /* Cannot occur */ }
-        try { jKey.put(KEYP_CONTEXT_ID, contextId); } catch (JSONException e) { /* Cannot occur */ }
-        return jKey.toString();
-    }
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CacheFolderStorageInvalidator.class);
 
     private final BundleContext context;
 
     /**
-     * Initializes a new {@link FolderMapInvalidator}.
+     * Initializes a new {@link CacheFolderStorageInvalidator}.
      *
      * @param context The bundle context
      */
-    public FolderMapInvalidator(final BundleContext context) {
+    public CacheFolderStorageInvalidator(BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public void onEvent(final Object sender, final CacheEvent cacheEvent, final boolean fromRemote) {
+    public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (fromRemote) {
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
 
-            String region = cacheEvent.getRegion();
-            if (REGION.equals(region)) {
-                for (Serializable cacheKey : cacheEvent.getKeys()) {
-                    handleCacheKey(cacheKey);
+            final String region = cacheEvent.getRegion();
+            if ("GlobalFolderCache".equals(region)) {
+                int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
+                List<Serializable> cacheKeys = cacheEvent.getKeys();
+                if (null == cacheKeys || 0 == cacheKeys.size()) {
+                    FolderMapManagement.getInstance().dropFor(contextId, false);
+                } else {
+                    for (Serializable cacheKey : cacheKeys) {
+                        if (cacheKey instanceof CacheKey) {
+                            Serializable[] keys = ((CacheKey) cacheKey).getKeys();
+                            if (keys.length > 1) {
+                                String id = keys[1].toString();
+                                String treeId = keys[0].toString();
+                                removeFromUserCache(id, treeId, contextId);
+                            }
+                        } else if (cacheKey instanceof String) {
+                            FolderMapInvalidator.handleCacheKey(cacheKey);
+                        }
+                    }
+                }
+            } else if ("OXFolderCache".equals(region)) {
+                for (Serializable key : cacheEvent.getKeys()) {
+                    CacheKey cacheKey = (CacheKey) key;
+                    String id = cacheKey.getKeys()[0].toString();
+                    String treeId = FolderStorage.REAL_TREE_ID;
+                    removeFromUserCache(id, treeId, cacheKey.getContextId());
                 }
             }
         }
     }
 
-    /**
-     * Handles specified cache key.
-     *
-     * @param cacheKey The cache key to handle
-     */
-    public static void handleCacheKey(Serializable cacheKey) {
-        JSONObject jKey = optJsonObject(String.valueOf(cacheKey));
-        if (null != jKey) {
-            String folderId = jKey.optString(KEYP_FOLDER_ID);
-            String treeId = jKey.optString(KEYP_TREE_ID);
-            int optUser = jKey.optInt(KEYP_USER_ID, -1);
-            int contextId = jKey.optInt(KEYP_CONTEXT_ID, -1);
-            if (null == folderId && null == treeId && optUser <= 0) {
-                FolderMapManagement.getInstance().dropFor(contextId, false);
-            } else if (null == folderId && null == treeId && optUser > 0) {
-                FolderMapManagement.getInstance().dropFor(optUser, contextId, false);
-            } else {
-                FolderMapManagement.getInstance().dropFor(folderId, treeId, optUser, contextId, null, false);
-            }
-        }
-    }
-
-    private static JSONObject optJsonObject(String key)  {
-        try {
-            return new JSONObject(key);
-        } catch (JSONException e) {
-            return null;
-        }
+    private void removeFromUserCache(String id, String treeId, int contextId) {
+        FolderMapManagement.getInstance().dropFor(id, treeId, -1, contextId, null, false);
     }
 
     @Override
     public CacheEventService addingService(ServiceReference<CacheEventService> reference) {
-        CacheEventService service = context.getService(reference);
-        service.addListener(REGION, this);
+        final CacheEventService service = context.getService(reference);
+        service.addListener("GlobalFolderCache", this);
+        service.addListener("OXFolderCache", this);
         return service;
     }
 
@@ -171,7 +141,8 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
 
     @Override
     public void removedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
-        service.removeListener(REGION, this);
+        service.removeListener("GlobalFolderCache", this);
+        service.removeListener("OXFolderCache", this);
         context.ungetService(reference);
     }
 

@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.folderstorage.Folder;
@@ -476,36 +475,30 @@ public final class FolderMap {
         @Override
         public void run() {
             try {
-                final StorageParameters params = new StorageParametersImpl(session);
+                StorageParameters params = new StorageParametersImpl(session);
                 params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
-                final Lock lock = CacheFolderStorage.readLockFor(treeId, params);
-                lock.lock();
-                try {
-                    final CacheFolderStorage folderStorage = CacheFolderStorage.getInstance();
-                    Folder loaded = folderStorage.loadFolder(treeId, folderId, StorageType.WORKING, params);
-                    if (loaded.isGlobalID()) {
-                        // Eh... No global folder here.
-                        return;
-                    }
-                    folderMap.put(treeId, loaded, session);
-                    // Check for subfolders
-                    if (loadSubfolders) {
-                        final String[] subfolderIDs = loaded.getSubfolderIDs();
-                        if (null != subfolderIDs) {
-                            for (final String subfolderId : subfolderIDs) {
-                                loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
-                                if (loaded.isGlobalID()) {
-                                    folderStorage.putFolder(loaded, treeId, params, false);
-                                } else {
-                                    folderMap.put(treeId, loaded, session);
-                                }
+                CacheFolderStorage folderStorage = CacheFolderStorage.getInstance();
+                Folder loaded = folderStorage.loadFolder(treeId, folderId, StorageType.WORKING, params);
+                if (loaded.isGlobalID()) {
+                    // Eh... No global folder here.
+                    return;
+                }
+                folderMap.put(treeId, loaded, session);
+                // Check for subfolders
+                if (loadSubfolders) {
+                    String[] subfolderIDs = loaded.getSubfolderIDs();
+                    if (null != subfolderIDs) {
+                        for (String subfolderId : subfolderIDs) {
+                            loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
+                            if (loaded.isGlobalID()) {
+                                folderStorage.putFolder(loaded, treeId, params, false);
+                            } else {
+                                folderMap.put(treeId, loaded, session);
                             }
                         }
                     }
-                } finally {
-                    lock.unlock();
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.debug("", e);
             }
         }
@@ -528,33 +521,27 @@ public final class FolderMap {
         @Override
         public void run() {
             try {
-                final StorageParameters params = new StorageParametersImpl(session);
+                StorageParameters params = new StorageParametersImpl(session);
                 params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
-                final Lock lock = CacheFolderStorage.readLockFor(treeId, params);
-                lock.lock();
-                try {
-                    final CacheFolderStorage folderStorage = CacheFolderStorage.getInstance();
-                    // Check for subfolders
-                    final SortableId[] subfolders = folderStorage.getSubfolders(treeId, folder.getID(), params);
-                    {
-                        final String[] ids = new String[subfolders.length];
-                        for (int i = 0; i < ids.length; i++) {
-                            ids[i] = subfolders[i].getId();
-                        }
-                        folder.setSubfolderIDs(ids);
+                CacheFolderStorage folderStorage = CacheFolderStorage.getInstance();
+                // Check for subfolders
+                SortableId[] subfolders = folderStorage.getSubfolders(treeId, folder.getID(), params);
+                {
+                    final String[] ids = new String[subfolders.length];
+                    for (int i = 0; i < ids.length; i++) {
+                        ids[i] = subfolders[i].getId();
                     }
-                    for (final SortableId sortableId : subfolders) {
-                        final Folder loaded = folderStorage.loadFolder(treeId, sortableId.getId(), StorageType.WORKING, params);
-                        if (loaded.isGlobalID()) {
-                            folderStorage.putFolder(loaded, treeId, params, false);
-                        } else {
-                            folderMap.put(treeId, loaded, session);
-                        }
-                    }
-                } finally {
-                    lock.unlock();
+                    folder.setSubfolderIDs(ids);
                 }
-            } catch (final Exception e) {
+                for (SortableId sortableId : subfolders) {
+                    Folder loaded = folderStorage.loadFolder(treeId, sortableId.getId(), StorageType.WORKING, params);
+                    if (loaded.isGlobalID()) {
+                        folderStorage.putFolder(loaded, treeId, params, false);
+                    } else {
+                        folderMap.put(treeId, loaded, session);
+                    }
+                }
+            } catch (Exception e) {
                 LOG.debug("", e);
             }
         }

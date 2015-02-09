@@ -50,7 +50,10 @@
 package com.openexchange.events.remote.internal;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.osgi.service.event.Event;
@@ -193,7 +196,37 @@ public class EventBridge implements MessageListener<Map<String, Object>>, EventH
     }
 
     private static boolean isPojo(Object obj) {
-        return null != obj && obj.getClass().getName().startsWith(POJO_PACKAGE);
+        if (null == obj) {
+            return false;
+        }
+
+        Class<? extends Object> clazz = obj.getClass();
+        String className = clazz.getName();
+        if (className.startsWith("[")) {
+            // Array
+            if (clazz.isPrimitive()) {
+                return true;
+            }
+
+            // Array of objects
+            Object[] objects = (Object[]) obj;
+            boolean pojo = true;
+            for (int i = 0; pojo && i < objects.length; i++) {
+                pojo = isPojo(objects[i]);
+            }
+            return pojo;
+        }
+
+        if ((LinkedList.class.equals(clazz)) || (ArrayList.class.equals(clazz))) {
+            List<?> list = (List<?>) obj;
+            boolean pojo = true;
+            for (int i = 0, len = list.size(); pojo && i < len; i++) {
+                pojo = isPojo(list.get(i));
+            }
+            return pojo;
+        }
+
+        return className.startsWith(POJO_PACKAGE);
     }
 
 }

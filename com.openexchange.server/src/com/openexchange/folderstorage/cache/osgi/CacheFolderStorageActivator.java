@@ -52,10 +52,10 @@ package com.openexchange.folderstorage.cache.osgi;
 import static com.openexchange.folderstorage.cache.CacheServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.osgi.framework.BundleActivator;
@@ -72,7 +72,6 @@ import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
-import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.lock.UserLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
@@ -84,7 +83,6 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -111,7 +109,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class, ThreadPoolService.class, ConfigurationService.class, SessiondService.class, MailAccountStorageService.class };
+        return new Class<?>[] { CacheService.class, ThreadPoolService.class, ConfigurationService.class, SessiondService.class,
+            MailAccountStorageService.class, CacheEventService.class };
     }
 
     @Override
@@ -164,6 +163,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             List<ServiceTracker<?,?>> serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
             this.serviceTrackers = serviceTrackers;
             serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new CacheFolderStorageServiceTracker(context)));
+            serviceTrackers.add(new ServiceTracker<CacheEventService, CacheEventService>(context, CacheEventService.class, new CacheFolderStorageInvalidator(context)));
             serviceTrackers.add(new ServiceTracker<CacheEventService, CacheEventService>(context, CacheEventService.class, new FolderMapInvalidator(context)));
             for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
@@ -261,10 +261,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     // There is no session available for remotely received events
                     final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
                     if (null != session) {
-                        final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
-                        final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                        String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                        Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                        String[] folderPath = (String[]) event.getProperty(FolderEventConstants.PROPERTY_FOLDER_PATH);
                         try {
-                            tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                            List<String> fp = null == folderPath ? null : Arrays.asList(folderPath);
+                            boolean singleOnly = null != contentRelated && contentRelated.booleanValue();
+                            tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, singleOnly, session, fp);
                         } catch (final OXException e) {
                             LOG.error("", e);
                         }
@@ -309,7 +312,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     if (FolderEventConstants.TOPIC_IDENTIFIERS.equals(event.getTopic())) {
                         final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
                         final String oldFolder = (String) event.getProperty(FolderEventConstants.PROPERTY_OLD_IDENTIFIER);
-                        tmp.removeSingleFromCache(sanitizeFolderId(oldFolder), FolderStorage.REAL_TREE_ID, session.getUserId(), session.getContextId(), true, session);
+                        tmp.removeSingleFromCache(Collections.singletonList(sanitizeFolderId(oldFolder)), FolderStorage.REAL_TREE_ID, session.getUserId(), session.getContextId(), true, session);
                         return;
                     }
                     final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
@@ -320,7 +323,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final String[] folderPath = (String[]) event.getProperty(FolderEventConstants.PROPERTY_FOLDER_PATH);
                     try {
                         if (null == session) {
-                            tmp.removeSingleFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true, session);
+                            tmp.removeSingleFromCache(Collections.singletonList(sanitizeFolderId(folderId)), FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true, session);
                         } else {
                             if (null != folderPath) {
                                 tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session, Arrays.asList(folderPath));
@@ -370,37 +373,21 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                  */
                 protected void doHandleEvent(final Event event) {
                     final String topic = event.getTopic();
-                    if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                        handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
-                    } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-                        @SuppressWarnings("unchecked")
-                        final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                        for (final Session session : map.values()) {
-                            handleDroppedSession(session);
+                    if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                        Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                        if (null != contextId) {
+                            Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                            if (null != userId) {
+                                FolderMapManagement.getInstance().dropFor(userId.intValue(), contextId.intValue());
+                                UserLockManagement.getInstance().dropFor(userId, contextId);
+                            }
                         }
-                    }
-                }
-
-                /**
-                 * Handles given event.
-                 *
-                 * @param event The event
-                 */
-                protected void handleDroppedSession(final Session session) {
-                    if (session.isTransient()) {
-                        return;
-                    }
-                    final SessiondService sessiondService = getService(SessiondService.class);
-                    final int contextId = session.getContextId();
-                    if (null == sessiondService.getAnyActiveSessionForUser(session.getUserId(), contextId)) {
-                        FolderMapManagement.getInstance().dropFor(session);
-                        TreeLockManagement.getInstance().dropFor(session);
-                        UserLockManagement.getInstance().dropFor(session);
-                    }
-                    if ((sessiondService instanceof SessiondServiceExtended) && !((SessiondServiceExtended) sessiondService).hasForContext(contextId)) {
-                        FolderMapManagement.getInstance().dropFor(contextId);
-                        TreeLockManagement.getInstance().dropFor(contextId);
-                        UserLockManagement.getInstance().dropFor(contextId);
+                    } else if (SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT.equals(topic)) {
+                        Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                        if (null != contextId) {
+                            FolderMapManagement.getInstance().dropFor(contextId.intValue());
+                            UserLockManagement.getInstance().dropFor(contextId.intValue());
+                        }
                     }
                 }
             };

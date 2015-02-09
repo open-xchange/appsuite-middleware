@@ -51,6 +51,7 @@ package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,13 +94,17 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class ListLsubCollection {
+final class ListLsubCollection implements Serializable {
+
+    private static final long serialVersionUID = 8327173541031987226L;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class);
 
     private static final String ROOT_FULL_NAME = "";
 
     private static final String INBOX = "INBOX";
+
+    // -----------------------------------------------------------------------------------------------------------
 
     private final ConcurrentMap<String, ListLsubEntryImpl> listMap;
     private final ConcurrentMap<String, ListLsubEntryImpl> lsubMap;
@@ -1616,7 +1621,9 @@ final class ListLsubCollection {
         return new EmptyListLsubEntry(fullName);
     }
 
-    private static class EmptyListLsubEntry implements ListLsubEntry {
+    private static class EmptyListLsubEntry implements ListLsubEntry, Serializable {
+
+        private static final long serialVersionUID = -58599804792393870L;
 
         private final String fullName;
 
@@ -1735,7 +1742,9 @@ final class ListLsubCollection {
     /**
      * A LIST/LSUB entry.
      */
-    private static final class ListLsubEntryImpl implements ListLsubEntry, Comparable<ListLsubEntryImpl> {
+    private static final class ListLsubEntryImpl implements ListLsubEntry, Comparable<ListLsubEntryImpl>, Serializable {
+
+        private static final long serialVersionUID = 7788296796126971004L;
 
         private ListLsubEntryImpl parent;
 
@@ -1761,7 +1770,7 @@ final class ListLsubCollection {
 
         private final ConcurrentMap<String, ListLsubEntryImpl> lsubMap;
 
-        private List<ACL> acls;
+        private transient List<ACL> acls;
 
         private Boolean hasChildren;
 

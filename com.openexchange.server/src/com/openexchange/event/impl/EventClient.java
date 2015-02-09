@@ -556,7 +556,7 @@ public class EventClient {
             triggerEvent(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(folder, parentFolder, folderPath)));
         }
 
-        final EventObject eventObject = new EventObject(folder, CREATED, session);
+        final EventObject eventObject = new EventObject(folder, CREATED, session).setNoDelay(true);
         EventQueue.add(eventObject);
     }
 
@@ -598,7 +598,7 @@ public class EventClient {
             triggerEvent(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, properties));
         }
 
-        final EventObject eventObject = new EventObject(newFolder, CHANGED, session);
+        final EventObject eventObject = new EventObject(newFolder, CHANGED, session).setNoDelay(true);
         EventQueue.add(eventObject);
     }
 
@@ -658,7 +658,7 @@ public class EventClient {
             triggerEvent(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folder, parentFolder, folderPath)));
         }
 
-        final EventObject eventObject = new EventObject(folder, DELETED, session);
+        final EventObject eventObject = new EventObject(folder, DELETED, session).setNoDelay(true);
         EventQueue.add(eventObject);
     }
 

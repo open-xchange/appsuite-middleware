@@ -150,6 +150,5 @@ public enum ITipAction {
      * If ORGANIZER: Send an ADD mail
      * If Attendee: Send a REPLY
      */
-    CREATE
-
+    CREATE;
 }

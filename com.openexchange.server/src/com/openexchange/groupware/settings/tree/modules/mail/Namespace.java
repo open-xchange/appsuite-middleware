@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,65 @@
  *
  */
 
-package com.openexchange.imap.notify;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.AbstractWarningAwareReadOnlyValue;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 
+
 /**
- * {@link IMAPNotifierRegistryService} - The registry service for notifier tasks.
+ * {@link Namespace}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMAPNotifierRegistryService {
+public class Namespace extends AbstractWarningAwareReadOnlyValue implements PreferencesItemService {
 
     /**
-     * Adds (and starts) a new notifier task for specified account.
-     *
-     * @param accountId The account identifier
-     * @param session The session providing user information
-     * @return <code>true</code> for successful insertion and start-up of a new notifier task; otherwise <code>false</code>
+     * Initializes a new {@link Namespace}.
      */
-    public boolean addTaskFor(final int accountId, final Session session);
+    public Namespace() {
+        super();
+    }
 
-    /**
-     * Checks if this registry contains a notifier task for specified session's user.
-     *
-     * @param session The session providing user information
-     * @return <code>true</code> if this registry contains a notifier task for specified session's user; otherwise <code>false</code>
-     */
-    public boolean containsTaskFor(final Session session);
+    @Override
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "namespace" };
+    }
 
-    /**
-     * Removes and shuts down all notifier tasks for specified session's user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     */
-    public void removeTaskFor(int userId, int contextId);
+    @Override
+    public IValueHandler getSharedValue() {
+        return this;
+    }
 
-    /**
-     * Handles tracked removal of specified session
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     */
-    public void handleRemovedSession(int userId, int contextId);
+    @Override
+    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
+
+            String namespace = mailAccess.getFolderStorage().getDefaultFolderPrefix();
+            setting.setSingleValue(namespace);
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close();
+            }
+        }
+    }
+
+    @Override
+    public boolean isAvailable(UserConfiguration userConfig) {
+        return userConfig.hasWebMail();
+    }
 
 }

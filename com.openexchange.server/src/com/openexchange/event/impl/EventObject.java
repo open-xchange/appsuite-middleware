@@ -65,46 +65,79 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-
 public class EventObject {
 
-	private int module;
-
-	private int action;
-
-	private Object obj;
-
-	private Session session;
-
-	private Date creationDate;
+	private final int module;
+	private final int action;
+	private final Object obj;
+	private final Session session;
+	private final Date creationDate;
+	private boolean noDelay;
 
 	public EventObject(final Appointment obj, final int action, final Session session) {
-		init(obj, Types.APPOINTMENT, action, session);
+	    super();
+		this.obj = obj;
+        this.module = Types.APPOINTMENT;
+        this.action = action;
+        this.session = session;
+        creationDate = new Date();
 	}
 
 	public EventObject(final Task obj, final int action, final Session session) {
-		init(obj, Types.TASK, action, session);
+        super();
+		this.obj = obj;
+        this.module = Types.TASK;
+        this.action = action;
+        this.session = session;
+        creationDate = new Date();
 	}
 
 	public EventObject(final Contact obj, final int action, final Session session) {
-		init(obj, Types.CONTACT, action, session);
+        super();
+		this.obj = obj;
+        this.module = Types.CONTACT;
+        this.action = action;
+        this.session = session;
+        creationDate = new Date();
 	}
 
 	public EventObject(final FolderObject obj, final int action, final Session session) {
-		init(obj, Types.FOLDER, action, session);
+        super();
+		this.obj = obj;
+        this.module = Types.FOLDER;
+        this.action = action;
+        this.session = session;
+        creationDate = new Date();
 	}
 
 	public EventObject(final DocumentMetadata obj, final int action, final Session session) {
-		init(obj, Types.INFOSTORE, action, session);
+        super();
+		this.obj = obj;
+        this.module = Types.INFOSTORE;
+        this.action = action;
+        this.session = session;
+        creationDate = new Date();
 	}
 
-	private void init(final Object obj, final int module, final int action, final Session session) {
-		this.obj = obj;
-		this.module = module;
-		this.action = action;
-		this.session = session;
-		creationDate = new Date();
-	}
+	/**
+     * Sets the <code>no-delay</code> flag
+     *
+     * @param noDelay The <code>no-delay</code> flag to set
+     * @return This instance
+     */
+    public EventObject setNoDelay(boolean noDelay) {
+        this.noDelay = noDelay;
+        return this;
+    }
+
+    /**
+     * Gets the <code>no-delay</code> flag
+     *
+     * @return The <code>no-delay</code> flag
+     */
+    public boolean isNoDelay() {
+        return noDelay;
+    }
 
 	public int getModule() {
 		return module;

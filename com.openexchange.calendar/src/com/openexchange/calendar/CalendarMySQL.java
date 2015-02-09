@@ -3268,19 +3268,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             throw OXCalendarExceptionCodes.UPDATE_WITHOUT_PARTICIPANTS.create();
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("New participants:");
-            for (Participant d : new_participants) {
-                LOG.debug(Integer.toString(d.getIdentifier()));
-                LOG.debug(d.getEmailAddress());
-            }
-            LOG.debug("Old participants:");
-            for (Participant d : old_participants) {
-                LOG.debug(Integer.toString(d.getIdentifier()));
-                LOG.debug(d.getEmailAddress());
-            }
-        }
-
         if (new_participants != null && new_participants.size() > 0) {
             final Set<Integer> knownExternalIds = createExternalIdentifierSet(old_participants);
             retval = true;

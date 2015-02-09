@@ -467,47 +467,25 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         synchronized (retval) {
             final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, retval, session);
             if (!isDefaultFolder && !STR_INBOX.equals(fullName) && (!listEntry.exists())) {
-                throw IMAPException.create(
-                    IMAPException.Code.FOLDER_NOT_FOUND,
-                    imapConfig,
-                    session,
-                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
+                ListLsubCache.clearCache(accountId, session);
+                throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
             if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
                 throw IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, imapConfig, session, Integer.valueOf(desiredMode));
             }
             final boolean selectable = listEntry.canOpen();
             if (!selectable) { // NoSelect
-                throw IMAPException.create(
-                    IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
-                    imapConfig,
-                    session,
-                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
+                throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
             try {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session, accountId))) {
-                    throw IMAPException.create(
-                        IMAPException.Code.NO_FOLDER_OPEN,
-                        imapConfig,
-                        session,
-                        isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
+                    throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
                 }
             } catch (final MessagingException e) {
-                throw IMAPException.create(
-                    IMAPException.Code.NO_ACCESS,
-                    imapConfig,
-                    session,
-                    e,
-                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
-            if ((Folder.READ_WRITE == desiredMode) && (!selectable) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
-                MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT,
-                STR_FALSE)) && IMAPCommandsCollection.isReadOnly(retval)) {
-                throw IMAPException.create(
-                    IMAPException.Code.READ_ONLY_FOLDER,
-                    imapConfig,
-                    session,
-                    isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
+            if ((Folder.READ_WRITE == desiredMode) && (!selectable) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_FALSE)) && IMAPCommandsCollection.isReadOnly(retval)) {
+                throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
             openFolder(desiredMode, retval);
         }
