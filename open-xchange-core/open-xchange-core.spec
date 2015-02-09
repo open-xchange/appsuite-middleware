@@ -998,6 +998,10 @@ fi
 ox_add_property com.openexchange.rest.services.basic-auth.login "" /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.rest.services.basic-auth.password "" /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-2079
+ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
+ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
+
 # SoftwareChange_Request-2081
 PFILE=/opt/open-xchange/etc/configdb.properties
 KEY=minIdle
@@ -1009,9 +1013,6 @@ fi
 PFILE=/opt/open-xchange/etc/mail.properties
 KEY=com.openexchange.mail.imageHost
 ox_add_property $KEY "" $PFILE
-
-# SoftwareChagne_Request-2110
-ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
 
 # SoftwareChange_Request-2108
 pfile=/opt/open-xchange/etc/mime.types
@@ -1032,12 +1033,11 @@ EOF
    rm -f $ptmp
 fi
 
+# SoftwareChagne_Request-2110
+ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
+
 # SoftwareChange_Request-2148
 ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xchange/etc/mail.properties
-
-# SoftwareChange_Request-2079
-ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
-ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
 
 # SoftwareChange_Request-2171
 PFILE=/opt/open-xchange/etc/server.properties
@@ -1132,6 +1132,12 @@ if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
     ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
 fi
 
+# SoftwareChange_Request-2249
+ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt/open-xchange/etc/requestwatcher.properties
+
+# SoftwareChange_Request-2250
+ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
+
 # SoftwareChange_Request-2342
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
@@ -1188,6 +1194,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-09
 * Fri Jan 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth candidate for 7.6.2 release
 * Wed Jan 28 2015 Marcus Klein <marcus.klein@open-xchange.com>
