@@ -84,9 +84,11 @@ public class ChunkData {
      * Sets the user identifier
      *
      * @param userId The user identifier to set
+     * @return This chunk data with value applied
      */
-    public void setUserId(int userId) {
+    public ChunkData setUserId(int userId) {
         this.userId = userId;
+        return this;
     }
 
     /**
@@ -102,9 +104,11 @@ public class ChunkData {
      * Sets the context identifier
      *
      * @param contextId The context identifier to set
+     * @return This chunk data with value applied
      */
-    public void setContextId(int contextId) {
+    public ChunkData setContextId(int contextId) {
         this.contextId = contextId;
+        return this;
     }
 
     /**
@@ -120,9 +124,11 @@ public class ChunkData {
      * Sets the document identifier
      *
      * @param documentId The document identifier to set
+     * @return This chunk data with value applied
      */
-    public void setDocumentId(UUID documentId) {
+    public ChunkData setDocumentId(UUID documentId) {
         this.documentId = documentId;
+        return this;
     }
 
     /**
@@ -138,9 +144,11 @@ public class ChunkData {
      * Sets the offset
      *
      * @param offset The offset to set
+     * @return This chunk data with value applied
      */
-    public void setOffset(long offset) {
+    public ChunkData setOffset(long offset) {
         this.offset = offset;
+        return this;
     }
 
     /**
@@ -156,9 +164,11 @@ public class ChunkData {
      * Sets the length
      *
      * @param length The length to set
+     * @return This chunk data with value applied
      */
-    public void setLength(long length) {
+    public ChunkData setLength(long length) {
         this.length = length;
+        return this;
     }
 
 }
