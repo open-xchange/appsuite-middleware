@@ -92,6 +92,40 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
+    public List<UUID> getDocuments(int userId, int contextId) throws OXException {
+        DatabaseService dbService = getDbService();
+        Connection con = dbService.getReadOnly(contextId);
+        try {
+            return getDocuments(userId, contextId, con);
+        } finally {
+            dbService.backReadOnly(contextId, con);
+        }
+    }
+
+    private List<UUID> getDocuments(int userId, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT uuid FROM scality_filestore WHERE cid=? AND user=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+            List<UUID> documentIds = new LinkedList<UUID>();
+            do {
+                documentIds.add(UUIDs.toUUID(rs.getBytes(1)));
+            } while (rs.next());
+            return documentIds;
+        } catch (SQLException e) {
+            throw SproxydExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
     public List<Chunk> getChunks(UUID documentId, int userId, int contextId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getReadOnly(contextId);
@@ -182,6 +216,37 @@ public class RdbChunkStorage implements ChunkStorage {
 
             if (!rs.next()) {
                 throw SproxydExceptionCode.NO_NEXT_CHUNK.create(UUIDs.getUnformattedString(chunkId));
+            }
+            return new Chunk(documentId, UUIDs.toUUID(rs.getBytes(1)), rs.getLong(2), rs.getLong(3));
+        } catch (SQLException e) {
+            throw SproxydExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
+    public Chunk getLastChunk(UUID documentId, int userId, int contextId) throws OXException {
+        DatabaseService dbService = getDbService();
+        Connection con = dbService.getReadOnly(contextId);
+        try {
+            return getLastChunk(documentId, userId, contextId, con);
+        } finally {
+            dbService.backReadOnly(contextId, con);
+        }
+    }
+
+    private Chunk getLastChunk(UUID documentId, int userId, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT scality_id, offset, length FROM scality_filestore WHERE cid=? AND user=? AND uuid=? ORDER BY offsetDESC LIMIT 1");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setBytes(3, UUIDs.toByteArray(documentId));
+
+            if (!rs.next()) {
+                throw SproxydExceptionCode.NO_LAST_CHUNK.create(UUIDs.getUnformattedString(documentId));
             }
             return new Chunk(documentId, UUIDs.toUUID(rs.getBytes(1)), rs.getLong(2), rs.getLong(3));
         } catch (SQLException e) {

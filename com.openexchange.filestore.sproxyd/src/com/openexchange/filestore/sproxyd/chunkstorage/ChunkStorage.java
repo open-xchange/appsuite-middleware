@@ -62,6 +62,16 @@ import com.openexchange.exception.OXException;
 public interface ChunkStorage {
 
     /**
+     * Gets the stored documents for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The documents
+     * @throws OXException If documents cannot be returned
+     */
+    List<UUID> getDocuments(int userId, int contextId) throws OXException;
+
+    /**
      * Gets the chunks for the denoted document.
      *
      * @param documentId The document identifier
@@ -93,6 +103,17 @@ public interface ChunkStorage {
      * @throws OXException If chunk cannot be returned
      */
     Chunk getNextChunk(UUID chunkId, UUID documentId, int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the next chunk following referenced chunk in denoted document.
+     *
+     * @param documentId The document identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The next chunk or <code>null</code> if there is no next chunk
+     * @throws OXException If chunk cannot be returned
+     */
+    Chunk getLastChunk(UUID documentId, int userId, int contextId) throws OXException;
 
     /**
      * Stores a new chunk
