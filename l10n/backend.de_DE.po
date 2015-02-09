@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-02-05 15:19+0100\n"
+"PO-Revision-Date: 2015-02-09 15:55+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -870,78 +870,6 @@ msgstr ""
 "Sie erhalten diese E-Mail, da der Termin die Ressource %1$s enthält, die Sie "
 "verwalten."
 
-#. No account found with identifier "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:65
-msgid "The account \"%1$s\" was not found."
-msgstr "Der Account \"%1$s\" wurde nicht gefunden."
-
-#. Invalid presence packet. A presence packet provides the status as well as the status message; e.g. "Online" + "At work"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:66
-msgid "Invalid presence status."
-msgstr "Ungültiger Presence-Status."
-
-#. A chat with identifier "%1$s" already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:69
-msgid "A chat with identifier \"%1$s\" already exists."
-msgstr "Ein Chat mit der ID \"%1$s\" ist bereits vorhanden."
-
-#. Chat member "%1$s" already exists in chat "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:72
-msgid "Chat member \"%1$s\" already exists in chat \"%2$s\"."
-msgstr "Chat-Mitglied \"%1$s\" ist bereits im Chat \"%2$s\" vorhanden."
-
-#. No chat found with identifier "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:75
-msgid "Chat with identifier \"%1$s\" does not exist."
-msgstr "Ein Chat mit der ID \"%1$s\" ist nicht vorhanden."
-
-#. Unknown chat service: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:78
-msgid "The requested chat service \"%1$s\" is unknown."
-msgstr "Der angeforderte Chat-Dienst \"%1$s\" ist unbekannt."
-
-#. No message found with identifier "%1$s" in chat "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:81
-msgid "Message with identifier \"%1$s\" does not exist in chat \"%2$s\"."
-msgstr ""
-"Eine Nachricht mit der ID \"%1$s\" ist im Chat \"%2$s\" nicht vorhanden."
-
-#. No member found with identifier "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:84
-msgid "Member with identifier \"%1$s\" does not exist."
-msgstr "Ein Mitglied mit der ID \"%1$s\" ist nicht vorhanden."
-
-#. Invalid conversation identifier: "%1$s"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:87
-msgid "Invalid chat identifier: \"%1$s\""
-msgstr "Ungültige Chat-ID: %1$s."
-
-#. Invalid roster identifier: "%1$s". A roster is the list of chat buddies/contacts that a chat user knows about and about whom he receives frequent updates about their presence/availability.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:90
-msgid "The provided roster identifier \"%1$s\" is invalid."
-msgstr "Die angegebene Roster-ID \"%1$s\" ist ungültig. "
-
-#. Posted message is too long.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:93
-msgid "Posted message is too long."
-msgstr "Die veröffentlichte Nachricht ist zu lang."
-
-#. Subject is too long and is therefore truncated.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:96
-msgid "Subject is too long and is therefore truncated."
-msgstr "Der Betreff ist zu lang und wird daher abgeschnitten."
-
-#. The chat system message when a user left a chat.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatStrings.java:69
-msgid "%1$s has left the chat"
-msgstr "%1$s hat den Chat verlassen"
-
-#. The chat system message when a user joined a chat.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatStrings.java:72
-msgid "%1$s has joined the chat"
-msgstr "%1$s ist dem Chat beigetreten"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
 msgstr "LDAP-Kontakte können nicht gelöscht werden."
@@ -1731,7 +1659,6 @@ msgstr "Die angegebene Box-URL bezeichnet keine Datei: %1$s"
 
 #. Missing file name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:86
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:86
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:83
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:86
@@ -1747,7 +1674,6 @@ msgstr "Versionierung wird nicht vom Box-Dateispeicher unterstützt."
 
 #. Missing configuration for account "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:89
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:92
@@ -1757,7 +1683,6 @@ msgstr "Fehlende Konfiguration für den Account \"%1$s\"."
 
 #. Bad or expired access token. Need to re-authenticate user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:95
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:95
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:95
@@ -1769,7 +1694,6 @@ msgstr ""
 
 #. An I/O error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:98
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:98
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:95
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:98
 msgid "An I/O error occurred: %1$s"
@@ -1777,13 +1701,11 @@ msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
 #. Authentication failed: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:101
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:101
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:101
 msgid "Authentication failed: %1$s"
 msgstr "Authentifizierung fehlgeschlagen: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
@@ -2165,60 +2087,6 @@ msgstr "CMIS URL bezeichnet keine Datei: %1$s"
 msgid "Versioning not supported by CMIS file storage."
 msgstr "Versionierung wird nicht vom CMIS-Dateispeicher unterstützt."
 
-#. A Copy.com error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:62
-msgid "A Copy.com error occurred: %1$s"
-msgstr "Es trat ein Copy.com-Fehler auf: %1$s"
-
-#. A Copy.com error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:65
-msgid ""
-"A Copy.com server error occurred with HTTP status code %1$s. Error message: "
-"%2$s"
-msgstr ""
-"Es trat ein Copy.com-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
-"Fehlermeldung: %2$s"
-
-#. Invalid Copy.com URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:68
-msgid "The provided Copy.com URL: %1$s is invalid"
-msgstr "Die angegebene Copy.com-URL %1$s ist ungültig."
-
-#. Copy.com URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:71
-msgid "The provided Copy.com URL does not denote a directory: %1$s"
-msgstr "Die angegebene Copy.com-URL bezeichnet kein Verzeichnis: %1$s"
-
-#. The Copy.com resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:74
-msgid "The provided Copy.com resource does not exist: %1$s"
-msgstr "Die angegebene Copy.com-Ressource ist nicht vorhanden: %1$s"
-
-#. Update denied for Copy.com resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:77
-msgid "Update denied for the provided Copy.com resource: %1$s"
-msgstr "Aktualisierung für die angegebene Copy.com-Ressource verweigert: %1$s"
-
-#. Delete denied for Copy.com resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:80
-msgid "Delete denied for the provided Copy.com resource: %1$s"
-msgstr "Löschvorgang für die angegebene Copy.com-Ressource verweigert: %1$s"
-
-#. Copy.com URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:83
-msgid "The provided Copy.com URL does not denote a file: %1$s"
-msgstr "Die angegebene Copy.com-URL bezeichnet keine Datei: %1$s"
-
-#. Versioning not supported by Copy.com file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:89
-msgid "Versioning not supported by Copy.com file storage."
-msgstr "Versionierung wird nicht vom Copy.com-Dateispeicher unterstützt."
-
-#. The Copy.com resource does not exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.copycom/src/com/openexchange/file/storage/copycom/CopyComExceptionMessages.java:104
-msgid "The Copy.com resource does not exist"
-msgstr "Die Copy.com-Ressource ist nicht vorhanden."
-
 #. A Dropbox error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:62
 msgid "A Dropbox error occurred: %1$s"
@@ -2479,7 +2347,6 @@ msgstr "Die Datei \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
 
 #. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:100
-#, fuzzy
 msgid ""
 "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
 "into the account \"%3$s\"."
@@ -2489,7 +2356,6 @@ msgstr ""
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:103
-#, fuzzy
 msgid ""
 "All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when "
 "moving it into the account \"%3$s\"."
@@ -2499,7 +2365,6 @@ msgstr ""
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:106
-#, fuzzy
 msgid ""
 "The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost "
 "when moving it into the account \"%3$s\"."
@@ -2509,7 +2374,6 @@ msgstr ""
 
 #. The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:109
-#, fuzzy
 msgid ""
 "The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other "
 "users when moving it into the account \"%3$s\"."
@@ -2520,7 +2384,6 @@ msgstr ""
 
 #. The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:112
-#, fuzzy
 msgid ""
 "The shared folder \"%1$s\" is no longer accessible by other users when "
 "moving it into the account \"%2$s\"."
@@ -2530,13 +2393,12 @@ msgstr ""
 
 #. The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:115
-#, fuzzy
 msgid ""
 "The file \"%1$s\" was not updated due to possible data loss. Please review "
 "the warnings for details."
 msgstr ""
-"Die Datei \"%1$s\" wurde wegen möglichen Datenverlusten nicht aktualisiert. "
-"Bitte lesen Sie die Warnhinweise für weitere Informationen."
+"Die Datei \"%1$s\" wurde aufgrund möglicher Datenverluste nicht "
+"aktualisiert. Bitte lesen Sie die Warnhinweise für weitere Informationen."
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -5144,13 +5006,12 @@ msgstr "Folgende Ordner konnten nicht gelöscht werden: %1$s"
 
 #. The folder \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:105
-#, fuzzy
 msgid ""
 "The folder \"%1$s\" was not updated due to possible data loss. Please review "
 "the warnings for details."
 msgstr ""
-"Der Ordner \"%1$s\" wurde mittlerweile geändert. Bitte aktualisieren Sie die "
-"Ansicht und versuchen Sie es erneut."
+"Der Ordner \"%1$s\" wurde aufgrund möglicher Datenverluste nicht "
+"aktualisiert. Bitte lesen Sie die Warnhinweise für weitere Informationen."
 
 #. No group given.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
@@ -5725,6 +5586,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "Could not connect to the context storage."
 msgstr "Verbindung zum Kontext-Speicher fehlgeschlagen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:65
+msgid "The account \"%1$s\" was not found."
+msgstr "Der Account \"%1$s\" wurde nicht gefunden."
 
 #. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
 #. This should happen in very rare conditions and is not visible to the client.
@@ -11769,6 +11634,81 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Invalid presence status."
+#~ msgstr "Ungültiger Presence-Status."
+
+#~ msgid "A chat with identifier \"%1$s\" already exists."
+#~ msgstr "Ein Chat mit der ID \"%1$s\" ist bereits vorhanden."
+
+#~ msgid "Chat member \"%1$s\" already exists in chat \"%2$s\"."
+#~ msgstr "Chat-Mitglied \"%1$s\" ist bereits im Chat \"%2$s\" vorhanden."
+
+#~ msgid "Chat with identifier \"%1$s\" does not exist."
+#~ msgstr "Ein Chat mit der ID \"%1$s\" ist nicht vorhanden."
+
+#~ msgid "The requested chat service \"%1$s\" is unknown."
+#~ msgstr "Der angeforderte Chat-Dienst \"%1$s\" ist unbekannt."
+
+#~ msgid "Message with identifier \"%1$s\" does not exist in chat \"%2$s\"."
+#~ msgstr ""
+#~ "Eine Nachricht mit der ID \"%1$s\" ist im Chat \"%2$s\" nicht vorhanden."
+
+#~ msgid "Member with identifier \"%1$s\" does not exist."
+#~ msgstr "Ein Mitglied mit der ID \"%1$s\" ist nicht vorhanden."
+
+#~ msgid "Invalid chat identifier: \"%1$s\""
+#~ msgstr "Ungültige Chat-ID: %1$s."
+
+#~ msgid "The provided roster identifier \"%1$s\" is invalid."
+#~ msgstr "Die angegebene Roster-ID \"%1$s\" ist ungültig. "
+
+#~ msgid "Posted message is too long."
+#~ msgstr "Die veröffentlichte Nachricht ist zu lang."
+
+#~ msgid "Subject is too long and is therefore truncated."
+#~ msgstr "Der Betreff ist zu lang und wird daher abgeschnitten."
+
+#~ msgid "%1$s has left the chat"
+#~ msgstr "%1$s hat den Chat verlassen"
+
+#~ msgid "%1$s has joined the chat"
+#~ msgstr "%1$s ist dem Chat beigetreten"
+
+#~ msgid "A Copy.com error occurred: %1$s"
+#~ msgstr "Es trat ein Copy.com-Fehler auf: %1$s"
+
+#~ msgid ""
+#~ "A Copy.com server error occurred with HTTP status code %1$s. Error "
+#~ "message: %2$s"
+#~ msgstr ""
+#~ "Es trat ein Copy.com-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
+#~ "Fehlermeldung: %2$s"
+
+#~ msgid "The provided Copy.com URL: %1$s is invalid"
+#~ msgstr "Die angegebene Copy.com-URL %1$s ist ungültig."
+
+#~ msgid "The provided Copy.com URL does not denote a directory: %1$s"
+#~ msgstr "Die angegebene Copy.com-URL bezeichnet kein Verzeichnis: %1$s"
+
+#~ msgid "The provided Copy.com resource does not exist: %1$s"
+#~ msgstr "Die angegebene Copy.com-Ressource ist nicht vorhanden: %1$s"
+
+#~ msgid "Update denied for the provided Copy.com resource: %1$s"
+#~ msgstr ""
+#~ "Aktualisierung für die angegebene Copy.com-Ressource verweigert: %1$s"
+
+#~ msgid "Delete denied for the provided Copy.com resource: %1$s"
+#~ msgstr "Löschvorgang für die angegebene Copy.com-Ressource verweigert: %1$s"
+
+#~ msgid "The provided Copy.com URL does not denote a file: %1$s"
+#~ msgstr "Die angegebene Copy.com-URL bezeichnet keine Datei: %1$s"
+
+#~ msgid "Versioning not supported by Copy.com file storage."
+#~ msgstr "Versionierung wird nicht vom Copy.com-Dateispeicher unterstützt."
+
+#~ msgid "The Copy.com resource does not exist"
+#~ msgstr "Die Copy.com-Ressource ist nicht vorhanden."
 
 #~ msgid "Account not found with identifier %1$s for user %2$s"
 #~ msgstr "Kein Account mit der ID %1$s für Benutzer %2$s gefunden"
