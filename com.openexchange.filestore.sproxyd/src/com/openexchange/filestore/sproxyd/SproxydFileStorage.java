@@ -52,6 +52,7 @@ package com.openexchange.filestore.sproxyd;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -139,7 +140,10 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-        return getStorage().deleteDocument(UUIDs.fromUnformattedString(identifier), contextId, userId);
+        UUID documentId = UUIDs.fromUnformattedString(identifier);
+        boolean removed = client.delete(documentId);
+        getStorage().deleteDocument(documentId, userId, contextId);
+        return removed;
     }
 
     @Override
@@ -186,12 +190,78 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public void setFileLength(long length, String name) throws OXException {
-        // TODO Auto-generated method stub
-
+        UUID documentId = UUIDs.fromUnformattedString(name);
+        List<Chunk> chunks = getStorage().getChunks(documentId, userId, contextId);
+        if (null == chunks || 0 == chunks.size()) {
+            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+        }
+        for (Chunk chunk : chunks) {
+            if (chunk.getOffset() >= length) {
+                /*
+                 * delete the whole chunk
+                 */
+                client.delete(chunk.getScalityId());
+                getStorage().deleteChunk(chunk.getScalityId(), contextId);
+            } else if (chunk.getOffset() < length && length <= chunk.getOffset() + chunk.getLength()) {
+                /*
+                 * trim the last chunk
+                 */
+                long newChunkLength = chunk.getOffset() + chunk.getLength() - length;
+                InputStream data = null;
+                try {
+                    data = client.get(chunk.getDocumentId(), 0, newChunkLength);
+                    UUID scalityId = client.put(data, newChunkLength);
+                    ChunkData chunkData = new ChunkData(contextId, userId).setLength(newChunkLength).setOffset(chunk.getOffset()).setDocumentId(documentId);
+                    getStorage().storeChunk(scalityId, chunkData);
+                } finally {
+                    Streams.close(data);
+                }
+                break;
+            }
+        }
     }
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
+        long rangeStart = offset;
+        long rangeEnd = offset + length;
+
+        UUID documentId = UUIDs.fromUnformattedString(name);
+        List<Chunk> chunks = getStorage().getChunks(documentId, userId, contextId);
+        if (null == chunks || 0 == chunks.size()) {
+            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+        }
+        /*
+         * browse to start chunk
+         */
+        Chunk startChunk = null;
+        Iterator<Chunk> iterator = chunks.iterator();
+        do {
+            Chunk chunk = iterator.next();
+            if (chunk.getOffset() <= rangeStart && rangeStart < chunk.getOffset() + chunk.getLength()) {
+                startChunk = chunk;
+            }
+        } while (null == startChunk && iterator.hasNext());
+        /*
+         * check if range can be satisfied by start chunk solely
+         */
+        if (startChunk.getOffset() + startChunk.getLength() >= rangeEnd) {
+            return client.get(startChunk.getScalityId(), offset - startChunk.getOffset(), length);
+        }
+        /*
+         * browse further & collect data until end chunk, otherwise
+         */
+        List<InputStream> streams = new ArrayList<InputStream>();
+//        streams.add(client.get(startChunk.getScalityId(), offset - startChunk.getOffset(), startChunk.getOffset() + startChunk.getLength() - length));
+//        while (iterator.hasNext()) {
+//            Chunk chunk = iterator.next();
+//
+//            if (chunk.getOffset() + chunk.getLength() > offset + length) {
+//                break;
+//            }
+//        }
+
+
         // TODO Auto-generated method stub
         return null;
     }

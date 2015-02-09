@@ -154,6 +154,7 @@ public class SproxydClient {
             if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {
                 InputStream content = response.getEntity().getContent();
                 response = null;
+                get = null;
                 return content;
             }
             if (HttpServletResponse.SC_NOT_FOUND == status) {
