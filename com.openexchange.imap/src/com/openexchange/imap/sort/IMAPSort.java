@@ -57,9 +57,7 @@ import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Locale;
 import javax.mail.FetchProfile;
 import javax.mail.FolderClosedException;
@@ -149,22 +147,22 @@ public final class IMAPSort {
      * @return The IMAP-sorted sequence number or <code>null</code> if unable to do IMAP sort
      * @throws MessagingException If sort attempt fails horribly
      */
-    public static int[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailSortField sortField, final OrderDirection orderDir, final IMAPConfig imapConfig, final boolean doImapSort, final int threshold) throws MessagingException {
-        final int messageCount = imapFolder.getMessageCount();
+    public static int[] sortMessages(IMAPFolder imapFolder, int[] filter, MailSortField sortField, OrderDirection orderDir, IMAPConfig imapConfig, boolean doImapSort, int threshold) throws MessagingException {
+        int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             return new int[0];
         }
-        final int size = filter == null ? messageCount : filter.length;
+        int size = filter == null ? messageCount : filter.length;
         if (doImapSort || (imapConfig.getCapabilities().hasSort() && (size >= threshold))) {
             try {
                 // Get IMAP sort criteria
-                final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
-                final String sortCriteria = getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
+                MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
+                String sortCriteria = getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
                 if (null != sortCriteria) {
-                    final int[] seqNums;
+                    int[] seqNums;
                     {
                         // Do IMAP sort
-                        final long start = System.currentTimeMillis();
+                        long start = System.currentTimeMillis();
                         seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         LOG.debug("IMAP sort took {}msec", (System.currentTimeMillis() - start));
@@ -174,27 +172,27 @@ public final class IMAPSort {
                     }
                     return seqNums;
                 }
-            } catch (final FolderClosedException e) {
+            } catch (FolderClosedException e) {
                 /*
                  * Caused by a protocol error such as a socket error. No retry in this case.
                  */
                 throw e;
-            } catch (final StoreClosedException e) {
+            } catch (StoreClosedException e) {
                 /*
                  * Caused by a protocol error such as a socket error. No retry in this case.
                  */
                 throw e;
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 if (e.getNextException() instanceof ProtocolException) {
-                    final ProtocolException protocolException = (ProtocolException) e.getNextException();
-                    final Response response = protocolException.getResponse();
+                    ProtocolException protocolException = (ProtocolException) e.getNextException();
+                    Response response = protocolException.getResponse();
                     if (response != null && response.isBYE()) {
                         /*
                          * The BYE response is always untagged, and indicates that the server is about to close the connection.
                          */
                         throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
                     }
-                    final Throwable cause = protocolException.getCause();
+                    Throwable cause = protocolException.getCause();
                     if (cause instanceof StoreClosedException) {
                         /*
                          * Connection is down. No retry.

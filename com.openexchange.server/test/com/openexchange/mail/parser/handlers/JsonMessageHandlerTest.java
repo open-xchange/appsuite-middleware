@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.parser.handlers;
 
-import java.io.File;
 import java.io.FileInputStream;
 import junit.framework.TestCase;
 import org.json.JSONArray;
@@ -463,7 +462,7 @@ public class JsonMessageHandlerTest extends TestCase {
             assertTrue("Unexpected content", jAttachment3.getString("content_type").startsWith("application/pdf"));
             assertTrue("Unexpected content", jAttachment4.getString("content_type").startsWith("image/png"));
 
-            // System.out.println(jMail.toString(2));
+            System.out.println(jMail.toString(2));
 
         } catch (Exception e) {
             e.printStackTrace();

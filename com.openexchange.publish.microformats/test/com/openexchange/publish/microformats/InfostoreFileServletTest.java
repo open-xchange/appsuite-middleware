@@ -66,12 +66,13 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.session.Session;
 
 
 /**
  * Unit tests for {@link InfostoreFileServlet}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.1
  */
@@ -82,7 +83,7 @@ public class InfostoreFileServletTest {
      * Instance to test
      */
     @InjectMocks
-    private InfostoreFileServlet infostoreFileServlet = null;
+    private final InfostoreFileServlet infostoreFileServlet = null;
 
     /**
      * Mock of the {@link Publication}
@@ -112,9 +113,15 @@ public class InfostoreFileServletTest {
 
     @Test
     public void testLoadMetadata_PublicationNull_ReturnEmptyObject() throws OXException {
-        DocumentMetadata loadMetadata = this.infostoreFileServlet.loadMetadata(null, 1);
+        OXException exception = null;
+        try {
+            this.infostoreFileServlet.loadMetadata(null, 1);
+        } catch (OXException oe) {
+            exception = oe;
+        }
 
-        Assert.assertNotNull(loadMetadata);
+        Assert.assertNotNull("Exception expected.", exception);
+        Assert.assertTrue("Wrong exception.", PublicationErrorMessage.NOT_FOUND_EXCEPTION.equals(exception));
     }
 
     @Test

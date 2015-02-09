@@ -90,7 +90,6 @@ import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -1635,24 +1634,11 @@ public class MimeMessageFiller {
         return sb.toString();
     }
 
-    private static final Pattern PATTERN_SRC = Pattern.compile("<img[^>]*?src=\"([^\"]+)\"[^>]*/?>", Pattern.CASE_INSENSITIVE);
-
+    private static final Pattern PATTERN_SRC = MimeMessageUtility.PATTERN_SRC;
     private static final Pattern PATTERN_AMP = Pattern.compile(Pattern.quote("&amp;"));
 
     private static String blankSrc(final String imageTag) {
-        if (isEmpty(imageTag)) {
-            return imageTag;
-        }
-        final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
-        if (!srcMatcher.find()) {
-            return imageTag;
-        }
-        final StringBuffer sb = new StringBuffer(imageTag.length());
-        int st = srcMatcher.start(1);
-        int end = srcMatcher.end(1);
-        srcMatcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageTag.substring(end)));
-        srcMatcher.appendTail(sb);
-        return sb.toString();
+        return MimeMessageUtility.blankSrc(imageTag);
     }
 
     private static final String VERSION_NAME = Version.NAME;
@@ -1840,25 +1826,8 @@ public class MimeMessageFiller {
         return false;
     }
 
-    private static String urlDecode(final String s) {
-        try {
-            return AJAXUtility.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
-        } catch (final RuntimeException e) {
-            return s;
-        }
-    }
-
-    private static final Pattern PATTERN_CODE_POINT = Pattern.compile("%u00([a-fA-F0-9]{2})");
-
-    private static String replaceURLCodePoints(final String s) {
-        final Matcher m = PATTERN_CODE_POINT.matcher(s);
-        final StringBuffer buffer = new StringBuffer(s.length());
-        while (m.find()) {
-            final char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
-            m.appendReplacement(buffer, com.openexchange.java.Strings.quoteReplacement(new String(chars)));
-        }
-        m.appendTail(buffer);
-        return buffer.toString();
+    private static String urlDecode(String s) {
+        return MimeMessageUtility.urlDecode(s);
     }
 
     private static final Pattern PATTERN_DASHES = Pattern.compile("-+");

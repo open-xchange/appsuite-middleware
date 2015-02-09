@@ -196,7 +196,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
 
     @Override
     public int getColumnID() {
-        return 3040;
+        return 3050;
     }
 
     @Override
