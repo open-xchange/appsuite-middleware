@@ -58,8 +58,11 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
@@ -73,10 +76,20 @@ public class SproxydFileStorage implements FileStorage {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydFileStorage.class);
 
     private final SproxydClient client;
+    private final ServiceLookup services;
 
-    public SproxydFileStorage() {
+    public SproxydFileStorage(ServiceLookup services) {
         super();
+        this.services = services;
         this.client = new SproxydClient("http://sproxyd.ox.io/proxy/57462_ctx_store/");
+    }
+
+    private ChunkStorage getStorage() throws OXException {
+        ChunkStorage service = services.getOptionalService(ChunkStorage.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(ChunkStorage.class);
+        }
+        return service;
     }
 
     private void storeChunk(String uuid, String scalityId, long offset, long length) throws OXException {
