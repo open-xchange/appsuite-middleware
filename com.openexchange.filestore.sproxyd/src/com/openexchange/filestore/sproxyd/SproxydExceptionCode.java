@@ -71,9 +71,13 @@ public enum SproxydExceptionCode implements DisplayableOXExceptionCode {
      */
     IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2),
     /**
+     * An SQL error occurred: %1$s
+     */
+    SQL_ERROR("An SQL error occurred: %1$s", CATEGORY_ERROR, 3),
+    /**
      * No such document: %1$s
      */
-    NO_SUCH_DOCUMENT("No such document: %1$s", CATEGORY_ERROR, 3, SproxydExceptionMessages.NO_SUCH_DOCUMENT_MSG),
+    NO_SUCH_DOCUMENT("No such document: %1$s", CATEGORY_ERROR, 4, SproxydExceptionMessages.NO_SUCH_DOCUMENT_MSG),
     ;
 
     private static final String PREFIX = "SPROXYD";
