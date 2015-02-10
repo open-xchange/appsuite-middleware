@@ -54,18 +54,13 @@ import static com.openexchange.java.Strings.isWhitespace;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.JEditorPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.EditorKit;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -93,8 +88,6 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.java.UnsynchronizedStringReader;
-import com.openexchange.java.UnsynchronizedStringWriter;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
@@ -1162,40 +1155,6 @@ public final class HtmlProcessing {
         } catch (final UnsupportedEncodingException e) {
             LOG.error("", e);
             return text;
-        }
-    }
-
-    /**
-     * Converts RTF to HTML content.
-     *
-     * @param rtf The RTF content
-     * @return The HTML content
-     * @throws IOException If an I/O error occurs
-     */
-    public static String rtfToHtml(String rtf) throws IOException {
-        return rtfToHtml(new UnsynchronizedStringReader(rtf));
-    }
-
-    /**
-     * Converts RTF to HTML content.
-     *
-     * @param rtf The RTF content
-     * @return The HTML content
-     * @throws IOException If an I/O error occurs
-     */
-    public static String rtfToHtml(Reader rtf) throws IOException {
-        JEditorPane p = new JEditorPane();
-        p.setContentType("text/rtf");
-        EditorKit kitRtf = p.getEditorKitForContentType("text/rtf");
-        try {
-            kitRtf.read(rtf, p.getDocument(), 0);
-            kitRtf = null;
-            EditorKit kitHtml = p.getEditorKitForContentType("text/html");
-            Writer writer = new UnsynchronizedStringWriter();
-            kitHtml.write(writer, p.getDocument(), 0, p.getDocument().getLength());
-            return writer.toString();
-        } catch (BadLocationException e) {
-            throw new IOException(e.getMessage(), e);
         }
     }
 
