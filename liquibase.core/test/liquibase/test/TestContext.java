@@ -58,17 +58,17 @@ public class TestContext {
     }
 
     public File findCoreProjectRoot() throws URISyntaxException {
-        URI uri = new URI(this.getClass().getClassLoader().getResource("test/liquibase/test/TestContext.class").toExternalForm());
+        URI uri = new URI(this.getClass().getClassLoader().getResource("liquibase/test/TestContext.class").toExternalForm());
         if(!uri.isOpaque()) {
             File thisClassFile = new File(uri);
             return thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
         }
-        uri = new URI(this.getClass().getClassLoader().getResource("test/liquibase/integration/commandline/Main.class").toExternalForm());
+        uri = new URI(this.getClass().getClassLoader().getResource("liquibase/integration/commandline/Main.class").toExternalForm());
         if(!uri.isOpaque()) {
             File thisClassFile = new File(uri);
             return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase.core");
         }
-        uri = new URI(this.getClass().getClassLoader().getResource("test/liquibase/test/DatabaseTest.class").toExternalForm());
+        uri = new URI(this.getClass().getClassLoader().getResource("liquibase/test/DatabaseTest.class").toExternalForm());
         if(!uri.isOpaque()) {
             File thisClassFile = new File(uri);
             return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase.core");
