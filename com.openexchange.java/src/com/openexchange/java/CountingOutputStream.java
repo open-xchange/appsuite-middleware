@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,49 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.java;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * {@link AttachmentResponse}
+ * {@link CountingOutputStream} - Counts the number of written bytes.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AttachmentResponse extends AbstractAJAXResponse {
+public class CountingOutputStream extends OutputStream {
 
-    private final String stringBody;
-    private final byte[] binaryBody;
-
-    AttachmentResponse(String stringBody) {
-        super(new Response(new JSONObject(0)));
-        this.stringBody = stringBody;
-        binaryBody = null;
-    }
-
-    AttachmentResponse(byte[] binaryBody) {
-        super(new Response(new JSONObject(0)));
-        this.binaryBody = binaryBody;
-        stringBody = null;
-    }
+    private long count;
 
     /**
-     * Initializes a new {@link AttachmentResponse}.
+     * Initializes a new {@link CountingOutputStream}.
      */
-    public AttachmentResponse(Response response) {
-        super(response);
-        binaryBody = null;
-        stringBody = null;
+    public CountingOutputStream() {
+        super();
     }
 
     /**
-     * Gets the binary body
+     * Gets the number of written bytes.
      *
-     * @return The binary body
+     * @return The byte count
      */
-    public byte[] getBinaryBody() {
-        return binaryBody;
+    public long getCount() {
+        return count;
     }
 
-    /**
-     * Gets the string body
-     *
-     * @return The string body
-     */
-    public String getStringBody() {
-        return stringBody;
+    @Override
+    public void write(byte[] b) throws IOException {
+        count += b.length;
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        count += len;
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        count++;
     }
 
 }
