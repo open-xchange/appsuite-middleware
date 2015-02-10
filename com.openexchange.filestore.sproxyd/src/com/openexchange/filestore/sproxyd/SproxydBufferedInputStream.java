@@ -75,8 +75,8 @@ public class SproxydBufferedInputStream extends InputStream {
     private final SproxydClient client;
     private InputStream current;
     private int pos;
-    private long start;
-    private long end;
+    private final long start;
+    private final long end;
 
     /**
      * Initializes a new {@link SproxydBufferedInputStream}.
@@ -85,91 +85,48 @@ public class SproxydBufferedInputStream extends InputStream {
      * @param client The client to use
      */
     public SproxydBufferedInputStream(List<Chunk> documentChunks, SproxydClient client) {
-        this(documentChunks, documentChunks.size(), client);
+        this(documentChunks, client, 0, -1);
     }
 
     /**
      * Initializes a new {@link SproxydBufferedInputStream}.
      *
      * @param documentChunks The document's chunks
-     * @param chunksSize The number of chunks
      * @param client The client to use
+     * @param start The range start (inclusive), or <code>0</code> to start reading from the beginning
+     * @param end The range end (inclusive), or <code>-1</code> to read until the end
      */
-    public SproxydBufferedInputStream(List<Chunk> documentChunks, int chunksSize, SproxydClient client) {
+    public SproxydBufferedInputStream(List<Chunk> documentChunks, SproxydClient client, long start, long end) {
         super();
         this.documentChunks = documentChunks;
-        this.chunksSize = chunksSize;
+        this.chunksSize = documentChunks.size();
         this.client = client;
-        pos = 0;
-        start = -1;
-        end = -1;
+        this.start = start;
+        this.end = end;
+        this.pos = 0;
     }
 
     private InputStream initNext() throws OXException {
         if (pos >= chunksSize) {
             return null;
         }
-
         // Next chunk
         Chunk chunk = documentChunks.get(pos++);
-
-        // Range specified?
+        long[] relativeRange = getRelativeRange(chunk, start, end);
+        if (null == relativeRange) {
+            return initNext();
+        }
         InputStream in;
-        if (start >= 0 && end > 0 && (chunk.getOffset() + chunk.getLength() > end)) {
-            in = client.get(chunk.getScalityId(), 0L, end - chunk.getOffset());
-        } else {
+        if (0 == relativeRange.length) {
             in = client.get(chunk.getScalityId());
+        } else {
+            in = client.get(chunk.getScalityId(), relativeRange[0], relativeRange[1]);
         }
         if (!(in instanceof BufferedInputStream) && !(in instanceof ByteArrayInputStream)) {
             in = new FastBufferedInputStream(in);
         }
         current = in;
         return in;
-    }
-
-    /**
-     * Applies the given range to this Sproxyd buffered input stream.
-     *
-     * @param start The start (inclusive)
-     * @param end The end (exclusive)
-     * @return This Sproxyd buffered input stream. with range applied
-     * @throws IOException If range cannot be applied
-     */
-    public SproxydBufferedInputStream applyRange(long start, long end) throws IOException {
-        try {
-            // Find appropriate start chunk
-            Chunk startChunk = null;
-            int pos = 0;
-            for (; null == startChunk && pos < chunksSize; pos++) {
-                Chunk c = documentChunks.get(pos);
-                if (c.getOffset() <= start && c.getOffset() + c.getLength() > start) {
-                    startChunk = c;
-                }
-            }
-            if (null == startChunk) {
-                throw new IOException("Start is out of range");
-            }
-
-            // Initialize first chunk
-            InputStream in;
-            if (startChunk.getOffset() + startChunk.getLength() < end || startChunk.getOffset() < start) {
-                long off = start - startChunk.getOffset();
-                long len = end - start;
-                in = client.get(startChunk.getScalityId(), off, off + len);
-            } else {
-                in = client.get(startChunk.getScalityId());
-            }
-            if (!(in instanceof BufferedInputStream) && !(in instanceof ByteArrayInputStream)) {
-                in = new FastBufferedInputStream(in);
-            }
-            this.pos = pos;
-            current = in;
-            this.start = start;
-            this.end = end;
-            return this;
-        } catch (OXException e) {
-           throw toIOException(e);
-        }
     }
 
     @Override
@@ -203,6 +160,41 @@ public class SproxydBufferedInputStream extends InputStream {
             return (IOException) cause;
         }
         return new IOException(e.getMessage(), e);
+    }
+
+    /**
+     * Gets an array representing the relative byte range for a specific chunk, based on the defined parent range-start and -end applied
+     * to this combined stream. If the supplied chunk can be consumed "as-is", or if no range is defined, an empty array is returned. If
+     * the chunk is out of the specified range and should not be included at all in the combined stream, <code>null</code> is returned.
+     *
+     * @param chunk The chunk to get the relative range for
+     * @param start The (inclusive) range-start of the parent stream
+     * @param end The (inclusive) range-end of the parent stream
+     * @return The relative range, with the range-start in the first, and the range-end in the second array element, an empty array if no
+     *         range has to be applied for this chunk, or <code>null</code> if not applicable
+     */
+    static long[] getRelativeRange(Chunk chunk, long start, long end) {
+        if (0 >= start && 0 > end) {
+            return new long[0]; // no range
+        }
+        long chunkStart = chunk.getOffset();
+        long chunkEnd = chunkStart + chunk.getLength() - 1;
+        if (0 < start && start > chunkEnd) {
+            return null; // requested range is behind this chunk
+        }
+        if (0 <= end && end < chunkStart) {
+            return null; // requested range is before this chunk
+        }
+        if (start <= chunkStart && (0 > end || end >= chunkEnd)) {
+            return new long[0]; // whole chunk requested
+        }
+        /*
+         * transform to relative range
+         */
+        long[] range = new long[2];
+        range[0] = 0 >= start || start < chunkStart ? 0 : start - chunkStart;
+        range[1] = 0 > end || end > chunkEnd ? chunkEnd - chunkStart : end - chunkStart;
+        return range;
     }
 
 }

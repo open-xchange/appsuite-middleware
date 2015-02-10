@@ -49,7 +49,6 @@
 
 package com.openexchange.filestore.sproxyd;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -72,8 +71,6 @@ import com.openexchange.tools.file.external.FileStorageCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SproxydFileStorage implements FileStorage {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydFileStorage.class);
 
     private final SproxydClient client;
     private final ChunkStorage chunkStorage;
@@ -104,13 +101,10 @@ public class SproxydFileStorage implements FileStorage {
         if (null == chunks || chunks.isEmpty()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
-
-        int size = chunks.size();
-        if (1 == size) {
+        if (1 == chunks.size()) {
             return client.get(chunks.get(0).getScalityId());
         }
-
-        return new SproxydBufferedInputStream(chunks, size, client);
+        return new SproxydBufferedInputStream(chunks, client);
     }
 
     @Override
@@ -231,35 +225,36 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
+        if (0 >= offset && 0 >= length) {
+            return getFile(name);
+        }
         List<Chunk> chunks = chunkStorage.getChunks(UUIDs.fromUnformattedString(name));
         if (null == chunks || chunks.isEmpty()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
-
-        int size = chunks.size();
-        if (1 == size) {
+        if (1 == chunks.size()) {
+            /*
+             * download parts of a single chunk
+             */
             Chunk chunk = chunks.get(0);
-            if (0 < offset || 0 < length) {
-                if (offset > chunk.getLength() || -1 != length && length > chunk.getLength() - offset) {
-                    throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, chunk.getLength());
-                }
-                long rangeStart = 0 < offset ? offset : 0;
-                long rangeEnd = (0 < length ? rangeStart + length : chunk.getLength()) - 1;
-                return client.get(chunk.getScalityId(), rangeStart, rangeEnd);
-            } else {
-                return client.get(chunks.get(0).getScalityId());
+            if (offset > chunk.getLength() || -1 != length && length > chunk.getLength() - offset) {
+                throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, chunk.getLength());
             }
+            long rangeStart = 0 < offset ? offset : 0;
+            long rangeEnd = (0 < length ? rangeStart + length : chunk.getLength()) - 1;
+            return client.get(chunk.getScalityId(), rangeStart, rangeEnd);
         } else {
-            SproxydBufferedInputStream sproxydStream = new SproxydBufferedInputStream(chunks, size, client);
-            if (1 < offset || 1 < length) {
-                try {
-                    return sproxydStream.applyRange(offset, offset + length);
-                } catch (IOException e) {
-                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-                }
-            } else {
-                return sproxydStream;
+            /*
+             * download from multiple chunks
+             */
+            Chunk lastChunk = chunks.get(chunks.size() - 1);
+            long totalLength = lastChunk.getOffset() + lastChunk.getLength();
+            if (offset > totalLength || -1 != length && length > totalLength - offset) {
+                throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, totalLength);
             }
+            long rangeStart = 0 < offset ? offset : 0;
+            long rangeEnd = (0 < length ? rangeStart + length : totalLength) - 1;
+            return new SproxydBufferedInputStream(chunks, client, rangeStart, rangeEnd);
         }
     }
 
