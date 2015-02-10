@@ -147,10 +147,9 @@ public class Bug36333Test extends AbstractMailTest {
         }
 
         {
-            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] {folderID, mailID, "2"}));
+            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] {folderID, mailID, "2"}).setFromStructure(true));
             String strBody = response.getStringBody();
             assertNotNull(strBody);
-            System.out.println(strBody);
             assertTrue(strBody.startsWith("{\\rtf1"));
         }
 
@@ -159,4 +158,64 @@ public class Bug36333Test extends AbstractMailTest {
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }
+
+    public void testBug36333_2() throws OXException, IOException, JSONException {
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(
+            MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR),
+            "bug36333_2.eml")), "UTF-8");
+        char[] buf = new char[512];
+        int length;
+        StringBuilder sb = new StringBuilder();
+        while ((length = streamReader.read(buf)) != -1) {
+            sb.append(buf, 0, length);
+        }
+        streamReader.close();
+        InputStream inputStream = new ByteArrayInputStream(
+            TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+        final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
+        final ImportMailResponse importResp = client.execute(importMailRequest);
+        JSONArray json = (JSONArray) importResp.getData();
+        fmid = importResp.getIds();
+
+        int err = 0;
+        for (int i = 0; i < json.length(); i++) {
+            JSONObject jo = json.getJSONObject(i);
+            if (jo.has("Error")) {
+                err++;
+            }
+        }
+
+        if (err != 0) {
+            fail("Error importing mail");
+        }
+
+        String mailID = json.getJSONObject(0).getString("id");
+        String folderID = json.getJSONObject(0).getString("folder_id");
+
+        {
+            GetResponse response = Executor.execute(getSession(), new GetRequest(folderID, mailID, true, true));
+            Object data = response.getData();
+            assertNotNull(data);
+
+            JSONObject jResponse = (JSONObject) data;
+            JSONArray jAttachments = jResponse.getJSONArray("body");
+            assertEquals(4, jAttachments.length());
+
+            JSONObject jAttachment = jAttachments.getJSONObject(1);
+            assertEquals("application/rtf", jAttachment.getJSONObject("headers").getJSONObject("content-type").getString("type"));
+        }
+
+        {
+            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] {folderID, mailID, "2"}).setFromStructure(true));
+            String strBody = response.getStringBody();
+            assertNotNull(strBody);
+            assertTrue(strBody.startsWith("{\\rtf1"));
+        }
+
+        if ((folderID != null) && (mailID != null)) {
+            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
+        }
+    }
+
 }
