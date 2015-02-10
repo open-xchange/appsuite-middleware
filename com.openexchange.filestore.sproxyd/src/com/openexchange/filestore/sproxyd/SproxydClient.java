@@ -137,8 +137,8 @@ public class SproxydClient {
      * Gets the input stream of a stored object.
      *
      * @param id The identifier of the object
-     * @param rangeStart The start of the requested byte range, or a value equal or smaller <code>0</code> if not used
-     * @param rangeEnd The end of the requested byte range, or a value equal or smaller <code>0</code> if not used
+     * @param rangeStart The (inclusive) start of the requested byte range, or a value equal or smaller <code>0</code> if not used
+     * @param rangeEnd The (inclusive) end of the requested byte range, or a value equal or smaller <code>0</code> if not used
      * @return The object's input stream
      */
     public InputStream get(UUID id, long rangeStart, long rangeEnd) throws OXException {

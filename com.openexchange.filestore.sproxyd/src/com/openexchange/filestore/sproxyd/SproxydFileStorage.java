@@ -238,8 +238,14 @@ public class SproxydFileStorage implements FileStorage {
 
         int size = chunks.size();
         if (1 == size) {
-            if (1 < offset || 1 < length) {
-                return client.get(chunks.get(0).getScalityId(), offset, length);
+            Chunk chunk = chunks.get(0);
+            if (0 < offset || 0 < length) {
+                if (offset > chunk.getLength() || -1 != length && length > chunk.getLength() - offset) {
+                    throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, chunk.getLength());
+                }
+                long rangeStart = 0 < offset ? offset : 0;
+                long rangeEnd = (0 < length ? rangeStart + length : chunk.getLength()) - 1;
+                return client.get(chunk.getScalityId(), rangeStart, rangeEnd);
             } else {
                 return client.get(chunks.get(0).getScalityId());
             }
