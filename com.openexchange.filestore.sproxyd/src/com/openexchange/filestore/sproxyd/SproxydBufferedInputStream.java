@@ -188,13 +188,10 @@ public class SproxydBufferedInputStream extends InputStream {
             if (read < 0) {
                 Streams.close(in);
                 current = null;
-                in = initNext();
-                if (null == in) {
-                    return -1;
-                }
+                return read();
             }
 
-            return in.read();
+            return read;
         } catch (OXException e) {
             throw toIOException(e);
         }
