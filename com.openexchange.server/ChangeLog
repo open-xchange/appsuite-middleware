@@ -1,3 +1,7 @@
+* 2015-02-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35794: Ignore un-subscribe attempt for a standard folder
+
 * 2015-01-09 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 36024: Replace occurrences of position:fixed by display:block in inline styles to prevent defacing the web ui.

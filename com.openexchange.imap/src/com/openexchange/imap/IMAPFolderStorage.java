@@ -1819,9 +1819,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } else if (fullName.equals(checker.getDefaultFolder(StorageUtility.INDEX_SPAM)) ) {
                     defaultFolder = true;
                 }
-                final boolean performSubscription = MailProperties.getInstance().isIgnoreSubscription() && defaultFolder ? false : performSubscribe(toUpdate, updateMe);
+                boolean performSubscription = MailProperties.getInstance().isIgnoreSubscription() && defaultFolder ? false : performSubscribe(toUpdate, updateMe);
                 if (performSubscription && defaultFolder && !toUpdate.isSubscribed()) {
-                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UNSUBSCRIBE, imapConfig, session, fullName);
+                    OXException warning = IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UNSUBSCRIBE, imapConfig, session, fullName);
+                    warning.setCategory(OXException.CATEGORY_WARNING);
+                    imapAccess.addWarnings(Collections.singletonList(warning));
+                    performSubscription = false;
                 }
                 /*
                  * Notify message storage
