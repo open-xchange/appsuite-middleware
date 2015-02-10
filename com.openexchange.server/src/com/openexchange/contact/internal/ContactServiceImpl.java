@@ -87,6 +87,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
 
@@ -452,6 +453,8 @@ public class ContactServiceImpl extends DefaultContactService {
             contactStorage.updateReferences(session, storedContact, updatedContact);
         }
         new EventClient(session).modify(storedContact, updatedContact, Tools.getFolder(contextId, folderID));
+        UserService us = ContactServiceLookup.getService(UserService.class);
+        us.invalidateUser(storageContext, userID);
     }
 
     @Override

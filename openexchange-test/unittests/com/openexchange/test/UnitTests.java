@@ -176,6 +176,9 @@ public class UnitTests {
         // Mail
         tests.addTest(com.openexchange.mail.MailAPITestSuite.suite());
 
+        //User tests
+        tests.addTest(com.openexchange.user.UserTestSuite.suite());
+
         return tests;
     }
 }
