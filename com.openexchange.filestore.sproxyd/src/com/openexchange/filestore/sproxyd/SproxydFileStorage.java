@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.sproxyd;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,12 +60,9 @@ import java.util.TreeSet;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.sproxyd.chunkstorage.Chunk;
-import com.openexchange.filestore.sproxyd.chunkstorage.ChunkData;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
@@ -78,17 +76,19 @@ public class SproxydFileStorage implements FileStorage {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydFileStorage.class);
 
     private final SproxydClient client;
-    private final ServiceLookup services;
-    private final int contextId;
-    private final int userId;
+    private final ChunkStorage chunkStorage;
 
-
-    public SproxydFileStorage(ServiceLookup services, int userId, int contextId, SproxydClient client) {
+    /**
+     * Initializes a new {@link SproxydFileStorage}.
+     *
+     * @param services A service lookup reference
+     * @param client The spoxyd client to use
+     * @param chunkStorage The underlying chunk storage
+     */
+    public SproxydFileStorage(SproxydClient client, ChunkStorage chunkStorage) {
         super();
-        this.contextId = contextId;
-        this.userId = userId;
-        this.services = services;
         this.client = client;
+        this.chunkStorage = chunkStorage;
     }
 
     @Override
@@ -100,7 +100,7 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name) throws OXException {
-        List<Chunk> chunks = getStorage().getChunks(UUIDs.fromUnformattedString(name), userId, contextId);
+        List<Chunk> chunks = chunkStorage.getChunks(UUIDs.fromUnformattedString(name));
         if (null == chunks || chunks.isEmpty()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
@@ -115,7 +115,7 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public SortedSet<String> getFileList() throws OXException {
-        List<UUID> documentIds = getStorage().getDocuments(userId, contextId);
+        List<UUID> documentIds = chunkStorage.getDocuments();
         SortedSet<String> fileIds = new TreeSet<String>();
         for (UUID documentId : documentIds) {
             fileIds.add(UUIDs.getUnformattedString(documentId));
@@ -125,7 +125,7 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public long getFileSize(String name) throws OXException {
-        Chunk lastChunk = getStorage().getLastChunk(UUIDs.fromUnformattedString(name), userId, contextId);
+        Chunk lastChunk = chunkStorage.getLastChunk(UUIDs.fromUnformattedString(name));
         if (null == lastChunk) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
@@ -141,7 +141,7 @@ public class SproxydFileStorage implements FileStorage {
     public boolean deleteFile(String identifier) throws OXException {
         UUID documentId = UUIDs.fromUnformattedString(identifier);
         boolean removed = client.delete(documentId);
-        getStorage().deleteDocument(documentId, userId, contextId);
+        chunkStorage.deleteDocument(documentId);
         return removed;
     }
 
@@ -176,7 +176,7 @@ public class SproxydFileStorage implements FileStorage {
     @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
         UUID documentId = UUIDs.fromUnformattedString(name);
-        Chunk lastChunk = getStorage().getLastChunk(documentId, userId, contextId);
+        Chunk lastChunk = chunkStorage.getLastChunk(documentId);
         if (null == lastChunk) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
@@ -190,7 +190,7 @@ public class SproxydFileStorage implements FileStorage {
     @Override
     public void setFileLength(long length, String name) throws OXException {
         UUID documentId = UUIDs.fromUnformattedString(name);
-        List<Chunk> chunks = getStorage().getChunks(documentId, userId, contextId);
+        List<Chunk> chunks = chunkStorage.getChunks(documentId);
         if (null == chunks || 0 == chunks.size()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
@@ -200,7 +200,7 @@ public class SproxydFileStorage implements FileStorage {
                  * delete the whole chunk
                  */
                 client.delete(chunk.getScalityId());
-                getStorage().deleteChunk(chunk.getScalityId(), contextId);
+                chunkStorage.deleteChunk(chunk.getScalityId());
             } else if (chunk.getOffset() < length && length <= chunk.getOffset() + chunk.getLength()) {
                 /*
                  * trim the last chunk
@@ -210,11 +210,12 @@ public class SproxydFileStorage implements FileStorage {
                 try {
                     data = client.get(chunk.getDocumentId(), 0, newChunkLength);
                     UUID scalityId = client.put(data, newChunkLength);
-                    ChunkData chunkData = new ChunkData(contextId, userId).setLength(newChunkLength).setOffset(chunk.getOffset()).setDocumentId(documentId);
-                    getStorage().storeChunk(scalityId, chunkData);
+                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, chunk.getOffset(), newChunkLength));
                 } finally {
                     Streams.close(data);
                 }
+                client.delete(chunk.getScalityId());
+                chunkStorage.deleteChunk(chunk.getScalityId());
                 break;
             }
         }
@@ -222,21 +223,30 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * Gets a reference to the chunk storage service.
-     *
-     * @return The chunk storage
-     */
-    private ChunkStorage getStorage() throws OXException {
-        ChunkStorage service = services.getService(ChunkStorage.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(ChunkStorage.class);
+        List<Chunk> chunks = chunkStorage.getChunks(UUIDs.fromUnformattedString(name));
+        if (null == chunks || chunks.isEmpty()) {
+            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
-        return service;
+
+        int size = chunks.size();
+        if (1 == size) {
+            if (1 < offset || 1 < length) {
+                return client.get(chunks.get(0).getScalityId(), offset, length);
+            } else {
+                return client.get(chunks.get(0).getScalityId());
+            }
+        } else {
+            SproxydBufferedInputStream sproxydStream = new SproxydBufferedInputStream(chunks, size, client);
+            if (1 < offset || 1 < length) {
+                try {
+                    return sproxydStream.applyRange(offset, offset + length);
+                } catch (IOException e) {
+                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+                }
+            } else {
+                return sproxydStream;
+            }
+        }
     }
 
     /**
@@ -260,8 +270,7 @@ public class SproxydFileStorage implements FileStorage {
                     chunk = chunkedUpload.next();
                     UUID scalityId = client.put(chunk.getData(), chunk.getSize());
                     scalityIds.add(scalityId);
-                    ChunkData chunkData = new ChunkData(contextId, userId).setLength(chunk.getSize()).setOffset(offset).setDocumentId(documentId);
-                    getStorage().storeChunk(scalityId, chunkData);
+                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, offset, chunk.getSize()));
                     offset += chunk.getSize();
                 } finally {
                     Streams.close(chunk);
@@ -273,7 +282,7 @@ public class SproxydFileStorage implements FileStorage {
             if (false == success) {
                 client.delete(scalityIds);
                 for (UUID scalityId : scalityIds) {
-                    getStorage().deleteChunk(scalityId, contextId);
+                    chunkStorage.deleteChunk(scalityId);
                 }
             }
         }

@@ -64,86 +64,73 @@ public interface ChunkStorage {
     /**
      * Gets the stored documents for specified user.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
      * @return The documents
      * @throws OXException If documents cannot be returned
      */
-    List<UUID> getDocuments(int userId, int contextId) throws OXException;
+    List<UUID> getDocuments() throws OXException;
 
     /**
      * Gets the chunks for the denoted document.
      *
      * @param documentId The document identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
      * @return The document's chunks
      * @throws OXException If chunks cannot be returned
      */
-    List<Chunk> getChunks(UUID documentId, int userId, int contextId) throws OXException;
+    List<Chunk> getChunks(UUID documentId) throws OXException;
 
     /**
      * Gets the chunk for the denoted document.
      *
      * @param chunkId The chunk's identifier in Scality system
-     * @param contextId The context identifier
      * @return The chunk or <code>null</code> if there is no such chunk
      * @throws OXException If chunk cannot be returned
      */
-    Chunk getChunk(UUID chunkId, int contextId) throws OXException;
+    Chunk getChunk(UUID chunkId) throws OXException;
 
     /**
      * Gets the next chunk following referenced chunk in denoted document.
      *
      * @param chunkId The chunk's identifier in Scality system
      * @param documentId The document identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
      * @return The next chunk or <code>null</code> if there is no next chunk
      * @throws OXException If chunk cannot be returned
      */
-    Chunk getNextChunk(UUID chunkId, UUID documentId, int userId, int contextId) throws OXException;
+    Chunk getNextChunk(UUID chunkId, UUID documentId) throws OXException;
 
     /**
      * Gets the next chunk following referenced chunk in denoted document.
      *
      * @param documentId The document identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
      * @return The next chunk or <code>null</code> if there is no next chunk
      * @throws OXException If chunk cannot be returned
      */
-    Chunk getLastChunk(UUID documentId, int userId, int contextId) throws OXException;
+    Chunk getLastChunk(UUID documentId) throws OXException;
 
     /**
      * Stores a new chunk
      *
-     * @param chunkId The identifier in Scality system for the new chunk
      * @param chunkData The chunk data
      * @return The newly stored chunk
      * @throws OXException If chunk cannot be stored
      */
-    Chunk storeChunk(UUID chunkId, ChunkData chunkData) throws OXException;
+    Chunk storeChunk(Chunk chunk) throws OXException;
 
     /**
      * Deletes a document and all associated chunks.
      *
      * @param documentId The document identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
      * @return <code>true</code> upon successful deletion; otherwise <code>false</code> if there was no such document
      * @throws OXException If document cannot be deleted
      */
-    boolean deleteDocument(UUID documentId, int userId, int contextId) throws OXException;
+    boolean deleteDocument(UUID documentId) throws OXException;
 
     /**
      * Deletes a chunk
      *
      * @param chunkId The chunk's identifier in Scality system
-     * @param contextId The context identifier
      * @return <code>true</code> upon successful deletion; otherwise <code>false</code> if there was no such chunk
      * @throws OXException If chunk cannot be deleted
      */
-    boolean deleteChunk(UUID chunkId, int contextId) throws OXException;
+    boolean deleteChunk(UUID chunkId) throws OXException;
 
 }

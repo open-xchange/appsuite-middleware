@@ -74,13 +74,21 @@ import com.openexchange.server.ServiceLookup;
 public class RdbChunkStorage implements ChunkStorage {
 
     private final ServiceLookup services;
+    private final int contextId;
+    private final int userId;
 
     /**
      * Initializes a new {@link RdbChunkStorage}.
+     *
+     * @param A service lookup reference
+     * @param contextId The context identifier
+     * @param userId The user identifier
      */
-    public RdbChunkStorage(ServiceLookup services) {
+    public RdbChunkStorage(ServiceLookup services, int contextId, int userId) {
         super();
         this.services = services;
+        this.contextId = contextId;
+        this.userId = userId;
     }
 
     private DatabaseService getDbService() throws OXException {
@@ -92,7 +100,7 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public List<UUID> getDocuments(int userId, int contextId) throws OXException {
+    public List<UUID> getDocuments() throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getReadOnly(contextId);
         try {
@@ -102,7 +110,7 @@ public class RdbChunkStorage implements ChunkStorage {
         }
     }
 
-    private List<UUID> getDocuments(int userId, int contextId, Connection con) throws OXException {
+    private static List<UUID> getDocuments(int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -126,7 +134,7 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public List<Chunk> getChunks(UUID documentId, int userId, int contextId) throws OXException {
+    public List<Chunk> getChunks(UUID documentId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getReadOnly(contextId);
         try {
@@ -136,7 +144,7 @@ public class RdbChunkStorage implements ChunkStorage {
         }
     }
 
-    private List<Chunk> getChunks(UUID documentId, int userId, int contextId, Connection con) throws OXException {
+    private static List<Chunk> getChunks(UUID documentId, int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -162,7 +170,7 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public Chunk getChunk(UUID chunkId, int contextId) throws OXException {
+    public Chunk getChunk(UUID chunkId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getReadOnly(contextId);
         try {
@@ -172,7 +180,7 @@ public class RdbChunkStorage implements ChunkStorage {
         }
     }
 
-    private Chunk getChunk(UUID chunkId, int contextId, Connection con) throws OXException {
+    private static Chunk getChunk(UUID chunkId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -192,7 +200,7 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public Chunk getNextChunk(UUID chunkId, UUID documentId, int userId, int contextId) throws OXException {
+    public Chunk getNextChunk(UUID chunkId, UUID documentId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getReadOnly(contextId);
         try {
@@ -202,7 +210,7 @@ public class RdbChunkStorage implements ChunkStorage {
         }
     }
 
-    private Chunk getNextChunk(UUID chunkId, UUID documentId, int userId, int contextId, Connection con) throws OXException {
+    private static Chunk getNextChunk(UUID chunkId, UUID documentId, int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -226,7 +234,7 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public Chunk getLastChunk(UUID documentId, int userId, int contextId) throws OXException {
+    public Chunk getLastChunk(UUID documentId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getReadOnly(contextId);
         try {
@@ -236,7 +244,7 @@ public class RdbChunkStorage implements ChunkStorage {
         }
     }
 
-    private Chunk getLastChunk(UUID documentId, int userId, int contextId, Connection con) throws OXException {
+    private static Chunk getLastChunk(UUID documentId, int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -257,30 +265,28 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public Chunk storeChunk(UUID chunkId, ChunkData chunkData) throws OXException {
+    public Chunk storeChunk(Chunk chunk) throws OXException {
         DatabaseService dbService = getDbService();
-        int contextId = chunkData.getContextId();
         Connection con = dbService.getWritable(contextId);
         try {
-            return storeChunk(chunkId, chunkData, con);
+            return storeChunk(chunk, contextId, userId, con);
         } finally {
             dbService.backWritable(contextId, con);
         }
     }
 
-    private Chunk storeChunk(UUID chunkId, ChunkData chunkData, Connection con) throws OXException {
+    private static Chunk storeChunk(Chunk chunk, int contextId, int userId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO scality_filestore (cid, user, document_id, scality_id, offset, length) VALUES (?, ?, ?, ?, ?, ?)");
-            stmt.setInt(1, chunkData.getContextId());
-            stmt.setInt(2, chunkData.getUserId());
-            stmt.setBytes(3, UUIDs.toByteArray(chunkData.getDocumentId()));
-            stmt.setBytes(4, UUIDs.toByteArray(chunkId));
-            stmt.setLong(5, chunkData.getOffset());
-            stmt.setLong(6, chunkData.getLength());
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setBytes(3, UUIDs.toByteArray(chunk.getDocumentId()));
+            stmt.setBytes(4, UUIDs.toByteArray(chunk.getScalityId()));
+            stmt.setLong(5, chunk.getOffset());
+            stmt.setLong(6, chunk.getLength());
             stmt.executeUpdate();
-
-            return new Chunk(chunkData.getDocumentId(), chunkId, chunkData.getOffset(), chunkData.getLength());
+            return chunk;
         } catch (SQLException e) {
             throw SproxydExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -289,7 +295,7 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public boolean deleteChunk(UUID chunkId, int contextId) throws OXException {
+    public boolean deleteChunk(UUID chunkId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
         try {
@@ -299,7 +305,7 @@ public class RdbChunkStorage implements ChunkStorage {
         }
     }
 
-    private boolean deleteChunk(UUID chunkId, int contextId, Connection con) throws OXException {
+    private static boolean deleteChunk(UUID chunkId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM scality_filestore WHERE cid=? AND scality_id=?");
@@ -314,7 +320,7 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public boolean deleteDocument(UUID documentId, int userId, int contextId) throws OXException {
+    public boolean deleteDocument(UUID documentId) throws OXException {
         DatabaseService dbService = getDbService();
         Connection con = dbService.getWritable(contextId);
         try {
@@ -324,7 +330,7 @@ public class RdbChunkStorage implements ChunkStorage {
         }
     }
 
-    private boolean deleteDocument(UUID documentId, int userId, int contextId, Connection con) throws OXException {
+    private static boolean deleteDocument(UUID documentId, int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM scality_filestore WHERE cid=? AND user=? AND document_id=?");

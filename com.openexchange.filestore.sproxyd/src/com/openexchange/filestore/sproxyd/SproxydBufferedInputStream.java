@@ -155,7 +155,7 @@ public class SproxydBufferedInputStream extends InputStream {
             if (startChunk.getOffset() + startChunk.getLength() < end || startChunk.getOffset() < start) {
                 long off = start - startChunk.getOffset();
                 long len = end - start;
-                in = client.get(startChunk.getScalityId(), off, len);
+                in = client.get(startChunk.getScalityId(), off, off + len);
             } else {
                 in = client.get(startChunk.getScalityId());
             }

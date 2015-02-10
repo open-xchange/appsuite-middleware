@@ -53,8 +53,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.sproxyd.SproxydFileStorageFactory;
-import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
-import com.openexchange.filestore.sproxyd.chunkstorage.RdbChunkStorage;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableService;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableTask;
 import com.openexchange.filestore.sproxyd.groupware.SproxydDeleteListener;
@@ -89,8 +87,6 @@ public class SproxydActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.filestore.sproxyd");
 
-        addService(ChunkStorage.class, new RdbChunkStorage(this));
-
         // Register update task, create table job and delete listener
         registerService(CreateTableService.class, new SproxydCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SproxydCreateTableTask(this)));
@@ -103,18 +99,7 @@ public class SproxydActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.filestore.sproxyd");
-        removeService(ChunkStorage.class);
         super.stopBundle();
-    }
-
-    @Override
-    public <S> boolean addService(Class<S> clazz, S service) {
-        return super.addService(clazz, service);
-    }
-
-    @Override
-    public <S> boolean removeService(Class<? extends S> clazz) {
-        return super.removeService(clazz);
     }
 
 }

@@ -50,11 +50,15 @@
 package com.openexchange.filestore.sproxyd;
 
 import java.net.URI;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
+import com.openexchange.filestore.sproxyd.chunkstorage.RdbChunkStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.file.external.FileStorage;
@@ -80,6 +84,7 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
     private static final int RANKING = 999547;
 
     private final ServiceLookup services;
+    private final ConcurrentMap<URI, SproxydFileStorage> storages; //
 
     /**
      * Initializes a new {@link SproxydFileStorageFactory}.
@@ -89,13 +94,34 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
     public SproxydFileStorageFactory(ServiceLookup services) {
         super();
         this.services = services;
+        this.storages = new ConcurrentHashMap<URI, SproxydFileStorage>();
     }
 
     @Override
     public SproxydFileStorage getFileStorage(URI uri) throws OXException {
-        int[] contextAndUser = extractContextAndUser(uri);
-        SproxydClient client = initClient(extractFilestoreID(uri), contextAndUser[0], contextAndUser[1]);
-        return new SproxydFileStorage(services, contextAndUser[1], contextAndUser[0], client);
+        SproxydFileStorage storage = storages.get(uri);
+        if (null == storage) {
+            LOG.debug("Initializing sproxyd file storage for {}", uri);
+            /*
+             * extract context and user from URI path
+             */
+            String filestoreID = extractFilestoreID(uri);
+            int[] contextAndUser = extractContextAndUser(uri);
+            int contextId = contextAndUser[0];
+            int userId = contextAndUser[1];
+            LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, contextId, userId);
+            /*
+             * initialize file storage using dedicated client & chunk storage
+             */
+            SproxydClient client = initClient(filestoreID, contextId, userId);
+            ChunkStorage chunkStorage = new RdbChunkStorage(services, contextId, userId);
+            SproxydFileStorage newStorage = new SproxydFileStorage(client, chunkStorage);
+            storage = storages.putIfAbsent(uri, newStorage);
+            if (null == storage) {
+                storage = newStorage;
+            }
+        }
+        return storage;
     }
 
     @Override
@@ -162,18 +188,13 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
      * @return The client
      */
     private SproxydClient initClient(String filestoreID, int contextID, int userID) throws OXException {
-        String baseUrl = requireProperty("com.openexchange.filestore.sproxyd." + filestoreID + ".baseUrl");
-        return new SproxydClient(Strings.trimEnd(baseUrl, '/') + '/' + contextID + '/' + userID + '/');
-    }
-
-    private String requireProperty(String propertyName) throws OXException {
-        String property = services.getService(ConfigurationService.class).getProperty(propertyName);
-        if (Strings.isEmpty(property)) {
+        String propertyName = "com.openexchange.filestore.sproxyd." + filestoreID + ".baseUrl";
+        String baseUrl = services.getService(ConfigurationService.class).getProperty(propertyName);
+        if (Strings.isEmpty(baseUrl)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propertyName);
         }
-        return property;
+        return new SproxydClient(Strings.trimEnd(baseUrl, '/') + '/' + contextID + '/' + userID + '/');
     }
-
 
     /**
      * Extracts the filestore ID from the configured file store URI, i.e. the 'authority' part from the URI.
