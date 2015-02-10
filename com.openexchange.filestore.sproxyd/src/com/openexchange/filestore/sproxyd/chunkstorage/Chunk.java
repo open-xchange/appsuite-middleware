@@ -122,4 +122,9 @@ public class Chunk implements Comparable<Chunk> {
         return (thisOffset < otherOffset ? -1 : (thisOffset == otherOffset ? 0 : 1));
     }
 
+    @Override
+    public String toString() {
+        return "Chunk [documentId=" + documentId + ", scalityId=" + scalityId + ", offset=" + offset + ", length=" + length + "]";
+    }
+
 }
