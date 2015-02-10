@@ -1,3 +1,7 @@
+* 2015-02-09 - martin.schneider@open-xchange.com
+
+ - Fix for bug 36263: add primary key for table DATABASECHANGELOG and create presenceSubscriptions with primary key
+
 * 2015-02-06 - marcus.klein@open-xchange.com
 
  - US 86092922: Backend start script terminates if it is run by a different user as open-xchange.
