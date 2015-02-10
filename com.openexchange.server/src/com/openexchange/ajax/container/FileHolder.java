@@ -52,6 +52,7 @@ package com.openexchange.ajax.container;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -121,7 +122,7 @@ public class FileHolder implements IFileHolder {
 
     private static final class FileInputStreamClosure implements InputStreamClosure {
 
-        private final File file;
+        final File file;
 
         FileInputStreamClosure(final File file) {
             super();
@@ -154,6 +155,10 @@ public class FileHolder implements IFileHolder {
     private String disposition;
     private String delivery;
 
+    private File file;
+    private byte[] bytes;
+    private RandomAccess raf;
+
     /**
      * Initializes a new {@link FileHolder}.
      *
@@ -168,6 +173,15 @@ public class FileHolder implements IFileHolder {
         this.length = length;
         this.contentType = contentType;
         this.name = name;
+        file = null;
+
+        if (is instanceof ByteArrayInputStream) {
+            this.bytes = bytesFrom((ByteArrayInputStream) is);
+            isClosure = new ByteArrayInputStreamClosure(bytes);
+            this.length = bytes.length;
+        } else {
+            this.bytes = null;
+        }
     }
 
     /**
@@ -184,6 +198,26 @@ public class FileHolder implements IFileHolder {
         this.length = length;
         this.contentType = contentType;
         this.name = name;
+
+        if (isClosure instanceof FileInputStreamClosure) {
+            file = ((FileInputStreamClosure) isClosure).file;
+            bytes = null;
+        } else if (isClosure instanceof ByteArrayInputStreamClosure) {
+            file = null;
+            bytes = ((ByteArrayInputStreamClosure) isClosure).bytes;
+        } else {
+            file = null;
+            bytes = null;
+        }
+    }
+
+    /**
+     * Initializes a new {@link FileHolder}.
+     *
+     * @param file The associated file
+     */
+    public FileHolder(final File file) {
+        this(file, null);
     }
 
     /**
@@ -208,11 +242,19 @@ public class FileHolder implements IFileHolder {
                 return new FileInputStream(file);
             }
         };
-
+        this.file = file;
+        bytes = null;
     }
 
-    public FileHolder(final File file) {
-        this(file, null);
+    /**
+     * Sets the random access.
+     *
+     * @param raf The random access to set
+     * @return This instance
+     */
+    public FileHolder setRandomAccess(RandomAccess raf) {
+        this.raf = raf;
+        return this;
     }
 
     @Override
@@ -221,8 +263,7 @@ public class FileHolder implements IFileHolder {
             return true;
         }
         if (is instanceof ByteArrayInputStream) {
-            final ByteArrayInputStream bais = (ByteArrayInputStream) is;
-            final byte[] bytes = bytesFrom(bais);
+            byte[] bytes = bytesFrom((ByteArrayInputStream) is);
             if (null != bytes) {
                 isClosure = new ByteArrayInputStreamClosure(bytes);
                 is = null;
@@ -251,6 +292,34 @@ public class FileHolder implements IFileHolder {
         return is;
     }
 
+    @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        // Check random access
+        RandomAccess raf = this.raf;
+        if (null != raf) {
+            return raf;
+        }
+
+        // Check file
+        File file = this.file;
+        if (null != file) {
+            try {
+                return new FileRandomAccess(file);
+            } catch (FileNotFoundException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        // Check bytes
+        byte[] bytes = this.bytes;
+        if (null != bytes) {
+            return new ByteArrayRandomAccess(bytes);
+        }
+
+        // No random access support
+        return null;
+    }
+
     /**
      * Sets the input stream
      *
@@ -260,6 +329,16 @@ public class FileHolder implements IFileHolder {
         Streams.close(this.is);
         this.is = is;
         this.isClosure = null;
+        file = null;
+        raf = null;
+        length = -1L;
+        if (is instanceof ByteArrayInputStream) {
+            this.bytes = bytesFrom((ByteArrayInputStream) is);
+            isClosure = new ByteArrayInputStreamClosure(bytes);
+            length = bytes.length;
+        } else {
+            this.bytes = null;
+        }
     }
 
     @Override

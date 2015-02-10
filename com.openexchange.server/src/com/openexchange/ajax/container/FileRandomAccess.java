@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,93 +47,57 @@
  *
  */
 
-package com.openexchange.drive.internal;
+package com.openexchange.ajax.container;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.drive.internal.throttle.BucketInputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
+import java.io.RandomAccessFile;
+import com.openexchange.ajax.container.IFileHolder.RandomAccess;
+
 
 /**
- * {@link DriveFileHolder}
+ * {@link FileRandomAccess}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DriveFileHolder implements IFileHolder {
+public class FileRandomAccess implements RandomAccess {
 
-    private final InputStream stream;
-    private final String contentType;
-    private final String name;
+    private final RandomAccessFile raf;
 
     /**
-     * Initializes a new {@link DriveFileHolder}.
+     * Initializes a new {@link FileRandomAccess}.
      *
-     * @param session The sync session
-     * @param stream The underlying stream
-     * @param name The filename
-     * @param contentType The content-type, or <code>null</code> if unknown
+     * @throws FileNotFoundException If no such file exists
      */
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType) {
-        this(session, stream, name, contentType, true);
-    }
-
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType, boolean throttled) {
+    public FileRandomAccess(File file) throws FileNotFoundException {
         super();
-        this.contentType = null != contentType ? contentType : "application/octet-stream";
-        this.name = name;
-        if (throttled) {
-            this.stream = new BucketInputStream(stream, session.getServerSession());
-        } else {
-            this.stream = stream;
-        }
+        raf = new RandomAccessFile(file, "r");
     }
 
     @Override
-    public boolean repetitive() {
-        return false;
+    public int read(byte[] b) throws IOException {
+        return raf.read(b);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        return raf.read(b, off, len);
+    }
+
+    @Override
+    public void seek(long pos) throws IOException {
+        raf.seek(pos);
+    }
+
+    @Override
+    public long length() throws IOException {
+        return raf.length();
     }
 
     @Override
     public void close() throws IOException {
-        Streams.close(stream);
-    }
-
-    @Override
-    public InputStream getStream() throws OXException {
-        return stream;
-    }
-
-    @Override
-    public RandomAccess getRandomAccess() throws OXException {
-        // No random access support
-        return null;
-    }
-
-    @Override
-    public long getLength() {
-        return -1;
-    }
-
-    @Override
-    public String getContentType() {
-        return contentType;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getDisposition() {
-        return null;
-    }
-
-    @Override
-    public String getDelivery() {
-        return "download";
+        raf.close();
     }
 
 }

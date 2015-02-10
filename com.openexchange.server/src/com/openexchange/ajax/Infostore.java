@@ -52,7 +52,6 @@ package com.openexchange.ajax;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -65,6 +64,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.container.InputStreamReadable;
+import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -598,11 +599,11 @@ public class Infostore extends PermissionServlet {
     protected void document(final HttpServletResponse res, final String userAgent, final int id, final int version, final String contentType, final Context ctx, final User user, final UserPermissionBits userPerm, final ServerSession session) throws IOException {
         final InfostoreFacade infostore = getInfostore();
         OutputStream os = null;
-        InputStream documentData = null;
+        Readable documentData = null;
         try {
             final DocumentMetadata metadata = infostore.getDocumentMetadata(id, version, session);
 
-            documentData = infostore.getDocument(id, version, session);
+            documentData = new InputStreamReadable(infostore.getDocument(id, version, session));
             os = res.getOutputStream();
 
             res.setContentLength((int) metadata.getFileSize());
@@ -635,10 +636,9 @@ public class Infostore extends PermissionServlet {
             // pragma header
             Tools.removeCachingHeader(res);
 
-            final byte[] buffer = new byte[0xFFFF];
-            int bytesRead = 0;
-
-            while ((bytesRead = documentData.read(buffer)) > 0) {
+            int buflen = 0xFFFF;
+            byte[] buffer = new byte[buflen];
+            for (int bytesRead; (bytesRead = documentData.read(buffer, 0, buflen)) > 0;) {
                 os.write(buffer, 0, bytesRead);
             }
             os.flush();

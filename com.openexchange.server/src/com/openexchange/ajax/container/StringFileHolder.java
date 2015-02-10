@@ -51,6 +51,7 @@ package com.openexchange.ajax.container;
 
 import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -106,6 +107,11 @@ public final class StringFileHolder implements IFileHolder {
     @Override
     public InputStream getStream() {
         return new UnsynchronizedByteArrayInputStream(bytes);
+    }
+
+    @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        return new ByteArrayRandomAccess(bytes);
     }
 
     @Override

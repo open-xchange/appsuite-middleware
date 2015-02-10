@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,93 +47,46 @@
  *
  */
 
-package com.openexchange.drive.internal;
+package com.openexchange.ajax.container;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
-import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.drive.internal.throttle.BucketInputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
+
 
 /**
- * {@link DriveFileHolder}
+ * {@link Readable} - Represents a readable resource.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DriveFileHolder implements IFileHolder {
-
-    private final InputStream stream;
-    private final String contentType;
-    private final String name;
+public interface Readable extends Closeable {
 
     /**
-     * Initializes a new {@link DriveFileHolder}.
+     * Reads up to <code>b.length</code> bytes of data from this file into an array of bytes. This method blocks until at least one byte of input is available.
      *
-     * @param session The sync session
-     * @param stream The underlying stream
-     * @param name The filename
-     * @param contentType The content-type, or <code>null</code> if unknown
+     * @param b The buffer into which the data is read.
+     * @return The total number of bytes read into the buffer, or
+     *         <code>-1</code> if there is no more data because the end of
+     *         this file has been reached.
+     * @throws IOException If the first byte cannot be read for any reason
+     *             other than end of file, or if the random access file has been closed, or if
+     *             some other I/O error occurs.
      */
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType) {
-        this(session, stream, name, contentType, true);
-    }
+    int read(byte b[]) throws IOException;
 
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType, boolean throttled) {
-        super();
-        this.contentType = null != contentType ? contentType : "application/octet-stream";
-        this.name = name;
-        if (throttled) {
-            this.stream = new BucketInputStream(stream, session.getServerSession());
-        } else {
-            this.stream = stream;
-        }
-    }
-
-    @Override
-    public boolean repetitive() {
-        return false;
-    }
-
-    @Override
-    public void close() throws IOException {
-        Streams.close(stream);
-    }
-
-    @Override
-    public InputStream getStream() throws OXException {
-        return stream;
-    }
-
-    @Override
-    public RandomAccess getRandomAccess() throws OXException {
-        // No random access support
-        return null;
-    }
-
-    @Override
-    public long getLength() {
-        return -1;
-    }
-
-    @Override
-    public String getContentType() {
-        return contentType;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getDisposition() {
-        return null;
-    }
-
-    @Override
-    public String getDelivery() {
-        return "download";
-    }
+    /**
+     * Reads up to <code>len</code> bytes of data from this file into an array of bytes. This method blocks until at least one byte of input is available.
+     *
+     * @param b The buffer into which the data is read.
+     * @param off The start offset in array <code>b</code>
+     *            at which the data is written.
+     * @param len The maximum number of bytes read.
+     * @return The total number of bytes read into the buffer, or
+     *         <code>-1</code> if there is no more data because the end of
+     *         the file has been reached.
+     * @throws IOException If the first byte cannot be read for any reason
+     *             other than end of file, or if the random access file has been closed, or if
+     *             some other I/O error occurs.
+     */
+    int read(byte b[], int off, int len) throws IOException;
 
 }

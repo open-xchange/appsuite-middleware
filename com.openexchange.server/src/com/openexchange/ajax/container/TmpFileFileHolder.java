@@ -51,6 +51,7 @@ package com.openexchange.ajax.container;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.configuration.ServerConfig;
@@ -119,6 +120,15 @@ public final class TmpFileFileHolder implements IFileHolder {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        try {
+            return new FileRandomAccess(tmpFile);
+        } catch (FileNotFoundException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 

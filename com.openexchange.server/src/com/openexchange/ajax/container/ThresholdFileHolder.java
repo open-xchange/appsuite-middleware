@@ -52,6 +52,7 @@ package com.openexchange.ajax.container;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -270,6 +271,22 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @throws OXException If write attempt fails
      */
     public ThresholdFileHolder write(final InputStream in) throws OXException {
+        if (null == in) {
+            return this;
+        }
+        return write(new InputStreamReadable(in));
+    }
+
+    /**
+     * Writes the specified content to this file holder.
+     * <p>
+     * Orderly closes specified {@link InputStream} instance.
+     *
+     * @param in The content to be written.
+     * @return This file holder with content written
+     * @throws OXException If write attempt fails
+     */
+    public ThresholdFileHolder write(final Readable in) throws OXException {
         if (null == in) {
             return this;
         }
@@ -509,6 +526,41 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     /**
+     * Gets the random access for this file holder's content.
+     * <p>
+     * Closing the random access will also {@link #close() close} this file holder.
+     *
+     * @return The random access
+     * @throws OXException If random access cannot be returned
+     */
+    public RandomAccess getClosingRandomAccess() throws OXException {
+        return new ClosingRandomAccess(this);
+    }
+
+    @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        if (count <= 0) {
+            return new ByteArrayRandomAccess(new byte[0]);
+        }
+
+        ByteArrayOutputStream buf = this.buf;
+        if (null != buf) {
+            return new ByteArrayRandomAccess(buf.toByteArray());
+        }
+
+        File tempFile = this.tempFile;
+        if (null != tempFile) {
+            try {
+                return new FileRandomAccess(tempFile);
+            } catch (FileNotFoundException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Gets this instance's content as a {@link SharedInputStream} appropriate to create MIME resources from it
      *
      * @return The shared input stream
@@ -673,6 +725,50 @@ public final class ThresholdFileHolder implements IFileHolder {
         public void close() throws IOException {
             try {
                 super.close();
+            } finally {
+                fileHolder.close();
+            }
+        }
+    }
+
+    private static final class ClosingRandomAccess implements RandomAccess {
+
+        private final ThresholdFileHolder fileHolder;
+        private final RandomAccess randomAccess;
+
+        /**
+         * Initializes a new {@link ClosingInputStream}.
+         */
+        protected ClosingRandomAccess(ThresholdFileHolder fileHolder) throws OXException {
+            super();
+            this.fileHolder = fileHolder;
+            this.randomAccess = fileHolder.getRandomAccess();
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            return randomAccess.read(b);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            return randomAccess.read(b, off, len);
+        }
+
+        @Override
+        public void seek(long pos) throws IOException {
+            randomAccess.seek(pos);
+        }
+
+        @Override
+        public long length() throws IOException {
+            return randomAccess.length();
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                randomAccess.close();
             } finally {
                 fileHolder.close();
             }

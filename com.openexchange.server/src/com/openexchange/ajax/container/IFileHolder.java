@@ -75,6 +75,27 @@ public interface IFileHolder extends Closeable {
         InputStream newStream() throws OXException, IOException;
     }
 
+    /** Provides random access to a resource */
+    interface RandomAccess extends Readable {
+
+        /**
+         * Sets the pointer offset, measured from the beginning of associated resource, at which the next read.
+         *
+         * @param pos The offset position, measured in bytes
+         * @exception IOException If <code>pos</code> is less than
+         *                <code>0</code> or if an I/O error occurs.
+         */
+        void seek(long pos) throws IOException;
+
+        /**
+         * Gets the length of the resource.
+         *
+         * @return The length measured in bytes.
+         * @exception IOException If an I/O error occurs.
+         */
+        long length() throws IOException;
+    }
+
     /**
      * Signals if this file holder is repetitive; meaning {@link #getStream()} yields a new {@link InputStream}.
      *
@@ -100,6 +121,16 @@ public interface IFileHolder extends Closeable {
      * @throws OXException If input stream cannot be returned
      */
     InputStream getStream() throws OXException;
+
+    /**
+     * Gets the content's random access representation.
+     * <p>
+     * <b>Note</b>: The {@link #close()} method is supposed being invoked in a wrapping <code>try-finally</code> block.
+     *
+     * @return The random access representation or <code>null</code> if random access is not supported
+     * @throws OXException If random access representation cannot be returned
+     */
+    RandomAccess getRandomAccess() throws OXException;
 
     /**
      * Gets the content's length.

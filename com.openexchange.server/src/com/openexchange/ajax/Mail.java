@@ -97,6 +97,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
+import com.openexchange.ajax.container.ByteArrayRandomAccess;
+import com.openexchange.ajax.container.InputStreamReadable;
+import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -200,7 +203,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.utility.VersitUtility;
 
@@ -2215,7 +2217,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         PARAMETER_MAILCID).toString());
                 }
                 final MailPart mailPart;
-                InputStream attachmentInputStream;
+                Readable attachmentInputStream;
                 if (imageContentId == null) {
                     mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
                     if (mailPart == null) {
@@ -2230,10 +2232,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                         String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                         htmlContent = MessageUtility.simpleHtmlDuplicateRemoval(htmlContent);
                         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                        attachmentInputStream = new UnsynchronizedByteArrayInputStream(sanitizeHtml(htmlContent, htmlService).getBytes(
-                            Charsets.forName(cs)));
+                        attachmentInputStream = new ByteArrayRandomAccess(sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs)));
                     } else {
-                        attachmentInputStream = mailPart.getInputStream();
+                        attachmentInputStream = new InputStreamReadable(mailPart.getInputStream());
                     }
                     /*-
                      * TODO: Does not work, yet.
@@ -2253,7 +2254,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (mailPart == null) {
                         throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                     }
-                    attachmentInputStream = mailPart.getInputStream();
+                    attachmentInputStream = new InputStreamReadable(mailPart.getInputStream());
                 }
                 /*
                  * Set Content-Type and Content-Disposition header

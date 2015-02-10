@@ -93,6 +93,11 @@ public class ModifyableFileHolder implements IFileHolder {
     }
 
     @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        return fileHolder.getRandomAccess();
+    }
+
+    @Override
     public long getLength() {
         return fileHolder.getLength();
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,93 +47,56 @@
  *
  */
 
-package com.openexchange.drive.internal;
+package com.openexchange.ajax.container;
 
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.drive.internal.throttle.BucketInputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
+
 
 /**
- * {@link DriveFileHolder}
+ * {@link InputStreamReadable} - The {@link Readable} representation for an {@link InputStream} instance.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DriveFileHolder implements IFileHolder {
+public class InputStreamReadable implements Readable {
 
-    private final InputStream stream;
-    private final String contentType;
-    private final String name;
+    private final InputStream in;
 
     /**
-     * Initializes a new {@link DriveFileHolder}.
+     * Initializes a new {@link InputStreamReadable}.
      *
-     * @param session The sync session
-     * @param stream The underlying stream
-     * @param name The filename
-     * @param contentType The content-type, or <code>null</code> if unknown
+     * @throws IllegalArgumentException If input stream is null
      */
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType) {
-        this(session, stream, name, contentType, true);
+    public InputStreamReadable(InputStream in) {
+        super();
+        if (null == in) {
+            throw new IllegalArgumentException("Input stream is null.");
+        }
+        this.in = in;
     }
 
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType, boolean throttled) {
-        super();
-        this.contentType = null != contentType ? contentType : "application/octet-stream";
-        this.name = name;
-        if (throttled) {
-            this.stream = new BucketInputStream(stream, session.getServerSession());
-        } else {
-            this.stream = stream;
-        }
+    /**
+     * Gets the input stream
+     *
+     * @return The input stream
+     */
+    public InputStream getInputStream() {
+        return in;
     }
 
     @Override
-    public boolean repetitive() {
-        return false;
+    public int read(byte[] b) throws IOException {
+        return in.read(b);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        return in.read(b, off, len);
     }
 
     @Override
     public void close() throws IOException {
-        Streams.close(stream);
-    }
-
-    @Override
-    public InputStream getStream() throws OXException {
-        return stream;
-    }
-
-    @Override
-    public RandomAccess getRandomAccess() throws OXException {
-        // No random access support
-        return null;
-    }
-
-    @Override
-    public long getLength() {
-        return -1;
-    }
-
-    @Override
-    public String getContentType() {
-        return contentType;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getDisposition() {
-        return null;
-    }
-
-    @Override
-    public String getDelivery() {
-        return "download";
+        in.close();
     }
 
 }

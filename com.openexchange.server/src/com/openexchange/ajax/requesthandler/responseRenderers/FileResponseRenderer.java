@@ -74,6 +74,9 @@ import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.IFileHolder.RandomAccess;
+import com.openexchange.ajax.container.InputStreamReadable;
+import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
@@ -122,7 +125,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final int INITIAL_CAPACITY = 8192;
 
-    private static final int BUFLEN = 2048;
+    private static final int BUFLEN = 10240;
 
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
 
@@ -219,7 +222,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         final String fileName = file.getName();
         final long length;
         final List<Closeable> closeables = new LinkedList<Closeable>();
-        InputStream documentData = null;
+        Readable documentData = null;
         try {
             final String fileContentType = file.getContentType();
             /*-
@@ -277,13 +280,18 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             // Set binary input stream
             {
-                final InputStream stream = file.getStream();
-                if (null != stream) {
-                    if ((stream instanceof ByteArrayInputStream) || (stream instanceof BufferedInputStream)) {
-                        documentData = stream;
-                    } else {
-                        documentData = new BufferedInputStream(stream, 65536);
+                RandomAccess ra = file.getRandomAccess();
+                if (null == ra) {
+                    InputStream stream = file.getStream();
+                    if (null != stream) {
+                        if ((stream instanceof ByteArrayInputStream) || (stream instanceof BufferedInputStream)) {
+                            documentData = new InputStreamReadable(stream);
+                        } else {
+                            documentData = new InputStreamReadable(new BufferedInputStream(stream, 65536));
+                        }
                     }
+                } else {
+                    documentData = ra;
                 }
             }
             // Check for null
@@ -318,7 +326,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             temp.write(documentData);
                             // We know for sure
                             fileLength = temp.getLength();
-                            documentData = temp.getClosingStream();
+                            documentData = temp.getClosingRandomAccess();
                             cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
                                 cts = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : cts;
@@ -334,7 +342,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             temp.write(documentData);
                             // We know for sure
                             fileLength = temp.getLength();
-                            documentData = temp.getClosingStream();
+                            documentData = temp.getClosingRandomAccess();
                             cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
                                 cts = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : cts;
@@ -417,7 +425,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         final ThresholdFileHolder temp = new ThresholdFileHolder(DEFAULT_IN_MEMORY_THRESHOLD, INITIAL_CAPACITY);
                         closeables.add(temp);
                         temp.write(documentData);
-                        documentData = temp.getClosingStream();
+                        documentData = temp.getClosingRandomAccess();
                         preferredContentType = detectMimeType(temp.getStream());
                         if ("text/plain".equals(preferredContentType)) {
                             preferredContentType = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : preferredContentType;
@@ -773,6 +781,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 {
                     final InputStream inputStream = cachedResource.getInputStream();
                     if (null == inputStream) {
+                        @SuppressWarnings("resource")
                         final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedResource.getBytes());
                         responseFileHolder.setContentType(contentType);
                         responseFileHolder.setName(cachedResource.getFileName());
@@ -1055,7 +1064,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     /**
-     * Copy the given byte range of the given input to the given output.
+     * Copies the given byte range of the given input to the given output.
      *
      * @param inputStream The input to copy the given range to the given output for.
      * @param output The output to copy the given range from the given input for.
@@ -1063,17 +1072,17 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param length Length of the byte range.
      * @throws IOException If something fails at I/O level.
      */
-    private void copy(final InputStream inputStream, final OutputStream output, final long start, final long length) throws IOException {
-        // Write partial range.
-        final InputStream input;
-        if (!(inputStream instanceof BufferedInputStream) && !(inputStream instanceof ByteArrayInputStream)) {
-            input = new BufferedInputStream(inputStream, 8192);
-        } else {
-            input = inputStream;
+    private void copy(Readable inputStream, OutputStream output, long start, long length) throws IOException {
+        if (inputStream instanceof IFileHolder.RandomAccess) {
+            copy((IFileHolder.RandomAccess) inputStream, output, start, length);
+            return;
         }
+
+        // Write partial range.
         // Discard previous bytes
+        byte[] buffer = new byte[1];
         for (int i = 0; i < start; i++) {
-            if (input.read() < 0) {
+            if (inputStream.read(buffer, 0, 1) < 0) {
                 // Stream does not provide enough bytes
                 throw new OffsetOutOfRangeIOException(start, i);
             }
@@ -1081,14 +1090,50 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         long toRead = length;
 
-        final byte[] buffer = new byte[BUFLEN];
+        int buflen = BUFLEN;
+        buffer = new byte[buflen];
         int read;
-        while ((read = input.read(buffer)) > 0) {
+        while ((read = inputStream.read(buffer, 0, buflen)) > 0) {
             if ((toRead -= read) > 0) {
                 output.write(buffer, 0, read);
             } else {
                 output.write(buffer, 0, (int) toRead + read);
                 break;
+            }
+        }
+    }
+
+    /**
+     * Copies the given byte range of the given input to the given output.
+     *
+     * @param input The input to copy the given range to the given output for.
+     * @param output The output to copy the given range from the given input for.
+     * @param start Start of the byte range.
+     * @param length Length of the byte range.
+     * @throws IOException If something fails at I/O level.
+     */
+    private static void copy(IFileHolder.RandomAccess input, OutputStream output, long start, long length) throws IOException {
+        int buflen = BUFLEN;
+        byte[] buffer = new byte[buflen];
+        int read;
+
+        if (input.length() == length) {
+            // Write full range.
+            while ((read = input.read(buffer, 0, buflen)) > 0) {
+                output.write(buffer, 0, read);
+            }
+        } else {
+            // Write partial range.
+            input.seek(start);
+            long toRead = length;
+
+            while ((read = input.read(buffer, 0, buflen)) > 0) {
+                if ((toRead -= read) > 0) {
+                    output.write(buffer, 0, read);
+                } else {
+                    output.write(buffer, 0, (int) toRead + read);
+                    break;
+                }
             }
         }
     }

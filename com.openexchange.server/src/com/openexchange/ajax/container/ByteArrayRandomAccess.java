@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,93 +47,76 @@
  *
  */
 
-package com.openexchange.drive.internal;
+package com.openexchange.ajax.container;
 
 import java.io.IOException;
-import java.io.InputStream;
-import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.drive.internal.throttle.BucketInputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
+import com.openexchange.ajax.container.IFileHolder.RandomAccess;
+
 
 /**
- * {@link DriveFileHolder}
+ * {@link ByteArrayRandomAccess}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DriveFileHolder implements IFileHolder {
+public class ByteArrayRandomAccess implements RandomAccess {
 
-    private final InputStream stream;
-    private final String contentType;
-    private final String name;
+    private final byte[] bytes;
+    private int pos;
 
     /**
-     * Initializes a new {@link DriveFileHolder}.
-     *
-     * @param session The sync session
-     * @param stream The underlying stream
-     * @param name The filename
-     * @param contentType The content-type, or <code>null</code> if unknown
+     * Initializes a new {@link ByteArrayRandomAccess}.
      */
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType) {
-        this(session, stream, name, contentType, true);
-    }
-
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType, boolean throttled) {
+    public ByteArrayRandomAccess(byte[] bytes) {
         super();
-        this.contentType = null != contentType ? contentType : "application/octet-stream";
-        this.name = name;
-        if (throttled) {
-            this.stream = new BucketInputStream(stream, session.getServerSession());
-        } else {
-            this.stream = stream;
-        }
+        this.bytes = bytes;
+        pos = 0;
     }
 
     @Override
-    public boolean repetitive() {
-        return false;
+    public long length() throws IOException {
+        return bytes.length;
+    }
+
+    @Override
+    public int read(byte[] b) throws IOException {
+        return read(b, 0, b.length);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        if (b == null) {
+            throw new NullPointerException();
+        }
+        if (off < 0 || len < 0 || len > b.length - off) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        int count = bytes.length;
+        if (pos >= count) {
+            return -1;
+        }
+
+        int length = len;
+        int avail = count - pos;
+        if (length > avail) {
+            length = avail;
+        }
+        if (length <= 0) {
+            return 0;
+        }
+        System.arraycopy(bytes, pos, b, off, length);
+        pos += length;
+        return length;
+    }
+
+    @Override
+    public void seek(long pos) throws IOException {
+        this.pos = (int) pos;
     }
 
     @Override
     public void close() throws IOException {
-        Streams.close(stream);
-    }
-
-    @Override
-    public InputStream getStream() throws OXException {
-        return stream;
-    }
-
-    @Override
-    public RandomAccess getRandomAccess() throws OXException {
-        // No random access support
-        return null;
-    }
-
-    @Override
-    public long getLength() {
-        return -1;
-    }
-
-    @Override
-    public String getContentType() {
-        return contentType;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getDisposition() {
-        return null;
-    }
-
-    @Override
-    public String getDelivery() {
-        return "download";
+        // Nothing to do
     }
 
 }
