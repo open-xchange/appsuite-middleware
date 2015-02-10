@@ -2,6 +2,10 @@
 
  - Fix for bug 36228: Invalidate user after changing personal contact data
 
+* 2015-02-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35794: Ignore un-subscribe attempt for a standard folder
+
 * 2015-02-09 - martin.schneider@open-xchange.com
 
  - Fix for bug 36263: add primary key for table DATABASECHANGELOG and create presenceSubscriptions with primary key
