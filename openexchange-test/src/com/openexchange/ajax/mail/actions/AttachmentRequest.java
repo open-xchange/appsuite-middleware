@@ -49,11 +49,18 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import java.io.IOException;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.java.Strings;
 
 /**
  * {@link AttachmentRequest}
@@ -65,6 +72,9 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
 
 	class AttachmentParser extends AbstractAJAXParser<AttachmentResponse> {
 
+	    private String strBody;
+        private byte[] bytesBody;
+
 		/**
 		 * Default constructor.
 		 */
@@ -73,12 +83,23 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
 		}
 
 		@Override
+		public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+		    assertEquals("Response code is not okay. (" + resp.getStatusLine().getReasonPhrase() + ")", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+		    Header contentType = resp.getFirstHeader("Content-Type");
+		    if (Strings.asciiLowerCase(contentType.getValue()).startsWith("text/")) {
+                strBody = EntityUtils.toString(resp.getEntity());
+            } else {
+                bytesBody = EntityUtils.toByteArray(resp.getEntity());
+            }
+		    return "{}";
+		}
+
+		@Override
 		public AttachmentResponse parse(String body) throws JSONException {
 		    if (body.length() == 0) {
-		        Response response = new Response();
-		        return new AttachmentResponse(response);
+		        return new AttachmentResponse(new Response());
 		    }
-		    return super.parse(body);
+		    return null == strBody ? new AttachmentResponse(bytesBody) : new AttachmentResponse(strBody);
 		}
 
 		/**
