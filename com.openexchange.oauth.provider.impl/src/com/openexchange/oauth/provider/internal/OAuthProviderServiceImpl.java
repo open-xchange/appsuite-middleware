@@ -50,25 +50,36 @@
 package com.openexchange.oauth.provider.internal;
 
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
+import com.openexchange.oauth.provider.DefaultGrantView;
 import com.openexchange.oauth.provider.DefaultScopes;
+import com.openexchange.oauth.provider.GrantView;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
+import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
 import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
-import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
+import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.StoredGrant;
 import com.openexchange.oauth.provider.tools.URIValidator;
 import com.openexchange.oauth.provider.tools.UserizedToken;
@@ -111,13 +122,13 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public boolean unregisterClient(String clientId) throws OXException {
-        grantStorage.deleteGrantsForClient(clientId);
+        grantStorage.deleteGrantsByClientId(clientId);
         return clientStorage.unregisterClient(clientId);
     }
 
     @Override
     public Client revokeClientSecret(String clientId) throws OXException {
-        grantStorage.deleteGrantsForClient(clientId);
+        grantStorage.deleteGrantsByClientId(clientId);
         return clientStorage.revokeClientSecret(clientId);
     }
 
@@ -133,7 +144,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public void disableClient(String clientId) throws OXException {
-        grantStorage.deleteGrantsForClient(clientId); // TODO: really?
+        grantStorage.deleteGrantsByClientId(clientId); // TODO: really?
         clientStorage.disableClient(clientId);
     }
 
@@ -150,7 +161,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         CapabilitySet capabilities = capabilityService.getCapabilities(userId, contextId);
         Set<String> finalScopes = new HashSet<>();
 
-        DefaultScopes scopes = DefaultScopes.parseScope(scopeString);
+        Scopes scopes = DefaultScopes.parseScope(scopeString);
         for (String scope : scopes.getScopes()) {
             OAuthScopeProvider provider = ScopeRegistry.getInstance().getProvider(scope);
             if (provider != null && provider.canBeGranted(capabilities, scopes.isReadOnly(scope))) {
@@ -256,7 +267,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     @Override
     public boolean isValidScopeString(String scopeString) {
         if (DefaultScopes.isValidScopeString(scopeString)) {
-            DefaultScopes scopes = DefaultScopes.parseScope(scopeString);
+            Scopes scopes = DefaultScopes.parseScope(scopeString);
             if (scopes.size() == 0) {
                 return false;
             }
@@ -271,6 +282,62 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         }
 
         return false;
+    }
+
+    @Override
+    public Iterator<GrantView> getGrants(int contextId, int userId) throws OXException {
+        List<StoredGrant> grants = grantStorage.getGrantsForUser(contextId, userId);
+        Map<String, List<StoredGrant>> grantsByClient = new HashMap<>();
+        for (StoredGrant grant : grants) {
+            List<StoredGrant> clientGrants = grantsByClient.get(grant.getClientId());
+            if (clientGrants == null) {
+                clientGrants = new LinkedList<>();
+                grantsByClient.put(grant.getClientId(), clientGrants);
+            }
+            clientGrants.add(grant);
+        }
+
+        List<GrantView> grantViews = new ArrayList<GrantView>(grantsByClient.size());
+        for (Entry<String, List<StoredGrant>> entry : grantsByClient.entrySet()) {
+            Client client = clientStorage.getClientById(entry.getKey());
+            Map<String, Boolean> scopes = new HashMap<>();
+            for (StoredGrant grant : entry.getValue()) {
+                for (String scope : grant.getScopes().getScopes()) {
+                    Boolean readOnly = scopes.get(scope);
+                    if (readOnly == null) {
+                        scopes.put(scope, grant.getScopes().isReadOnly(scope));
+                    } else {
+                        if (!grant.getScopes().isReadOnly(scope)) {
+                            scopes.put(scope, Boolean.FALSE);
+                        }
+                    }
+                }
+            }
+
+            String[] qualifiedScopes = new String[scopes.size()];
+            int i = 0;
+            for (Entry<String, Boolean> scope : scopes.entrySet()) {
+                qualifiedScopes[i] = DefaultScopes.qualify(scope.getKey(), scope.getValue());
+                i++;
+            }
+
+            DefaultGrantView view = new DefaultGrantView();
+            view.setClient(client);
+            view.setScopes(new DefaultScopes(qualifiedScopes));
+            grantViews.add(view);
+        }
+
+        return Collections.unmodifiableList(grantViews).iterator();
+    }
+
+    @Override
+    public void revokeGrants(String clientId, int contextId, int userId) throws OXException {
+       grantStorage.deleteGrantsByClientAndUser(clientId, contextId, userId);
+    }
+
+    @Override
+    public OAuthScopeProvider getScopeProvider(String scopeId) {
+        return ScopeRegistry.getInstance().getProvider(scopeId);
     }
 
 }

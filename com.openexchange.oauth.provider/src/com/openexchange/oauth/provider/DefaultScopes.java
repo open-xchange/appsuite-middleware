@@ -93,7 +93,7 @@ public class DefaultScopes implements Scopes {
      * @return The parsed scope
      * @throws IllegalArgumentException if the scope string is invalid
      */
-    public static DefaultScopes parseScope(String scopeString) {
+    public static Scopes parseScope(String scopeString) {
         if (Strings.isEmpty(scopeString)) {
             return new DefaultScopes();
         }
@@ -120,6 +120,21 @@ public class DefaultScopes implements Scopes {
         }
 
         return false;
+    }
+
+    /**
+     * Returns the qualified scope for a given scope identifier.
+     *
+     * @param scope The un-qualified scope
+     * @param readOnly <code>true</code> if the qualified scope shall denote read-only access
+     * @return The qualified scope
+     */
+    public static String qualify(String scope, boolean readOnly) {
+        if (readOnly) {
+            return "r_" + scope;
+        }
+
+        return "rw_" + scope;
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------

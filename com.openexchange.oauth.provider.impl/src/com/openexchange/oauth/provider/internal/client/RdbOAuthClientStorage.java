@@ -347,6 +347,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             client.addRedirectURI(uri);
         }
 
+        client.setIcon(clientData.getIcon());
         return client;
     }
 

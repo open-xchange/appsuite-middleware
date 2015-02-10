@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.internal.grant;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 
@@ -86,7 +87,7 @@ public interface OAuthGrantStorage {
      */
     public void updateGrant(UserizedToken refreshToken, StoredGrant grant) throws OXException;
 
-    public void deleteGrantsForClient(String clientId) throws OXException;
+    public void deleteGrantsByClientId(String clientId) throws OXException;
 
     public StoredGrant getGrantByAccessToken(UserizedToken accessToken) throws OXException;
 
@@ -119,5 +120,25 @@ public interface OAuthGrantStorage {
      * @throws OXException
      */
     public boolean deleteGrantByAccessToken(UserizedToken accessToken) throws OXException;
+
+    /**
+     * Gets all stored grants for a user.
+     *
+     * @param contextId The context ID
+     * @param userId The user ID
+     * @return The list of grants
+     * @throws OXException
+     */
+    public List<StoredGrant> getGrantsForUser(int contextId, int userId) throws OXException;
+
+    /**
+     * Deletes all grants for a user that belong to a certain client.
+     *
+     * @param clientId The client ID
+     * @param contextId The context ID
+     * @param userId The user ID
+     * @throws OXException
+     */
+    public void deleteGrantsByClientAndUser(String clientId, int contextId, int userId) throws OXException;
 
 }

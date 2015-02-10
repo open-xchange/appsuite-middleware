@@ -205,7 +205,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
     }
 
     @Override
-    public void deleteGrantsForClient(String clientId) throws OXException {
+    public void deleteGrantsByClientId(String clientId) throws OXException {
         DatabaseService dbService = requireService(DatabaseService.class, services);
         Deque<SchemaAndWritePool> schemasAndWritePools = getSchemasAndWritePools(dbService);
         while (!schemasAndWritePools.isEmpty()) {
@@ -229,24 +229,6 @@ public class DbGrantStorage implements OAuthGrantStorage {
                 Databases.closeSQLStuff(stmt);
                 dbService.back(schemaAndWritePool.getWritePool(), con);
             }
-        }
-    }
-
-    public void deleteGrantsForUserAndClient(int contextId, int userId, String clientId) throws OXException {
-        DatabaseService dbService = requireService(DatabaseService.class, services);
-        Connection con = dbService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ? AND cid = ? AND user = ?");
-            stmt.setString(1, clientId);
-            stmt.setInt(2, contextId);
-            stmt.setInt(3, userId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            dbService.backWritable(contextId, con);
         }
     }
 
@@ -341,6 +323,58 @@ public class DbGrantStorage implements OAuthGrantStorage {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             dbService.backReadOnly(contextId, con);
+        }
+    }
+
+    @Override
+    public List<StoredGrant> getGrantsForUser(int contextId, int userId) throws OXException {
+        List<StoredGrant> grants = new LinkedList<>();
+        DatabaseService dbService = requireService(DatabaseService.class, services);
+        Connection con = dbService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT client, access_token, refresh_token, expiration_date, scopes FROM oauth_grant WHERE cid = ? AND user = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                StoredGrant grant = new StoredGrant();
+                grant.setContextId(contextId);
+                grant.setUserId(userId);
+                grant.setClientId(rs.getString(1));
+                grant.setAccessToken(new UserizedToken(userId, contextId, rs.getString(2)));
+                grant.setRefreshToken(new UserizedToken(userId, contextId, rs.getString(3)));
+                grant.setExpirationDate(new Date(rs.getLong(4)));
+                grant.setScopes(DefaultScopes.parseScope(rs.getString(5)));
+                grants.add(grant);
+            }
+
+            return grants;
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            dbService.backReadOnly(contextId, con);
+        }
+    }
+
+    @Override
+    public void deleteGrantsByClientAndUser(String clientId, int contextId, int userId) throws OXException {
+        DatabaseService dbService = requireService(DatabaseService.class, services);
+        Connection con = dbService.getWritable(contextId);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ? AND cid = ? AND user = ?");
+            stmt.setString(1, clientId);
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            dbService.backWritable(contextId, con);
         }
     }
 

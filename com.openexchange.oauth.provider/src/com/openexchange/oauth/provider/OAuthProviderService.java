@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 
@@ -165,7 +166,7 @@ public interface OAuthProviderService {
      */
     OAuthGrant redeemAuthCode(Client client, String redirectURI, String authCode) throws OXException;
 
-    // ------------------------------------ Token Handling ----------------------------------- \\
+    // ------------------------------------ Grant Handling ----------------------------------- \\
 
 
     /**
@@ -195,6 +196,25 @@ public interface OAuthProviderService {
      */
     boolean revokeByAccessToken(String accessToken) throws OXException;
 
+    /**
+     * Gets all grants of a user as client-centric views.
+     *
+     * @param contextId The contest ID
+     * @param userId The user ID
+     * @return An immutable iterator of {@link GrantView}s.
+     */
+    Iterator<GrantView> getGrants(int contextId, int userId) throws OXException;
+
+    /**
+     * Revokes all grants of a user to a certain client.
+     *
+     * @param clientId The client ID
+     * @param contextId The context ID
+     * @param userId The user ID
+     * @throws OXException
+     */
+    void revokeGrants(String clientId, int contextId, int userId) throws OXException;
+
     // --------------------------------------- Helper methods -------------------------------------- \\
 
     /**
@@ -205,5 +225,13 @@ public interface OAuthProviderService {
      * to registered providers. Otherwise <code>false</code>.
      */
     boolean isValidScopeString(String scopeString);
+
+    /**
+     * Gets the scope provider for a given scope ID (must be non-qualified).
+     *
+     * @param scopeId The scope ID
+     * @return The provider or <code>null</code> if none can be found
+     */
+    OAuthScopeProvider getScopeProvider(String scopeId);
 
 }
