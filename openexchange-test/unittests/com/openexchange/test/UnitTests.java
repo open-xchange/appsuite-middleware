@@ -176,8 +176,13 @@ public class UnitTests {
         // Mail
         tests.addTest(com.openexchange.mail.MailAPITestSuite.suite());
 
+<<<<<<< HEAD
         //Share tests
         tests.addTest(com.openexchange.share.ShareTestSuite.suite());
+=======
+        //User tests
+        tests.addTest(com.openexchange.user.UserTestSuite.suite());
+>>>>>>> 46e0c87... Fix for bug 36228: Invalidate user after changing personal contact data
 
         return tests;
     }
