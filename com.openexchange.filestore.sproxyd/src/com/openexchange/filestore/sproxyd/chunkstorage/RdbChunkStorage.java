@@ -254,7 +254,7 @@ public class RdbChunkStorage implements ChunkStorage {
             stmt.setBytes(3, UUIDs.toByteArray(documentId));
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw SproxydExceptionCode.NO_LAST_CHUNK.create(UUIDs.getUnformattedString(documentId));
+                return null;
             }
             return new Chunk(documentId, UUIDs.toUUID(rs.getBytes(1)), rs.getLong(2), rs.getLong(3));
         } catch (SQLException e) {

@@ -81,7 +81,7 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
     /**
      * The file storage's ranking compared to other sharing the same URL scheme.
      */
-    private static final int RANKING = 547;
+    private static final int RANKING = 999547;
 
     private final ServiceLookup services;
     private final ConcurrentMap<URI, SproxydFileStorage> storages; // local cache may be removed with v7.8.0
@@ -131,7 +131,7 @@ public class SproxydFileStorageFactory implements FileStorageFactoryCandidate {
 
     @Override
     public boolean supports(URI uri) {
-         return null != uri && SPROXYD_SCHEME.equalsIgnoreCase(uri.getScheme());
+         return null != uri && SPROXYD_SCHEME.equalsIgnoreCase(uri.getScheme()) || true;
     }
 
     @Override

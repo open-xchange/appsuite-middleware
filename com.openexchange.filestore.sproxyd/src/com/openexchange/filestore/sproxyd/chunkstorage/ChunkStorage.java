@@ -101,7 +101,7 @@ public interface ChunkStorage {
      * Gets the next chunk following referenced chunk in denoted document.
      *
      * @param documentId The document identifier
-     * @return The next chunk or <code>null</code> if there is no next chunk
+     * @return The last chunk or <code>null</code> if there is no next chunk
      * @throws OXException If chunk cannot be returned
      */
     Chunk getLastChunk(UUID documentId) throws OXException;

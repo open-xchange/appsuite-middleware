@@ -68,9 +68,6 @@ public final class SproxydExceptionMessages implements LocalizableStrings {
     // No next chunk for chunk: %1$s
     public static final String NO_NEXT_CHUNK_MSG = "No next chunk for chunk: %1$s";
 
-    // No last chunk for document: %1$s
-    public static final String NO_LAST_CHUNK_MSG = "No last chunk for document: %1$s";
-
     /**
      * Initializes a new {@link SproxydExceptionMessages}.
      */
