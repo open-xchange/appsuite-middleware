@@ -4,6 +4,10 @@
  - Fix for bug 36585: Signal proper RENAME_FLAG for mail standard folders
  - Fix for bug 36487: Subscribe folder incl. predecessor folders to the top to not leave a parent folder unsubscribed
 
+* 2015-02-11 - choeger@open-xchange.com
+
+ - Fix for bug 36656: SOAP: getContextCapabilities does not work
+
 * 2015-02-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 36288: Don't hide "email1" property, even if the global address book permissions are limited
