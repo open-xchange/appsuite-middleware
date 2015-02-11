@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -208,6 +209,7 @@ public final class TmpFileFileHolder implements IFileHolder {
         try {
             final File tmpFile = File.createTempFile("open-xchange-", ".tmp", uploadDirectory());
             tmpFile.deleteOnExit();
+            LogProperties.appendTempFileProperty(tmpFile);
             return tmpFile;
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
