@@ -54,9 +54,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.ajax.requesthandler.oauth.OAuthModule;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -67,6 +67,8 @@ import com.openexchange.server.ServiceLookup;
 @Module(name = "config", description = "The config module is used to retrieve and set user-specific configuration.")
 @OAuthModule
 public class ConfigActionFactory implements AJAXActionServiceFactory {
+
+    public static final String OAUTH_WRITE_SCOPE = "write_userconfig";
 
     private final Map<String, AJAXActionService> actions;
 

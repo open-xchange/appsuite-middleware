@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.json.ConfigAJAXRequest;
+import com.openexchange.config.json.ConfigActionFactory;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -72,6 +73,7 @@ import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -84,6 +86,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "config/path", description = "Set configuration data", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "The new value of the node specified by path.")
+@OAuthAction(ConfigActionFactory.OAUTH_WRITE_SCOPE)
 public final class PUTAction extends AbstractConfigAction {
 
     /** The paths to ignore */

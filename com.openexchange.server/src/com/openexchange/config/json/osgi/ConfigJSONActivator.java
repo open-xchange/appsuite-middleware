@@ -50,9 +50,13 @@
 package com.openexchange.config.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.json.ConfigActionFactory;
+import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.oauth.provider.AbstractScopeProvider;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 
@@ -78,6 +82,19 @@ public final class ConfigJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         registerModule(new ConfigActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "config");
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ConfigActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return true;
+            }
+        });
+    }
+
+    private static final class OAuthScopeDescription implements LocalizableStrings {
+        // Application 'xyz' requires following permissions:
+        //  - Change your settings.
+        //  - ...
+        public static final String WRITABLE = "Change your settings.";
     }
 
 }
