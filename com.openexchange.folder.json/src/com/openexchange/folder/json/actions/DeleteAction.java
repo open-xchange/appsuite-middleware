@@ -74,6 +74,9 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.OAuthScopeCheck;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -90,6 +93,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "hardDelete", type=Type.BOOLEAN, description = "Optional, defaults to \"false\". If set to \"true\", the folders are deleted permanently. Otherwise, and if the underlying storage supports a trash folder and the folders are not yet located below the trash folder, they are moved to the trash folder.")
 }, requestBody = "An array with object IDs of the folders that shall be deleted.",
 responseDescription = "An array with object IDs of folders that were NOT deleted. There may be a lot of different causes for a not deleted folder: A folder has been modified in the mean time, the user does not have the permission to delete it or those permissions have just been removed, the folder does not exist, etc.")
+@OAuthAction(OAuthAction.CUSTOM)
 public final class DeleteAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_DELETE;
@@ -211,6 +215,31 @@ public final class DeleteAction extends AbstractFolderAction {
             org.slf4j.LoggerFactory.getLogger(DeleteAction.class).debug("Error getting folder name for {}", folderId, e);
         }
         return folderId;
+    }
+
+    @OAuthScopeCheck
+    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
+        final JSONArray jsonArray = (JSONArray) request.requireData();
+        final int len = jsonArray.length();
+        String treeId = request.getParameter("tree");
+        if (null == treeId) {
+            treeId = getDefaultTreeIdentifier();
+        }
+
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        try {
+            for (int i = 0; i < len; i++) {
+                final String folderId = jsonArray.getString(i);
+                UserizedFolder folder = folderService.getFolder(treeId, folderId, session, new FolderServiceDecorator());
+                if (!mayWriteViaOAuthRequest(folder.getContentType(), grant)) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

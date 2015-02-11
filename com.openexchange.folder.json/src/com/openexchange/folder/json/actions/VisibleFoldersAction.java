@@ -75,6 +75,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -90,6 +91,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for folders are defined in Common folder data and Detailed folder data.")
 }, requestBody = "None",
 responseDescription = "Response with timestamp: A JSON object containing three fields: \"private\", \"public\", and \"shared\". Each field is a JSON array with data for all folders. Each folder is itself described by an array.")
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class VisibleFoldersAction extends AbstractFolderAction {
 
     public static final String ACTION = "allVisible";

@@ -78,6 +78,10 @@ import com.openexchange.tasks.json.actions.UpdatesAction;
 @Module(name = "tasks", description = "Provides access to task information.")
 public class TaskActionFactory implements AJAXActionServiceFactory {
 
+    public static final String OAUTH_READ_SCOPE = "read_tasks";
+
+    public static final String OAUTH_WRITE_SCOPE = "write_tasks";
+
     private final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10);
 
     /**

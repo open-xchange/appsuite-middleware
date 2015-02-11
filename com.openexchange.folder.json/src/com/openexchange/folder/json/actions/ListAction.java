@@ -72,6 +72,7 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -89,6 +90,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "allowed_modules", description = "An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered."),
     @Parameter(name = "errorOnDuplicateName", description = "An optional flag to enable or disable (default) check for duplicate folder names within returned folder response (since v6.20.1). If a duplicate folder name is detected, an appropriate error is returned as response.")
 }, responseDescription = "Response with timestamp: An array with data for all folders, which have the folder with the requested object ID as parent. Each array element describes one folder and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class ListAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_LIST;

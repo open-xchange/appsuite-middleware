@@ -56,6 +56,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -69,6 +70,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "tree", description = "The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
     @Parameter(name = "allowed_modules", description = "An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
 }, responseDescription = "An array with data for all folders at the root level of the folder structure. Each array element describes one folder and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class RootAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_ROOT;

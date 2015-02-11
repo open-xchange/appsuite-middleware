@@ -63,12 +63,19 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -281,6 +288,25 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, tmp);
         }
         return ct;
+    }
+
+    /**
+     * Checks whether write operations are permitted for the given folder content type and OAuth grant.
+     *
+     * @param contentType The content type
+     * @param grant The grant
+     * @return <code>true</code> if write operations are permitted
+     */
+    protected static boolean mayWriteViaOAuthRequest(ContentType contentType, OAuthGrant grant) {
+        if (contentType == ContactContentType.getInstance()) {
+            return grant.getScopes().has(ContactActionFactory.OAUTH_WRITE_SCOPE);
+        } else if (contentType == CalendarContentType.getInstance()) {
+            return grant.getScopes().has(AppointmentActionFactory.OAUTH_WRITE_SCOPE);
+        } else if (contentType == TaskContentType.getInstance()) {
+            return grant.getScopes().has(TaskActionFactory.OAUTH_WRITE_SCOPE);
+        }
+
+        return false;
     }
 
     private static Set<String> TRUES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "yes", "on", "1", "y")));

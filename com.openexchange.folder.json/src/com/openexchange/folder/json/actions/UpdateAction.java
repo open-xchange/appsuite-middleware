@@ -65,6 +65,7 @@ import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -73,6 +74,9 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.OAuthScopeCheck;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -91,6 +95,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "cascadePermissions", description = "(Optional. Defaults to false) Flag to cascade permissions to all sub-folders. The user must have administrative permissions to all sub-folders subject to change. If one permission change fails, the entire operation fails.")
 }, requestBody = "Folder object as described in Common folder data and Detailed folder data. Only modified fields are present.",
     responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated folder, and maybe errors.")
+@OAuthAction(OAuthAction.CUSTOM)
 public final class UpdateAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
@@ -203,6 +208,23 @@ public final class UpdateAction extends AbstractFolderAction {
             }
         }
         return "";
+    }
+
+    @OAuthScopeCheck
+    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
+        String treeId = request.getParameter("tree");
+        if (null == treeId) {
+            treeId = getDefaultTreeIdentifier();
+        }
+
+        final String id = request.getParameter("id");
+        if (null == id) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
+        }
+
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        ContentType contentType = folderService.getFolder(treeId, id, session, new FolderServiceDecorator()).getContentType();
+        return mayWriteViaOAuthRequest(contentType, grant);
     }
 
 }

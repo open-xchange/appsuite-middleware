@@ -62,6 +62,13 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.OAuthScopeCheck;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -75,6 +82,7 @@ import com.openexchange.folderstorage.FolderService;
     @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
 }, requestBody = "A JSON array containing the folder ID(s) whose content should be cleared. NOTE: Although the requests offers to clear multiple folders at once it is recommended to clear only one folder per request since if any exception occurs (e.g. missing permissions) the complete request is going to be aborted.",
 responseDescription = "A JSON array containing the IDs of folders that could not be cleared due to a concurrent modification. Meaning you receive an empty JSON array if everything worked well.")
+@OAuthAction(OAuthAction.CUSTOM)
 public final class ClearAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_CLEAR;
@@ -125,6 +133,31 @@ public final class ClearAction extends AbstractFolderAction {
          * Return appropriate result
          */
         return new AJAXRequestResult(responseArray).addWarnings(warnings);
+    }
+
+    @OAuthScopeCheck
+    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
+        final JSONArray jsonArray = (JSONArray) request.requireData();
+        final int len = jsonArray.length();
+        String treeId = request.getParameter("tree");
+        if (null == treeId) {
+            treeId = getDefaultTreeIdentifier();
+        }
+
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        try {
+            for (int i = 0; i < len; i++) {
+                final String folderId = jsonArray.getString(i);
+                UserizedFolder folder = folderService.getFolder(treeId, folderId, session, new FolderServiceDecorator());
+                if (!mayWriteViaOAuthRequest(folder.getContentType(), grant)) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

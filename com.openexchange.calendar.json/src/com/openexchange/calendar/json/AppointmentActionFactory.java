@@ -82,6 +82,10 @@ import com.openexchange.server.ServiceLookup;
 @Module(name = "calendar", description = "Provides access to calendar information.")
 public class AppointmentActionFactory implements AJAXActionServiceFactory {
 
+    public static final String OAUTH_READ_SCOPE = "read_calendar";
+
+    public static final String OAUTH_WRITE_SCOPE = "write_calendar";
+
     private final Map<String, AJAXActionService> actions;
 
     /**

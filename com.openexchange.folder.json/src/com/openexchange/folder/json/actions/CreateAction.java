@@ -59,12 +59,16 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.OAuthScopeCheck;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -80,6 +84,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
 }, requestBody = "Folder object as described in Common folder data and Detailed folder data. The field id should not be present. Provided that permission is granted to create a folder, its module is bound to the limitation, that the new folder's module must be equal to parent folder's module except that: Parent folder is one of the system folders private, public, or shared. Below these folders task, calendar, and contact modules are permitted. Parent folder's module is one of task, calendar, or contact. Below this kind of folders task, calendar, and contact modules are permitted.",
 responseDescription = "Object ID of the newly created folder.")
+@OAuthAction(OAuthAction.CUSTOM)
 public final class CreateAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_NEW;
@@ -127,6 +132,14 @@ public final class CreateAction extends AbstractFolderAction {
         final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session, new FolderServiceDecorator().put("autorename", request.getParameter("autorename")));
         final String newId = newIdResponse.getResponse();
         return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(newIdResponse.getWarnings());
+    }
+
+    @OAuthScopeCheck
+    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
+        JSONObject folderObject = (JSONObject) request.requireData();
+        Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
+        ContentType contentType = folder.getContentType();
+        return mayWriteViaOAuthRequest(contentType, grant);
     }
 
 }
