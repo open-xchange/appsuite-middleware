@@ -51,7 +51,6 @@ package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import javax.mail.internet.AddressException;
@@ -144,7 +143,7 @@ public class PasswordResetServlet extends HttpServlet {
             int guestID = guestInfo.getGuestID();
             User storageUser = userService.getUser(guestID, context);
 
-            String hash = URLEncoder.encode(getHash(storageUser.getUserPassword()), "UTF-8");
+            String hash = getHash(storageUser.getUserPassword());
             if (null == confirm) {
                 // Generate hash and send link to confirm
                 GuestShare guestShare = shareService.resolveToken(token);
