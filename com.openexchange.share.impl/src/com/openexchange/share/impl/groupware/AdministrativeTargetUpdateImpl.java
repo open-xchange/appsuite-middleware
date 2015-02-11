@@ -60,6 +60,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -157,15 +158,20 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     private Map<String, FolderObject> loadFolderTargets(List<ShareTarget> folderTargets, Map<ShareTarget, TargetProxy> proxies) throws OXException {
         Map<String, FolderObject> foldersById = new HashMap<String, FolderObject>();
         for (ShareTarget folderTarget : folderTargets) {
-            FolderObject folder;
-            try {
-                folder = folderAccess.getFolderObject(Integer.valueOf(folderTarget.getFolder()));
-            } catch (NumberFormatException e) {
-                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            if (null != Module.getForFolderConstant(folderTarget.getModule())) {
+                FolderObject folder;
+                try {
+                    folder = folderAccess.getFolderObject(Integer.valueOf(folderTarget.getFolder()));
+                } catch (NumberFormatException e) {
+                    throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+                AdministrativeFolderTargetProxy proxy = new AdministrativeFolderTargetProxy(folder);
+                foldersById.put(folderTarget.getFolder(), folder);
+                proxies.put(folderTarget, proxy);
+            } else {
+                VirtualTargetProxy proxy = new VirtualTargetProxy(parameters.getUser(), folderTarget);
+                proxies.put(folderTarget, proxy);
             }
-            AdministrativeFolderTargetProxy proxy = new AdministrativeFolderTargetProxy(folder);
-            foldersById.put(folderTarget.getFolder(), folder);
-            proxies.put(folderTarget, proxy);
         }
 
         return foldersById;
