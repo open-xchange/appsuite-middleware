@@ -1,10 +1,9 @@
 package liquibase.util;
 
+import static org.junit.Assert.assertEquals;
+import java.util.Date;
 import org.junit.Test;
 
-import java.util.Date;
-
-import static junit.framework.Assert.assertEquals;
 
 public class ISODateFormatTest {
     @Test

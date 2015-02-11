@@ -1,20 +1,13 @@
 package liquibase.change.custom;
 
-import junit.framework.Assert;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import org.junit.Test;
-
 import java.net.URL;
 import java.net.URLClassLoader;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 

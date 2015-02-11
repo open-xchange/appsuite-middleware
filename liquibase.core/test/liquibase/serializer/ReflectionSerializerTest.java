@@ -1,12 +1,9 @@
 package liquibase.serializer;
 
-import liquibase.changelog.visitor.ChangeSetVisitor;
+import static org.junit.Assert.assertEquals;
 import liquibase.sql.visitor.PrependSqlVisitor;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.structure.core.Table;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
 
 public class ReflectionSerializerTest {
 

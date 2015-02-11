@@ -1,13 +1,12 @@
 package liquibase.util;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-import org.junit.Test;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import org.junit.Test;
 
 public class StreamUtilTest {
 
@@ -62,7 +61,7 @@ public class StreamUtilTest {
 
 		assertEquals(contents, StreamUtil.getStreamContents(bais, "Latin1"));
 	}
-	
+
 	@Test
 	public void testWithBomWrongEncodingGiven() throws IOException {
 		ByteArrayInputStream bais = new ByteArrayInputStream(new byte[] {

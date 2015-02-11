@@ -1,9 +1,12 @@
 package liquibase.database.core;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 import liquibase.database.Database;
 
-public class DerbyDatabaseTest extends TestCase {
+public class DerbyDatabaseTest {
+
+    @Test
     public void testGetDefaultDriver() {
         Database database = new DerbyDatabase();
 
@@ -12,6 +15,7 @@ public class DerbyDatabaseTest extends TestCase {
         assertNull(database.getDefaultDriver("jdbc:oracle://localhost;databaseName=liquibase"));
     }
 
+    @Test
     public void testGetDateLiteral() {
         assertEquals("TIMESTAMP('2008-01-25 13:57:41')", new DerbyDatabase().getDateLiteral("2008-01-25 13:57:41"));
         assertEquals("TIMESTAMP('2008-01-25 13:57:41.300000')", new DerbyDatabase().getDateLiteral("2008-01-25 13:57:41.3"));

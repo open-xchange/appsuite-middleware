@@ -1,10 +1,32 @@
+
 package liquibase.change;
 
+import static liquibase.test.Assert.assertArraysEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.exception.*;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
@@ -14,43 +36,27 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static junit.framework.Assert.*;
-import static liquibase.test.Assert.assertArraysEqual;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-
 /*
-I moved this annotation from the class 
-@PrepareForTest({SqlGeneratorFactory.class, CheckSum.class})
-and used more specific annotations on individual test methods 
-because SqlGeneratorFactory was scanning classes and interacting
-with large numbers of mocked/generated classes with proxied
-methods.  The behavior seemed to differ between Linux and Windows.
-I don't really know why yet.
+ I moved this annotation from the class
+ @PrepareForTest({SqlGeneratorFactory.class, CheckSum.class})
+ and used more specific annotations on individual test methods
+ because SqlGeneratorFactory was scanning classes and interacting
+ with large numbers of mocked/generated classes with proxied
+ methods.  The behavior seemed to differ between Linux and Windows.
+ I don't really know why yet.
  */
-
 
 @RunWith(PowerMockRunner.class)
 public class AbstractChangeTest {
-  
-  @BeforeClass
-  public static void unClench() {
-  }
+
+    @BeforeClass
+    public static void unClench() {}
 
     @Test
     public void finishInitialization() throws SetupException {
@@ -63,6 +69,7 @@ public class AbstractChangeTest {
     public void createChangeMetaData_noAnnotation() {
         try {
             new AbstractChange() {
+
                 @Override
                 public String getConfirmationMessage() {
                     return null;
@@ -75,7 +82,7 @@ public class AbstractChangeTest {
             }.createChangeMetaData();
             fail("Did not throw exception");
         } catch (UnexpectedLiquibaseException e) {
-            assertTrue("Incorrect message: "+e.getMessage(), e.getMessage().startsWith("liquibase.exception.UnexpectedLiquibaseException: No @DatabaseChange annotation for "));
+            assertTrue("Incorrect message: " + e.getMessage(), e.getMessage().startsWith("liquibase.exception.UnexpectedLiquibaseException: No @DatabaseChange annotation for "));
         }
     }
 
@@ -151,7 +158,7 @@ public class AbstractChangeTest {
     }
 
     @Test
-    @PrepareForTest({SqlGeneratorFactory.class})
+    @PrepareForTest({ SqlGeneratorFactory.class })
     public void generateStatementsVolatile() throws Exception {
         Database database = mock(Database.class);
         final SqlStatement statement1No = mock(SqlStatement.class);
@@ -169,19 +176,26 @@ public class AbstractChangeTest {
         when(SqlGeneratorFactory.getInstance()).thenReturn(generatorFactory);
 
         assertTrue(new ExampleAbstractChange() {
+
             @Override
-            public SqlStatement[] generateStatements(Database database) { return new SqlStatement[] { statement1Yes, statement2Yes }; }
+            public SqlStatement[] generateStatements(Database database) {
+                return new SqlStatement[] { statement1Yes, statement2Yes };
+            }
         }.generateStatementsVolatile(database));
 
         assertFalse(new ExampleAbstractChange() {
+
             @Override
-            public SqlStatement[] generateStatements(Database database) { return new SqlStatement[]{statement1No, statement2No}; }
+            public SqlStatement[] generateStatements(Database database) {
+                return new SqlStatement[] { statement1No, statement2No };
+            }
         }.generateStatementsVolatile(database));
 
         assertTrue(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
-                return new SqlStatement[]{statement1No, statement1Yes};
+                return new SqlStatement[] { statement1No, statement1Yes };
             }
         }.generateStatementsVolatile(database));
     }
@@ -189,6 +203,7 @@ public class AbstractChangeTest {
     @Test
     public void generateStatementsVolatile_noStatements() throws Exception {
         assertFalse(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return null;
@@ -196,6 +211,7 @@ public class AbstractChangeTest {
         }.generateStatementsVolatile(mock(Database.class)));
 
         assertFalse(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return new SqlStatement[0];
@@ -204,7 +220,7 @@ public class AbstractChangeTest {
     }
 
     @Test
-    @PrepareForTest({SqlGeneratorFactory.class})
+    @PrepareForTest({ SqlGeneratorFactory.class })
     public void generateRollbackStatementsVolatile() throws Exception {
         Database database = mock(Database.class);
         final SqlStatement statement1No = mock(SqlStatement.class);
@@ -222,24 +238,34 @@ public class AbstractChangeTest {
         when(SqlGeneratorFactory.getInstance()).thenReturn(generatorFactory);
 
         assertTrue(new ExampleAbstractChange() {
+
             @Override
-            public SqlStatement[] generateStatements(Database database) { return new SqlStatement[] { statement1Yes, statement2Yes }; }
+            public SqlStatement[] generateStatements(Database database) {
+                return new SqlStatement[] { statement1Yes, statement2Yes };
+            }
         }.generateRollbackStatementsVolatile(database));
 
         assertFalse(new ExampleAbstractChange() {
+
             @Override
-            public SqlStatement[] generateStatements(Database database) { return new SqlStatement[]{statement1No, statement2No}; }
+            public SqlStatement[] generateStatements(Database database) {
+                return new SqlStatement[] { statement1No, statement2No };
+            }
         }.generateRollbackStatementsVolatile(database));
 
         assertTrue(new ExampleAbstractChange() {
+
             @Override
-            public SqlStatement[] generateStatements(Database database) { return new SqlStatement[]{statement1No, statement1Yes}; }
+            public SqlStatement[] generateStatements(Database database) {
+                return new SqlStatement[] { statement1No, statement1Yes };
+            }
         }.generateRollbackStatementsVolatile(database));
     }
 
     @Test
     public void generateRollbackStatementsVolatile_noStatements() throws Exception {
         assertFalse(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return null;
@@ -247,6 +273,7 @@ public class AbstractChangeTest {
         }.generateRollbackStatementsVolatile(mock(Database.class)));
 
         assertFalse(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return new SqlStatement[0];
@@ -257,6 +284,7 @@ public class AbstractChangeTest {
     @Test
     public void supports_noStatements() throws Exception {
         assertTrue(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return null;
@@ -264,6 +292,7 @@ public class AbstractChangeTest {
         }.supports(mock(Database.class)));
 
         assertTrue(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return new SqlStatement[0];
@@ -272,7 +301,7 @@ public class AbstractChangeTest {
     }
 
     @Test
-    @PrepareForTest({SqlGeneratorFactory.class})
+    @PrepareForTest({ SqlGeneratorFactory.class })
     public void warn() throws Exception {
         Database database = mock(Database.class);
         final SqlStatement statementUnsupported = mock(SqlStatement.class);
@@ -298,9 +327,10 @@ public class AbstractChangeTest {
         when(SqlGeneratorFactory.getInstance()).thenReturn(generatorFactory);
 
         Warnings warningsToTest = new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
-                return new SqlStatement[]{statementUnsupported, statementNullWarnings, statementEmptyWarnings, statementOneWarning, statementTwoWarnings};
+                return new SqlStatement[] { statementUnsupported, statementNullWarnings, statementEmptyWarnings, statementOneWarning, statementTwoWarnings };
             }
         }.warn(database);
 
@@ -311,7 +341,7 @@ public class AbstractChangeTest {
     }
 
     @Test
-    @PrepareForTest({SqlGeneratorFactory.class})
+    @PrepareForTest({ SqlGeneratorFactory.class })
     public void warn_unsupportedButSkip() throws Exception {
         Database database = new MySQLDatabase();
         final SqlStatement statementSkip = mock(SqlStatement.class);
@@ -330,9 +360,10 @@ public class AbstractChangeTest {
         when(SqlGeneratorFactory.getInstance()).thenReturn(generatorFactory);
 
         Warnings warnings = new ExampleParamlessAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
-                return new SqlStatement[]{statementSkip, statementFails};
+                return new SqlStatement[] { statementSkip, statementFails };
             }
         }.warn(database);
 
@@ -344,6 +375,7 @@ public class AbstractChangeTest {
     @Test
     public void warn_noStatements() throws Exception {
         assertFalse(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return null;
@@ -351,6 +383,7 @@ public class AbstractChangeTest {
         }.warn(mock(Database.class)).hasWarnings());
 
         assertFalse(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return new SqlStatement[0];
@@ -361,6 +394,7 @@ public class AbstractChangeTest {
     @Test
     public void validate_noStatements() throws Exception {
         assertFalse(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return null;
@@ -368,6 +402,7 @@ public class AbstractChangeTest {
         }.validate(mock(Database.class)).hasErrors());
 
         assertFalse(new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return new SqlStatement[0];
@@ -381,7 +416,7 @@ public class AbstractChangeTest {
     }
 
     @Test
-    @PrepareForTest({SqlGeneratorFactory.class})
+    @PrepareForTest({ SqlGeneratorFactory.class })
     public void validate_notSupported() throws Exception {
         Database database = new MySQLDatabase();
         final SqlStatement statement1Unsupported = mock(SqlStatement.class);
@@ -399,9 +434,10 @@ public class AbstractChangeTest {
         when(SqlGeneratorFactory.getInstance()).thenReturn(generatorFactory);
 
         ValidationErrors errors = new ExampleParamlessAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
-                return new SqlStatement[]{statement1Unsupported, statementSupported, statement2Unsupported};
+                return new SqlStatement[] { statement1Unsupported, statementSupported, statement2Unsupported };
             }
         }.validate(database);
 
@@ -410,7 +446,7 @@ public class AbstractChangeTest {
     }
 
     @Test
-    @PrepareForTest({SqlGeneratorFactory.class})
+    @PrepareForTest({ SqlGeneratorFactory.class })
     public void validate_statementsHaveErrors() throws Exception {
         Database database = new MySQLDatabase();
         final SqlStatement statement1Fails = mock(SqlStatement.class);
@@ -428,9 +464,10 @@ public class AbstractChangeTest {
         when(SqlGeneratorFactory.getInstance()).thenReturn(generatorFactory);
 
         ValidationErrors errors = new ExampleParamlessAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
-                return new SqlStatement[]{statement1Fails, statement2Fails, statementNoErrors};
+                return new SqlStatement[] { statement1Fails, statement2Fails, statementNoErrors };
             }
         }.validate(database);
 
@@ -457,7 +494,7 @@ public class AbstractChangeTest {
     }
 
     @Test
-    @PrepareForTest({SqlGeneratorFactory.class})
+    @PrepareForTest({ SqlGeneratorFactory.class })
     public void validate_noErrorsForSkipOnUnsupported() throws Exception {
         Database database = new MySQLDatabase();
         final SqlStatement statementSkip = mock(SqlStatement.class);
@@ -476,6 +513,7 @@ public class AbstractChangeTest {
         when(SqlGeneratorFactory.getInstance()).thenReturn(generatorFactory);
 
         ValidationErrors errors = new ExampleParamlessAbstractChange() {
+
             @Override
             public boolean supports(Database database) {
                 return true;
@@ -483,7 +521,7 @@ public class AbstractChangeTest {
 
             @Override
             public SqlStatement[] generateStatements(Database database) {
-                return new SqlStatement[]{statementSkip, statementFails};
+                return new SqlStatement[] { statementSkip, statementFails };
             }
         }.validate(database);
 
@@ -504,13 +542,14 @@ public class AbstractChangeTest {
         SqlStatement change1Statement2 = mock(SqlStatement.class);
         SqlStatement change2Statement = mock(SqlStatement.class);
 
-        when(change1.generateStatements(database)).thenReturn(new SqlStatement[] {change1Statement1, change1Statement2});
-        when(change2.generateStatements(database)).thenReturn(new SqlStatement[] {change2Statement});
+        when(change1.generateStatements(database)).thenReturn(new SqlStatement[] { change1Statement1, change1Statement2 });
+        when(change2.generateStatements(database)).thenReturn(new SqlStatement[] { change2Statement });
 
         SqlStatement[] rollbackStatements = new ExampleParamlessAbstractChange() {
+
             @Override
             protected Change[] createInverses() {
-                return new Change[] {change1, change2};
+                return new Change[] { change1, change2 };
             }
         }.generateRollbackStatements(database);
 
@@ -524,6 +563,7 @@ public class AbstractChangeTest {
     public void generateRollbackStatements_nullCreateInverse() throws Exception, RollbackImpossibleException {
         Database database = mock(Database.class);
         new ExampleParamlessAbstractChange() {
+
             @Override
             protected Change[] createInverses() {
                 return null;
@@ -536,6 +576,7 @@ public class AbstractChangeTest {
         Database database = mock(Database.class);
 
         SqlStatement[] rollbackStatements = new ExampleParamlessAbstractChange() {
+
             @Override
             protected Change[] createInverses() {
                 return new Change[0];
@@ -564,7 +605,7 @@ public class AbstractChangeTest {
     }
 
     @Test
-    @PrepareForTest({SqlGeneratorFactory.class})
+    @PrepareForTest({ SqlGeneratorFactory.class })
     public void getAffectedDatabaseObjects() throws Exception {
         Database database = mock(Database.class);
         final SqlStatement statement1 = mock(SqlStatement.class);
@@ -581,9 +622,10 @@ public class AbstractChangeTest {
         when(SqlGeneratorFactory.getInstance()).thenReturn(generatorFactory);
 
         Set<DatabaseObject> objects = new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
-                return new SqlStatement[]{statement1, statement2};
+                return new SqlStatement[] { statement1, statement2 };
             }
         }.getAffectedDatabaseObjects(database);
 
@@ -596,6 +638,7 @@ public class AbstractChangeTest {
     @Test
     public void getAffectedDatabaseObjects_noStatements() throws Exception {
         assertEquals(0, new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return null;
@@ -603,6 +646,7 @@ public class AbstractChangeTest {
         }.getAffectedDatabaseObjects(mock(Database.class)).size());
 
         assertEquals(0, new ExampleAbstractChange() {
+
             @Override
             public SqlStatement[] generateStatements(Database database) {
                 return new SqlStatement[0];
@@ -619,6 +663,7 @@ public class AbstractChangeTest {
     @Test
     public void supportsRollback() {
         assertTrue(new ExampleParamlessAbstractChange() {
+
             @Override
             protected Change[] createInverses() {
                 return new Change[0];
@@ -626,13 +671,15 @@ public class AbstractChangeTest {
         }.supportsRollback(mock(Database.class)));
 
         assertTrue(new ExampleParamlessAbstractChange() {
+
             @Override
             protected Change[] createInverses() {
-                return new Change[] { mock(Change.class)};
+                return new Change[] { mock(Change.class) };
             }
         }.supportsRollback(mock(Database.class)));
 
         assertFalse(new ExampleParamlessAbstractChange() {
+
             @Override
             protected Change[] createInverses() {
                 return null;
@@ -640,9 +687,8 @@ public class AbstractChangeTest {
         }.supportsRollback(mock(Database.class)));
     }
 
-
     @Test
-    @PrepareForTest({CheckSum.class})
+    @PrepareForTest({ CheckSum.class })
     public void generateCheckSum() {
         ExampleAbstractChange change = new ExampleAbstractChange();
         String serializedChange = new StringChangeLogSerializer().serialize(change, false);
@@ -717,25 +763,25 @@ public class AbstractChangeTest {
     @Test
     public void createRequiredDatabasesMetaData() {
         DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
-        when(property.requiredForDatabase()).thenReturn(new String[] {"a", "b"});
-        assertArraysEqual(new String[]{"a", "b"}, new ExampleAbstractChange().createRequiredDatabasesMetaData("x", property));
+        when(property.requiredForDatabase()).thenReturn(new String[] { "a", "b" });
+        assertArraysEqual(new String[] { "a", "b" }, new ExampleAbstractChange().createRequiredDatabasesMetaData("x", property));
     }
 
     @Test
     public void createRequiredDatabasesMetaData_nullAnnotation() {
-        assertArraysEqual(new String[]{"COMPUTE"}, new ExampleAbstractChange().createRequiredDatabasesMetaData("x", null));
+        assertArraysEqual(new String[] { "COMPUTE" }, new ExampleAbstractChange().createRequiredDatabasesMetaData("x", null));
     }
 
     @Test
     public void createSupportedDatabasesMetaData() {
         DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
-        when(property.supportsDatabase()).thenReturn(new String[] {"a", "b"});
-        assertArraysEqual(new String[]{"a", "b"}, new ExampleAbstractChange().createSupportedDatabasesMetaData("x", property));
+        when(property.supportsDatabase()).thenReturn(new String[] { "a", "b" });
+        assertArraysEqual(new String[] { "a", "b" }, new ExampleAbstractChange().createSupportedDatabasesMetaData("x", property));
     }
 
     @Test
     public void createSupportedDatabasesMetaData_nullAnnotation() {
-        assertArraysEqual(new String[]{"COMPUTE"}, new ExampleAbstractChange().createSupportedDatabasesMetaData("x", null));
+        assertArraysEqual(new String[] { "COMPUTE" }, new ExampleAbstractChange().createSupportedDatabasesMetaData("x", null));
     }
 
     @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)

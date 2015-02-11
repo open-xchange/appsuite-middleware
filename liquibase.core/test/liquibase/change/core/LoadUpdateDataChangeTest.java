@@ -1,21 +1,18 @@
 package liquibase.change.core;
 
-import junit.framework.Assert;
-import static junit.framework.Assert.fail;
 
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
-import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import static org.junit.Assert.*;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 

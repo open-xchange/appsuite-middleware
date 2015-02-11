@@ -1,19 +1,15 @@
 package liquibase.sqlgenerator.core;
 
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.statement.core.InsertOrUpdateStatement;
-import liquibase.sql.Sql;
-import static junit.framework.Assert.assertTrue;
-import junit.framework.Assert;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class InsertOrUpdateGeneratorMSSQLTest {
-
-    
 
     @Test
     public void getRecordCheck(){
