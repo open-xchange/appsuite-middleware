@@ -47,31 +47,19 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.oauth;
+package com.openexchange.oauth.provider;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 
 
 /**
  * <p>
- * This annotation indicates {@link AJAXActionService} that shall be available
- * for requests that use OAuth 2.0 authentication.<br>
- * <b>Please note:</b>
- * <ul>
- * <li>The according {@link AJAXActionServiceFactory} must be annotated with {@link OAuthModule}.</li>
- * <li>Allowed characters are %x21 / %x23-5B / %x5D-7E</li>
- * </ul>
- * </p>
- * <p>
- * Before an action is called, the used access token is verified in terms of the
- * provided and needed OAuth 2.0 scopes. The required scope to call an action is defined via
- * the annotations {@link OAuthAction#scope()} attribute. If no certain scope is required,
- * {@link OAuthAction#GRANT_ALL} must be set.
+ * This annotation can be used on instances of <code>com.openexchange.ajax.requesthandler.AJAXActionServiceFactory</code>,
+ * to make one or more actions of it available for requests that use OAuth 2.0
+ * authentication. The concrete actions must then be annotated with {@link OAuthAction}.
  * </p>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -79,23 +67,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface OAuthAction {
-
-    public static final String GRANT_ALL = "*";
-
-    /**
-     * Indicates the required OAuth 2.0 scope to call this action.
-     * @return The scope. If all requests are authorized to call this action
-     * {@link OAuthAction#GRANT_ALL} must be returned.
-     */
-    String scope();
-
-    /**
-     * Indicates that this action performs no write operations which manipulate
-     * the persistent data of the module.
-     *
-     * @return <code>true</code> if read-only access is sufficient to call this action.
-     */
-    boolean readOnly() default false;
+public @interface OAuthModule {
 
 }

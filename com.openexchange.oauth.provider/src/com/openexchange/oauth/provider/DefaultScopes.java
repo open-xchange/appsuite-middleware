@@ -50,9 +50,7 @@
 package com.openexchange.oauth.provider;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,11 +76,7 @@ public class DefaultScopes implements Scopes {
      */
     private static final Pattern OAUTH_SCOPE_STRING = Pattern.compile("([\\x21\\x23-\\x5b\\x5d-\\x7e]+)((\\s([\\x21\\x23-\\x5b\\x5d-\\x7e]+))?)+");
 
-    /*
-     * We decide between read-only and writeable access. Therefore the scopes
-     * requested by clients are qualified  with an 'r_' or 'rw_' prefix.
-     */
-    private static final Pattern QUALIFIED_OAUTH_SCOPE = Pattern.compile("(r_|rw_)([\\x21\\x23-\\x5b\\x5d-\\x7e]+)");
+    private static final Pattern OAUTH_SCOPE = Pattern.compile("[\\x21\\x23-\\x5b\\x5d-\\x7e]+");
 
     /**
      * Parses the scope from specified string representation.
@@ -108,39 +102,13 @@ public class DefaultScopes implements Scopes {
      * @return <code>true</code> if the string is valid
      */
     public static boolean isValidScopeString(String scopeString) {
-        if (OAUTH_SCOPE_STRING.matcher(scopeString).matches()) {
-            for (String scope : Strings.splitByWhitespaces(scopeString)) {
-                Matcher matcher = QUALIFIED_OAUTH_SCOPE.matcher(scope);
-                if (!matcher.matches()) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns the qualified scope for a given scope identifier.
-     *
-     * @param scope The un-qualified scope
-     * @param readOnly <code>true</code> if the qualified scope shall denote read-only access
-     * @return The qualified scope
-     */
-    public static String qualify(String scope, boolean readOnly) {
-        if (readOnly) {
-            return "r_" + scope;
-        }
-
-        return "rw_" + scope;
+        return OAUTH_SCOPE_STRING.matcher(scopeString).matches();
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
 
-    /** The scopes mapped from base scope -> qualified scope **/
-    private final Map<String, String> scopes;
+    /** The scopes **/
+    private final Set<String> scopes;
 
     /**
      * Initializes a new {@link DefaultScopes}.
@@ -149,13 +117,13 @@ public class DefaultScopes implements Scopes {
      */
     public DefaultScopes(String... scopes) {
         super();
-        this.scopes = new HashMap<>();
+        this.scopes = new HashSet<>();
         if (scopes != null) {
             for (String scope : scopes) {
                 if (scope != null) {
-                    Matcher matcher = QUALIFIED_OAUTH_SCOPE.matcher(scope);
+                    Matcher matcher = OAUTH_SCOPE.matcher(scope);
                     if (matcher.matches()) {
-                        this.scopes.put(matcher.group(2), scope);
+                        this.scopes.add(scope);
                     } else {
                         throw new IllegalArgumentException("Invalid scope: " + scope);
                     }
@@ -169,44 +137,19 @@ public class DefaultScopes implements Scopes {
      *
      * @param scopes The scope set
      */
-    public DefaultScopes(Map<String, String> scopes) {
+    public DefaultScopes(Set<String> scopes) {
         super();
-        this.scopes = null == scopes ? Collections.<String, String> emptyMap() : scopes;
+        this.scopes = null == scopes ? Collections.<String> emptySet() : scopes;
     }
 
     @Override
-    public Set<String> getScopes() {
-        return Collections.unmodifiableSet(scopes.keySet());
+    public Set<String> get() {
+        return Collections.unmodifiableSet(scopes);
     }
 
     @Override
-    public Set<String> getQualifiedScopes() {
-        return Collections.unmodifiableSet(new HashSet<>(scopes.values()));
-    }
-
-    @Override
-    public String getQualifiedScope(String scope) {
-        String qualifiedScope = scopes.get(scope);
-        if (qualifiedScope == null) {
-            throw new IllegalArgumentException("The passed scope does not exist within this instance: " + scope);
-        }
-
-        return qualifiedScope;
-    }
-
-    @Override
-    public boolean isReadOnly(String scope) {
-        String qualifiedScope = scopes.get(scope);
-        if (qualifiedScope == null) {
-            throw new IllegalArgumentException("The passed scope does not exist within this instance: " + scope);
-        }
-
-        Matcher matcher = QUALIFIED_OAUTH_SCOPE.matcher(qualifiedScope);
-        if (matcher.matches()) {
-            return matcher.group(1).equals("r_");
-        }
-
-        return false;
+    public boolean has(String scope) {
+        return scopes.contains(scope);
     }
 
     @Override
@@ -216,7 +159,7 @@ public class DefaultScopes implements Scopes {
         }
 
         StringAppender sa = new StringAppender(' ');
-        for (String scope : scopes.values()) {
+        for (String scope : scopes) {
             sa.append(scope);
         }
         return sa.toString();

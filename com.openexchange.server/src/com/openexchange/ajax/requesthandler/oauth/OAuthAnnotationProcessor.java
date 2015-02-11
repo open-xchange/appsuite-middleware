@@ -49,13 +49,19 @@
 
 package com.openexchange.ajax.requesthandler.oauth;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcessor;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.Scopes;
+import com.openexchange.oauth.provider.OAuthScopeCheck;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -66,6 +72,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.8.0
  */
 public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProcessor<OAuthAction> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthAnnotationProcessor.class);
 
     @Override
     protected Class<OAuthAction> getAnnotation() {
@@ -80,24 +88,49 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
         }
 
         OAuthAction oAuthAction = action.getClass().getAnnotation(OAuthAction.class);
-        String requiredScope = oAuthAction.scope();
-        if (!OAuthAction.GRANT_ALL.equals(requiredScope)) {
-            if (!includesScope(grant.getScopes(), requiredScope, oAuthAction.readOnly())) {
-                if (oAuthAction.readOnly()) {
-                    throw new OAuthInsufficientScopeException("r_" + requiredScope);
-                } else {
-                    throw new OAuthInsufficientScopeException("rw_" + requiredScope);
+        String requiredScope = oAuthAction.value();
+        if (OAuthAction.GRANT_ALL.equals(requiredScope)) {
+            return;
+        } else if (OAuthAction.CUSTOM.equals(requiredScope)) {
+            for (Method method : action.getClass().getMethods()) {
+                if (method.isAnnotationPresent(OAuthScopeCheck.class)) {
+                    if (hasScopeCheckSignature(method)) {
+                        try {
+                            if ((boolean) method.invoke(action, requestData, session, grant)) {
+                                return;
+                            }
+                        } catch (InvocationTargetException e) {
+                            Throwable cause = e.getCause();
+                            if (cause instanceof OXException) {
+                                throw (OXException) cause;
+                            }
+
+                            throw new OXException(cause);
+                        } catch (IllegalAccessException | IllegalArgumentException e) {
+                            LOG.error("Could not check scope", e);
+                            throw new OXException(e);
+                        }
+                    } else {
+                        LOG.warn("Method '" + action.getClass() + "." + method.getName() + "' is annotated with @OAuthScopeCheck but its signature is invalid!");
+                    }
                 }
+            }
+
+            throw new OAuthInsufficientScopeException();
+        } else {
+            if (!grant.getScopes().has(requiredScope)) {
+                throw new OAuthInsufficientScopeException(requiredScope);
             }
         }
     }
 
-    private static boolean includesScope(Scopes scopes, String scope, boolean readOnly) {
-        if (scopes.getScopes().contains(scope)) {
-            if (readOnly) {
-                return true;
-            } else {
-                return !scopes.isReadOnly(scope);
+    private static boolean hasScopeCheckSignature(Method method) {
+        if (Modifier.isPublic(method.getModifiers()) && method.getReturnType().isAssignableFrom(boolean.class)) {
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            if (parameterTypes.length == 3) {
+                return parameterTypes[0].isAssignableFrom(AJAXRequestData.class) &&
+                       parameterTypes[1].isAssignableFrom(ServerSession.class) &&
+                       parameterTypes[2].isAssignableFrom(OAuthGrant.class);
             }
         }
 

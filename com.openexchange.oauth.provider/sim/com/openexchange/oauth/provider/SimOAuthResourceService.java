@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
 
@@ -65,10 +66,16 @@ import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
  */
 public class SimOAuthResourceService implements OAuthResourceService {
 
+    private static final Pattern TOKEN_PATTERN = Pattern.compile("[\\x41-\\x5a\\x61-\\x7a\\x30-\\x39-._~+/]+=*");
+
     private final Map<String, OAuthGrant> tokens = new HashMap<>();
 
     @Override
     public OAuthGrant validate(String accessToken) throws OXException {
+        if (!TOKEN_PATTERN.matcher(accessToken).matches()) {
+            throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
+        }
+
         OAuthGrant token = tokens.get(accessToken);
         if (token == null) {
             throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);

@@ -100,7 +100,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
             .setParameter("response_type", "code")
             .setParameter("client_id", getClientId())
             .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("scope", getScope())
+            .setParameter("scope", getScopes())
             .setParameter("state", csrfState)
             .build());
         HttpResponse loginFormResponse = executeAndConsume(getLoginForm);
@@ -125,17 +125,17 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testGETWithWrongResponseType() throws Exception {
-        testGETWithInvalidParameter("response_type");
+        testGETWithMissingAndInvalidParameter("response_type");
     }
 
     @Test
     public void testGETWithWrongClientId() throws Exception {
-        testGETWithInvalidParameter("client_id");
+        testGETWithMissingAndInvalidParameter("client_id");
     }
 
     @Test
     public void testGETWithWrongRedirectURI() throws Exception {
-        testGETWithInvalidParameter("redirect_uri");
+        testGETWithMissingAndInvalidParameter("redirect_uri");
     }
 
     @Test
@@ -149,7 +149,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
         params.put("response_type", "code");
         params.put("client_id", getClientId());
         params.put("redirect_uri", getRedirectURI());
-        params.put("scope", getScope());
+        params.put("scope", getScopes());
         params.put("state", csrfState);
 
         URI baseUri = new URIBuilder()
@@ -180,7 +180,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
             .setParameter("response_type", "code")
             .setParameter("client_id", getClientId())
             .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("scope", getScope())
+            .setParameter("scope", getScopes())
             .setParameter("state", csrfState)
             .build());
         HttpResponse loginFormResponse = client.execute(getLoginForm);
@@ -222,7 +222,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
             .setParameter("response_type", "code")
             .setParameter("client_id", getClientId())
             .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("scope", getScope())
+            .setParameter("scope", getScopes())
             .setParameter("state", csrfState)
             .build());
         HttpResponse loginFormResponse = client.execute(getLoginForm);
@@ -267,7 +267,6 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testPOSTWithInvalidScope() throws Exception {
-        testPOSTWithInvalidParameter("scope", ResponseType.ERROR_PAGE, true);
         testPOSTWithInvalidParameter("scope", ResponseType.REDIRECT, false, "invalid_scope");
     }
 
@@ -329,7 +328,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
             .setParameter("response_type", "code")
             .setParameter("client_id", getClientId())
             .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("scope", getScope())
+            .setParameter("scope", getScopes())
             .setParameter("state", csrfState)
             .build());
         HttpResponse loginFormResponse = client.execute(getLoginForm);
@@ -412,7 +411,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
             .setParameter("response_type", "code")
             .setParameter("client_id", getClientId())
             .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("scope", getScope())
+            .setParameter("scope", getScopes())
             .setParameter("state", csrfState)
             .build());
         HttpResponse loginFormResponse = client.execute(getLoginForm);
@@ -458,12 +457,17 @@ public class AuthorizationEndpointTest extends EndpointTest {
         assertNotNull(code);
     }
 
-    private void testGETWithInvalidParameter(String param) throws Exception {
+    private void testGETWithMissingAndInvalidParameter(String param) throws Exception {
+        testGETWithMissingParameter(param);
+        testGETWithInvalidParameter(param);
+    }
+
+    private void testGETWithMissingParameter(String param) throws Exception {
         Map<String, String> params = new HashMap<>();
         params.put("response_type", "code");
         params.put("client_id", getClientId());
         params.put("redirect_uri", getRedirectURI());
-        params.put("scope", getScope());
+        params.put("scope", getScopes());
         params.put("state", csrfState);
 
         URI baseUri = new URIBuilder()
@@ -472,7 +476,6 @@ public class AuthorizationEndpointTest extends EndpointTest {
             .setPath(AUTHORIZATION_ENDPOINT)
             .build();
 
-        // 1. missing param
         URIBuilder uriBuilder = new URIBuilder(baseUri);
         for (Entry<String, String> p : params.entrySet()) {
             if (!p.getKey().equals(param)) {
@@ -482,9 +485,23 @@ public class AuthorizationEndpointTest extends EndpointTest {
         HttpGet getLoginForm = new HttpGet(uriBuilder.build());
         HttpResponse loginFormResponse = executeAndConsume(getLoginForm);
         assertEquals(HttpStatus.SC_BAD_REQUEST, loginFormResponse.getStatusLine().getStatusCode());
+    }
 
-        // 2. invalid value
-        uriBuilder = new URIBuilder(baseUri);
+    private void testGETWithInvalidParameter(String param) throws Exception {
+        Map<String, String> params = new HashMap<>();
+        params.put("response_type", "code");
+        params.put("client_id", getClientId());
+        params.put("redirect_uri", getRedirectURI());
+        params.put("scope", getScopes());
+        params.put("state", csrfState);
+
+        URI baseUri = new URIBuilder()
+            .setScheme("https")
+            .setHost(hostname)
+            .setPath(AUTHORIZATION_ENDPOINT)
+            .build();
+
+        URIBuilder uriBuilder = new URIBuilder(baseUri);
         for (Entry<String, String> p : params.entrySet()) {
             if (p.getKey().equals(param)) {
                 uriBuilder.setParameter(p.getKey(), "invalid");
@@ -492,8 +509,8 @@ public class AuthorizationEndpointTest extends EndpointTest {
                 uriBuilder.setParameter(p.getKey(), p.getValue());
             }
         }
-        getLoginForm = new HttpGet(uriBuilder.build());
-        loginFormResponse = executeAndConsume(getLoginForm);
+        HttpGet getLoginForm = new HttpGet(uriBuilder.build());
+        HttpResponse loginFormResponse = executeAndConsume(getLoginForm);
         assertEquals(HttpStatus.SC_BAD_REQUEST, loginFormResponse.getStatusLine().getStatusCode());
     }
 

@@ -203,7 +203,7 @@ public class DefaultClient implements Client {
         StringBuilder builder = new StringBuilder();
         builder.append("DefaultClient [");
         if (getId() != null) {
-            builder.append("id").append(getId()).append(", ");
+            builder.append("id=").append(getId()).append(", ");
         }
         if (getSecret() != null) {
             builder.append("secret=").append(getSecret()).append(", ");

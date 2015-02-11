@@ -71,12 +71,12 @@ import com.openexchange.exception.OXException;
  */
 public class OAuthClient extends AJAXClient {
 
-    public OAuthClient(String clientId, String clientSecret, String redirectURI) throws Exception {
-        this(User.User1, clientId, clientSecret, redirectURI);
+    public OAuthClient(String clientId, String clientSecret, String redirectURI, String... scopes) throws Exception {
+        this(User.User1, clientId, clientSecret, redirectURI, scopes);
     }
 
-    public OAuthClient(User user, String clientId, String clientSecret, String redirectURI) throws Exception {
-        super(new OAuthSession(user, clientId, clientSecret, redirectURI), false);
+    public OAuthClient(User user, String clientId, String clientSecret, String redirectURI, String... scopes) throws Exception {
+        super(new OAuthSession(user, clientId, clientSecret, redirectURI, scopes), false);
     }
 
     @Override

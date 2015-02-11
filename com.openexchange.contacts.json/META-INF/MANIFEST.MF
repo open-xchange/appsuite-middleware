@@ -92,4 +92,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.json,
  org.osgi.framework,
  org.slf4j
-Export-Package: com.openexchange.contacts.json.mapping
+Export-Package: com.openexchange.contacts.json,
+ com.openexchange.contacts.json.mapping

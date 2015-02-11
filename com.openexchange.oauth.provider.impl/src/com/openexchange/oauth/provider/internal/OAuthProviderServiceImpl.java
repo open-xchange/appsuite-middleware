@@ -159,17 +159,17 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         // Adjust scope based on users permissions
         CapabilityService capabilityService = requireService(CapabilityService.class, services);
         CapabilitySet capabilities = capabilityService.getCapabilities(userId, contextId);
-        Set<String> finalScopes = new HashSet<>();
 
+        Set<String> grantedScopes = new HashSet<>();
         Scopes scopes = DefaultScopes.parseScope(scopeString);
-        for (String scope : scopes.getScopes()) {
+        for (String scope : scopes.get()) {
             OAuthScopeProvider provider = ScopeRegistry.getInstance().getProvider(scope);
-            if (provider != null && provider.canBeGranted(capabilities, scopes.isReadOnly(scope))) {
-                finalScopes.add(scopes.getQualifiedScope(scope));
+            if (provider != null && provider.canBeGranted(capabilities)) {
+                grantedScopes.add(scope);
             }
         }
 
-        return authCodeProvider.generateAuthorizationCodeFor(clientId, redirectURI, new DefaultScopes(finalScopes.toArray(new String[0])), userId, contextId);
+        return authCodeProvider.generateAuthorizationCodeFor(clientId, redirectURI, new DefaultScopes(grantedScopes.toArray(new String[0])), userId, contextId);
     }
 
     @Override
@@ -272,7 +272,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
                 return false;
             }
 
-            for (String scope : scopes.getScopes()) {
+            for (String scope : scopes.get()) {
                 if (!ScopeRegistry.getInstance().hasScopeProvider(scope)) {
                     return false;
                 }
@@ -300,30 +300,14 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         List<GrantView> grantViews = new ArrayList<GrantView>(grantsByClient.size());
         for (Entry<String, List<StoredGrant>> entry : grantsByClient.entrySet()) {
             Client client = clientStorage.getClientById(entry.getKey());
-            Map<String, Boolean> scopes = new HashMap<>();
+            Set<String> scopes = new HashSet<>();
             for (StoredGrant grant : entry.getValue()) {
-                for (String scope : grant.getScopes().getScopes()) {
-                    Boolean readOnly = scopes.get(scope);
-                    if (readOnly == null) {
-                        scopes.put(scope, grant.getScopes().isReadOnly(scope));
-                    } else {
-                        if (!grant.getScopes().isReadOnly(scope)) {
-                            scopes.put(scope, Boolean.FALSE);
-                        }
-                    }
-                }
-            }
-
-            String[] qualifiedScopes = new String[scopes.size()];
-            int i = 0;
-            for (Entry<String, Boolean> scope : scopes.entrySet()) {
-                qualifiedScopes[i] = DefaultScopes.qualify(scope.getKey(), scope.getValue());
-                i++;
+                scopes.addAll(grant.getScopes().get());
             }
 
             DefaultGrantView view = new DefaultGrantView();
             view.setClient(client);
-            view.setScopes(new DefaultScopes(qualifiedScopes));
+            view.setScopes(new DefaultScopes(scopes));
             grantViews.add(view);
         }
 

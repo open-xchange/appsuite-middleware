@@ -54,7 +54,6 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
-import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.LocalizableStrings;
@@ -77,9 +76,16 @@ public class ContactJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerModule(new ContactActionFactory(this), "contacts");
         registerService(ResultConverter.class, new ContactJSONResultConverter());
-        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ContactAction.OAUTH_SCOPE, OAuthScopeDescription.READ_ONLY, OAuthScopeDescription.WRITABLE) {
+
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ContactActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
             @Override
-            public boolean canBeGranted(CapabilitySet capabilities, boolean writeable) {
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.CONTACTS.getCapabilityName());
+            }
+        });
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ContactActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
                 return capabilities.contains(Permission.CONTACTS.getCapabilityName());
             }
         });
@@ -92,9 +98,9 @@ public class ContactJSONActivator extends AJAXModuleActivator {
         public static final String READ_ONLY = "See all your contacts.";
 
         // Application 'xyz' requires following permissions:
-        //  - See all your contacts, create new ones and modify existing ones.
+        //  - Create, modify and delete contacts.
         //  - ...
-        public static final String WRITABLE = "See all your contacts, create new ones and modify existing ones.";
+        public static final String WRITABLE = "Create, modify and delete contacts.";
     }
 
 }

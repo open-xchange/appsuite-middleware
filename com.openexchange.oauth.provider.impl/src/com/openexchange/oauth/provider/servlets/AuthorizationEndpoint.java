@@ -209,14 +209,13 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             // Check scope
             String scope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
             if (Strings.isEmpty(scope)) {
-                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_SCOPE);
-                return;
-            }
-
-            // Validate scope
-            if (!oAuthProvider.isValidScopeString(scope)) {
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_scope", "invalid parameter value:" + OAuthProviderConstants.PARAM_SCOPE, OAuthProviderConstants.PARAM_STATE, state));
-                return;
+                scope = client.getDefaultScope().scopeString();
+            } else {
+                // Validate scope
+                if (!oAuthProvider.isValidScopeString(scope)) {
+                    response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_scope", "invalid parameter value:" + OAuthProviderConstants.PARAM_SCOPE, OAuthProviderConstants.PARAM_STATE, state));
+                    return;
+                }
             }
 
             try {
@@ -327,17 +326,16 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 return;
             }
 
+            // Check scope
             String scope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
             if (Strings.isEmpty(scope)) {
-                // Send error page
-                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "missing required parameter: "+OAuthProviderConstants.PARAM_SCOPE);
-                return;
-            }
-
-            if (!oAuthProvider.isValidScopeString(scope)) {
-                // Send error page
-                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_SCOPE);
-                return;
+                scope = client.getDefaultScope().scopeString();
+            } else {
+                // Validate scope
+                if (!oAuthProvider.isValidScopeString(scope)) {
+                    sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_SCOPE);
+                    return;
+                }
             }
 
             if (!client.hasRedirectURI(redirectURI)) {

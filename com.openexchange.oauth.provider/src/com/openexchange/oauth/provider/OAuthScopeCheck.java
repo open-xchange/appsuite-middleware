@@ -49,47 +49,50 @@
 
 package com.openexchange.oauth.provider;
 
-import java.io.Serializable;
-import java.util.Set;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 /**
- * A container that carries all scopes of an {@link OAuthGrant}.
+ * In most cases the permission to call an action can be based on a simple scope
+ * string as defined via {@link OAuthAction}. In cases where this is not sufficient,
+ * it is possible to check the scope manually. In order to do so you must
+ * <ul>
+ *   <li>Set the scope of {@link OAuthAction} to {@link OAuthAction#CUSTOM}</li>
+ *   <li>
+ *     Implement a method to perform the scope check and annotate it with <code>@OAuthScopeCheck</code>.
+ *     The method
+ *     <ul>
+ *       <li>must be public</li>
+ *       <li>must return a boolean - <code>true</code> if access is granted, <code>false</code> if not</li>
+ *       <li>
+ *         must take three parameters (in that order):
+ *         <ul>
+ *           <li><code>com.openexchange.ajax.requesthandler.AJAXRequestData</code></li>
+ *           <li><code>com.openexchange.tools.session.ServerSession</code></li>
+ *           <li><code>com.openexchange.oauth.provider.OAuthGrant</code></li>
+ *         </ul>
+ *       </li>
+ *       <li>may throw an Exception</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * Example:
+ * <pre>
+ * &#064;OAuthScopeCheck
+ * public boolean checkScope(AJAXRequestData request, ServerSession session, OAuthGrant grant) {
+ *     return grant.getScopes().contains("custom_scope1") && grant.getScopes().contains("custom_scope2");
+ * }
+ * </pre>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface Scopes extends Serializable {
-
-    /**
-     * Gets the string representation of the contained scopes
-     * as defined in RFC 6749.
-     *
-     * @return The scope string
-     */
-    String scopeString();
-
-    /**
-     * Gets all contained scopes in their base representation,
-     * i.e. they have now prefix prepended.
-     *
-     * @return An immutable set of un-qualified scopes
-     */
-    Set<String> get();
-
-    /**
-     * Checks whether the given scope is contained.
-     *
-     * @param scope The scope
-     * @return <code>true</code> if the scope is contained, <code>false</code> if not
-     */
-    boolean has(String scope);
-
-    /**
-     * Gets the number of contained scopes.
-     *
-     * @return The number of scopes
-     */
-    int size();
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface OAuthScopeCheck {
 
 }

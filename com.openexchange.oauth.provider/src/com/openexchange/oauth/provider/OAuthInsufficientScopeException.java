@@ -64,6 +64,10 @@ public class OAuthInsufficientScopeException extends OAuthRequestException {
 
     private final String requiredScope;
 
+    public OAuthInsufficientScopeException() {
+        this(null);
+    }
+
     public OAuthInsufficientScopeException(String requiredScope) {
         super();
         this.requiredScope = requiredScope;
@@ -79,6 +83,13 @@ public class OAuthInsufficientScopeException extends OAuthRequestException {
         return 2;
     }
 
+    /**
+     * Gets the required scope that wasn't satisfied by the request.
+     * If no certain scope was responsible for the exception,
+     * <code>null</code> is returned.
+     *
+     * @return The required scope
+     */
     public String getScope() {
         return requiredScope;
     }

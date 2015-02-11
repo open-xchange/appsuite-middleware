@@ -83,20 +83,18 @@ public interface OAuthScopeProvider {
      * - Read your contacts
      * - Create / modify appointments
      *
-     * @param readOnly If read-only access is requested
      * @return The description
      */
-    String getDescription(boolean readOnly);
+    String getDescription();
 
     /**
      * Checks whether the denoted scope can be granted for the passed session users
      * capabilities.
      *
      * @param capabilities The capabilities to check
-     * @param readOnly If read-only access is requested
      * @return <code>true</code> if the scope can be granted, <code>false</code> if not.
      * @throws OXException If an error occurs during the permission check.
      */
-    boolean canBeGranted(CapabilitySet capabilities, boolean readOnly);
+    boolean canBeGranted(CapabilitySet capabilities);
 
 }

@@ -155,7 +155,7 @@ public abstract class EndpointTest {
         return response;
     }
 
-    protected String getScope() {
+    protected String getScopes() {
         return oauthClient.getDefaultScope().scopeString();
     }
 
@@ -191,7 +191,7 @@ public abstract class EndpointTest {
         clientData.setIcon(icon);
         clientData.setContactAddress("webmaster@example.com");
         clientData.setWebsite("http://www.example.com");
-        clientData.setDefaultScope(new DefaultScopes("r_contacts"));
+        clientData.setDefaultScope(new DefaultScopes("read_contacts"));
         clientData.setRedirectURIs(redirectURIs);
         return clientData;
     }

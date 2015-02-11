@@ -55,7 +55,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.oauth.OAuthAction;
 import com.openexchange.config.json.ConfigAJAXRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -64,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.GET, name = "config/path", description = "Get configuration data", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "Value of the node specified by path.")
-@OAuthAction(scope = OAuthAction.GRANT_ALL, readOnly = true)
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class GETAction extends AbstractConfigAction {
 
     /**

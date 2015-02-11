@@ -92,11 +92,6 @@ public abstract class ContactAction implements AJAXActionService {
         EnumSet.of(ContactField.IMAGE1_URL, ContactField.LAST_MODIFIED_UTC, ContactField.SORT_NAME);
 
     /**
-     * The scope for OAuth requests
-     */
-    public static final String OAUTH_SCOPE = "contacts";
-
-    /**
      * Initializes a new {@link ContactAction}.
      *
      * @param serviceLookup The service lookup to use

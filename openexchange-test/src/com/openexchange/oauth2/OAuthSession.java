@@ -90,6 +90,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.oauth.provider.DefaultScopes;
 
 
 /**
@@ -106,6 +107,8 @@ public class OAuthSession extends AJAXSession {
 
     private final String redirectURI;
 
+    private final String[] scopes;
+
     private String accessToken;
 
     private String refreshToken;
@@ -113,11 +116,12 @@ public class OAuthSession extends AJAXSession {
     /**
      * Initializes a new {@link OAuthSession}.
      */
-    public OAuthSession(User user, String clientId, String clientSecret, String redirectURI) {
+    public OAuthSession(User user, String clientId, String clientSecret, String redirectURI, String... scopes) {
         super(newWebConversation(), newOAuthHttpClient(), null);
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.redirectURI = redirectURI;
+        this.scopes = scopes;
         try {
             AJAXConfig.init();
             obtainAccess(user, getHttpClient());
@@ -146,16 +150,19 @@ public class OAuthSession extends AJAXSession {
         String password = AJAXConfig.getProperty(user.getPassword());
 
         String csrfState = UUIDs.getUnformattedStringFromRandom();
-        HttpGet getLoginForm = new HttpGet(new URIBuilder()
+        URIBuilder getLoginFormBuilder = new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
             .setPath("/ajax/o/oauth2/authorization")
             .setParameter("response_type", "code")
             .setParameter("client_id", clientId)
             .setParameter("redirect_uri", redirectURI)
-            .setParameter("scope", "r_contacts")
-            .setParameter("state", csrfState)
-            .build());
+            .setParameter("state", csrfState);
+        if (scopes != null && scopes.length > 0) {
+            getLoginFormBuilder.setParameter("scope", new DefaultScopes(scopes).scopeString());
+        }
+        HttpGet getLoginForm = new HttpGet(getLoginFormBuilder.build());
+
         HttpResponse loginFormResponse = client.execute(getLoginForm);
         assertEquals(HttpStatus.SC_OK, loginFormResponse.getStatusLine().getStatusCode());
         String loginForm = EntityUtils.toString(loginFormResponse.getEntity());
