@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
+import org.junit.Assert;
 import org.junit.Test;
 import java.net.URL;
 import java.net.URLClassLoader;
