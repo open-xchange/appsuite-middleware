@@ -3,6 +3,7 @@
  - Fix for bug 36333: Ensure file resources stay open while parsing MIME message data
  - Fix for bug 36585: Signal proper RENAME_FLAG for mail standard folders
  - Fix for bug 36487: Subscribe folder incl. predecessor folders to the top to not leave a parent folder unsubscribed
+ - Fix for bug 35954: Deal with corrupt BODYSTRUCTURE items in IMAP FETCH response that contain empty multipart sections
 
 * 2015-02-11 - choeger@open-xchange.com
 

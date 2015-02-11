@@ -334,7 +334,8 @@ public class Protocol {
 		// convert this into a BYE response
 		r = Response.byeResponse(ioex);
 	    } catch (ProtocolException pex) {
-		continue; // skip this response
+            logger.log(java.util.logging.Level.FINE, "Failed to read IMAP response", pex);
+		    continue; // skip this response
 	    }
 
 	    if (r.isBYE()) {
