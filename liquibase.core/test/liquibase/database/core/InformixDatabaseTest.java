@@ -9,7 +9,7 @@ public class InformixDatabaseTest {
 	private InformixDatabase database;
 
     @Before
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		database = new InformixDatabase();
 	}
 
