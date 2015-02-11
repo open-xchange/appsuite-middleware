@@ -49,6 +49,7 @@
 
 package org.json;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -252,9 +253,9 @@ abstract class AbstractJSONValue implements JSONValue {
         if (null == file) {
             return;
         }
-        OutputStreamWriter writer = null;
+        Writer writer = null;
         try {
-            writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
             write(writer);
             writer.flush();
         } catch (final IOException e) {
