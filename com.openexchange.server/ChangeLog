@@ -9,6 +9,7 @@
 * 2015-02-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 36333: Ensure file resources stay open while parsing MIME message data
+ - Fix for bug 35954: Deal with corrupt BODYSTRUCTURE items in IMAP FETCH response that contain empty multipart sections
 
 * 2015-02-10 - thorben.betten@open-xchange.com
 
