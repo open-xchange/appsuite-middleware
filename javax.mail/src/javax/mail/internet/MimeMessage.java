@@ -180,6 +180,9 @@ public class MimeMessage extends Message implements MimePart {
 
     // Should addresses in headers be parsed in "strict" mode?
     private boolean strict = true;
+    
+    // Keep the reference to SharedInputStream to avoid preliminary garbage collection.
+    private SharedInputStream sis;
 
     /**
      * Default constructor. An empty message object is created.
@@ -345,6 +348,7 @@ public class MimeMessage extends Message implements MimePart {
 
 	if (is instanceof SharedInputStream) {
 	    SharedInputStream sis = (SharedInputStream)is;
+        this.sis = sis;
 	    contentStream = sis.newStream(sis.getPosition(), -1);
 	} else {
 	    try {
