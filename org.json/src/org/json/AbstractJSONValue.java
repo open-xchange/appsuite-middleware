@@ -266,6 +266,31 @@ abstract class AbstractJSONValue implements JSONValue {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void prettyPrintTo(File file) throws JSONException {
+        if (null == file) {
+            return;
+        }
+
+        Writer writer = null;
+        JsonGenerator jGenerator = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
+            jGenerator = createGenerator(writer, false);
+            jGenerator.setPrettyPrinter(STANDARD_DEFAULT_PRETTY_PRINTER);
+            write(this, jGenerator);
+            writer.flush();
+        } catch (final IOException e) {
+            throw new JSONException(e);
+        } finally {
+            close(jGenerator);
+            close(writer);
+        }
+    }
+
+    /**
      * Closes given <code>java.io.Closeable</code> instance (if non-<code>null</code>).
      *
      * @param closeable The <code>java.io.Closeable</code> instance

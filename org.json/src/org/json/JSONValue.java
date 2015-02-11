@@ -69,6 +69,14 @@ public interface JSONValue extends Serializable {
     void writeTo(File file) throws JSONException;
 
     /**
+     * Pretty-prints this JSON value to specified file
+     *
+     * @param file The file to write to
+     * @throws JSONException If writing the JSON object fails (e.g. I/O error)
+     */
+    void prettyPrintTo(File file) throws JSONException;
+
+    /**
      * Write the contents of this JSON value as JSON text to a writer. For compactness, no whitespace is added.<br>
      * Invokes {@link #write(Writer, boolean)} with latter parameter set to <code>false</code>.
      * <p>
