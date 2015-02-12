@@ -54,6 +54,8 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.openexchange.database.migration.DBMigrationMonitorService;
+
 /**
  * Monitors the currently running migration tasks within this JVM. This for instance helps to hinder the server to shut down in case the
  * migration is running on this machine.
@@ -61,7 +63,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public class DBMigrationMonitor {
+public class DBMigrationMonitor implements DBMigrationMonitorService {
 
     private final ConcurrentMap<String, Thread> statesBySchema = new ConcurrentHashMap<String, Thread>();
 
@@ -109,6 +111,7 @@ public class DBMigrationMonitor {
      *
      * @return A list of states
      */
+    @Override
     public Collection<String> getScheduledFiles() {
         return new ArrayList<String>(statesBySchema.keySet());
     }

@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.startup.impl
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.startup,
+Import-Package: com.openexchange.database.migration,
+ com.openexchange.osgi,
+ com.openexchange.startup,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

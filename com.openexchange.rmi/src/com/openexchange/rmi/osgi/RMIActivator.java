@@ -54,8 +54,8 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rmi.RMIRegistryService;
 import com.openexchange.rmi.internal.RMIUtility;
+import com.openexchange.startup.SignalStartedService;
 
 /**
  * {@link RMIService}
@@ -76,7 +76,7 @@ public class RMIActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, SignalStartedService.class };
     }
 
     @Override
@@ -91,16 +91,6 @@ public class RMIActivator extends HousekeepingActivator {
         // Start tracker
         track(Remote.class, new RMITrackerCustomizer(registry, context));
         openTrackers();
-
-        // Register service
-        RMIRegistryService rmiRegistryService = new RMIRegistryService() {
-
-            @Override
-            public Registry getRMIRegistry() {
-                return registry;
-            }
-        };
-        registerService(RMIRegistryService.class, rmiRegistryService);
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,35 @@
  *
  */
 
-package com.openexchange.startup.impl.osgi;
+package com.openexchange.startup.impl;
 
-import org.osgi.framework.BundleContext;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
 import com.openexchange.database.migration.DBMigrationMonitorService;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
-import com.openexchange.startup.impl.SignalStartedServiceImpl;
 
 /**
- * {@link SignalStartedServiceActivator}
+ * {@link Services}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.6.2
  */
-public final class SignalStartedServiceActivator extends HousekeepingActivator {
+public class Services {
 
-//    private volatile ServiceRegistration<SignalStartedService> registration;
+    private static final AtomicReference<ServiceRegistration<SignalStartedService>> SIGNAL_STARTED_SERVICE = new AtomicReference<ServiceRegistration<SignalStartedService>>();
 
-    /**
-     * Initializes a new {@link SignalStartedServiceActivator}.
-     */
-    public SignalStartedServiceActivator() {
+    public Services() {
         super();
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        track(DBMigrationMonitorService.class, new DBMigrationMonitorTracker(context));
-        openTrackers();
+    public static ServiceRegistration<SignalStartedService> getSignalStartedService() {
+        return SIGNAL_STARTED_SERVICE.get();
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
-
-        super.stopBundle();
+    public static void addSignalStartedService(final ServiceRegistration<SignalStartedService> serviceRegistration) {
+        SIGNAL_STARTED_SERVICE.set(serviceRegistration);
     }
 
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public static ServiceRegistration<SignalStartedService> removeSignalStartedService() {
+        return SIGNAL_STARTED_SERVICE.getAndSet(null);
     }
 }

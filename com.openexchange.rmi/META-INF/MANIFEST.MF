@@ -12,8 +12,8 @@ Import-Package: com.openexchange.config,
  com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.startup,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.rmi

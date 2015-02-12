@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,22 @@
  *
  */
 
-package com.openexchange.startup.impl.osgi;
+package com.openexchange.database.migration;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import com.openexchange.database.migration.DBMigrationMonitorService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.startup.SignalStartedService;
-import com.openexchange.startup.impl.SignalStartedServiceImpl;
+import java.util.Collection;
 
 /**
- * {@link SignalStartedServiceActivator}
+ * Provides access to the monitor that shows current status of currently scheduled config db changes.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.6.2
  */
-public final class SignalStartedServiceActivator extends HousekeepingActivator {
-
-//    private volatile ServiceRegistration<SignalStartedService> registration;
+public interface DBMigrationMonitorService {
 
     /**
-     * Initializes a new {@link SignalStartedServiceActivator}.
+     * Returns the collection of currently scheduled files which are queued to get executed.
+     *
+     * @return Collection<String> - collection with the files the changesets have to be executed
      */
-    public SignalStartedServiceActivator() {
-        super();
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        track(DBMigrationMonitorService.class, new DBMigrationMonitorTracker(context));
-        openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
-
-        super.stopBundle();
-    }
-
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    Collection<String> getScheduledFiles();
 }

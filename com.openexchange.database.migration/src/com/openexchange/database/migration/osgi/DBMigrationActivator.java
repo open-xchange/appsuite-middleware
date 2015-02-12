@@ -51,12 +51,16 @@ package com.openexchange.database.migration.osgi;
 
 import liquibase.servicelocator.CustomResolverServiceLocator;
 import liquibase.servicelocator.ServiceLocator;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
 import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
+import com.openexchange.database.migration.internal.DBMigrationMonitor;
 import com.openexchange.database.migration.internal.Services;
 import com.openexchange.database.migration.osgi.tracker.ManagementServiceTracker;
 import com.openexchange.management.ManagementService;
@@ -80,7 +84,7 @@ public class DBMigrationActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, SignalStartedService.class, ThreadPoolService.class };
+        return new Class<?>[] { DatabaseService.class, ThreadPoolService.class };
     }
 
     /**
@@ -94,6 +98,8 @@ public class DBMigrationActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         // Important: Enable liquibase to load required classes (e.g. liquibase.logging.Logger implementation) from this bundle
         ServiceLocator.setInstance(new CustomResolverServiceLocator(new BundlePackageScanClassResolver(this.context.getBundle())));
+
+        context.registerService(DBMigrationMonitorService.class, DBMigrationMonitor.getInstance(), null);
 
         final DatabaseService databaseService = getService(DatabaseService.class);
         final ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
