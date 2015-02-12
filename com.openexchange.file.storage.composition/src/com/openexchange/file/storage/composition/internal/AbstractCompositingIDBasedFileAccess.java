@@ -438,37 +438,40 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public InputStream getDocument(final String id, final String version) throws OXException {
-        final FileID fileID = new FileID(id);
-        final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
+        /*
+         * get data from file access & post "access" event
+         */
+        FileID fileID = new FileID(id);
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-        // Post event
-        {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
-            if (null != metaData) {
-                postEvent(FileStorageEventHelper.buildAccessEvent(
-                    session,
-                    fileID.getService(),
-                    fileID.getAccountId(),
-                    metaData.getFolderId(),
-                    fileID.toUniqueID(),
-                    metaData.getFileName(),
-                    extractRemoteAddress()));
-            }
+        InputStream data = fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
+        postEvent(FileStorageEventHelper.buildAccessEvent(
+            session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
+        /*
+         * return handled stream
+         */
+        return handleInputStream(fileID, version, data);
+    }
+
+    @Override
+    public InputStream getDocument(String id, String version, long offset, long length) throws OXException {
+        /*
+         * check random access capability
+         */
+        FileID fileID = new FileID(id);
+        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
+            throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
         }
-        // Proceed...
-        if (null == registry) {
-            return fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
-        }
-        final Collection<FileStreamHandler> handlers = registry.getHandlers();
-        if (null == handlers || handlers.isEmpty()) {
-            return fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
-        }
-        // Handle stream
-        InputStream inputStream = fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
-        for (final FileStreamHandler streamHandler : handlers) {
-            inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
-        }
-        return inputStream;
+        /*
+         * get data from random file access & post "access" event
+         */
+        InputStream data = ((FileStorageRandomFileAccess) fileAccess).getDocument(fileID.getFolderId(), fileID.getFileId(), version, offset, length);
+        postEvent(FileStorageEventHelper.buildAccessEvent(
+            session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
+        /*
+         * return handled stream
+         */
+        return handleInputStream(fileID, version, data);
     }
 
     @Override
@@ -1058,16 +1061,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             }
 
         });
-    }
-
-    @Override
-    public InputStream getDocument(String id, String version, long offset, long length) throws OXException {
-        FileID fileID = new FileID(id);
-        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-        if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
-            throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
-        }
-        return ((FileStorageRandomFileAccess) fileAccess).getDocument(fileID.getFolderId(), fileID.getFileId(), version, offset, length);
     }
 
     @Override
@@ -1757,6 +1750,31 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             return new EventProperty("remoteAddress", serverName.toString());
         }
         return null;
+    }
+
+    /**
+     * Handles the supplied input stream if appropriate stream handlers are registered.
+     *
+     * @param fileID The file identifier
+     * @param version The file version
+     * @param inputStream The input stream
+     * @return The possibly modified input stream, or the original stream if no handlers registered
+     * @throws OXException
+     */
+    private InputStream handleInputStream(FileID fileID, String version, InputStream inputStream) throws OXException {
+        if (null == inputStream) {
+            return null;
+        }
+        FileStreamHandlerRegistry handlerRegistry = getStreamHandlerRegistry();
+        if (null != handlerRegistry) {
+            final Collection<FileStreamHandler> handlers = handlerRegistry.getHandlers();
+            if (null != handlers && 0 < handlers.size()) {
+                for (FileStreamHandler streamHandler : handlers) {
+                    inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
+                }
+            }
+        }
+        return inputStream;
     }
 
     /**
