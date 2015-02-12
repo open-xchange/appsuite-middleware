@@ -460,7 +460,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         FileID fileID = new FileID(id);
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
         if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
-            throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
+            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(fileAccess.getAccountAccess().getService());
         }
         /*
          * get data from random file access & post "access" event
@@ -1070,7 +1070,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             @Override
             protected IDTuple callInTransaction(FileStorageFileAccess access) throws OXException {
                 if (false == FileStorageRandomFileAccess.class.isInstance(access)) {
-                    throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
+                    throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(access.getAccountAccess().getService());
                 }
                 IDTuple result = ((FileStorageRandomFileAccess) access).saveDocument(document, data, sequenceNumber, modifiedColumns, offset);
                 document.setFolderId(result.getFolder());
