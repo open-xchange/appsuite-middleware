@@ -1,3 +1,7 @@
+* 2015-02-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36484: In case of a negative IP check, invalidate the previous session and continue with the form-login procedure
+
 * 2015-02-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 35504: Backported software change request 2249 and 2250.
