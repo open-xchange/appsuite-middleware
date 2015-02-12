@@ -117,7 +117,7 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
     public HTTPRequest build() throws OXException {
         try {
             final HttpClient client = new HttpClient();
-            final int timeout = 10000;
+            final int timeout = 20000;
             client.getParams().setSoTimeout(timeout);
             client.getParams().setIntParameter("http.connection.timeout", timeout);
 
@@ -144,7 +144,7 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
                 client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
 
                 final HttpMethodBase m = createMethod(javaURL.getFile());
-                m.getParams().setSoTimeout(10000);
+                m.getParams().setSoTimeout(20000);
                 m.setQueryString(javaURL.getQuery());
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
                     m.setRequestHeader(entry.getKey(), entry.getValue());
