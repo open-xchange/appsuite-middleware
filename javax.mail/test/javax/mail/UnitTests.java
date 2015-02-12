@@ -53,16 +53,18 @@ import javax.mail.internet.idn.IDNATest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.sun.mail.imap.protocol.FetchResponseTest;
 
 /**
  * Unit tests for the bundle javax.mail
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
 @RunWith(Suite.class)
-@SuiteClasses({ 
-    IDNATest.class
+@SuiteClasses({
+    IDNATest.class,
+    FetchResponseTest.class
 })
 public class UnitTests {
 

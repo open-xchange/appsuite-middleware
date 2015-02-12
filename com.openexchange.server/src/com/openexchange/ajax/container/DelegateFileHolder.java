@@ -95,6 +95,11 @@ public class DelegateFileHolder implements IFileHolder {
     }
 
     @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        return fileHolder.getRandomAccess();
+    }
+
+    @Override
     public InputStream getStream() throws OXException {
         final InputStream stream = this.stream;
         if (null != stream) {

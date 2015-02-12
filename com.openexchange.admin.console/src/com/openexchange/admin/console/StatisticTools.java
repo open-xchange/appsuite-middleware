@@ -556,6 +556,7 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the OSGi EventAdmin stats",
             false,
             NeededQuadState.notneeded);
+        this.generalstats = setLongOpt(parser, OPT_GENERAL_STATS_LONG, "shows the open-xchange general stats", false, false);
         this.mailinterfacestats = setLongOpt(parser, OPT_MAILINTERFACE_STATS_LONG, "shows the open-xchange mailinterface stats", false, false);
         this.poolingstats = setLongOpt(parser, OPT_POOLING_STATS_LONG, "shows the open-xchange pooling stats", false, false);
         this.callmonitorstats = setLongOpt(parser, OPT_CALLMONITOR_STATS_LONG, "shows admin.monitor Call Monitor stats", false, false);

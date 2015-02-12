@@ -60,7 +60,8 @@ import com.openexchange.java.Streams;
  */
 public class ByteArrayInputStreamClosure implements InputStreamClosure {
 
-    private final byte[] bytes;
+    /** The byte array */
+    final byte[] bytes;
 
     /**
      * Initializes a new {@link ByteArrayInputStreamClosure}.

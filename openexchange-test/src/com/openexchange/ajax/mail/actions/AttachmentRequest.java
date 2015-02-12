@@ -49,11 +49,20 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.java.Strings;
 
 /**
  * {@link AttachmentRequest}
@@ -65,6 +74,9 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
 
 	class AttachmentParser extends AbstractAJAXParser<AttachmentResponse> {
 
+	    private String strBody;
+        private byte[] bytesBody;
+
 		/**
 		 * Default constructor.
 		 */
@@ -73,12 +85,23 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
 		}
 
 		@Override
+		public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+		    assertEquals("Response code is not okay. (" + resp.getStatusLine().getReasonPhrase() + ")", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+		    Header contentType = resp.getFirstHeader("Content-Type");
+		    if (Strings.asciiLowerCase(contentType.getValue()).startsWith("text/")) {
+                strBody = EntityUtils.toString(resp.getEntity());
+            } else {
+                bytesBody = EntityUtils.toByteArray(resp.getEntity());
+            }
+		    return "{}";
+		}
+
+		@Override
 		public AttachmentResponse parse(String body) throws JSONException {
 		    if (body.length() == 0) {
-		        Response response = new Response();
-		        return new AttachmentResponse(response);
+		        return new AttachmentResponse(new Response());
 		    }
-		    return super.parse(body);
+		    return null == strBody ? new AttachmentResponse(bytesBody) : new AttachmentResponse(strBody);
 		}
 
 		/**
@@ -96,10 +119,9 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
 	private final String[] folderAndIDAndSequenceID;
 
 	private final boolean failOnError;
-
 	private boolean saveToDisk;
-
 	private boolean filter;
+    private boolean fromStructure;
 
 	public AttachmentRequest(final String folder, final String ID, final String sequenceId) {
 		this(new String[] { folder, ID, sequenceId }, true);
@@ -126,46 +148,39 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
 		this.failOnError = failOnError;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
+    /**
+     * Sets the <code>fromStructure</code> flag
+     *
+     * @param fromStructure The <code>fromStructure</code> flag to set
+     */
+    public AttachmentRequest setFromStructure(boolean fromStructure) {
+        this.fromStructure = fromStructure;
+        return this;
+    }
+
 	@Override
     public Object getBody() throws JSONException {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
 	@Override
     public Method getMethod() {
 		return Method.GET;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
 	@Override
     public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, Mail.ACTION_MATTACH),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndIDAndSequenceID[0]),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderAndIDAndSequenceID[1]),
-				new Parameter(Mail.PARAMETER_MAILATTCHMENT, folderAndIDAndSequenceID[2]),
-				new Parameter(Mail.PARAMETER_SAVE, String.valueOf(saveToDisk ? 1 : 0)),
-				new Parameter(Mail.PARAMETER_FILTER, filter ? "true" : "false")};
+	    List<Parameter> l = new LinkedList<Parameter>();
+	    l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, Mail.ACTION_MATTACH));
+	    l.add( new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndIDAndSequenceID[0]) );
+	    l.add( new Parameter(AJAXServlet.PARAMETER_ID, folderAndIDAndSequenceID[1]) );
+	    l.add( new Parameter(Mail.PARAMETER_MAILATTCHMENT, folderAndIDAndSequenceID[2]) );
+	    l.add( new Parameter(Mail.PARAMETER_SAVE, String.valueOf(saveToDisk ? 1 : 0)) );
+	    l.add( new Parameter(Mail.PARAMETER_FILTER, filter ? "true" : "false") );
+	    l.add( new Parameter("from_structure", fromStructure ? "true" : "false") );
+	    return l.toArray(new Parameter[0]);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
 	@Override
     public AttachmentParser getParser() {
 		return new AttachmentParser(failOnError);

@@ -17,7 +17,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Xerces Compat for IBM Java
-Autoreqprov:    no
+AutoReqProv:    no
 Requires:       java-ibm >= 1.7.0
 Provides:       open-xchange-xerces
 Conflicts:      open-xchange-xerces-sun
@@ -50,6 +50,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Feb 11 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.6.2 release
+* Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-10
 * Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-02-09
 * Fri Jan 30 2015 Marcus Klein <marcus.klein@open-xchange.com>

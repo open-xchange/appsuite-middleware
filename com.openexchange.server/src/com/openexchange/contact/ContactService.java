@@ -76,7 +76,7 @@ public interface ContactService {
      */
 	public static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
 		ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX, ContactField.LAST_MODIFIED,
-		ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID };
+		ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID, ContactField.EMAIL1 };
 
     /**
      * Gets a contact with all fields.

@@ -106,6 +106,12 @@ public class DriveFileHolder implements IFileHolder {
     }
 
     @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        // No random access support
+        return null;
+    }
+
+    @Override
     public long getLength() {
         return -1;
     }

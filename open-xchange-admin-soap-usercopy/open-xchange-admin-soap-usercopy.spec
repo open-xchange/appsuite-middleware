@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -23,7 +23,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       SOAP interface for extension to copy user into other contexts
-Autoreqprov:   no
+AutoReqProv:   no
 Requires:      open-xchange-soap-cxf >= @OXVERSION@
 Requires:      open-xchange-admin-user-copy >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-user-copy-soap = %{version}
@@ -59,6 +59,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Feb 11 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.6.2 release
+* Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-10
 * Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-02-09
 * Fri Jan 30 2015 Marcus Klein <marcus.klein@open-xchange.com>

@@ -1059,6 +1059,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 if (false == FileStorageTools.supports(access, FileStorageCapability.RANDOM_FILE_ACCESS)) {
                     throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
                 }
+                if (false == FileStorageRandomFileAccess.class.isInstance(access)) {
+                    throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(access.getAccountAccess().getService());
+                }
                 ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(access, document, modifiedColumns);
                 IDTuple result = ((FileStorageRandomFileAccess) access).saveDocument(document, data, sequenceNumber, modifiedColumns, offset);
                 document.setFolderId(result.getFolder());
