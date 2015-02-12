@@ -66,6 +66,8 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 * Wed Feb 11 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Seventh candidate for 7.6.2 release
 * Fri Feb 06 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2015-02-10
+* Fri Feb 06 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2015-02-09
 * Fri Jan 30 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Sixth candidate for 7.6.2 release

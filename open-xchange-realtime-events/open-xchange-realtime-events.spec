@@ -48,6 +48,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 * Wed Feb 11 2015 Marc Arens <marc.arens@open-xchange.com>
 Seventh candidate for 7.6.2 release
 * Fri Feb 06 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-02-10
+* Fri Feb 06 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2015-02-09
 * Fri Jan 30 2015 Marc Arens <marc.arens@open-xchange.com>
 Sixth candidate for 7.6.2 release

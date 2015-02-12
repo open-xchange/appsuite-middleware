@@ -71,6 +71,8 @@ exit 0
 * Wed Feb 11 2015 Felix Marx <felix.marx@open-xchange.com>
 Seventh candidate for 7.6.2 release
 * Fri Feb 06 2015 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2015-02-10
+* Fri Feb 06 2015 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2015-02-09
 * Fri Jan 30 2015 Felix Marx <felix.marx@open-xchange.com>
 Sixth candidate for 7.6.2 release
