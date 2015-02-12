@@ -4,6 +4,12 @@ open-xchange-authentication-ucs (7.8.0-0) unstable; urgency=medium
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 05 Nov 2014 09:40:42 +0100
 
+open-xchange-authentication-ucs (7.6.2-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 11 Feb 2015 15:41:50 +0100
+
 open-xchange-authentication-ucs (7.6.2-6) stable; urgency=low
 
   * Sixth candidate for 7.6.2 release

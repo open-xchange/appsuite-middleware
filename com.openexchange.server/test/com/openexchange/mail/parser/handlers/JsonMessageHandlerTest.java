@@ -457,12 +457,12 @@ public class JsonMessageHandlerTest extends TestCase {
             final JSONObject jAttachment4 = jAttachments.getJSONObject(3);
             assertNotNull(jAttachment4);
 
+            System.out.println("------- Debug Output ------");
+            System.out.println(jMail.toString(2));
             assertTrue("Unexpected content", jAttachment1.getString("content_type").startsWith("text/plain"));
             assertTrue("Unexpected content", jAttachment2.getString("content_type").startsWith("application/rtf"));
             assertTrue("Unexpected content", jAttachment3.getString("content_type").startsWith("application/pdf"));
             assertTrue("Unexpected content", jAttachment4.getString("content_type").startsWith("image/png"));
-
-            System.out.println(jMail.toString(2));
 
         } catch (Exception e) {
             e.printStackTrace();

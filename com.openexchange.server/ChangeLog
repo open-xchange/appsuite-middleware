@@ -1,6 +1,26 @@
+* 2015-02-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36333: Ensure file resources stay open while parsing MIME message data
+ - Fix for bug 36585: Signal proper RENAME_FLAG for mail standard folders
+ - Fix for bug 36487: Subscribe folder incl. predecessor folders to the top to not leave a parent folder unsubscribed
+ - Fix for bug 35954: Deal with corrupt BODYSTRUCTURE items in IMAP FETCH response that contain empty multipart sections
+ - Fix for bug 36661: Apply proper sort option to "unified" accounts when performing a search
+
+* 2015-02-11 - choeger@open-xchange.com
+
+ - Fix for bug 36656: SOAP: getContextCapabilities does not work
+
+* 2015-02-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36288: Don't hide "email1" property, even if the global address book permissions are limited
+
 * 2015-02-10 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 36228: Invalidate user after changing personal contact data
+
+* 2015-02-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35794: Ignore un-subscribe attempt for a standard folder
 
 * 2015-02-09 - martin.schneider@open-xchange.com
 

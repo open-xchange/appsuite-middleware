@@ -51,6 +51,7 @@ package com.openexchange.ajax.container;
 
 import java.io.InputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -88,6 +89,11 @@ public final class ByteArrayFileHolder implements IFileHolder {
     @Override
     public InputStream getStream() {
         return new UnsynchronizedByteArrayInputStream(bytes);
+    }
+
+    @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        return new ByteArrayRandomAccess(bytes);
     }
 
     @Override

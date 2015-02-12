@@ -51,11 +51,13 @@ package com.openexchange.ajax.container;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -120,6 +122,15 @@ public final class TmpFileFileHolder implements IFileHolder {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        try {
+            return new FileRandomAccess(tmpFile);
+        } catch (FileNotFoundException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -209,6 +220,7 @@ public final class TmpFileFileHolder implements IFileHolder {
         try {
             final File tmpFile = File.createTempFile("open-xchange-", ".tmp", uploadDirectory());
             tmpFile.deleteOnExit();
+            LogProperties.appendTempFileProperty(tmpFile);
             return tmpFile;
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());

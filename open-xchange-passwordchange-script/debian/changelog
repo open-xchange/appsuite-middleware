@@ -4,6 +4,12 @@ open-xchange-passwordchange-script (7.8.0-0) unstable; urgency=medium
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 05 Nov 2014 09:41:09 +0100
 
+open-xchange-passwordchange-script (7.6.2-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 11 Feb 2015 15:43:00 +0100
+
 open-xchange-passwordchange-script (7.6.2-6) stable; urgency=low
 
   * Sixth candidate for 7.6.2 release

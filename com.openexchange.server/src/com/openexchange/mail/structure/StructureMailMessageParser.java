@@ -63,8 +63,11 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
+import net.fortuna.ical4j.model.Property;
 import net.freeutils.tnef.Attachment;
 import net.freeutils.tnef.Attr;
+import net.freeutils.tnef.CompressedRTFInputStream;
 import net.freeutils.tnef.MAPIProp;
 import net.freeutils.tnef.MAPIProps;
 import net.freeutils.tnef.RawInputStream;
@@ -78,6 +81,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.CountingOutputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
@@ -102,6 +106,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.tools.tnef.TNEF2ICal;
 
 /**
  * {@link StructureMailMessageParser} - A callback parser to parse instances of {@link MailMessage} by invoking the <code>handleXXX()</code>
@@ -111,8 +116,11 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class StructureMailMessageParser {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(StructureMailMessageParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StructureMailMessageParser.class);
+
+    private static final String HDR_CONTENT_DISPOSITION = MessageHeaders.HDR_CONTENT_DISPOSITION;
+
+    private static final String HDR_CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
 
     private static final int BUF_SIZE = 8192;
 
@@ -179,6 +187,7 @@ public final class StructureMailMessageParser {
     private boolean parseTNEFParts;
     private boolean parseUUEncodedParts;
     private boolean stop;
+    private String subject;
     private boolean multipartDetected;
     private InlineDetector inlineDetector;
     private boolean neverTreatMessageAsAttachment;
@@ -245,6 +254,7 @@ public final class StructureMailMessageParser {
     public StructureMailMessageParser reset() {
         stop = false;
         multipartDetected = false;
+        subject = null;
         return this;
     }
 
@@ -520,7 +530,13 @@ public final class StructureMailMessageParser {
                  * Handle special conversion
                  */
                 final Attr messageClass = message.getAttribute(Attr.attMessageClass);
-                final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue());
+                final String messageClassName;
+                if (messageClass == null) {
+                    final MAPIProp prop = message.getMAPIProps().getProp(MAPIProp.PR_MESSAGE_CLASS);
+                    messageClassName = null == prop ? "" : prop.getValue().toString();
+                } else {
+                    messageClassName = ((String) messageClass.getValue());
+                }
                 if (TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
                     /*
                      * Convert contact to standard vCard. Resulting Multipart object consists of only ONE BodyPart object which encapsulates
@@ -559,6 +575,59 @@ public final class StructureMailMessageParser {
                      * Stop to further process TNEF attachment
                      */
                     return;
+                } else if (TNEF2ICal.isVPart(messageClassName)) {
+                    final net.fortuna.ical4j.model.Calendar calendar = TNEF2ICal.tnef2VPart(message);
+                    if (null != calendar) {
+                        /*
+                         * VPart successfully converted. Generate appropriate body part.
+                         */
+                        final TNEFBodyPart part = new TNEFBodyPart();
+                        /*
+                         * Determine VPart's Content-Type
+                         */
+                        final String contentTypeStr;
+                        {
+                            final net.fortuna.ical4j.model.Property method = calendar.getProperties().getProperty(net.fortuna.ical4j.model.Property.METHOD);
+                            if (null == method) {
+                                contentTypeStr = "text/calendar; charset=UTF-8";
+                            } else {
+                                contentTypeStr = new StringBuilder("text/calendar; method=").append(method.getValue()).append("; charset=UTF-8").toString();
+                            }
+                        }
+                        /*
+                         * Set part's body
+                         */
+                        {
+                            final byte[] bytes = calendar.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
+                            part.setDataHandler(new DataHandler(new MessageDataSource(bytes, contentTypeStr)));
+                            part.setSize(bytes.length);
+                        }
+                        /*
+                         * Set part's headers
+                         */
+                        part.setHeader(HDR_CONTENT_TYPE, contentTypeStr);
+                        {
+                            final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                            cd.setFilenameParameter(getFileName(null, getSequenceId(prefix, partCount), "text/calendar"));
+                            part.setHeader(HDR_CONTENT_DISPOSITION, cd.toString());
+                        }
+                        part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                        {
+                            final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
+                            final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
+                            if (summary != null) {
+                                part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                            }
+                        }
+                        /*
+                         * Parse part
+                         */
+                        parseMailContent(MimeMessageConverter.convertPart(part), handler, prefix, partCount++);
+                        /*
+                         * Stop to further process TNEF attachment
+                         */
+                        return;
+                    }
                 }
                 /*
                  * Look for body. Usually the body is the RTF text.
@@ -572,28 +641,37 @@ public final class StructureMailMessageParser {
                     bodyPart.setSize(value.length());
                     parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                 }
-                final MAPIProps mapiProps = message.getMAPIProps();
-                if (mapiProps != null) {
-                    final RawInputStream ris = (RawInputStream) mapiProps.getPropValue(MAPIProp.PR_RTF_COMPRESSED);
-                    if (ris != null) {
-                        final TNEFBodyPart bodyPart = new TNEFBodyPart();
-                        /*
-                         * Decompress RTF body
-                         */
-                        final byte[] decompressedBytes = TNEFUtils.decompressRTF(ris.toByteArray());
-                        final String contentTypeStr;
-                        {
-                            // final String charset = CharsetDetector.detectCharset(new
-                            // UnsynchronizedByteArrayInputStream(decompressedBytes));
-                            contentTypeStr = "application/rtf";
+                /*
+                 * Check for possible RTF content
+                 */
+                TNEFBodyPart rtfPart = null;
+                {
+                    final MAPIProps mapiProps = message.getMAPIProps();
+                    if (mapiProps != null) {
+                        final RawInputStream ris = (RawInputStream) mapiProps.getPropValue(MAPIProp.PR_RTF_COMPRESSED);
+                        if (ris != null) {
+                            rtfPart = new TNEFBodyPart();
+                            /*
+                             * De-compress RTF body
+                             */
+                            final byte[] decompressedBytes = CompressedRTFInputStream.decompressRTF(ris.toByteArray());
+                            final String contentTypeStr;
+                            {
+                                // final String charset = CharsetDetector.detectCharset(new
+                                // UnsynchronizedByteArrayInputStream(decompressedBytes));
+                                contentTypeStr = "application/rtf";
+                            }
+                            /*
+                             * Set content through a data handler to avoid further exceptions raised by unavailable DCH (data content handler)
+                             */
+                            rtfPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
+                            rtfPart.setHeader(HDR_CONTENT_TYPE, contentTypeStr);
+                            rtfPart.setSize(decompressedBytes.length);
+                            parseMailContent(MimeMessageConverter.convertPart(rtfPart), handler, prefix, partCount++);
+                            /*
+                             * Further process TNEF attachment
+                             */
                         }
-                        /*
-                         * Set content through a data handler to avoid further exceptions raised by unavailable DCH (data content handler)
-                         */
-                        bodyPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
-                        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
-                        bodyPart.setSize(decompressedBytes.length);
-                        parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
                 /*
@@ -636,19 +714,19 @@ public final class StructureMailMessageParser {
                             }
                             final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
                             bodyPart.setDataHandler(new DataHandler(ds));
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
+                            bodyPart.setHeader(HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
                                 contentTypeStr,
                                 attachFilename));
                             if (attachFilename != null) {
                                 final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                                 cd.setFilenameParameter(attachFilename);
                                 bodyPart.setHeader(
-                                    MessageHeaders.HDR_CONTENT_DISPOSITION,
+                                    HDR_CONTENT_DISPOSITION,
                                     MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
-                            os.reset();
-                            attachment.writeTo(os);
-                            bodyPart.setSize(os.size());
+                            CountingOutputStream counter = new CountingOutputStream();
+                            attachment.writeTo(counter);
+                            bodyPart.setSize((int) counter.getCount());
                             parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
@@ -664,6 +742,12 @@ public final class StructureMailMessageParser {
                         }
                     }
                 } else {
+                    // Check RTF part
+                    if (null != rtfPart) {
+                        final MailPart convertedPart = MimeMessageConverter.convertPart(rtfPart);
+                        convertedPart.setFileName(new StringBuilder(subject.replaceAll("\\s+", "_")).append(".rtf").toString());
+                        parseMailContent(convertedPart, handler, prefix, partCount++);
+                    }
                     // As attachment
                     if (null == messageClass) {
                         if (!mailPart.containsSequenceId()) {
@@ -778,6 +862,16 @@ public final class StructureMailMessageParser {
     }
 
     private void parseEnvelope(final MailMessage mail, final StructureHandler handler) throws OXException {
+        /*
+         * SUBJECT
+         */
+        {
+            String subj = mail.getSubject();
+            if (subj == null) { // in case no subject was set
+                subj = "";
+            }
+            subject = subj;
+        }
         /*
          * RECEIVED DATE
          */
