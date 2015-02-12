@@ -6,29 +6,21 @@
 
  - Fix for bug 35794: Ignore un-subscribe attempt for a standard folder
 
-* 2015-01-09 - lars.hoogestraat@open-xchange.com
+* 2015-02-05 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 36024: Replace occurrences of position:fixed by display:block in inline styles to prevent defacing the web ui.
-
-* 2015-01-08 - thorben.betten@open-xchange.com
-
- - Fix for bug 35982: Improved recognition of <script> tags to also cover "... <script/xss>..." occurrences
+ - Fix for bug 36484: In case of a negative IP check, invalidate the previous session and continue with the form-login procedure
 
 * 2015-02-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 35504: Backported software change request 2249 and 2250.
 
-* 2015-01-24 - thorben.betten@open-xchange.com
-
- - Fix for bug 35899: Properly handle RTF part inside TNEF attachments to keep sequence identifiers in sync
-
-* 2015-01-14 - martin.herfurth@open-xchange.com
-
- - Fix for bug 36035: External updates override internal confirmation status.
-
 * 2015-01-26 - marcus.klein@open-xchange.com
 
  - Fix for bug 35426: Execute SessionEnhancement earlier, so parameters added through this get populated with the session in the cluster.
+
+* 2015-01-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35899: Properly handle RTF part inside TNEF attachments to keep sequence identifiers in sync
 
 * 2015-01-21 - marcus.klein@open-xchange.com
 
@@ -39,9 +31,21 @@
 
  - Fix for bug 36141: Do proper url-encoding in composed redirect URI
 
+* 2015-01-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 36035: External updates override internal confirmation status.
+
 * 2015-01-14 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 36072: Remove white spaces between encoded words as per RFC2047.
+
+* 2015-01-09 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 36024: Replace occurrences of position:fixed by display:block in inline styles to prevent defacing the web ui.
+
+* 2015-01-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35982: Improved recognition of <script> tags to also cover "... <script/xss>..." occurrences
 
 * 2015-01-07 - thorben.betten@open-xchange.com
 

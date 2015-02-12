@@ -55,6 +55,7 @@ import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,7 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -135,7 +137,7 @@ public class FormLogin implements LoginRequestHandler {
         }
 
         // Try to lookup session by auto-login
-        LoginResult result = reAuthenticate(tryAutologin(req), request.getLogin(), request.getPassword(), properties);
+        LoginResult result = reAuthenticate(tryAutologin(req, resp), request.getLogin(), request.getPassword(), properties);
         if (null == result) {
             // Continue with form login
             result = LoginPerformer.getInstance().doLogin(request, properties);
@@ -186,10 +188,11 @@ public class FormLogin implements LoginRequestHandler {
      * Tries to lookup an exiting session by the cookies supplied with the request.
      *
      * @param request The request to try and perform the auto-login for
+     * @param response The corresponding response
      * @return The login result if a valid session was found, or <code>null</code>, otherwise
      * @throws OXException
      */
-    private LoginResult tryAutologin(HttpServletRequest request) throws OXException {
+    private LoginResult tryAutologin(HttpServletRequest request, HttpServletResponse response) throws OXException {
         Cookie[] cookies = request.getCookies();
         if (conf.isSessiondAutoLogin() && null != cookies && 0 < cookies.length) {
             /*
@@ -219,7 +222,20 @@ public class FormLogin implements LoginRequestHandler {
                      */
                     String remoteAddress = request.getRemoteAddr();
                     if (conf.isIpCheck()) {
-                        SessionUtility.checkIP(true, conf.getRanges(), session, remoteAddress, conf.getIpCheckWhitelist());
+                        try {
+                            SessionUtility.checkIP(true, conf.getRanges(), session, remoteAddress, conf.getIpCheckWhitelist());
+                        } catch (OXException e) {
+                            if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
+                                /*
+                                 * session found, but IP changed -> discard session & cancel auto-login (but continue with form-login),
+                                 * invalidate session-cookie (public- and secret-cookies are re-written later)
+                                 */
+                                SessionUtility.removeOXCookies(request, response, Collections.singletonList(sessionCookieName));
+                                LoginPerformer.getInstance().doLogout(sessionID);
+                                return null;
+                            }
+                            throw e;
+                        }
                     }
                     updateIPAddress(conf, remoteAddress, session);
                     /*

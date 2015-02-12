@@ -1,3 +1,9 @@
+open-xchange-configjump-generic (7.6.1-19) stable; urgency=low
+
+  * Build for patch 2015-02-10
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 06 Feb 2015 11:23:14 +0100
+
 open-xchange-configjump-generic (7.6.1-18) stable; urgency=low
 
   * Build for patch 2015-02-09
