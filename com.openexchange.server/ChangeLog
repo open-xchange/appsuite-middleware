@@ -1,3 +1,7 @@
+* 2015-02-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36478: Stick to positive capability "portal" only
+
 * 2015-02-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 36333: Ensure file resources stay open while parsing MIME message data
