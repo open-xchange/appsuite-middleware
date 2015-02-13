@@ -341,13 +341,12 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                         capabilities.remove(getCapability(Permission.WEBMAIL));
                     }
                 }
-                // Portal
+                // Portal - stick to positive "portal" capability only
+                capabilities.remove("denied_portal");
                 if (userPermissionBits.hasPortal()) {
                     capabilities.add(getCapability("portal"));
-                    capabilities.remove("deniedPortal");
                 } else {
                     capabilities.remove("portal");
-                    capabilities.add(getCapability("deniedPortal"));
                 }
                 // Free-Busy
                 if (userPermissionBits.hasFreeBusy()) {
