@@ -207,6 +207,9 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property SENT_MAILFOLDER_EN_GB "Sent Mail" /opt/open-xchange/etc/AdminUser.properties
     fi
 
+    # SoftwareChange_Request-2382
+    ox_add_property MASTER_ACCOUNT_OVERRIDE false /opt/open-xchange/etc/AdminDaemon.properties
+
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
 
