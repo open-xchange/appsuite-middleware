@@ -45,11 +45,11 @@
     <changeSet id="7.6.2:changelog:addprimarykey" author="martin.schneider@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
-                <primaryKeyExists tableName="DATABASECHANGELOG" schemaName="configdb" />
+                <primaryKeyExists tableName="DATABASECHANGELOG" />
             </not>
         </preConditions>
         <comment>Add missing primary key for DATABASECHANGELOG</comment>
-        <addPrimaryKey columnNames="id, author, filename" schemaName="configdb" tableName="DATABASECHANGELOG" />
+        <addPrimaryKey columnNames="id, author, filename" tableName="DATABASECHANGELOG" />
     </changeSet>
 
     <changeSet id="7.6.2:milestone" author="martin.schneider@open-xchange.com">
@@ -63,7 +63,7 @@
     <changeSet id="7.8.0:guest:create" author="martin.schneider@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="guest" schemaName="configdb" />
+                <tableExists tableName="guest" />
             </not>
         </preConditions>
         <comment>
@@ -87,7 +87,7 @@
     <changeSet id="7.8.0:guest2context:create" author="martin.schneider@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="guest2context" schemaName="configdb" />
+                <tableExists tableName="guest2context" />
             </not>
         </preConditions>
         <comment>
@@ -112,7 +112,7 @@
     <changeSet id="7.8.0:oauth_client:create" author="steffen.templin@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="oauth_client" schemaName="configdb" />
+                <tableExists tableName="oauth_client" />
             </not>
         </preConditions>
         <comment>
@@ -142,7 +142,7 @@
     <changeSet id="7.8.0:oauth_client_uri:create" author="steffen.templin@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="oauth_client_uri" schemaName="configdb" />
+                <tableExists tableName="oauth_client_uri" />
             </not>
         </preConditions>
         <comment>
@@ -165,5 +165,4 @@
     <changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
         <tagDatabase tag="7.8.0-milestone" />
     </changeSet>
-
 </databaseChangeLog>
