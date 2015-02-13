@@ -63,6 +63,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
@@ -70,6 +71,7 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
@@ -291,6 +293,26 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     }
 
     /**
+     * Check whether the given request is made via OAuth.
+     *
+     * @param request The request
+     * @return <code>true</code> if so
+     */
+    protected static boolean isOAuthRequest(AJAXRequestData request) {
+        return request.containsProperty(OAuthConstants.PARAM_OAUTH_GRANT);
+    }
+
+    /**
+     * Gets the OAuth grant if the given request is made via OAuth.
+     *
+     * @param request The request
+     * @return The grant
+     */
+    protected static OAuthGrant getOAuthGrant(AJAXRequestData request) {
+        return request.getProperty(OAuthConstants.PARAM_OAUTH_GRANT);
+    }
+
+    /**
      * Checks whether write operations are permitted for the given folder content type and OAuth grant.
      *
      * @param contentType The content type
@@ -304,6 +326,27 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             return grant.getScopes().has(AppointmentActionFactory.OAUTH_WRITE_SCOPE);
         } else if (contentType == TaskContentType.getInstance()) {
             return grant.getScopes().has(TaskActionFactory.OAUTH_WRITE_SCOPE);
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether read operations are permitted for the given folder content type and OAuth grant.
+     *
+     * @param contentType The content type
+     * @param grant The grant
+     * @return <code>true</code> if read operations are permitted
+     */
+    protected static boolean mayReadViaOAuthRequest(ContentType contentType, OAuthGrant grant) {
+        if (contentType == SystemContentType.getInstance()) {
+            return true;
+        } else if (contentType == ContactContentType.getInstance()) {
+            return grant.getScopes().has(ContactActionFactory.OAUTH_READ_SCOPE);
+        } else if (contentType == CalendarContentType.getInstance()) {
+            return grant.getScopes().has(AppointmentActionFactory.OAUTH_READ_SCOPE);
+        } else if (contentType == TaskContentType.getInstance()) {
+            return grant.getScopes().has(TaskActionFactory.OAUTH_READ_SCOPE);
         }
 
         return false;

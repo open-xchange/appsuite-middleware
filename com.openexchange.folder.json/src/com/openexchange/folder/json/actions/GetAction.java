@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -121,6 +122,11 @@ public final class GetAction extends AbstractFolderAction {
                 folderId,
                 session,
                 new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
+
+        if (isOAuthRequest(request) && !mayReadViaOAuthRequest(folder.getContentType(), getOAuthGrant(request))) {
+            throw new OAuthInsufficientScopeException();
+        }
+
         /*
          * Write subfolders as JSON arrays to JSON array
          */
