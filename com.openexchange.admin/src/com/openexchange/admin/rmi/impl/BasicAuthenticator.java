@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 
 /**
@@ -72,6 +73,7 @@ public class BasicAuthenticator extends OXCommonImpl {
 
     private final OXAuthStorageInterface sqlAuth;
     private final OXAuthStorageInterface fileAuth;
+    private final OXToolStorageInterface oxtool;
     private final AdminCache cache;
     private final BundleContext context;
 
@@ -84,6 +86,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         this.context = context;
         sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
         fileAuth = OXAuthStorageInterface.getInstanceFile();
+        oxtool = OXToolStorageInterface.getInstance();
         cache = ClientAdminThread.cache;
     }
 
@@ -94,6 +97,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         this.context = null;
         sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
         fileAuth = OXAuthStorageInterface.getInstanceFile();
+        oxtool = OXToolStorageInterface.getInstance();
         cache = ClientAdminThread.cache;
     }
 
@@ -197,7 +201,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         if (!cache.contextAuthenticationDisabled()) {
             if( isMasterOfContext(authdata, ctx) ) {
                 doAuthentication(authdata);
-            } else if (!sqlAuth.authenticate(authdata, ctx)) {
+            } else if (!oxtool.existsUserName(ctx, authdata.getLogin()) || !sqlAuth.authenticate(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
                 LOG.error("Admin authentication for user {}", authdata.getLogin(),invalidCredentialsException);
