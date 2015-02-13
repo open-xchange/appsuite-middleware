@@ -55,7 +55,7 @@ import java.util.Collection;
  * Provides access to the monitor that shows current status of currently scheduled config db changes.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
 public interface DBMigrationMonitorService {
 

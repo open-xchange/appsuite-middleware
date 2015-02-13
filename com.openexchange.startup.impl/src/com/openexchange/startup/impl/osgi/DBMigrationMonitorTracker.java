@@ -54,7 +54,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.startup.SignalStartedService;
 import com.openexchange.startup.impl.Services;
@@ -65,7 +64,7 @@ import com.openexchange.startup.impl.SignalStartedServiceImpl;
  * Tracker for the {@link DBMigrationMonitorService}.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
 public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMigrationMonitorService, DBMigrationMonitorService> {
 

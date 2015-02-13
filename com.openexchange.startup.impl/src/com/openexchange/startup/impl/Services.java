@@ -51,14 +51,13 @@ package com.openexchange.startup.impl;
 
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.startup.SignalStartedService;
 
 /**
  * {@link Services}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
 public class Services {
 
