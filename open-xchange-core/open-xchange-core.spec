@@ -1138,6 +1138,9 @@ ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt
 # SoftwareChange_Request-2250
 ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
 
+# SoftwareChange_Request-2270
+ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+
 # SoftwareChange_Request-2342
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
@@ -1150,9 +1153,6 @@ fi
 
 # SoftwareChange_Request-2353
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
-
-# SoftwareChange_Request-2379
-ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
