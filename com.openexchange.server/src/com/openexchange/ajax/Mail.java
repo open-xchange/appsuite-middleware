@@ -144,6 +144,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
@@ -1227,7 +1228,113 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Read in parameters
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
+            String tmp = paramContainer.getStringParam(PARAMETER_SAVE);
+            final boolean saveToDisk = (tmp != null && tmp.length() > 0 && Integer.parseInt(tmp) > 0);
+            tmp = null;
+            errorAsCallback = saveToDisk;
+            /*
+             * Get message
+             */
+            MailServletInterface mailInterface = mailInterfaceArg;
+            boolean closeMailInterface = false;
+            try {
+                if (mailInterface == null) {
+                    mailInterface = MailServletInterface.getInstance(session);
+                    closeMailInterface = true;
+                }
+
+                String uid;
+                {
+                    String tmp2 = paramContainer.getStringParam(PARAMETER_ID);
+                    if (null == tmp2) {
+                        tmp2 = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
+                        if (null == tmp2) {
+                            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ID);
+                        }
+                        uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
+                    } else {
+                        uid = tmp2;
+                    }
+                }
+
+                MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                if (mail == null) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
+                }
+
+                return actionGetMessage(session, paramContainer, mail, uid, mailInterface);
+            } finally {
+                if (closeMailInterface && mailInterface != null) {
+                    mailInterface.close(true);
+                }
+            }
+        } catch (final OXException e) {
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+                LOG.warn(
+                    "Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
+                    e);
+            } else {
+                LOG.error("", e);
+            }
+            response.setException(e);
+            if (errorAsCallback) {
+                try {
+                    final HttpServletResponse resp = paramContainer.getHttpServletResponse();
+                    resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+                    final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), ACTION_GET);
+                    final PrintWriter writer = resp.getWriter();
+                    writer.write(jsResponse);
+                    writer.flush();
+                    return null;
+                } catch (final Exception exc) {
+                    throw new JSONException(exc);
+                }
+            }
+        } catch (final Exception e) {
+            final OXException wrapper = getWrappingOXException(e);
+            LOG.error("", wrapper);
+            response.setException(wrapper);
+            if (errorAsCallback) {
+                try {
+                    final HttpServletResponse resp = paramContainer.getHttpServletResponse();
+                    resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+                    final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), ACTION_GET);
+                    final PrintWriter writer = resp.getWriter();
+                    writer.write(jsResponse);
+                    writer.flush();
+                    return null;
+                } catch (final Exception exc) {
+                    throw new JSONException(exc);
+                }
+            }
+        }
+        /*
+         * Close response and flush print writer
+         */
+        response.setData(data);
+        response.setTimestamp(null);
+        if (!warnings.isEmpty()) {
+            response.addWarning(warnings.get(0));
+        }
+        return response;
+    }
+
+    private final Response actionGetMessage(ServerSession session, ParamContainer paramContainer, MailMessage mail, String uid, MailServletInterface mailInterface) throws JSONException {
+        /*
+         * Some variables
+         */
+        final Response response = new Response(session);
+        Object data = JSONObject.NULL;
+        final List<OXException> warnings = new ArrayList<OXException>(2);
+        /*
+         * Start response
+         */
+        boolean errorAsCallback = false;
+        try {
+            /*
+             * Read in parameters
+             */
+            final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             String tmp = paramContainer.getStringParam(PARAMETER_SHOW_SRC);
             final boolean showMessageSource = (STR_1.equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = paramContainer.getStringParam(PARAMETER_EDIT_DRAFT);
@@ -1275,227 +1382,177 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             tmp = null;
             errorAsCallback = saveToDisk;
-            /*
-             * Get message
-             */
-            MailServletInterface mailInterface = mailInterfaceArg;
-            boolean closeMailInterface = false;
-            try {
-                if (mailInterface == null) {
-                    mailInterface = MailServletInterface.getInstance(session);
-                    closeMailInterface = true;
-                }
 
-                final String uid;
-                {
-                    String tmp2 = paramContainer.getStringParam(PARAMETER_ID);
-                    if (null == tmp2) {
-                        tmp2 = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
-                        if (null == tmp2) {
-                            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ID);
-                        }
-                        uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
-                    } else {
-                        uid = tmp2;
+            if (showMessageSource) {
+                final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
+                try {
+                    mail.writeTo(baos);
+                } catch (final OXException e) {
+                    if (!MailExceptionCode.NO_CONTENT.equals(e)) {
+                        throw e;
                     }
+                    LOG.debug("", e);
+                    baos.reset();
                 }
-
-                if (showMessageSource) {
+                // Filter
+                if (null != mimeFilter) {
+                    MimeMessage mimeMessage = new MimeMessage(
+                        MimeDefaultSession.getDefaultSession(),
+                        Streams.newByteArrayInputStream(baos.toByteArray()));
+                    mimeMessage = mimeFilter.filter(mimeMessage);
+                    baos.reset();
+                    mimeMessage.writeTo(baos);
+                }
+                // Proceed
+                final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                final boolean doUnseen = (unseen && wasUnseen);
+                if (doUnseen) {
+                    mail.setFlag(MailMessage.FLAG_SEEN, false);
+                    final int unreadMsgs = mail.getUnreadMessages();
+                    mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
+                }
+                if (doUnseen) {
                     /*
-                     * Get message
+                     * Leave mail as unseen
                      */
-                    final MailMessage mail = mailInterface.getMessage(folderPath, uid);
-                    if (mail == null) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
-                    }
-                    final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
+                    mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                } else if (wasUnseen) {
+                    /*
+                     * Trigger contact collector
+                     */
                     try {
-                        mail.writeTo(baos);
+                        final ServerUserSetting setting = ServerUserSetting.getInstance();
+                        final int contextId = session.getContextId();
+                        final int userId = session.getUserId();
+                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                            contextId,
+                            userId).booleanValue()) {
+                            triggerContactCollector(session, mail);
+                        }
                     } catch (final OXException e) {
-                        if (!MailExceptionCode.NO_CONTENT.equals(e)) {
-                            throw e;
-                        }
-                        LOG.debug("", e);
-                        baos.reset();
-                    }
-                    // Filter
-                    if (null != mimeFilter) {
-                        MimeMessage mimeMessage = new MimeMessage(
-                            MimeDefaultSession.getDefaultSession(),
-                            Streams.newByteArrayInputStream(baos.toByteArray()));
-                        mimeMessage = mimeFilter.filter(mimeMessage);
-                        baos.reset();
-                        mimeMessage.writeTo(baos);
-                    }
-                    // Proceed
-                    final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-                    final boolean doUnseen = (unseen && wasUnseen);
-                    if (doUnseen) {
-                        mail.setFlag(MailMessage.FLAG_SEEN, false);
-                        final int unreadMsgs = mail.getUnreadMessages();
-                        mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
-                    }
-                    if (doUnseen) {
-                        /*
-                         * Leave mail as unseen
-                         */
-                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-                    } else if (wasUnseen) {
-                        /*
-                         * Trigger contact collector
-                         */
-                        try {
-                            final ServerUserSetting setting = ServerUserSetting.getInstance();
-                            final int contextId = session.getContextId();
-                            final int userId = session.getUserId();
-                            if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
-                                contextId,
-                                userId).booleanValue()) {
-                                triggerContactCollector(session, mail);
-                            }
-                        } catch (final OXException e) {
-                            LOG.warn("Contact collector could not be triggered.", e);
-                        }
-                    }
-                    if (saveToDisk) {
-                        /*
-                         * Write message source to output stream...
-                         */
-                        final ContentType contentType = new ContentType();
-                        contentType.setPrimaryType("application");
-                        contentType.setSubType("octet-stream");
-                        final HttpServletResponse httpResponse = paramContainer.getHttpServletResponse();
-                        httpResponse.setContentType(contentType.toString());
-
-                        String subject = mail.getSubject();
-                        if (subject == null) { // in case no subject was set
-                            subject = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.DEFAULT_SUBJECT);
-                        }
-
-                        httpResponse.setHeader(
-                            "Content-disposition",
-                            getAttachmentDispositionValue(
-                                new StringBuilder(subject).append(".eml").toString(),
-                                null,
-                                paramContainer.getHeader("user-agent")));
-                        Tools.removeCachingHeader(httpResponse);
-                        // Write output stream in max. 8K chunks
-                        final OutputStream out = httpResponse.getOutputStream();
-                        final byte[] bytes = baos.toByteArray();
-                        int offset = 0;
-                        while (offset < bytes.length) {
-                            final int len = Math.min(0xFFFF, bytes.length - offset);
-                            out.write(bytes, offset, len);
-                            offset += len;
-                        }
-                        out.flush();
-                        /*
-                         * ... and return
-                         */
-                        return null;
-                    }
-                    final ContentType ct = mail.getContentType();
-                    if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                        data = new String(baos.toByteArray(), Charsets.forName(ct.getCharsetParameter()));
-                    } else {
-                        data = new String(baos.toByteArray(), Charsets.UTF_8);
-                    }
-                } else if (showMessageHeaders) {
-                    /*
-                     * Get message
-                     */
-                    final MailMessage mail = mailInterface.getMessage(folderPath, uid);
-                    if (mail == null) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
-                    }
-                    final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-                    final boolean doUnseen = (unseen && wasUnseen);
-                    if (doUnseen) {
-                        mail.setFlag(MailMessage.FLAG_SEEN, false);
-                        final int unreadMsgs = mail.getUnreadMessages();
-                        mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
-                    }
-                    data = formatMessageHeaders(mail.getHeadersIterator());
-                    if (doUnseen) {
-                        /*
-                         * Leave mail as unseen
-                         */
-                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-                    } else if (wasUnseen) {
-                        try {
-                            final ServerUserSetting setting = ServerUserSetting.getInstance();
-                            final int contextId = session.getContextId();
-                            final int userId = session.getUserId();
-                            if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
-                                contextId,
-                                userId).booleanValue()) {
-                                triggerContactCollector(session, mail);
-                            }
-                        } catch (final OXException e) {
-                            LOG.warn("Contact collector could not be triggered.", e);
-                        }
-                    }
-                } else {
-                    final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
-                    /*
-                     * Deny saving for this request-specific settings
-                     */
-                    usmNoSave.setNoSave(true);
-                    /*
-                     * Overwrite settings with request's parameters
-                     */
-                    final DisplayMode displayMode = detectDisplayMode(editDraft, view, usmNoSave);
-                    final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
-                    fa.getAccountId();
-                    fa.getFullname();
-                    /*
-                     * Get message
-                     */
-                    final MailMessage mail = mailInterface.getMessage(folderPath, uid);
-                    if (mail == null) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
-                    }
-                    final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-                    final boolean doUnseen = (unseen && wasUnseen);
-                    if (doUnseen) {
-                        mail.setFlag(MailMessage.FLAG_SEEN, false);
-                        final int unreadMsgs = mail.getUnreadMessages();
-                        mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
-                    }
-                    data = MessageWriter.writeMailMessage(
-                        mailInterface.getAccountID(),
-                        mail,
-                        displayMode,
-                        false,
-                        session,
-                        usmNoSave,
-                        warnings,
-                        token,
-                        ttlMillis,
-                        mimeFilter);
-                    if (doUnseen) {
-                        /*
-                         * Leave mail as unseen
-                         */
-                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-                    } else if (wasUnseen) {
-                        try {
-                            final ServerUserSetting setting = ServerUserSetting.getInstance();
-                            final int contextId = session.getContextId();
-                            final int userId = session.getUserId();
-                            if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
-                                contextId,
-                                userId).booleanValue()) {
-                                triggerContactCollector(session, mail);
-                            }
-                        } catch (final OXException e) {
-                            LOG.warn("Contact collector could not be triggered.", e);
-                        }
+                        LOG.warn("Contact collector could not be triggered.", e);
                     }
                 }
-            } finally {
-                if (closeMailInterface && mailInterface != null) {
-                    mailInterface.close(true);
+                if (saveToDisk) {
+                    /*
+                     * Write message source to output stream...
+                     */
+                    final ContentType contentType = new ContentType();
+                    contentType.setPrimaryType("application");
+                    contentType.setSubType("octet-stream");
+                    final HttpServletResponse httpResponse = paramContainer.getHttpServletResponse();
+                    httpResponse.setContentType(contentType.toString());
+
+                    String subject = mail.getSubject();
+                    if (subject == null) { // in case no subject was set
+                        subject = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.DEFAULT_SUBJECT);
+                    }
+
+                    httpResponse.setHeader(
+                        "Content-disposition",
+                        getAttachmentDispositionValue(
+                            new StringBuilder(subject).append(".eml").toString(),
+                            null,
+                            paramContainer.getHeader("user-agent")));
+                    Tools.removeCachingHeader(httpResponse);
+                    // Write output stream in max. 8K chunks
+                    final OutputStream out = httpResponse.getOutputStream();
+                    final byte[] bytes = baos.toByteArray();
+                    int offset = 0;
+                    while (offset < bytes.length) {
+                        final int len = Math.min(0xFFFF, bytes.length - offset);
+                        out.write(bytes, offset, len);
+                        offset += len;
+                    }
+                    out.flush();
+                    /*
+                     * ... and return
+                     */
+                    return null;
+                }
+                final ContentType ct = mail.getContentType();
+                if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
+                    data = new String(baos.toByteArray(), Charsets.forName(ct.getCharsetParameter()));
+                } else {
+                    data = new String(baos.toByteArray(), Charsets.UTF_8);
+                }
+            } else if (showMessageHeaders) {
+                final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                final boolean doUnseen = (unseen && wasUnseen);
+                if (doUnseen) {
+                    mail.setFlag(MailMessage.FLAG_SEEN, false);
+                    final int unreadMsgs = mail.getUnreadMessages();
+                    mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
+                }
+                data = formatMessageHeaders(mail.getHeadersIterator());
+                if (doUnseen) {
+                    /*
+                     * Leave mail as unseen
+                     */
+                    mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                } else if (wasUnseen) {
+                    try {
+                        final ServerUserSetting setting = ServerUserSetting.getInstance();
+                        final int contextId = session.getContextId();
+                        final int userId = session.getUserId();
+                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                            contextId,
+                            userId).booleanValue()) {
+                            triggerContactCollector(session, mail);
+                        }
+                    } catch (final OXException e) {
+                        LOG.warn("Contact collector could not be triggered.", e);
+                    }
+                }
+            } else {
+                final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
+                /*
+                 * Deny saving for this request-specific settings
+                 */
+                usmNoSave.setNoSave(true);
+                /*
+                 * Overwrite settings with request's parameters
+                 */
+                final DisplayMode displayMode = detectDisplayMode(editDraft, view, usmNoSave);
+                final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
+                fa.getAccountId();
+                fa.getFullname();
+                final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                final boolean doUnseen = (unseen && wasUnseen);
+                if (doUnseen) {
+                    mail.setFlag(MailMessage.FLAG_SEEN, false);
+                    final int unreadMsgs = mail.getUnreadMessages();
+                    mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
+                }
+                data = MessageWriter.writeMailMessage(
+                    mailInterface.getAccountID(),
+                    mail,
+                    displayMode,
+                    false,
+                    session,
+                    usmNoSave,
+                    warnings,
+                    token,
+                    ttlMillis,
+                    mimeFilter);
+                if (doUnseen) {
+                    /*
+                     * Leave mail as unseen
+                     */
+                    mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                } else if (wasUnseen) {
+                    try {
+                        final ServerUserSetting setting = ServerUserSetting.getInstance();
+                        final int contextId = session.getContextId();
+                        final int userId = session.getUserId();
+                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                            contextId,
+                            userId).booleanValue()) {
+                            triggerContactCollector(session, mail);
+                        }
+                    } catch (final OXException e) {
+                        LOG.warn("Contact collector could not be triggered.", e);
+                    }
                 }
             }
         } catch (final OXException e) {
@@ -4417,6 +4474,61 @@ public class Mail extends PermissionServlet implements UploadListener {
                 } else {
                     final Response response = new Response(session);
                     response.setData(JSONObject.NULL);
+                    response.setTimestamp(null);
+                    ResponseWriter.write(response, writer, localeFrom(session));
+                }
+            } finally {
+                if (closeMailInterface && mailInterface != null) {
+                    mailInterface.close(true);
+                }
+            }
+        } catch (final OXException e) {
+            LOG.error("", e);
+            final Response response = new Response(session);
+            for (String mailID : mailIDs) {
+                response.reset();
+                response.setException(e);
+                response.setData(JSONObject.NULL);
+                response.setTimestamp(null);
+                ResponseWriter.write(response, writer, localeFrom(session));
+            }
+        } catch (final Exception e) {
+            final OXException wrapper = getWrappingOXException(e);
+            LOG.error("", wrapper);
+            final Response response = new Response(session);
+            for (String mailID : mailIDs) {
+                response.reset();
+                response.setException(wrapper);
+                response.setData(JSONObject.NULL);
+                response.setTimestamp(null);
+                ResponseWriter.write(response, writer, localeFrom(session));
+            }
+        }
+    }
+
+    public void actionGetGetMessageMultiple(ServerSession session, JSONWriter writer, String[] mailIDs, ParamContainer[] containers, String folder, MailServletInterface mailInterfaceArg) throws JSONException {
+        try {
+            MailServletInterface mailInterface = mailInterfaceArg;
+            boolean closeMailInterface = false;
+            try {
+                if (mailInterface == null) {
+                    mailInterface = MailServletInterface.getInstance(session);
+                    closeMailInterface = true;
+                }
+                mailInterface.openFor(folder);
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
+                MailMessage[] messages = mailAccess.getMessageStorage().getMessages(folder, mailIDs, new MailField[] { MailField.FULL});
+
+                int length = messages.length;
+                for (int i = 0; i < length; i++) {
+                    MailMessage m = messages[i];
+                    Response response;
+                    if (null == m) {
+                        response = new Response(session);
+                        response.setException(MailExceptionCode.MAIL_NOT_FOUND.create(mailIDs[i], folder));
+                    } else {
+                        response = actionGetMessage(session, containers[i], m, m.getMailId(), mailInterface);
+                    }
                     response.setTimestamp(null);
                     ResponseWriter.write(response, writer, localeFrom(session));
                 }
