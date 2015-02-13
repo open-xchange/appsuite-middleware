@@ -54,6 +54,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,6 +67,7 @@ import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
+import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -100,6 +102,14 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListPerformer.class);
 
     protected static final FolderType FOLDER_TYPE_MAIL = MailFolderType.getInstance();
+
+    private static final Folder MISSING_FOLDER = new AbstractFolder() {
+        private static final long serialVersionUID = -2248191704180825606L;
+        @Override
+        public boolean isGlobalID() {
+            return false;
+        }
+    };
 
     /**
      * Initializes a new {@link ListPerformer} from given session.
@@ -206,6 +216,33 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
     }
 
     /**
+     * Gets the parent folder from its storage and checks its visibility against the requesting
+     * users permissions.
+     *
+     * @param treeId The requested folder tree identifier
+     * @param parentId The ID of the parent folder
+     * @param openedStorages The already opened folder storages
+     * @return The parent folder
+     * @throws OXException If the users permissions aren't sufficient or an error occurs
+     */
+    private Folder checkParentFolder(String treeId, String parentId, Collection<FolderStorage> openedStorages) throws OXException {
+        FolderStorage folderStorage = getOpenedStorage(parentId, treeId, storageParameters, openedStorages);
+        Folder parent = folderStorage.getFolder(treeId, parentId, storageParameters);
+        /*
+         * Check folder permission for parent folder
+         */
+        Permission parentPermission = CalculatePermission.calculate(parent, this, getAllowedContentTypes());
+        if (!parentPermission.isVisible()) {
+            throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
+                getFolderInfo4Error(parent),
+                getUserInfo4Error(),
+                getContextInfo4Error());
+        }
+
+        return parent;
+    }
+
+    /**
      * Performs the <code>LIST</code> request.
      *
      * @param treeId The tree identifier
@@ -217,25 +254,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
      * @throws OXException If a folder error occurs
      */
     UserizedFolder[] doList(final String treeId, final String parentId, final boolean all, final java.util.Collection<FolderStorage> openedStorages, final boolean checkOnly) throws OXException {
-        final FolderStorage folderStorage = getOpenedStorage(parentId, treeId, storageParameters, openedStorages);
+        Folder parent = checkParentFolder(treeId, parentId, openedStorages);
         try {
-            Folder parent = folderStorage.getFolder(treeId, parentId, storageParameters);
-            {
-                /*
-                 * Check folder permission for parent folder
-                 */
-                final Permission parentPermission = CalculatePermission.calculate(parent, this, getAllowedContentTypes());
-                if (!parentPermission.isVisible()) {
-                    throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        getFolderInfo4Error(parent),
-                        getUserInfo4Error(),
-                        getContextInfo4Error());
-                }
-            }
             /*
              * Get subfolder identifiers from folder itself
              */
-            final String[] subfolderIds = parent.getSubfolderIDs();
+            String[] subfolderIds = parent.getSubfolderIDs();
             if (null == subfolderIds) {
                 /*
                  * Need to get user-visible subfolders from appropriate storage
@@ -243,189 +267,139 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 return getSubfoldersFromStorages(treeId, parentId, all, checkOnly);
             }
 
-            // Load by subfolder identifiers
+            subfolderIds = filterPOP3SubfolderIds(parentId, subfolderIds);
             if (0 == subfolderIds.length) {
                 return new UserizedFolder[0];
             }
-            /*
-             * The subfolders can be completely fetched from already opened parent's folder storage
-             */
-            if (MailProperties.getInstance().isHidePOP3StorageFolders() && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
-                final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
-                if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
-                    final List<String> l = new ArrayList<String>(Arrays.asList(subfolderIds));
-                    final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
-                    for (final Iterator<String> it = l.iterator(); it.hasNext();) {
-                        if (pop3StorageFolders.contains(it.next())) {
-                            it.remove();
-                        }
-                    }
-                }
-            }
-            /*
-             * Collect by folder storage
-             */
-            final Map<FolderStorage, TIntList> map = new HashMap<FolderStorage, TIntList>(4);
-            for (int i = 0; i < subfolderIds.length; i++) {
-                final String id = subfolderIds[i];
-                final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
-                if (null == tmp) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
-                }
-                TIntList list = map.get(tmp);
-                if (null == list) {
-                    list = new TIntArrayList();
-                    map.put(tmp, list);
-                }
-                list.add(i);
-            }
-            /*
-             * Process by folder storage
-             */
-            final UserizedFolder[] subfolders = new UserizedFolder[subfolderIds.length];
-            final CompletionService<Object> completionService;
-            final StorageParametersProvider paramsProvider;
-            if (1 == map.size()) {
-                completionService = new CallerRunsCompletionService<Object>();
-                paramsProvider = new InstanceStorageParametersProvider(storageParameters);
-            } else {
-                completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
-                paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
-            }
-            final AbstractPerformer performer = this;
-            int taskCount = 0;
-            for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
-                final FolderStorage tmp = entry.getKey();
-                final int[] indexes = entry.getValue().toArray();
-                final org.slf4j.Logger log = LOG;
-                completionService.submit(new ThreadPools.TrackableCallable<Object>() {
 
-                    @Override
-                    public Object call() throws OXException {
-                        final StorageParameters newParameters = paramsProvider.getStorageParameters();
-                        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
-                        if (tmp.startTransaction(newParameters, false)) {
-                            openedStorages.add(tmp);
-                        }
-                        try {
-                            /*
-                             * Try to batch-load the folders
-                             */
-                            List<Folder> folders;
-                            try {
-                                final List<String> ids = new ArrayList<String>(indexes.length);
-                                for (final int index : indexes) {
-                                    ids.add(subfolderIds[index]);
-                                }
-                                folders = tmp.getFolders(treeId, ids, newParameters);
-                                final Set<OXException> warnings = newParameters.getWarnings();
-                                if (!warnings.isEmpty()) {
-                                    addWarning(warnings.iterator().next());
-                                }
-                            } catch (final OXException e) {
-                                if (OXExceptions.isUserInput(e)) {
-                                    log.debug("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
-                                } else {
-                                    log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
-                                }
-                                folders = null;
-                            }
-                            if (null == folders) {
-                                /*
-                                 * Load them one-by-one
-                                 */
-                                NextIndex: for (final int index : indexes) {
-                                    final String id = subfolderIds[index];
-                                    /*
-                                     * Get subfolder from appropriate storage
-                                     */
-                                    final Folder subfolder;
-                                    try {
-                                        subfolder = tmp.getFolder(treeId, id, newParameters);
-                                    } catch (final OXException e) {
-                                        if (OXExceptions.isUserInput(e)) {
-                                            log.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
-                                        } else {
-                                            log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
-                                        }
-                                        addWarning(e);
-                                        continue NextIndex;
-                                    }
-                                    /*
-                                     * Check for subscribed status dependent on parameter "all"
-                                     */
-                                    if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                        final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
-                                        if (userPermission.isVisible()) {
-                                            subfolders[index] =
-                                                getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
-                                        }
-                                    }
-                                }
-                            } else {
-                                /*
-                                 * Convert to userized folders and put into array
-                                 */
-                                final int size = folders.size();
-                                int j = 0;
-                                for (final int index : indexes) {
-                                    if (j < size) {
-                                        final Folder subfolder = folders.get(j++);
-                                        /*
-                                         * Check for subscribed status dependent on parameter "all"
-                                         */
-                                        if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                            final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
-                                            if (userPermission.isVisible()) {
-                                                subfolders[index] =
-                                                    getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            /*
-                             * Commit
-                             */
-                            for (final FolderStorage fs : openedStorages) {
-                                fs.commitTransaction(newParameters);
-                            }
-                            return null;
-                        } catch (final OXException e) {
-                            for (final FolderStorage fs : openedStorages) {
-                                fs.rollback(newParameters);
-                            }
-                            throw e;
-                        } catch (final RuntimeException e) {
-                            for (final FolderStorage fs : openedStorages) {
-                                fs.rollback(newParameters);
-                            }
-                            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        }
-                    }
-                });
-                taskCount++;
-            }
-            /*
-             * Wait for completion
-             */
-            ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
-            return trimArray(subfolders);
-        } catch (final OXException e) {
-            throw e;
+            return loadFolders(treeId, subfolderIds, all, checkOnly);
         } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private List<SortableId> filterPOP3SubfolderIds(FolderStorage neededStorage, String treeId, String parentId, SortableId[] subfolderIds, StorageParameters newParameters) throws OXException {
+        final List<SortableId> l;
+        if (MailProperties.getInstance().isHidePOP3StorageFolders() && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
+            l = new ArrayList<SortableId>(Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters)));
+            final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
+            if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
+                final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                for (final Iterator<SortableId> it = l.iterator(); it.hasNext();) {
+                    if (pop3StorageFolders.contains(it.next().getId())) {
+                        it.remove();
+                    }
+                }
+            }
+        } else {
+            l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
+        }
+        return l;
+    }
+
+    private String[] filterPOP3SubfolderIds(String parentId, String[] subfolderIds) throws OXException {
+        /*
+         * The subfolders can be completely fetched from already opened parent's folder storage
+         */
+        if (MailProperties.getInstance().isHidePOP3StorageFolders() && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
+            final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
+            if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
+                final List<String> l = new ArrayList<String>(Arrays.asList(subfolderIds));
+                final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                for (final Iterator<String> it = l.iterator(); it.hasNext();) {
+                    if (pop3StorageFolders.contains(it.next())) {
+                        it.remove();
+                    }
+                }
+                return l.toArray(new String[l.size()]);
+            }
+        }
+
+        return subfolderIds;
+    }
+
+    private Map<FolderStorage, TIntList> mapStoragesToIndexes(final String treeId, final String[] subfolderIds) throws OXException {
+        /*
+         * Collect by folder storage
+         */
+        final Map<FolderStorage, TIntList> map = new HashMap<FolderStorage, TIntList>(4);
+        for (int i = 0; i < subfolderIds.length; i++) {
+            final String id = subfolderIds[i];
+            final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
+            if (null == tmp) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
+            }
+            TIntList list = map.get(tmp);
+            if (null == list) {
+                list = new TIntArrayList();
+                map.put(tmp, list);
+            }
+            list.add(i);
+        }
+
+        return map;
+    }
+
+    private List<List<SortableId>> getAllVisibleSubfolderIds(FolderStorage[] neededStorages, final String parentId, final String treeId) throws OXException {
+        ThreadPoolService threadPool = getInstance().getService(ThreadPoolService.class, true);
+        CompletionService<List<SortableId>> completionService = new ThreadPoolCompletionService<List<SortableId>>(threadPool);
+        for (final FolderStorage neededStorage : neededStorages) {
+            completionService.submit(new ThreadPools.TrackableCallable<List<SortableId>>() {
+                @Override
+                public List<SortableId> call() throws OXException {
+                    StorageParameters newParameters = newStorageParameters();
+                    boolean started = neededStorage.startTransaction(newParameters, false);
+                    try {
+                        final List<SortableId> l = filterPOP3SubfolderIds(neededStorage, treeId, parentId, neededStorage.getSubfolders(treeId, parentId, newParameters), newParameters);
+                        if (started) {
+                            neededStorage.commitTransaction(newParameters);
+                        }
+                        return l;
+                    } catch (OXException e) {
+                        if (started) {
+                            neededStorage.rollback(newParameters);
+                        }
+                        addWarning(e);
+                        return Collections.<SortableId> emptyList();
+                    } catch (RuntimeException e) {
+                        if (started) {
+                            neededStorage.rollback(newParameters);
+                        }
+                        final OXException OXException = FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        addWarning(OXException);
+                        return Collections.<SortableId> emptyList();
+                    }
+                }
+            });
+        }
+        /*
+         * Wait for completion
+         */
+        List<List<SortableId>> results = ThreadPools.takeCompletionService(completionService, neededStorages.length, FACTORY);
+        return results;
     }
 
     private UserizedFolder[] getSubfoldersFromStorages(final String treeId, final String parentId, final boolean all, final boolean checkOnly) throws OXException {
         /*
          * Determine needed storages for given parent
          */
-        FolderStorage[] neededStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
-        if (null == neededStorages || 0 == neededStorages.length) {
+        final String[] subfolderIds = collectAndSortSubfolderIds(treeId, parentId);
+        if (subfolderIds.length == 0) {
             return new UserizedFolder[0];
         }
+
+        return loadFolders(treeId, subfolderIds, all, checkOnly);
+    }
+
+    private String[] collectAndSortSubfolderIds(final String treeId, final String parentId) throws OXException {
+        FolderStorage[] neededStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
+        if (null == neededStorages || 0 == neededStorages.length) {
+            return new String[0];
+        }
+
+        /*
+         * Collect
+         */
         final List<SortableId> allSubfolderIds;
         if (1 == neededStorages.length) {
             FolderStorage neededStorage = neededStorages[0];
@@ -448,62 +422,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             }
         } else {
             allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
-            CompletionService<List<SortableId>> completionService;
-            {
-                ThreadPoolService threadPool = getInstance().getService(ThreadPoolService.class, true);
-                completionService = new ThreadPoolCompletionService<List<SortableId>>(threadPool);
-            }
+
             /*
              * Get all visible subfolders from each storage
              */
-            for (final FolderStorage neededStorage : neededStorages) {
-                completionService.submit(new ThreadPools.TrackableCallable<List<SortableId>>() {
-
-                    @Override
-                    public List<SortableId> call() throws OXException {
-                        StorageParameters newParameters = newStorageParameters();
-                        boolean started = neededStorage.startTransaction(newParameters, false);
-                        try {
-                            final List<SortableId> l;
-                            if (MailProperties.getInstance().isHidePOP3StorageFolders() && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
-                                l = new ArrayList<SortableId>(Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters)));
-                                final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
-                                if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
-                                    final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
-                                    for (final Iterator<SortableId> it = l.iterator(); it.hasNext();) {
-                                        if (pop3StorageFolders.contains(it.next().getId())) {
-                                            it.remove();
-                                        }
-                                    }
-                                }
-                            } else {
-                                l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
-                            }
-                            if (started) {
-                                neededStorage.commitTransaction(newParameters);
-                            }
-                            return l;
-                        } catch (OXException e) {
-                            if (started) {
-                                neededStorage.rollback(newParameters);
-                            }
-                            addWarning(e);
-                            return Collections.<SortableId> emptyList();
-                        } catch (RuntimeException e) {
-                            if (started) {
-                                neededStorage.rollback(newParameters);
-                            }
-                            final OXException OXException = FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-                            addWarning(OXException);
-                            return Collections.<SortableId> emptyList();
-                        }
-                    }
-                });
-            }
-            /*
-             * Wait for completion
-             */
-            List<List<SortableId>> results = ThreadPools.takeCompletionService(completionService, neededStorages.length, FACTORY);
+            List<List<SortableId>> results = getAllVisibleSubfolderIds(neededStorages, parentId, treeId);
             for (List<SortableId> result : results) {
                 allSubfolderIds.addAll(result);
             }
@@ -519,34 +442,27 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 throw e;
             }
         }
+
         /*
-         * Sort them
+         * Sort
          */
         Collections.sort(allSubfolderIds);
-        final int size = allSubfolderIds.size();
-        final UserizedFolder[] subfolders = new UserizedFolder[size];
-        /*-
-         * Get corresponding user-sensitive folders
-         *
-         * Collect by folder storage
-         */
-        final Map<FolderStorage, TIntList> map = new HashMap<FolderStorage, TIntList>(4);
-        for (int i = 0; i < size; i++) {
-            final String id = allSubfolderIds.get(i).getId();
-            final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
-            if (null == tmp) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
-            }
-            TIntList list = map.get(tmp);
-            if (null == list) {
-                list = new TIntArrayList();
-                map.put(tmp, list);
-            }
-            list.add(i);
+
+        String[] subfolderIds = new String[allSubfolderIds.size()];
+        for (int i = 0; i < subfolderIds.length; i++) {
+            SortableId subfolderId = allSubfolderIds.get(i);
+            subfolderIds[i] = subfolderId.getId();
         }
+
+        return subfolderIds;
+    }
+
+    private UserizedFolder[] loadFolders(final String treeId, final String[] subfolderIds, final boolean all, final boolean checkOnly) throws OXException {
         /*
          * Process by folder storage
          */
+        final UserizedFolder[] subfolders = new UserizedFolder[subfolderIds.length];
+        final Map<FolderStorage, TIntList> map = mapStoragesToIndexes(treeId, subfolderIds);
         final CompletionService<Object> completionService;
         final StorageParametersProvider paramsProvider;
         if (1 == map.size()) {
@@ -556,117 +472,17 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
             paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
         }
-        final AbstractPerformer performer = this;
         int taskCount = 0;
         for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
-            final FolderStorage tmp = entry.getKey();
+            final FolderStorage folderStorage = entry.getKey();
             final int[] indexes = entry.getValue().toArray();
-            final org.slf4j.Logger log = LOG;
             completionService.submit(new ThreadPools.TrackableCallable<Object>() {
-
                 @Override
                 public Object call() throws Exception {
-                    final StorageParameters newParameters = paramsProvider.getStorageParameters();
-                    final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
-                    if (tmp.startTransaction(newParameters, false)) {
-                        openedStorages.add(tmp);
-                    }
-                    try {
-                        /*
-                         * Try to batch-load the folders
-                         */
-                        List<Folder> folders;
-                        try {
-                            final List<String> ids = new ArrayList<String>(indexes.length);
-                            for (final int index : indexes) {
-                                ids.add(allSubfolderIds.get(index).getId());
-                            }
-
-                            folders = tmp.getFolders(treeId, ids, newParameters);
-
-                            Set<OXException> warnings = newParameters.getWarnings();
-                            if (!warnings.isEmpty()) {
-                                addWarning(warnings.iterator().next());
-                            }
-                        } catch (final OXException e) {
-                            if (OXExceptions.isUserInput(e)) {
-                                log.debug("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
-                            } else {
-                                log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
-                            }
-                            folders = null;
-                        }
-                        if (null == folders) {
-                            NextIndex: for (final int index : indexes) {
-                                final String id = allSubfolderIds.get(index).getId();
-                                /*
-                                 * Get subfolder from appropriate storage
-                                 */
-                                final Folder subfolder;
-                                try {
-                                    subfolder = tmp.getFolder(treeId, id, newParameters);
-                                } catch (final OXException e) {
-                                    if (OXExceptions.isUserInput(e)) {
-                                        log.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
-                                    } else {
-                                        log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
-                                    }
-                                    addWarning(e);
-                                    continue NextIndex;
-                                }
-                                /*
-                                 * Check for subscribed status dependent on parameter "all"
-                                 */
-                                if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                    final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
-                                    if (userPermission.isVisible()) {
-                                        subfolders[index] = getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
-                                    }
-                                }
-                            }
-                        } else {
-                            /*
-                             * Convert to userized folders and put into array
-                             */
-                            int size = folders.size();
-                            int j = 0;
-                            for (final int index : indexes) {
-                                if (j < size) {
-                                    final Folder subfolder = folders.get(j++);
-                                    if (null != subfolder) {
-                                        /*
-                                         * Check for subscribed status dependent on parameter "all"
-                                         */
-                                        if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                            final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
-                                            if (userPermission.isVisible()) {
-                                                subfolders[index] = getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        /*
-                         * Commit
-                         */
-                        for (final FolderStorage fs : openedStorages) {
-                            fs.commitTransaction(newParameters);
-                        }
-                        return null;
-                    } catch (final OXException e) {
-                        for (final FolderStorage fs : openedStorages) {
-                            fs.rollback(newParameters);
-                        }
-                        throw e;
-                    } catch (final RuntimeException e) {
-                        for (final FolderStorage fs : openedStorages) {
-                            fs.rollback(newParameters);
-                        }
-                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    }
-
+                    loadFoldersFromStorage(folderStorage, paramsProvider, treeId, subfolderIds, all, checkOnly, subfolders, indexes);
+                    return null;
                 }
+
             });
             taskCount++;
         }
@@ -675,6 +491,125 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
          */
         ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
         return trimArray(subfolders);
+    }
+
+    private void loadFoldersFromStorage(FolderStorage folderStorage, StorageParametersProvider paramsProvider, String treeId, String[] subfolderIds, boolean all, boolean checkOnly, UserizedFolder[] subfolders, int[] indexes) throws Exception {
+        StorageParameters newParameters = paramsProvider.getStorageParameters();
+        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+        if (folderStorage.startTransaction(newParameters, false)) {
+            openedStorages.add(folderStorage);
+        }
+        try {
+            /*
+             * Try to batch-load the folders
+             */
+            List<Folder> folders = getFolders(folderStorage, newParameters, treeId, subfolderIds, indexes);
+            if (null == folders) {
+                /*
+                 * Load them one-by-one
+                 */
+                folders = getFoldersOneByOne(folderStorage, newParameters, treeId, subfolderIds, indexes, openedStorages);
+            }
+
+            /*
+             * Convert to userized folders and put into array
+             */
+            final int size = folders.size();
+            int j = 0;
+            for (final int index : indexes) {
+                if (j < size) {
+                    final Folder subfolder = folders.get(j++);
+                    if (null != subfolder) {
+                        setSubfolder(subfolders, subfolder, index, all, checkOnly, treeId, newParameters, openedStorages);
+                    }
+                }
+            }
+
+            /*
+             * Commit
+             */
+            for (final FolderStorage fs : openedStorages) {
+                fs.commitTransaction(newParameters);
+            }
+        } catch (final OXException e) {
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(newParameters);
+            }
+            throw e;
+        } catch (final RuntimeException e) {
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(newParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private List<Folder> getFolders(FolderStorage folderStorage, StorageParameters newParameters, String treeId, String[] subfolderIds, int[] indexes) {
+        List<Folder> folders;
+        try {
+            final List<String> ids = new ArrayList<String>(indexes.length);
+            for (final int index : indexes) {
+                ids.add(subfolderIds[index]);
+            }
+            folders = folderStorage.getFolders(treeId, ids, newParameters);
+            final Set<OXException> warnings = newParameters.getWarnings();
+            if (!warnings.isEmpty()) {
+                addWarning(warnings.iterator().next());
+            }
+        } catch (final OXException e) {
+            if (OXExceptions.isUserInput(e)) {
+                LOG.debug("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+            } else {
+                LOG.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+            }
+            folders = null;
+        }
+        return folders;
+    }
+
+    private List<Folder> getFoldersOneByOne(FolderStorage folderStorage, StorageParameters newParameters, String treeId, String[] subfolderIds, int[] indexes, List<FolderStorage> openedStorages) throws OXException {
+        List<Folder> folders = new ArrayList<>(indexes.length);
+        for (final int index : indexes) {
+            final String id = subfolderIds[index];
+            /*
+             * Get subfolder from appropriate storage
+             */
+            Folder subfolder = null;
+            try {
+                subfolder = folderStorage.getFolder(treeId, id, newParameters);
+            } catch (final OXException e) {
+                if (OXExceptions.isUserInput(e)) {
+                    LOG.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName(), e);
+                } else {
+                    LOG.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName(), e);
+                }
+                addWarning(e);
+            }
+
+            if (subfolder == null) {
+                folders.add(MISSING_FOLDER);
+            } else {
+                folders.add(subfolder);
+            }
+        }
+
+        return folders;
+    }
+
+    private void setSubfolder(UserizedFolder[] subfolders, Folder subfolder, int index, boolean all, boolean checkOnly, String treeId, StorageParameters newParameters, List<FolderStorage> openedStorages) throws OXException {
+        if (subfolder == MISSING_FOLDER) {
+            return;
+        }
+
+        /*
+         * Check for subscribed status dependent on parameter "all"
+         */
+        if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
+            final Permission userPermission = CalculatePermission.calculate(subfolder, this, getAllowedContentTypes());
+            if (userPermission.isVisible()) {
+                subfolders[index] = getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
+            }
+        }
     }
 
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
