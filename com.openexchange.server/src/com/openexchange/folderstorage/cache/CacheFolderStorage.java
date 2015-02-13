@@ -1760,7 +1760,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                          */
                         return null;
                     } catch (RuntimeException e) {
-                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e);
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                     } finally {
                         if (started) {
                             fs.rollback(newParameters);
