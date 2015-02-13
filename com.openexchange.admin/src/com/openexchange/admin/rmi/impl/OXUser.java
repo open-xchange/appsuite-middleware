@@ -128,7 +128,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         LOGGER.info("Class loaded: {}", this.getClass().getName());
-        basicauth = new BasicAuthenticator();
+        basicauth = new BasicAuthenticator(context);
         try {
             oxu = OXUserStorageInterface.getInstance();
         } catch (final StorageException e) {
