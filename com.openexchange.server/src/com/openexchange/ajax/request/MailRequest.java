@@ -441,7 +441,7 @@ public final class MailRequest {
          */
         protected CollectObject(final Mail mailServlet) {
             super();
-            this.mailIDs = new ArrayList<String>();
+            this.mailIDs = new LinkedList<String>();
             this.mailServlet = mailServlet;
         }
 
@@ -479,7 +479,7 @@ public final class MailRequest {
          * @param dataObject
          * @throws OXException If a JSON error occurs
          */
-        public final void addCollectable(final JSONObject jsonObject) throws  OXException {
+        public void addCollectable(final JSONObject jsonObject) throws  OXException {
             mailIDs.add(JSONUtil.requireString(PARAMETER_ID, jsonObject));
         }
 
@@ -488,7 +488,7 @@ public final class MailRequest {
          *
          * @return A newly created array of long containing this object's mail IDs.
          */
-        protected final String[] getMailIDs() {
+        protected String[] getMailIDs() {
             return mailIDs.toArray(new String[mailIDs.size()]);
         }
     }
@@ -611,16 +611,14 @@ public final class MailRequest {
 
         private final String folder;
         private final List<ParamContainer> containers;
-        private final List<String> ids;
 
         public GetCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
             this.folder = JSONUtil.requireString(PARAMETER_FOLDERID, dataObject);
             containers = new LinkedList<ParamContainer>();
-            ids = new LinkedList<String>();
             ParamContainer container = ParamContainer.getInstance(dataObject, EnumComponent.MAIL);
             containers.add(container);
-            ids.add(container.getStringParam(PARAMETER_ID));
+            mailIDs.add(container.getStringParam(PARAMETER_ID));
         }
 
         @Override
@@ -634,8 +632,13 @@ public final class MailRequest {
                 return false;
             }
             containers.add(container);
-            ids.add(id);
+            mailIDs.add(id);
             return true;
+        }
+
+        @Override
+        public void addCollectable(JSONObject jsonObject) throws OXException {
+            // Nothing to do
         }
 
         @Override
@@ -645,7 +648,7 @@ public final class MailRequest {
 
         @Override
         public void performOperations(final ServerSession session, final OXJSONWriter writer, final MailServletInterface mailInterface) throws JSONException {
-            mailServlet.actionGetGetMessageMultiple(session, writer, ids.toArray(new String[ids.size()]), containers.toArray(new ParamContainer[containers.size()]), folder, mailInterface);
+            mailServlet.actionGetGetMessageMultiple(session, writer, getMailIDs(), containers.toArray(new ParamContainer[containers.size()]), folder, mailInterface);
         }
     }
 }

@@ -4517,7 +4517,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 mailInterface.openFor(folder);
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
-                MailMessage[] messages = mailAccess.getMessageStorage().getMessages(folder, mailIDs, new MailField[] { MailField.FULL});
+                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folder);
+                MailMessage[] messages = mailAccess.getMessageStorage().getMessages(fa.getFullName(), mailIDs, new MailField[] { MailField.FULL});
 
                 int length = messages.length;
                 for (int i = 0; i < length; i++) {

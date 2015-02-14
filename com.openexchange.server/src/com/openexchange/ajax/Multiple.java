@@ -425,6 +425,8 @@ public class Multiple extends SessionServlet {
                     }
                 } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
                     handles = false;
+                } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
+                    handles = false;
                 }
             }
             if (handles) {
