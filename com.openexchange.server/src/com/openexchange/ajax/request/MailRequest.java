@@ -398,7 +398,11 @@ public final class MailRequest {
         if (jsonObject.has(DATA)) {
             return false;
         }
-        Object object = jsonObject.opt(Mail.PARAMETER_SAVE);
+        Object object = jsonObject.opt("format");
+        if (null != object && !"json".equalsIgnoreCase(object.toString())) {
+            return false;
+        }
+        object = jsonObject.opt(Mail.PARAMETER_SAVE);
         if (null != object && Integer.parseInt(object.toString()) > 0) {
             return false;
         }
