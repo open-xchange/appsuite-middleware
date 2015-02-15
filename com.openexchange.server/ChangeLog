@@ -1,3 +1,7 @@
+* 2015-02-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36688: Accept incoming POST's multipart without size restrictions in case 'publish-on-exceeded-quota' is enabled
+
 * 2015-02-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 36333: Ensure file resources stay open while parsing MIME message data
