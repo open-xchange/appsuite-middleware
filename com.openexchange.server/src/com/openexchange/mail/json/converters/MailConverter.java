@@ -478,9 +478,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     }
 
     private void convertSingle4Get(MailMessage mail, AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException {
-        ParamContainer paramContainer = ParamContainer.getInstance(requestData);
-        MailServletInterface mailInterface = getMailInterface(requestData, session);
-        JSONObject jMail = convertSingle4Get(mail, paramContainer, session, mailInterface);
+        JSONObject jMail = convertSingle4Get(mail, ParamContainer.getInstance(requestData), session, getMailInterface(requestData, session));
         if (null == jMail) {
             result.setResultObject(null, "native");
             result.setType(ResultType.DIRECT);
