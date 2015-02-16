@@ -88,7 +88,7 @@ public class JsonMessageHandlerTest extends TestCase {
     public JsonMessageHandlerTest(String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -433,6 +433,9 @@ public class JsonMessageHandlerTest extends TestCase {
             final MailMessage mail = MimeMessageConverter.convertMessage(new FileInputStream("./test/com/openexchange/mail/parser/handlers/tnef_oloxproblemmail.eml"));
 
             // Preps
+            MimeType2ExtMap.addMimeType("application/pdf", "pdf");
+            MimeType2ExtMap.addMimeType("application/rtf", "rtf");
+            MimeType2ExtMap.addMimeType("image/png", "png");
 
             ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
 
