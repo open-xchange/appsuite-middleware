@@ -75,6 +75,17 @@ public class FolderClosedIOException extends IOException {
     }
 
     /**
+     * Constructor
+     * @param folder 	the Folder
+     * @param message	the detailed error message
+     * @param cause     the cause
+     */
+    public FolderClosedIOException(Folder folder, String message, Throwable cause) {
+        super(message, cause);
+        this.folder = folder;
+    }
+
+    /**
      * Returns the dead Folder object
      */
     public Folder getFolder() {
