@@ -55,15 +55,19 @@ import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.SimHtmlService;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
@@ -139,6 +143,7 @@ public class GetAttachmentActionTest {
 
         ServiceLookup serviceLookup = mock(ServiceLookup.class);
         ServerServiceRegistry.getInstance().addService(StringParser.class, new BasicTypesStringParser());
+        ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
         AJAXRequestData ajaxRequestData = new AJAXRequestData();
         MailRequest mailRequest = mock(MailRequest.class);
         doReturn(folder).when(mailRequest).checkParameter(AJAXServlet.PARAMETER_FOLDERID);
