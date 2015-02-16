@@ -54,12 +54,11 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.osgi.util.ServiceCallWrapper;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
-import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
+import com.openexchange.oauth.provider.osgi.Services;
 
 /**
  * {@link URLHelper}
@@ -82,18 +81,7 @@ public class URLHelper {
      * @throws OXException If determining the host name fails
      */
     public static String getSecureLocation(HttpServletRequest request) throws OXException {
-        String hostname;
-        try {
-            hostname = ServiceCallWrapper.tryServiceCall(URLHelper.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
-                @Override
-                public String call(HostnameService service) throws Exception {
-                    return service.getHostname(-1, -1);
-                }
-            }, request.getServerName());
-        } catch (ServiceException e) {
-            throw e.toOXException();
-        }
-
+        String hostname = getHostname(request);
         StringBuilder requestURL = new StringBuilder("https://").append(hostname).append(request.getServletPath());
         String pathInfo = request.getPathInfo();
         if (pathInfo != null) {
@@ -106,6 +94,13 @@ public class URLHelper {
             requestURL.append(queryString);
         }
         return requestURL.toString();
+    }
+
+    public static String getBaseLocation(HttpServletRequest request) throws OXException {
+        String hostname = getHostname(request);
+        String prefix = Services.requireService(DispatcherPrefixService.class).getPrefix();
+        return "https://" + hostname + prefix;
+
     }
 
     public static String getRedirectLocation(String redirectURI, String... additionalParams) {
@@ -159,6 +154,18 @@ public class URLHelper {
             // UTF-8 must not fail
             throw new RuntimeException(e);
         }
+    }
+
+    private static String getHostname(HttpServletRequest request) {
+        String hostname;
+        HostnameService hostnameService = Services.getServiceLookup().getService(HostnameService.class);
+        if (hostnameService == null) {
+            hostname = request.getServerName();
+        } else {
+            hostname = hostnameService.getHostname(-1, -1);
+        }
+
+        return hostname;
     }
 
 }

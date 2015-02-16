@@ -56,10 +56,14 @@ import static com.openexchange.tools.servlet.http.Tools.sendErrorPage;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -79,16 +83,26 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.html.HtmlService;
+import com.openexchange.i18n.LocaleTools;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
+import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.URLHelper;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.OXTemplateExceptionHandler;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -264,7 +278,6 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                     return;
                 }
             }
-
         } catch (OXException e) {
             LOG.error("Authorization request failed", e);
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
@@ -350,42 +363,60 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             session.setAttribute(ATTR_OAUTH_CSRF_TOKEN, csrfToken);
 
             // Redirect to login page
-
-            // Hidden: Client identifier, Redirect URI, Scope, State, Response Type, CSRF Token
-            // Visible: Login, Password
-            StringBuilder sb = new StringBuilder(1024);
-            String lineSep = System.getProperty("line.separator");
-            sb.append("<!DOCTYPE html>").append(lineSep);
-            sb.append("<html><head>").append(lineSep);
-            {
-                sb.append("<title>Login</title>").append(lineSep);
-            }
-            sb.append("</head><body>").append(lineSep);
-            sb.append("<form action=\"").append(getAuthorizationEndpointURL(request)).append("\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">").append(lineSep);
-            sb.append("<p><label for=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\">Username: </label><input name=\"").append(OAuthProviderConstants.PARAM_USER_LOGIN).append("\" type=\"text\"><br>").append(lineSep);
-            sb.append("<p><label for=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\">Password:  </label><input name=\"").append(OAuthProviderConstants.PARAM_USER_PASSWORD).append("\" type=\"password\">").append(lineSep);
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CLIENT_ID).append("\" type=\"hidden\" value=\"").append(clientId).append("\">").append(lineSep);
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_REDIRECT_URI).append("\" type=\"hidden\" value=\"").append(redirectURI).append("\">").append(lineSep);
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_SCOPE).append("\" type=\"hidden\" value=\"").append(scope).append("\">").append(lineSep);
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_STATE).append("\" type=\"hidden\" value=\"").append(state).append("\">").append(lineSep);
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_CSRF_TOKEN).append("\" type=\"hidden\" value=\"").append(csrfToken).append("\">").append(lineSep);
-            sb.append("<input name=\"").append(OAuthProviderConstants.PARAM_RESPONSE_TYPE).append("\" type=\"hidden\" value=\"").append(responseType).append("\">").append(lineSep);
-            sb.append("<p><button name=\"").append(OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"false\">Allow</button>").append(lineSep);
-            sb.append("<button name=\"").append( OAuthProviderConstants.PARAM_ACCESS_DENIED).append("\" type=\"submit\" value=\"true\">Deny</button>").append(lineSep);
-            sb.append("</form>").append(lineSep);
-            sb.append("</body></html>").append(lineSep);
-
-
+            String loginPage = compileLoginPage(request, redirectURI, state, csrfToken, client, DefaultScopes.parseScope(scope), LocaleTools.DEFAULT_LOCALE); // TODO: allow url parameter to provide language
             response.setContentType("text/html; charset=UTF-8");
             response.setHeader("Content-Disposition", "inline");
             response.setStatus(200);
             PrintWriter writer = response.getWriter();
-            writer.write(sb.toString());
+            writer.write(loginPage);
             writer.flush();
         } catch (OXException e) {
             LOG.error("Login request failed", e);
             sendErrorPage(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internal error");
         }
+    }
+
+    private String compileLoginPage(HttpServletRequest request, String redirectURI, String state, String csrfToken, Client client, Scopes scopes, Locale locale) throws OXException {
+        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        TemplateService templateService = requireService(TemplateService.class, services);
+        HtmlService htmlService = requireService(HtmlService.class, services);
+        OXTemplate loginPage = templateService.loadTemplate("oauth-provider-login.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
+
+        // build replacement strings
+        Translator translator = translatorFactory.translatorFor(locale);
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("lang", locale.getLanguage());
+        String title = translator.translate(OAuthProviderStrings.LOGIN);
+        vars.put("title", title);
+        vars.put("iconURL", URLHelper.getBaseLocation(request) + OAuthProviderConstants.CLIENT_ICON_SERVLET_ALIAS + '/' + client.getId());
+        String clientName = htmlService.htmlFormat(client.getName());
+        vars.put("iconAlternative", clientName);
+        vars.put("intro", translator.translate(String.format(OAuthProviderStrings.OAUTH_INTRO, clientName)));
+        List<String> descriptions = new ArrayList<>(scopes.size());
+        for (String scope : scopes.get()) {
+            OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(scope);
+            if (scopeProvider == null) {
+                descriptions.add(scope);
+            } else {
+                descriptions.add(translator.translate(scopeProvider.getDescription()));
+            }
+        }
+        vars.put("scopeDescriptions", descriptions);
+        vars.put("target", getAuthorizationEndpointURL(request));
+        vars.put("formHeading", title);
+        vars.put("usernameLabel", translator.translate(OAuthProviderStrings.USERNAME));
+        vars.put("passwordLabel", translator.translate(OAuthProviderStrings.PASSWORD));
+        vars.put("allowLabel", translator.translate(OAuthProviderStrings.ALLOW));
+        vars.put("denyLabel", translator.translate(OAuthProviderStrings.DENY));
+        vars.put("clientId", client.getId());
+        vars.put("redirectURI", redirectURI);
+        vars.put("scopes", scopes.scopeString());
+        vars.put("state", state);
+        vars.put("csrfToken", csrfToken);
+
+        StringWriter writer = new StringWriter();
+        loginPage.process(vars, writer);
+        return writer.toString();
     }
 
     private final String getAuthorizationEndpointURL(HttpServletRequest request) throws OXException {

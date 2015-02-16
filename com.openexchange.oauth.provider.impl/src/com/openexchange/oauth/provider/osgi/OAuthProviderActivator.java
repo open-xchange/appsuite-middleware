@@ -74,6 +74,8 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.html.HtmlService;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.groupware.CreateOAuthGrantTableService;
 import com.openexchange.oauth.provider.groupware.CreateOAuthGrantTableTask;
@@ -82,6 +84,7 @@ import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
 /**
@@ -251,6 +254,9 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(ConfigViewFactory.class);
         trackService(AuthorizationService.class);
         trackService(CapabilityService.class);
+        trackService(TemplateService.class);
+        trackService(TranslatorFactory.class);
+        trackService(HtmlService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
 
         OAuthProvider provider = new OAuthProvider(this, context);

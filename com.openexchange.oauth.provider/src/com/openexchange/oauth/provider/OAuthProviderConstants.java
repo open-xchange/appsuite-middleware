@@ -73,6 +73,11 @@ public interface OAuthProviderConstants {
      */
     public static final String REVOKE_SERVLET_ALIAS = "o/oauth2/revoke";
 
+    /**
+     * Servlet alias of the endpoint for client icons
+     */
+    public static final String CLIENT_ICON_SERVLET_ALIAS = "o/oauth2/icon";
+
     // -------------------------------------------------------------------------------------------------------
 
     /**
