@@ -2,6 +2,10 @@
 
  - Fix for bug 36276: If ticket is expired in session and AppSuite tab was closed, terminate the session and create a new with a new ticket.
 
+* 2015-02-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36729: Safe preparation of a parameterized header + handling for unexpected runtime errors
+
 * 2015-02-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 36688: Accept incoming POST's multipart without size restrictions in case 'publish-on-exceeded-quota' is enabled
