@@ -285,7 +285,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
             return Boolean.TRUE;
         }
         if ("false".equalsIgnoreCase(value)) {
-            return Boolean.TRUE;
+            return Boolean.FALSE;
         }
 
         Object obj = parseObjectFromString(value, Integer.class);
