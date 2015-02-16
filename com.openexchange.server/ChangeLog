@@ -4,6 +4,7 @@
  - Fix for bug 36236: Determine appropriate "From" address when generating reply/forward version from a mailing-list message
  - Fix for bug 36719: Orderly stop IMAP-IDLE bundle on shut-down
  - Fix for bug #36723: Keep parameters intact when performing a multiple action=get
+ - Fix for bug 36729: Safe preparation of a parameterized header + handling for unexpected runtime errors
 
 * 2015-02-15 - thorben.betten@open-xchange.com
 
