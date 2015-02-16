@@ -59,6 +59,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 

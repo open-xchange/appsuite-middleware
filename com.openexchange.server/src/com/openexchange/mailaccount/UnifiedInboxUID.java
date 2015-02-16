@@ -47,8 +47,10 @@
  *
  */
 
-package com.openexchange.unifiedinbox;
+package com.openexchange.mailaccount;
 
+import static com.openexchange.mail.MailPath.SEPERATOR;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.BitSet;
 import java.util.regex.Pattern;
@@ -56,6 +58,8 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 
 /**
@@ -64,6 +68,52 @@ import com.openexchange.mail.MailPath;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedInboxUID {
+
+    /**
+     * Parses nested full name.
+     * <p>
+     * <code>"INBOX/default3/INBOX"</code> =&gt; <code>"default3/INBOX"</code>
+     *
+     * @param nestedFullName The nested full name to parse
+     * @return The parsed nested full name argument or <code>null</code>
+     */
+    public static FullnameArgument parsePossibleNestedFullName(String nestedFullName) {
+        // INBOX/default0/INBOX
+        if (!startsWithKnownFullname(nestedFullName)) {
+            return null;
+        }
+        // Cut off starting known full name and its separator character
+        final String fn = nestedFullName.substring(nestedFullName.indexOf(SEPERATOR) + 1);
+        return prepareMailFolderParam(fn);
+    }
+
+    /**
+     * Parses nested full name.
+     * <p>
+     * <code>"INBOX/default3/INBOX"</code> =&gt; <code>"default3/INBOX"</code>
+     *
+     * @param nestedFullName The nested full name to parse
+     * @return The parsed nested full name argument
+     * @throws OXException If specified nested full name is invalid
+     */
+    public static FullnameArgument parseNestedFullName(String nestedFullName) throws OXException {
+        FullnameArgument ret = parsePossibleNestedFullName(nestedFullName);
+        if (null == ret) {
+            throw MailExceptionCode.FOLDER_NOT_FOUND.create(prepareMailFolderParam(nestedFullName).getFullname());
+        }
+        return ret;
+    }
+
+    private static boolean startsWithKnownFullname(String fullName) {
+        for (final String knownFullname : UnifiedInboxManagement.KNOWN_FOLDERS) {
+            if (fullName.startsWith(knownFullname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------
 
     private int accountId;
     private String fullName;

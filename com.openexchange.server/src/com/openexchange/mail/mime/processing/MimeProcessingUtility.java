@@ -59,12 +59,10 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.Part;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
@@ -73,6 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -84,12 +83,15 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
+import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -115,6 +117,13 @@ public final class MimeProcessingUtility {
             return ((ServerSession) session).getUser();
         }
         return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+    }
+
+    private static UserSettingMail getUserSettingMail(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUserSettingMail();
+        }
+        return UserSettingMailStorage.getInstance().getUserSettingMail(session);
     }
 
     /**
@@ -214,44 +223,42 @@ public final class MimeProcessingUtility {
      * @param ctx The context
      * @return The possible <code>From</code> address or <code>null</code>
      * @throws OXException If an Open-Xchange error occurs
-     * @throws AddressException If address cannot be parsed
      */
-    static InternetAddress determinePossibleFrom(boolean isForward, MailMessage origMsg, int accountId, Session session, Context ctx) throws OXException, AddressException {
-        final Set<InternetAddress> fromCandidates;
+    static InternetAddress determinePossibleFrom(boolean isForward, MailMessage origMsg, int accountId, Session session, Context ctx) throws OXException {
+        Set<InternetAddress> fromCandidates;
+        InternetAddress likely = null;
         if (accountId == MailAccount.DEFAULT_ID) {
             if (isForward) {
                 // Fall-back to primary address
                 return null;
             }
             fromCandidates = new HashSet<InternetAddress>(8);
+            likely = new QuotedInternetAddress();
+            likely.setAddress(getUserSettingMail(session).getSendAddr());
             addUserAliases(fromCandidates, session, ctx);
         } else {
             // Check for Unified Mail account
             ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
             UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
             if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
-                {
-                    LinkedList<InternetAddress> candidates = new LinkedList<InternetAddress>();
-                    for (InternetAddress a : origMsg.getAllRecipients()) {
-                        int accId = isKnownAddress(session, a);
-                        if (accId == 0) {
-                            candidates.addFirst(a);
-                        } else if (accId > 0) {
-                            candidates.add(a);
-                        }
-                    }
-                    if (!candidates.isEmpty()) {
-                        return candidates.getFirst();
-                    }
+                int realAccountId;
+                try {
+                    UnifiedInboxUID uid = new UnifiedInboxUID(origMsg.getMailId());
+                    realAccountId = uid.getAccountId();
+                } catch (OXException e) {
+                    // No Unified Mail identifier
+                    FullnameArgument fa = UnifiedInboxUID.parsePossibleNestedFullName(origMsg.getFolder());
+                    realAccountId = null == fa ? MailAccount.DEFAULT_ID : fa.getAccountId();
                 }
 
-                int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
                 if (realAccountId == MailAccount.DEFAULT_ID) {
                     if (isForward) {
                         // Fall-back to primary address
                         return null;
                     }
                     fromCandidates = new HashSet<InternetAddress>(8);
+                    likely = new QuotedInternetAddress();
+                    likely.setAddress(getUserSettingMail(session).getSendAddr());
                     addUserAliases(fromCandidates, session, ctx);
                 } else {
                     MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
@@ -261,6 +268,8 @@ public final class MimeProcessingUtility {
                             return null;
                         }
                         fromCandidates = new HashSet<InternetAddress>(8);
+                        likely = new QuotedInternetAddress();
+                        likely.setAddress(getUserSettingMail(session).getSendAddr());
                         addUserAliases(fromCandidates, session, ctx);
                     } else {
                         QuotedInternetAddress a = new QuotedInternetAddress();
@@ -269,6 +278,7 @@ public final class MimeProcessingUtility {
                             return a;
                         }
                         fromCandidates = new HashSet<InternetAddress>(2);
+                        likely = a;
                         fromCandidates.add(a);
                     }
                 }
@@ -280,6 +290,8 @@ public final class MimeProcessingUtility {
                         return null;
                     }
                     fromCandidates = new HashSet<InternetAddress>(8);
+                    likely = new QuotedInternetAddress();
+                    likely.setAddress(getUserSettingMail(session).getSendAddr());
                     addUserAliases(fromCandidates, session, ctx);
                 } else {
                     QuotedInternetAddress a = new QuotedInternetAddress();
@@ -288,6 +300,7 @@ public final class MimeProcessingUtility {
                         return a;
                     }
                     fromCandidates = new HashSet<InternetAddress>(2);
+                    likely = a;
                     fromCandidates.add(a);
                 }
             }
@@ -333,7 +346,7 @@ public final class MimeProcessingUtility {
                 }
             }
         }
-        return from;
+        return null == from ? likely : from;
     }
 
     /**
