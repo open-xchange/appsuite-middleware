@@ -479,11 +479,11 @@ public final class CSSMatcher {
             final int start = m.start() + off;
             cssElemsBuffer.append(css.substring(off, start));
             final String prefix;
-            if (cssElemsBuffer.length() > 0) {
+            if (cssElemsBuffer.isEmpty()) {
+                prefix = "";
+            } else {
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                 prefix = cssElemsBuffer.toString();
-            } else {
-                prefix = "";
             }
             cssElemsBuffer.setLength(0);
             // Check block part

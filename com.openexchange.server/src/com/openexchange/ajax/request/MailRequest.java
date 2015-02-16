@@ -65,7 +65,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
@@ -620,7 +619,7 @@ public final class MailRequest {
             super(mailServlet);
             this.folder = JSONUtil.requireString(PARAMETER_FOLDERID, dataObject);
             containers = new LinkedList<ParamContainer>();
-            ParamContainer container = ParamContainer.getInstance(dataObject, EnumComponent.MAIL);
+            ParamContainer container = ParamContainer.getInstance(dataObject);
             containers.add(container);
             mailIDs.add(container.getStringParam(PARAMETER_ID));
         }
@@ -630,7 +629,7 @@ public final class MailRequest {
             if (!CollectableOperation.GET.equals(op) || !folder.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject))) {
                 return false;
             }
-            ParamContainer container = ParamContainer.getInstance(dataObject, EnumComponent.MAIL);
+            ParamContainer container = ParamContainer.getInstance(dataObject);
             String id = container.getStringParam(PARAMETER_ID);
             if (null == id) {
                 return false;

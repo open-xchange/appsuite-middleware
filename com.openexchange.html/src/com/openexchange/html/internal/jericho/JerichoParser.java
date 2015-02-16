@@ -294,6 +294,7 @@ public final class JerichoParser {
                         }
                     }
 
+                    @SuppressWarnings("resource")
                     StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag));
                     Thread thread = Thread.currentThread();
                     for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
