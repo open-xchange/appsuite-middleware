@@ -56,6 +56,8 @@ package com.openexchange.java;
  */
 public final class StringBuilderStringer implements Stringer {
 
+    private static final long serialVersionUID = -5617579874001869121L;
+
     private final StringBuilder sb;
 
     /**
@@ -64,6 +66,16 @@ public final class StringBuilderStringer implements Stringer {
     public StringBuilderStringer(final StringBuilder sb) {
         super();
         this.sb = sb;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        int length = sb.length();
+        boolean empty = true;
+        for (int i = 0; i < length; i++) {
+            empty = Strings.isWhitespace(sb.charAt(i));
+        }
+        return empty;
     }
 
     @Override

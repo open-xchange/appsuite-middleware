@@ -197,6 +197,9 @@ public class PortableSession extends StoredSession implements CustomPortable {
                         serializableNames.append(parameterName);
                         byte[] bytes = SerializationUtils.serialize((Serializable) value);
                         writer.writeByteArray(parameterName, bytes);
+                    } else {
+                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
+                        logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
                     }
                 }
                 if (0 == names.length()) {
@@ -313,6 +316,51 @@ public class PortableSession extends StoredSession implements CustomPortable {
 
     private static String decodeSafeValue(String value) throws DecoderException {
         return value.indexOf('%') < 0 ? value : new String(URLCodec.decodeUrl(Charsets.toAsciiBytes(value)), Charsets.UTF_8);
+    }
+
+    private static final String POJO_PACKAGE = "java.lang.";
+
+    private static boolean isSerializablePojo(Object obj) {
+        return null == obj ? false : ((obj instanceof Serializable) && obj.getClass().getName().startsWith(POJO_PACKAGE));
+    }
+
+    private static Object parseToSerializablePojo(String value) {
+        if ("true".equalsIgnoreCase(value)) {
+            return Boolean.TRUE;
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return Boolean.FALSE;
+        }
+
+        Object obj = parseObjectFromString(value, Integer.class);
+        if (null != obj) {
+            return obj;
+        }
+
+        obj = parseObjectFromString(value, Long.class);
+        if (null != obj) {
+            return obj;
+        }
+
+        obj = parseObjectFromString(value, Float.class);
+        if (null != obj) {
+            return obj;
+        }
+
+        obj = parseObjectFromString(value, Double.class);
+        if (null != obj) {
+            return obj;
+        }
+
+        return value;
+    }
+
+    private static <T> T parseObjectFromString(String s, Class<T> clazz) {
+        try {
+            return clazz.getConstructor(new Class[] {String.class }).newInstance(s);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

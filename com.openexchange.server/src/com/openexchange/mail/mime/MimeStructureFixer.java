@@ -236,30 +236,64 @@ public final class MimeStructureFixer {
         if (null == mimeMessage) {
             return mimeMessage;
         }
-        final ContentType contentType = getContentType(mimeMessage);
-        if (!contentType.startsWith("multipart/")) {
-            // Nothing to filter
-            return mimeMessage;
-        }
+        ThresholdFileHolder sink = null;
+        boolean closeSink = true;
         try {
-            // Check mailer/boundary for "Apple"
-            {
-                final String mailer = mimeMessage.getHeader(MessageHeaders.HDR_X_MAILER, null);
-                final boolean noAppleMailer;
-                if (null == mailer || (noAppleMailer = (toLowerCase(mailer).indexOf("apple") < 0))) {
-                    // Not composed by Apple mailer
-                    return mimeMessage;
-                }
-                final String boundary = contentType.getParameter("boundary");
-                if (noAppleMailer && (null == boundary || toLowerCase(boundary).indexOf("apple") < 0)) {
-                    // Not composed by Apple mailer
-                    return mimeMessage;
-                }
+            final ContentType contentType = getContentType(mimeMessage);
+            if (!contentType.startsWith("multipart/")) {
+                // Nothing to filter
+                return mimeMessage;
             }
-            // Start to check & fix multipart structure
-            return process0(mimeMessage, contentType);
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+            try {
+                // Check mailer/boundary for "Apple"
+                {
+                    final String mailer = mimeMessage.getHeader(MessageHeaders.HDR_X_MAILER, null);
+                    final boolean noAppleMailer;
+                    if (null == mailer || (noAppleMailer = (toLowerCase(mailer).indexOf("apple") < 0))) {
+                        // Not composed by Apple mailer
+                        return mimeMessage;
+                    }
+                    final String boundary = contentType.getParameter("boundary");
+                    if (noAppleMailer && (null == boundary || toLowerCase(boundary).indexOf("apple") < 0)) {
+                        // Not composed by Apple mailer
+                        return mimeMessage;
+                    }
+                }
+                // Remember original Message-ID
+                String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
+                // Start to check & fix multipart structure
+                MimeMessage mime;
+                if (mimeMessage instanceof com.sun.mail.util.ReadableMime) {
+                    sink = new ThresholdFileHolder();
+                    mimeMessage.writeTo(sink.asOutputStream());
+                    File tempFile = sink.getTempFile();
+                    if (null == tempFile) {
+                        mime = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                    } else {
+                        mime = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile);
+                    }
+                } else {
+                    mime = mimeMessage;
+                }
+                MimeMessage retval = process0(mime, contentType);
+                MimeMessageConverter.saveChanges(retval);
+                // Restore original Message-Id header
+                if (null == messageId) {
+                    retval.removeHeader(MESSAGE_ID);
+                } else {
+                    retval.setHeader(MESSAGE_ID, messageId);
+                }
+                closeSink = false;
+                return retval;
+            } catch (MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } catch (IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        } finally {
+            if (closeSink && null != sink) {
+                sink.close();
+            }
         }
     }
 

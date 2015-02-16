@@ -67,7 +67,6 @@ import com.openexchange.api2.sync.FolderSyncInterface;
 import com.openexchange.api2.sync.RdbFolderSyncInterface;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -166,7 +165,7 @@ public class SyncServlet extends PermissionServlet {
 			throws IOException {
 		try {
 			actionPutClearFolderContent(getSessionObject(req), resp.getWriter(), getBody(req), ParamContainer
-					.getInstance(req, EnumComponent.SYNCML, resp));
+					.getInstance(req, resp));
 		} catch (final JSONException e) {
 			writeErrorResponse((HttpServletResponseWrapper) resp, e, getSessionObject(req));
 		}

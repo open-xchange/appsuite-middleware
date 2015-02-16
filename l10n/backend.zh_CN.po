@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-10-08 11:19+1000\n"
+"PO-Revision-Date: 2015-02-10 14:55+1000\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.6.9\n"
+"X-Generator: Poedit 1.7.4\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -2311,6 +2311,21 @@ msgstr "超出允许限额，请删除一些项目以能储存新的。"
 msgid "ZIP archive exceeds max. allowed size of %1$s"
 msgstr "ZIP 档案超过允许的最大值 %1$s"
 
+#. The file storage account is currently not accessible.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
+msgid "The file storage account is currently not accessible."
+msgstr "文件储存户口现在无法访问。"
+
+#. The folder \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
+msgid "The folder \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "不能把文件夹 \"%1$s\" 移动到 \"%2$s\"。"
+
+#. The file \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
+msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "不能把文件 \"%1$s\" 移动到 \"%2$s\"。"
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -2456,7 +2471,7 @@ msgstr "临时指向。"
 #. Object restore is already in progress.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:142
 msgid "Object restore is already in progress."
-msgstr "已经进行对象复原"
+msgstr "已经进行对象恢复。"
 
 #. You are being redirected to the bucket while DNS updates.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:145
@@ -3742,6 +3757,31 @@ msgstr "无法从关联 OAuth 提供者获得一个有效的回应。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
 msgid "There was a problem while creating a connection to the remote service."
 msgstr "创建到远端服务器的连接时有一个错误。"
+
+#. You need to grant additional %1$s permissions to access the resource.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
+msgid "You need to grant additional %1$s permissions to access the resource."
+msgstr "您需要批准额外 %1$s 权限，以访问此资源。"
+
+#. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
+msgid ""
+"Your '%1$s' access was rejected. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"您的 \"%1$s\" 访问被拒绝。您需要重新认证服务器才能在您的户口使用新密码。如要"
+"这样，进入配置 -> 我的社交配置 -> 户口。然后重试。"
+
+#. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
+msgid ""
+"Your '%1$s' access was revoked. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"您的 \"%1$s\" 密码已被收回。您需要重新认证服务器才能在您的户口使用新密码。如"
+"要这样，进入配置 -> 我的社交配置 -> 户口。然后重试。"
 
 #. *
 #. * New password too short.
@@ -5091,6 +5131,13 @@ msgstr "服务器现时关闭，请稍后再试。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "Could not connect to the context storage."
 msgstr "无法连接到上下文存储。"
+
+#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+#. This should happen in very rare conditions and is not visible to the client.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
+msgid "Denied concurrent update of user attributes."
+msgstr "拒绝用户属性同时更新。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
@@ -7196,6 +7243,20 @@ msgstr "因为请求大小超过最大配置大小 %1$s，所以请求被拒绝�
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "连线已无预警关闭。请重试。"
 
+#. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+msgid ""
+"Request rejected because file size (%1$s) exceeds the maximum configured "
+"file size of %2$s."
+msgstr "因为文件大小 (%1$s) 超过最大配置文件大小 %2$s，所以请求被拒绝。"
+
+#. Request rejected because file size exceeds the maximum configured file size of %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+msgid ""
+"Request rejected because file size exceeds the maximum configured file size "
+"of %1$s."
+msgstr "因为文件大小超过最大配置文件大小 %1$s，所以请求被拒绝。"
+
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
@@ -7484,6 +7545,17 @@ msgstr "服务器 %1$s 不支持经由一个安全的连接访问。"
 msgid "Mail access is disabled for context administrator."
 msgstr "已禁用环境管理员的邮件访问。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
+msgid ""
+"The maximum number of files that may be attached to an E-Mail is exceeded. "
+"Max. is %1$s."
+msgstr "超过一个限制邮件的最大附件数。最大附件数为 %1$s.。"
+
+#. The client request is not permitted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:185
+msgid "The client request is not permitted."
+msgstr "客户端请求不获批准。"
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -7611,23 +7683,40 @@ msgid "Message could not be sent to the following recipients: %1$s (%2$s)"
 msgstr "无法将消息发送到以下收件人：%1$s (%2$s)"
 
 #. *
-#. * Lost connection to mail server.
+#. * Message could not be sent. Error message from mail transport server: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s"
+msgstr "消息无法发送。邮件传送服务器回传错误消息：%1$s"
+
+#. *
+#. * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s "
+"(%2$s)"
+msgstr "消息无法发送。邮件传送服务器回传错误消息：%1$s (%2$s)"
+
+#. *
+#. * Lost connection to mail server.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid "Lost connection to mail server."
 msgstr "丢失到邮件服务器的连接。"
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "Connection closed to mail server %1$s."
 msgstr "关闭到邮件服务器 %1$s 的连接。"
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
 "attempting to connect."
@@ -7636,34 +7725,34 @@ msgstr "尝试连接到远程服务器 %1$s 时，连接被拒绝或超时。"
 #. *
 #. * The allowed quota on mail server exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid "The allowed quota on mail server exceeded."
 msgstr "超出邮件服务器上允许的配额。"
 
 #. *
 #. * The allowed quota on mail server "%1$s" exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
 msgid "The allowed quota on mail server \"%1$s\" exceeded."
 msgstr "超出邮件服务器 \"%1$s\" 上允许的配额。"
 
 #. *
 #. * The mailbox is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
 msgid "The mailbox is already in use. Please try again later."
 msgstr "邮箱已经被使用，请稍后再试。"
 
 #. *
 #. * The mailbox on mail server %1$s is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid ""
 "The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr "邮件服务器 %1$s 上的邮箱已经被使用，请稍后再试。"
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
@@ -8084,7 +8173,7 @@ msgstr "不能删除文件夹 \"%1$s\"。"
 msgid ""
 "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
 "restored."
-msgstr "\"%2$s\" 文件夹里 \"%1$s\" 用户的管理权限已经还原。"
+msgstr "\"%2$s\" 文件夹里 \"%1$s\" 用户的管理权限已经恢复。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -8124,6 +8213,12 @@ msgstr "请求的操作要求一个有效会期，请登录后再试。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:68
 msgid "Missing the following field in JSON data: %1$s"
 msgstr "JSON 数据缺少以下输入字段：%1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:69
+msgid ""
+"The HTML content is too big and therefore cannot be safely displayed. Please "
+"select to download its content if you want to see it."
+msgstr "HTML 内容太大因此未能安全地显示。如果您要观看请选择下载其内容。"
 
 #. *
 #. * The provided cookie is invalid. Please login.
@@ -8290,6 +8385,11 @@ msgid ""
 msgstr ""
 "服务提供者要求确认身份。有的户口会发生这个问题，而那是提供者的责任，因此我们"
 "无法解决。由于这个原因，无法完成订阅。"
+
+#. You already have such a subscription.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
+msgid "You already have such a subscription."
+msgstr "您已经有此订阅。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."

@@ -58,6 +58,7 @@ import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -86,6 +87,12 @@ public class JsonMessageHandlerTest extends TestCase {
      */
     public JsonMessageHandlerTest(String name) {
         super(name);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        MimeType2ExtMap.addMimeType("application/pdf", "pdf");
     }
 
     /**
@@ -426,6 +433,9 @@ public class JsonMessageHandlerTest extends TestCase {
             final MailMessage mail = MimeMessageConverter.convertMessage(new FileInputStream("./test/com/openexchange/mail/parser/handlers/tnef_oloxproblemmail.eml"));
 
             // Preps
+            MimeType2ExtMap.addMimeType("application/pdf", "pdf");
+            MimeType2ExtMap.addMimeType("application/rtf", "rtf");
+            MimeType2ExtMap.addMimeType("image/png", "png");
 
             ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
 

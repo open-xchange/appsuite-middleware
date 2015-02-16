@@ -1146,10 +1146,7 @@ fi
 # SoftwareChange_Request-2353
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
 
-# SoftwareChange_Request-2379
-ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
-
-PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
+PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
