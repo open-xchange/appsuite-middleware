@@ -790,28 +790,28 @@ public class MimeStructureFixerTest extends TestCase {
 
             assertTrue("No multipart content", processed.getContent() instanceof Multipart);
             Multipart multipart = (Multipart) processed.getContent();
-            assertTrue("Unexpected Content-Type header.", multipart.getContentType().startsWith("multipart/mixed"));
+            assertTrue("Unexpected Content-Type header: " + multipart.getContentType(), multipart.getContentType().startsWith("multipart/alternative"));
             int count = multipart.getCount();
-            assertEquals("Unexpected number of body parts.", 2, count);
+            assertEquals("Unexpected number of body parts: " + count, 2, count);
 
-            Object content = multipart.getBodyPart(0).getContent();
+            assertTrue("Unexpected Content-Type header: " + multipart.getBodyPart(0).getContentType(), multipart.getBodyPart(0).getContentType().startsWith("text/plain"));
+
+            Object content = multipart.getBodyPart(1).getContent();
             assertTrue("No multipart content", content instanceof Multipart);
             multipart = (Multipart) content;
-            assertTrue("Unexpected Content-Type header.", multipart.getContentType().startsWith("multipart/alternative"));
+            assertTrue("Unexpected Content-Type header: " + multipart.getContentType(), multipart.getContentType().startsWith("multipart/mixed"));
             count = multipart.getCount();
-            assertEquals("Unexpected number of body parts.", 2, count);
+            assertEquals("Unexpected number of body parts: " + count, 2, count);
 
-            assertTrue("Unexpected Content-Type header.", multipart.getBodyPart(0).getContentType().startsWith("text/plain"));
-
-            content = multipart.getBodyPart(1).getContent();
+            content = multipart.getBodyPart(0).getContent();
             assertTrue("No multipart content", content instanceof Multipart);
             multipart = (Multipart) content;
-            assertTrue("Unexpected Content-Type header.", multipart.getContentType().startsWith("multipart/related"));
+            assertTrue("Unexpected Content-Type header: " + multipart.getContentType(), multipart.getContentType().startsWith("multipart/related"));
             count = multipart.getCount();
-            assertEquals("Unexpected number of body parts.", 2, count);
+            assertEquals("Unexpected number of body parts: " + count, 2, count);
 
-            assertTrue("Unexpected Content-Type header.", multipart.getBodyPart(0).getContentType().startsWith("text/html"));
-            assertTrue("Unexpected Content-Type header.", multipart.getBodyPart(1).getContentType().startsWith("image/png"));
+            assertTrue("Unexpected Content-Type header: " + multipart.getBodyPart(0).getContentType(), multipart.getBodyPart(0).getContentType().startsWith("text/html"));
+            assertTrue("Unexpected Content-Type header: " + multipart.getBodyPart(1).getContentType(), multipart.getBodyPart(1).getContentType().startsWith("image/png"));
 
         } catch (Exception e) {
             e.printStackTrace();
