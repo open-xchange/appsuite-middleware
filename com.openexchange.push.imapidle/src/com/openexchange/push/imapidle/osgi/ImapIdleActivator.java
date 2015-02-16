@@ -142,6 +142,7 @@ public class ImapIdleActivator extends HousekeepingActivator {
                         ServiceRegistration<PushManagerService> reg = this.reg;
                         if (null != reg) {
                             reg.unregister();
+                            stopPushManagerSafe();
                             this.reg = null;
                         }
 
@@ -225,12 +226,18 @@ public class ImapIdleActivator extends HousekeepingActivator {
             track(HazelcastConfigurationService.class, new HzConfigTracker(context, configuration, this));
             openTrackers();
         } else {
-
+            // Register PushManagerService instance
             registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, this));
         }
 
         registerService(MailAccountDeleteListener.class, new ImapIdleMailAccountDeleteListener());
         registerService(DeleteListener.class, new ImapIdleDeleteListener());
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        stopPushManagerSafe();
+        super.stopBundle();
     }
 
     @Override
@@ -241,6 +248,16 @@ public class ImapIdleActivator extends HousekeepingActivator {
     @Override
     public <S> boolean removeService(Class<? extends S> clazz) {
         return super.removeService(clazz);
+    }
+
+    /**
+     * Stops the push manager.
+     */
+    static void stopPushManagerSafe() {
+        ImapIdlePushManagerService pushManager = ImapIdlePushManagerService.getInstance();
+        if (null != pushManager) {
+            pushManager.stopAllListeners();
+        }
     }
 
 }

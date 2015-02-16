@@ -2,6 +2,7 @@
 
  - Fix for bug 36605: Set proper message reference when doing a forward from Unified Mail Drafts folder
  - Fix for bug 36236: Determine appropriate "From" address when generating reply/forward version from a mailing-list message
+ - Fix for bug 36719: Orderly stop IMAP-IDLE bundle on shut-down
 
 * 2015-02-15 - thorben.betten@open-xchange.com
 
