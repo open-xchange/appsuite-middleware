@@ -62,6 +62,7 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -73,6 +74,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.collections.PropertizedList;
@@ -89,6 +91,7 @@ import com.openexchange.tools.iterator.SearchIterator;
     @Parameter(name = "columns", description = "The requested fields.")
 }, requestBody = "An Object as described in Search appointments.",
 responseDescription = "An array with appointment data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+@OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class SearchAction extends AppointmentAction {
 
     private static final org.slf4j.Logger LOG =

@@ -59,6 +59,7 @@ import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -66,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -85,6 +87,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the to confirmed appointment.")
 }, requestBody = "The appointment object to delete. The fields for the object are described in Full identifier for an appointment.",
     responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")
+@OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
 public final class ConfirmAction extends AppointmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfirmAction.class);

@@ -58,11 +58,13 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -77,6 +79,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "start", description = "Lower inclusive limit of the queried range as a Date. Only appointments which end on or after this date are returned."),
     @Parameter(name = "end", description = "Upper exclusive limit of the queried range as a Date. Only appointments which start before this date are returned.")
 }, responseDescription = "Response is an array of booleans. Array length is the number of days. Each entry in the array corresponds with one day in the range that was queried, explaining whether there is an appointment on this day or not.")
+@OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class HasAction extends AppointmentAction {
 
     /**

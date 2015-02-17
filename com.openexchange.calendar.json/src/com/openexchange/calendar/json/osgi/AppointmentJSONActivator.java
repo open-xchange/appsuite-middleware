@@ -54,9 +54,14 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.converters.AppointmentIcalResultConverter;
 import com.openexchange.calendar.json.converters.AppointmentResultConverter;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.oauth.provider.AbstractScopeProvider;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.user.UserService;
 
 /**
@@ -81,6 +86,30 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
         registerModule(new AppointmentActionFactory(this), "calendar");
         registerService(ResultConverter.class, new AppointmentResultConverter(this));
         registerService(ResultConverter.class, new AppointmentIcalResultConverter(this));
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(AppointmentActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.CALENDAR.getCapabilityName());
+            }
+        });
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(AppointmentActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.CALENDAR.getCapabilityName());
+            }
+        });
+    }
+
+    private static final class OAuthScopeDescription implements LocalizableStrings {
+        // Application 'xyz' requires following permissions:
+        //  - See all your appointments.
+        //  - ...
+        public static final String READ_ONLY = "See all your appointments.";
+
+        // Application 'xyz' requires following permissions:
+        //  - Create, modify and delete appointments.
+        //  - ...
+        public static final String WRITABLE = "Create, modify and delete appointments.";
     }
 
 }

@@ -71,6 +71,7 @@ import com.openexchange.calendar.json.actions.UpdateAction;
 import com.openexchange.calendar.json.actions.UpdatesAction;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -80,6 +81,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @Module(name = "calendar", description = "Provides access to calendar information.")
+@OAuthModule
 public class AppointmentActionFactory implements AJAXActionServiceFactory {
 
     public static final String OAUTH_READ_SCOPE = "read_calendar";

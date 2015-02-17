@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -69,6 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -86,6 +88,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "timestamp", description = "Timestamp of the updated appointment. If the appointment was modified after the specified timestamp, then the update must fail.")
 }, requestBody = "Appointment object as described in Common object data, Detailed task and appointment data and Detailed appointment data. The field recurrence_id is always present if it is present in the original appointment. The field recurrence_position is present if it is present in the original appointment and only this single appointment should be modified. The field id is not present because it is already included as a parameter. Other fields are present only if modified.",
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated appointment, and maybe errors.")
+@OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
 public final class UpdateAction extends AppointmentAction {
 
     private static final org.slf4j.Logger LOG =

@@ -57,6 +57,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -71,6 +72,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -92,6 +94,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "recurrence_master", description = "Extract the recurrence to several appointments. The default value is false so every appointment of the recurrence will be calculated."),
     @Parameter(name = "showPrivate", optional=true, description = "only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information (since 6.18)")
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted appointments. New and modified appointments are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted appointments (should the ignore parameter be ever implemented) would be identified by objects described in Full identifier for an appointment instead of arrays. Appointment sequencies are broken up into individual appointments and each modified occurrence of a sequence in the requested range is returned separately. The appointments are sorted in ascending order by the field start_date.")
+@OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class UpdatesAction extends AppointmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);
