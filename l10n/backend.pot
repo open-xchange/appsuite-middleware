@@ -72,6 +72,27 @@ msgstr ""
 msgid "No Kerberos delegation ticket found in session."
 msgstr ""
 
+#. final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+#. props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
+#. registerService(TargetService.class, new ModifyThroughDependant(), props);
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:86
+msgid "calendar"
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - See all your appointments.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:107
+msgid "See all your appointments."
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Create, modify and delete appointments.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:112
+msgid "Create, modify and delete appointments."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Calendar"
@@ -1924,17 +1945,21 @@ msgid ""
 "log in."
 msgstr ""
 
+#. label of login form
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
 msgid "Login"
 msgstr ""
 
+#. label of username input field
 #. Password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:91
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
@@ -3624,6 +3649,30 @@ msgstr ""
 #. Invalid OAuth account specified.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:100
 msgid "Invalid OAuth account specified."
+msgstr ""
+
+#. Application "%1$s" wants to access to your data. It requires the following permissions:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:64
+msgid ""
+"Application \"%1$s\" wants to access to your data. It requires the following "
+"permissions:"
+msgstr ""
+
+#. label of deny button
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:67
+msgid "Deny"
+msgstr ""
+
+#. label of allow button
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:70
+msgid "Allow"
+msgstr ""
+
+#. label of password input field
+#. Username
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
+msgid "Username"
 msgstr ""
 
 #. Account not found.
@@ -6545,6 +6594,24 @@ msgstr ""
 msgid "Required  value \"identifier\" was not supplied."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:84
+msgid "reminder"
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Fetch reminders for appointments and tasks.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:103
+msgid "Fetch reminders for appointments and tasks."
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Set or change reminders for appointments and tasks.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:108
+msgid "Set or change reminders for appointments and tasks."
+msgstr ""
+
 #. * Writing the setting %1$s is not permitted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/settings/SettingExceptionMessage.java:69
 msgid "Writing the setting %1$s is not permitted."
@@ -7912,11 +7979,6 @@ msgstr ""
 msgid "Click here to reset your password"
 msgstr ""
 
-#. Username
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
-msgid "Username"
-msgstr ""
-
 #. John Doe shared 7 items with you
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:94
 msgid "%d items"
@@ -8106,6 +8168,24 @@ msgstr ""
 #. You already have such a subscription.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
 msgid "You already have such a subscription."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:79
+msgid "tasks"
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - See all your tasks.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:101
+msgid "See all your tasks."
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Create, modify and delete tasks.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:106
+msgid "Create, modify and delete tasks."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
