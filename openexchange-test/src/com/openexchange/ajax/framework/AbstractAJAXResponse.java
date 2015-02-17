@@ -113,6 +113,10 @@ public abstract class AbstractAJAXResponse extends Assert {
         return response.hasError();
     }
 
+    public boolean hasWarnings() {
+        return response.hasWarnings();
+    }
+
     /**
      * Gets the formatted error message.
      *
