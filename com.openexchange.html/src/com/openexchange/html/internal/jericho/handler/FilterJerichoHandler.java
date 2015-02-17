@@ -781,7 +781,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
 
         htmlBuilder.append('<').append(tagName).append(attrBuilder.toString());
-        if (startTag.isSyntacticalEmptyElementTag()) {
+        if (startTag.isEmptyElementTag() && !startTag.isEndTagForbidden()) {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');

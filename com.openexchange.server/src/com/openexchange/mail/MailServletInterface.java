@@ -607,6 +607,8 @@ public abstract class MailServletInterface implements Closeable {
 
     /**
      * Returns user-specific mail access
+     *
+     * @see #openFor(String)
      */
     public abstract MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException;
 

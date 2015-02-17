@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1138,6 +1138,9 @@ ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt
 # SoftwareChange_Request-2250
 ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
 
+# SoftwareChange_Request-2270
+ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+
 # SoftwareChange_Request-2342
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
@@ -1150,9 +1153,6 @@ fi
 
 # SoftwareChange_Request-2353
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
-
-# SoftwareChange_Request-2379
-ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -1194,6 +1194,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Feb 11 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.6.2 release
+* Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-10
 * Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-02-09
 * Fri Jan 30 2015 Marcus Klein <marcus.klein@open-xchange.com>

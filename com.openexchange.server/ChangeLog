@@ -1,3 +1,35 @@
+* 2015-02-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36735: Pass proper file identifier when re-fetching file meta data after move operation
+
+* 2015-02-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36605: Set proper message reference when doing a forward from Unified Mail Drafts folder
+ - Fix for bug 36236: Determine appropriate "From" address when generating reply/forward version from a mailing-list message
+ - Fix for bug 36719: Orderly stop IMAP-IDLE bundle on shut-down
+ - Fix for bug #36723: Keep parameters intact when performing a multiple action=get
+ - Fix for bug 36729: Safe preparation of a parameterized header + handling for unexpected runtime errors
+
+* 2015-02-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36688: Accept incoming POST's multipart without size restrictions in case 'publish-on-exceeded-quota' is enabled
+
+* 2015-02-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36478: Stick to positive capability "portal" only
+
+* 2015-02-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36333: Ensure file resources stay open while parsing MIME message data
+ - Fix for bug 36585: Signal proper RENAME_FLAG for mail standard folders
+ - Fix for bug 36487: Subscribe folder incl. predecessor folders to the top to not leave a parent folder unsubscribed
+ - Fix for bug 35954: Deal with corrupt BODYSTRUCTURE items in IMAP FETCH response that contain empty multipart sections
+ - Fix for bug 36661: Apply proper sort option to "unified" accounts when performing a search
+
+* 2015-02-11 - choeger@open-xchange.com
+
+ - Fix for bug 36656: SOAP: getContextCapabilities does not work
+
 * 2015-02-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 36288: Don't hide "email1" property, even if the global address book permissions are limited

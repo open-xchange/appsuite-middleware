@@ -91,6 +91,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(GetStructureTest.class);
         mailSuite.addTestSuite(Base64Test.class);
         mailSuite.addTestSuite(AllSeenMailTest.class);
+        mailSuite.addTestSuite(com.openexchange.ajax.mail.MultipleGetTest.class);
 
         /*mailSuite.addTestSuite(AlwaysTest.class);*/
 
@@ -111,6 +112,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTest(new JUnit4TestAdapter(Bug28913Test.class));
         mailSuite.addTestSuite(Bug29437Test.class);
         mailSuite.addTestSuite(Bug34254Test.class);
+        mailSuite.addTestSuite(Bug36333Test.class);
 
         mailSuite.addTestSuite(MaxMailSizeTest.class);
         mailSuite.addTestSuite(MSISDNAddressTest.class);

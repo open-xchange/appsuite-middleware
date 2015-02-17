@@ -59,6 +59,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
@@ -67,7 +68,6 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
-import com.openexchange.unifiedinbox.UnifiedInboxUID;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 
 /**

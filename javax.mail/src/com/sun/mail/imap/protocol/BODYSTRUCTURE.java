@@ -239,6 +239,95 @@ public class BODYSTRUCTURE implements Item {
 
 	    // SIMS 4.0 returns NIL for a Content-Type of "binary", fix it here
 	    if (type == null) {
+            if ("mixed".equalsIgnoreCase(subtype)) {
+                // Empty multipart
+                type = "multipart";
+                processedType = MULTI;
+                // setup bodies.
+                bodies = new BODYSTRUCTURE[0];
+
+                if (r.readByte() == ')') { // done
+                    if (parseDebug)
+                        System.out.println("DEBUG IMAP: parse DONE");
+                    return;
+                }
+
+                // Else, we have extension data
+
+                if (parseDebug)
+                    System.out.println("DEBUG IMAP: parsing extension data");
+                // Body parameters
+                cParams = parseParameters(r);
+                if (r.readByte() == ')') { // done
+                    if (parseDebug)
+                        System.out.println("DEBUG IMAP: body parameters DONE");
+                    return;
+                }
+
+                // Disposition
+                byte b = r.readByte();
+                if (b == '(') {
+                    if (parseDebug)
+                        System.out.println("DEBUG IMAP: parse disposition");
+                    disposition = r.readString();
+                    if (parseDebug)
+                        System.out.println("DEBUG IMAP: disposition " +
+                                           disposition);
+                    dParams = parseParameters(r);
+                    if (r.readByte() != ')') // eat the end ')'
+                        throw new ParsingException(
+                                                   "BODYSTRUCTURE parse error: " +
+                                                   "missing ``)'' at end of disposition in multipart");
+                    if (parseDebug)
+                        System.out.println("DEBUG IMAP: disposition DONE");
+                } else if (b == 'N' || b == 'n') {
+                    if (parseDebug)
+                        System.out.println("DEBUG IMAP: disposition NIL");
+                    r.skip(2); // skip 'NIL'
+                } else {
+                    throw new ParsingException(
+                                               "BODYSTRUCTURE parse error: " +
+                                               type + "/" + subtype + ": " +
+                                               "bad multipart disposition, b " + b);
+                }
+
+                // RFC3501 allows no body-fld-lang after body-fld-disp,
+                // even though RFC2060 required it
+                if ((b = r.readByte()) == ')') {
+                    if (parseDebug)
+                        System.out.println("DEBUG IMAP: no body-fld-lang");
+                    return; // done
+                }
+
+                if (b != ' ')
+                    throw new ParsingException(
+                                               "BODYSTRUCTURE parse error: " +
+                                               "missing space after disposition");
+
+                // Language
+                if (r.peekByte() == '(') { // a list follows
+                    language = r.readStringList();
+                    if (parseDebug)
+                        System.out.println(
+                                           "DEBUG IMAP: language len " + language.length);
+                } else {
+                    String l = r.readString();
+                    if (l != null) {
+                        String[] la = { l };
+                        language = la;
+                        if (parseDebug)
+                            System.out.println("DEBUG IMAP: language " + l);
+                    }
+                }
+
+                // RFC3501 defines an optional "body location" next,
+                // but for now we ignore it along with other extensions.
+
+                // Throw away any further extension data
+                while (r.readByte() == ' ')
+                    parseBodyExtension(r);
+                return;
+            }
 		type = "application";
 		subtype = "octet-stream";
 	    }

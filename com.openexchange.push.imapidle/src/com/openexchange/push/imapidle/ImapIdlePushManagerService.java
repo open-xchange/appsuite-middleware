@@ -50,6 +50,7 @@
 package com.openexchange.push.imapidle;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
@@ -245,6 +246,21 @@ public final class ImapIdlePushManagerService implements PushManagerService {
             }
         }
         return null;
+    }
+
+    /**
+     * Stops all listeners.
+     */
+    public void stopAllListeners() {
+        for (Iterator<ImapIdlePushListener> it = listeners.values().iterator(); it.hasNext();) {
+            ImapIdlePushListener listener = it.next();
+            try {
+                listener.cancel(false);
+            } catch (Exception e) {
+                // Ignore
+            }
+            it.remove();
+        }
     }
 
 }

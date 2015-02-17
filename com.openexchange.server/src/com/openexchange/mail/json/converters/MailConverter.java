@@ -68,6 +68,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -476,29 +477,48 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
     }
 
+    private void convertSingle4Get(MailMessage mail, AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException {
+        JSONObject jMail = convertSingle4Get(mail, ParamContainer.getInstance(requestData), session, getMailInterface(requestData, session));
+        if (null == jMail) {
+            result.setResultObject(null, "native");
+            result.setType(ResultType.DIRECT);
+        } else {
+            result.setResultObject(jMail, "json");
+        }
+    }
+
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
-    private void convertSingle4Get(final MailMessage mail, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
-        String tmp = requestData.getParameter(Mail.PARAMETER_EDIT_DRAFT);
+    /**
+     * Converts given mail
+     *
+     * @param mail The mail
+     * @param paramContainer The parameter container
+     * @param session The associated session
+     * @param mailInterface The mail interface
+     * @throws OXException If operation fails
+     */
+    public JSONObject convertSingle4Get(MailMessage mail, ParamContainer paramContainer, ServerSession session, MailServletInterface mailInterface) throws OXException {
+        String tmp = paramContainer.getStringParam(Mail.PARAMETER_EDIT_DRAFT);
         final boolean editDraft = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
-        tmp = requestData.getParameter(Mail.PARAMETER_VIEW);
+        tmp = paramContainer.getStringParam(Mail.PARAMETER_VIEW);
         final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
-        tmp = requestData.getParameter(Mail.PARAMETER_UNSEEN);
+        tmp = paramContainer.getStringParam(Mail.PARAMETER_UNSEEN);
         final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
-        tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
+        tmp = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
         final TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
-        tmp = requestData.getParameter("token");
+        tmp = paramContainer.getStringParam("token");
         final boolean token = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
-        tmp = requestData.getParameter("ttlMillis");
+        tmp = paramContainer.getStringParam("ttlMillis");
         int ttlMillis;
         try {
             ttlMillis = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
         } catch (final NumberFormatException e) {
             ttlMillis = -1;
         }
-        tmp = requestData.getParameter("embedded");
+        tmp = paramContainer.getStringParam("embedded");
         final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
-        tmp = requestData.getParameter("ignorable");
+        tmp = paramContainer.getStringParam("ignorable");
         final MimeFilter mimeFilter;
         if (com.openexchange.java.Strings.isEmpty(tmp)) {
             mimeFilter = null;
@@ -532,7 +552,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          * Overwrite settings with request's parameters
          */
         final DisplayMode displayMode = AbstractMailAction.detectDisplayMode(editDraft, view, usmNoSave);
-        final String folderPath = requestData.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        final String folderPath = paramContainer.checkStringParam(AJAXServlet.PARAMETER_FOLDERID);
         /*
          * Check for possible unseen action
          */
@@ -543,11 +563,10 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             final int unreadMsgs = mail.getUnreadMessages();
             mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
         }
-        final MailServletInterface mailInterface = getMailInterface(requestData, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
-        final int maxContentSize = AJAXRequestDataTools.parseIntParameter(requestData.getParameter(Mail.PARAMETER_MAX_SIZE), -1);
-        final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(requestData.getParameter("exact_length"));
-        final JSONObject jMail;
+        final int maxContentSize = AJAXRequestDataTools.parseIntParameter(paramContainer.getStringParam(Mail.PARAMETER_MAX_SIZE), -1);
+        final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("exact_length"));
+        JSONObject jMail;
         try {
             jMail = MessageWriter.writeMailMessage(
                 mail.getAccountId(),
@@ -573,8 +592,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 }
             } else if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.equals(e)) {
                 final StringBuilder sb = new StringBuilder("Requested mail could not be found  (");
-                sb.append("folder=").append(requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-                sb.append(", id=").append(requestData.getParameter(AJAXServlet.PARAMETER_ID));
+                sb.append("folder=").append(paramContainer.getStringParam(AJAXServlet.PARAMETER_FOLDERID));
+                sb.append(", id=").append(paramContainer.getStringParam(AJAXServlet.PARAMETER_ID));
                 sb.append(", user=").append(session.getUserId());
                 sb.append(", context=").append(session.getContextId()).append(')');
                 sb.append("Most likely this is caused by concurrent access of multiple clients ");
@@ -593,7 +612,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
         // Check for special view=document
         if (DisplayMode.DOCUMENT.isIncluded(displayMode)) {
-            HttpServletResponse resp = requestData.optHttpServletResponse();
+            HttpServletResponse resp = paramContainer.getHttpServletResponse();
             if (resp != null) {
                 try {
                     String htmlContent = jMail.getJSONArray(MailJSONField.ATTACHMENTS.getKey()).getJSONObject(0).getString(MailJSONField.CONTENT.getKey());
@@ -603,9 +622,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     PrintWriter writer = resp.getWriter();
                     writer.write(htmlContent);
                     writer.flush();
-                    result.setResultObject(null, "native");
-                    result.setType(ResultType.DIRECT);
-                    return;
+                    jMail = null;
                 } catch (JSONException e) {
                     throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 } catch (IOException e) {
@@ -614,8 +631,6 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             }
         }
 
-        //  Common handling
-        result.setResultObject(jMail, "json");
         if (doUnseen) {
             /*-
              * Leave mail as unseen
@@ -624,9 +639,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
              */
             final String uid;
             {
-                String tmp2 = requestData.getParameter(AJAXServlet.PARAMETER_ID);
+                String tmp2 = paramContainer.getStringParam(AJAXServlet.PARAMETER_ID);
                 if (null == tmp2) {
-                    tmp2 = requestData.getParameter(Mail.PARAMETER_MESSAGE_ID);
+                    tmp2 = paramContainer.getStringParam(Mail.PARAMETER_MESSAGE_ID);
                     if (null == tmp2) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_ID);
                     }
@@ -637,6 +652,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             }
             mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
         }
+
+        // Common handling
+        return jMail;
     }
 
     private void convertSingle(final MailMessage mail, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {

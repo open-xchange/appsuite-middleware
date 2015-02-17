@@ -1,3 +1,9 @@
+open-xchange-spamhandler-cloudmark (7.6.2-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.2 release
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Wed, 11 Feb 2015 15:43:29 +0100
+
 open-xchange-spamhandler-cloudmark (7.6.2-6) stable; urgency=low
 
   * Sixth candidate for 7.6.2 release
@@ -39,6 +45,12 @@ open-xchange-spamhandler-cloudmark (7.6.2-0) unstable; urgency=medium
   * prepare for 7.6.2 release
 
  -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Wed, 17 Sep 2014 12:36:36 +0200
+
+open-xchange-spamhandler-cloudmark (7.6.1-19) stable; urgency=low
+
+  * Build for patch 2015-02-10
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Fri, 06 Feb 2015 11:24:44 +0100
 
 open-xchange-spamhandler-cloudmark (7.6.1-18) stable; urgency=low
 

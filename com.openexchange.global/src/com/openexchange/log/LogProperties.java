@@ -49,6 +49,7 @@
 
 package com.openexchange.log;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,6 +68,7 @@ import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
 import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -292,6 +294,10 @@ public final class LogProperties {
          * com.openexchange.login.version
          */
         LOGIN_VERSION("com.openexchange.login.version"),
+        /**
+         * com.openexchange.system.tempfile
+         */
+        TEMP_FILE("com.openexchange.system.tempfile"),
 
         ;
 
@@ -483,12 +489,67 @@ public final class LogProperties {
     }
 
     /**
+     * Gets the temporary file property.
+     *
+     * @return The temporary file property or <code>null</code>
+     */
+    public static String[] getTempFileProperty() {
+        String str = MDC.get(Name.TEMP_FILE.getName());
+        return null == str ? null : Strings.splitByComma(str);
+    }
+
+    /**
+     * Appends temporary file.
+     *
+     * @param tempFile The temporary file
+     */
+    public static void appendTempFileProperty(File tempFile) {
+        if (null == tempFile) {
+            return;
+        }
+        appendTempFileProperty(tempFile.getPath());
+    }
+
+    /**
+     * Appends temporary file.
+     *
+     * @param tempFilePath The path of the temporary file
+     */
+    public static void appendTempFileProperty(String tempFilePath) {
+        if (null == tempFilePath) {
+            return;
+        }
+        String prev = MDC.get(Name.TEMP_FILE.getName());
+        MDC.put(Name.TEMP_FILE.getName(), null == prev ? tempFilePath : new StringBuffer(prev).append(',').append(tempFilePath).toString());
+    }
+
+    /**
+     * Appends denoted property
+     *
+     * @param name The name
+     */
+    public static void append(LogProperties.Name name, String value) {
+        if (null == name || null == value) {
+            return;
+        }
+        String prev = MDC.get(name.getName());
+        MDC.put(name.getName(), null == prev ? value : new StringBuffer(prev).append(',').append(value).toString());
+    }
+
+    /**
      * Removes denoted property
      *
      * @param name The name
      */
     public static void remove(final LogProperties.Name name) {
         removeProperty(name);
+    }
+
+    /**
+     * Removes temporary file property
+     */
+    public static void removeTempFileProperty() {
+        MDC.remove(Name.TEMP_FILE.getName());
     }
 
     /**

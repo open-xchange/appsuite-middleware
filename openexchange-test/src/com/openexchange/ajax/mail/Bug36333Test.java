@@ -55,6 +55,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,6 +71,7 @@ import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Bug36333Test}
@@ -210,6 +212,74 @@ public class Bug36333Test extends AbstractMailTest {
             String strBody = response.getStringBody();
             assertNotNull(strBody);
             assertTrue(strBody.startsWith("{\\rtf1"));
+        }
+
+        if ((folderID != null) && (mailID != null)) {
+            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
+            assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
+        }
+    }
+
+    public void testBug36333_3() throws OXException, IOException, JSONException {
+        JSONArray json;
+        {
+            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(
+                MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR),
+                "bug36333_3.eml")), "UTF-8");
+            char[] buf = new char[512];
+            int length;
+            StringBuilder sb = new StringBuilder();
+            while ((length = streamReader.read(buf)) != -1) {
+                sb.append(buf, 0, length);
+            }
+            streamReader.close();
+            InputStream inputStream = new ByteArrayInputStream(
+                TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
+            final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
+            final ImportMailResponse importResp = client.execute(importMailRequest);
+            json = (JSONArray) importResp.getData();
+            fmid = importResp.getIds();
+        }
+
+        int err = 0;
+        for (int i = 0; i < json.length(); i++) {
+            JSONObject jo = json.getJSONObject(i);
+            if (jo.has("Error")) {
+                err++;
+            }
+        }
+
+        if (err != 0) {
+            fail("Error importing mail");
+        }
+
+        String mailID = json.getJSONObject(0).getString("id");
+        String folderID = json.getJSONObject(0).getString("folder_id");
+
+        {
+            GetResponse response = Executor.execute(getSession(), new GetRequest(folderID, mailID, true, true));
+            Object data = response.getData();
+            assertNotNull(data);
+
+            JSONObject jResponse = (JSONObject) data;
+
+            JSONArray jAttachments = jResponse.getJSONArray("body");
+            assertEquals(2, jAttachments.length());
+
+            JSONObject jAttachment = jAttachments.getJSONObject(1);
+            assertEquals("multipart/mixed", jAttachment.getJSONObject("headers").getJSONObject("content-type").getString("type"));
+        }
+
+        {
+            AttachmentResponse response = Executor.execute(getSession(), new AttachmentRequest(new String[] {folderID, mailID, "2.2"}).setFromStructure(true));
+
+            byte[] binBody = response.getBinaryBody();
+            assertNotNull(binBody);
+
+            String base64 = Base64.encodeBase64String(binBody);
+            binBody = null;
+            assertTrue("Unexpected content: " + Strings.abbreviate(base64, 32), base64.startsWith("JVBERi0xLjUNJeLjz9MN"));
+            assertTrue("Unexpected content: " + base64.substring(base64.length() - 32, base64.length()), base64.endsWith("DSUlRU9GDQ=="));
         }
 
         if ((folderID != null) && (mailID != null)) {
