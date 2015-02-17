@@ -64,6 +64,7 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;
+import org.apache.commons.fileupload.FileUploadBase.FileUploadIOException;
 import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -348,6 +349,18 @@ public final class UploadUtility {
                 throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
             }
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
+        } catch (FileUploadIOException e) {
+            // Might wrap a size-limit-exceeded error
+            Throwable cause = e.getCause();
+            if (cause instanceof FileSizeLimitExceededException) {
+                FileSizeLimitExceededException exc = (FileSizeLimitExceededException) cause;
+                throw UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            if (cause instanceof SizeLimitExceededException) {
+                SizeLimitExceededException exc = (SizeLimitExceededException) cause;
+                throw UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true);
+            }
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         } catch (IOException e) {
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         } catch (RuntimeException e) {
