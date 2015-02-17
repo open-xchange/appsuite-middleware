@@ -67,6 +67,8 @@ import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
+import com.openexchange.groupware.reminder.json.ReminderActionFactory;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,6 +83,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "id", description = "The ID of the reminder whose date shall be changed.")
 }, requestBody = "The JSON representation of the reminder; mainly containing the field \u201calarm\u201d which provides the new reminder date. E.g. { \"alarm\": 1283418027381 }",
 responseDescription = "The JSON representation of the updated reminder.")
+@OAuthAction(ReminderActionFactory.OAUTH_WRITE_SCOPE)
 public final class RemindAgainAction extends AbstractReminderAction {
 
     private static final org.slf4j.Logger LOG =

@@ -51,9 +51,14 @@ package com.openexchange.groupware.reminder.osgi;
 
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.reminder.json.ReminderActionFactory;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.oauth.provider.AbstractScopeProvider;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
@@ -68,14 +73,39 @@ public class ReminderActivator extends AJAXModuleActivator {
     }
 
     @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {AppointmentSqlFactoryService.class};
+    }
+
+    @Override
     protected void startBundle() throws Exception {
         rememberTracker(new ServiceTracker<TargetService, TargetService>(context, TargetService.class.getName(), new TargetRegistryCustomizer(context)));
         openTrackers();
         registerModule(new ReminderActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "reminder");
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ReminderActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.TASKS.getCapabilityName()) || capabilities.contains(Permission.CALENDAR.getCapabilityName());
+            }
+        });
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ReminderActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.TASKS.getCapabilityName()) || capabilities.contains(Permission.CALENDAR.getCapabilityName());
+            }
+        });
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {AppointmentSqlFactoryService.class};
+    private static final class OAuthScopeDescription implements LocalizableStrings {
+        // Application 'xyz' requires following permissions:
+        //  - Fetch reminders for appointments and tasks.
+        //  - ...
+        public static final String READ_ONLY = "Fetch reminders for appointments and tasks.";
+
+        // Application 'xyz' requires following permissions:
+        //  - Set or change reminders for appointments and tasks.
+        //  - ...
+        public static final String WRITABLE = "Set or change reminders for appointments and tasks.";
     }
+
 }

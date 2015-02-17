@@ -68,6 +68,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
+import com.openexchange.groupware.reminder.json.ReminderActionFactory;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -82,6 +84,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "end", description = "The End date of the reminder range.")
 }, responseDescription = "An Array with all reminders which are scheduled until the specified time. Each reminder is described in Reminder response.")
+@OAuthAction(ReminderActionFactory.OAUTH_READ_SCOPE)
 public final class RangeAction extends AbstractReminderAction {
 
     private static final org.slf4j.Logger LOG =

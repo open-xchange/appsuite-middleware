@@ -65,6 +65,8 @@ import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
+import com.openexchange.groupware.reminder.json.ReminderActionFactory;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -77,6 +79,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "An object with the field \"id\" or an array of objects with the field \"id\".",
 responseDescription = "An JSON array with the ids that was not deleted.")
+@OAuthAction(ReminderActionFactory.OAUTH_WRITE_SCOPE)
 public final class DeleteAction extends AbstractReminderAction {
 
     private static final org.slf4j.Logger LOG =
