@@ -65,7 +65,8 @@ import org.junit.runners.Suite.SuiteClasses;
     AuthorizationEndpointTest.class,
     TokenEndpointTest.class,
     ProtocolFlowTest.class,
-    RevokeTokensTest.class
+    RevokeTokensTest.class,
+    FolderTreeTest.class
 })
 public class OAuthTests {
 
