@@ -64,6 +64,8 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.RootRequest;
+import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
+import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXRequest;
@@ -71,6 +73,9 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.test.FolderTestManager;
@@ -102,7 +107,7 @@ public class FolderTreeTest extends AbstractOAuthTest {
 
     private int privateTaskFolderId;
 
-    private int privateAppointmentFolderId;
+    private int privateCalendarFolderId;
 
     private int privateContactFolderId;
 
@@ -112,7 +117,7 @@ public class FolderTreeTest extends AbstractOAuthTest {
 
     private FolderObject sharedContactFolder;
 
-    private FolderObject sharedAppointmentFolder;
+    private FolderObject sharedCalendarFolder;
 
     private FolderObject sharedTaskFolder;
 
@@ -126,10 +131,10 @@ public class FolderTreeTest extends AbstractOAuthTest {
         values = ajaxClient.getValues();
         int userId = values.getUserId();
         privateContactFolderId = values.getPrivateContactFolder();
-        privateAppointmentFolderId = values.getPrivateAppointmentFolder();
+        privateCalendarFolderId = values.getPrivateAppointmentFolder();
         privateTaskFolderId = values.getPrivateTaskFolder();
         privateContactFolder = ftm.generatePrivateFolder("oauth provider folder tree test - private contacts " + System.currentTimeMillis(), FolderObject.CONTACT, privateContactFolderId, userId);
-        privateCalendarFolder = ftm.generatePrivateFolder("oauth provider folder tree test - private calendar " + System.currentTimeMillis(), FolderObject.CALENDAR, privateAppointmentFolderId, userId);
+        privateCalendarFolder = ftm.generatePrivateFolder("oauth provider folder tree test - private calendar " + System.currentTimeMillis(), FolderObject.CALENDAR, privateCalendarFolderId, userId);
         privateTaskFolder = ftm.generatePrivateFolder("oauth provider folder tree test - private tasks " + System.currentTimeMillis(), FolderObject.TASK, privateTaskFolderId, userId);
         publicContactFolder = ftm.generatePublicFolder("oauth provider folder tree test - public contacts " + System.currentTimeMillis(), FolderObject.CONTACT, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId);
         publicCalendarFolder = ftm.generatePublicFolder("oauth provider folder tree test - public calendar " + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId);
@@ -140,9 +145,9 @@ public class FolderTreeTest extends AbstractOAuthTest {
         ajaxClient2 = new AJAXClient(User.User2);
         ftm2 = new FolderTestManager(ajaxClient2);
         sharedContactFolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared contacts " + System.currentTimeMillis(), FolderObject.CONTACT, ajaxClient2.getValues().getPrivateContactFolder(), ajaxClient2.getValues().getUserId(), userId);
-        sharedAppointmentFolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared calendar " + System.currentTimeMillis(), FolderObject.CALENDAR, ajaxClient2.getValues().getPrivateAppointmentFolder(), ajaxClient2.getValues().getUserId(), userId);
+        sharedCalendarFolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared calendar " + System.currentTimeMillis(), FolderObject.CALENDAR, ajaxClient2.getValues().getPrivateAppointmentFolder(), ajaxClient2.getValues().getUserId(), userId);
         sharedTaskFolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared tasks " + System.currentTimeMillis(), FolderObject.TASK, ajaxClient2.getValues().getPrivateTaskFolder(), ajaxClient2.getValues().getUserId(), userId);
-        ftm2.insertFoldersOnServer(new FolderObject[] { sharedContactFolder, sharedAppointmentFolder, sharedTaskFolder });
+        ftm2.insertFoldersOnServer(new FolderObject[] { sharedContactFolder, sharedCalendarFolder, sharedTaskFolder });
     }
 
     @Test
@@ -160,7 +165,7 @@ public class FolderTreeTest extends AbstractOAuthTest {
         // expect private folders
         expectedFolderIds.clear();
         expectedFolderIds.add(privateContactFolderId);
-        expectedFolderIds.add(privateAppointmentFolderId);
+        expectedFolderIds.add(privateCalendarFolderId);
         expectedFolderIds.add(privateTaskFolderId);
 
         List<FolderObject> privateFolders = listFolders(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
@@ -173,8 +178,8 @@ public class FolderTreeTest extends AbstractOAuthTest {
             if (objectID == privateContactFolderId) {
                 request = new ListRequest(EnumAPI.OX_NEW, privateContactFolderId);
                 expectedFolderIds.add(privateContactFolder.getObjectID());
-            } else if (objectID == privateAppointmentFolderId) {
-                request = new ListRequest(EnumAPI.OX_NEW, privateAppointmentFolderId);
+            } else if (objectID == privateCalendarFolderId) {
+                request = new ListRequest(EnumAPI.OX_NEW, privateCalendarFolderId);
                 expectedFolderIds.add(privateCalendarFolder.getObjectID());
             } else if (objectID == privateTaskFolderId) {
                 request = new ListRequest(EnumAPI.OX_NEW, privateTaskFolderId);
@@ -205,10 +210,57 @@ public class FolderTreeTest extends AbstractOAuthTest {
         Assert.assertNotNull(client2Folder);
         expectedFolderIds.clear();
         expectedFolderIds.add(sharedContactFolder.getObjectID());
-        expectedFolderIds.add(sharedAppointmentFolder.getObjectID());
+        expectedFolderIds.add(sharedCalendarFolder.getObjectID());
         expectedFolderIds.add(sharedTaskFolder.getObjectID());
         Assert.assertTrue(collectFolderIds(new ListRequest(EnumAPI.OX_NEW, "u:" + ajaxClient2.getValues().getUserId())).containsAll(expectedFolderIds));
     }
+
+    @Test
+    public void testAllVisibleFoldersForContacts() throws Exception {
+        VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, ContactContentType.getInstance().toString()));
+        Set<Integer> expectedFolderIds = new HashSet<>();
+        expectedFolderIds.add(privateContactFolderId);
+        expectedFolderIds.add(privateContactFolder.getObjectID());
+        Assert.assertTrue(collectFolderIds(response.getPrivateFolders()).containsAll(expectedFolderIds));
+        expectedFolderIds.clear();
+        expectedFolderIds.add(publicContactFolder.getObjectID());
+        Assert.assertTrue(collectFolderIds(response.getPublicFolders()).containsAll(expectedFolderIds));
+        expectedFolderIds.clear();
+        expectedFolderIds.add(sharedContactFolder.getObjectID());
+        Assert.assertTrue(collectFolderIds(response.getSharedFolders()).containsAll(expectedFolderIds));
+    }
+
+    @Test
+    public void testAllVisibleFoldersForCalendar() throws Exception {
+        VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, CalendarContentType.getInstance().toString()));
+        Set<Integer> expectedFolderIds = new HashSet<>();
+        expectedFolderIds.add(privateCalendarFolderId);
+        expectedFolderIds.add(privateCalendarFolder.getObjectID());
+        Assert.assertTrue(collectFolderIds(response.getPrivateFolders()).containsAll(expectedFolderIds));
+        expectedFolderIds.clear();
+        expectedFolderIds.add(publicCalendarFolder.getObjectID());
+        Assert.assertTrue(collectFolderIds(response.getPublicFolders()).containsAll(expectedFolderIds));
+        expectedFolderIds.clear();
+        expectedFolderIds.add(sharedCalendarFolder.getObjectID());
+        Assert.assertTrue(collectFolderIds(response.getSharedFolders()).containsAll(expectedFolderIds));
+    }
+
+    @Test
+    public void testAllVisibleFoldersForTasks() throws Exception {
+        VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, TaskContentType.getInstance().toString()));
+        Set<Integer> expectedFolderIds = new HashSet<>();
+        expectedFolderIds.add(privateTaskFolderId);
+        expectedFolderIds.add(privateTaskFolder.getObjectID());
+        Assert.assertTrue(collectFolderIds(response.getPrivateFolders()).containsAll(expectedFolderIds));
+        expectedFolderIds.clear();
+        expectedFolderIds.add(publicTaskFolder.getObjectID());
+        Assert.assertTrue(collectFolderIds(response.getPublicFolders()).containsAll(expectedFolderIds));
+        expectedFolderIds.clear();
+        expectedFolderIds.add(sharedTaskFolder.getObjectID());
+        Assert.assertTrue(collectFolderIds(response.getSharedFolders()).containsAll(expectedFolderIds));
+    }
+
+    // TODO: test with limited scopes
 
     private List<FolderObject> listFolders(AJAXRequest<ListResponse> request) throws OXException, IOException, JSONException {
         ListResponse response = client.execute(request);
@@ -226,6 +278,10 @@ public class FolderTreeTest extends AbstractOAuthTest {
 
     private Set<Integer> collectFolderIds(List<FolderObject> folders) {
         Iterator<FolderObject> it = folders.iterator();
+        return collectFolderIds(it);
+    }
+
+    private Set<Integer> collectFolderIds(Iterator<FolderObject> it) {
         Set<Integer> folderIds = new HashSet<>();
         while (it.hasNext()) {
             folderIds.add(it.next().getObjectID());
