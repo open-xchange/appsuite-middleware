@@ -95,7 +95,8 @@ public class PortableID extends ID implements CustomPortable {
      * @param id The non portable ID to use as base for this PortableID.
      */
     public PortableID(ID id) {
-        super(id.getProtocol(), id.getComponent(), id.getUser(), id.getContext(), id.getResource());
+        //call id.toString() instead of id.getCachedStringRepresentation to make sure we cache in the original and this instance
+        super(id.getProtocol(), id.getComponent(), id.getUser(), id.getContext(), id.getResource(), id.toString());
     }
 
     /**
@@ -167,6 +168,7 @@ public class PortableID extends ID implements CustomPortable {
         user = idComponents.user;
         context = idComponents.context;
         resource = idComponents.resource;
+        cachedStringRepresentation = idString;
         sanitize();
         validate();
     }

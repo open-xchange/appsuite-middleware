@@ -49,9 +49,8 @@
 
 package com.openexchange.realtime.packet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import java.lang.reflect.Field;
 import java.util.concurrent.locks.Lock;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -64,7 +63,7 @@ import org.junit.Test;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class IDTest {
-    
+
     @BeforeClass
     public static void setUp() {
         ID.ID_MANAGER_REF.set(new IDManager());
@@ -86,7 +85,7 @@ public class IDTest {
         ID clonedID = new ID(newID.toString());
         assertEquals(newID, clonedID);
     }
-    
+
     @Test
     public void testSyntheticIDFromToString() {
         String original = "synthetic.office://operations@premium/66499.62446";
@@ -100,7 +99,7 @@ public class IDTest {
         ID clonedID = new ID(realEntity.toString());
         assertEquals(realEntity, clonedID);
     }
-    
+
     @Test
     public void testSyntheticIDToGeneralString() {
         String original = "synthetic.office://operations@premium/66499.62446";
@@ -109,7 +108,7 @@ public class IDTest {
         ID clonedID = new ID(syntheticEntity.toString());
         assertEquals(syntheticEntity, clonedID);
     }
-    
+
     @Test
     public void testStringConstructor() {
         String idString = "ox.some.component://some.body@context/762d2d9b-a949-418a-ac11-645a5b05038f";
@@ -121,7 +120,7 @@ public class IDTest {
         ID clonedID = new ID(id.toString());
         assertEquals(id, clonedID);
     }
-    
+
     @Test
     public void testRealIDFromToString() {
         String original = "ox://francisco.laguna@premium/20d39asd9da93249f009d";
@@ -135,7 +134,7 @@ public class IDTest {
         ID clonedID = new ID(realEntity.toString());
         assertEquals(realEntity, clonedID);
     }
-    
+
     @Test
     public void testRealIDToGeneralString() {
         String original = "ox://francisco.laguna@premium/20d39asd9da93249f009d";
@@ -144,7 +143,7 @@ public class IDTest {
         ID clonedID = new ID(realEntity.toString());
         assertEquals(realEntity, clonedID);
     }
-    
+
     @Test
     public void testCallIDFromToString() {
         String original = "call://356c4ad6a4af46948f9703217a1f5a2d@internal";
@@ -189,16 +188,60 @@ public class IDTest {
     public void testIDWithDefaultContext() {
         new ID("thorben");
     }
-    
+
     @Test
     public void testIDLocking() throws Exception {
         ID id1 = new ID("protocol", "component", "user", "context", "resource");
         ID id2 = new ID("protocol", "component", "user", "context", "resource");
         assertEquals("IDs were not equal", id1, id2);
-        
+
         Lock lock1 = id1.getLock("scope");
         Lock lock2 = id2.getLock("scope");
         assertTrue("Locks were not identical", lock1 == lock2);
     }
+
+    @Test
+    public void testToString() throws Exception {
+        String original = "ox://francisco.laguna@premium/20d39asd9da93249f009d";
+        ID id = new ID(original);
+        assertFalse(representationInSync(id));
+        id.toString();
+        assertTrue(representationInSync(id));
+
+        id.setComponent("changedComponent");
+        assertFalse(representationInSync(id));
+        id.toString();
+        assertTrue(representationInSync(id));
+
+        id.setContext("changedContext");
+        assertFalse(representationInSync(id));
+        id.toString();
+        assertTrue(representationInSync(id));
+
+        id.setProtocol("changedProtocol");
+        assertFalse(representationInSync(id));
+        id.toString();
+        assertTrue(representationInSync(id));
+
+        id.setResource("changedResource");
+        assertFalse(representationInSync(id));
+        id.toString();
+        assertTrue(representationInSync(id));
+
+        id.setUser("changedUser");
+        assertFalse(representationInSync(id));
+        id.toString();
+        assertTrue(representationInSync(id));
+
+        assertEquals("changedProtocol.changedComponent://changedUser@changedContext/changedResource", id.toString());
+
+
+    }
+
+     private boolean representationInSync(ID id) throws Exception {
+         Field loopMap = ID.class.getDeclaredField("stringRepresentationInSync");
+         loopMap.setAccessible(true);
+         return loopMap.getBoolean(id);
+     }
 
 }
