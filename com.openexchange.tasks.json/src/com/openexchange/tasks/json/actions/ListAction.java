@@ -66,7 +66,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -82,6 +84,7 @@ import com.openexchange.tools.iterator.SearchIterators;
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for tasks are defined in Common object data, Detailed task and appointment data and Detailed task data. The alias \"list\" uses the predefined columnset [20, 1, 5, 2, 4, 209, 301, 101, 200, 309, 201, 202, 102].")
 }, requestBody = "An array of with object IDs of requested tasks. ",
 responseDescription = "Response with timestamp: An object containing all data of the requested task. The fields of the object are listed in Common object data, Detailed task and appointment data and Detailed task data. The field id is not included. ")
+@OAuthAction(TaskActionFactory.OAUTH_READ_SCOPE)
 public class ListAction extends TaskAction {
 
     /**

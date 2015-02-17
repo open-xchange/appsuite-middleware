@@ -51,7 +51,12 @@ package com.openexchange.tasks.json.osgi;
 
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.oauth.provider.AbstractScopeProvider;
+import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.converters.TaskIcalResultConverter;
 import com.openexchange.tasks.json.converters.TaskResultConverter;
@@ -74,6 +79,31 @@ public class TaskJSONActivator extends AJAXModuleActivator {
         registerModule(new TaskActionFactory(this), "tasks");
         registerService(ResultConverter.class, new TaskResultConverter());
         registerService(ResultConverter.class, new TaskIcalResultConverter(this));
+
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(TaskActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.TASKS.getCapabilityName());
+            }
+        });
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(TaskActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.TASKS.getCapabilityName());
+            }
+        });
+    }
+
+    private static final class OAuthScopeDescription implements LocalizableStrings {
+        // Application 'xyz' requires following permissions:
+        //  - See all your tasks.
+        //  - ...
+        public static final String READ_ONLY = "See all your tasks.";
+
+        // Application 'xyz' requires following permissions:
+        //  - Create, modify and delete tasks.
+        //  - ...
+        public static final String WRITABLE = "Create, modify and delete tasks.";
     }
 
 }

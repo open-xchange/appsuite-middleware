@@ -64,7 +64,9 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -82,6 +84,7 @@ import com.openexchange.tools.iterator.SearchIterators;
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
 }, responseDescription = "An array with task data. Each array element describes one task and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+@OAuthAction(TaskActionFactory.OAUTH_READ_SCOPE)
 public class AllAction extends TaskAction {
 
     /**

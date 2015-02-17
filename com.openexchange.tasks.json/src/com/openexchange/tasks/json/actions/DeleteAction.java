@@ -62,7 +62,9 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 
 
@@ -76,6 +78,7 @@ import com.openexchange.tasks.json.TaskRequest;
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted tasks.")
 }, requestBody = "An object in the field \"id\" and \"folder\".",
 responseDescription = "An array with object IDs of tasks which were modified after the specified timestamp and were therefore not deleted.")
+@OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
 public class DeleteAction extends TaskAction {
 
     /**

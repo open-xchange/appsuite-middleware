@@ -64,7 +64,9 @@ import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -84,6 +86,7 @@ import com.openexchange.tools.iterator.SearchIterators;
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the requested tasks."),
     @Parameter(name = "ignore", description = "(mandatory - should be set to \"deleted\") (deprecated) - Which kinds of updates should be ignored. Currently, the only valid value - \"deleted\" - causes deleted object IDs not to be returned.")
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted tasks. New and modified tasks are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted tasks (should the ignore parameter be ever implemented) would be identified by their object IDs as plain strings, without being part of a nested array. ")
+@OAuthAction(TaskActionFactory.OAUTH_READ_SCOPE)
 public class UpdatesAction extends TaskAction {
 
     /**

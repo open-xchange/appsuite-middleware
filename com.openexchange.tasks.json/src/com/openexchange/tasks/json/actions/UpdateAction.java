@@ -61,7 +61,9 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.session.ServerSession;
 
@@ -77,6 +79,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "timestamp", description = "Timestamp of the updated task. If the task was modified after the specified timestamp, then the update must fail.")
 }, requestBody = "Task object as described in Common object data, Detailed task and appointment data and Detailed task data. Only modified fields are present. ",
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated task, and maybe errors.")
+@OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
 public class UpdateAction extends TaskAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateAction.class);

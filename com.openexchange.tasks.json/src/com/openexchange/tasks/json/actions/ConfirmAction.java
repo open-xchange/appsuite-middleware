@@ -61,7 +61,9 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -79,6 +81,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "timestamp", description =  "Timestamp of the last update of the to confirm task.")
 }, requestBody = "An object with the fields \"confirmation\" and \"confirmmessage\" as described in User participant object.",
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the confirmed and thereby updated task, and maybe errors.")
+@OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
 public class ConfirmAction extends TaskAction {
 
     /**

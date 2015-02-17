@@ -61,7 +61,9 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.session.ServerSession;
 
@@ -73,6 +75,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "new", description = "Create a task.", parameters = {},
 requestBody = "Task object as described in Common object data, Detailed task and appointment data and Detailed task data. The field id is not present.",
 responseDescription = "A json objekt with attribute id of the newly created task.")
+@OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
 public class NewAction extends TaskAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);

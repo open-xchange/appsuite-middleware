@@ -64,7 +64,9 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 
 
@@ -76,6 +78,7 @@ import com.openexchange.tasks.json.TaskRequest;
 @Action(method = RequestMethod.PUT, name = "copy", description = "", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "")
+@OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
 public class CopyAction extends TaskAction {
 
     public CopyAction(final ServiceLookup services) {
