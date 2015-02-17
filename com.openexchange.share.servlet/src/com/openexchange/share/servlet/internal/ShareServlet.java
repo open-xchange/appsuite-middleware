@@ -63,6 +63,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandlerReply;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
@@ -107,14 +108,14 @@ public class ShareServlet extends HttpServlet {
                 String[] paths = ShareServletUtils.splitPath(pathInfo);
                 if (paths == null || paths.length == 0) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    Tools.sendErrorPage(response, HttpServletResponse.SC_NOT_FOUND, "The share you are looking for does not exist.");
                     return;
                 }
 
                 share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
                 if (null == share) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    Tools.sendErrorPage(response, HttpServletResponse.SC_NOT_FOUND, "The share you are looking for does not exist.");
                     return;
                 }
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
@@ -123,7 +124,7 @@ public class ShareServlet extends HttpServlet {
                     if (null == target) {
                         //TODO: fallback to share without target?
                         LOG.debug("No share target found at '{}'", pathInfo);
-                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                        Tools.sendErrorPage(response, HttpServletResponse.SC_NOT_FOUND, "The share you are looking for does not exist.");
                         return;
                     }
                 } else {

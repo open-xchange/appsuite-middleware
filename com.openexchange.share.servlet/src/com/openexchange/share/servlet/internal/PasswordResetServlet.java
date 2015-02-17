@@ -161,6 +161,7 @@ public class PasswordResetServlet extends HttpServlet {
                     .build();
                 notificationService.send(notification);
                 response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().write("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Confirmation needed</title></head><body><h1>Confirmation needed</h1><p>You must confirm the reset of your password. We sent an email to " + mailAddress + ". Please click the link provided in this email.</p></body></html>");
                 response.flushBuffer();
             } else {
                 // Try to set new password
@@ -188,7 +189,8 @@ public class PasswordResetServlet extends HttpServlet {
                     user.setUserPassword(PasswordMech.BCRYPT.encode(password));
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
 
-                    setRedirect(guestShare, null, response);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().write("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Your password has been reset</title></head><body><h1>Your password has been reset</h1><p>Your new password has been sent to " + guestInfo.getEmailAddress() + ". Click <a href=\"" +  ShareRedirectUtils.getRedirectUrl(guestInfo, null, this.loginConfig.getLoginConfig()) + "\">here</a> to log in with your new credentials.</p></body></html>");
                 } else {
                     LOG.debug("Bad attempt to reset password for share '{}'", token);
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
