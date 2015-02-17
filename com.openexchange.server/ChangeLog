@@ -1,3 +1,7 @@
+* 2015-02-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36735: Pass proper file identifier when re-fetching file meta data after move operation
+
 * 2015-02-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 36605: Set proper message reference when doing a forward from Unified Mail Drafts folder

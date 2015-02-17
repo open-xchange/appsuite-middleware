@@ -93,23 +93,24 @@ public class UpdateAction extends AbstractWriteAction {
         }
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
+        String fileId = file.getId();
         if (request.hasUploads()) {
             boolean ignoreVersion = request.getBoolParameter("ignoreVersion");
             if (ignoreVersion && (fileAccess instanceof IDBasedIgnorableVersionFileAccess)) {
                 IDBasedIgnorableVersionFileAccess ignorableVersionFileAccess = (IDBasedIgnorableVersionFileAccess) fileAccess;
-                FileID id = new FileID(file.getId());
+                FileID id = new FileID(fileId);
                 if (ignorableVersionFileAccess.supportsIgnorableVersion(id.getService(), id.getAccountId())) {
-                    ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
+                    fileId = ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
                 } else {
-                    ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+                    fileId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
                 }
             } else {
-                fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+                fileId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
             }
         } else {
-            fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
+            fileId = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
         }
-        return request.extendedResponse() ? result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
+        return request.extendedResponse() ? result(fileAccess.getFileMetadata(null == fileId ? file.getId() : fileId, FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
     }
 
 }
