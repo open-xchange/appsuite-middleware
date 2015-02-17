@@ -1,3 +1,7 @@
+* 2015-02-17 - marc.arens@open-xchange.com
+
+ - Fix for bug 36742: Cache string representations of IDs
+
 * 2015-02-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 36735: Pass proper file identifier when re-fetching file meta data after move operation
