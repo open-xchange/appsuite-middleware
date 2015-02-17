@@ -16,6 +16,19 @@
         </ul>
       </div>
       <div id="login-form">
+        <div id="login-error"></div>
+        <script>
+          if (window.location.hash) {
+              var hash = window.location.hash.substring(1);
+              var parts = hash.split("=", 2);
+              if (parts.length === 2 && parts[0] === "error") {
+                var errorSpan = document.createElement('span');
+                var errorText = document.createTextNode(decodeURIComponent(parts[1]));
+                errorSpan.appendChild(errorText);
+                document.getElementById('login-error').appendChild(errorSpan);
+              }
+          }
+        </script>
         <form action="${target}" method="POST" enctype="application/x-www-form-urlencoded">
           <fieldset>
             <legend>${formHeading}</legend>

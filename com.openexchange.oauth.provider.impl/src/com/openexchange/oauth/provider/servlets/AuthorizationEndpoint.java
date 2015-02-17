@@ -68,6 +68,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.authentication.Authenticated;
@@ -140,20 +141,17 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             }
 
             // Check for CSRF
-            // Respond with JSON errors w/o redirect
             if (isInvalidReferer(request)) {
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained no or invalid referer header");
                 return;
             }
 
-            // Set JSESSIONID cookie and generate CSRF token
             if (isInvalidCSRFToken(request)) {
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained no or invalid CSRF token. Ensure that cookies are allowed.");
                 return;
             }
 
             // Check & validate client, redirect URI and state
-            // Respond with error pages
             String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
             if (Strings.isEmpty(clientId)) {
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
@@ -238,15 +236,21 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 try {
                     authed = Authentication.login(login, password, new HashMap<String, Object>(0));
                 } catch (OXException e) {
-                    if (!INVALID_CREDENTIALS.equals(e)) {
+                    if (INVALID_CREDENTIALS.equals(e)) {
+                        URI uri = new URIBuilder(URLHelper.getSecureLocation(request))
+                            .addParameter(OAuthProviderConstants.PARAM_RESPONSE_TYPE, responseType)
+                            .addParameter(OAuthProviderConstants.PARAM_CLIENT_ID, clientId)
+                            .addParameter(OAuthProviderConstants.PARAM_REDIRECT_URI, redirectURI)
+                            .addParameter(OAuthProviderConstants.PARAM_STATE, state)
+                            .addParameter(OAuthProviderConstants.PARAM_SCOPE, scope)
+                            .setFragment("error=" + e.getDisplayMessage(LocaleTools.DEFAULT_LOCALE)) // TODO locale as uri param
+                            .build();
+
+                        response.sendRedirect(uri.toASCIIString());
+                        return;
+                    } else {
                         throw e;
                     }
-                }
-
-                if (null == authed) {
-                    // TODO: redirect to login form again and set error message?
-                    response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_grant", "invalid resource owner credentials", OAuthProviderConstants.PARAM_STATE, state));
-                    return;
                 }
 
                 // Perform user / context lookup
@@ -277,6 +281,10 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                     response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "server_error", "internal error", OAuthProviderConstants.PARAM_STATE, state));
                     return;
                 }
+            } catch (URISyntaxException e) {
+                LOG.error("Authorization request failed", e);
+                response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "server_error", "internal error", OAuthProviderConstants.PARAM_STATE, state));
+                return;
             }
         } catch (OXException e) {
             LOG.error("Authorization request failed", e);
