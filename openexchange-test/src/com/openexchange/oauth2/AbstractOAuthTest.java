@@ -54,11 +54,12 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.ClientData;
@@ -66,7 +67,7 @@ import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
-
+import com.openexchange.tasks.json.TaskActionFactory;
 
 /**
  * {@link AbstractOAuthTest}
@@ -76,31 +77,17 @@ import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
  */
 public abstract class AbstractOAuthTest {
 
-    protected static String hostname;
-
-    protected static String login;
-
-    protected static String password;
-
     protected Scopes scopes;
 
-    protected Client oauthClient;
+    protected Client clientApp;
 
     protected OAuthClient client;
 
     protected AJAXClient ajaxClient;
 
-    protected AbstractOAuthTest(String... scopes) {
+    protected AbstractOAuthTest() throws OXException {
         super();
-        this.scopes = new DefaultScopes(scopes);
-    }
-
-    @BeforeClass
-    public static void beforeClass() throws OXException {
         AJAXConfig.init();
-        hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        login = AJAXConfig.getProperty(User.User1.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
-        password = AJAXConfig.getProperty(User.User1.getPassword());
     }
 
     @Before
@@ -108,8 +95,8 @@ public abstract class AbstractOAuthTest {
         // register client application
         ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
         OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        oauthClient = clientProvisioning.registerClient(clientData);
-        client = new OAuthClient(User.User1, oauthClient.getId(), oauthClient.getSecret(), oauthClient.getRedirectURIs().get(0), oauthClient.getDefaultScope().get().toArray(new String[0]));
+        clientApp = clientProvisioning.registerClient(clientData);
+        client = new OAuthClient(User.User1, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), clientApp.getDefaultScope().get().toArray(new String[0]));
         ajaxClient = new AJAXClient(User.User1);
     }
 
@@ -118,7 +105,7 @@ public abstract class AbstractOAuthTest {
         ajaxClient.logout();
         client.logout();
         OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        clientProvisioning.unregisterClient(oauthClient.getId());
+        clientProvisioning.unregisterClient(clientApp.getId());
     }
 
     protected ClientData prepareClient(String name) {
@@ -137,7 +124,7 @@ public abstract class AbstractOAuthTest {
         clientData.setIcon(icon);
         clientData.setContactAddress("webmaster@example.com");
         clientData.setWebsite("http://www.example.com");
-        clientData.setDefaultScope(scopes);
+        clientData.setDefaultScope(new DefaultScopes(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE));
         clientData.setRedirectURIs(redirectURIs);
         return clientData;
     }
