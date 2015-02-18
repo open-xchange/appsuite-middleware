@@ -96,7 +96,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListener.class);
 
     /** The timeout threshold; cluster lock timeout minus one minute */
-    private static final long TIMEOUT_THRESHOLD = ImapIdleClusterLock.TIMEOUT_MILLIS - 60000;
+    private static final long TIMEOUT_THRESHOLD_MILLIS = ImapIdleClusterLock.TIMEOUT_MILLIS - 60000;
 
     /**
      * A simple task that actually performs the {@link IMAPFolder#idle() IMAP IDLE call}.
@@ -373,7 +373,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private boolean doRefreshLock() {
         long last = lastLockRefreshNanos;
         long nanos = System.nanoTime();
-        if (nanos - last > TIMEOUT_THRESHOLD) {
+        if (nanos - last > TimeUnit.MILLISECONDS.toNanos(TIMEOUT_THRESHOLD_MILLIS)) {
             lastLockRefreshNanos = nanos;
             return true;
         }
@@ -399,7 +399,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private boolean doImapIdleTimeoutAware(final IMAPFolder imapFolder) throws InterruptedException, MessagingException {
         Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
         try {
-            f.get(TIMEOUT_THRESHOLD, TimeUnit.MILLISECONDS);
+            f.get(TIMEOUT_THRESHOLD_MILLIS, TimeUnit.MILLISECONDS);
             return true;
         } catch (TimeoutException e) {
             // Next run...
