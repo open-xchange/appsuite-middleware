@@ -73,7 +73,7 @@ public final class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { CapabilityService.class, ConfigViewFactory.class, ThreadPoolService.class };
+        return new Class[] { CapabilityService.class, ConfigViewFactory.class, ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override

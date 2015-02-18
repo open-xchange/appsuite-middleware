@@ -59,7 +59,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
@@ -89,12 +88,8 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
     private ServiceRegistration<FacebookService> registration2;
     private ServiceRegistration<Reloadable> registration3;
     private volatile ServiceRegistration<CapabilityChecker> capabilityChecker;
-    private ConfigurationService configurationService;
     private OAuthService oAuthService;
-
     private DeferringURLService deferrer;
-
-
 
     public FacebookRegisterer(final BundleContext context) {
         super();
@@ -107,23 +102,18 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
         final boolean needsRegistration;
         lock.lock();
         try {
-            if (obj instanceof ConfigurationService) {
-                configurationService = (ConfigurationService) obj;
-            }
             if (obj instanceof OAuthService) {
                 oAuthService = (OAuthService) obj;
             }
             if (obj instanceof DeferringURLService) {
                 deferrer = (DeferringURLService) obj;
             }
-            needsRegistration = null != configurationService && null != oAuthService && deferrer != null && registration == null;
+            needsRegistration = null != oAuthService && deferrer != null && registration == null;
         } finally {
             lock.unlock();
         }
         if (needsRegistration) {
             LOG.info("Registering Facebook MetaData service.");
-            LOG.info("Parameter com.openexchange.facebook.apiKey : {}", configurationService.getProperty("com.openexchange.facebook.apiKey"));
-            LOG.info("Parameter com.openexchange.facebook.secretKey :{}", configurationService.getProperty("com.openexchange.facebook.secretKey"));
             final OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(deferrer);
             registration = context.registerService(OAuthServiceMetaData.class, facebookMetaDataService, null);
 
@@ -165,13 +155,10 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
         ServiceRegistration<?> unregister = null;
         lock.lock();
         try {
-            if (service instanceof ConfigurationService) {
-                configurationService = null;
-            }
             if (service instanceof OAuthService) {
                 oAuthService = null;
             }
-            if (registration != null && (configurationService == null || oAuthService == null)) {
+            if (registration != null && oAuthService == null) {
                 unregister = registration;
                 registration = null;
             }
