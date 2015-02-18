@@ -397,12 +397,13 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      * @throws MessagingException If IMAP-IDLE fails for any reason
      */
     private boolean doImapIdleTimeoutAware(final IMAPFolder imapFolder) throws InterruptedException, MessagingException {
+        Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
         try {
-            Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
             f.get(TIMEOUT_THRESHOLD, TimeUnit.MILLISECONDS);
             return true;
         } catch (TimeoutException e) {
             // Next run...
+            f.cancel(true);
             return false;
         } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, MessagingException.class);
