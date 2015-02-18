@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OAuth Provider JSON API
+Bundle-SymbolicName: com.openexchange.oauth.provider.json
+Bundle-Version: 7.8.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.context,
+ com.openexchange.documentation.annotations,
+ com.openexchange.exception,
+ com.openexchange.filemanagement,
+ com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.mail.mime,
+ com.openexchange.oauth.provider,
+ com.openexchange.osgi,
+ com.openexchange.osgi.util,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ org.json,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.oauth.provider.json.osgi.OAuthProviderJSONActivator
