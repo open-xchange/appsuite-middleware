@@ -95,6 +95,9 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListener.class);
 
+    /** The timeout threshold; cluster lock timeout minus one minute */
+    private static final long TIMEOUT_THRESHOLD = ImapIdleClusterLock.TIMEOUT_MILLIS - 60000;
+
     /**
      * A simple task that actually performs the {@link IMAPFolder#idle() IMAP IDLE call}.
      */
@@ -172,6 +175,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private final PushMode pushMode;
     private final AtomicBoolean canceled;
     private volatile IMAPFolder imapFolderInUse;
+    private volatile long lastLockRefreshNanos;
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
@@ -185,6 +189,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.delay = delay <= 0 ? 5000L : delay;
         this.services = services;
         this.pushMode = pushMode;
+        lastLockRefreshNanos = System.nanoTime();
     }
 
     @Override
@@ -241,7 +246,9 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     }
 
                     // Refresh lock prior to entering IMAP-IDLE
-                    ImapIdlePushManagerService.getInstance().refreshLock(session);
+                    if (doRefreshLock()) {
+                        ImapIdlePushManagerService.getInstance().refreshLock(session);
+                    }
 
                     // Do the IMAP IDLE connect
                     mailAccess.setWaiting(true);
@@ -359,6 +366,21 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     }
 
     /**
+     * Checks whether held cluster lock needs to be refreshed.
+     *
+     * @return <code>true</code> if refresh is needed; otherwise <code>false</code>
+     */
+    private boolean doRefreshLock() {
+        long last = lastLockRefreshNanos;
+        long nanos = System.nanoTime();
+        if (nanos - last > TIMEOUT_THRESHOLD) {
+            lastLockRefreshNanos = nanos;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Actually enters the IMAP-IDLE to IMAP server with respect to frequent cluster lock <i><tt>touch</tt></i>ing.
      * <p>
      * IMAP-IDLE is performed until either
@@ -377,7 +399,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private boolean doImapIdleTimeoutAware(final IMAPFolder imapFolder) throws InterruptedException, MessagingException {
         try {
             Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
-            f.get(ImapIdleClusterLock.TIMEOUT_MILLIS - 60000, TimeUnit.MILLISECONDS);
+            f.get(TIMEOUT_THRESHOLD, TimeUnit.MILLISECONDS);
             return true;
         } catch (TimeoutException e) {
             // Next run...
