@@ -50,6 +50,7 @@
 package com.openexchange.caching.events.internal;
 
 import static com.openexchange.caching.events.internal.StampedCacheEvent.POISON;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -216,7 +217,11 @@ public final class CacheEventServiceImpl implements CacheEventService {
      * @param fromRemote Whether remotely or locally generated
      */
     protected static void notify(final List<CacheListener> listeners, final Object sender, final CacheEvent event, final boolean fromRemote) {
-        LOG.debug("Notifying {} listener(s) about {} event: {}", listeners.size(), fromRemote ? "remote" : "local", event);
+        if (isEmpty(event.getKeys())) {
+            return;
+        }
+
+        LOG.debug("Notifying {} listener(s) about {} event: {}", Integer.valueOf(listeners.size()), fromRemote ? "remote" : "local", event);
 
         ExecutorService executorService = getExecutorService();
         if (null == executorService) {
@@ -251,6 +256,10 @@ public final class CacheEventServiceImpl implements CacheEventService {
     private static ExecutorService getExecutorService() {
         ThreadPoolService threadPoolService = CacheEventServiceLookup.getService(ThreadPoolService.class);
         return null != threadPoolService ? threadPoolService.getExecutor() : null;
+    }
+
+    private static boolean isEmpty(List<Serializable> keys) {
+        return null == keys || keys.isEmpty();
     }
 
 }
