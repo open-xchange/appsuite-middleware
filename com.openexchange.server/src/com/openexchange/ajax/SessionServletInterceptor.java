@@ -50,7 +50,7 @@
 package com.openexchange.ajax;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * Can intercept with the session and throw {@link OXException}s just before the request is processed.
@@ -60,6 +60,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface SessionServletInterceptor {
 
-    void intercept(ServerSession session) throws OXException;
+    /**
+     * This method allows to modify arbitrary attributes in the session before the session is used to process a request.
+     * @param session Session to check.
+     * @throws OXException To interrupt processing the request. The exception is then responded to the client.
+     */
+    void intercept(Session session) throws OXException;
 
 }
