@@ -3019,7 +3019,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private CacheEvent newCacheEventFor(final int userId) {
-        return CacheEvent.INVALIDATE(ListLsubCache.REGION, null, new StringBuilder(16).append(userId).append('@').append(ctx.getContextId()).toString());
+        return ListLsubCache.newCacheEventFor(userId, ctx.getContextId());
     }
 
     private static String stripPOSTRight(final String rights) {

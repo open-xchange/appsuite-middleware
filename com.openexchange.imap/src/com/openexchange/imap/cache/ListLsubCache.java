@@ -62,6 +62,7 @@ import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.Logger;
+import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.exception.OXException;
@@ -926,8 +927,20 @@ public final class ListLsubCache {
         }
     }
 
-    private static CacheEvent newCacheEventFor(int userId, int contextId) {
-        return CacheEvent.INVALIDATE(REGION, null, new StringBuilder(16).append(userId).append('@').append(contextId).toString());
+    /**
+     * Creates a new cache event
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The cache event
+     */
+    public static CacheEvent newCacheEventFor(int userId, int contextId) {
+        CacheService service = Services.optService(CacheService.class);
+        if (null == service) {
+            return null;
+        }
+
+        return CacheEvent.INVALIDATE(REGION, null, service.newCacheKey(contextId, userId));
     }
 
 }
