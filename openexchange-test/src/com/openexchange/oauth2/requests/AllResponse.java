@@ -47,28 +47,69 @@
  *
  */
 
-package com.openexchange.oauth2;
+package com.openexchange.oauth2.requests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.oauth.provider.DefaultClient;
+import com.openexchange.oauth.provider.DefaultGrantView;
+import com.openexchange.oauth.provider.DefaultScopes;
+import com.openexchange.oauth.provider.GrantView;
+import com.openexchange.oauth.provider.Scopes;
 
 
 /**
- * {@link OAuthTests}
+ * {@link AllResponse}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    AuthorizationEndpointTest.class,
-    TokenEndpointTest.class,
-    ProtocolFlowTest.class,
-    RevokeTokensTest.class,
-    ReadFoldersTest.class,
-    JSONApiTest.class
-})
-public class OAuthTests {
+public class AllResponse extends AbstractAJAXResponse {
+
+    /**
+     * Initializes a new {@link AllResponse}.
+     * @param response
+     */
+    protected AllResponse(Response response) {
+        super(response);
+    }
+
+    public List<GrantView> getGrantViews() throws JSONException {
+        List<GrantView> grants = new LinkedList<>();
+        JSONArray data = (JSONArray) getData();
+        for (int i = 0; i < data.length(); i++) {
+            JSONObject jGrant = data.getJSONObject(i);
+            JSONObject jClient = jGrant.getJSONObject("client");
+            DefaultClient client = new DefaultClient();
+            client.setId(jClient.getString("id"));
+            client.setName(jClient.getString("name"));
+            client.setDescription(jClient.getString("description"));
+            client.setWebsite(jClient.getString("website"));
+
+            Set<String> scopeSet = new HashSet<>();
+            JSONArray jScopes = jGrant.getJSONArray("scopes");
+            for (int j = 0; j < jScopes.length(); j++) {
+                scopeSet.add(jScopes.getString(j));
+            }
+            Scopes scopes = new DefaultScopes(scopeSet);
+            Date latestGrantDate = new Date(jGrant.getLong("date"));
+
+            DefaultGrantView grant = new DefaultGrantView();
+            grant.setClient(client);
+            grant.setScopes(scopes);
+            grant.setLatestGrantDate(latestGrantDate);
+            grants.add(grant);
+
+        }
+        return grants;
+    }
 
 }

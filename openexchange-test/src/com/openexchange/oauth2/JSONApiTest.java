@@ -49,26 +49,59 @@
 
 package com.openexchange.oauth2;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.GrantView;
+import com.openexchange.oauth2.requests.AllRequest;
+import com.openexchange.oauth2.requests.AllResponse;
+import com.openexchange.oauth2.requests.RevokeRequest;
 
 
 /**
- * {@link OAuthTests}
+ * {@link JSONApiTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    AuthorizationEndpointTest.class,
-    TokenEndpointTest.class,
-    ProtocolFlowTest.class,
-    RevokeTokensTest.class,
-    ReadFoldersTest.class,
-    JSONApiTest.class
-})
-public class OAuthTests {
+public class JSONApiTest extends AbstractOAuthTest {
+
+    /**
+     * Initializes a new {@link JSONApiTest}.
+     * @throws OXException
+     */
+    public JSONApiTest() throws OXException {
+        super(ContactActionFactory.OAUTH_READ_SCOPE); // scope for first grant
+    }
+
+    @Test
+    public void testAllAndRevoke() throws Exception {
+        new OAuthClient(User.User1, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), new String[] { AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE });
+        AllResponse allResponse = ajaxClient.execute(new AllRequest());
+        List<GrantView> grantViews = allResponse.getGrantViews();
+        GrantView expected = null;
+        for (GrantView grant : grantViews) {
+            if (grant.getClient().getId().equals(clientApp.getId())) {
+                expected = grant;
+                break;
+            }
+        }
+        Assert.assertNotNull(expected);
+        Assert.assertEquals(3, expected.getScopes().size());
+
+        // revoke access for application
+        ajaxClient.execute(new RevokeRequest(expected.getClient().getId()));
+
+        // assert it does not appear anymore in all response
+        allResponse = ajaxClient.execute(new AllRequest());
+        grantViews = allResponse.getGrantViews();
+        for (GrantView grant : grantViews) {
+            Assert.assertFalse(grant.getClient().getId().equals(clientApp.getId()));
+        }
+    }
 
 }

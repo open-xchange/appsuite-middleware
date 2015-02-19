@@ -47,28 +47,26 @@
  *
  */
 
-package com.openexchange.oauth2;
+package com.openexchange.oauth2.requests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 
 /**
- * {@link OAuthTests}
+ * {@link RevokeResponse}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    AuthorizationEndpointTest.class,
-    TokenEndpointTest.class,
-    ProtocolFlowTest.class,
-    RevokeTokensTest.class,
-    ReadFoldersTest.class,
-    JSONApiTest.class
-})
-public class OAuthTests {
+public class RevokeResponse extends AbstractAJAXResponse {
+
+    /**
+     * Initializes a new {@link RevokeResponse}.
+     * @param response
+     */
+    protected RevokeResponse(Response response) {
+        super(response);
+    }
 
 }

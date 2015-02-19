@@ -47,28 +47,58 @@
  *
  */
 
-package com.openexchange.oauth2;
+package com.openexchange.oauth2.requests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
 
 
 /**
- * {@link OAuthTests}
+ * {@link AllRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    AuthorizationEndpointTest.class,
-    TokenEndpointTest.class,
-    ProtocolFlowTest.class,
-    RevokeTokensTest.class,
-    ReadFoldersTest.class,
-    JSONApiTest.class
-})
-public class OAuthTests {
+public class AllRequest implements AJAXRequest<AllResponse> {
+
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public String getServletPath() {
+        return "/ajax/oauth/grants";
+    }
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION , "all") };
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends AllResponse> getParser() {
+        return new AbstractAJAXParser<AllResponse>(true) {
+            @Override
+            protected AllResponse createResponse(Response response) throws JSONException {
+                return new AllResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
 
 }
