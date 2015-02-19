@@ -60,9 +60,9 @@ import com.openexchange.java.Strings;
  */
 public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
-    private static final int[] DEFAULT_COLUMNS = {
+    public static final int[] DEFAULT_COLUMNS = {
         FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
-        FolderObject.CREATED_BY };
+        FolderObject.CREATED_BY, FolderObject.PERMISSIONS_BITS };
 
     private final String parentFolder;
 

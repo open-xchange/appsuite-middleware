@@ -1073,7 +1073,6 @@ public class FolderTest extends AbstractAJAXTest {
         // List known folder
         final UpdatesRequest updatesRequest = new UpdatesRequest(
             EnumAPI.OX_OLD,
-            FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             new int[] { FolderObject.LAST_MODIFIED_UTC },
             -1,
             null,

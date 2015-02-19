@@ -151,7 +151,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         boolean found2 = false;
         final Date date = new Date();
         date.setDate(date.getDate() - 1);
-        final FolderObject[] allFolders = manager.getUpdatedFoldersOnServer(client.getValues().getPrivateInfostoreFolder(), date);
+        final FolderObject[] allFolders = manager.getUpdatedFoldersOnServer(date);
         for (int i = 0; i < allFolders.length; i++) {
             final FolderObject co = allFolders[i];
             if (co.getObjectID() == folderObject1.getObjectID()) {

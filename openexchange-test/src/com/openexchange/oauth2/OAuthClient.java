@@ -50,18 +50,32 @@
 package com.openexchange.oauth2;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assert;
 import com.openexchange.ajax.contact.action.AllRequest;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.CustomizedParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.OAuthInvalidRequestException;
+import com.openexchange.oauth.provider.OAuthInvalidTokenException;
+import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
+import com.openexchange.oauth.provider.OAuthRequestException;
 
 /**
  * {@link OAuthClient}
@@ -114,7 +128,8 @@ public class OAuthClient extends AJAXClient {
 
         @Override
         public AbstractAJAXParser<? extends T> getParser() {
-            return delegate.getParser();
+            AbstractAJAXParser<? extends T> parser = delegate.getParser();
+            return new OAuthResponseParser<>(parser);
         }
 
         @Override
@@ -133,6 +148,89 @@ public class OAuthClient extends AJAXClient {
             newHeaders[headers.length] = new Header.SimpleHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
             return newHeaders;
         }
+    }
+
+    private static final class OAuthResponseParser<T extends AbstractAJAXResponse> extends CustomizedParser<T> {
+
+        private OAuthRequestException e;
+
+        private boolean tryParseOAuthError;
+
+        protected OAuthResponseParser(AbstractAJAXParser<T> delegate) {
+            super(delegate);
+        }
+
+        @Override
+        protected String checkCustom(HttpResponse resp) throws ParseException, IOException {
+            if (isPossibleOAuthError(resp)) {
+                tryParseOAuthError = true;
+                String body = EntityUtils.toString(resp.getEntity());
+                if (body == null) {
+                    fail("Response code is not okay: " + resp.getStatusLine().getStatusCode() + " (" + resp.getStatusLine().getReasonPhrase() + ")");
+                }
+                return body;
+            }
+
+            return null;
+        }
+
+        @Override
+        public T parse(String body) throws JSONException {
+            if (tryParseOAuthError) {
+                try {
+                    JSONObject jsonObject = new JSONObject(body);
+                    String error = jsonObject.getString("error");
+                    switch (error) {
+                        case "invalid_token":
+                            String description = jsonObject.getString("error_description");
+                            Reason reason = null;
+                            for (Entry<Reason, String> entry : OAuthInvalidTokenException.DESCRIPTIONS.entrySet()) {
+                                if (description.equals(entry.getValue())) {
+                                    reason = entry.getKey();
+                                    break;
+                                }
+                            }
+                            e = new OAuthInvalidTokenException(reason);
+                            break;
+                        case "insufficient_scope":
+                            String requiredScope = jsonObject.optString("scope", null);
+                            if (requiredScope == null) {
+                                e = new OAuthInsufficientScopeException();
+                            } else {
+                                e = new OAuthInsufficientScopeException(requiredScope);
+                            }
+                            break;
+                        case "invalid_request":
+                            e = new OAuthInvalidRequestException();
+                            break;
+                    }
+                } catch (JSONException e) {
+                    fail("Error: " + body);
+                }
+
+                if (e == null) {
+                    fail("Error: " + body);
+                } else {
+                    if (isFailOnError()) {
+                        throw new AssertionError("OAuth error", e);
+                    }
+                    Response response = new Response();
+                    response.setException(e);
+                    return super.createResponse(response);
+                }
+            }
+
+            return super.parse(body);
+        }
+
+        boolean isPossibleOAuthError(HttpResponse resp) {
+            Set<Integer> codes = new HashSet<>();
+            codes.add(HttpStatus.SC_BAD_REQUEST);
+            codes.add(HttpStatus.SC_FORBIDDEN);
+            codes.add(HttpStatus.SC_UNAUTHORIZED);
+            return codes.contains(resp.getStatusLine().getStatusCode());
+        }
+
     }
 
     /**

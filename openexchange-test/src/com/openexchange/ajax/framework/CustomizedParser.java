@@ -47,68 +47,51 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.ajax.framework;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.exception.Category;
+import java.io.IOException;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
 
 
 /**
- * {@link OAuthInvalidTokenException}
+ * {@link CustomizedParser}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthInvalidTokenException extends OAuthRequestException {
+public abstract class CustomizedParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
 
-    private static final long serialVersionUID = 518106848861523133L;
+    protected final AbstractAJAXParser<T> delegate;
 
-    public enum Reason {
-        TOKEN_MALFORMED,
-        TOKEN_EXPIRED,
-        TOKEN_UNKNOWN,
-        TOKEN_MISSING,
-        INVALID_AUTH_SCHEME
-    }
-
-    public static Map<Reason, String> DESCRIPTIONS = new HashMap<>();
-    static {
-        DESCRIPTIONS.put(Reason.TOKEN_EXPIRED, "The passed access token is expired.");
-        DESCRIPTIONS.put(Reason.TOKEN_MALFORMED, "The passed access token is malformed.");
-        DESCRIPTIONS.put(Reason.TOKEN_UNKNOWN, "The passed access token is unknown to the server.");
-        DESCRIPTIONS.put(Reason.INVALID_AUTH_SCHEME, "Invalid auth scheme, must always be 'Bearer'.");
-    }
-
-    private final Reason reason;
-
-    public OAuthInvalidTokenException(Reason reason) {
-        super();
-        this.reason = reason;
+    protected CustomizedParser(AbstractAJAXParser<T> delegate) {
+        super(delegate.isFailOnError());
+        this.delegate = delegate;
     }
 
     @Override
-    public int getCode() {
-        return 1;
+    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+        String checkCustom = checkCustom(resp);
+        if (checkCustom == null) {
+            return delegate.checkResponse(resp);
+        }
+
+        return checkCustom;
+    }
+
+    protected abstract String checkCustom(HttpResponse resp) throws ParseException, IOException;
+
+    @Override
+    public T parse(String body) throws JSONException {
+        return delegate.parse(body);
     }
 
     @Override
-    public Category getCategory() {
-        return Category.CATEGORY_PERMISSION_DENIED;
+    public T createResponse(Response response) throws JSONException {
+        return delegate.createResponse(response);
     }
 
-    @Override
-    public String getError() {
-        return "invalid_token";
-    }
-
-    public Reason getReason() {
-        return reason;
-    }
-
-    @Override
-    public String getErrorDescription() {
-        return DESCRIPTIONS.get(reason);
-    }
 
 }

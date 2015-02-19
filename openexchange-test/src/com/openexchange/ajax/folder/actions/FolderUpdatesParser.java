@@ -4,7 +4,6 @@ package com.openexchange.ajax.folder.actions;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.parser.FolderParser;
@@ -49,28 +48,12 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
             final JSONArray row = (JSONArray) arrayOrId;
 
             for (int colIndex = 0; colIndex < getColumns().length; colIndex++) {
-                Object value = row.get(colIndex);
-                if (value == JSONObject.NULL) {
-                    continue;
-                }
-                final int column = getColumns()[colIndex];
-                if (getsIgnored(column)) {
-                    continue;
-                }
-                value = transform(value, column);
-                if (FolderObject.OBJECT_ID == column) {
-                    if (value instanceof Integer) {
-                        folder.setObjectID(((Integer) value).intValue());
-                    } else {
-                        final String svalue = (String) value;
-                        try {
-                            folder.setObjectID(Integer.parseInt(svalue));
-                        } catch (final NumberFormatException e) {
-                            folder.setFullName(svalue);
-                        }
+                for (int columnPos = 0; columnPos < getColumns().length; columnPos++) {
+                    try {
+                        Parser.parse(row.get(columnPos), getColumns()[columnPos], folder);
+                    } catch (OXException e) {
+                        throw new JSONException(e);
                     }
-                } else {
-                    folder.set(column, value);
                 }
             }
             folderUpdateResponse.addFolder(folder);

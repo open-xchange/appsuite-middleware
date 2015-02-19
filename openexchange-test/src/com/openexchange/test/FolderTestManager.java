@@ -407,13 +407,13 @@ public class FolderTestManager implements TestManager{
     /**
      * Get folders in a parent folder that were updated since a specific date via the HTTP-API
      */
-    public FolderObject[] getUpdatedFoldersOnServer(final int folderId, final Date lastModified) {
-        return getUpdatedFoldersOnServer(folderId, lastModified, null);
+    public FolderObject[] getUpdatedFoldersOnServer(final Date lastModified) {
+        return getUpdatedFoldersOnServer(lastModified, null);
     }
 
-    public FolderObject[] getUpdatedFoldersOnServer(final int folderId, final Date lastModified, final int[] additionalFields) {
+    public FolderObject[] getUpdatedFoldersOnServer(final Date lastModified, final int[] additionalFields) {
         final Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        final UpdatesRequest request = new UpdatesRequest(EnumAPI.OX_OLD, folderId, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
+        final UpdatesRequest request = new UpdatesRequest(EnumAPI.OX_OLD, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
         try {
             final CommonUpdatesResponse response = client.execute(request);
             final int idPos = findIDPosition(response.getColumns());

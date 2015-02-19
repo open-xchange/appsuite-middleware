@@ -189,7 +189,7 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
     public void testShouldSetTheIconViaUpdates() throws Exception {
         // check negative
         Date lastModified = new Date(fMgr.getLastResponse().getTimestamp().getTime() - 1);
-        fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { FLAG_SUBSCRIBED });
+        fMgr.getUpdatedFoldersOnServer(lastModified, new int[] { FLAG_SUBSCRIBED });
         FolderUpdatesResponse response = (FolderUpdatesResponse) fMgr.getLastResponse();
         int idPos = findPositionOfColumn(response.getColumns(), CalendarObject.OBJECT_ID);
         int flagPos = findPositionOfColumn(response.getColumns(), FLAG_SUBSCRIBED);
@@ -204,7 +204,7 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
 
         // check positive
         lastModified = new Date(fMgr.getLastResponse().getTimestamp().getTime() - 1);
-        fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { FLAG_SUBSCRIBED });
+        fMgr.getUpdatedFoldersOnServer(lastModified, new int[] { FLAG_SUBSCRIBED });
         response = (FolderUpdatesResponse) fMgr.getLastResponse();
         arr = (JSONArray) response.getData();
         assertTrue("Should return at least one update", arr.length() > 0);

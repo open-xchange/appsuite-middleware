@@ -63,12 +63,12 @@ public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> 
 
     private final API api;
 
-    public UpdatesRequest(final API api, final int folderId, final int[] columns, final int sort, final Order order, final Date lastModified) {
-        this(api, folderId, columns, sort, order, lastModified, CommonUpdatesRequest.Ignore.DELETED);
+    public UpdatesRequest(final API api, final int[] columns, final int sort, final Order order, final Date lastModified) {
+        this(api, columns, sort, order, lastModified, CommonUpdatesRequest.Ignore.DELETED);
     }
 
-    public UpdatesRequest(final API api, final int folderId, final int[] columns, final int sort, final Order order, final Date lastModified, final CommonUpdatesRequest.Ignore ignore) {
-        super(api.getUrl(), folderId, columns, sort, order, lastModified, ignore, true);
+    public UpdatesRequest(final API api, final int[] columns, final int sort, final Order order, final Date lastModified, final CommonUpdatesRequest.Ignore ignore) {
+        super(api.getUrl(), -1, columns, sort, order, lastModified, ignore, true);
         this.api = api;
     }
 

@@ -180,7 +180,7 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
         fMgr.getFolderFromServer(folder);
         Date lastModified = new Date(fMgr.getLastResponse().getTimestamp().getTime() - 1);
 
-        fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { 3010 });
+        fMgr.getUpdatedFoldersOnServer(lastModified, new int[] { 3010 });
         FolderUpdatesResponse response = (FolderUpdatesResponse) fMgr.getLastResponse();
         int idPos = findPositionOfColumn(response.getColumns(), CalendarObject.OBJECT_ID);
         int flagPos = findPositionOfColumn(response.getColumns(), 3010);
@@ -195,7 +195,7 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
 
         // check positive
 
-        fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { 3010 });
+        fMgr.getUpdatedFoldersOnServer(lastModified, new int[] { 3010 });
         response = (FolderUpdatesResponse) fMgr.getLastResponse();
         arr = (JSONArray) response.getData();
         assertTrue("Should return at least one update", arr.length() > 0);

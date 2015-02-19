@@ -109,7 +109,7 @@ public class UpdatesTest extends AbstractFolderTest {
 
             final FolderUpdatesResponse response;
             {
-                final UpdatesRequest request = new UpdatesRequest(EnumAPI.OUTLOOK, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] {
+                final UpdatesRequest request = new UpdatesRequest(EnumAPI.OUTLOOK, new int[] {
                     FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp.getTime() - 1));
                 response = client.execute(request);
             }
@@ -139,7 +139,7 @@ public class UpdatesTest extends AbstractFolderTest {
 
     public void testUpdatesAll() throws Throwable {
         final UpdatesRequest request =
-            new UpdatesRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
+            new UpdatesRequest(EnumAPI.OX_NEW, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
         final FolderUpdatesResponse response = client.execute(request);
 
         assertNotNull(response);
@@ -172,7 +172,7 @@ public class UpdatesTest extends AbstractFolderTest {
         // check modified with timestamp from last
         Date lastModified = newFolders.get(numberOfFolders-1).getLastModified();
         int[] cols = new int[]{ FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME};
-        FolderUpdatesResponse modifiedFoldersResponse = listModifiedFolders(FolderObject.SYSTEM_ROOT_FOLDER_ID, cols, lastModified, Ignore.NONE);
+        FolderUpdatesResponse modifiedFoldersResponse = listModifiedFolders(cols, lastModified, Ignore.NONE);
         assertTrue(modifiedFoldersResponse.getNewOrModifiedIds().containsAll(expectUpdatedFolderIds));
         assertTrue(modifiedFoldersResponse.getDeletedIds().containsAll(expectDeletedFolderIds));
 
