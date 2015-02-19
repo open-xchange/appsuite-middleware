@@ -174,17 +174,13 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
             } else {
-                StringAppender names = null;
-                StringAppender values = null;
+                int capacity = remoteParameterNames.size() << 4;
+                StringAppender names = new StringAppender(':', capacity);
+                StringAppender values = new StringAppender(':', capacity);
                 for (String parameterName : remoteParameterNames) {
                     Object value = parameters.get(parameterName);
                     if (isSerializablePojo(value)) {
                         String sValue = value.toString();
-                        if (null == names) {
-                            int capacity = remoteParameterNames.size() << 4;
-                            names = new StringAppender(':', capacity);
-                            values = new StringAppender(':', capacity);
-                        }
                         names.append(parameterName);
                         values.append(getSafeValue(sValue));
                     } else {
@@ -192,7 +188,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
                         logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
                     }
                 }
-                if (null == names) {
+                if (names.length() == 0) {
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
                 } else {

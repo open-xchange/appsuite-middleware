@@ -1,3 +1,7 @@
+* 2015-02-19 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 36821: Initialize the appenders prior entering the loop
+
 * 2015-02-18 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 36100: Use IDGenerator to block concurrent deleting threads to prevent MySQL deadlocks
