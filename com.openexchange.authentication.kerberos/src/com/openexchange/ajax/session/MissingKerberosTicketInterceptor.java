@@ -53,11 +53,11 @@ import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
 import static com.openexchange.kerberos.KerberosUtils.SESSION_SUBJECT;
 import com.openexchange.ajax.SessionServletInterceptor;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * Throws a SES- error if the session has been migrated and does not contain the Kerberos tickets anymore.
+ * Throws a SES-0212 error if the session has been migrated and does not contain the Kerberos tickets anymore.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @since 7.6.0
@@ -69,7 +69,7 @@ public final class MissingKerberosTicketInterceptor implements SessionServletInt
     }
 
     @Override
-    public void intercept(ServerSession session) throws OXException {
+    public void intercept(Session session) throws OXException {
         if (!session.containsParameter(SESSION_SUBJECT) || !session.containsParameter(SESSION_PRINCIPAL)) {
             throw SessionExceptionCodes.KERBEROS_TICKET_MISSING.create(session.getSessionID());
         }
