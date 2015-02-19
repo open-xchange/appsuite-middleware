@@ -80,6 +80,7 @@ import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.login.AutoLogin;
 import com.openexchange.ajax.login.FormLogin;
+import com.openexchange.ajax.login.HasAutoLogin;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.Login;
 import com.openexchange.ajax.login.LoginConfiguration;
@@ -654,6 +655,7 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf, rampUpServices));
         handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
+        handlerMap.put("hasAutologin", new HasAutoLogin(conf));
     }
 
     public void addRequestHandler(String action, LoginRequestHandler handler) {
@@ -672,24 +674,8 @@ public class LoginServlet extends AJAXServlet {
             if (null != subPath && subPath.startsWith("/httpAuth")) {
                 doHttpAuth(req, resp);
             } else if (null != action) {
-                // Check if autologin is enabled
-                if (action.equalsIgnoreCase("hasAutologin")) {
-                    // The magic spell to disable caching
-                    Tools.disableCaching(resp);
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                    resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
-                    try {
-                        final JSONObject jo = new JSONObject(2);
-                        jo.put(ACTION_AUTOLOGIN, confReference.get().isSessiondAutoLogin());
-                        jo.write(resp.getWriter());
-                    } catch (final JSONException e) {
-                        LOG.error(LoginServlet.RESPONSE_ERROR, e);
-                        LoginServlet.sendError(resp);
-                    }
-                } else {
-                    // Regular login handling
-                    doJSONAuth(req, resp, action);
-                }
+                // Regular login handling
+                doJSONAuth(req, resp, action);
             } else {
                 logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
                 return;
