@@ -49,6 +49,7 @@
 
 package com.openexchange.push.imapidle;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -144,19 +145,19 @@ public final class ImapIdlePushManagerService implements PushManagerService {
                 if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
                     listener.start();
                     unlock = false;
-                    LOGGER.info("Started IMAP-IDLE listener for user {} in context {} with session {}", userId, contextId, session.getSessionID());
+                    LOGGER.info("Started IMAP-IDLE listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
                     return listener;
                 }
 
                 // Already running for session user
-                LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", userId, contextId, session.getSessionID());
+                LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
             } finally {
                 if (unlock) {
                     releaseLock(session);
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", userId, contextId, session.getSessionID());
+            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
         }
 
         // No listener registered for given session
@@ -172,10 +173,10 @@ public final class ImapIdlePushManagerService implements PushManagerService {
         StopResult stopResult = stopListener(true, session.getUserId(), session.getContextId());
         switch (stopResult) {
         case RECONNECTED:
-            LOGGER.info("Reconnected IMAP-IDLE listener for user {} in context {} using another session", session.getUserId(), session.getContextId());
+            LOGGER.info("Reconnected IMAP-IDLE listener for user {} in context {} using another session", I(session.getUserId()), I(session.getContextId()));
             return true;
         case STOPPED:
-            LOGGER.info("Stopped IMAP-IDLE listener for user {} in context {} with session {}", session.getUserId(), session.getContextId(), session.getSessionID());
+            LOGGER.info("Stopped IMAP-IDLE listener for user {} in context {} with session {}", I(session.getUserId()), I(session.getContextId()), session.getSessionID());
             return true;
         default:
             break;
