@@ -59,7 +59,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -76,6 +75,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -1542,7 +1542,7 @@ final class ListLsubCollection implements Serializable {
              */
             attributes = new HashSet<String>(s.length);
             for (int i = 0; i < s.length; i++) {
-                final String attr = s[i].toLowerCase(Locale.US);
+                String attr = Strings.asciiLowerCase(s[i]);
                 switch (POS_MAP.get(attr)) {
                 case 1:
                     changeState = ListLsubEntry.ChangeState.CHANGED;
