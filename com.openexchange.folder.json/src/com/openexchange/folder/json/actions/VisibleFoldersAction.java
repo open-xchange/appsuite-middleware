@@ -116,7 +116,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
              */
             treeId = getDefaultTreeIdentifier();
         }
-        final ContentType contentType = parseContentTypeParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, request);
+        final ContentType contentType = parseAndCheckContentTypeParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, request);
         if (null == contentType) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_CONTENT_TYPE);
         }
@@ -132,7 +132,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         final String mailRootFolders = request.getParameter("mailRootFolders");
-        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
+        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Get folder service
          */

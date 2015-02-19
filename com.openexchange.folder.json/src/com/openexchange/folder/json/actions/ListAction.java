@@ -128,7 +128,7 @@ public final class ListAction extends AbstractFolderAction {
             all = "1".equals(parameter) || Boolean.parseBoolean(parameter);
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
+        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         boolean filterDuplicateNames = parseBoolean(request.getParameter("errorOnDuplicateName"), false);
         if (!filterDuplicateNames) {
             filterDuplicateNames = parseBoolean(request.getParameter("errOnDuplName"), false);

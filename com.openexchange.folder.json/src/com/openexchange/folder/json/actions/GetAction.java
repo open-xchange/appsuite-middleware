@@ -110,7 +110,7 @@ public final class GetAction extends AbstractFolderAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
+        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Request subfolders from folder service
          */
@@ -124,7 +124,7 @@ public final class GetAction extends AbstractFolderAction {
                 new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
 
         if (isOAuthRequest(request) && !mayReadViaOAuthRequest(folder.getContentType(), getOAuthGrant(request))) {
-            throw new OAuthInsufficientScopeException();
+            throw new OAuthInsufficientScopeException(OAuthContentTypes.readScopeForContentType(folder.getContentType()));
         }
 
         /*

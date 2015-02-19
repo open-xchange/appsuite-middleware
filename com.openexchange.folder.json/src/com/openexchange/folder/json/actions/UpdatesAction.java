@@ -132,7 +132,7 @@ public final class UpdatesAction extends AbstractFolderAction {
             includeMail = "1".equals(parameter) || Boolean.parseBoolean(parameter);
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
+        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Request subfolders from folder service
          */
