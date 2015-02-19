@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.Date;
+
 
 /**
  * Provides a user-centric view on all grants for a certain client. A user might grant access
@@ -74,5 +76,12 @@ public interface GrantView {
      * @return The scopes
      */
     Scopes getScopes();
+
+    /**
+     * Gets the most recent date when a user granted access for this client.
+     *
+     * @return The date
+     */
+    Date getLatestGrantDate();
 
 }

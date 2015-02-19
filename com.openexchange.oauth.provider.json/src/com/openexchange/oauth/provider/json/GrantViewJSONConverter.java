@@ -111,6 +111,7 @@ public class GrantViewJSONConverter {
         JSONObject json = new JSONObject();
         json.put("client", convertClient(grant.getClient()));
         json.put("scopes", convertScopes(grant.getScopes()));
+        json.put("date", grant.getLatestGrantDate().getTime());
         return json;
     }
 

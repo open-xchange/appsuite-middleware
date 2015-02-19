@@ -301,13 +301,19 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         for (Entry<String, List<StoredGrant>> entry : grantsByClient.entrySet()) {
             Client client = clientStorage.getClientById(entry.getKey());
             Set<String> scopes = new HashSet<>();
+            Date latestGrantDate = new Date(0);
             for (StoredGrant grant : entry.getValue()) {
                 scopes.addAll(grant.getScopes().get());
+                Date creationDate = grant.getCreationDate();
+                if (creationDate.after(latestGrantDate)) {
+                    latestGrantDate = creationDate;
+                }
             }
 
             DefaultGrantView view = new DefaultGrantView();
             view.setClient(client);
             view.setScopes(new DefaultScopes(scopes));
+            view.setLatestGrantDate(latestGrantDate);
             grantViews.add(view);
         }
 

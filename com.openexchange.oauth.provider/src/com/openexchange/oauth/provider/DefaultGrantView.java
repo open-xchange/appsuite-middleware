@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.Date;
+
 
 /**
  * {@link DefaultGrantView}
@@ -62,6 +64,8 @@ public class DefaultGrantView implements GrantView {
 
     private Scopes scopes;
 
+    private Date grantDate;
+
     @Override
     public Client getClient() {
         return client;
@@ -72,6 +76,11 @@ public class DefaultGrantView implements GrantView {
         return scopes;
     }
 
+    @Override
+    public Date getLatestGrantDate() {
+        return grantDate;
+    }
+
     public void setClient(Client client) {
         this.client = client;
     }
@@ -80,11 +89,16 @@ public class DefaultGrantView implements GrantView {
         this.scopes = scopes;
     }
 
+    public void setLatestGrantDate(Date grantDate) {
+        this.grantDate = grantDate;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((client == null) ? 0 : client.hashCode());
+        result = prime * result + ((grantDate == null) ? 0 : grantDate.hashCode());
         result = prime * result + ((scopes == null) ? 0 : scopes.hashCode());
         return result;
     }
@@ -108,6 +122,13 @@ public class DefaultGrantView implements GrantView {
         } else if (!client.equals(other.client)) {
             return false;
         }
+        if (grantDate == null) {
+            if (other.grantDate != null) {
+                return false;
+            }
+        } else if (!grantDate.equals(other.grantDate)) {
+            return false;
+        }
         if (scopes == null) {
             if (other.scopes != null) {
                 return false;
@@ -120,7 +141,7 @@ public class DefaultGrantView implements GrantView {
 
     @Override
     public String toString() {
-        return "DefaultGrantView [client=" + client + ", scopes=" + scopes + "]";
+        return "DefaultGrantView [client=" + client + ", scopes=" + scopes + ", grantDate=" + grantDate + "]";
     }
 
 }

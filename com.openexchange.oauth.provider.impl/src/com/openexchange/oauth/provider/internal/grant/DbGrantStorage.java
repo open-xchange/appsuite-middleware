@@ -241,7 +241,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT client, refresh_token, expiration_date, scopes FROM oauth_grant WHERE access_token = ? AND cid = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT client, refresh_token, expiration_date, scopes, creation_date FROM oauth_grant WHERE access_token = ? AND cid = ? AND user = ?");
             stmt.setString(1, accessToken.getBaseToken());
             stmt.setInt(2, contextId);
             stmt.setInt(3, userId);
@@ -255,6 +255,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
                 grant.setRefreshToken(new UserizedToken(userId, contextId, rs.getString(2)));
                 grant.setExpirationDate(new Date(rs.getLong(3)));
                 grant.setScopes(DefaultScopes.parseScope(rs.getString(4)));
+                grant.setCreationDate(new Date(rs.getLong(5)));
                 return grant;
             }
 
@@ -276,7 +277,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT client, access_token, expiration_date, scopes FROM oauth_grant WHERE refresh_token = ? AND cid = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT client, access_token, expiration_date, scopes, creation_date FROM oauth_grant WHERE refresh_token = ? AND cid = ? AND user = ?");
             stmt.setString(1, refreshToken.getBaseToken());
             stmt.setInt(2, contextId);
             stmt.setInt(3, userId);
@@ -290,6 +291,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
                 grant.setRefreshToken(refreshToken);
                 grant.setExpirationDate(new Date(rs.getLong(3)));
                 grant.setScopes(DefaultScopes.parseScope(rs.getString(4)));
+                grant.setCreationDate(new Date(rs.getLong(5)));
                 return grant;
             }
 
@@ -334,7 +336,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT client, access_token, refresh_token, expiration_date, scopes FROM oauth_grant WHERE cid = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT client, access_token, refresh_token, expiration_date, scopes, creation_date FROM oauth_grant WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
@@ -347,6 +349,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
                 grant.setRefreshToken(new UserizedToken(userId, contextId, rs.getString(3)));
                 grant.setExpirationDate(new Date(rs.getLong(4)));
                 grant.setScopes(DefaultScopes.parseScope(rs.getString(5)));
+                grant.setCreationDate(new Date(rs.getLong(6)));
                 grants.add(grant);
             }
 

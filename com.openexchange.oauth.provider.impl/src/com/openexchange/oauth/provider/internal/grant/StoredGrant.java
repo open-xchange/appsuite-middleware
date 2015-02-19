@@ -75,6 +75,8 @@ public class StoredGrant {
 
     private Date expirationDate;
 
+    private Date creationDate;
+
     public int getContextId() {
         return contextId;
     }
@@ -129,6 +131,14 @@ public class StoredGrant {
 
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
 }
