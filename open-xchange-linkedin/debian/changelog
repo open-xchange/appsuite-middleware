@@ -1,0 +1,5 @@
+open-xchange-linkedin (7.6.2-0) unstable; urgency=low
+
+  * Extracting LinkedIn integration into its own package due to special API access grants are necessary
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 19 Feb 2015 15:42:12 +0100
