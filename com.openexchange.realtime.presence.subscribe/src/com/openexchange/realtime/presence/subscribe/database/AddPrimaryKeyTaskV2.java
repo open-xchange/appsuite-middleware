@@ -65,25 +65,27 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
-
 /**
- * {@link AddPrimaryKeyTask}
+ * Used to add primary key in case the installation has been executed in that time the installation has been done without a primary key and the update task was marked as executed. {@link AddPrimaryKeyTaskV2}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.6.2
  */
-public class AddPrimaryKeyTask extends UpdateTaskAdapter {
+public class AddPrimaryKeyTaskV2 extends UpdateTaskAdapter {
 
     private final DatabaseService dbService;
 
     /**
-     * Initializes a new {@link AddPrimaryKeyTask}.
+     * Initializes a new {@link AddPrimaryKeyTaskV2}.
      */
-    public AddPrimaryKeyTask(DatabaseService dbService) {
+    public AddPrimaryKeyTaskV2(DatabaseService dbService) {
         super();
         this.dbService = dbService;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
@@ -111,7 +113,9 @@ public class AddPrimaryKeyTask extends UpdateTaskAdapter {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
