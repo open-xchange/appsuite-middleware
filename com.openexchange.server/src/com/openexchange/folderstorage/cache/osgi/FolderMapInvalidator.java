@@ -50,16 +50,17 @@
 package com.openexchange.folderstorage.cache.osgi;
 
 import java.io.Serializable;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
@@ -73,11 +74,6 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
 
     private static final String REGION = FolderMapManagement.REGION;
 
-    private static final String KEYP_FOLDER_ID = "folderId";
-    private static final String KEYP_TREE_ID = "treeId";
-    private static final String KEYP_USER_ID = "userId";
-    private static final String KEYP_CONTEXT_ID = "contextId";
-
     /**
      * Gets the invalidation key for given arguments.
      *
@@ -87,17 +83,19 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
      * @param contextId The context identifier
      * @return The appropriate invalidation key
      */
-    public static String keyFor(String folderId, String treeId, int optUser, int contextId) {
-        JSONObject jKey = new JSONObject(6);
-        if (null != folderId) {
-            try { jKey.put(KEYP_FOLDER_ID, folderId); } catch (JSONException e) { /* Cannot occur */ }
+    public static CacheKey keyFor(String folderId, String treeId, int optUser, int contextId) {
+        CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null == service) {
+            return null;
         }
-        if (null != treeId) {
-            try { jKey.put(KEYP_TREE_ID, treeId); } catch (JSONException e) { /* Cannot occur */ }
+
+        if (null != folderId && null != treeId) {
+            return service.newCacheKey(contextId, Integer.toString(optUser), treeId, folderId);
         }
-        try { jKey.put(KEYP_USER_ID, optUser); } catch (JSONException e) { /* Cannot occur */ }
-        try { jKey.put(KEYP_CONTEXT_ID, contextId); } catch (JSONException e) { /* Cannot occur */ }
-        return jKey.toString();
+        if (optUser > 0) {
+            return service.newCacheKey(contextId, Integer.toString(optUser));
+        }
+        return service.newCacheKey(contextId, new String[0]);
     }
 
     private final BundleContext context;
@@ -133,27 +131,17 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
      * @param cacheKey The cache key to handle
      */
     public static void handleCacheKey(Serializable cacheKey) {
-        JSONObject jKey = optJsonObject(String.valueOf(cacheKey));
-        if (null != jKey) {
-            String folderId = jKey.optString(KEYP_FOLDER_ID);
-            String treeId = jKey.optString(KEYP_TREE_ID);
-            int optUser = jKey.optInt(KEYP_USER_ID, -1);
-            int contextId = jKey.optInt(KEYP_CONTEXT_ID, -1);
-            if (null == folderId && null == treeId && optUser <= 0) {
-                FolderMapManagement.getInstance().dropFor(contextId, false);
-            } else if (null == folderId && null == treeId && optUser > 0) {
-                FolderMapManagement.getInstance().dropFor(optUser, contextId, false);
-            } else {
-                FolderMapManagement.getInstance().dropFor(folderId, treeId, optUser, contextId, null, false);
+        if (cacheKey instanceof CacheKey) {
+            CacheKey key = (CacheKey) cacheKey;
+            Serializable[] keys = key.getKeys();
+            int length = keys.length;
+            if (0 == length) {
+                FolderMapManagement.getInstance().dropFor(key.getContextId(), false);
+            } else if (1 == length) {
+                FolderMapManagement.getInstance().dropFor(Integer.parseInt(keys[0].toString()), key.getContextId(), false);
+            } else if (3 == length) {
+                FolderMapManagement.getInstance().dropFor(keys[2].toString(), keys[1].toString(), Integer.parseInt(keys[0].toString()), key.getContextId(), null, false);
             }
-        }
-    }
-
-    private static JSONObject optJsonObject(String key)  {
-        try {
-            return new JSONObject(key);
-        } catch (JSONException e) {
-            return null;
         }
     }
 
