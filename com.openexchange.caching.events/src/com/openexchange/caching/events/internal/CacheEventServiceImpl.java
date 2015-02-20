@@ -221,6 +221,12 @@ public final class CacheEventServiceImpl implements CacheEventService {
             return;
         }
 
+        if (!fromRemote) {
+            System.out.println("Firing event: " + event);
+        } else {
+            System.out.println("Received event: " + event);
+        }
+
         LOG.debug("Notifying {} listener(s) about {} event: {}", Integer.valueOf(listeners.size()), fromRemote ? "remote" : "local", event);
 
         ExecutorService executorService = getExecutorService();
