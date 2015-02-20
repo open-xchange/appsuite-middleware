@@ -49,10 +49,12 @@
 
 package com.openexchange.tools.images.transformations;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import org.imgscalr.Scalr;
+import org.imgscalr.Scalr.Method;
 import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.impl.AutoDimensionConstrain;
@@ -95,10 +97,16 @@ public class ScaleTransformation implements ImageTransformation {
             break;
         }
         transformationContext.addExpense(ImageTransformations.HIGH_EXPENSE);
-        ResampleOp resampleOp = new ResampleOp(constrain);
-        // Do not use more than calling thread
-        resampleOp.setNumberOfThreads(1);
-        return resampleOp.filter(sourceImage, null);
+        Dimension dimension = constrain.getDimension(new Dimension(sourceImage.getWidth(), sourceImage.getHeight()));
+        int targetWidth = (int) dimension.getWidth();
+        int targetHeight = (int) dimension.getHeight();
+        final BufferedImage resize;
+        if (ScaleType.COVER == scaleType) {
+            resize = Scalr.resize(sourceImage, Method.SPEED, targetWidth, targetHeight);
+        } else {
+            resize = Scalr.resize(sourceImage, targetWidth, targetHeight);
+        }
+        return resize;
     }
 
     @Override
