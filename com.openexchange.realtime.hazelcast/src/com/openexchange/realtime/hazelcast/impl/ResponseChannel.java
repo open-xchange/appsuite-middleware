@@ -93,9 +93,10 @@ public class ResponseChannel implements Channel {
      * Set up/prepare the channel for sending a Stanza. This includes replacing the from ID with a channel specific internal ID
      * @param uuid the unique id to use for sending this Stanza
      * @param stanza the Stanza to send
+     * @return A generated id that has to be reused in {@link ResponseChannel#waitFor(ID, long, TimeUnit)}
      * @throws OXException
      */
-    public void setUp(String uuid, Stanza stanza) throws OXException {
+    public ID setUp(String uuid, Stanza stanza) throws OXException {
         ID id = getId(uuid);
         ReentrantLock lock = new ReentrantLock();
         locks.put(id, lock);
@@ -103,18 +104,18 @@ public class ResponseChannel implements Channel {
         Resource res = new DefaultResource();
         directory.set(id, res);
         stanza.setFrom(id);
+        return id;
     }
 
     /**
      * Wait "synchronously" for the arrival of a response Stanza addressed for a given unique id.
-     * @param uuid the unique id used during {@link ResponseChannel#setUp(String, Stanza)}
-     * @param timeout duration to wait for the arrival or the expected response 
+     * @param id the id created during {@link ResponseChannel#setUp(String, Stanza)}
+     * @param timeout duration to wait for the arrival or the expected response
      * @param unit timout unit
      * @return the Stanza representing the response that we are waiting for
      * @throws OXException if no Stanza was received within the given timout
      */
-    public Stanza waitFor(String uuid, long timeout, TimeUnit unit) throws OXException {
-        ID id = getId(uuid);
+    public Stanza waitFor(ID id, long timeout, TimeUnit unit) throws OXException {
         try {
             locks.get(id).lock();
             Stanza stanza = responses.get(id);
@@ -188,7 +189,7 @@ public class ResponseChannel implements Channel {
     }
 
     /**
-     * 
+     *
      */
     @Override
     public void send(Stanza stanza, ID recipient) throws OXException {

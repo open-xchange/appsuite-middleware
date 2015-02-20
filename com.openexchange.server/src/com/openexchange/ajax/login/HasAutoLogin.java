@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,48 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.ajax.login;
 
-import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
-import static com.openexchange.kerberos.KerberosUtils.SESSION_SUBJECT;
-import com.openexchange.ajax.SessionServletInterceptor;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionExceptionCodes;
+import static com.openexchange.ajax.AJAXServlet.ACTION_AUTOLOGIN;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * Throws a SES-0212 error if the session has been migrated and does not contain the Kerberos tickets anymore.
+ * {@link HasAutoLogin} implements the hasAutoLogin action.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @since 7.6.0
+ * @since 7.6.2
  */
-public final class MissingKerberosTicketInterceptor implements SessionServletInterceptor {
+public final class HasAutoLogin implements LoginRequestHandler {
 
-    public MissingKerberosTicketInterceptor() {
+    private static final Logger LOG = LoggerFactory.getLogger(HasAutoLogin.class);
+
+    private final LoginConfiguration conf;
+
+    public HasAutoLogin(LoginConfiguration conf) {
         super();
+        this.conf = conf;
     }
 
     @Override
-    public void intercept(Session session) throws OXException {
-        if (!session.containsParameter(SESSION_SUBJECT) || !session.containsParameter(SESSION_PRINCIPAL)) {
-            throw SessionExceptionCodes.KERBEROS_TICKET_MISSING.create(session.getSessionID());
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Tools.disableCaching(resp);
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+        try {
+            final JSONObject json = new JSONObject(2);
+            json.put(ACTION_AUTOLOGIN, conf.isSessiondAutoLogin());
+            json.write(resp.getWriter());
+        } catch (JSONException e) {
+            LOG.error(LoginServlet.RESPONSE_ERROR, e);
+            LoginServlet.sendError(resp);
         }
     }
 }

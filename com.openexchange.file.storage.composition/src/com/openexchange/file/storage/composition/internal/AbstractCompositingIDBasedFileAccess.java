@@ -778,81 +778,81 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             postEvent(FileStorageEventHelper.buildCreateEvent(
                 session, serviceID, accountID, newFolderID.toUniqueID(), newID.toUniqueID(), document.getFileName()));
             return newID.toUniqueID();
+        }
+
+        /*
+         * Update existing file
+         */
+        FileID sourceFileID = new FileID(document.getId());
+        if (null == sourceFileID.getFolderId()) {
+            // preserve folder information also for infostore items
+            sourceFileID.setFolderId(document.getFolderId());
+        }
+        String serviceID = sourceFileID.getService();
+        String accountID = sourceFileID.getAccountId();
+        final FolderID targetFolderID;
+        if (null == document.getFolderId()) {
+            targetFolderID = new FolderID(serviceID, accountID, sourceFileID.getFolderId());
         } else {
-            /*
-             * update existing file
-             */
-            FileID sourceFileID = new FileID(document.getId());
-            if (null == sourceFileID.getFolderId()) {
-                // preserve folder information also for infostore items
-                sourceFileID.setFolderId(document.getFolderId());
-            }
-            String serviceID = sourceFileID.getService();
-            String accountID = sourceFileID.getAccountId();
-            final FolderID targetFolderID;
-            if (null == document.getFolderId()) {
-                targetFolderID = new FolderID(serviceID, accountID, sourceFileID.getFolderId());
-            } else {
-                targetFolderID = new FolderID(document.getFolderId());
-                if (false == serviceID.equals(targetFolderID.getService()) || false == accountID.equals(targetFolderID.getAccountId())) {
-                    /*
-                     * special handling for move between storages
-                     */
-                    return move(document, data, sequenceNumber, modifiedColumns, ignoreWarnings);
-                }
-            }
-            FileStorageFileAccess fileAccess = getFileAccess(serviceID, accountID);
-            final IDTuple sourceIDTuple = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
-            ensureFolderIDs(fileAccess, Collections.singletonList(sourceIDTuple));
-            if (null != document.getFolderId() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
+            targetFolderID = new FolderID(document.getFolderId());
+            if (false == serviceID.equals(targetFolderID.getService()) || false == accountID.equals(targetFolderID.getAccountId())) {
                 /*
-                 * special handling for move to different folder
+                 * Special handling for move between storages
                  */
-                FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceIDTuple.getFolder());
-                document.setFolderId(sourceIDTuple.getFolder());
-                document.setId(sourceIDTuple.getId());
-                IDTuple result = new TransactionAwareFileAccessDelegation<IDTuple>() {
-
-                    @Override
-                    protected IDTuple callInTransaction(FileStorageFileAccess access) throws OXException {
-                        return access.move(sourceIDTuple, targetFolderID.getFolderId(), sequenceNumber, document, modifiedColumns);
-                    }
-                }.call(fileAccess);
-
-                FileID newFileID = new FileID(targetFolderID.getService(), targetFolderID.getAccountId(), result.getFolder(), result.getId());
-                FolderID newFolderID = new FolderID(targetFolderID.getService(), targetFolderID.getAccountId(), result.getFolder());
-                postEvent(FileStorageEventHelper.buildDeleteEvent(
-                    session,
-                    sourceFileID.getService(),
-                    sourceFileID.getAccountId(),
-                    sourceFolderID.toUniqueID(),
-                    sourceFileID.toUniqueID(),
-                    document.getFileName(),
-                    null));
-                postEvent(FileStorageEventHelper.buildCreateEvent(
-                    session,
-                    newFileID.getService(),
-                    newFileID.getAccountId(),
-                    newFolderID.toUniqueID(),
-                    newFileID.toUniqueID(),
-                    document.getFileName()));
-                return newFileID.toUniqueID();
-            } else {
-                /*
-                 * update without move
-                 */
-                document.setFolderId(targetFolderID.getFolderId());
-                document.setId(sourceFileID.getFileId());
-                IDTuple result = saveDelegation.call(getFileAccess(serviceID, accountID));
-                FileID newFileID = new FileID(serviceID, accountID, result.getFolder(), result.getId());
-                FolderID newFolderID = new FolderID(serviceID, accountID, result.getFolder());
-                document.setId(newFileID.toUniqueID());
-                document.setFolderId(newFolderID.toUniqueID());
-                postEvent(FileStorageEventHelper.buildUpdateEvent(
-                    session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
-                return newFileID.toUniqueID();
+                return move(document, data, sequenceNumber, modifiedColumns, ignoreWarnings);
             }
         }
+        FileStorageFileAccess fileAccess = getFileAccess(serviceID, accountID);
+        final IDTuple sourceIDTuple = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
+        ensureFolderIDs(fileAccess, Collections.singletonList(sourceIDTuple));
+        if (null != document.getFolderId() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
+            /*
+             * Special handling for move to different folder
+             */
+            FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceIDTuple.getFolder());
+            document.setFolderId(sourceIDTuple.getFolder());
+            document.setId(sourceIDTuple.getId());
+            IDTuple result = new TransactionAwareFileAccessDelegation<IDTuple>() {
+
+                @Override
+                protected IDTuple callInTransaction(FileStorageFileAccess access) throws OXException {
+                    return access.move(sourceIDTuple, targetFolderID.getFolderId(), sequenceNumber, document, modifiedColumns);
+                }
+            }.call(fileAccess);
+
+            FileID newFileID = new FileID(targetFolderID.getService(), targetFolderID.getAccountId(), result.getFolder(), result.getId());
+            FolderID newFolderID = new FolderID(targetFolderID.getService(), targetFolderID.getAccountId(), result.getFolder());
+            postEvent(FileStorageEventHelper.buildDeleteEvent(
+                session,
+                sourceFileID.getService(),
+                sourceFileID.getAccountId(),
+                sourceFolderID.toUniqueID(),
+                sourceFileID.toUniqueID(),
+                document.getFileName(),
+                null));
+            postEvent(FileStorageEventHelper.buildCreateEvent(
+                session,
+                newFileID.getService(),
+                newFileID.getAccountId(),
+                newFolderID.toUniqueID(),
+                newFileID.toUniqueID(),
+                document.getFileName()));
+            return newFileID.toUniqueID();
+        }
+
+        /*
+         * Update without move
+         */
+        document.setFolderId(targetFolderID.getFolderId());
+        document.setId(sourceFileID.getFileId());
+        IDTuple result = saveDelegation.call(getFileAccess(serviceID, accountID));
+        FileID newFileID = new FileID(serviceID, accountID, result.getFolder(), result.getId());
+        FolderID newFolderID = new FolderID(serviceID, accountID, result.getFolder());
+        document.setId(newFileID.toUniqueID());
+        document.setFolderId(newFolderID.toUniqueID());
+        postEvent(FileStorageEventHelper.buildUpdateEvent(
+            session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
+        return newFileID.toUniqueID();
     }
 
 

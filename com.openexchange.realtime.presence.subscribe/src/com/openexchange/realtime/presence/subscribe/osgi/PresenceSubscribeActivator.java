@@ -62,6 +62,7 @@ import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.database.AddPrimaryKeyTask;
+import com.openexchange.realtime.presence.subscribe.database.AddPrimaryKeyTaskV2;
 import com.openexchange.realtime.presence.subscribe.database.AddUUIDColumnTask;
 import com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB;
 import com.openexchange.realtime.presence.subscribe.database.PresenceSubscriptionsTable;
@@ -96,7 +97,8 @@ public class PresenceSubscribeActivator extends HousekeepingActivator {
                 return Arrays.asList(
                     new CreatePresenceSubscriptionDB(dbService),
                     new AddUUIDColumnTask(dbService),
-                    new AddPrimaryKeyTask(dbService));
+                    new AddPrimaryKeyTask(dbService),
+                    new AddPrimaryKeyTaskV2(dbService));
             }
         });
     }

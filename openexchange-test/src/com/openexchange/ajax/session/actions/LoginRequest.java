@@ -52,6 +52,7 @@ package com.openexchange.ajax.session.actions;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 
 /**
@@ -124,7 +125,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
      */
     public LoginRequest(TokenLoginParameters parameters, boolean failOnError) {
         this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_REDEEM_TOKEN),
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, LoginServlet.ACTION_REDEEM_TOKEN),
             new URLParameter(LoginFields.AUTHID_PARAM, parameters.getAuthId()),
             new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient()),
             new URLParameter(LoginFields.VERSION_PARAM, parameters.getVersion()),

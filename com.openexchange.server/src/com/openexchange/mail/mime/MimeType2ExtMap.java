@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -65,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.SystemConfig;
@@ -245,7 +245,7 @@ public final class MimeType2ExtMap {
         ConcurrentMap<String, List<String>> em = extMap;
         List<String> list = em.get(mimeType);
         if (null == list) {
-            List<String> nl = new ArrayList<String>(2);
+            List<String> nl = new CopyOnWriteArrayList<String>();
             list = em.putIfAbsent(mimeType, nl);
             if (null == list) {
                 list = nl;
@@ -499,7 +499,7 @@ public final class MimeType2ExtMap {
             String[] tokens = entry.split("[ \t\n\r\f]+");
             if (tokens.length > 1) {
                 String type = toLowerCase(tokens[0]);
-                List<String> set = new ArrayList<String>();
+                List<String> set = new CopyOnWriteArrayList<String>();
                 for (int i = 1; i < tokens.length; i++) {
                     String ext = toLowerCase(tokens[i]);
                     set.add(ext);

@@ -47,31 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.session;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
-import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
-import static com.openexchange.kerberos.KerberosUtils.SESSION_SUBJECT;
-import com.openexchange.ajax.SessionServletInterceptor;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
- * Throws a SES-0212 error if the session has been migrated and does not contain the Kerberos tickets anymore.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @since 7.6.0
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class MissingKerberosTicketInterceptor implements SessionServletInterceptor {
+public class SaveNoCopy implements PreferencesItemService {
 
-    public MissingKerberosTicketInterceptor() {
+    /**
+     * Default constructor.
+     */
+    public SaveNoCopy() {
         super();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void intercept(Session session) throws OXException {
-        if (!session.containsParameter(SESSION_SUBJECT) || !session.containsParameter(SESSION_PRINCIPAL)) {
-            throw SessionExceptionCodes.KERBEROS_TICKET_MISSING.create(session.getSessionID());
-        }
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "savenocopy" };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IValueHandler getSharedValue() {
+        return new AbstractMailFuncs() {
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
+            }
+            @Override
+            protected Boolean isSet(final UserSettingMail settings) {
+                return Boolean.valueOf(settings.isNoCopyIntoStandardSentFolder());
+            }
+            @Override
+            protected void setValue(final UserSettingMail settings,
+                final String value) {
+                settings.setNoCopyIntoStandardSentFolder(Boolean.parseBoolean(value));
+            }
+        };
     }
 }

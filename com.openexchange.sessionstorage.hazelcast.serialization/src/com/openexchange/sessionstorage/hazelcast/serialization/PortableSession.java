@@ -190,9 +190,10 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 StringAppender serializableNames = new StringAppender(':');
                 for (String parameterName : remoteParameterNames) {
                     Object value = parameters.get(parameterName);
-                    if (value instanceof String) {
+                    if (isSerializablePojo(value)) {
+                        String sValue = value.toString();
                         names.append(parameterName);
-                        values.append(getSafeValue(value.toString()));
+                        values.append(getSafeValue(sValue));
                     } else if (value instanceof Serializable) {
                         serializableNames.append(parameterName);
                         byte[] bytes = SerializationUtils.serialize((Serializable) value);

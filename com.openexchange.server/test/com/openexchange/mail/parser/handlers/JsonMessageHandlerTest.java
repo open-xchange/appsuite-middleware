@@ -381,6 +381,9 @@ public class JsonMessageHandlerTest extends TestCase {
             final MailMessage mail = MimeMessageConverter.convertMessage(bytes);
 
             // Preps
+            MimeType2ExtMap.addMimeType("application/pdf", "pdf");
+            MimeType2ExtMap.addMimeType("application/rtf", "rtf");
+            MimeType2ExtMap.addMimeType("application/ics", "ics");
 
             ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
 

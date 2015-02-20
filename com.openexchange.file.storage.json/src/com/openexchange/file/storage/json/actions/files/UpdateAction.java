@@ -98,6 +98,7 @@ public class UpdateAction extends AbstractWriteAction {
         FileID id = new FileID(file.getId());
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
+        String fileId = file.getId();
         if (request.hasUploads()) {
             String result;
             if (request.getBoolParameter("ignoreVersion") &&
