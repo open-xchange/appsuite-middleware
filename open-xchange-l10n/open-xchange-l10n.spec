@@ -343,6 +343,22 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package nb-no
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for nb_NO
+Provides:       open-xchange-lang-community-no-nb = %{version}
+Obsoletes:      open-xchange-lang-community-no-nb < %{version}
+
+%description nb-no
+Package containing Open-Xchange backend localization for nb_NO
+This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package nl-nl
 Group:		Applications/Productivity
 Summary:	Package containing Open-Xchange backend localization for nl_NL
@@ -355,22 +371,6 @@ Package containing Open-Xchange backend localization for nl_NL
 Authors:
 --------
     Open-Xchange
-
-#-------------------------------------------------------------------------------------
-
-#%package no-nb
-#Group:      Applications/Productivity
-#Summary:    Package containing Open-Xchange backend localization for no_NB
-#Provides:       open-xchange-lang-community-no-nb = %{version}
-#Obsoletes:      open-xchange-lang-community-no-nb < %{version}
-#
-#%description no-nb
-#Package containing Open-Xchange backend localization for no_NB
-#This localization package are driven by the community.
-#
-#Authors:
-#--------
-#    Open-Xchange
 
 #-------------------------------------------------------------------------------------
 
@@ -566,7 +566,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fi_FI fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
+for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fi_FI fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nb_NO nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
 
@@ -666,6 +666,11 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*lv_LV*
+
+%files nb-no
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*nb_NO*
 
 %files nl-nl
 %defattr(-,root,root)

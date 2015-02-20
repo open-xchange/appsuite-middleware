@@ -148,20 +148,20 @@ Replaces: open-xchange-lang-lv-lv (<< 6.21.0-0)
 Conflicts: open-xchange-lang-lv-lv (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for lv_LV
 
+Package: open-xchange-l10n-nb-no
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Replaces: open-xchange-lang-community-no-nb (<< 6.21.0-0)
+Conflicts: open-xchange-lang-community-no-nb (<< 6.21.0-0)
+Description: Package containing Open-Xchange backend localization for nb_NO
+ This localization package are driven by the community.
+
 Package: open-xchange-l10n-nl-nl
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Replaces: open-xchange-lang-nl-nl (<< 6.21.0-0)
 Conflicts: open-xchange-lang-nl-nl (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for nl_NL
-
-#Package: open-xchange-l10n-no-nb
-#Architecture: all
-#Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-#Replaces: open-xchange-lang-community-no-nb (<< 6.21.0-0)
-#Conflicts: open-xchange-lang-community-no-nb (<< 6.21.0-0)
-#Description: Package containing Open-Xchange backend localization for no_NB
-# This localization package are driven by the community.
 
 Package: open-xchange-l10n-pl-pl
 Architecture: all
