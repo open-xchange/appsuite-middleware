@@ -246,7 +246,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
                 /*
                  * notify listeners
                  */
-                LOG.info("Notifying {} listener(s) about {} event: {}", Integer.valueOf(listeners.size()), fromRemote ? "remote" : "local", event);
+                LOG.debug("Notifying {} listener(s) about {} event: {}", Integer.valueOf(listeners.size()), fromRemote ? "remote" : "local", event);
                 for (CacheListener listener : listeners) {
                     try {
                         listener.onEvent(sender, event, fromRemote);
