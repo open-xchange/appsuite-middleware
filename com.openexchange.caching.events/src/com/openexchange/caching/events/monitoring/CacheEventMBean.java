@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,34 @@
  *
  */
 
-package com.openexchange.caching.events.osgi;
-
-import com.openexchange.caching.events.CacheEventService;
-import com.openexchange.caching.events.internal.CacheEventServiceImpl;
-import com.openexchange.caching.events.internal.CacheEventServiceLookup;
-import com.openexchange.caching.events.monitoring.ManagementRegisterer;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
+package com.openexchange.caching.events.monitoring;
 
 /**
- * {@link CacheEventServiceActivator}
+ * {@link CacheEventMBean}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CacheEventServiceActivator extends HousekeepingActivator {
+public interface CacheEventMBean {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
+    /** The domain of the MBean */
+    static final String DOMAIN = "com.openexchange.caching";
 
-    private volatile CacheEventServiceImpl service;
+    /** The name of the MBean */
+    static final String NAME = "CacheEventInformation";
 
     /**
-     * Initializes a new {@link CacheEventServiceActivator}.
+     * Gets the number of events that are waiting for asynchronous delivery.
      */
-    public CacheEventServiceActivator() {
-        super();
-    }
+    long getEnqueuedEvents();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class };
-    }
+    /**
+     * Returns the average number of posted events per minute.
+     */
+    long getEventsPerMinute();
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
-        CacheEventServiceLookup.set(this);
-        CacheEventServiceImpl service = new CacheEventServiceImpl();
-        this.service = service;
-        registerService(CacheEventService.class, service);
-        try {
-            track(ManagementService.class, new ManagementRegisterer(service, context));
-        openTrackers();
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
-        CacheEventServiceImpl service = this.service;
-        if (null != service) {
-            service.shutdown();
-            this.service = null;
-        }
-        CacheEventServiceLookup.set(null);
-        super.stopBundle();
-    }
+    /**
+     * Gets the total count of events that have been posted until now.
+     */
+    long getTotalEventCount();
 
 }
