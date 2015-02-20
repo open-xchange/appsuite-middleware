@@ -58,7 +58,7 @@
 
     <!-- ******************************************************* -->
     <!-- ************** Release 7.8.0 starts here ************** -->
-    <!-- ******************************************************* -->
+    <!-- *******************************************************
 
     <changeSet id="7.8.0:guest:create" author="martin.schneider@open-xchange.com">
         <preConditions onFail="MARK_RAN">
@@ -165,4 +165,5 @@
     <changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
         <tagDatabase tag="7.8.0-milestone" />
     </changeSet>
+    -->
 </databaseChangeLog>
