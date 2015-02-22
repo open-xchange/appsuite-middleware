@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.MessageRemovedException;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -243,7 +244,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         }
 
                         mailPart = ret;
-                        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
                         if (exactLength) {
                             sink = new ThresholdFileHolder();
                             InputStream in = Streams.getNonEmpty(ret.getInputStream());
@@ -312,7 +313,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     if (isEmpty(mailPart.getFileName())) {
                         mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
                     }
-                    boolean exactLength = !saveToDisk || AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                    boolean exactLength = !saveToDisk || AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
                     if (exactLength) {
                         if (null == sink) {
                             sink = new ThresholdFileHolder();
@@ -332,7 +333,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
 
-                boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
                 if (exactLength) {
                     sink = new ThresholdFileHolder();
                     InputStream in = Streams.getNonEmpty(mailPart.getInputStream());
@@ -395,6 +396,11 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private boolean clientRequestsRange(MailRequest req) {
+        HttpServletRequest servletRequest = req.getRequest().optHttpServletRequest();
+        return (null != servletRequest && null != servletRequest.getHeader("Range"));
     }
 
     private boolean fileNameIndicatesHtml(String fileName) {
