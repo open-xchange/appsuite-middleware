@@ -246,7 +246,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
                         if (exactLength) {
                             sink = new ThresholdFileHolder();
-                            InputStream in = Streams.bufferedInputStreamFor(ret.getInputStream());
+                            InputStream in = Streams.getNonEmpty(ret.getInputStream());
                             sink.write(null == in ? Streams.EMPTY_INPUT_STREAM : in);
                             size = sink.getLength();
                         } else {
@@ -316,7 +316,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     if (exactLength) {
                         if (null == sink) {
                             sink = new ThresholdFileHolder();
-                            InputStream in = Streams.bufferedInputStreamFor(mailPart.getInputStream());
+                            InputStream in = Streams.getNonEmpty(mailPart.getInputStream());
                             sink.write(null == in ? Streams.EMPTY_INPUT_STREAM : in);
                             size = sink.getLength();
                         }
@@ -335,7 +335,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
                 if (exactLength) {
                     sink = new ThresholdFileHolder();
-                    InputStream in = Streams.bufferedInputStreamFor(mailPart.getInputStream());
+                    InputStream in = Streams.getNonEmpty(mailPart.getInputStream());
                     sink.write(null == in ? Streams.EMPTY_INPUT_STREAM : in);
                     size = sink.getLength();
                 } else {
