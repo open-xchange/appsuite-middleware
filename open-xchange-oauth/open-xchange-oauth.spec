@@ -57,7 +57,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-CONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties twitteroauth.properties yahoooauth.properties"
+CONFFILES="deferrer.properties oauth.properties facebookoauth.properties twitteroauth.properties yahoooauth.properties"
 for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
@@ -68,7 +68,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    PROTECT="facebookoauth.properties linkedinoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+    PROTECT="facebookoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
     for FILE in $PROTECT; do
         ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
     done
@@ -80,14 +80,6 @@ if [ ${1:-0} -eq 2 ]; then
            ox_set_property com.openexchange.oauth.yahoo false $pfile
        else
            ox_set_property com.openexchange.oauth.yahoo true $pfile
-       fi
-    fi
-    pfile=/opt/open-xchange/etc/linkedinoauth.properties
-    if ! ox_exists_property com.openexchange.oauth.linkedin $pfile; then
-       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_THE_KEY_FROM' $pfile > /dev/null; then
-           ox_set_property com.openexchange.oauth.linkedin false $pfile
-       else
-           ox_set_property com.openexchange.oauth.linkedin true $pfile
        fi
     fi
     pfile=/opt/open-xchange/etc/facebookoauth.properties
@@ -125,7 +117,6 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/dropboxoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
 %config(noreplace) /opt/open-xchange/etc/oauth.properties
 %config(noreplace) /opt/open-xchange/etc/twitteroauth.properties

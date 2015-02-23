@@ -538,7 +538,7 @@ public final class ConfigJSlobService implements JSlobService {
             final ConfigTree configTree = ConfigTree.getInstance();
 
             final Set<Entry<String, String>> entrySet = equiv.config2lob.entrySet();
-            final JSONObject jObject = new JSONObject(entrySet.size());
+            final JSONObject jObject = new JSONObject(jsLob.getJsonObject());
             for (final Map.Entry<String, String> mapping : entrySet) {
                 final String configTreePath = mapping.getKey();
                 final String lobPath = mapping.getValue();
@@ -552,7 +552,7 @@ public final class ConfigJSlobService implements JSlobService {
                 }
             }
 
-            jsLob.setJsonObject(JSONUtil.rightMerge(jsLob.getJsonObject(), jObject));
+            jsLob.setJsonObject(jObject);
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException rte) {
@@ -702,13 +702,13 @@ public final class ConfigJSlobService implements JSlobService {
         }
     }
 
-    private void updateConfigTreeSetting(final String prefix, final JSONObject jObject, final ConfigTree configTree, final Map<String, String> attribute2ConfigTreeMap, final SettingStorage stor, final List<List<JSONPathElement>> pathsToPurge, final CompletionServiceReference cr) {
+    private void updateConfigTreeSetting(final String prefix, final JSONObject jObject, final ConfigTree configTree, final Map<String, String> attribute2ConfigTreeMap, final SettingStorage stor, final List<List<JSONPathElement>> pathsToPurge, final CompletionServiceReference cr) throws OXException {
         for (final Entry<String, Object> entry : jObject.entrySet()) {
             final String key = prefix + entry.getKey();
             final Object value = entry.getValue();
             String path = attribute2ConfigTreeMap.get(key);
             if (path != null) {
-                pathsToPurge.add(Arrays.asList(new JSONPathElement(key)));
+                pathsToPurge.add(JSONPathElement.parsePath(key));
                 if (path.length() > 0 && path.charAt(0) == '/') {
                     path = path.substring(1);
                 }

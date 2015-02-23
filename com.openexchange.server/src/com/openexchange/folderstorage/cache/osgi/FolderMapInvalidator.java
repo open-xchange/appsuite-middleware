@@ -60,6 +60,7 @@ import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -116,10 +117,12 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
 
-            String region = cacheEvent.getRegion();
-            if (REGION.equals(region)) {
-                for (Serializable cacheKey : cacheEvent.getKeys()) {
-                    handleCacheKey(cacheKey);
+            if (REGION.equals(cacheEvent.getRegion())) {
+                int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
+                if (contextId > 0) {
+                    for (Serializable cacheKey : cacheEvent.getKeys()) {
+                        handleCacheKey(cacheKey, contextId);
+                    }
                 }
             }
         }
@@ -130,17 +133,17 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
      *
      * @param cacheKey The cache key to handle
      */
-    public static void handleCacheKey(Serializable cacheKey) {
+    public static void handleCacheKey(Serializable cacheKey, int contextId) {
         if (cacheKey instanceof CacheKey) {
             CacheKey key = (CacheKey) cacheKey;
             Serializable[] keys = key.getKeys();
             int length = keys.length;
             if (0 == length) {
-                FolderMapManagement.getInstance().dropFor(key.getContextId(), false);
+                FolderMapManagement.getInstance().dropFor(contextId, false);
             } else if (1 == length) {
-                FolderMapManagement.getInstance().dropFor(Integer.parseInt(keys[0].toString()), key.getContextId(), false);
+                FolderMapManagement.getInstance().dropFor(Integer.parseInt(keys[0].toString()), contextId, false);
             } else if (3 == length) {
-                FolderMapManagement.getInstance().dropFor(keys[2].toString(), keys[1].toString(), Integer.parseInt(keys[0].toString()), key.getContextId(), null, false);
+                FolderMapManagement.getInstance().dropFor(keys[2].toString(), keys[1].toString(), Tools.getUnsignedInteger(keys[0].toString()), contextId, null, false);
             }
         }
     }

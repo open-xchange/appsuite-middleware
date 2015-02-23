@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.MessageRemovedException;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -224,6 +225,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             long size = -1L; /* mail system does not provide exact size */
             MailPart mailPart = null;
             IFileHolder.InputStreamClosure isClosure = null;
+            ThresholdFileHolder sink = null;
 
             if (imageContentId == null) {
                 // Check if part should be fetched from a previously "fixed" message
@@ -243,19 +245,22 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                             throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, uid, folderPath);
                         }
 
-                        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
-                        if (exactLength) {
-                            size = Streams.countInputStream(ret.getInputStream());
-                        }
-
                         mailPart = ret;
-                        isClosure = new IFileHolder.InputStreamClosure() {
+                        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+                        if (exactLength) {
+                            sink = new ThresholdFileHolder();
+                            InputStream in = Streams.getNonEmpty(ret.getInputStream());
+                            sink.write(null == in ? Streams.EMPTY_INPUT_STREAM : in);
+                            size = sink.getLength();
+                        } else {
+                            isClosure = new IFileHolder.InputStreamClosure() {
 
-                            @Override
-                            public InputStream newStream() throws OXException, IOException {
-                                return ret.getInputStream();
-                            }
-                        };
+                                @Override
+                                public InputStream newStream() throws OXException, IOException {
+                                    return ret.getInputStream();
+                                }
+                            };
+                        }
                     }
                 }
 
@@ -302,16 +307,26 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                             return Streams.newByteArrayInputStream(bytes);
                         }
                     };
+                    if (null != sink) {
+                        Streams.close(sink);
+                        sink = null;
+                    }
                 } else {
                     if (isEmpty(mailPart.getFileName())) {
                         mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
                     }
-                    boolean exactLength = !saveToDisk || AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                    boolean exactLength = !saveToDisk || AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
                     if (exactLength) {
-                        size = Streams.countInputStream(mailPart.getInputStream());
-                    }
-                    if (null == isClosure) {
-                        isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, sequenceId, false, req.getSession());
+                        if (null == sink) {
+                            sink = new ThresholdFileHolder();
+                            InputStream in = Streams.getNonEmpty(mailPart.getInputStream());
+                            sink.write(null == in ? Streams.EMPTY_INPUT_STREAM : in);
+                            size = sink.getLength();
+                        }
+                    } else {
+                        if (null == isClosure) {
+                            isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, sequenceId, false, req.getSession());
+                        }
                     }
                 }
             } else {
@@ -320,27 +335,46 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
 
-                boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
                 if (exactLength) {
-                    size = Streams.countInputStream(mailPart.getInputStream());
+                    sink = new ThresholdFileHolder();
+                    InputStream in = Streams.getNonEmpty(mailPart.getInputStream());
+                    sink.write(null == in ? Streams.EMPTY_INPUT_STREAM : in);
+                    size = sink.getLength();
+                } else {
+                    isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, imageContentId, true, req.getSession());
                 }
-                isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, imageContentId, true, req.getSession());
             }
 
             // Check for image data
             AJAXRequestData requestData = req.getRequest();
             boolean isPreviewImage = "preview_image".equals(requestData.getFormat());
+            String baseType = mailPart.getContentType().getBaseType();
+            String filename = getFileName(fileNameFromRequest, mailPart.getFileName(), baseType);
 
             // Read from stream
-            FileHolder fileHolder;
+            IFileHolder fileHolder;
             if (saveToDisk) {
-                String filename = getFileName(fileNameFromRequest, mailPart.getFileName(), mailPart.getContentType().getBaseType());
-                fileHolder = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
-                fileHolder.setDelivery("download");
+                if (null == sink) {
+                    @SuppressWarnings("resource")
+                    FileHolder tmp = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
+                    tmp.setDelivery("download");
+                    fileHolder = tmp;
+                } else {
+                    sink.setContentType(baseType);
+                    sink.setName(filename);
+                    sink.setDelivery("download");
+                    fileHolder = sink;
+                }
                 req.getRequest().putParameter(PARAMETER_DELIVERY, "download");
             } else {
-                String baseType = mailPart.getContentType().getBaseType();
-                fileHolder = new FileHolder(isClosure, size, baseType, getFileName(fileNameFromRequest, mailPart.getFileName(), baseType));
+                if (null == sink) {
+                    fileHolder = new FileHolder(isClosure, size, baseType, filename);
+                } else {
+                    sink.setContentType(baseType);
+                    sink.setName(filename);
+                    fileHolder = sink;
+                }
             }
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
 
@@ -364,6 +398,11 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private boolean clientRequestsRange(MailRequest req) {
+        HttpServletRequest servletRequest = req.getRequest().optHttpServletRequest();
+        return (null != servletRequest && null != servletRequest.getHeader("Range"));
     }
 
     private boolean fileNameIndicatesHtml(String fileName) {

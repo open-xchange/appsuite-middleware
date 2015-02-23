@@ -200,7 +200,11 @@ public class PortableSession extends StoredSession implements CustomPortable {
                         writer.writeByteArray(parameterName, bytes);
                     } else {
                         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
-                        logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
+                        if (null == value) {
+                            logger.warn("Denied remote parameter for null value.");
+                        } else {
+                            logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
+                        }
                     }
                 }
                 if (0 == names.length()) {

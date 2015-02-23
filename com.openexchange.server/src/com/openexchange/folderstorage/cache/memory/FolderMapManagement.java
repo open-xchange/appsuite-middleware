@@ -59,7 +59,7 @@ import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
 import com.openexchange.folderstorage.cache.osgi.FolderMapInvalidator;
-import com.openexchange.mailaccount.Tools;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.session.Session;
 
 /**
@@ -318,7 +318,7 @@ public final class FolderMapManagement {
     private static void fireInvalidateCacheEvent(int contextId) {
         CacheEventService cacheEventService = CacheServiceRegistry.getServiceRegistry().getOptionalService(CacheEventService.class);
         if (null != cacheEventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(REGION, null, FolderMapInvalidator.keyFor(null, null, -1, contextId));
+            CacheEvent event = CacheEvent.INVALIDATE(REGION, Integer.toString(contextId), FolderMapInvalidator.keyFor(null, null, -1, contextId));
             cacheEventService.notify(INSTANCE, event, false);
         }
     }
@@ -326,15 +326,18 @@ public final class FolderMapManagement {
     private static void fireInvalidateCacheEvent(int userId, int contextId) {
         CacheEventService cacheEventService = CacheServiceRegistry.getServiceRegistry().getOptionalService(CacheEventService.class);
         if (null != cacheEventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(REGION, null, FolderMapInvalidator.keyFor(null, null, userId, contextId));
+            CacheEvent event = CacheEvent.INVALIDATE(REGION, Integer.toString(contextId), FolderMapInvalidator.keyFor(null, null, userId, contextId));
             cacheEventService.notify(INSTANCE, event, false);
         }
     }
 
     private static void fireInvalidateCacheEvent(String folderId, String treeId, int optUser, int contextId) {
+        if (Tools.isGlobalId(folderId)) {
+            return;
+        }
         CacheEventService cacheEventService = CacheServiceRegistry.getServiceRegistry().getOptionalService(CacheEventService.class);
         if (null != cacheEventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(REGION, null, FolderMapInvalidator.keyFor(folderId, treeId, optUser, contextId));
+            CacheEvent event = CacheEvent.INVALIDATE(REGION, Integer.toString(contextId), FolderMapInvalidator.keyFor(folderId, treeId, optUser, contextId));
             cacheEventService.notify(INSTANCE, event, false);
         }
     }
@@ -343,8 +346,10 @@ public final class FolderMapManagement {
         CacheEventService cacheEventService = CacheServiceRegistry.getServiceRegistry().getOptionalService(CacheEventService.class);
         if (null != cacheEventService) {
             for (String folderId : folderIds) {
-                CacheEvent event = CacheEvent.INVALIDATE(REGION, null, FolderMapInvalidator.keyFor(folderId, treeId, optUser, contextId));
-                cacheEventService.notify(INSTANCE, event, false);
+                if (!Tools.isGlobalId(folderId)) {
+                    CacheEvent event = CacheEvent.INVALIDATE(REGION, Integer.toString(contextId), FolderMapInvalidator.keyFor(folderId, treeId, optUser, contextId));
+                    cacheEventService.notify(INSTANCE, event, false);
+                }
             }
         }
     }

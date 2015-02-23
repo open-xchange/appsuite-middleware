@@ -64,6 +64,7 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.java.util.Pair;
+import com.openexchange.mailaccount.Tools;
 
 
 /**
@@ -96,17 +97,18 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
 
-            String region = cacheEvent.getRegion();
-            if (REGION.equals(region)) {
+            if (REGION.equals(cacheEvent.getRegion())) {
                 List<Serializable> keys = cacheEvent.getKeys();
                 Set<Pair<Integer, Integer>> pairs = new LinkedHashSet<Pair<Integer,Integer>>(keys.size());
                 for (Serializable cacheKey : keys) {
                     if (cacheKey instanceof CacheKey) {
                         CacheKey ckey = (CacheKey) cacheKey;
-                        int contextId = ckey.getContextId();
-                        int userId = Integer.parseInt(ckey.getKeys()[0].toString());
-                        if (pairs.add(new Pair<Integer, Integer>(I(contextId), I(userId)))) {
-                            ListLsubCache.dropFor(userId, contextId, false);
+                        int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
+                        if (contextId > 0) {
+                            int userId = Integer.parseInt(ckey.getKeys()[0].toString());
+                            if (pairs.add(new Pair<Integer, Integer>(I(contextId), I(userId)))) {
+                                ListLsubCache.dropFor(userId, contextId, false);
+                            }
                         }
                     }
                 }

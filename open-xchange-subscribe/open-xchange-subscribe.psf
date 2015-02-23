@@ -5,7 +5,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.google"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.facebook"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.microformats"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.mslive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.yahoo"/>

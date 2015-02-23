@@ -607,7 +607,7 @@ public class StatisticTools extends AbstractJMXTools {
         return getStats(con, "com.openexchange.admin.monitor:name=CallMonitor");
     }
 
-    private static String showCacheData(MBeanServerConnection mbc) throws MalformedObjectNameException, InstanceNotFoundException, NullPointerException, MBeanException, ReflectionException, IOException, InvalidDataException {
+    private static String showCacheData(MBeanServerConnection mbc) throws NullPointerException, IOException, InvalidDataException, IllegalStateException, JMException {
         StringBuilder sb = new StringBuilder();
         sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!Context"));
         sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!Filestore"));
@@ -623,6 +623,7 @@ public class StatisticTools extends AbstractJMXTools {
         sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!MailConnectionCache"));
         sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!CalendarCache"));
         sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!SessionCache"));
+        sb.append(getStats(mbc, "com.openexchange.caching", "name", "CacheEventInformation"));
         return sb.toString();
     }
 
@@ -653,7 +654,7 @@ public class StatisticTools extends AbstractJMXTools {
          * query general information
          */
         StringBuilder sb = new StringBuilder();
-        for (String type : new String[] { "HazelcastInstance", "HazelcastInstance.Node",
+        for (String type : new String[] { "HazelcastInstance", "HazelcastInstance.Node", "HazelcastInstance.EventService",
             "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager", "HazelcastInstance.PartitionServiceMBean" }) {
             for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
                 ObjectName objectName = mbean.getObjectName();
