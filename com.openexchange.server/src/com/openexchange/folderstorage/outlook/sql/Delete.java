@@ -260,6 +260,42 @@ public final class Delete {
         if (null == con) {
             return deleteFolder(cid, tree, user, folderId, global, backup);
         }
+
+        {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement(global ? "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND parentId = ?" : "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?");
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                if (!global) {
+                    stmt.setInt(pos++, user);
+                }
+                stmt.setString(pos, folderId);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    List<String> children = new LinkedList<String>();
+                    do {
+                        children.add(rs.getString(1));
+                    } while (rs.next());
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+
+                    for (String childId : children) {
+                        boolean nextGlobal = Tools.getUnsignedInteger(childId) > 0;
+                        deleteFolder(cid, tree, user, childId, nextGlobal, backup, con);
+                    }
+                }
+            } catch (SQLException e) {
+                debugSQL(stmt);
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+            }
+        }
+
         PreparedStatement stmt = null;
         if (backup) {
             /*
@@ -275,7 +311,7 @@ public final class Delete {
                 }
                 stmt.setString(pos, folderId);
                 stmt.executeUpdate();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 /*
                  * Backup failed
                  */
@@ -298,7 +334,7 @@ public final class Delete {
                 }
                 stmt.setString(pos, folderId);
                 stmt.executeUpdate();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 debugSQL(stmt);
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
                 log.debug("Backup failed.", e);
@@ -318,7 +354,7 @@ public final class Delete {
                 }
                 stmt.setString(pos, folderId);
                 stmt.executeUpdate();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 debugSQL(stmt);
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
                 log.debug("Backup failed.", e);
@@ -339,7 +375,7 @@ public final class Delete {
             }
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -358,7 +394,7 @@ public final class Delete {
             }
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -378,7 +414,7 @@ public final class Delete {
             }
             stmt.setString(pos, folderId);
             success = stmt.executeUpdate() > 0;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {

@@ -669,7 +669,11 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             folderManager.deleteFolder(fo, true, System.currentTimeMillis(), hardDelete);
 
             // Cleanse from other folder storage, too
-            Delete.hardDeleteFolder(session.getContextId(), Tools.getUnsignedInteger(OutlookFolderStorage.OUTLOOK_TREE_ID), session.getUserId(), folderIdentifier, true, true, con);
+            if (hardDelete) {
+                Delete.hardDeleteFolder(session.getContextId(), Tools.getUnsignedInteger(OutlookFolderStorage.OUTLOOK_TREE_ID), session.getUserId(), folderIdentifier, true, true, con);
+            } else {
+                Delete.deleteFolder(session.getContextId(), Tools.getUnsignedInteger(OutlookFolderStorage.OUTLOOK_TREE_ID), session.getUserId(), folderIdentifier, true, true, con);
+            }
 
             List<OXException> warnings = folderManager.getWarnings();
             if (null != warnings) {
