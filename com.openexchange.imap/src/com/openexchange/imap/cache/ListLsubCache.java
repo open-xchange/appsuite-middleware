@@ -940,7 +940,7 @@ public final class ListLsubCache {
             return null;
         }
 
-        return CacheEvent.INVALIDATE(REGION, null, service.newCacheKey(contextId, userId));
+        return CacheEvent.INVALIDATE(REGION, Integer.toString(contextId), service.newCacheKey(contextId, userId));
     }
 
 }

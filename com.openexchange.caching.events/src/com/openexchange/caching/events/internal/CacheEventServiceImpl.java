@@ -83,7 +83,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
     private final CacheEventQueue delayedEvents;
     private final AtomicBoolean keepgoing;
     private final AtomicLong offeredEvents;
-    private final AtomicLong deliveredEvents;
+    final AtomicLong deliveredEvents;
 
     /**
      * Initializes a new {@link CacheEventServiceImpl}.
