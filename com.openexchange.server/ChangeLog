@@ -1,3 +1,7 @@
+* 2015-02-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36863: Fixed merging of config tree settings into JSlob
+
 * 2015-02-19 - marcus.klein@open-xchange.com
 
  - Fix for bug 36276: If ticket is expired in session and AppSuite tab was closed, terminate the session and create a new with a new ticket.
