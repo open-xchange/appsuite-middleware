@@ -53,6 +53,7 @@ import java.io.InputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
  * {@link InfostoreDocument}
@@ -67,18 +68,21 @@ public class InfostoreDocument extends Document {
      * Initializes a new {@link InfostoreDocument}.
      *
      * @param documentAndMetadata The underlying document and metadata
-     * @throws OXException
      */
     public InfostoreDocument(DocumentAndMetadata documentAndMetadata) throws OXException {
         super();
         this.documentAndMetadata = documentAndMetadata;
-        if (null != documentAndMetadata.getLastModified()) {
-            setLastModified(documentAndMetadata.getLastModified().getTime());
-        }
-        setMimeType(documentAndMetadata.getFileMIMEType());
-        setName(documentAndMetadata.getFileName());
-        setSize(documentAndMetadata.getFileSize());
         setEtag(documentAndMetadata.getETag());
+        DocumentMetadata metadata = documentAndMetadata.getMetadata();
+        if (null != metadata) {
+            setFile(new InfostoreFile(metadata));
+            setMimeType(metadata.getFileMIMEType());
+            setName(metadata.getFileName());
+            setSize(metadata.getFileSize());
+            if (null != metadata.getLastModified()) {
+                setLastModified(metadata.getLastModified().getTime());
+            }
+        }
     }
 
     @Override

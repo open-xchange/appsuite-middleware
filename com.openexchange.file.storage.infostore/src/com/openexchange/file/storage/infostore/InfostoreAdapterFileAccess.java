@@ -218,7 +218,8 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         try {
             DocumentAndMetadata document = getInfostore(folderId).getDocumentAndMetadata(
                 ID(id), null == version ? -1 : ID(version), clientETag, sessionObj);
-            if (null != folderId && 0 < document.getFolderId() && false == folderId.equals(String.valueOf(document.getFolderId()))) {
+            long documentFolderId = null != document.getMetadata() ? document.getMetadata().getFolderId() : 0;
+            if (null != folderId && 0 < documentFolderId && false == folderId.equals(String.valueOf(documentFolderId))) {
                 throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
             }
             return new InfostoreDocument(document);

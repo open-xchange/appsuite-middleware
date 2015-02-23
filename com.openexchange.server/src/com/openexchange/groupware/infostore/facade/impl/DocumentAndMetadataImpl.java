@@ -51,7 +51,6 @@ package com.openexchange.groupware.infostore.facade.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -85,53 +84,8 @@ public class DocumentAndMetadataImpl implements DocumentAndMetadata {
     }
 
     @Override
-    public Date getLastModified() {
-        return metadata.getLastModified();
-    }
-
-    @Override
-    public long getFolderId() {
-        return metadata.getFolderId();
-    }
-
-    @Override
-    public String getTitle() {
-        return metadata.getTitle();
-    }
-
-    @Override
-    public int getVersion() {
-        return metadata.getVersion();
-    }
-
-    @Override
-    public long getFileSize() {
-        return metadata.getFileSize();
-    }
-
-    @Override
-    public String getFileMIMEType() {
-        return metadata.getFileMIMEType();
-    }
-
-    @Override
-    public String getFileName() {
-        return metadata.getFileName();
-    }
-
-    @Override
-    public int getId() {
-        return metadata.getId();
-    }
-
-    @Override
-    public int getCreatedBy() {
-        return metadata.getCreatedBy();
-    }
-
-    @Override
-    public long getSequenceNumber() {
-        return metadata.getSequenceNumber();
+    public DocumentMetadata getMetadata() {
+        return metadata;
     }
 
     @Override

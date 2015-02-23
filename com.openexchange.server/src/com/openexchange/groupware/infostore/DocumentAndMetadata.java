@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore;
 
 import java.io.InputStream;
-import java.util.Date;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,28 +59,25 @@ import com.openexchange.exception.OXException;
  */
 public interface DocumentAndMetadata {
 
-    Date getLastModified();
+    /**
+     * Gets the metadata.
+     *
+     * @return The metadata
+     */
+    DocumentMetadata getMetadata();
 
-    long getFolderId();
-
-    String getTitle();
-
-    int getVersion();
-
-    long getFileSize();
-
-    String getFileMIMEType();
-
-    String getFileName();
-
-    int getId();
-
-    int getCreatedBy();
-
-    long getSequenceNumber();
-
+    /**
+     * Gets the ETag.
+     *
+     * @return The ETag
+     */
     String getETag();
 
+    /**
+     * Gets the data.
+     *
+     * @return The data
+     */
     InputStream getData() throws OXException;
 
 }
