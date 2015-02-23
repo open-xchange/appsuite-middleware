@@ -1,6 +1,7 @@
 * 2015-02-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 36863: Fixed merging of config tree settings into JSlob
+ - Fix for bug 35304: Added appropriate index to table 'context_server2db_pool' for columns "write_db_pool_id" and "db_schema"
 
 * 2015-02-19 - marcus.klein@open-xchange.com
 
