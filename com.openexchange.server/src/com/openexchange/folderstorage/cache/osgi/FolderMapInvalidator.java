@@ -60,6 +60,7 @@ import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -140,7 +141,7 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
             } else if (1 == length) {
                 FolderMapManagement.getInstance().dropFor(Integer.parseInt(keys[0].toString()), key.getContextId(), false);
             } else if (3 == length) {
-                FolderMapManagement.getInstance().dropFor(keys[2].toString(), keys[1].toString(), Integer.parseInt(keys[0].toString()), key.getContextId(), null, false);
+                FolderMapManagement.getInstance().dropFor(keys[2].toString(), keys[1].toString(), Tools.getUnsignedInteger(keys[0].toString()), key.getContextId(), null, false);
             }
         }
     }
