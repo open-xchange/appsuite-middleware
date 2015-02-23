@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-02-09 15:55+0100\n"
+"PO-Revision-Date: 2015-02-23 14:08+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -65,6 +65,27 @@ msgstr "Kein Ticket im Principal %1$s gefunden, das erneuert werden muss. "
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:81
 msgid "No Kerberos delegation ticket found in session."
 msgstr "Kein Kerberos-Weiterleitungsticket in der Sitzung gefunden."
+
+#. final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+#. props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
+#. registerService(TargetService.class, new ModifyThroughDependant(), props);
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:86
+msgid "calendar"
+msgstr "Kalender"
+
+#. Application 'xyz' requires following permissions:
+#. - See all your appointments.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:107
+msgid "See all your appointments."
+msgstr "Alle Ihre Termine sehen."
+
+#. Application 'xyz' requires following permissions:
+#. - Create, modify and delete appointments.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:112
+msgid "Create, modify and delete appointments."
+msgstr "Termine anlegen, ändern und löschen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
@@ -1301,24 +1322,22 @@ msgid "Address (other)"
 msgstr "Adresse (weitere)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:79
 msgid "contacts"
 msgstr "Kontakte"
 
 #. Application 'xyz' requires following permissions:
 #. - See all your contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:91
-#, fuzzy
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:98
 msgid "See all your contacts."
 msgstr "Alle Ihre Kontakte sehen."
 
 #. Application 'xyz' requires following permissions:
-#. - See all your contacts, create new ones and modify existing ones.
+#. - Create, modify and delete contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:96
-msgid "See all your contacts, create new ones and modify existing ones."
-msgstr "Alle Ihre Kontakte sehen, neue anlegen und vorhandene ändern."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:103
+msgid "Create, modify and delete contacts."
+msgstr "Kontakte anlegen, ändern und löschen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:61
 msgid "The type %1$s of the provided file is not supported."
@@ -1696,12 +1715,14 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:98
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:95
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:74
 msgid "An I/O error occurred: %1$s"
 msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
 #. Authentication failed: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:101
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:77
 msgid "Authentication failed: %1$s"
 msgstr "Authentifizierung fehlgeschlagen: %1$s"
 
@@ -2031,17 +2052,21 @@ msgstr ""
 "Sollten Sie sich weiterhin nicht anmelden können, wenden Sie sich bitte an "
 "Ihren Systemadmininstratoren oder Hoster."
 
+#. label of login form
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
 msgid "Login"
 msgstr "Login"
 
+#. label of username input field
 #. Password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:91
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
@@ -3249,10 +3274,38 @@ msgid "The session is no longer available. Please try again."
 msgstr "Ihre Sitzung ist abgelaufen. Bitte versuchen Sie es erneut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:69
-#, fuzzy
 msgid "Kerberos ticket in session is missing. Pleasy try again."
 msgstr ""
 "Das Kerberos-Ticket für die Sitzung fehlt. Bitte versuchen Sie es erneut."
+
+#. A Guard error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:62
+msgid "A Guard error occurred: %1$s"
+msgstr "Es trat ein Guard-Fehler auf: %1$s"
+
+#. A Guard error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:65
+msgid ""
+"A Guard server error occurred with HTTP status code %1$s. Error message: %2$s"
+msgstr ""
+"Es trat ein Guard-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
+"Fehlermeldung: %2$s"
+
+#. Invalid Guard URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:68
+#, fuzzy
+msgid "The provided Guard URL: %1$s is invalid"
+msgstr "Die angegebene Guard-URL %1$s ist ungültig."
+
+#. The Guard resource does not exist: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:71
+msgid "The provided Guard resource does not exist: %1$s"
+msgstr "Die angegebene Guard-Ressource ist nicht vorhanden: %1$s"
+
+#. The Guard resource does not exist
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:80
+msgid "The Guard resource does not exist"
+msgstr "Die Guard-Ressource ist nicht vorhanden"
 
 #. No Linked-In account available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
@@ -3895,6 +3948,35 @@ msgstr "Nachricht %1$s nicht im Ordner %2$s gefunden."
 msgid "Invalid OAuth account specified."
 msgstr "Es wurde ein ungültiger OAuth-Account angegeben."
 
+#. Application "%1$s" wants to access to your data. It requires the following permissions:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:64
+#, fuzzy
+msgid ""
+"Application \"%1$s\" wants to access to your data. It requires the following "
+"permissions:"
+msgstr ""
+"Die Applikation \"%1$s\" möchte auf Ihre Daten zugreifen. Folgende "
+"Berechtigungen werden benötigt:"
+
+#. label of deny button
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:67
+#, fuzzy
+msgid "Deny"
+msgstr "Verweigern"
+
+#. label of allow button
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:70
+#, fuzzy
+msgid "Allow"
+msgstr "Zulassen"
+
+#. label of password input field
+#. Username
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
+msgid "Username"
+msgstr "Benutzername"
+
 #. Account not found.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:63
 msgid "Account not found"
@@ -3920,6 +4002,17 @@ msgstr "Der Client '%1$s' konnte nicht aktiviert werden."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:75
 msgid "The client '%1$s' could not be disabled."
 msgstr "Der Cient '%1$s' konnte nicht deaktiviert werden."
+
+#. You reached the max. number of %3$d possible grants for 3rd party applications. Please revoke access for the ones you don't longer need.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:78
+#, fuzzy
+msgid ""
+"You reached the max. number of %3$d possible grants for 3rd party "
+"applications. Please revoke access for the ones you don't longer need."
+msgstr ""
+"Sie haben die maximale Anzahl von %3$d möglichen Berechtigungen für "
+"Applikationen von Drittanbietern erreicht. Bitte setzen Sie die "
+"Zugriffsberechtigung für diejenigen zurück, die Sie nicht länger benötigen."
 
 #. Account not found with identifier %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
@@ -4857,6 +4950,18 @@ msgstr "Benutzer ist deaktiviert"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/authorization/AuthorizationExceptionMessages.java:62
 msgid "Password expired"
 msgstr "Passwort ist abgelaufen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:84
+msgid "config"
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Change your settings.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:97
+#, fuzzy
+msgid "Change your settings."
+msgstr "Ändern Ihrer Einstellungen."
 
 #. The policy you have entered is malformed. It should look like \"condition:action\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/consistency/ConsistencyExceptionMessages.java:62
@@ -7474,6 +7579,25 @@ msgstr "Kein Zieldienst eingetragen für das Modul %1$d."
 msgid "Required  value \"identifier\" was not supplied."
 msgstr "Erforderlicher Wert \"Identifier\" wurde nicht angegeben."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:84
+msgid "reminder"
+msgstr "Erinnerung"
+
+#. Application 'xyz' requires following permissions:
+#. - Fetch reminders for appointments and tasks.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:103
+#, fuzzy
+msgid "Fetch reminders for appointments and tasks."
+msgstr "Abrufen von Termin- und Aufgabenerinnerungen."
+
+#. Application 'xyz' requires following permissions:
+#. - Set or change reminders for appointments and tasks.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:108
+msgid "Set or change reminders for appointments and tasks."
+msgstr "Termin- und Aufgabenerinnerungen festlegen oder ändern."
+
 #. * Writing the setting %1$s is not permitted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/settings/SettingExceptionMessage.java:69
 msgid "Writing the setting %1$s is not permitted."
@@ -7919,8 +8043,7 @@ msgstr ""
 #, fuzzy
 msgid "The new password might not be empty! Please provide a password."
 msgstr ""
-"Das neue Passwort ist möglicherweise nicht leer. Bitte geben Sie ein "
-"Passwort an."
+"Das neue Passwort darf nicht leer sein. Bitte geben Sie ein Passwort an."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:68
 msgid "A messaging error occurred. Please try again later."
@@ -8444,14 +8567,17 @@ msgstr ""
 "Diese Mailbox wird bereits verwendet. Bitte versuchen Sie es später erneut. "
 
 #. *
-#. * The mailbox on mail server %1$s is already in use. Please try again later.
+#. * The mailbox on mail server %1$s for login %2$s is already in use by one of your other processes or clients. Please try again later.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
+#, fuzzy
 msgid ""
-"The mailbox on mail server %1$s is already in use. Please try again later."
+"The mailbox on mail server %1$s for login %2$s is already in use by one of "
+"your other processes or clients. Please try again later."
 msgstr ""
-"Die Mailbox auf dem Mailserver %1$s wird bereits verwendet. Bitte versuchen "
-"Sie es später erneut."
+"Die Mailbox auf dem Mailserver %1$s für das Login %2$s wird bereits durch "
+"einen Ihrer anderen Prozesse oder Clients verwendet. Bitte versuchen Sie es "
+"später erneut."
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
@@ -9098,11 +9224,6 @@ msgstr "Verwenden Sie bei Aufforderung bitte das folgende Passwort"
 msgid "Click here to reset your password"
 msgstr "Zum Zurücksetzen Ihres Passworts klicken Sie bitte hier"
 
-#. Username
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
-msgid "Username"
-msgstr "Benutzername"
-
 #. John Doe shared 7 items with you
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:94
 msgid "%d items"
@@ -9317,6 +9438,24 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
 msgid "You already have such a subscription."
 msgstr "Sie haben bereits ein solches Abonnement."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:79
+msgid "tasks"
+msgstr "Aufgaben"
+
+#. Application 'xyz' requires following permissions:
+#. - See all your tasks.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:101
+msgid "See all your tasks."
+msgstr "Alle Ihre Aufgaben sehen."
+
+#. Application 'xyz' requires following permissions:
+#. - Create, modify and delete tasks.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:106
+msgid "Create, modify and delete tasks."
+msgstr "Aufgaben anlegen, ändern und löschen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."
@@ -11634,6 +11773,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "See all your contacts, create new ones and modify existing ones."
+#~ msgstr "Alle Ihre Kontakte sehen, neue anlegen und vorhandene ändern."
 
 #~ msgid "Invalid presence status."
 #~ msgstr "Ungültiger Presence-Status."
@@ -14507,9 +14649,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Die Position der Ausnahme des Serientermins konnte nicht geändert werden."
 
-#~ msgid "User changing the appointment is missing."
-#~ msgstr "Benutzerangabe für Terminänderung fehlt"
-
 #~ msgid "Some callbacks threw exceptions: %s"
 #~ msgstr "Einige Callbacks gaben Ausnahmefehler zurück: %s"
 
@@ -14971,9 +15110,6 @@ msgstr "Zulu"
 #~ msgid "You are not allowed to create tasks in folder %1$s (%2$d)."
 #~ msgstr ""
 #~ "Sie haben keine Berechtigung, Aufgaben im Ordner %1$s (%2$d) anzulegen."
-
-#~ msgid "You are not allowed to delegate tasks."
-#~ msgstr "Sie haben keine Berechtigung zum Delegieren von Aufgaben."
 
 #~ msgid "Missing folder id for creating task."
 #~ msgstr "Fehlende Ordner-ID zum Anlegen der Aufgabe"
