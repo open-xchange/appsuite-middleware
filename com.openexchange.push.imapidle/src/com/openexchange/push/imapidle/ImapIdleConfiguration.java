@@ -105,7 +105,7 @@ public class ImapIdleConfiguration {
 
             String tmp = configService.getProperty("com.openexchange.push.imapidle.clusterLock", "hz").trim();
             if ("hz".equalsIgnoreCase(tmp)) {
-                clusterLock = new HzImapIdleClusterLock("imapidle-1", services);
+                clusterLock = new HzImapIdleClusterLock("imapidle-2", services);
             } else if ("db".equalsIgnoreCase(tmp)) {
                 clusterLock = new DbImapIdleClusterLock(services);
             } else {
