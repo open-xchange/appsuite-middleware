@@ -1,3 +1,9 @@
+open-xchange-spamsettings-generic (7.6.2-8) stable; urgency=low
+
+  * Eighth candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Feb 2015 16:16:01 +0100
+
 open-xchange-spamsettings-generic (7.6.2-7) stable; urgency=low
 
   * Seventh candidate for 7.6.2 release

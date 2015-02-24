@@ -1,3 +1,9 @@
+open-xchange-grizzly (7.6.2-8) stable; urgency=low
+
+  * Eighth candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 24 Feb 2015 16:14:28 +0100
+
 open-xchange-grizzly (7.6.2-7) stable; urgency=low
 
   * Seventh candidate for 7.6.2 release

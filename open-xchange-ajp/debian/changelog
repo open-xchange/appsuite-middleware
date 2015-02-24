@@ -1,3 +1,9 @@
+open-xchange-ajp (7.6.2-8) stable; urgency=low
+
+  * Eighth candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 24 Feb 2015 16:13:57 +0100
+
 open-xchange-ajp (7.6.2-7) stable; urgency=low
 
   * Seventh candidate for 7.6.2 release

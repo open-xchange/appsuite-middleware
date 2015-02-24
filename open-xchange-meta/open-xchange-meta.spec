@@ -3,7 +3,7 @@ Name:           open-xchange-meta
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define        ox_release 7
+%define        ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -419,6 +419,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Tue Feb 24 2015 Carsten Hoeger <choeger@open-xchange.com>
+Eighth candidate for 7.6.2 release
 * Wed Feb 11 2015 Carsten Hoeger <choeger@open-xchange.com>
 Seventh candidate for 7.6.2 release
 * Fri Feb 06 2015 Carsten Hoeger <choeger@open-xchange.com>
