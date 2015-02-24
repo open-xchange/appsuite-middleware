@@ -75,6 +75,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -93,10 +94,13 @@ public abstract class AbstractITipAction implements AJAXActionService{
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractITipAction.class);
 
     protected ServiceLookup services;
+    
+    protected RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing;
 
-    public AbstractITipAction(final ServiceLookup services) {
+    public AbstractITipAction(final ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing) {
         super();
         this.services = services;
+        this.analyzerListing = analyzerListing;
     }
 
 
@@ -106,10 +110,7 @@ public abstract class AbstractITipAction implements AJAXActionService{
         if (null == itipParser) {
             throw ServiceExceptionCode.serviceUnavailable(ITipParser.class);
         }
-        final ITipAnalyzerService analyzer = services.getService(ITipAnalyzerService.class);
-        if (null == analyzer) {
-            throw ServiceExceptionCode.serviceUnavailable(ITipAnalyzerService.class);
-        }
+        ITipAnalyzerService analyzer = getAnalyzerService();
 
         final TimeZone tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
         final String timezoneParameter = request.getParameter("timezone");
@@ -126,6 +127,19 @@ public abstract class AbstractITipAction implements AJAXActionService{
         }
 
         return new AJAXRequestResult(result, new Date());
+    }
+
+
+    private ITipAnalyzerService getAnalyzerService() throws OXException {
+        List<ITipAnalyzerService> serviceList = analyzerListing.getServiceList();
+        if (serviceList == null || serviceList.isEmpty()) {
+            throw ServiceExceptionCode.serviceUnavailable(ITipAnalyzerService.class);
+        }
+        ITipAnalyzerService analyzer = serviceList.get(0);
+        if (analyzer == null) {
+            throw ServiceExceptionCode.serviceUnavailable(ITipAnalyzerService.class);
+        }
+        return analyzer;
     }
 
 

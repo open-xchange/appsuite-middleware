@@ -60,10 +60,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
+import com.openexchange.calendar.itip.ITipAnalyzerService;
 import com.openexchange.calendar.itip.ITipDingeMacher;
 import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,8 +77,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DingeMacherAction extends AbstractITipAction {
 
-    public DingeMacherAction(ServiceLookup services) {
-        super(services);
+    public DingeMacherAction(ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing) {
+        super(services, analyzerListing);
     }
 
     @Override
