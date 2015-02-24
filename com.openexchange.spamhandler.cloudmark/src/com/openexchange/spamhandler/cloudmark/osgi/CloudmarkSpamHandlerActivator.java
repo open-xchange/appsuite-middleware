@@ -49,12 +49,10 @@
 
 package com.openexchange.spamhandler.cloudmark.osgi;
 
-import static com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.cloudmark.CloudmarkSpamHandler;
 
@@ -62,11 +60,9 @@ import com.openexchange.spamhandler.cloudmark.CloudmarkSpamHandler;
  * {@link CloudmarkSpamHandlerActivator}
  *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CloudmarkSpamHandlerActivator extends HousekeepingActivator {
-
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CloudmarkSpamHandlerActivator.class);
 
 	/**
 	 * Initializes a new {@link CloudmarkSpamHandlerActivator}
@@ -81,69 +77,18 @@ public final class CloudmarkSpamHandlerActivator extends HousekeepingActivator {
 	}
 
 	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		LOG.warn("Absent service: {}", clazz.getName());
-		getServiceRegistry().removeService(clazz);
-	}
-
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		LOG.info("Re-available service: {}", clazz.getName());
-		getServiceRegistry().addService(clazz, getService(clazz));
-	}
-
-	@Override
 	protected void startBundle() throws Exception {
+	    org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CloudmarkSpamHandlerActivator.class);
 		try {
-			{
-				final ServiceRegistry registry = getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-			if (!started.compareAndSet(false, true)) {
-				/*
-				 * Don't start the server again. A duplicate call to
-				 * startBundle() is probably caused by temporary absent
-				 * service(s) whose re-availability causes to trigger this
-				 * method again.
-				 */
-				LOG.info("A temporary absent service is available again");
-				return;
-			}
-
-			final Dictionary<String, String> dictionary = new Hashtable<String, String>();
-	        dictionary.put("name", CloudmarkSpamHandler.getInstance().getSpamHandlerName());
-	        registerService(SpamHandler.class, CloudmarkSpamHandler.getInstance(), dictionary);
-		} catch (final Throwable t) {
-			LOG.error("", t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
-	 */
-	@Override
-	protected void stopBundle() throws Exception {
-		try {
-			cleanUp();
-			getServiceRegistry().clearRegistry();
-		} catch (final Throwable t) {
-			LOG.error("", t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		} finally {
-			started.set(false);
-		}
-
+            CloudmarkSpamHandler spamHandler = new CloudmarkSpamHandler(this);
+            Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
+            dictionary.put("name", spamHandler.getSpamHandlerName());
+            registerService(SpamHandler.class, spamHandler, dictionary);
+            logger.info("Successfully started bundle {}", context.getBundle().getSymbolicName());
+        } catch (Exception e) {
+            logger.error("Failed starting bundle {}", context.getBundle().getSymbolicName(), e);
+            throw e;
+        }
 	}
 
 }

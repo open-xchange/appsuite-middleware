@@ -100,13 +100,7 @@ public class ScaleTransformation implements ImageTransformation {
         Dimension dimension = constrain.getDimension(new Dimension(sourceImage.getWidth(), sourceImage.getHeight()));
         int targetWidth = (int) dimension.getWidth();
         int targetHeight = (int) dimension.getHeight();
-        final BufferedImage resize;
-        if (ScaleType.COVER == scaleType) {
-            resize = Scalr.resize(sourceImage, Method.SPEED, targetWidth, targetHeight);
-        } else {
-            resize = Scalr.resize(sourceImage, targetWidth, targetHeight);
-        }
-        return resize;
+        return Scalr.resize(sourceImage, Method.AUTOMATIC, targetWidth, targetHeight);
     }
 
     @Override

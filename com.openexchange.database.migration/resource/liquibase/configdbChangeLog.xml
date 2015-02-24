@@ -5,6 +5,7 @@
     xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
     logicalFilePath="configdbChangeLog">
 
+
     <!-- ******************************************************* -->
     <!-- ************** Release 7.6.1 starts here ************** -->
     <!-- ******************************************************* -->
@@ -50,6 +51,19 @@
         </preConditions>
         <comment>Add missing primary key for DATABASECHANGELOG</comment>
         <addPrimaryKey columnNames="id, author, filename" tableName="DATABASECHANGELOG" />
+    </changeSet>
+
+    <changeSet id="7.6.2:context_server2db_pool:addpoolandschemaindex" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(table_name) FROM information_schema.statistics WHERE table_name = 'context_server2db_pool' AND index_name = 'poolAndSchema';</sqlCheck>
+        </preConditions>
+        <comment>Add index to context_server2db_pool table for columns write_db_pool_id and db_schema</comment>
+        <sql>
+            ALTER TABLE context_server2db_pool ADD INDEX `poolAndSchema` (write_db_pool_id, db_schema);
+        </sql>
+        <rollback>
+            <dropIndex indexName="poolAndSchema" tableName="context_server2db_pool"/>
+        </rollback>
     </changeSet>
 
     <changeSet id="7.6.2:milestone" author="martin.schneider@open-xchange.com">
