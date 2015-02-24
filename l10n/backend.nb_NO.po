@@ -27,8 +27,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2015-02-19 20:30+0000\n"
-"Last-Translator: hv@webhuset.no <hv@webhuset.no>\n"
+"PO-Revision-Date: 2015-02-24 11:13+0000\n"
+"Last-Translator: Anonymous Pootle User\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nb_NO\n"
 "MIME-Version: 1.0\n"
@@ -36,7 +36,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1424377826.000000\n"
+"X-POOTLE-MTIME: 1424776402.000000\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -171,7 +171,7 @@ msgstr "Arbeidsdag"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:918
 msgid "Weekend day"
-msgstr "Helg"
+msgstr "Helgedag"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:82
 msgid "Day"
@@ -1385,7 +1385,7 @@ msgstr "Får ikke tilkobling til config DB."
 #. %2$d is replaced with the server identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
 msgid "Database for context %1$d and server %2$d can not be resolved"
-msgstr "Databasen for kontekst %1$d og server %2$d kan ikke løses"
+msgstr "Databasen for kontekst %1$d og server %2$d kunne ikke kontaktes"
 
 #. The connection to the database could not be established.
 #. %1$d is replaced with the database pool identifier.
@@ -1494,7 +1494,7 @@ msgid ""
 "Inserting or updating database assignment for context %1$d and server %2$d "
 "failed!"
 msgstr ""
-"Sette inn eller oppdatere databasetildeling for kontekst %1$d og server %2$d "
+"Innsetting eller oppdatering i databasen til kontekst %1$d og server %2$d "
 "mislyktes!"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:63
@@ -4458,8 +4458,8 @@ msgid ""
 "Quota exceeded. Please delete some items in order to create new ones. Please "
 "note: The quota refers to all items of all users in this context."
 msgstr ""
-"Kvote overskredet. Slett noen elementer for å lage nye. Vennligst merk deg "
-"at: Kvoten refererer til alle elementer av alle brukerne i denne konteksten."
+"Kvoten er overskredet. Slett noen elementer for å lage nye. Merk at kvoten "
+"deles av alle brukerne i domenet ditt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:64
 msgid ""
@@ -4468,8 +4468,8 @@ msgid ""
 "refers to all appointments of all users in this context."
 msgstr ""
 "Kvote overskredet for kalenderen. Kvotegrense: %2$s. Kvote brukt: %1$s. "
-"Slett noen avtaler for å opprette nye. Vennligst merk deg at: Kvoten "
-"refererer til alle elementer av alle brukerne i denne konteksten."
+"Slett noen avtaler for å opprette nye. Merk at kvoten deles av alle brukerne "
+"i domenet ditt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 msgid ""
@@ -4478,8 +4478,8 @@ msgid ""
 "refers to all contacts of all users in this context."
 msgstr ""
 "Kvote overskredet for kontakter. Kvotegrense: %2$s. Kvote brukt: %1$s. Slett "
-"noen kontakter for å opprette nye. Vennligst merk deg at: Kvoten refererer "
-"til alle kontakter av alle brukerne i denne konteksten."
+"noen kontakter for å opprette nye. Merk at kvoten deles av alle brukerne i "
+"domenet ditt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:68
 msgid ""
@@ -4487,9 +4487,9 @@ msgid ""
 "some tasks in order to create new ones. Please note: The quota refers to all "
 "tasks of all users in this context."
 msgstr ""
-"Kvote overskredet for oppgaver&#x0A;. Kvotegrense: %2$s. Kvote brukt: %1$s. "
-"Slett noen oppgaver for å opprette nye. Vennligst merk deg at: Kvoten "
-"refererer til alle oppgaver av alle brukerne i denne konteksten."
+"Kvote overskredet for oppgaver. Kvotegrense: %2$s. Kvote brukt: %1$s. Slett "
+"noen oppgaver for å opprette nye. Merk at kvoten deles av alle brukerne i "
+"domenet ditt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
 msgid ""
@@ -4498,8 +4498,8 @@ msgid ""
 "files of all users in this context."
 msgstr ""
 "Kvote overskredet for filer. Kvotegrense: %2$s. Kvote brukt: %1$s. Slett "
-"noen filer for å opprette nye. Vennligst merk deg at: Kvoten refererer til "
-"alle filer av alle brukerne i denne konteksten."
+"noen filer for å opprette nye. Merk at kvoten deles av alle brukerne i "
+"domenet ditt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:72
 msgid ""
@@ -4508,8 +4508,8 @@ msgid ""
 "refers to all attachments of all users in this context."
 msgstr ""
 "Kvote overskredet for vedlegg. Kvotegrense: %2$s. Kvote brukt: %1$s. Slett "
-"noen vedlegg for å opprette nye. Vennligst merk deg at: Kvoten refererer til "
-"alle vedlegg av alle brukerne i denne konteksten."
+"noen vedlegg for å opprette nye. Merk at kvoten deles av alle brukerne i "
+"domenet ditt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
 msgid ""
@@ -4518,8 +4518,8 @@ msgid ""
 "refers to all shares of one user in this context."
 msgstr ""
 "Kvote overskredet for shares. Kvotegrense: %2$s. Kvote brukt: %1$s. Slett "
-"noen shares for å opprette nye. Vennligst merk deg at: Kvoten gjelder alle "
-"shares i én bruker i denne konteksten."
+"noen shares for å opprette nye. Merk at kvoten deles av alle brukerne i "
+"domenet ditt."
 
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
@@ -4729,7 +4729,7 @@ msgstr "Element avkortet: %s"
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 msgid "You do not have a valid session. Please login again."
-msgstr "Du har ikke en gyldig økt. Vennligst logg inn igjen."
+msgstr "Økten din har utløpt. Vennligst logg inn på nytt."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
@@ -5437,7 +5437,7 @@ msgstr "Innboks"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:157
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
-msgstr "Søppelkasse"
+msgstr "Slettede elementer"
 
 #. The internationalized name for the drafts mail folder
 #. The name for trash folder
@@ -5453,7 +5453,7 @@ msgstr "Utkast"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:165
 msgid "Sent objects"
-msgstr "Sendte gjenstander"
+msgstr "Sendte elementer"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -5491,17 +5491,17 @@ msgstr "bekreftet-søppelpost"
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "Confirmed ham"
-msgstr "Bekreftet skinke"
+msgstr "Bekreftet ikke-SPAM"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
-msgstr "bekreftet-skinke"
+msgstr "bekreftet-ikke-spam"
 
 #. The internationalized subject for a read acknowledgement
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
 msgid "Read acknowledgement"
-msgstr "Les anerkjennelse"
+msgstr "Lesebekreftelse"
 
 #. The text body of a received read acknowledgement
 #. #DATE# is replaced with the sent date of referenced email
@@ -5516,10 +5516,10 @@ msgid ""
 "on the recipients computer. There is no guarantee that the recipient has "
 "read or understood the message contents."
 msgstr ""
-"Dette er en leveringsbekreftelse for e-posten som du sendte den #DATE# til "
-"#RECIPIENT# med emne \"#SUBJECT#\".\n"
+"Dette er en lesebekreftelse for e-posten som du sendte den #DATE# til "
+"#RECIPIENT# med emnet \"#SUBJECT#\".\n"
 "\n"
-"Notat: Denne leveransekvitteringen erkjenner kun at meldingen ble vist på "
+"Merk: Denne leveransekvitteringen erkjenner kun at meldingen ble vist på "
 "mottakerens datamaskin. Det er ingen garanti for at mottakeren har lest og "
 "forstått innholdet i meldingene."
 
@@ -5529,7 +5529,7 @@ msgstr ""
 #. #SENDER# is replaced with personal and/or email address of the sender
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:126
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
-msgstr "Den #DATE# ved #TIME# #SENDER# skrev:"
+msgstr "Den #DATE# klokken #TIME# skrev #SENDER#:"
 
 #. The prefixed text on inline forward.
 #. #FROM# is replaced with personal and/or email address of original message's From header
@@ -5547,8 +5547,11 @@ msgid ""
 "Date: #DATE# at #TIME#\n"
 "Subject: #SUBJECT#"
 msgstr ""
-"---------- Opprinnelig melding ---------- &#x0A;Fra: #FROM#&#x0A;Til: "
-"#TIL##CC_LINE#&#x0A;Dato: #DATE# ved #TIME# &#x0A;Subject: #SUBJECT#"
+"---------- Opprinnelig melding ----------\n"
+"Fra: #FROM#\n"
+"Til: #TO##CC_LINE#\n"
+"Dato: #DATE# klokken #TIME#\n"
+"Emne: #SUBJECT#"
 
 #. The internationalized default subject.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
@@ -5560,7 +5563,8 @@ msgstr "[Ingen emne]"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
-msgstr "De tilgjengelige vedlegg for denne e-post kan nåes via disse linkene:"
+msgstr ""
+"De tilgjengelige vedleggene for denne e-posten kan nås via følgende lenke(r):"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
@@ -5573,19 +5577,19 @@ msgstr "Linkene vil bli slettet den #DATE#"
 msgid ""
 "This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
 msgstr ""
-"Denne filen har blitt publisert for e-post \"#SUBJECT#\" sendes den #DATE# "
+"Denne filen har blitt publisert for e-post \"#SUBJECT#\", sendt den #DATE# "
 "til #TO#"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 msgid "Dear Sir or Madam"
-msgstr "Kjære herr eller fru"
+msgstr "Hei"
 
 #. The name for "Unified Mail" root folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:177
 msgid "Unified mail"
-msgstr "Enhetlig post"
+msgstr "Samlet postkasse"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
@@ -5614,13 +5618,30 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"En ny avtale ble oprettet av [created_by].\n"
+"En ny avtale ble opprettet av [created_by].\n"
 "Du kan sjekke denne avtalen i kalenderen din:\n"
-"[link]  Avtale&#x0A; ===========&#x0A;Laget av: [created_by] &#x0A;Opprettet:"
-" [creation_datetime]&#x0A;[title]&#x0A;[location][folder_name]  [start]&#x0A;"
-"[end]&#x0A;[series][delete_exceptions][change_exceptions]&#x0A;[description]&"
-"#x0A;Deltakere&#x0A;============&#x0A;[participants] Ressurser "
-"&#x0A;=========&#x0A;[resources]  ========================================== "
+"[link]\n"
+"\n"
+"Avtale\n"
+"===========\n"
+"Opprettet av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Deltakere\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressurser \n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:94
 msgid ""
@@ -5646,13 +5667,27 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"En ny avtale ble oprettet av [created_by].\n"
+"En ny avtale ble opprettet av [created_by].\n"
 "\n"
-"Avtale&#x0A;===========&#x0A;Laget av: [created_by] &#x0A;Opprettet: "
-"[creation_datetime]&#x0A;[title]&#x0A;[location]&#x0A;[start]  &#x0A;[end]&#x"
-"0A;[series][delete_exceptions][change_exceptions]&#x0A;[description]&#x0A;Del"
-"takere&#x0A;============&#x0A;[participants] Ressurser "
-"&#x0A;=========&#x0A;[resources] ========================================== "
+"Avtale\n"
+"===========\n"
+"Laget av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[start]  \n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Deltakere\n"
+"============\n"
+"[participants] \n"
+"\n"
+"Ressurser \n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:124
 msgid ""
@@ -5681,13 +5716,30 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"En ny avtale ble skapt av [created_by] på vegne av [behalf_of].\n"
+"En ny avtale ble opprettet av [created_by] på vegne av [behalf_of].\n"
 "Du kan sjekke denne avtalen i kalenderen din:\n"
-"[link]  Avtale&#x0A; ===========&#x0A;Laget av: [created_by] &#x0A;Opprettet:"
-" [creation_datetime]&#x0A;[title]&#x0A;[location][folder_name]  [start]&#x0A;"
-"[end]&#x0A;[series][delete_exceptions][change_exceptions]&#x0A;[description]&"
-"#x0A;Deltakere&#x0A;============&#x0A;[participants] Ressurser "
-"&#x0A;=========&#x0A;[resources]  ========================================== "
+"[link]\n"
+"\n"
+"Avtale\n"
+"===========\n"
+"Laget av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]  \n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Deltakere\n"
+"============\n"
+"[participants] \n"
+"\n"
+"Ressurser \n"
+"=========\n"
+"[resources]  \n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:157
 msgid ""
@@ -5715,11 +5767,25 @@ msgid ""
 msgstr ""
 "En ny avtale ble skapt av [created_by] på vegne av [behalf_of].\n"
 "\n"
-"Avtale&#x0A;===========&#x0A;Laget av: [created_by] &#x0A;Opprettet: "
-"[creation_datetime]&#x0A;[title]&#x0A;[location]&#x0A;[start]  &#x0A;[end]&#x"
-"0A;[series][delete_exceptions][change_exceptions]&#x0A;[description]&#x0A;Del"
-"takere&#x0A;============&#x0A;[participants] Ressurser "
-"&#x0A;=========&#x0A;[resources] ========================================== "
+"Avtale\n"
+"===========\n"
+"Laget av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[start]  \n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Deltakere\n"
+"============\n"
+"[participants] \n"
+"\n"
+"Ressurser \n"
+"=========\n"
+"[resources] \n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:194
 msgid ""
@@ -5752,12 +5818,30 @@ msgid ""
 msgstr ""
 "En ny oppgave ble opprettet av [created_by].\n"
 "Du kan sjekke denne oppgaven i dine oppgaver:\n"
-"[link] Oppgaver&#x0A; ==== &#x0A;Laget av: [created_by] &#x0A;Opprettet: [cre"
-"ation_datetime]&#x0A;[title]&#x0A;[folder_name]&#x0A;[priority]&#x0A;[task_st"
-"atus]  [start]&#x0A;[end] "
-"&#x0A;[series]&#x0A;[description]&#x0A;Deltakere&#x0A; "
-"============&#x0A;[participants]  Ressurser&#x0A; =========&#x0A;[resources]"
-"  ========================================== "
+"[link] \n"
+"\n"
+"Oppgaver\n"
+"==== \n"
+"Laget av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]  \n"
+"\n"
+"[start]\n"
+"[end] \n"
+"[series]\n"
+"[description]\n"
+"Deltakere\n"
+" ============\n"
+"[participants]  \n"
+"\n"
+"Ressurser\n"
+"=========\n"
+"[resources]  \n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:226
 msgid ""
@@ -5788,11 +5872,28 @@ msgid ""
 msgstr ""
 "En ny oppgave ble opprettet av [created_by].\n"
 "\n"
-"Oppgave&#x0A;===========&#x0A;Laget av: [created_by] &#x0A;Opprettet: [creati"
-"on_datetime]&#x0A;[title]&#x0A;[folder_name]&#x0A;[priority]&#x0A;[task_statu"
-"s]  [start]&#x0A;[end] &#x0A;[series]&#x0A;[description]&#x0A;Deltakere&#x0A;"
-" ============&#x0A;[participants]  Ressurser&#x0A; =========&#x0A;[resources]"
-"  ========================================== "
+"Oppgave\n"
+"===========\n"
+"Laget av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]  \n"
+"\n"
+"[start]\n"
+"[end] \n"
+"[series]\n"
+"[description]\n"
+"Deltakere\n"
+" ============\n"
+"[participants]  \n"
+"\n"
+"Ressurser\n"
+"=========\n"
+"[resources]  \n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:266
 msgid ""
@@ -5822,14 +5923,29 @@ msgid ""
 "=========================================="
 msgstr ""
 "Denne avtalen finner ikke sted.\n"
-"Den ble enten slettet etter [changed_by] eller du ble fjernet fra listen "
-"over deltakere.\n"
+"Den ble enten slettet av [changed_by] eller du ble fjernet fra listen over "
+"deltakere.\n"
 "\n"
-"Avtale&#x0A;===========&#x0A;Laget av:  [created_by] &#x0A;Opprettet:  "
-"[creation_datetime]&#x0A;[title]&#x0A;[location][folder_name]  [start]&#x0A;["
-"end]&#x0A;[series][delete_exceptions][change_exceptions]&#x0A;[description]&#"
-"x0A;Deltakere&#x0A;============&#x0A;[participants] Ressurser "
-"&#x0A;=========&#x0A;[resources]  =========================================="
+"Avtale\n"
+"===========\n"
+"Opprettet av:  [created_by] \n"
+"Opprettet:  [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]  \n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Deltakere\n"
+"============\n"
+"[participants] \n"
+"\n"
+"Ressurser \n"
+"=========\n"
+"[resources]  \n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:299
 msgid ""
@@ -5862,12 +5978,28 @@ msgstr ""
 "Denne oppgaven ble enten slettet av [changed_by] eller du ble fjernet fra "
 "listen over deltakere.\n"
 "\n"
-"Oppgave&#x0A;===========&#x0A;Laget av:  [created_by] &#x0A;Opprettet:  [crea"
-"tion_datetime]&#x0A;[title]&#x0A;[folder_name]&#x0A;[priority]&#x0A;[task_sta"
-"tus]  [start]&#x0A;[end] "
-"&#x0A;[series]&#x0A;[description]&#x0A;Deltakere&#x0A; "
-"============&#x0A;[participants]  Ressurser&#x0A; =========&#x0A;[resources]"
-"  ========================================== "
+"Oppgave\n"
+"===========\n"
+"Opprettet av:  [created_by] \n"
+"Opprettet:  [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]  \n"
+"\n"
+"[start]\n"
+"[end] \n"
+"[series]\n"
+"[description]\n"
+"Deltakere\n"
+" ============\n"
+"[participants]  \n"
+"\n"
+"Ressurser\n"
+" =========\n"
+"[resources]  \n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:334
 msgid ""
@@ -5898,11 +6030,28 @@ msgid ""
 msgstr ""
 "Denne avtalen ble endret av [changed_by].\n"
 "Du kan sjekke denne avtalen i kalenderen din:\n"
-"[link]  Avtale&#x0A; ===========&#x0A;Laget av: [created_by] &#x0A;Opprettet:"
-" [creation_datetime]&#x0A;[title]&#x0A;[location][folder_name]  [start]&#x0A;"
-"[end]&#x0A;[series][delete_exceptions][change_exceptions]&#x0A;[description]&"
-"#x0A;Deltakere&#x0A;============&#x0A;[participants] Ressurser "
-"&#x0A;=========&#x0A;[resources]  =========================================="
+"[link]  \n"
+"\n"
+"Avtale\n"
+" ===========\n"
+"Opprettet av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]  \n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Deltakere\n"
+"============\n"
+"[participants] \n"
+"\n"
+"Ressurser \n"
+"=========\n"
+"[resources]  \n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:367
 msgid ""
@@ -5931,11 +6080,26 @@ msgid ""
 msgstr ""
 "Denne avtalen ble endret av [changed_by].\n"
 "\n"
-"Avtale&#x0A;===========&#x0A;Laget av: [created_by] &#x0A;Opprettet: "
-"[creation_datetime]&#x0A;[title]&#x0A;[location][folder_name]  [start]&#x0A;["
-"end]&#x0A;[series][delete_exceptions][change_exceptions]&#x0A;[description]&#"
-"x0A;Deltakere&#x0A;============&#x0A;[participants] Ressurser "
-"&#x0A;=========&#x0A;[resources]  =========================================="
+"Avtale\n"
+"===========\n"
+"Laget av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]  \n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Deltakere\n"
+"============\n"
+"[participants] \n"
+"\n"
+"Ressurser \n"
+"=========\n"
+"[resources]  \n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:404
 msgid ""
@@ -5968,12 +6132,29 @@ msgid ""
 msgstr ""
 "Denne oppgaven ble endret av [changed_by].\n"
 "Du kan sjekke denne oppgaven i dine oppgaver:\n"
-"[link] Oppgaver&#x0A; ==== &#x0A;Laget av: [created_by] &#x0A;Opprettet: [cre"
-"ation_datetime]&#x0A;[title]&#x0A;[folder_name]&#x0A;[priority]&#x0A;[task_st"
-"atus]  [start]&#x0A;[end] "
-"&#x0A;[series]&#x0A;[description]&#x0A;Deltakere&#x0A; "
-"============&#x0A;[participants]  Ressurser&#x0A; =========&#x0A;[resources]"
-"  =========================================="
+"[link] \n"
+"Oppgaver\n"
+" ==== \n"
+"Opprettet av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]  \n"
+"\n"
+"[start]\n"
+"[end] \n"
+"[series]\n"
+"[description]\n"
+"Deltakere\n"
+" ============\n"
+"[participants]  \n"
+"\n"
+"Ressurser\n"
+" =========\n"
+"[resources]  \n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:436
 msgid ""
@@ -6004,11 +6185,28 @@ msgid ""
 msgstr ""
 "Denne oppgaven ble endret av [changed_by].\n"
 "\n"
-"Oppgave&#x0A;===========&#x0A;Laget av: [created_by] &#x0A;Opprettet: [creati"
-"on_datetime]&#x0A;[title]&#x0A;[folder_name]&#x0A;[priority]&#x0A;[task_statu"
-"s]  [start]&#x0A;[end] &#x0A;[series]&#x0A;[description]&#x0A;Deltakere&#x0A;"
-" ============&#x0A;[participants]  Ressurser&#x0A; =========&#x0A;[resources]"
-"  =========================================="
+"Oppgave\n"
+"===========\n"
+"Opprettet av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]  \n"
+"\n"
+"[start]\n"
+"[end] \n"
+"[series]\n"
+"[description]\n"
+"Deltakere\n"
+" ============\n"
+"[participants]  \n"
+"\n"
+"Ressurser\n"
+" =========\n"
+"[resources]  \n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:476
 msgid ""
@@ -6039,11 +6237,27 @@ msgid ""
 msgstr ""
 "[changed_by] har [confirmation_action] denne avtalen.\n"
 "Du kan sjekke denne avtalen i kalenderen din:\n"
-"[link]  Avtale&#x0A; ===========&#x0A;Laget av: [created_by] &#x0A;Opprettet:"
-" [creation_datetime]&#x0A;[title]&#x0A;[location][folder_name]  [start]&#x0A;"
-"[end]&#x0A;[series][delete_exceptions][change_exceptions]&#x0A;[description]&"
-"#x0A;Deltakere&#x0A;============&#x0A;[participants] Ressurser "
-"&#x0A;=========&#x0A;[resources]  =========================================="
+"[link]  \n"
+"\n"
+"Avtale\n"
+" ===========\n"
+"Laget av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]  \n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Deltakere\n"
+"============\n"
+"[participants] \n"
+"Ressurser \n"
+"=========\n"
+"[resources]  \n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:509
 msgid ""
@@ -6072,11 +6286,25 @@ msgid ""
 msgstr ""
 "[changed_by] har [confirmation_action] denne avtalen.\n"
 "\n"
-"Avtale&#x0A;===========&#x0A;Laget av: [created_by] &#x0A;Opprettet: "
-"[creation_datetime]&#x0A;[title]&#x0A;[location][folder_name]  [start]&#x0A;["
-"end]&#x0A;[series][delete_exceptions][change_exceptions]&#x0A;[description]&#"
-"x0A;Deltakere&#x0A;============&#x0A;[participants] Ressurser "
-"&#x0A;=========&#x0A;[resources]  =========================================="
+"Avtale\n"
+"===========\n"
+"Opprettet av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]  \n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Deltakere\n"
+"============\n"
+"[participants] \n"
+"Ressurser \n"
+"=========\n"
+"[resources]  \n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:540
 msgid ""
@@ -6109,12 +6337,29 @@ msgid ""
 msgstr ""
 "[changed_by] har [confirmation_action] denne avtalen.\n"
 "Du kan sjekke denne oppgaven i dine oppgaver:\n"
-"[link] Oppgaver&#x0A; ==== &#x0A;Laget av: [created_by] &#x0A;Opprettet: [cre"
-"ation_datetime]&#x0A;[title]&#x0A;[folder_name]&#x0A;[priority]&#x0A;[task_st"
-"atus]  [start]&#x0A;[end] "
-"&#x0A;[series]&#x0A;[description]&#x0A;Deltakere&#x0A; "
-"============&#x0A;[participants]  Ressurser&#x0A; =========&#x0A;[resources]"
-"  =========================================="
+"[link] \n"
+"Oppgave\n"
+" ==== \n"
+"Opprettet av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]  \n"
+"\n"
+"[start]\n"
+"[end] \n"
+"[series]\n"
+"[description]\n"
+"Deltakere\n"
+" ============\n"
+"[participants]  \n"
+"\n"
+"Ressurser\n"
+" =========\n"
+"[resources]  \n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:572
 msgid ""
@@ -6145,11 +6390,27 @@ msgid ""
 msgstr ""
 "[changed_by] har [confirmation_action] denne avtalen.\n"
 "\n"
-"Oppgave&#x0A;===========&#x0A;Laget av: [created_by] &#x0A;Opprettet: [creati"
-"on_datetime]&#x0A;[title]&#x0A;[folder_name]&#x0A;[priority]&#x0A;[task_statu"
-"s]  [start]&#x0A;[end] &#x0A;[series]&#x0A;[description]&#x0A;Deltakere&#x0A;"
-" ============&#x0A;[participants]  Ressurser&#x0A; =========&#x0A;[resources]"
-"  =========================================="
+"Oppgave\n"
+"===========\n"
+"Opprettet av: [created_by] \n"
+"Opprettet: [creation_datetime]\n"
+"[title][folder_name]\n"
+"[priority]\n"
+"[task_status]  \n"
+"\n"
+"[start]\n"
+"[end] \n"
+"[series]\n"
+"[description]\n"
+"Deltakere\n"
+" ============\n"
+"[participants]  \n"
+"\n"
+"Ressurser\n"
+" =========\n"
+"[resources]  \n"
+"\n"
+"=========================================="
 
 #. -
 #. * MESSAGE SUBJECT PREFIXES
@@ -6176,7 +6437,7 @@ msgstr "Avtale (avslått)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:615
 msgid "Appointment (tentative)"
-msgstr "Avtale (foreløpig)"
+msgstr "Avtale (foreløpig godkjent)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:617
 msgid "Appointment (none)"
@@ -6348,7 +6609,7 @@ msgstr "Status: %1$s"
 #. Delete exceptions: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:746
 msgid "Delete exceptions: %1$s"
-msgstr "Ingen slette-unntak: %1$s"
+msgstr "Ingen sletteunntak: %1$s"
 
 #. Change exceptions: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:749
@@ -6560,7 +6821,7 @@ msgstr "Du har ikke de nødvendige tillatelsene til å flytte dokumentet."
 #. The document name \"%1$s\" already exists. Please choose another.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:101
 msgid "The document name \"%1$s\" already exists. Please choose another."
-msgstr "Dokumentnavnet \"%1$s\" finnes allerede. Velg en annen."
+msgstr "Dokumentnavnet \"%1$s\" finnes allerede. Velg et annet navn."
 
 #. You do not have the appropriate permissions to delete a document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:104
@@ -6571,7 +6832,7 @@ msgstr "Du har ikke de nødvendige tillatelsene til å slette et dokument."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:107
 msgid ""
 "In order to accomplish the search, %1$s or more characters are required."
-msgstr "For å utføre søket, kreves %1$s eller flere tegn."
+msgstr "For å utføre søket kreves %1$s eller flere tegn."
 
 #. The document could not be updated because it was modified. Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:110
@@ -6582,7 +6843,7 @@ msgstr "Dokumentet kunne ikke oppdateres fordi det ble endret. Prøv på nytt."
 #. The file name must not contain slashes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:113
 msgid "The file name must not contain slashes."
-msgstr "Filnavnet må ikke inneholde skråstreker."
+msgstr "Filnavnet kan ikke inneholde skråstreker."
 
 #. The file name contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:116
@@ -6617,7 +6878,7 @@ msgstr "Problem med å legge til/fjerne et objekt til/fra hurtigbufferen."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:76
 msgid "Hash algorithm \"%s\" could not be found."
-msgstr "Hash algoritme \"%s\" ble ikke funnet."
+msgstr "Hashalgoritmen \"%s\" ble ikke funnet."
 
 #. *
 #. * Encoding %s cannot be used.
@@ -6625,7 +6886,7 @@ msgstr "Hash algoritme \"%s\" ble ikke funnet."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:81
 msgid "Encoding \"%s\" cannot be used."
-msgstr "Tegnsett \"%s\" kan ikke brukes."
+msgstr "Tegnsettet \"%s\" kan ikke brukes."
 
 #. *
 #. * No resource group found for identifier \"%1$d\".
@@ -6711,7 +6972,7 @@ msgstr "Nytt passord inneholder ugyldige tegn."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:116
 msgid "Attributes of user %1$d in context %2$d have been erased."
-msgstr "Attributter til  bruker %1$d i kontekst %2$d har blitt slettet."
+msgstr "Attributter til bruker %1$d i kontekst %2$d har blitt slettet."
 
 #. *
 #. * Loading one or more users failed.
@@ -6839,23 +7100,23 @@ msgstr "Ønsket verdi \"alarm date\" ble ikke levert."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:83
 msgid "Unable to insert reminder."
-msgstr "Kan ikke sette inn påminnelse."
+msgstr "Kunne ikke sette inn påminnelse."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:85
 msgid "Unable to update reminder."
-msgstr "Kan ikke oppdatere påminnelse."
+msgstr "Kunne ikke oppdatere påminnelse."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:87
 msgid "Unable to delete reminder."
-msgstr "Kan ikke slette påminnelse."
+msgstr "Kunne ikke slette påminnelse."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:89
 msgid "Unable to load reminder."
-msgstr "Kan ikke laste påminnelse."
+msgstr "Kunne ikke laste påminnelse."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:91
 msgid "Unable to list reminder."
-msgstr "Ute av stand til å liste påminnelse."
+msgstr "Kunne ikke liste påminnelser."
 
 #. * Can not find reminder with identifier %1$d in context %2$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:94
@@ -7051,7 +7312,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
-msgstr "Bare oppgaveskaperen har lov til å sette privat flagg."
+msgstr "Bare oppgaveeieren har lov til å sette privat-flagget."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:116
 msgid "External participants without E-Mail address can not be added."
@@ -7061,7 +7322,8 @@ msgstr "Eksterne deltakere uten e-postadresse kan ikke legges til."
 msgid ""
 "You do not have the appropriate permisson to see the task %1$d in folder "
 "%2$s."
-msgstr "Du har ikke riktig tillatelse for å se oppgaven %1$d i mappen %2$s."
+msgstr ""
+"Du har ikke tilstrekkelige tillatelser for å se oppgaven %1$d i mappen %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Task contains invalid data: \"%1$s\"."
@@ -7154,7 +7416,7 @@ msgstr "Meldingen %1$s finnes ikke i mappen %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:62
 msgid "Cannot get database connection."
-msgstr "Kan ikke få databasetilkobling."
+msgstr "Kunne ikke kontakte databasen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:64
 msgid "Error while updating database."
@@ -7275,15 +7537,15 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:68
 msgid "A messaging error occurred. Please try again later."
-msgstr "En feilmelding oppstod. Prøv igjen senere."
+msgstr "En meldingsfeil oppstod. Prøv igjen senere."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:70
 msgid "A messaging error occurred."
-msgstr "En feilmelding oppstod."
+msgstr "En meldingsfeil oppstod."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:72
 msgid "Cannot initialize mail module."
-msgstr "Kan ikke initialisere e-postmodulen."
+msgstr "Kunne ikke initialisere e-postmodulen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:74
 msgid "No mail module access permitted."
@@ -7546,7 +7808,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:180
 msgid "Mail access is disabled for context administrator."
-msgstr "E-posttilgang er deaktivert for kontekst administrator."
+msgstr "E-posttilgang er deaktivert for domeneadministrator."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -8216,7 +8478,7 @@ msgstr "Mappen \"%1$s\" kan ikke slettes fordi den inneholder låste dokumenter.
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
-msgstr "Operasjonen kan bare utføres for kontekst-administrator."
+msgstr "Operasjonen kan bare utføres for domeneadministrator."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
 msgid "The folder \"%1$s\" cannot be deleted."
@@ -8386,7 +8648,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:64
 msgid "The requested share does not exist."
-msgstr "Etterspurt share finnes ikke."
+msgstr "Den forespurte ressursen finnes ikke."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:66
 msgid "The token \"%1$s\" is invalid."
@@ -8459,7 +8721,7 @@ msgstr "Abonnementet du forespurte er ukjent!"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:63
 msgid "OXMF Contacts"
-msgstr "OXMF kontakter"
+msgstr "OXMF-kontakter"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:65
 msgid "OXMF Infostore"
@@ -8674,8 +8936,7 @@ msgstr "Ugyldig destinasjonsmappe. E-post kan ikke vedlegges."
 #. A user named %1$s already exists in destination context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.user.copy/src/com/openexchange/user/copy/UserCopyExceptionMessages.java:62
 msgid "A user named %1$s already exists in destination context %2$s."
-msgstr ""
-"En bruker som heter %1$s eksisterer allerede i destinasjonskontekst %2$s."
+msgstr "En bruker med navnet %1$s eksisterer allerede i måldomenet %2$s."
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
