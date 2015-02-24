@@ -1,73 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog xmlns="urn:liquibase"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
-	logicalFilePath="configdbChangeLog">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
+    logicalFilePath="configdbChangeLog">
 
 
-	<!-- ******************************************************* -->
-	<!-- ************** Release 7.6.1 starts here ************** -->
-	<!-- ******************************************************* -->
+    <!-- ******************************************************* -->
+    <!-- ************** Release 7.6.1 starts here ************** -->
+    <!-- ******************************************************* -->
 
-	<changeSet id="7.6.1-milestone" author="martin.schneider@open-xchange.com">
-		<tagDatabase tag="7.6.1-milestone" />
-	</changeSet>
+    <changeSet id="7.6.1-milestone" author="martin.schneider@open-xchange.com">
+        <tagDatabase tag="7.6.1-milestone" />
+    </changeSet>
 
-	<changeSet id="7.6.1:login2context:login_info" author="martin.schneider@open-xchange.com">
-		<preConditions onFail="MARK_RAN">
-			<customPrecondition
-				className="liquibase.precondition.ext.ColumnSizePrecondition">
-				<param name="expectedSize" value="255" />
-				<param name="tableName" value="login2context" />
-				<param name="columnName" value="login_info" />
-			</customPrecondition>
-		</preConditions>
-		<comment>Fix for bug 33418: enhances the login_info column to 255
-			characters</comment>
-		<modifyDataType columnName="login_info" newDataType="varchar(255)"
-			tableName="login2context" />
-		<dropDefaultValue columnDataType="varchar(255)"
-			columnName="login_info" tableName="login2context" />
-		<rollback>
-			<dropDefaultValue tableName="login2context"
-				columnName="login_info" />
-			<modifyDataType tableName="login2context" columnName="login_info"
-				newDataType="varchar(128)" />
-			<dropDefaultValue columnDataType="varchar(128)"
-				columnName="login_info" tableName="login2context" />
-		</rollback>
-	</changeSet>
-
-	<!-- ******************************************************* -->
-	<!-- ************** Release 7.6.2 starts here ************** -->
-	<!-- ******************************************************* -->
-
-	<changeSet id="7.6.2:changelog:addprimarykey" author="martin.schneider@open-xchange.com">
-		<preConditions onFail="MARK_RAN">
-			<not>
-				<primaryKeyExists tableName="DATABASECHANGELOG" />
-			</not>
-		</preConditions>
-		<comment>Add missing primary key for DATABASECHANGELOG</comment>
-		<addPrimaryKey columnNames="id, author, filename" tableName="DATABASECHANGELOG" />
-	</changeSet>
-
-	<changeSet id="7.6.2:context_server2db_pool:addpoolandschemaindex" author="thorben.betten@open-xchange.com">
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">SELECT COUNT(table_name) FROM information_schema.statistics WHERE table_name = 'context_server2db_pool' AND index_name = 'poolAndSchema';</sqlCheck>
-		</preConditions>
-		<comment>Add index to context_server2db_pool table for columns write_db_pool_id and db_schema</comment>
-		<sql>
-            ALTER TABLE context_server2db_pool ADD INDEX `poolAndSchema` (write_db_pool_id, db_schema);
-        </sql>
+    <changeSet id="7.6.1:login2context:login_info" author="martin.schneider@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <customPrecondition
+                className="liquibase.precondition.ext.ColumnSizePrecondition">
+                <param name="expectedSize" value="255" />
+                <param name="tableName" value="login2context" />
+                <param name="columnName" value="login_info" />
+            </customPrecondition>
+        </preConditions>
+        <comment>Fix for bug 33418: enhances the login_info column to 255
+            characters</comment>
+        <modifyDataType columnName="login_info" newDataType="varchar(255)"
+            tableName="login2context" />
+        <dropDefaultValue columnDataType="varchar(255)"
+            columnName="login_info" tableName="login2context" />
         <rollback>
-        	<dropIndex indexName="poolAndSchema" tableName="context_server2db_pool"/>
+            <dropDefaultValue tableName="login2context"
+                columnName="login_info" />
+            <modifyDataType tableName="login2context" columnName="login_info"
+                newDataType="varchar(128)" />
+            <dropDefaultValue columnDataType="varchar(128)"
+                columnName="login_info" tableName="login2context" />
         </rollback>
-	</changeSet>
+    </changeSet>
 
-	<changeSet id="7.6.2:milestone" author="martin.schneider@open-xchange.com">
-		<tagDatabase tag="7.6.2:milestone" />
-	</changeSet>
+    <!-- ******************************************************* -->
+    <!-- ************** Release 7.6.2 starts here ************** -->
+    <!-- ******************************************************* -->
+
+    <changeSet id="7.6.2:changelog:addprimarykey" author="martin.schneider@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <primaryKeyExists tableName="DATABASECHANGELOG"/>
+            </not>
+        </preConditions>
+        <comment>Add missing primary key for DATABASECHANGELOG</comment>
+        <addPrimaryKey columnNames="id, author, filename" tableName="DATABASECHANGELOG" />
+    </changeSet>
+
+    <changeSet id="7.6.2:context_server2db_pool:addpoolandschemaindex" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="context_server2db_pool"  columnNames="write_db_pool_id,db_schema"/>
+            </not>
+        </preConditions>
+        <comment>Add index to context_server2db_pool table for columns write_db_pool_id and db_schema</comment>
+        <createIndex indexName="poolAndSchema" tableName="context_server2db_pool">
+            <column name="write_db_pool_id"/>
+            <column name="db_schema"/>
+        </createIndex>
+        <rollback>
+            <dropIndex indexName="poolAndSchema" tableName="context_server2db_pool"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="7.6.2:milestone" author="martin.schneider@open-xchange.com">
+        <tagDatabase tag="7.6.2:milestone" />
+    </changeSet>
 
 </databaseChangeLog>
