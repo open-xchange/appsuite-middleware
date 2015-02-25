@@ -71,6 +71,8 @@ exit 0
 %changelog
 * Tue Feb 24 2015 Carsten Hoeger <choeger@open-xchange.com>
 Eighth candidate for 7.6.2 release
+* Mon Feb 23 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-02-25
 * Wed Feb 11 2015 Carsten Hoeger <choeger@open-xchange.com>
 Seventh candidate for 7.6.2 release
 * Fri Feb 06 2015 Carsten Hoeger <choeger@open-xchange.com>

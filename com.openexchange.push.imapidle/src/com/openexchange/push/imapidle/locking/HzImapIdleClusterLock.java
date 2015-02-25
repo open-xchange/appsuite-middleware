@@ -74,8 +74,9 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
     /**
      * Initializes a new {@link HzImapIdleClusterLock}.
      */
-    public HzImapIdleClusterLock(ServiceLookup services) {
+    public HzImapIdleClusterLock(String mapName, ServiceLookup services) {
         super(services);
+        this.mapName = mapName;
         notActive = new AtomicBoolean();
     }
 

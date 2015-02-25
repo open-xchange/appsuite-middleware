@@ -52,6 +52,12 @@ open-xchange-system (7.6.2-0) unstable; urgency=medium
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 17 Sep 2014 12:35:41 +0200
 
+open-xchange-system (7.6.1-20) stable; urgency=low
+
+  * Build for patch 2015-02-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 23 Feb 2015 12:28:28 +0100
+
 open-xchange-system (7.6.1-19) stable; urgency=low
 
   * Build for patch 2015-02-10
