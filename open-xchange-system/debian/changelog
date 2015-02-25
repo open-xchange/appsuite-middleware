@@ -4,6 +4,12 @@ open-xchange-system (7.8.0-0) unstable; urgency=medium
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 05 Nov 2014 09:40:27 +0100
 
+open-xchange-system (7.6.2-8) stable; urgency=low
+
+  * Eighth candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Feb 2015 16:13:07 +0100
+
 open-xchange-system (7.6.2-7) stable; urgency=low
 
   * Seventh candidate for 7.6.2 release

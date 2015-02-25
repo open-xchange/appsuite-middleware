@@ -78,6 +78,7 @@ public class CSVParser {
     private List<List<String>> structure = new LinkedList<List<String>>();
     private int pointer;
     private char[] fileAsArray;
+    private char cellDelimiter;
 
     public CSVParser(final String file) {
         this();
@@ -93,6 +94,7 @@ public class CSVParser {
     }
 
     public CSVParser() {
+        cellDelimiter = CELL_DELIMITER;
         isTolerant = false;
         reset();
     }
@@ -108,6 +110,15 @@ public class CSVParser {
      */
     public void setTolerant(final boolean isTolerant) {
         this.isTolerant = isTolerant;
+    }
+
+    /**
+     * Sets the cell delimiter character to use.
+     *
+     * @param delimiter The delimiter
+     */
+    public void setCellDelimiter(char delimiter) {
+        this.cellDelimiter = delimiter;
     }
 
     /**
@@ -134,22 +145,15 @@ public class CSVParser {
 
         pointer = 0;
         for (; pointer < fileAsArray.length; pointer++) {
-            switch (fileAsArray[pointer]) {
-            case LINE_DELIMITER:
-                handleLineDelimiter();
-                break;
-
-            case ESCAPER:
-                handleEscaping();
-                break;
-
-            case CELL_DELIMITER:
+            char c = fileAsArray[pointer];
+            if (cellDelimiter == c) {
                 handleCellDelimiter();
-                break;
-
-            default:
+            } else if (LINE_DELIMITER == c) {
+                handleLineDelimiter();
+            } else if (ESCAPER == c) {
+                handleEscaping();
+            } else {
                 handleDefault();
-                break;
             }
         }
 
@@ -166,7 +170,7 @@ public class CSVParser {
 
     protected void handleCellDelimiter() throws OXException {
         if (isEscaping) {
-            currentCell.append(CELL_DELIMITER);
+            currentCell.append(cellDelimiter);
         } else {
             if ((numberOfCells == STARTING_LENGTH) || (numberOfCells != STARTING_LENGTH && currentLine.size() <= numberOfCells)) {
                 currentLine.add(currentCell.toString().trim());

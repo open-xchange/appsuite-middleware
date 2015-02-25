@@ -84,9 +84,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     private static final String CONFIGDB_CHANGE_LOG = "/liquibase/configdbChangeLog.xml";
 
     private final ConfigDBMigrationExecutor executor;
-
-    private DatabaseService databaseService;
-
+    private final DatabaseService databaseService;
     private final BundleResourceAccessor localResourceAccessor = new BundleResourceAccessor(FrameworkUtil.getBundle(getClass()));
 
 
@@ -103,7 +101,6 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         this.databaseService = databaseService;
         executor = new ConfigDBMigrationExecutor(databaseService);
     }
-
 
     /**
      * {@inheritDoc}

@@ -46,7 +46,7 @@
     <changeSet id="7.6.2:changelog:addprimarykey" author="martin.schneider@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
-                <primaryKeyExists tableName="DATABASECHANGELOG" />
+                <primaryKeyExists tableName="DATABASECHANGELOG"/>
             </not>
         </preConditions>
         <comment>Add missing primary key for DATABASECHANGELOG</comment>
@@ -55,12 +55,15 @@
 
     <changeSet id="7.6.2:context_server2db_pool:addpoolandschemaindex" author="thorben.betten@open-xchange.com">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">SELECT COUNT(table_name) FROM information_schema.statistics WHERE table_name = 'context_server2db_pool' AND index_name = 'poolAndSchema';</sqlCheck>
+            <not>
+                <indexExists tableName="context_server2db_pool"  columnNames="write_db_pool_id,db_schema"/>
+            </not>
         </preConditions>
         <comment>Add index to context_server2db_pool table for columns write_db_pool_id and db_schema</comment>
-        <sql>
-            ALTER TABLE context_server2db_pool ADD INDEX `poolAndSchema` (write_db_pool_id, db_schema);
-        </sql>
+        <createIndex indexName="poolAndSchema" tableName="context_server2db_pool">
+            <column name="write_db_pool_id"/>
+            <column name="db_schema"/>
+        </createIndex>
         <rollback>
             <dropIndex indexName="poolAndSchema" tableName="context_server2db_pool"/>
         </rollback>

@@ -101,5 +101,6 @@ CREATE TABLE context_server2db_pool (
     INDEX (write_db_pool_id),
     INDEX (server_id),
     INDEX (db_schema),
+    INDEX `poolAndSchema` (write_db_pool_id, db_schema),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
