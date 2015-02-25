@@ -52,20 +52,95 @@ package com.openexchange.groupware.infostore.database.impl;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.tx.AbstractDBAction;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.session.Session;
+import com.openexchange.tools.exceptions.SimpleIncorrectStringAttribute;
+import com.openexchange.tools.session.ServerSession;
 
 public abstract class AbstractInfostoreAction extends AbstractDBAction {
 
-	private InfostoreQueryCatalog queries = null;
+    /** The associated session */
+    protected final Session session;
+	private InfostoreQueryCatalog queries;
+
+	/**
+	 * Initializes a new {@link AbstractInfostoreAction}.
+	 */
+	protected AbstractInfostoreAction(Session session) {
+	    super();
+	    this.session = session;
+	}
+
+	private static User getUser(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+        return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+    }
+
+	/**
+     * Launders specified <code>OXException</code> instance.
+     *
+     * @param e The <code>OXException</code> instance
+     * @param session The optional session
+     * @return The appropriate <code>OXException</code> instance
+     * @throws OXException If operation fails
+     */
+    protected static OXException launderOXException(OXException e, Session session) throws OXException {
+        Throwable cause = e.getCause();
+        if (!(cause instanceof IncorrectStringSQLException)) {
+            return e;
+        }
+
+        IncorrectStringSQLException incorrectStringError = (IncorrectStringSQLException) cause;
+        Metadata metadata = Metadata.get(incorrectStringError.getColumn());
+        if (null == metadata) {
+            return InfostoreExceptionCodes.INVALID_CHARACTER_SIMPLE.create(cause);
+        }
+        String displayName = null == session ? null : metadata.getDisplayName();
+        if (null == displayName) {
+            return InfostoreExceptionCodes.INVALID_CHARACTER.create(cause, incorrectStringError.getIncorrectString(), incorrectStringError.getColumn());
+        }
+
+        String translatedName = StringHelper.valueOf(getUser(session).getLocale()).getString(displayName);
+        OXException oxe = InfostoreExceptionCodes.INVALID_CHARACTER.create(cause, incorrectStringError.getIncorrectString(), translatedName);
+        oxe.addProblematic(new SimpleIncorrectStringAttribute(metadata.getId(), incorrectStringError.getIncorrectString()));
+        return oxe;
+    }
+
+	@Override
+	protected int doUpdates(List<UpdateBlock> updates) throws OXException {
+	    try {
+            return super.doUpdates(updates);
+        } catch (OXException e) {
+            throw launderOXException(e, session);
+        }
+	}
+
+	@Override
+	protected int doUpdates(UpdateBlock... updates) throws OXException {
+	    try {
+            return super.doUpdates(updates);
+        } catch (OXException e) {
+            throw launderOXException(e, session);
+        }
+	}
 
     protected final void fillStmt(final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
         fillStmt(1, stmt, fields, doc, additional);

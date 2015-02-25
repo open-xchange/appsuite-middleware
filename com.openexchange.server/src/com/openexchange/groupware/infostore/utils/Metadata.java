@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.groupware.infostore.InfostoreStrings;
 
 public class Metadata {
 
@@ -83,28 +84,28 @@ public class Metadata {
     public static final int META = 23;
 
 
-    public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED,"last_modified");
-    public static final Metadata CREATION_DATE_LITERAL = new Metadata(CREATION_DATE,"creation_date");
-    public static final Metadata MODIFIED_BY_LITERAL = new Metadata(MODIFIED_BY,"modified_by");
-    public static final Metadata FOLDER_ID_LITERAL = new Metadata(FOLDER_ID,"folder_id");
-    public static final Metadata TITLE_LITERAL = new Metadata(TITLE,"title");
-    public static final Metadata VERSION_LITERAL = new Metadata(VERSION,"version");
-    public static final Metadata CONTENT_LITERAL = new Metadata(CONTENT,"content");
-    public static final Metadata ID_LITERAL = new Metadata(ID,"id");
-    public static final Metadata FILE_SIZE_LITERAL = new Metadata(FILE_SIZE,"file_size");
-    public static final Metadata DESCRIPTION_LITERAL = new Metadata(DESCRIPTION,"description");
-    public static final Metadata URL_LITERAL = new Metadata(URL,"url");
-    public static final Metadata CREATED_BY_LITERAL = new Metadata(CREATED_BY,"created_by");
-    public static final Metadata FILENAME_LITERAL = new Metadata(FILENAME,"filename");
-    public static final Metadata FILE_MIMETYPE_LITERAL = new Metadata(FILE_MIMETYPE,"file_mimetype");
+    public static final Metadata LAST_MODIFIED_LITERAL = new Metadata(LAST_MODIFIED, "last_modified");
+    public static final Metadata CREATION_DATE_LITERAL = new Metadata(CREATION_DATE, "creation_date");
+    public static final Metadata MODIFIED_BY_LITERAL = new Metadata(MODIFIED_BY, "modified_by");
+    public static final Metadata FOLDER_ID_LITERAL = new Metadata(FOLDER_ID, "folder_id");
+    public static final Metadata TITLE_LITERAL = new Metadata(TITLE, "title", InfostoreStrings.FIELD_TITLE);
+    public static final Metadata VERSION_LITERAL = new Metadata(VERSION, "version");
+    public static final Metadata CONTENT_LITERAL = new Metadata(CONTENT, "content");
+    public static final Metadata ID_LITERAL = new Metadata(ID, "id");
+    public static final Metadata FILE_SIZE_LITERAL = new Metadata(FILE_SIZE, "file_size");
+    public static final Metadata DESCRIPTION_LITERAL = new Metadata(DESCRIPTION, "description", InfostoreStrings.FIELD_DESCRIPTION);
+    public static final Metadata URL_LITERAL = new Metadata(URL, "url");
+    public static final Metadata CREATED_BY_LITERAL = new Metadata(CREATED_BY, "created_by");
+    public static final Metadata FILENAME_LITERAL = new Metadata(FILENAME, "filename", InfostoreStrings.FIELD_FILE_NAME);
+    public static final Metadata FILE_MIMETYPE_LITERAL = new Metadata(FILE_MIMETYPE, "file_mimetype");
     public static final Metadata SEQUENCE_NUMBER_LITERAL = new Metadata(SEQUENCE_NUMBER, "sequence_number");
-    public static final Metadata CATEGORIES_LITERAL = new Metadata(CATEGORIES,"categories");
-    public static final Metadata LOCKED_UNTIL_LITERAL = new Metadata(LOCKED_UNTIL,"locked_until");
-    public static final Metadata FILE_MD5SUM_LITERAL = new Metadata(FILE_MD5SUM,"file_md5sum");
-    public static final Metadata VERSION_COMMENT_LITERAL = new Metadata(VERSION_COMMENT,"version_comment");
-    public static final Metadata CURRENT_VERSION_LITERAL = new Metadata(CURRENT_VERSION,"current_version");
-    public static final Metadata COLOR_LABEL_LITERAL = new Metadata(COLOR_LABEL,"color_label");
-    public static final Metadata FILESTORE_LOCATION_LITERAL = new Metadata(FILESTORE_LOCATION,"filestore_location");
+    public static final Metadata CATEGORIES_LITERAL = new Metadata(CATEGORIES, "categories");
+    public static final Metadata LOCKED_UNTIL_LITERAL = new Metadata(LOCKED_UNTIL, "locked_until");
+    public static final Metadata FILE_MD5SUM_LITERAL = new Metadata(FILE_MD5SUM, "file_md5sum");
+    public static final Metadata VERSION_COMMENT_LITERAL = new Metadata(VERSION_COMMENT, "version_comment", InfostoreStrings.FIELD_VERSION_COMMENT);
+    public static final Metadata CURRENT_VERSION_LITERAL = new Metadata(CURRENT_VERSION, "current_version");
+    public static final Metadata COLOR_LABEL_LITERAL = new Metadata(COLOR_LABEL, "color_label");
+    public static final Metadata FILESTORE_LOCATION_LITERAL = new Metadata(FILESTORE_LOCATION, "filestore_location");
     public static final Metadata LAST_MODIFIED_UTC_LITERAL = new Metadata(LAST_MODIFIED_UTC, "last_modified_utc");
     public static final Metadata NUMBER_OF_VERSIONS_LITERAL = new Metadata(NUMBER_OF_VERSIONS, "number_of_versions");
     public static final Metadata META_LITERAL = new Metadata(META, "meta");
@@ -168,12 +169,18 @@ public class Metadata {
     public static final List<Metadata> HTTPAPI_VALUES = Collections.unmodifiableList(Arrays.asList(HTTPAPI_VALUES_ARRAY));
 
     private final String name;
+    private final String displayName;
     private final int id;
 
-    private Metadata(final int id, final String name) {
+    private Metadata(int id, String name) {
+        this(id, name, null);
+    }
+
+    private Metadata(int id, String name, String displayName) {
         super();
         this.name = name;
         this.id = id;
+        this.displayName = displayName;
     }
 
     @Override
@@ -187,6 +194,15 @@ public class Metadata {
 
     public int getId(){
         return id;
+    }
+
+    /**
+     * Gets the optional display name
+     *
+     * @return The display name or <code>null</code>
+     */
+    public String getDisplayName() {
+        return displayName;
     }
 
     public static Metadata get(final int id){
@@ -220,9 +236,18 @@ public class Metadata {
         }
     }
 
-    public static Metadata get(final String s){
-        for(final Metadata metadata : VALUES){
-            if(metadata.getName().equals(s)) {
+    /**
+     * Gets the metadata for given identifier
+     *
+     * @param s The identifier
+     * @return The metadata or <code>null</code>
+     */
+    public static Metadata get(String s) {
+        if (null == s) {
+            return null;
+        }
+        for (Metadata metadata : VALUES) {
+            if (metadata.getName().equals(s)) {
                 return metadata;
             }
         }
