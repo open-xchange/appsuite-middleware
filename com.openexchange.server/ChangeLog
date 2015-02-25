@@ -1,6 +1,7 @@
 * 2015-02-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 36960: Select an appropriate predecessor for 'com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob' update task
+ - Fix for bug 36866: Proper address header parsing in case of mail-safe encoded personal w/o quotes
 
 * 2015-02-24 - tobias.friedrich@open-xchange.com
 

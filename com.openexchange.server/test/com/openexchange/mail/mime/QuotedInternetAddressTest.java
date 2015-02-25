@@ -120,8 +120,18 @@ public class QuotedInternetAddressTest extends TestCase {
         String s = "=?UTF-8?Q?F=C3=B6oooo=2C_Bar?= <s.foeoooobar@foobar.org>";
         InternetAddress[] parsed = MimeMessageConverter.getAddressHeader(s);
         assertEquals("Unexpected amount of addresses", 1, parsed.length);
-        
+
         assertEquals("Display name does not equals \"F\u00f6oooo, Bar\"", "F\u00f6oooo, Bar", parsed[0].getPersonal());
         assertEquals("Address does not equals \"s.foeoooobar@foobar.org\"", "s.foeoooobar@foobar.org", parsed[0].getAddress());
     }
+
+    public void testBug36866() throws Exception {
+        String s = "=?iso-8859-1?Q?Mustermann=2C_J=F6rg?= <Joerg.Mustermann@musterfirma.org>";
+        InternetAddress[] parsed = QuotedInternetAddress.parseHeader(s, true);
+        assertEquals("Unexpected amount of addresses", 1, parsed.length);
+
+        assertEquals("Display name does not equals \"Mustermann, J\u00f6rg\"", "Mustermann, J\u00f6rg", parsed[0].getPersonal());
+        assertEquals("Address does not equals \"Joerg.Mustermann@musterfirma.org\"", "Joerg.Mustermann@musterfirma.org", parsed[0].getAddress());
+    }
+
 }
