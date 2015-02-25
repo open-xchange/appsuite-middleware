@@ -51,7 +51,6 @@ package com.openexchange.caching.events;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -131,8 +130,21 @@ public class CacheEvent implements Serializable {
         super();
         this.operation = operation;
         this.region = region;
-        this.keys = null == keys ? null : (((keys instanceof LinkedList) || (keys instanceof ArrayList) ? keys : new LinkedList<Serializable>(keys)));
+        this.keys = getPreparedKeys(keys);
         this.groupName = groupName;
+    }
+
+    private static List<Serializable> getPreparedKeys(List<Serializable> keys) {
+        if (null == keys) {
+            return null;
+        }
+        List<Serializable> retval = new ArrayList<Serializable>(keys.size());
+        for (Serializable keyToAdd : keys) {
+            if (!retval.contains(keyToAdd)) {
+                retval.add(keyToAdd);
+            }
+        }
+        return retval;
     }
 
     /**
@@ -182,11 +194,7 @@ public class CacheEvent implements Serializable {
 
         // Add keys if absent
         for (Serializable keyToAdd : event.keys) {
-            boolean contained = false;
-            for (Iterator<Serializable> it = thisKeys.iterator(); !contained && it.hasNext();) {
-                contained = keyToAdd.equals(it.next());
-            }
-            if (!contained) {
+            if (!thisKeys.contains(keyToAdd)) {
                 thisKeys.add(keyToAdd);
             }
         }
