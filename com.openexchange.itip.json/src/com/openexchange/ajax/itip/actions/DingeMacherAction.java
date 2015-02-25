@@ -66,6 +66,7 @@ import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -77,15 +78,19 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DingeMacherAction extends AbstractITipAction {
 
-    public DingeMacherAction(ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing) {
+    private RankingAwareNearRegistryServiceTracker<ITipDingeMacherFactoryService> factoryListing;
+
+    public DingeMacherAction(ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing, RankingAwareNearRegistryServiceTracker<ITipDingeMacherFactoryService> factoryListing) {
         super(services, analyzerListing);
+        analyzerListing.getServiceList();
+        this.factoryListing = factoryListing;
     }
 
     @Override
     protected Object process(List<ITipAnalysis> analysis, AJAXRequestData request, ServerSession session, TimeZone tz) throws JSONException, OXException {
         int index = getIndex(request);
         ITipAnalysis analysisToProcess = analysis.get(index);
-        ITipDingeMacherFactoryService factory = services.getService(ITipDingeMacherFactoryService.class);
+        ITipDingeMacherFactoryService factory = getFactory();
         ITipAction action = ITipAction.valueOf(request.getParameter("action").toUpperCase());
         if (request.containsParameter("message")) {
             String message = request.getParameter("message", String.class);
@@ -117,8 +122,8 @@ public class DingeMacherAction extends AbstractITipAction {
         return 0;
     }
 
-    public Collection<String> getActionNames() {
-        ITipDingeMacherFactoryService factory = services.getService(ITipDingeMacherFactoryService.class);
+    public Collection<String> getActionNames() throws OXException {
+        ITipDingeMacherFactoryService factory = getFactory();
         Collection<ITipAction> supportedActions = factory.getSupportedActions();
         List<String> actionNames = new ArrayList<String>(supportedActions.size());
         for (ITipAction action : supportedActions) {
@@ -126,6 +131,22 @@ public class DingeMacherAction extends AbstractITipAction {
         }
 
         return actionNames;
+    }
+    
+    private ITipDingeMacherFactoryService getFactory() throws OXException {
+        if (factoryListing == null) {
+            throw ServiceExceptionCode.serviceUnavailable(ITipDingeMacherFactoryService.class);
+        }
+        List<ITipDingeMacherFactoryService> serviceList = factoryListing.getServiceList();
+        if (serviceList == null || serviceList.isEmpty()) {
+            throw ServiceExceptionCode.serviceUnavailable(ITipDingeMacherFactoryService.class);
+        }
+        ITipDingeMacherFactoryService service = serviceList.get(0);
+        if (service == null) {
+            throw ServiceExceptionCode.serviceUnavailable(ITipDingeMacherFactoryService.class);
+        }
+        return service;
+        
     }
 
 }

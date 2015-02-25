@@ -72,21 +72,22 @@ public class ITipJSONActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ITipParser.class, ConversionService.class, ITipDingeMacherFactoryService.class,
-            ITipMailGeneratorFactory.class, HttpService.class, DispatcherPrefixService.class };
+        return new Class[] { ITipParser.class, ConversionService.class, ITipMailGeneratorFactory.class, HttpService.class, DispatcherPrefixService.class, ITipDingeMacherFactoryService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> rankingTracker = new RankingAwareNearRegistryServiceTracker<ITipAnalyzerService>(context, ITipAnalyzerService.class, 0);
+        RankingAwareNearRegistryServiceTracker<ITipDingeMacherFactoryService> factoryTracker = new RankingAwareNearRegistryServiceTracker<ITipDingeMacherFactoryService>(context, ITipDingeMacherFactoryService.class, 0);
+        rememberTracker(rankingTracker);
+        rememberTracker(factoryTracker);
+        openTrackers();
     
-        ITipActionFactory.INSTANCE = new ITipActionFactory(this, rankingTracker);
+        ITipActionFactory.INSTANCE = new ITipActionFactory(this, rankingTracker, factoryTracker);
 
         registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(ITipActionFactory.INSTANCE, "calendar/itip"));
 
         getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "calendar/itip", new ITipJSONServlet(), null, null);
-        rememberTracker(rankingTracker);
-        openTrackers();
     }
 
 }
