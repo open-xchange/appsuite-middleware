@@ -1048,6 +1048,27 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Interface for an incorrect string in an attribute.
+     */
+    public static interface IncorrectString extends ProblematicAttribute {
+
+        /**
+         * Gets the column identifier of the attribute containing the incorrect string.
+         *
+         * @return The column identifier of the truncated attribute
+         */
+        int getId();
+
+        /**
+         * Gets the incorrect (sub-)string.
+         *
+         * @return The incorrect string
+         */
+        String getIncorrectString();
+
+    }
+
+    /**
      * Interface for an attribute which could not be parsed orderly.
      */
     public static interface Parsing extends ProblematicAttribute {
