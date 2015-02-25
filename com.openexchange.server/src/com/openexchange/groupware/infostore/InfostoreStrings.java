@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.infostore.database.impl;
+package com.openexchange.groupware.infostore;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.sql.SQLException;
-import java.util.List;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.session.Session;
+import com.openexchange.i18n.LocalizableStrings;
 
-public class CreateVersionAction extends AbstractDocumentListAction {
 
-    /**
-     * Initializes a new {@link CreateVersionAction}.
-     */
-    public CreateVersionAction(Session session) {
-        super(session);
-    }
+/**
+ * {@link InfostoreStrings} - Localizable strings for InfoStore module.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class InfostoreStrings implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link CreateVersionAction}.
-     *
-     * @param provider The database provider
-     * @param queryCatalog The query catalog
-     * @param context The context
-     * @param versions The versions to create
+     * Initializes a new {@link InfostoreStrings}.
      */
-    public CreateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> versions, Session session) {
-        super(provider, queryCatalog, context, versions, session);
+    public InfostoreStrings() {
+        super();
     }
 
-    @Override
-    protected void undoAction() throws OXException {
-        final UpdateBlock update = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, getDocuments())){
+    // A document's title
+    public static final String FIELD_TITLE = "Title";
 
-            @Override
-            public void fillStatement() throws SQLException {
-                stmt.setInt(1, getContext().getContextId());
-            }
-        };
+    // A document's description
+    public static final String FIELD_DESCRIPTION = "Description";
 
-        doUpdates(update);
-    }
+    // A document's file name
+    public static final String FIELD_FILE_NAME = "File name";
 
-    @Override
-    public void perform() throws OXException {
-        assureExistence();
+    // A document's version comment
+    public static final String FIELD_VERSION_COMMENT = "Version comment";
 
-        final InfostoreQueryCatalog queryCatalog = getQueryCatalog();
-        doUpdates(queryCatalog.getVersionInsert(), queryCatalog.getWritableVersionFields(), getDocuments());
-    }
-
-    @Override
-    protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return new Object[] { I(getContext().getContextId()) };
-    }
 }

@@ -52,8 +52,17 @@ package com.openexchange.groupware.infostore.database.impl;
 import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.session.Session;
 
 public class DeleteAllDocumentsAction extends AbstractDocumentListAction {
+
+    /**
+     * Initializes a new {@link DeleteAllDocumentsAction}.
+     * @param session
+     */
+    public DeleteAllDocumentsAction(Session session) {
+        super(session);
+    }
 
     @Override
     protected void undoAction() throws OXException {
@@ -73,7 +82,11 @@ public class DeleteAllDocumentsAction extends AbstractDocumentListAction {
             };
         }
 
-        doUpdates(updates);
+        try {
+            doUpdates(updates);
+        } catch (OXException e) {
+            throw launderOXException(e, session);
+        }
     }
 
     @Override
@@ -92,8 +105,11 @@ public class DeleteAllDocumentsAction extends AbstractDocumentListAction {
 
         };
 
-
-        doUpdates(updates);
+        try {
+            doUpdates(updates);
+        } catch (OXException e) {
+            throw launderOXException(e, session);
+        }
     }
 
     @Override

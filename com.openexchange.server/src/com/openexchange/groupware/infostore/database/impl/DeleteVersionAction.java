@@ -57,14 +57,15 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.session.Session;
 
 public class DeleteVersionAction extends AbstractDocumentListAction {
 
     /**
      * Initializes a new {@link DeleteVersionAction}.
      */
-    public DeleteVersionAction() {
-        super();
+    public DeleteVersionAction(Session session) {
+        super(session);
     }
 
     /**
@@ -75,8 +76,8 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
      * @param context The context
      * @param version The version to delete
      */
-    public DeleteVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata version) {
-        this(provider, queryCatalog, context, Collections.singletonList(version));
+    public DeleteVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata version, Session session) {
+        this(provider, queryCatalog, context, Collections.singletonList(version), session);
     }
 
     /**
@@ -87,9 +88,8 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
      * @param context The context
      * @param versions The versions to delete
      */
-    public DeleteVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
-        List<DocumentMetadata> versions) {
-        super(provider, queryCatalog, context, versions);
+    public DeleteVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> versions, Session session) {
+        super(provider, queryCatalog, context, versions, session);
     }
 
     @Override
