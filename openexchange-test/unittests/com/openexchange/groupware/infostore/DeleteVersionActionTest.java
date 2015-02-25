@@ -14,8 +14,8 @@ import java.util.HashSet;
 public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 
 
-	private final CreateDocumentAction create = new CreateDocumentAction();
-	private final CreateVersionAction create2 = new CreateVersionAction();
+	private final CreateDocumentAction create = new CreateDocumentAction(null);
+	private final CreateVersionAction create2 = new CreateVersionAction(null);
 
 
 	@Override
@@ -45,7 +45,7 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		final DeleteVersionAction deleteAction = new DeleteVersionAction();
+		final DeleteVersionAction deleteAction = new DeleteVersionAction(null);
 		deleteAction.setProvider(getProvider());
 		deleteAction.setContext(getContext());
 		deleteAction.setDocuments(getDocuments());
