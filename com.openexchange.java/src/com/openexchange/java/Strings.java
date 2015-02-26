@@ -266,12 +266,12 @@ public class Strings {
     }
 
     /**
-     * Splits given string by comma separator.
+     * Splits given string by specifies delimiter.
      *
      * @param s The string to split
      * @return The split string
      */
-    public static String[] splitByCommaNotInQuotes(String str) {
+    public static String[] splitByDelimNotInQuotes(String str, char delim) {
         if (null == str) {
             return null;
         }
@@ -283,7 +283,7 @@ public class Strings {
         int length = str.length();
         for (int i = 0; i < length; i++) {
             char c = str.charAt(i);
-            if (c == ',') {
+            if (c == delim) {
                 if (inQuotes) {
                     if ('"' == c && !escaped) {
                         inQuotes = !inQuotes;
@@ -307,6 +307,16 @@ public class Strings {
         }
         splitted.add(s.toString().trim());
         return splitted.toArray(new String[splitted.size()]);
+    }
+
+    /**
+     * Splits given string by comma separator.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByCommaNotInQuotes(String str) {
+        return splitByDelimNotInQuotes(str, ',');
     }
 
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
