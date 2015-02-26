@@ -58,25 +58,26 @@ public class DeleteAllDocumentsAction extends AbstractDocumentListAction {
 
     /**
      * Initializes a new {@link DeleteAllDocumentsAction}.
-     * @param session
+     *
+     * @param optSession The optional session
      */
-    public DeleteAllDocumentsAction(Session session) {
-        super(session);
+    public DeleteAllDocumentsAction(Session optSession) {
+        super(optSession);
     }
 
     @Override
     protected void undoAction() throws OXException {
-        if(getDocuments().size() == 0) {
+        if (getDocuments().isEmpty()) {
             return;
         }
         final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()];
         int i = 0;
-        for(final DocumentMetadata doc : getDocuments()) {
+        for (final DocumentMetadata doc : getDocuments()) {
             updates[i++] = new Update(getQueryCatalog().getDocumentInsert()) {
 
                 @Override
                 public void fillStatement() throws SQLException {
-                    fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
+                    fillStmt(stmt, getQueryCatalog().getWritableDocumentFields(), doc, Integer.valueOf(getContext().getContextId()));
                 }
 
             };
@@ -85,18 +86,18 @@ public class DeleteAllDocumentsAction extends AbstractDocumentListAction {
         try {
             doUpdates(updates);
         } catch (OXException e) {
-            throw launderOXException(e, session);
+            throw launderOXException(e, optSession);
         }
     }
 
     @Override
     public void perform() throws OXException {
-        if(getDocuments().size() == 0) {
+        if (getDocuments().isEmpty()) {
             return;
         }
         final UpdateBlock[] updates = new UpdateBlock[1];
 
-        updates[0] = new Update("DELETE FROM infostore WHERE cid = ?"){ // REFACTOR!
+        updates[0] = new Update("DELETE FROM infostore WHERE cid = ?") { // REFACTOR!
 
             @Override
             public void fillStatement() throws SQLException {
@@ -108,7 +109,7 @@ public class DeleteAllDocumentsAction extends AbstractDocumentListAction {
         try {
             doUpdates(updates);
         } catch (OXException e) {
-            throw launderOXException(e, session);
+            throw launderOXException(e, optSession);
         }
     }
 
