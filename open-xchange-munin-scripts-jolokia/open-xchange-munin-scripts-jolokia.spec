@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:	   @OXVERSION@
-%define        ox_release 20
+%define        ox_release 19
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -68,8 +68,6 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
-* Tue Feb 17 2015 Felix Marx <felix.marx@open-xchange.com>
-Build for patch 2015-02-23
 * Fri Feb 06 2015 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2015-02-10
 * Fri Feb 06 2015 Felix Marx <felix.marx@open-xchange.com>
