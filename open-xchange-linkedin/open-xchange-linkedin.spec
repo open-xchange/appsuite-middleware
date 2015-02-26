@@ -2,10 +2,18 @@
 Name:          open-xchange-linkedin
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant-nodeps
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
+BuildRequires:  ant
+%else
+BuildRequires:  ant-nodeps
+%endif
 BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-halo
-BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
