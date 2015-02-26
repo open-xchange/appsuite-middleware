@@ -5195,6 +5195,11 @@ msgstr ""
 msgid "Other files"
 msgstr ""
 
+#. -----------------------------------------------------------------------------------------------------
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:116
+msgid "Folder name"
+msgstr ""
+
 #. Display name of group with identifier 0. This group always contains all existing users of a context.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All users"
@@ -6252,6 +6257,7 @@ msgstr ""
 
 #. Unsupported character "%1$s" in field "%2$s". Please remove that character.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:122
 msgid ""
 "Unsupported character \"%1$s\" in field \"%2$s\". Please remove that "
 "character."
@@ -6259,6 +6265,7 @@ msgstr ""
 
 #. Unsupported character. Please correct your input.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:125
 msgid "Unsupported character. Please correct your input."
 msgstr ""
 
