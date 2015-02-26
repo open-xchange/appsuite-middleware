@@ -248,6 +248,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                     response.addMessage(builder.toString(), MessageType.INFO);
                     LOG.info(builder.toString());
                 }
+                if (!filter.hasLoggers()) {
+                    turboFilterCache.remove(key);
+                }
             } else {
                 builder.setLength(0);
                 builder.append("Context filter with contextID \"").append(contextID).append("\" does not exist.");
@@ -283,6 +286,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                     LOG.info(builder.toString());
                     response.addMessage(builder.toString(), MessageType.INFO);
                 }
+                if (!filter.hasLoggers()) {
+                    turboFilterCache.remove(key);
+                }
             } else {
                 builder.append("User filter for user with ID \"").append(userID).append("\", context with ID \"").append(contextID).append("\" and policy \"ACCEPT\" does not exist");
                 LOG.info(builder.toString());
@@ -315,6 +321,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                         .append("\" and policy \"ACCEPT\"");
                     response.addMessage(builder.toString(), MessageType.INFO);
                     LOG.info(builder.toString());
+                }
+                if (!filter.hasLoggers()) {
+                    turboFilterCache.remove(key);
                 }
             } else {
                 builder.setLength(0);
@@ -349,7 +358,6 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     @Override
     public synchronized LogbackMBeanResponse clearFilters() {
         LogbackMBeanResponse response = new LogbackMBeanResponse();
-        rankingAwareTurboFilterList.clear();
         turboFilterCache.clear();
         String msg = "Removed all filters";
         LOG.info(msg);
