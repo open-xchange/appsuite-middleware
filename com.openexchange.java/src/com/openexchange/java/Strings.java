@@ -269,39 +269,43 @@ public class Strings {
      * Splits given string by comma separator.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByCommaNotInQuotes(String str) {
         if (null == str) {
             return null;
         }
         List<String> splitted = new LinkedList<String>();
-        int skipCommas = 0;
         boolean inQuotes = false;
-        String s = "";
+        boolean escaped = false;
+        StringBuilder s = new StringBuilder(16);
 
         int length = str.length();
         for (int i = 0; i < length; i++) {
             char c = str.charAt(i);
-            if (c == ',' && skipCommas == 0 && !inQuotes) {
-                splitted.add(s);
-                s = "";
+            if (c == ',') {
+                if (inQuotes) {
+                    if ('"' == c && !escaped) {
+                        inQuotes = !inQuotes;
+                    }
+                    s.append(c);
+                    escaped = false;
+                } else {
+                    splitted.add(s.toString().trim());
+                    s.setLength(0);
+                }
+            } else if ('\\' == c) {
+                escaped = !escaped;
+                s.append(c);
             } else {
-                /*
-                if (c == '(') {
-                    skipCommas++;
-                }
-                if (c == ')') {
-                    skipCommas--;
-                }
-                */
-                if ('"' == c) {
+                if ('"' == c && !escaped) {
                     inQuotes = !inQuotes;
                 }
-                s += c;
+                s.append(c);
+                escaped = false;
             }
         }
-        splitted.add(s);
+        splitted.add(s.toString().trim());
         return splitted.toArray(new String[splitted.size()]);
     }
 
