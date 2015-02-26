@@ -1,3 +1,7 @@
+* 2015-02-26 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 36321: Partial fix. New ical4j library to avoid parsing error.
+
 * 2015-02-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 36860: Perform simple search if no search term is supported by storage
