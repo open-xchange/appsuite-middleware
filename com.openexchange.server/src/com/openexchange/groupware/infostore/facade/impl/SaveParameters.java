@@ -54,10 +54,12 @@ import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.session.Session;
 
 class SaveParameters {
 
     private final Context context;
+    private final Session session;
     private final DocumentMetadata document;
     private final DocumentMetadata oldDocument;
     private final long sequenceNumber;
@@ -69,9 +71,10 @@ class SaveParameters {
     private int fileCreatedBy = -1;
     private boolean ignoreVersion = false;
 
-    SaveParameters(Context context, DocumentMetadata document, DocumentMetadata oldDocument, long sequenceNumber, Set<Metadata> updatedCols, int optFolderAdmin) {
+    SaveParameters(Context context, Session session, DocumentMetadata document, DocumentMetadata oldDocument, long sequenceNumber, Set<Metadata> updatedCols, int optFolderAdmin) {
         super();
         this.context = context;
+        this.session = session;
         this.document = document;
         this.oldDocument = oldDocument;
         this.sequenceNumber = sequenceNumber;
@@ -128,6 +131,10 @@ class SaveParameters {
 
     Context getContext() {
         return context;
+    }
+
+    Session getSession() {
+        return session;
     }
 
 }

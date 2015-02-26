@@ -111,6 +111,7 @@ msgid "Events"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
 msgid "Location"
 msgstr ""
 
@@ -894,7 +895,10 @@ msgstr ""
 msgid "Suffix"
 msgstr ""
 
+#. A document's title
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:70
 msgid "Title"
 msgstr ""
 
@@ -1151,6 +1155,7 @@ msgid "URL"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:131
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:63
 msgid "Categories"
 msgstr ""
 
@@ -1263,8 +1268,10 @@ msgid "UID"
 msgstr ""
 
 #. Search in file name.
+#. A document's file name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:76
 msgid "File name"
 msgstr ""
 
@@ -4785,6 +4792,18 @@ msgstr ""
 msgid "Attachments"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:64
+msgid "Label"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:65
+msgid "Note"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:66
+msgid "Timezone"
+msgstr ""
+
 #. *
 #. * Appointments must have at least one participant.
 #.
@@ -4976,10 +4995,10 @@ msgid "You can not use the private flag in a non private folder."
 msgstr ""
 
 #. *
-#. * Invalid characters in field %1$s.
+#. * Invalid characters (%2$s) in field %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:198
-msgid "Invalid characters in field %1$s."
+msgid "Invalid characters (%2$s) in field %1$s."
 msgstr ""
 
 #. *
@@ -6340,6 +6359,28 @@ msgstr ""
 msgid ""
 "This folder is a virtual folder that cannot contain documents. Please choose "
 "another folder."
+msgstr ""
+
+#. Unsupported character "%1$s" in field "%2$s". Please remove that character.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:125
+msgid ""
+"Unsupported character \"%1$s\" in field \"%2$s\". Please remove that "
+"character."
+msgstr ""
+
+#. Unsupported character. Please correct your input.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:128
+msgid "Unsupported character. Please correct your input."
+msgstr ""
+
+#. A document's description
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
+msgid "Description"
+msgstr ""
+
+#. A document's version comment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
+msgid "Version comment"
 msgstr ""
 
 #. *

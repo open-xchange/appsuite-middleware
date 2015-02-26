@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -78,7 +79,16 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unexpected SQL Error!
      */
-    CALENDAR_SQL_ERROR(OXCalendarExceptionCodes.CALENDAR_SQL_ERROR_MSG, OXExceptionStrings.SQL_ERROR_MSG, 5, Category.CATEGORY_ERROR),
+    CALENDAR_SQL_ERROR(OXCalendarExceptionCodes.CALENDAR_SQL_ERROR_MSG, OXExceptionStrings.SQL_ERROR_MSG, 5, Category.CATEGORY_ERROR) {
+        public OXException create(final Throwable cause, final Object... args) {
+            if (IncorrectStringSQLException.class.isInstance(cause)) {
+                IncorrectStringSQLException isse = (IncorrectStringSQLException) cause;
+                System.out.println(isse.getColumn() + " " + isse.getRow());
+                return OXCalendarExceptionCodes.INVALID_CHARACTER.create(cause, CalendarField.getByDbField(isse.getColumn()).getName(), isse.getIncorrectString());
+            }
+            return OXExceptionFactory.getInstance().create(this, cause, args);
+        }
+    },
     /**
      * TODO remove this exception. The AJAX interface should already check for a missing last modified.
      */
@@ -507,7 +517,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
 
     private static final String FOLDER_TYPE_UNRESOLVEABLE_MSG = "Folder type unresolvable.";
 
-    private static final String CALENDAR_SQL_ERROR_MSG = "Unexpected SQL error.";
+    public static final String CALENDAR_SQL_ERROR_MSG = "Unexpected SQL error.";
 
     private static final String LAST_MODIFIED_IS_NULL_MSG = "clientLastModified IS NULL. Abort action.";
 

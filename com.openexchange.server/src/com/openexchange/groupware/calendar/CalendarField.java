@@ -68,48 +68,49 @@ import com.openexchange.groupware.container.Appointment;
  *
  */
 public enum CalendarField {
-    OBJECTID ( Appointment.OBJECT_ID , "ObjectID" ),
-    CREATEDBY ( Appointment.CREATED_BY , "CreatedBy" ),
-    CREATIONDATE ( Appointment.CREATION_DATE , "CreationDate" ),
-    MODIFIEDBY ( Appointment.MODIFIED_BY , "ModifiedBy" ),
-    LASTMODIFIED ( Appointment.LAST_MODIFIED , "LastModified" ),
-    PARENTFOLDERID ( Appointment.FOLDER_ID , "ParentFolderID" ),
-    TITLE ( Appointment.TITLE , "Title" ),
-    STARTDATE ( Appointment.START_DATE , "StartDate" ),
-    ENDDATE ( Appointment.END_DATE , "EndDate" ),
-    SHOWNAS ( Appointment.SHOWN_AS , "ShownAs" ),
-    LOCATION ( Appointment.LOCATION , "Location" ),
-    CATEGORIES ( Appointment.CATEGORIES , "Categories" ),
-    LABEL ( Appointment.COLOR_LABEL , "Label" ),
-    PRIVATEFLAG ( Appointment.PRIVATE_FLAG , "PrivateFlag" ),
-    FULLTIME ( Appointment.FULL_TIME , "FullTime" ),
-    NOTE ( Appointment.NOTE , "Note" ),
-    RECURRENCETYPE ( Appointment.RECURRENCE_TYPE , "RecurrenceType" ),
-    INTERVAL ( Appointment.INTERVAL , "Interval" ),
-    DAYS ( Appointment.DAYS , "Days" ),
-    DAYINMONTH ( Appointment.DAY_IN_MONTH , "DayInMonth" ),
-    MONTH ( Appointment.MONTH , "Month" ),
-    UNTIL ( Appointment.UNTIL , "Until" ),
-    OCCURRENCE ( Appointment.RECURRENCE_COUNT , "Occurrence" ),
-    RECURRENCEDATEPOSITION ( Appointment.RECURRENCE_DATE_POSITION , "RecurrenceDatePosition" ),
-    RECURRENCEPOSITION ( Appointment.RECURRENCE_POSITION , "RecurrencePosition" ),
-    TIMEZONE ( Appointment.TIMEZONE , "Timezone" ),
-    CHANGEEXCEPTION ( Appointment.CHANGE_EXCEPTIONS, "ChangeExceptions" ),
-    DELETEEXCEPTION ( Appointment.DELETE_EXCEPTIONS, "DeleteExceptions" ),
-    PARTICIPANTS ( Appointment.PARTICIPANTS, "Participants" ),
-    USERS ( Appointment.USERS, "Users" ),
-    RECURRINGOCCURRENCE ( Appointment.NOTIFICATION, "Notification"),
-    RECURRENCECALCULATOR ( Appointment.RECURRENCE_CALCULATOR, "RecurrenceCalculator"),
-    ALARM ( Appointment.ALARM, "Alarm");
+    OBJECTID ( Appointment.OBJECT_ID , "ObjectID", "intfield01" ),
+    CREATEDBY ( Appointment.CREATED_BY , "CreatedBy", "created_from" ),
+    CREATIONDATE ( Appointment.CREATION_DATE , "CreationDate", "creating_date" ),
+    MODIFIEDBY ( Appointment.MODIFIED_BY , "ModifiedBy", "changed_from" ),
+    LASTMODIFIED ( Appointment.LAST_MODIFIED , "LastModified", "changing_date" ),
+    PARENTFOLDERID ( Appointment.FOLDER_ID , "ParentFolderID", "fid" ),
+    TITLE ( Appointment.TITLE , CalendarFieldStrings.TITLE, "field01" ),
+    STARTDATE ( Appointment.START_DATE , "StartDate", "timestampfield01"),
+    ENDDATE ( Appointment.END_DATE , "EndDate", "timestampfield02" ),
+    SHOWNAS ( Appointment.SHOWN_AS , "ShownAs", "intfield06" ),
+    LOCATION ( Appointment.LOCATION , CalendarFieldStrings.LOCATION, "field02" ),
+    CATEGORIES ( Appointment.CATEGORIES , CalendarFieldStrings.CATEGORIES, "field09" ),
+    LABEL ( Appointment.COLOR_LABEL , CalendarFieldStrings.LABEL, "intfield03" ),
+    PRIVATEFLAG ( Appointment.PRIVATE_FLAG , "PrivateFlag", "pflag" ),
+    FULLTIME ( Appointment.FULL_TIME , "FullTime", "intfield07" ),
+    NOTE ( Appointment.NOTE , CalendarFieldStrings.NOTE, "field04" ),
+    RECURRENCETYPE ( Appointment.RECURRENCE_TYPE , "RecurrenceType", null),
+    INTERVAL ( Appointment.INTERVAL , "Interval", null ),
+    DAYS ( Appointment.DAYS , "Days", null ),
+    DAYINMONTH ( Appointment.DAY_IN_MONTH , "DayInMonth", null ),
+    MONTH ( Appointment.MONTH , "Month", null ),
+    UNTIL ( Appointment.UNTIL , "Until", null ),
+    OCCURRENCE ( Appointment.RECURRENCE_COUNT , "Occurrence", null ),
+    RECURRENCEDATEPOSITION ( Appointment.RECURRENCE_DATE_POSITION , "RecurrenceDatePosition", null ),
+    RECURRENCEPOSITION ( Appointment.RECURRENCE_POSITION , "RecurrencePosition", null ),
+    TIMEZONE ( Appointment.TIMEZONE , CalendarFieldStrings.TIMEZONE, "timezone" ),
+    CHANGEEXCEPTION ( Appointment.CHANGE_EXCEPTIONS, "ChangeExceptions", "field08" ),
+    DELETEEXCEPTION ( Appointment.DELETE_EXCEPTIONS, "DeleteExceptions", "field07" ),
+    PARTICIPANTS ( Appointment.PARTICIPANTS, "Participants", null ),
+    USERS ( Appointment.USERS, "Users", null ),
+    RECURRENCECALCULATOR ( Appointment.RECURRENCE_CALCULATOR, "RecurrenceCalculator", "intfield04"),
+    ALARM ( Appointment.ALARM, "Alarm", null);
 
 
     private int appointmentObjectID; //this is the ID of AppointmentObject
     private String name;             //this is the name of the internal variable (as used by setters & getters)
+    private String dbField;
 
 
-    private CalendarField(final int appointmentObjectID, final String name){
+    private CalendarField(final int appointmentObjectID, final String name, String dbField){
         this.appointmentObjectID = appointmentObjectID;
         this.name = name;
+        this.dbField = dbField;
     }
 
     public static CalendarField getByAppointmentObjectId(final int id){
@@ -124,6 +125,15 @@ public enum CalendarField {
     public static CalendarField getByName(final String name){
         for(final CalendarField field : values()){
             if( name.equals( field.getName() ) ){
+                return field;
+            }
+        }
+        return null;
+    }
+    
+    public static CalendarField getByDbField(String dbField) {
+        for (CalendarField field : values()) {
+            if (field.getdbField().equals(dbField)) {
                 return field;
             }
         }
@@ -149,5 +159,9 @@ public enum CalendarField {
 
     public String getICalElement(){
         return name; //TODO get real ICAL element name
+    }
+    
+    public String getdbField() {
+        return dbField;
     }
 }

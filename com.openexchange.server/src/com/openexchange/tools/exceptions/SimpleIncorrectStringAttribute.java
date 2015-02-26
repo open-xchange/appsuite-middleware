@@ -47,61 +47,39 @@
  *
  */
 
-package com.openexchange.groupware.infostore.database.impl;
+package com.openexchange.tools.exceptions;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.sql.SQLException;
-import java.util.List;
-import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.session.Session;
 
-public class CreateVersionAction extends AbstractDocumentListAction {
+/**
+ * {@link SimpleIncorrectStringAttribute}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class SimpleIncorrectStringAttribute implements OXException.IncorrectString {
 
-    /**
-     * Initializes a new {@link CreateVersionAction}.
-     */
-    public CreateVersionAction(Session session) {
-        super(session);
-    }
+    private final int id;
+    private final String incorrectString;
 
     /**
-     * Initializes a new {@link CreateVersionAction}.
+     * Initializes a new {@link SimpleIncorrectStringAttribute}.
      *
-     * @param provider The database provider
-     * @param queryCatalog The query catalog
-     * @param context The context
-     * @param versions The versions to create
+     * @param id The column identifier
+     * @param incorrectString The incorrect string
      */
-    public CreateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> versions, Session session) {
-        super(provider, queryCatalog, context, versions, session);
+    public SimpleIncorrectStringAttribute(int id, String incorrectString) {
+        super();
+        this.id = id;
+        this.incorrectString = incorrectString;
     }
 
     @Override
-    protected void undoAction() throws OXException {
-        final UpdateBlock update = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, getDocuments())){
-
-            @Override
-            public void fillStatement() throws SQLException {
-                stmt.setInt(1, getContext().getContextId());
-            }
-        };
-
-        doUpdates(update);
+    public int getId() {
+        return id;
     }
 
     @Override
-    public void perform() throws OXException {
-        assureExistence();
-
-        final InfostoreQueryCatalog queryCatalog = getQueryCatalog();
-        doUpdates(queryCatalog.getVersionInsert(), queryCatalog.getWritableVersionFields(), getDocuments());
-    }
-
-    @Override
-    protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return new Object[] { I(getContext().getContextId()) };
+    public String getIncorrectString() {
+    	return incorrectString;
     }
 }

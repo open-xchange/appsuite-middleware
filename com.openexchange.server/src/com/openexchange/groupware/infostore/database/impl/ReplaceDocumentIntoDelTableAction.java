@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
+import com.openexchange.session.Session;
 
 /**
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -69,8 +70,8 @@ public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListActio
     /**
      * Initializes a new {@link ReplaceDocumentIntoDelTableAction}.
      */
-    public ReplaceDocumentIntoDelTableAction() {
-        super();
+    public ReplaceDocumentIntoDelTableAction(Session session) {
+        super(session);
     }
 
     /**
@@ -81,9 +82,8 @@ public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListActio
      * @param context The context
      * @param document The document to replace in the backup tables
      */
-    public ReplaceDocumentIntoDelTableAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
-        DocumentMetadata document) {
-        this(provider, queryCatalog, context, Collections.singletonList(document));
+    public ReplaceDocumentIntoDelTableAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata document, Session session) {
+        this(provider, queryCatalog, context, Collections.singletonList(document), session);
     }
 
     /**
@@ -94,9 +94,8 @@ public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListActio
      * @param context The context
      * @param documents The documents to replace in the backup tables
      */
-    public ReplaceDocumentIntoDelTableAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
-        List<DocumentMetadata> documents) {
-        super(provider, queryCatalog, context, documents);
+    public ReplaceDocumentIntoDelTableAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> documents, Session session) {
+        super(provider, queryCatalog, context, documents, session);
     }
 
     @Override

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,58 @@
  *
  */
 
-package com.openexchange.groupware.infostore.database.impl;
+package com.openexchange.html;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.sql.SQLException;
-import java.util.List;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.session.Session;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
 
-public class CreateVersionAction extends AbstractDocumentListAction {
+/**
+ * {@link Bug31826Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class Bug31826Test {
 
-    /**
-     * Initializes a new {@link CreateVersionAction}.
-     */
-    public CreateVersionAction(Session session) {
-        super(session);
+    private HtmlService service;
+
+    public Bug31826Test() {
+        super();
     }
 
-    /**
-     * Initializes a new {@link CreateVersionAction}.
-     *
-     * @param provider The database provider
-     * @param queryCatalog The query catalog
-     * @param context The context
-     * @param versions The versions to create
-     */
-    public CreateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> versions, Session session) {
-        super(provider, queryCatalog, context, versions, session);
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
     }
 
-    @Override
-    protected void undoAction() throws OXException {
-        final UpdateBlock update = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, getDocuments())){
-
-            @Override
-            public void fillStatement() throws SQLException {
-                stmt.setInt(1, getContext().getContextId());
-            }
-        };
-
-        doUpdates(update);
+    @After
+    public void tearDown() {
+        service = null;
     }
 
-    @Override
-    public void perform() throws OXException {
-        assureExistence();
+    @Test
+    public void testKeepUnicode() {
+        String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
+        String test = service.sanitize(content, null, true, null, null);
 
-        final InfostoreQueryCatalog queryCatalog = getQueryCatalog();
-        doUpdates(queryCatalog.getVersionInsert(), queryCatalog.getWritableVersionFields(), getDocuments());
-    }
+        Assert.assertEquals("Unexpected return value.", "dfg \u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 dfg", test);
 
-    @Override
-    protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return new Object[] { I(getContext().getContextId()) };
+        content = "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 <>";
+        test = service.htmlFormat(content, true, "--==--");
+
+        Assert.assertEquals("Unexpected return value.", "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 &lt;&gt;", test);
     }
 }
