@@ -268,7 +268,7 @@ public class Strings {
     /**
      * Splits given string by specifies delimiter.
      *
-     * @param s The string to split
+     * @param str The string to split
      * @param delim The delimiting character
      * @return The split string
      */
@@ -313,7 +313,7 @@ public class Strings {
     /**
      * Splits given string by comma separator.
      *
-     * @param s The string to split
+     * @param str The string to split
      * @return The split string
      */
     public static String[] splitByCommaNotInQuotes(String str) {
