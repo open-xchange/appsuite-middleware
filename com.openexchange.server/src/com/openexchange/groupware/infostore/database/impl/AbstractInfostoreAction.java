@@ -75,16 +75,20 @@ import com.openexchange.tools.session.ServerSession;
 
 public abstract class AbstractInfostoreAction extends AbstractDBAction {
 
-    /** The associated session */
-    protected final Session session;
+    /** The associated session (optional) */
+    protected final Session optSession;
+
+    /** The catalog queries */
 	private InfostoreQueryCatalog queries;
 
 	/**
 	 * Initializes a new {@link AbstractInfostoreAction}.
+	 *
+	 * @param optSession The optional session
 	 */
-	protected AbstractInfostoreAction(Session session) {
+	protected AbstractInfostoreAction(Session optSession) {
 	    super();
-	    this.session = session;
+	    this.optSession = optSession;
 	}
 
 	private static User getUser(Session session) throws OXException {
@@ -98,11 +102,11 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
      * Launders specified <code>OXException</code> instance.
      *
      * @param e The <code>OXException</code> instance
-     * @param session The optional session
+     * @param optSession The optional session
      * @return The appropriate <code>OXException</code> instance
      * @throws OXException If operation fails
      */
-    protected static OXException launderOXException(OXException e, Session session) throws OXException {
+    protected static OXException launderOXException(OXException e, Session optSession) throws OXException {
         Throwable cause = e.getCause();
         if (!(cause instanceof IncorrectStringSQLException)) {
             return e;
@@ -113,12 +117,15 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
         if (null == metadata) {
             return InfostoreExceptionCodes.INVALID_CHARACTER_SIMPLE.create(cause);
         }
-        String displayName = null == session ? null : metadata.getDisplayName();
+        if (null == optSession) {
+            return InfostoreExceptionCodes.INVALID_CHARACTER.create(cause, incorrectStringError.getIncorrectString(), incorrectStringError.getColumn());
+        }
+        String displayName = metadata.getDisplayName();
         if (null == displayName) {
             return InfostoreExceptionCodes.INVALID_CHARACTER.create(cause, incorrectStringError.getIncorrectString(), incorrectStringError.getColumn());
         }
 
-        String translatedName = StringHelper.valueOf(getUser(session).getLocale()).getString(displayName);
+        String translatedName = StringHelper.valueOf(getUser(optSession).getLocale()).getString(displayName);
         OXException oxe = InfostoreExceptionCodes.INVALID_CHARACTER.create(cause, incorrectStringError.getIncorrectString(), translatedName);
         oxe.addProblematic(new SimpleIncorrectStringAttribute(metadata.getId(), incorrectStringError.getIncorrectString()));
         return oxe;
@@ -129,7 +136,7 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
 	    try {
             return super.doUpdates(updates);
         } catch (OXException e) {
-            throw launderOXException(e, session);
+            throw launderOXException(e, optSession);
         }
 	}
 
@@ -138,7 +145,7 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
 	    try {
             return super.doUpdates(updates);
         } catch (OXException e) {
-            throw launderOXException(e, session);
+            throw launderOXException(e, optSession);
         }
 	}
 

@@ -70,9 +70,11 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 
     /**
      * Initializes a new {@link AbstractDocumentListAction}.
+     *
+     * @param optSession The optional session
      */
-    protected AbstractDocumentListAction(Session session) {
-        super(session);
+    protected AbstractDocumentListAction(Session optSession) {
+        super(optSession);
     }
 
     /**
