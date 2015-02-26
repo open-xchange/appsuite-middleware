@@ -1,3 +1,7 @@
+* 2015-02-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36860: Perform simple search if no search term is supported by storage
+
 * 2015-02-26 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 36969: Include session information (sessionId, contextId and userId) to all relevant servlets.Remove filter artifacts. Correctly assert the filter rule.
