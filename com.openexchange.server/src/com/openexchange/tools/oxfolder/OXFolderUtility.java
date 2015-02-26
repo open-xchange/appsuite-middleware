@@ -67,6 +67,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
+import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -1027,6 +1028,24 @@ public final class OXFolderUtility {
         default:
             return STR_UNKNOWN;
         }
+    }
+
+    private static final String COLUMN_FNAME = "fname";
+
+    /**
+     * Gets the appropriate localizable field name for specified column
+     *
+     * @param column The column
+     * @return The field name or <code>null</code>
+     */
+    public static String column2Field(String column) {
+        if (null == column) {
+            return null;
+        }
+        if (COLUMN_FNAME.equalsIgnoreCase(column)) {
+            return FolderStrings.FIELD_FOLDER_NAME;
+        }
+        return null;
     }
 
 }

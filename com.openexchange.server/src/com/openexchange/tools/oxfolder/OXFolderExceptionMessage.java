@@ -118,4 +118,10 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     public static final String CREATOR_STAYS_ADMIN_MSG = "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were restored.";
     public static final String NO_FOLDER_NAME_MSG = "You must enter a folder name.";
 
+    // Unsupported character "%1$s" in field "%2$s". Please remove that character.
+    public static final String INVALID_CHARACTER_MSG = "Unsupported character \"%1$s\" in field \"%2$s\". Please remove that character.";
+
+    // Unsupported character. Please correct your input.
+    public static final String INVALID_CHARACTER_SIMPLE_MSG = "Unsupported character. Please correct your input.";
+
 }
