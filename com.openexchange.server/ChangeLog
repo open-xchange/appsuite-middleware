@@ -5,6 +5,7 @@
 * 2015-02-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 36666: Allow "unseen=1" parameter for /ajax/mail?action=attachment call to leave the associated message as unseen
+ - Fix for bug 36993: Refer to year 2015 in copyright note
 
 * 2015-02-25 - thorben.betten@open-xchange.com
 
