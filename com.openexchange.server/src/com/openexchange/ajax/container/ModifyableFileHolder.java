@@ -51,6 +51,7 @@ package com.openexchange.ajax.container;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
@@ -75,6 +76,16 @@ public class ModifyableFileHolder implements IFileHolder {
     public ModifyableFileHolder(final IFileHolder fileHolder) {
         super();
         this.fileHolder = fileHolder;
+    }
+
+    @Override
+    public List<Runnable> getPostProcessingTasks() {
+        return fileHolder.getPostProcessingTasks();
+    }
+
+    @Override
+    public void addPostProcessingTask(Runnable task) {
+        fileHolder.addPostProcessingTask(task);
     }
 
     @Override

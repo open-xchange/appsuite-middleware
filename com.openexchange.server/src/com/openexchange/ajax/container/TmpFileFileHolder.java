@@ -54,6 +54,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogProperties;
@@ -72,6 +74,7 @@ public final class TmpFileFileHolder implements IFileHolder {
     private String name;
     private String disposition;
     private String delivery;
+    private final List<Runnable> tasks;
 
     /**
      * Initializes a new {@link TmpFileFileHolder}.
@@ -82,6 +85,19 @@ public final class TmpFileFileHolder implements IFileHolder {
         super();
         tmpFile = newTempFile();
         length = -1L;
+        tasks = new LinkedList<Runnable>();
+    }
+
+    @Override
+    public List<Runnable> getPostProcessingTasks() {
+        return tasks;
+    }
+
+    @Override
+    public void addPostProcessingTask(Runnable task) {
+        if (null != task) {
+            tasks.add(task);
+        }
     }
 
     @Override

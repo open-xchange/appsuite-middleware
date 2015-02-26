@@ -205,7 +205,20 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             return;
         }
-        writeFileHolder(file, request, result, req, resp);
+        try {
+            writeFileHolder(file, request, result, req, resp);
+        } finally {
+            postProcessingTasks(file);
+        }
+    }
+
+    private void postProcessingTasks(IFileHolder file) {
+        List<Runnable> tasks = file.getPostProcessingTasks();
+        if (null != tasks && !tasks.isEmpty()) {
+            for (Runnable task : tasks) {
+                task.run();
+            }
+        }
     }
 
     /**

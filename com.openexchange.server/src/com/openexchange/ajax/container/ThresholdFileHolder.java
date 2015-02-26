@@ -59,6 +59,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.util.LinkedList;
+import java.util.List;
 import javax.mail.internet.SharedInputStream;
 import javax.mail.util.SharedByteArrayInputStream;
 import javax.mail.util.SharedFileInputStream;
@@ -105,6 +107,9 @@ public final class ThresholdFileHolder implements IFileHolder {
     /** The initial capacity */
     private final int initalCapacity;
 
+    /** The list for post-processing tasks */
+    private final List<Runnable> tasks;
+
     /**
      * Initializes a new {@link ThresholdFileHolder} with default threshold and default initial capacity.
      */
@@ -133,6 +138,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         this.threshold = threshold > 0 ? threshold : DEFAULT_IN_MEMORY_THRESHOLD;
         contentType = "application/octet-stream";
         this.initalCapacity = initalCapacity > 0 ? initalCapacity : 65536;
+        tasks = new LinkedList<Runnable>();
     }
 
     /**
@@ -637,6 +643,18 @@ public final class ThresholdFileHolder implements IFileHolder {
             setName(fileHolder.getName());
         }
         return this;
+    }
+
+    @Override
+    public List<Runnable> getPostProcessingTasks() {
+        return tasks;
+    }
+
+    @Override
+    public void addPostProcessingTask(Runnable task) {
+        if (null != task) {
+            tasks.add(task);
+        }
     }
 
     /**

@@ -56,6 +56,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -158,6 +160,7 @@ public class FileHolder implements IFileHolder {
     private File file;
     private byte[] bytes;
     private RandomAccess raf;
+    private final List<Runnable> tasks;
 
     /**
      * Initializes a new {@link FileHolder}.
@@ -173,6 +176,7 @@ public class FileHolder implements IFileHolder {
         this.length = length;
         this.contentType = contentType;
         this.name = name;
+        tasks = new LinkedList<Runnable>();
         file = null;
 
         if (is instanceof ByteArrayInputStream) {
@@ -198,6 +202,7 @@ public class FileHolder implements IFileHolder {
         this.length = length;
         this.contentType = contentType;
         this.name = name;
+        tasks = new LinkedList<Runnable>();
 
         if (isClosure instanceof FileInputStreamClosure) {
             file = ((FileInputStreamClosure) isClosure).file;
@@ -235,6 +240,7 @@ public class FileHolder implements IFileHolder {
             this.contentType = contentType;
         }
         this.name = file.getName();
+        tasks = new LinkedList<Runnable>();
         this.isClosure = new InputStreamClosure() {
 
             @Override
@@ -244,6 +250,18 @@ public class FileHolder implements IFileHolder {
         };
         this.file = file;
         bytes = null;
+    }
+
+    @Override
+    public List<Runnable> getPostProcessingTasks() {
+        return tasks;
+    }
+
+    @Override
+    public void addPostProcessingTask(Runnable task) {
+        if (null != task) {
+            tasks.add(task);
+        }
     }
 
     /**
