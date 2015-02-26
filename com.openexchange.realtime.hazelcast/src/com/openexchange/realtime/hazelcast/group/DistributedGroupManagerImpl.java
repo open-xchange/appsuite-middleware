@@ -98,8 +98,8 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
 
     /**
      * Initializes a new {@link DistributedGroupManagerImpl}.
-     * 
-     * @param messageDispatcher The MessageDispatcher 
+     *
+     * @param messageDispatcher The MessageDispatcher
      * @param globalCleanup The GlobalRealtimeCleanup
      * @param client_map The name of the client map
      * @param group_map The name of group map
@@ -145,7 +145,10 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
     public boolean removeChoice(SelectorChoice selectorChoice) throws OXException {
         Validate.notNull(selectorChoice, "SelectorChoice must not be null");
 
-        return removeClientToSelectorChoice(selectorChoice) && removeGroupToSelectorChoice(selectorChoice);
+        boolean wasClientToGroupMappingRemoved = removeClientToSelectorChoice(selectorChoice);
+        boolean wasGroupToClientMappingRemoved = removeGroupToSelectorChoice(selectorChoice);
+
+        return wasClientToGroupMappingRemoved && wasGroupToClientMappingRemoved;
     }
 
     @Override
@@ -259,7 +262,7 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
 
     /**
      * Get mapping of one client to many groups
-     * 
+     *
      * @return A {@link MultiMap} of one client to many groups
      */
     private MultiMap<PortableID, PortableSelectorChoice> getClientToGroupsMapping() throws OXException {
@@ -269,7 +272,7 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
 
     /**
      * Get mappings of one group to many members
-     * 
+     *
      * @return A @ MultiMap} of one group to many members
      */
     private MultiMap<PortableID, PortableSelectorChoice> getGroupToMembersMapping() throws OXException {
@@ -280,7 +283,7 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
     /**
      * Remove all client -> group mappings for a given client ID. Additionally allows to send a LeaveCommand to all GroupDispatchers that
      * hold the client as member and thus remove the group -> client mapping.
-     * 
+     *
      * @param client The client to remove
      * @param sendLeave If a LeaveCommand should be sent to all GrpupDispatchers that the client was a member of
      * @return A Collection of groups IDs that the client was member of
@@ -299,7 +302,7 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
     /**
      * Remove all group -> client mappings for a given group ID. Additionally allows to send a {@link NotMember} to all members of the group
      * being removed.
-     * 
+     *
      * @param group The group to remove
      * @param sendNotMember If a {@link NotMember} should be sent to all members of the group being removed
      * @return A Collection selectorchoices representing the former members
@@ -316,7 +319,7 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
 
     /**
      * Send a @{@link Stanza} containing a {@link LeaveCommand} from a client to a {@link Collection} of groups.
-     * 
+     *
      * @param client The client that leaves a group.
      * @param groups The groups that the client should leave.
      */
@@ -337,7 +340,7 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
 
     /**
      * Send a @{@link Stanza} containing a {@link NotMember} from a group to a {@link Collection} of clients.
-     * 
+     *
      * @param selectorChoices The {@link SelectorChoice}s containing the details needed to send the {@link NotMember}.
      */
     private void sendNotMember(Collection<PortableSelectorChoice> selectorChoices) {
