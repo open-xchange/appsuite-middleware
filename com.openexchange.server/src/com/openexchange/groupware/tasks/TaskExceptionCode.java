@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.groupware.contact.ContactExceptionMessages;
 
 /**
  * Error codes for task exceptions.
@@ -257,7 +258,10 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     UNKNOWN_DELEGATOR("Can not determine delegator of task %1$d.", Category.CATEGORY_ERROR, 56),
 
     /** Priority is %d but mist be between 1 and 3. */
-    INVALID_PRIORITY(TaskExceptionMessage.INVALID_PRIORITY_MSG, TaskExceptionMessage.INVALID_PRIORITY_MSG, Category.CATEGORY_USER_INPUT, 57);
+    INVALID_PRIORITY(TaskExceptionMessage.INVALID_PRIORITY_MSG, TaskExceptionMessage.INVALID_PRIORITY_MSG, Category.CATEGORY_USER_INPUT, 57),
+
+    /** "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again." */
+    INCORRECT_STRING("Field \"%2$s\" contains invalid character: \"%1$s\"", TaskExceptionMessage.INCORRECT_STRING_DISPLAY, Category.CATEGORY_USER_INPUT, 58);
 
     private String message;
 

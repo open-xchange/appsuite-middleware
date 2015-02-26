@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -409,22 +410,35 @@ public final class SQL {
     }
 
     /**
-     * Maps the index of the truncated value to the according identifier of the
-     * truncated attribute.
-     * @param fields string array with all truncated field names.
-     * @return the identifier of the truncated attribute.
+     * Maps a list of column names to the according database column mapper implementations.
+     * @param fields string array with database column names.
+     * @return the database column mapper implementation.
      */
-    public static Mapper<?>[] findTruncated(final String[] fields) {
+    public static Mapper<?>[] mapColumns(final String[] fields) {
         final List<Mapper<?>> tmp = new ArrayList<Mapper<?>>();
         for (final String field : fields) {
-            for (final Mapper<?> mapper : Mapping.MAPPERS) {
-                if (mapper.getDBColumnName().equals(field)) {
-                    tmp.add(mapper);
-                    break;
-                }
+            Mapper<?> mapper = mapColumn(field);
+            if (null != mapper) {
+                tmp.add(mapper);
+                break;
             }
         }
         return tmp.toArray(new Mapper[tmp.size()]);
+    }
+
+    /**
+     * Maps the column name to the according database column mapper implementation.
+     * @param columnName name of a database column.
+     * @return the database column mapper implementation or <code>null</code> if the column can not be mapped.
+     */
+    @Nullable
+    public static Mapper<?> mapColumn(String columnName) {
+        for (final Mapper<?> mapper : Mapping.MAPPERS) {
+            if (mapper.getDBColumnName().equals(columnName)) {
+                return mapper;
+            }
+        }
+        return null;
     }
 
     static {

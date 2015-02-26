@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,74 +47,53 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.groupware.tasks;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.tasks.AttributeNames;
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Mapping;
-import com.openexchange.groupware.tasks.Task;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.i18n.I18nService;
 
 /**
- * Methods for dealing with the filename attribute of tasks.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link Translator} consumes {@link I18nService}s to translate task strings.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since 7.6.2
  */
-public final class Filename implements Mapper<String> {
+public final class Translator {
 
-    public static final Mapper<String> SINGLETON = new Filename();
+    private static final Translator SINGLETON = new Translator();
 
-    private Filename() {
+    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
+
+    private Translator() {
         super();
     }
 
-    @Override
-    public int getId() {
-        return CommonObject.FILENAME;
+    public static final Translator getInstance() {
+        return SINGLETON;
     }
 
-    @Override
-    public boolean isSet(final Task task) {
-        return task.containsFilename();
+    public void addService(I18nService service) {
+        services.put(service.getLocale(), service);
     }
 
-    @Override
-    public String getDBColumnName() {
-        return "filename";
+    public void removeService(I18nService service) {
+        services.remove(service.getLocale());
     }
 
-    @Override
-    public String getDisplayName() {
-        return AttributeNames.FILENAME;
-    }
-
-    @Override
-    public void toDB(final PreparedStatement stmt, final int pos, final Task task) throws SQLException {
-        stmt.setString(pos, task.getFilename());
-    }
-
-    @Override
-    public void fromDB(final ResultSet result, final int pos, final Task task) throws SQLException {
-        final String filename = result.getString(pos);
-        if (!result.wasNull()) {
-            task.setFilename(filename);
+    public String translate(@Nullable Locale locale, String toTranslate) {
+        if (null == locale) {
+            return toTranslate;
         }
-    }
-
-    @Override
-    public boolean equals(final Task task1, final Task task2) {
-        return Mapping.equals(task1.getFilename(), task2.getFilename());
-    }
-
-    @Override
-    public String get(final Task task) {
-        return task.getFilename();
-    }
-
-    @Override
-    public void set(final Task task, final String value) {
-        task.setFilename(value);
+        I18nService service = services.get(locale);
+        if (null == service) {
+            return toTranslate;
+        }
+        if (!service.hasKey(toTranslate)) {
+            return toTranslate;
+        }
+        return service.getLocalized(toTranslate);
     }
 }

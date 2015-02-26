@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -177,6 +178,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.executeBatch();
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
+        } catch (IncorrectStringSQLException e) {
+            throw Tools.parseIncorrectString(e, null);
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
@@ -367,6 +370,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.executeBatch();
         } catch (DataTruncation e) {
             throw parseTruncatedE(con, e, type, participants);
+        } catch (IncorrectStringSQLException e) {
+            throw Tools.parseIncorrectString(e, null);
         } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
@@ -479,6 +484,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.executeBatch();
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
+        } catch (IncorrectStringSQLException e) {
+            throw Tools.parseIncorrectString(e, null);
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {

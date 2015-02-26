@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,74 +47,67 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.ajax.task;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.tasks.AttributeNames;
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Mapping;
+import java.io.IOException;
+import java.util.TimeZone;
+import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
 
 /**
- * Methods for dealing with the filename attribute of tasks.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Verifies that external emoticons character are properly handled by the backend.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since 7.6.2
  */
-public final class Filename implements Mapper<String> {
+public final class Bug36943Test extends AbstractAJAXSession {
 
-    public static final Mapper<String> SINGLETON = new Filename();
+    private AJAXClient client1;
+    private TimeZone timeZone;
+    private Task task;
 
-    private Filename() {
-        super();
+    public Bug36943Test(String name) {
+        super(name);
     }
 
+    @Before
     @Override
-    public int getId() {
-        return CommonObject.FILENAME;
+    protected void setUp() throws Exception {
+        super.setUp();
+        client1 = getClient();
+        timeZone = client1.getValues().getTimeZone();
+        task = new Task();
+        task.setParentFolderID(client1.getValues().getPrivateTaskFolder());
+        task.setTitle("Test for bug 36943");
+        task.setNote("Pile of \uD83D\uDCA9 poo");
     }
 
+    @After
     @Override
-    public boolean isSet(final Task task) {
-        return task.containsFilename();
-    }
-
-    @Override
-    public String getDBColumnName() {
-        return "filename";
-    }
-
-    @Override
-    public String getDisplayName() {
-        return AttributeNames.FILENAME;
-    }
-
-    @Override
-    public void toDB(final PreparedStatement stmt, final int pos, final Task task) throws SQLException {
-        stmt.setString(pos, task.getFilename());
-    }
-
-    @Override
-    public void fromDB(final ResultSet result, final int pos, final Task task) throws SQLException {
-        final String filename = result.getString(pos);
-        if (!result.wasNull()) {
-            task.setFilename(filename);
+    protected void tearDown() throws Exception {
+        if (task.containsObjectID()) {
+            client1.execute(new DeleteRequest(task));
         }
+        super.tearDown();
     }
 
-    @Override
-    public boolean equals(final Task task1, final Task task2) {
-        return Mapping.equals(task1.getFilename(), task2.getFilename());
-    }
-
-    @Override
-    public String get(final Task task) {
-        return task.getFilename();
-    }
-
-    @Override
-    public void set(final Task task, final String value) {
-        task.setFilename(value);
+    @Test
+    public void testForPileOfPoo() throws OXException, IOException, JSONException {
+        InsertResponse response = client1.execute(new InsertRequest(task, timeZone, false));
+        if (!response.hasError()) {
+            response.fillTask(task);
+        }
+        assertTrue("Creating a task with pile of \uD83D\uDCA9 poo may have an error.", response.hasError());
+        assertTrue("Expected exception for wrong characters.", TaskExceptionCode.INCORRECT_STRING.create().similarTo(response.getException()));
     }
 }

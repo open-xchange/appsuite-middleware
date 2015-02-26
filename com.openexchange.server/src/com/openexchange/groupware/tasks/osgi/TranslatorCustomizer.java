@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,74 +47,44 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.groupware.tasks.osgi;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.tasks.AttributeNames;
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Mapping;
-import com.openexchange.groupware.tasks.Task;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.tasks.Translator;
+import com.openexchange.i18n.I18nService;
 
 /**
- * Methods for dealing with the filename attribute of tasks.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link TranslatorCustomizer} adds {@link I18nService}s found by the service tracker to the task translator.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @since 7.6.2
  */
-public final class Filename implements Mapper<String> {
+public final class TranslatorCustomizer implements ServiceTrackerCustomizer<I18nService, I18nService> {
 
-    public static final Mapper<String> SINGLETON = new Filename();
+    private final BundleContext context;
 
-    private Filename() {
+    public TranslatorCustomizer(BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    public int getId() {
-        return CommonObject.FILENAME;
+    public I18nService addingService(ServiceReference<I18nService> reference) {
+        final I18nService service = context.getService(reference);
+        Translator.getInstance().addService(service);
+        return service;
     }
 
     @Override
-    public boolean isSet(final Task task) {
-        return task.containsFilename();
+    public void modifiedService(ServiceReference<I18nService> reference, I18nService service) {
+        // Nothing to do.
     }
 
     @Override
-    public String getDBColumnName() {
-        return "filename";
-    }
-
-    @Override
-    public String getDisplayName() {
-        return AttributeNames.FILENAME;
-    }
-
-    @Override
-    public void toDB(final PreparedStatement stmt, final int pos, final Task task) throws SQLException {
-        stmt.setString(pos, task.getFilename());
-    }
-
-    @Override
-    public void fromDB(final ResultSet result, final int pos, final Task task) throws SQLException {
-        final String filename = result.getString(pos);
-        if (!result.wasNull()) {
-            task.setFilename(filename);
-        }
-    }
-
-    @Override
-    public boolean equals(final Task task1, final Task task2) {
-        return Mapping.equals(task1.getFilename(), task2.getFilename());
-    }
-
-    @Override
-    public String get(final Task task) {
-        return task.getFilename();
-    }
-
-    @Override
-    public void set(final Task task, final String value) {
-        task.setFilename(value);
+    public void removedService(ServiceReference<I18nService> reference, I18nService service) {
+        Translator.getInstance().removeService(service);
+        context.ungetService(reference);
     }
 }

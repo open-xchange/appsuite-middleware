@@ -53,8 +53,11 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -231,4 +234,22 @@ public final class Tools {
         return UserStorage.getInstance().getUser(userId, ctx);
     }
 
+    public static OXException parseIncorrectString(IncorrectStringSQLException e, @Nullable Locale locale) {
+        String columnName = e.getColumn();
+        final Mapper<?> mapper = SQL.mapColumn(columnName);
+        final String incorrectString = e.getIncorrectString();
+        String translatedDisplayName = Translator.getInstance().translate(locale, mapper.getDisplayName());
+        OXException incorrectStringException = TaskExceptionCode.INCORRECT_STRING.create(e, incorrectString, translatedDisplayName);
+        incorrectStringException.addProblematic(new OXException.IncorrectString() {
+            @Override
+            public int getId() {
+                return mapper.getId();
+            }
+            @Override
+            public String getIncorrectString() {
+                return incorrectString;
+            }
+        });
+        return incorrectStringException;
+    }
 }
