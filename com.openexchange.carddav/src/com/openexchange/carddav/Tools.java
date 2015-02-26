@@ -51,7 +51,6 @@ package com.openexchange.carddav;
 
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -126,7 +125,11 @@ public class Tools {
     }
 
     public static boolean isDataTruncation(final OXException e) {
-    	return ContactExceptionCodes.DATA_TRUNCATION.equals(e);
+        return ContactExceptionCodes.DATA_TRUNCATION.equals(e);
+    }
+
+    public static boolean isIncorrectString(OXException e) {
+        return ContactExceptionCodes.INCORRECT_STRING.equals(e);
     }
 
 	/**

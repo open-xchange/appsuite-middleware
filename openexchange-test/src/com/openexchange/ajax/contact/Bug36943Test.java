@@ -47,50 +47,40 @@
  *
  */
 
-package com.openexchange.groupware.tools.mappings.json;
+package com.openexchange.ajax.contact;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.contact.action.InsertRequest;
+import com.openexchange.ajax.contact.action.InsertResponse;
+import com.openexchange.ajax.contact.action.UpdateRequest;
+import com.openexchange.ajax.contact.action.UpdateResponse;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link StringMapping} - JSON specific mapping implementation for Strings.
+ * {@link Bug36943Test}
  *
- * @param <O> the type of the object
+ * iOS emoticon causes database exception
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping<O> extends DefaultJsonMapping<String, O> {
+public class Bug36943Test extends AbstractManagedContactTest {
 
-	public StringMapping(final String ajaxName, final int columnID) {
-		super(ajaxName, columnID);
-	}
+    public Bug36943Test(String name) {
+        super(name);
+    }
 
-	@Override
-	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-		this.set(to, from.isNull(getAjaxName()) ? null : from.getString(getAjaxName()));
-	}
+    public void testCreateWithAstralSymbols() throws Exception {
+        Contact contact = generateContact("Pile of \uD83D\uDCA9 poo");
+        InsertResponse insertResponse = getClient().execute(new InsertRequest(contact, false));
+        assertTrue("No errors in response", insertResponse.hasError());
+        assertEquals("Unexpected error code", "CON-0262", insertResponse.getException().getErrorCode());
+    }
 
-	@Override
-	public boolean truncate(final O object, final int length) throws OXException {
-		final String value = this.get(object);
-		if (null != value && length < value.length()) {
-			this.set(object, value.substring(0, length));
-			return true;
-		}
-		return false;
-	}
-
-    @Override
-    public boolean replaceAll(O object, String regex, String replacement) throws OXException {
-        String value = get(object);
-        if (null != value) {
-            String replacedValue = value.replaceAll(regex, replacement);
-            if (false == value.equals(replacedValue)) {
-                set(object, replacedValue);
-                return true;
-            }
-        }
-        return false;
+    public void testUpdateWithAstralSymbols() throws Exception {
+        Contact contact = manager.newAction(generateContact());
+        contact.setSurName("Pile of \uD83D\uDCA9 poo");
+        UpdateResponse updateResponse = getClient().execute(new UpdateRequest(contact, false));
+        assertTrue("No errors in response", updateResponse.hasError());
+        assertEquals("Unexpected error code", "CON-0262", updateResponse.getException().getErrorCode());
     }
 
 }

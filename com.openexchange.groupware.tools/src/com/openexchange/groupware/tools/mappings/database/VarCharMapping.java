@@ -52,7 +52,6 @@ package com.openexchange.groupware.tools.mappings.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
 import com.openexchange.exception.OXException;
 
 /**
@@ -81,4 +80,18 @@ public abstract class VarCharMapping<O> extends DefaultDbMapping<String, O> {
 		}
 		return false;
 	}
+
+    @Override
+    public boolean replaceAll(O object, String regex, String replacement) throws OXException {
+        String value = get(object);
+        if (null != value) {
+            String replacedValue = value.replaceAll(regex, replacement);
+            if (false == value.equals(replacedValue)) {
+                set(object, replacedValue);
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

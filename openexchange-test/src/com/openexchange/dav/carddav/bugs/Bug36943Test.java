@@ -47,50 +47,69 @@
  *
  */
 
-package com.openexchange.groupware.tools.mappings.json;
+package com.openexchange.dav.carddav.bugs;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.carddav.CardDAVTest;
+import com.openexchange.dav.carddav.VCardResource;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link StringMapping} - JSON specific mapping implementation for Strings.
+ * {@link Bug36943Test}
  *
- * @param <O> the type of the object
+ * iOS emoticon causes database exception
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping<O> extends DefaultJsonMapping<String, O> {
+public class Bug36943Test extends CardDAVTest {
 
-	public StringMapping(final String ajaxName, final int columnID) {
-		super(ajaxName, columnID);
+	public Bug36943Test(String name) {
+		super(name);
 	}
 
-	@Override
-	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-		this.set(to, from.isNull(getAjaxName()) ? null : from.getString(getAjaxName()));
+	public void testAddAstralSymbols() throws Exception {
+		/*
+		 * fetch sync token for later synchronization
+		 */
+		String syncToken = super.fetchSyncToken();
+		/*
+		 * create contact
+		 */
+    	String uid = randomUID();
+    	String firstName = "Pile of \uD83D\uDCA9 poo";
+    	String lastName = "test";
+    	String vCard =
+			"BEGIN:VCARD" + "\r\n" +
+			"VERSION:3.0" + "\r\n" +
+			"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
+			"FN:" + firstName + " " + lastName + "\r\n" +
+			"UID:" + uid + "\r\n" +
+			"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
+			"PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
+			"END:VCARD" + "\r\n"
+		;
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
+        /*
+         * verify contact on server
+         */
+        String expectedFirstName = firstName.replaceAll("\uD83D\uDCA9", "");
+        Contact contact = super.getContact(uid);
+        super.rememberForCleanUp(contact);
+        assertEquals("uid wrong", uid, contact.getUid());
+        assertEquals("firstname wrong", expectedFirstName, contact.getGivenName());
+        assertEquals("lastname wrong", lastName, contact.getSurName());
+        /*
+         * verify contact on client
+         */
+        Map<String, String> eTags = super.syncCollection(syncToken);
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
+        VCardResource card = assertContains(uid, addressData);
+        assertEquals("N wrong", expectedFirstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", expectedFirstName + " " + lastName, card.getFN());
 	}
-
-	@Override
-	public boolean truncate(final O object, final int length) throws OXException {
-		final String value = this.get(object);
-		if (null != value && length < value.length()) {
-			this.set(object, value.substring(0, length));
-			return true;
-		}
-		return false;
-	}
-
-    @Override
-    public boolean replaceAll(O object, String regex, String replacement) throws OXException {
-        String value = get(object);
-        if (null != value) {
-            String replacedValue = value.replaceAll(regex, replacement);
-            if (false == value.equals(replacedValue)) {
-                set(object, replacedValue);
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

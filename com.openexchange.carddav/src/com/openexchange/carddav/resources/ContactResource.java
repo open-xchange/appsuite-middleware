@@ -59,6 +59,7 @@ import com.openexchange.carddav.mapping.CardDAVMapper;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.versit.Versit;
@@ -332,14 +333,22 @@ public class ContactResource extends CardDAVResource {
         	LOG.warn("{}: {} - removing image and trying again.", this.getUrl(), e.getMessage());
         	this.contact.removeImage1();
         	retry = true;
-    	} else if (Tools.isDataTruncation(e)) {
-    		/*
-    		 * handle by trimming truncated fields
-    		 */
-        	if (this.trimTruncatedAttributes(e)) {
-        		LOG.warn("{}: {} - trimming fields and trying again.", this.getUrl(), e.getMessage());
-        		retry = true;
-        	}
+        } else if (Tools.isDataTruncation(e)) {
+            /*
+             * handle by trimming truncated fields
+             */
+            if (this.trimTruncatedAttributes(e)) {
+                LOG.warn("{}: {} - trimming fields and trying again.", this.getUrl(), e.getMessage());
+                retry = true;
+            }
+        } else if (Tools.isIncorrectString(e)) {
+            /*
+             * handle by removing incorrect characters
+             */
+            if (this.replaceIncorrectStrings(e, "")) {
+                LOG.warn("{}: {} - removing incorrect characters and trying again.", this.getUrl(), e.getMessage());
+                retry = true;
+            }
     	} else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
     		/*
     		 * handle by overriding sync-token
@@ -361,14 +370,23 @@ public class ContactResource extends CardDAVResource {
     	}
 	}
 
-	private boolean trimTruncatedAttributes(OXException e) {
-		try {
-			return MappedTruncation.truncate(e.getProblematics(), this.contact);
-		} catch (OXException x) {
-			LOG.warn("{}: error trying to handle truncated attributes", getUrl(), x);
-			return false;
-		}
-	}
+    private boolean trimTruncatedAttributes(OXException e) {
+        try {
+            return MappedTruncation.truncate(e.getProblematics(), this.contact);
+        } catch (OXException x) {
+            LOG.warn("{}: error trying to handle truncated attributes", getUrl(), x);
+            return false;
+        }
+    }
+
+    private boolean replaceIncorrectStrings(OXException e, String replacement) {
+        try {
+            return MappedIncorrectString.replace(e.getProblematics(), this.contact, replacement);
+        } catch (OXException x) {
+            LOG.warn("{}: error trying to handle truncated attributes", getUrl(), x);
+            return false;
+        }
+    }
 
     private static boolean isGroup(VersitObject versitObject) {
         com.openexchange.tools.versit.Property property = versitObject.getProperty("X-ADDRESSBOOKSERVER-KIND");
