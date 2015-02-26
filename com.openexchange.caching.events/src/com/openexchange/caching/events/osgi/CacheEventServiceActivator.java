@@ -52,6 +52,8 @@ package com.openexchange.caching.events.osgi;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.events.internal.CacheEventServiceLookup;
+import com.openexchange.caching.events.monitoring.ManagementRegisterer;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -85,6 +87,12 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
         CacheEventServiceImpl service = new CacheEventServiceImpl();
         this.service = service;
         registerService(CacheEventService.class, service);
+        try {
+            track(ManagementService.class, new ManagementRegisterer(service, context));
+        openTrackers();
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
     @Override
