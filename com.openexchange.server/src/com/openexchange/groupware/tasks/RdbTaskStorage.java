@@ -335,7 +335,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, task, type);
         } catch (IncorrectStringSQLException e) {
-            throw Tools.parseIncorrectString(e, null);
+            throw Tools.parseIncorrectString(e);
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
@@ -456,7 +456,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, task, type);
         } catch (IncorrectStringSQLException e) {
-            throw Tools.parseIncorrectString(e, null);
+            throw Tools.parseIncorrectString(e);
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {

@@ -53,10 +53,8 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.annotation.Nullable;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
@@ -71,6 +69,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.i18n.LocalizableArgument;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -234,12 +233,10 @@ public final class Tools {
         return UserStorage.getInstance().getUser(userId, ctx);
     }
 
-    public static OXException parseIncorrectString(IncorrectStringSQLException e, @Nullable Locale locale) {
-        String columnName = e.getColumn();
-        final Mapper<?> mapper = SQL.mapColumn(columnName);
+    public static OXException parseIncorrectString(IncorrectStringSQLException e) {
+        final Mapper<?> mapper = SQL.mapColumn(e.getColumn());
         final String incorrectString = e.getIncorrectString();
-        String translatedDisplayName = Translator.getInstance().translate(locale, mapper.getDisplayName());
-        OXException incorrectStringException = TaskExceptionCode.INCORRECT_STRING.create(e, incorrectString, translatedDisplayName);
+        OXException incorrectStringException = TaskExceptionCode.INCORRECT_STRING.create(e, incorrectString, new LocalizableArgument(mapper.getDisplayName()));
         incorrectStringException.addProblematic(new OXException.IncorrectString() {
             @Override
             public int getId() {
