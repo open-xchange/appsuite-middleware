@@ -56,6 +56,7 @@ import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -324,6 +325,62 @@ public class IMAPDefaultFolderChecker {
         }
     }
 
+    private static ListLsubEntry getByName(String name, Collection<ListLsubEntry> entries) {
+        if (null == name) {
+            // First one
+            return entries.iterator().next();
+        }
+        for (ListLsubEntry entry : entries) {
+            if (name.equals(entry.getName())) {
+                return entry;
+            }
+        }
+        // First one as none matches
+        return entries.iterator().next();
+    }
+
+    private static ListLsubEntry getByFullName(String fullName, Collection<ListLsubEntry> entries) {
+        if (null == fullName) {
+            // First one
+            return entries.iterator().next();
+        }
+        for (ListLsubEntry entry : entries) {
+            if (fullName.equals(entry.getFullName())) {
+                return entry;
+            }
+        }
+        // First one as none matches
+        return entries.iterator().next();
+    }
+
+    /**
+     * Handles the marked entries and looks-up appropriate standard folder for designated type.
+     *
+     * @param entries The (optional) marked entries
+     * @param index The index
+     * @param names The expected names
+     * @param fullNames The expected full names
+     * @param checkedIndexes The checked indexes so far
+     * @param cache The mail session cache
+     * @param modified The <i>modified</i> boolean
+     */
+    protected void handleMarkedEntries(Collection<ListLsubEntry> entries, int index, String[] names, String[] fullNames, TIntObjectMap<String> checkedIndexes, MailSessionCache cache, AtomicBoolean modified) {
+        if (null != entries && !entries.isEmpty()) {
+            ListLsubEntry entry;
+            if (entries.size() == 1) {
+                entry = entries.iterator().next();
+            } else {
+                entry = (MailAccount.DEFAULT_ID == accountId ? getByName(names[index], entries) : getByFullName(fullNames[index], entries));
+            }
+            setDefaultMailFolder(index, entry.getFullName(), cache);
+            checkedIndexes.put(index, entry.getFullName());
+            if (!entry.isSubscribed()) {
+                IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                modified.set(true);
+            }
+        }
+    }
+
     /**
      * Checks for each standard folder sequentially.
      *
@@ -337,50 +394,6 @@ public class IMAPDefaultFolderChecker {
         // The flag to track possible modifications
         AtomicBoolean modified = new AtomicBoolean(false);
 
-        // Check for marked default folders
-        TIntObjectMap<String> checkedIndexes = new TIntObjectHashMap<String>(6);
-        try {
-            IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-            ListLsubEntry entry = ListLsubCache.getDraftsEntry(accountId, imapFolder, session);
-            if (null != entry) {
-                setDefaultMailFolder(StorageUtility.INDEX_DRAFTS, entry.getFullName(), cache);
-                checkedIndexes.put(StorageUtility.INDEX_DRAFTS, entry.getFullName());
-                if (!entry.isSubscribed()) {
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
-                    modified.set(true);
-                }
-            }
-            entry = ListLsubCache.getJunkEntry(accountId, imapFolder, session);
-            if (null != entry) {
-                setDefaultMailFolder(StorageUtility.INDEX_SPAM, entry.getFullName(), cache);
-                checkedIndexes.put(StorageUtility.INDEX_SPAM, entry.getFullName());
-                if (!entry.isSubscribed()) {
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
-                    modified.set(true);
-                }
-            }
-            entry = ListLsubCache.getSentEntry(accountId, imapFolder, session);
-            if (null != entry) {
-                setDefaultMailFolder(StorageUtility.INDEX_SENT, entry.getFullName(), cache);
-                checkedIndexes.put(StorageUtility.INDEX_SENT, entry.getFullName());
-                if (!entry.isSubscribed()) {
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
-                    modified.set(true);
-                }
-            }
-            entry = ListLsubCache.getTrashEntry(accountId, imapFolder, session);
-            if (null != entry) {
-                setDefaultMailFolder(StorageUtility.INDEX_TRASH, entry.getFullName(), cache);
-                checkedIndexes.put(StorageUtility.INDEX_TRASH, entry.getFullName());
-                if (!entry.isSubscribed()) {
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
-                    modified.set(true);
-                }
-            }
-        } catch (MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
-        }
-
         // Detect if spam option is enabled
         boolean isSpamOptionEnabled;
         {
@@ -393,6 +406,30 @@ public class IMAPDefaultFolderChecker {
         String[] fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(imapConfig, isSpamOptionEnabled);
         String[] names = defaultFolderNamesProvider.getDefaultFolderNames(imapConfig, isSpamOptionEnabled);
         SpamHandler spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
+
+        // Check for marked default folders
+        TIntObjectMap<String> checkedIndexes = new TIntObjectHashMap<String>(6);
+        try {
+            IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
+
+            // Entries with "\Drafts" marker
+            Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session);
+            handleMarkedEntries(entries, StorageUtility.INDEX_DRAFTS, names, fullNames, checkedIndexes, cache, modified);
+
+            // Entries with "\Junk" marker
+            entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session);
+            handleMarkedEntries(entries, StorageUtility.INDEX_SPAM, names, fullNames, checkedIndexes, cache, modified);
+
+            // Entries with "\Send" marker
+            entries = ListLsubCache.getSentEntry(accountId, imapFolder, session);
+            handleMarkedEntries(entries, StorageUtility.INDEX_SENT, names, fullNames, checkedIndexes, cache, modified);
+
+            // Entries with "\Trash" marker
+            entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session);
+            handleMarkedEntries(entries, StorageUtility.INDEX_TRASH, names, fullNames, checkedIndexes, cache, modified);
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+        }
 
         // Special handling for full names in case of primary mail account
         if (MailAccount.DEFAULT_ID == accountId) {

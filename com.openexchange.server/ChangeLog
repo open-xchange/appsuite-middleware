@@ -1,6 +1,7 @@
 * 2015-02-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 35122: Ensure proper runtime values
+ - Fix for bug 36786: Deal with possibly multiple folders having the same SPECIAL-USE marker and prefer the one matching to remembered name/full name
 
 * 2015-02-26 - martin.herfurth@open-xchange.com
 

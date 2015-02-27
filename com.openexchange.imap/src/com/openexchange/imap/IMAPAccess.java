@@ -645,7 +645,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("", e);
                 }
             }
-            final boolean certainPassword = false; // ("10.20.30.206".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainPassword = ("dovecot.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
             if (certainPassword) {
                 tmpPass = "secret";
             }
