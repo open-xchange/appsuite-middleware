@@ -67,6 +67,7 @@ import java.util.concurrent.FutureTask;
 import java.util.regex.Pattern;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.config.IIMAPProperties;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -149,16 +150,17 @@ public final class IMAPCapabilityAndGreetingCache {
         return getCapabilityAndGreeting(address, isSecure, imapProperties).getCapability();
     }
 
-    private static CapabilityAndGreeting getCapabilityAndGreeting(final String address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+    private static CapabilityAndGreeting getCapabilityAndGreeting(String address, boolean isSecure, IIMAPProperties imapProperties) throws IOException {
         ConcurrentMap<String, Future<CapabilityAndGreeting>> map = MAP;
         if (null == map) {
             init();
             map = MAP;
         }
-        Future<CapabilityAndGreeting> f = map.get(address);
+        String key = new StringBuilder(address).append('-').append(isSecure).toString();
+        Future<CapabilityAndGreeting> f = map.get(key);
         if (null == f) {
             final FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(address, isSecure, imapProperties));
-            f = map.putIfAbsent(address, ft);
+            f = map.putIfAbsent(key, ft);
             if (null == f) {
                 f = ft;
                 ft.run();
@@ -240,16 +242,18 @@ public final class IMAPCapabilityAndGreetingCache {
                 boolean skipLF = false;
                 boolean eol = false;
                 int i = -1;
-                while (!eol && ((i = in.read()) != -1)) {
-                    final char c = (char) i;
-                    if (c == '\r') {
-                        eol = true;
-                        skipLF = true;
-                    } else if (c == '\n') {
-                        eol = true;
-                        skipLF = false;
-                    } else {
-                        sb.append(c);
+                if (in.available() > 0) {
+                    while (!eol && ((i = in.read()) != -1)) {
+                        final char c = (char) i;
+                        if (c == '\r') {
+                            eol = true;
+                            skipLF = true;
+                        } else if (c == '\n') {
+                            eol = true;
+                            skipLF = false;
+                        } else {
+                            sb.append(c);
+                        }
                     }
                 }
                 final String greeting = sb.toString();
@@ -329,13 +333,7 @@ public final class IMAPCapabilityAndGreetingCache {
                  */
                 return new CapabilityAndGreeting(capabilities, greeting);
             } finally {
-                if (s != null) {
-                    try {
-                        s.close();
-                    } catch (final IOException e) {
-                        LOG.error("", e);
-                    }
-                }
+                Streams.close(s);
             }
         }
     }
