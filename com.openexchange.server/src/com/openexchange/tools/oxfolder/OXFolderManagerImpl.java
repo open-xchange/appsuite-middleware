@@ -2238,7 +2238,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
 
         String translatedName = StringHelper.valueOf(getUser(session).getLocale()).getString(displayName);
-        OXException oxe = InfostoreExceptionCodes.INVALID_CHARACTER.create(e, e.getIncorrectString(), translatedName);
+        OXException oxe = OXFolderExceptionCode.INVALID_CHARACTER.create(e, e.getIncorrectString(), translatedName);
         oxe.addProblematic(new SimpleIncorrectStringAttribute(fieldMapping.get(column).intValue(), e.getIncorrectString()));
         return oxe;
     }
