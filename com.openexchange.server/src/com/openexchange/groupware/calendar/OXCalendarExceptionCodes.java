@@ -85,7 +85,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
             if (IncorrectStringSQLException.class.isInstance(cause)) {
                 IncorrectStringSQLException isse = (IncorrectStringSQLException) cause;
                 CalendarField field = CalendarField.getByDbField(isse.getColumn());
-                OXException e = OXCalendarExceptionCodes.INVALID_CHARACTER.create(cause, field.getName(), isse.getIncorrectString());
+                OXException e = OXCalendarExceptionCodes.INVALID_CHARACTER.create(cause, field.getLocalizable(), isse.getIncorrectString());
                 e.addProblematic(new SimpleIncorrectStringAttribute(field.getAppointmentObjectID(), isse.getIncorrectString()));
                 return e;
             }

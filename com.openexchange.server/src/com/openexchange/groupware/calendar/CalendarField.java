@@ -51,6 +51,8 @@ package com.openexchange.groupware.calendar;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.i18n.Localizable;
+import com.openexchange.i18n.LocalizableArgument;
 
 /**
  * This class is meant for translating the different names and IDs
@@ -151,6 +153,10 @@ public enum CalendarField {
 
     public String getName() {
         return name;
+    }
+    
+    public Localizable getLocalizable() {
+        return new LocalizableArgument(getName());
     }
 
     public void setName(final String name) {
