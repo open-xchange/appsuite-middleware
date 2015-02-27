@@ -61,6 +61,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
@@ -77,6 +78,7 @@ import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -212,7 +214,8 @@ public class ImapIdleActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, SessiondService.class, ThreadPoolService.class };
+        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, SessiondService.class, ThreadPoolService.class,
+            ContextService.class, UserService.class };
     }
 
     @Override
