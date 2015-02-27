@@ -1,3 +1,7 @@
+* 2015-02-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35122: Ensure proper runtime values
+
 * 2015-02-26 - martin.herfurth@open-xchange.com
 
  - Fix for bug 36321: Partial fix. New ical4j library to avoid parsing error.
