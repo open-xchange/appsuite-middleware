@@ -67,7 +67,6 @@ import java.util.concurrent.FutureTask;
 import java.util.regex.Pattern;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.config.IIMAPProperties;
-import com.openexchange.java.Streams;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -333,7 +332,13 @@ public final class IMAPCapabilityAndGreetingCache {
                  */
                 return new CapabilityAndGreeting(capabilities, greeting);
             } finally {
-                Streams.close(s);
+                if (null != s) {
+                    try {
+                        s.close();
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
             }
         }
     }
