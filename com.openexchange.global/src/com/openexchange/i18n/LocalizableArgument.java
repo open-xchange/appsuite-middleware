@@ -52,6 +52,9 @@ package com.openexchange.i18n;
 
 /**
  * {@link LocalizableArgument} - Represents an argument that is localizable.
+ * <p>
+ * Passed <code>argument</code> needs to be contained in a class, which implements the {@link LocalizableStrings} interface,
+ * in order to be translatable to the appropriate language.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
