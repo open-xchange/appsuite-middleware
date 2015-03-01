@@ -505,7 +505,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 if ((length > 0) && (null != sRange)) {
                     // Taken from http://balusc.blogspot.co.uk/2009/02/fileservlet-supporting-resume-and.html
                     // Range header should match format "bytes=n-n,n-n,n-n...". If not, then return 416.
-                    if (!PATTERN_BYTE_RANGES.matcher(sRange).matches()) {
+                    if (!Tools.isByteRangeHeader(sRange)) {
                         resp.setHeader("Content-Range", "bytes */" + length); // Required in 416.
                         resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
                         return;

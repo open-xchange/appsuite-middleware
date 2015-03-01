@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.MessageRemovedException;
-import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -440,8 +439,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     }
 
     private boolean clientRequestsRange(MailRequest req) {
-        HttpServletRequest servletRequest = req.getRequest().optHttpServletRequest();
-        return (null != servletRequest && null != servletRequest.getHeader("Range"));
+        return Tools.hasRangeHeader(req.getRequest().optHttpServletRequest());
     }
 
     private boolean fileNameIndicatesHtml(String fileName) {
