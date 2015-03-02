@@ -127,6 +127,16 @@ public final class Tools {
     }
 
     /**
+     * Checks if given folder identifier appears to be a global identifier.
+     *
+     * @param id The folder identifier to check
+     * @return <code>true</code> if global; otherwise <code>false</code>
+     */
+    public static boolean isGlobalId(String id) {
+        return getUnsignedInteger(id) > 0;
+    }
+
+    /**
      * The radix for base <code>10</code>.
      */
     private static final int RADIX = 10;
@@ -137,7 +147,7 @@ public final class Tools {
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */
-    public static final int getUnsignedInteger(final String s) {
+    public static int getUnsignedInteger(final String s) {
         if (s == null) {
             return -1;
         }

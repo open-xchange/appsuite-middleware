@@ -90,10 +90,12 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
+import javax.mail.util.SharedFileInputStream;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.ContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.container.TmpFileFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -251,12 +253,20 @@ public final class MimeMessageConverter {
             if (mailPart instanceof MailMessage) {
                 return convertMailMessage((MailMessage) mailPart);
             }
-            final int size = (int) mailPart.getSize();
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
-            mailPart.writeTo(out);
-            return new MimeBodyPart(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+            @SuppressWarnings("resource") ThresholdFileHolder sink = new ThresholdFileHolder();
+            mailPart.writeTo(sink.asOutputStream());
+            File tempFile = sink.getTempFile();
+            if (null == tempFile) {
+                return new MimeBodyPart(Streams.newByteArrayInputStream(sink.toByteArray()));
+            }
+            return new MimeBodyPart(new SharedFileInputStream(tempFile));
         } catch (final MessagingException e) {
-            throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

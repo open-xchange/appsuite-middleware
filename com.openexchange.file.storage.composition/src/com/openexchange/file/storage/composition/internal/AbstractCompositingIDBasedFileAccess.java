@@ -406,141 +406,72 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public Document getDocumentAndMetadata(String id, final String version) throws OXException {
-        final FileID fileID = new FileID(id);
-        final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
-        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-        if (!(fileAccess instanceof FileStorageEfficientRetrieval)) {
-            return null;
-        }
-        FileStorageEfficientRetrieval retrieval = (FileStorageEfficientRetrieval) fileAccess;
-        // Post event
-        {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
-            if (null != metaData) {
-                postEvent(FileStorageEventHelper.buildAccessEvent(
-                    session,
-                    fileID.getService(),
-                    fileID.getAccountId(),
-                    metaData.getFolderId(),
-                    fileID.toUniqueID(),
-                    metaData.getFileName(),
-                    extractRemoteAddress()));
-            }
-        }
-        // Proceed...
-        final Document document = retrieval.getDocumentAndMetadata(fileID.getFolderId(), fileID.getFileId(), version);
-        if (null == document) {
-            return null;
-        }
-        if (null == registry) {
-            return document;
-        }
-        final Collection<FileStreamHandler> handlers = registry.getHandlers();
-        if (null == handlers || handlers.isEmpty()) {
-            return document;
-        }
-        // Handle stream
-        Document clone = new Document(document) {
-
-            @Override
-            public InputStream getData() throws OXException {
-                InputStream inputStream = document.getData();
-                for (final FileStreamHandler streamHandler : handlers) {
-                    inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
-                }
-                return inputStream;
-            }
-
-        };
-
-        return clone;
+        return getDocumentAndMetadata(id, version, null);
     }
 
     @Override
     public Document getDocumentAndMetadata(String id, final String version, String clientETag) throws OXException {
-        final FileID fileID = new FileID(id);
-        final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
+        FileID fileID = new FileID(id);
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-        if (!(fileAccess instanceof FileStorageEfficientRetrieval)) {
+        if (false == FileStorageEfficientRetrieval.class.isInstance(fileAccess)) {
             return null;
         }
-        FileStorageEfficientRetrieval retrieval = (FileStorageEfficientRetrieval) fileAccess;
-        // Post event
-        {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
-            if (null != metaData) {
-                postEvent(FileStorageEventHelper.buildAccessEvent(
-                    session,
-                    fileID.getService(),
-                    fileID.getAccountId(),
-                    metaData.getFolderId(),
-                    fileID.toUniqueID(),
-                    metaData.getFileName(),
-                    extractRemoteAddress()));
-            }
-        }
-        // Proceed...
-        final Document document = retrieval.getDocumentAndMetadata(fileID.getFolderId(), fileID.getFileId(), version, clientETag);
+        /*
+         * get document & metadata
+         */
+        FileStorageEfficientRetrieval efficientRetrieval = (FileStorageEfficientRetrieval) fileAccess;
+        Document document = null != clientETag ? efficientRetrieval.getDocumentAndMetadata(fileID.getFolderId(), fileID.getFileId(), version, clientETag) :
+            efficientRetrieval.getDocumentAndMetadata(fileID.getFolderId(), fileID.getFileId(), version);
         if (null == document) {
             return null;
         }
-        if (null == registry) {
-            return document;
-        }
-        final Collection<FileStreamHandler> handlers = registry.getHandlers();
-        if (null == handlers || handlers.isEmpty()) {
-            return document;
-        }
-        // Handle stream
-        Document clone = new Document(document) {
-
-            @Override
-            public InputStream getData() throws OXException {
-                InputStream inputStream = document.getData();
-                for (final FileStreamHandler streamHandler : handlers) {
-                    inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
-                }
-                return inputStream;
-            }
-
-        };
-
-        return clone;
+        /*
+         * post "access" event
+         */
+        postEvent(FileStorageEventHelper.buildAccessEvent(
+            session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), document.getName(), extractRemoteAddress()));
+        /*
+         * return handled document
+         */
+        return handleDocumentStream(fileID, version, fixIDs(document, fileID.getService(), fileID.getAccountId()));
     }
 
     @Override
     public InputStream getDocument(final String id, final String version) throws OXException {
-        final FileID fileID = new FileID(id);
-        final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
+        /*
+         * get data from file access & post "access" event
+         */
+        FileID fileID = new FileID(id);
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-        // Post event
-        {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
-            if (null != metaData) {
-                postEvent(FileStorageEventHelper.buildAccessEvent(
-                    session,
-                    fileID.getService(),
-                    fileID.getAccountId(),
-                    metaData.getFolderId(),
-                    fileID.toUniqueID(),
-                    metaData.getFileName(),
-                    extractRemoteAddress()));
-            }
+        InputStream data = fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
+        postEvent(FileStorageEventHelper.buildAccessEvent(
+            session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
+        /*
+         * return handled stream
+         */
+        return handleInputStream(fileID, version, data);
+    }
+
+    @Override
+    public InputStream getDocument(String id, String version, long offset, long length) throws OXException {
+        /*
+         * check random access capability
+         */
+        FileID fileID = new FileID(id);
+        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
+            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(fileAccess.getAccountAccess().getService());
         }
-        // Proceed...
-        if (null == registry) {
-            return fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
-        }
-        final Collection<FileStreamHandler> handlers = registry.getHandlers();
-        if (null == handlers || handlers.isEmpty()) {
-            return fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
-        }
-        // Handle stream
-        InputStream inputStream = fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
-        for (final FileStreamHandler streamHandler : handlers) {
-            inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
-        }
-        return inputStream;
+        /*
+         * get data from random file access & post "access" event
+         */
+        InputStream data = ((FileStorageRandomFileAccess) fileAccess).getDocument(fileID.getFolderId(), fileID.getFileId(), version, offset, length);
+        postEvent(FileStorageEventHelper.buildAccessEvent(
+            session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
+        /*
+         * return handled stream
+         */
+        return handleInputStream(fileID, version, data);
     }
 
     @Override
@@ -891,7 +822,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation<IDTuple> saveDelegation) throws OXException {
         if (FileStorageFileAccess.NEW == document.getId()) {
             /*
-             * create new file
+             * Create new file
              */
             if (null == document.getFolderId()) {
                 throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("null");
@@ -910,81 +841,81 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             postEvent(FileStorageEventHelper.buildCreateEvent(
                 session, serviceID, accountID, newFolderID.toUniqueID(), newID.toUniqueID(), document.getFileName()));
             return newID.toUniqueID();
+        }
+
+        /*
+         * Update existing file
+         */
+        FileID sourceFileID = new FileID(document.getId());
+        if (null == sourceFileID.getFolderId()) {
+            // preserve folder information also for infostore items
+            sourceFileID.setFolderId(document.getFolderId());
+        }
+        String serviceID = sourceFileID.getService();
+        String accountID = sourceFileID.getAccountId();
+        final FolderID targetFolderID;
+        if (null == document.getFolderId()) {
+            targetFolderID = new FolderID(serviceID, accountID, sourceFileID.getFolderId());
         } else {
-            /*
-             * update existing file
-             */
-            FileID sourceFileID = new FileID(document.getId());
-            if (null == sourceFileID.getFolderId()) {
-                // preserve folder information also for infostore items
-                sourceFileID.setFolderId(document.getFolderId());
-            }
-            String serviceID = sourceFileID.getService();
-            String accountID = sourceFileID.getAccountId();
-            final FolderID targetFolderID;
-            if (null == document.getFolderId()) {
-                targetFolderID = new FolderID(serviceID, accountID, sourceFileID.getFolderId());
-            } else {
-                targetFolderID = new FolderID(document.getFolderId());
-                if (false == serviceID.equals(targetFolderID.getService()) || false == accountID.equals(targetFolderID.getAccountId())) {
-                    /*
-                     * special handling for move between storages
-                     */
-                    return move(document, data, sequenceNumber, modifiedColumns);
-                }
-            }
-            FileStorageFileAccess fileAccess = getFileAccess(serviceID, accountID);
-            final IDTuple sourceIDTuple = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
-            ensureFolderIDs(fileAccess, Collections.singletonList(sourceIDTuple));
-            if (null != document.getFolderId() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
+            targetFolderID = new FolderID(document.getFolderId());
+            if (false == serviceID.equals(targetFolderID.getService()) || false == accountID.equals(targetFolderID.getAccountId())) {
                 /*
-                 * special handling for move to different folder
+                 * Special handling for move between storages
                  */
-                FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceIDTuple.getFolder());
-                document.setFolderId(sourceIDTuple.getFolder());
-                document.setId(sourceIDTuple.getId());
-                IDTuple result = new TransactionAwareFileAccessDelegation<IDTuple>() {
-
-                    @Override
-                    protected IDTuple callInTransaction(FileStorageFileAccess access) throws OXException {
-                        return access.move(sourceIDTuple, targetFolderID.getFolderId(), sequenceNumber, document, modifiedColumns);
-                    }
-                }.call(fileAccess);
-
-                FileID newFileID = new FileID(targetFolderID.getService(), targetFolderID.getAccountId(), result.getFolder(), result.getId());
-                FolderID newFolderID = new FolderID(targetFolderID.getService(), targetFolderID.getAccountId(), result.getFolder());
-                postEvent(FileStorageEventHelper.buildDeleteEvent(
-                    session,
-                    sourceFileID.getService(),
-                    sourceFileID.getAccountId(),
-                    sourceFolderID.toUniqueID(),
-                    sourceFileID.toUniqueID(),
-                    document.getFileName(),
-                    null));
-                postEvent(FileStorageEventHelper.buildCreateEvent(
-                    session,
-                    newFileID.getService(),
-                    newFileID.getAccountId(),
-                    newFolderID.toUniqueID(),
-                    newFileID.toUniqueID(),
-                    document.getFileName()));
-                return newFileID.toUniqueID();
-            } else {
-                /*
-                 * update without move
-                 */
-                document.setFolderId(targetFolderID.getFolderId());
-                document.setId(sourceFileID.getFileId());
-                IDTuple result = saveDelegation.call(getFileAccess(serviceID, accountID));
-                FileID newFileID = new FileID(serviceID, accountID, result.getFolder(), result.getId());
-                FolderID newFolderID = new FolderID(serviceID, accountID, result.getFolder());
-                document.setId(newFileID.toUniqueID());
-                document.setFolderId(newFolderID.toUniqueID());
-                postEvent(FileStorageEventHelper.buildUpdateEvent(
-                    session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
-                return newFileID.toUniqueID();
+                return move(document, data, sequenceNumber, modifiedColumns);
             }
         }
+        FileStorageFileAccess fileAccess = getFileAccess(serviceID, accountID);
+        final IDTuple sourceIDTuple = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
+        ensureFolderIDs(fileAccess, Collections.singletonList(sourceIDTuple));
+        if (null != document.getFolderId() && false == sourceIDTuple.getFolder().equals(targetFolderID.getFolderId())) {
+            /*
+             * Special handling for move to different folder
+             */
+            FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceIDTuple.getFolder());
+            document.setFolderId(sourceIDTuple.getFolder());
+            document.setId(sourceIDTuple.getId());
+            IDTuple result = new TransactionAwareFileAccessDelegation<IDTuple>() {
+
+                @Override
+                protected IDTuple callInTransaction(FileStorageFileAccess access) throws OXException {
+                    return access.move(sourceIDTuple, targetFolderID.getFolderId(), sequenceNumber, document, modifiedColumns);
+                }
+            }.call(fileAccess);
+
+            FileID newFileID = new FileID(targetFolderID.getService(), targetFolderID.getAccountId(), result.getFolder(), result.getId());
+            FolderID newFolderID = new FolderID(targetFolderID.getService(), targetFolderID.getAccountId(), result.getFolder());
+            postEvent(FileStorageEventHelper.buildDeleteEvent(
+                session,
+                sourceFileID.getService(),
+                sourceFileID.getAccountId(),
+                sourceFolderID.toUniqueID(),
+                sourceFileID.toUniqueID(),
+                document.getFileName(),
+                null));
+            postEvent(FileStorageEventHelper.buildCreateEvent(
+                session,
+                newFileID.getService(),
+                newFileID.getAccountId(),
+                newFolderID.toUniqueID(),
+                newFileID.toUniqueID(),
+                document.getFileName()));
+            return newFileID.toUniqueID();
+        }
+
+        /*
+         * Update without move
+         */
+        document.setFolderId(targetFolderID.getFolderId());
+        document.setId(sourceFileID.getFileId());
+        IDTuple result = saveDelegation.call(getFileAccess(serviceID, accountID));
+        FileID newFileID = new FileID(serviceID, accountID, result.getFolder(), result.getId());
+        FolderID newFolderID = new FolderID(serviceID, accountID, result.getFolder());
+        document.setId(newFileID.toUniqueID());
+        document.setFolderId(newFolderID.toUniqueID());
+        postEvent(FileStorageEventHelper.buildUpdateEvent(
+            session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
+        return newFileID.toUniqueID();
     }
 
     protected String move(final File document, InputStream data, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
@@ -1133,23 +1064,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     @Override
-    public InputStream getDocument(String id, String version, long offset, long length) throws OXException {
-        FileID fileID = new FileID(id);
-        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-        if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
-            throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
-        }
-        return ((FileStorageRandomFileAccess) fileAccess).getDocument(fileID.getFolderId(), fileID.getFileId(), version, offset, length);
-    }
-
-    @Override
     public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final long offset) throws OXException {
         return save(document, data, sequenceNumber, modifiedColumns, new TransactionAwareFileAccessDelegation<IDTuple>() {
 
             @Override
             protected IDTuple callInTransaction(FileStorageFileAccess access) throws OXException {
                 if (false == FileStorageRandomFileAccess.class.isInstance(access)) {
-                    throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
+                    throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(access.getAccountAccess().getService());
                 }
                 IDTuple result = ((FileStorageRandomFileAccess) access).saveDocument(document, data, sequenceNumber, modifiedColumns, offset);
                 document.setFolderId(result.getFolder());
@@ -1829,6 +1750,60 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             return new EventProperty("remoteAddress", serverName.toString());
         }
         return null;
+    }
+
+    /**
+     * Handles the supplied input stream if appropriate stream handlers are registered.
+     *
+     * @param fileID The file identifier
+     * @param version The file version
+     * @param inputStream The input stream
+     * @return The possibly modified input stream, or the original stream if no handlers registered
+     * @throws OXException
+     */
+    private InputStream handleInputStream(FileID fileID, String version, InputStream inputStream) throws OXException {
+        if (null == inputStream) {
+            return null;
+        }
+        FileStreamHandlerRegistry handlerRegistry = getStreamHandlerRegistry();
+        if (null != handlerRegistry) {
+            final Collection<FileStreamHandler> handlers = handlerRegistry.getHandlers();
+            if (null != handlers && 0 < handlers.size()) {
+                for (FileStreamHandler streamHandler : handlers) {
+                    inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
+                }
+            }
+        }
+        return inputStream;
+    }
+
+    /**
+     * Handles the supplied document stream if appropriate stream handlers are registered.
+     *
+     * @param fileID The file identifier
+     * @param version The file version
+     * @param document The document
+     * @return The handled document, with a possibly modified stream, or the original document if no handlers registered
+     */
+    private Document handleDocumentStream(final FileID fileID, final String version, final Document document) {
+        FileStreamHandlerRegistry handlerRegistry = getStreamHandlerRegistry();
+        if (null != handlerRegistry) {
+            final Collection<FileStreamHandler> handlers = handlerRegistry.getHandlers();
+            if (null != handlers && 0 < handlers.size()) {
+                return new Document(document) {
+
+                    @Override
+                    public InputStream getData() throws OXException {
+                        InputStream inputStream = document.getData();
+                        for (FileStreamHandler streamHandler : handlers) {
+                            inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
+                        }
+                        return inputStream;
+                    }
+                };
+            }
+        }
+        return document;
     }
 
     /**

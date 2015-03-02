@@ -94,12 +94,11 @@ public class Bug31826Test {
         String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
         String test = service.sanitize(content, null, true, null, null);
 
-        Assert.assertEquals("Unexpected retur value.", "dfg \u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 dfg", test);
-
+        Assert.assertEquals("Unexpected return value.", "dfg \u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 dfg", test);
 
         content = "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 <>";
         test = service.htmlFormat(content, true, "--==--");
 
-        Assert.assertEquals("Unexpected retur value.", "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 &lt;&gt;", test);
+        Assert.assertEquals("Unexpected return value.", "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 &lt;&gt;", test);
     }
 }

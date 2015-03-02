@@ -109,9 +109,9 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
     public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException {
         String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
         stanza.trace("Send synchronously. UUID: " + uuid);
-        channel.setUp(uuid, stanza);
+        ID id = channel.setUp(uuid, stanza);
         send(stanza);
-        return channel.waitFor(uuid, timeout, unit);
+        return channel.waitFor(id, timeout, unit);
     }
 
     @Override
@@ -156,7 +156,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
                         ids = new HashSet<ID>();
                         targets.put(member, ids);
                     }
-                    
+
                     ids.add(id);
                 } else {
                     LOG.error("No member matches {}", routingInfo);
@@ -171,7 +171,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
 
     /**
      * Filter the set of cluster {@link Member}s for a node matching the given {@link RoutingInfo}.
-     * 
+     *
      * @param routingInfo The {@link RoutingInfo} to filter the cluster {@link Member}s
      * @return null if no matching {@link Member} can be found, otherwise the first matching {@link Member}
      * @throws OXException

@@ -74,6 +74,7 @@ import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.OutputDocument;
+import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
 import org.w3c.dom.Document;
@@ -357,15 +358,16 @@ public final class HtmlProcessing {
             outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
             outputDocument.insert(source.length() - 1, "</div>");
         } else {
-            StringBuilder sb = new StringBuilder(source.length());
             for (Element bodyElement : bodyElements) {
+                Segment content = bodyElement.getContent();
+                StringBuilder sb = new StringBuilder(content.length());
                 sb.append(getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix));
                 if (null != styleElements) {
                     for (Element element : styleElements) {
                         sb.append(element);
                     }
                 }
-                sb.append(bodyElement.getContent());
+                sb.append(content);
                 sb.append("</div>");
                 outputDocument.replace(bodyElement, sb);
             }

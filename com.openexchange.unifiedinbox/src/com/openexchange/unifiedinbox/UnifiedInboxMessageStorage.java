@@ -101,6 +101,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
+import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -1288,17 +1289,25 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 if (fn == null) {
                                     return Collections.emptyList();
                                 }
+                                // Determine sort option
+                                MailSortField sortField = MailSortField.RECEIVED_DATE;
+                                OrderDirection orderDir = OrderDirection.DESC;
+                                if (null != indexRange) {
+                                    // Apply proper sort option
+                                    sortField = effectiveSortField;
+                                    orderDir = order;
+                                }
                                 // Get account's messages
                                 MailMessage[] accountMails;
                                 if (null == headerNames || headerNames.length <= 0) {
-                                    accountMails = mailAccess.getMessageStorage().searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
+                                    accountMails = mailAccess.getMessageStorage().searchMessages(fn, null, sortField, orderDir, searchTerm, checkedFields);
                                 } else {
                                     IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                                     if (messageStorage instanceof IMailMessageStorageExt) {
-                                        accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields, headerNames);
+                                        accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, null, sortField, orderDir, searchTerm, checkedFields, headerNames);
                                     } else {
                                         MailField[] checkedFields2 = MailFields.addIfAbsent(checkedFields, MailField.ID);
-                                        accountMails = messageStorage.searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields2);
+                                        accountMails = messageStorage.searchMessages(fn, null, sortField, orderDir, searchTerm, checkedFields2);
 
                                         if (null == accountMails || accountMails.length <= 0) {
                                             return Collections.emptyList();
@@ -1391,17 +1400,25 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             if (fn == null) {
                                 return Collections.emptyList();
                             }
+                            // Determine sort option
+                            MailSortField sortField = MailSortField.RECEIVED_DATE;
+                            OrderDirection orderDir = OrderDirection.DESC;
+                            if (null != indexRange) {
+                                // Apply proper sort option
+                                sortField = effectiveSortField;
+                                orderDir = order;
+                            }
                             // Get account's messages
                             MailMessage[] accountMails;
                             if (null == headerNames || headerNames.length <= 0) {
-                                accountMails = mailAccess.getMessageStorage().searchMessages(fn, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
+                                accountMails = mailAccess.getMessageStorage().searchMessages(fn, indexRange, sortField, orderDir, searchTerm, checkedFields);
                             } else {
                                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                                 if (messageStorage instanceof IMailMessageStorageExt) {
-                                    accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields, headerNames);
+                                    accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, indexRange, sortField, orderDir, searchTerm, checkedFields, headerNames);
                                 } else {
                                     MailField[] checkedFields2 = MailFields.addIfAbsent(checkedFields, MailField.ID);
-                                    accountMails = messageStorage.searchMessages(fn, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields2);
+                                    accountMails = messageStorage.searchMessages(fn, indexRange, sortField, orderDir, searchTerm, checkedFields2);
 
                                     if (null == accountMails || accountMails.length <= 0) {
                                         return Collections.emptyList();

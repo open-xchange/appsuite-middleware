@@ -57,7 +57,7 @@ import com.openexchange.tx.UndoableAction;
  */
 public class InsertDocumentIntoDelTableActionTest extends AbstractInfostoreActionTest {
 
-	CreateDocumentAction create = new CreateDocumentAction();
+	CreateDocumentAction create = new CreateDocumentAction(null);
 
 	@Override
 	public void setUp() throws Exception {
@@ -91,7 +91,7 @@ public class InsertDocumentIntoDelTableActionTest extends AbstractInfostoreActio
 
     @Override
     protected UndoableAction getAction() throws Exception {
-        final InsertDocumentIntoDelTableAction action = new InsertDocumentIntoDelTableAction();
+        final InsertDocumentIntoDelTableAction action = new InsertDocumentIntoDelTableAction(null);
 		action.setProvider(getProvider());
 		action.setContext(getContext());
 		action.setDocuments(getDocuments());

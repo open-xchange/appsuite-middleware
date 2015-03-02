@@ -70,6 +70,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import com.openexchange.database.Databases;
+import com.openexchange.database.IncorrectStringSQLException;
 
 /**
  * {@link JDBC4PreparedStatementWrapper}
@@ -115,6 +116,12 @@ public class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper impleme
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
             LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             throw syntaxError;
+        } catch (java.sql.SQLException sqlException) {
+            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
+            if (null != incorrectStringError) {
+                throw incorrectStringError;
+            }
+            throw sqlException;
         }
     }
 
@@ -126,6 +133,12 @@ public class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper impleme
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
             LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             throw syntaxError;
+        } catch (java.sql.SQLException sqlException) {
+            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
+            if (null != incorrectStringError) {
+                throw incorrectStringError;
+            }
+            throw sqlException;
         }
     }
 
@@ -139,6 +152,12 @@ public class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper impleme
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
             LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             throw syntaxError;
+        } catch (java.sql.SQLException sqlException) {
+            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
+            if (null != incorrectStringError) {
+                throw incorrectStringError;
+            }
+            throw sqlException;
         }
     }
 

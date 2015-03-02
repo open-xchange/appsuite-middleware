@@ -10,7 +10,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.oauth.flickr"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.oauth.google"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.oauth.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.oauth.linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.oauth.msliveconnect"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.oauth.tumblr"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.2,com.openexchange.oauth.twitter"/>

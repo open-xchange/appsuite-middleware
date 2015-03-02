@@ -85,9 +85,11 @@ import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.PermissionTools;
+import com.openexchange.test.TaskTestManager;
 
 /**
  * {@link CalDAVTest} - Common base class for CalDAV tests
@@ -99,6 +101,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     protected static final int TIMEOUT = 10000;
 
     private CalendarTestManager testManager = null;
+    private TaskTestManager taskTestManager = null;
     private int folderId;
     private final List<FolderObject> createdFolders = new ArrayList<FolderObject>();
 
@@ -112,6 +115,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         this.folderId = this.getAJAXClient().getValues().getPrivateAppointmentFolder();
         this.testManager = new CalendarTestManager(this.getAJAXClient());
         this.testManager.setFailOnError(true);
+        this.taskTestManager = new TaskTestManager(getAJAXClient());
     }
 
     @Override
@@ -121,6 +125,9 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
         if (null != this.getManager()) {
             this.getManager().cleanUp();
+        }
+        if (null != taskTestManager) {
+            taskTestManager.cleanUp();
         }
         super.tearDown();
     }
@@ -145,6 +152,10 @@ public abstract class CalDAVTest extends WebDAVTest {
      */
     protected CalendarTestManager getManager() {
         return this.testManager;
+    }
+
+    protected TaskTestManager getTaskManager() {
+        return this.taskTestManager;
     }
 
     @Override
@@ -322,6 +333,16 @@ public abstract class CalDAVTest extends WebDAVTest {
         return null;
     }
 
+    protected Task getTask(String folderID, String uid) throws OXException {
+        Task[] tasks = taskTestManager.getAllTasksOnServer(parse(folderID), new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.UID });
+        for (Task task : tasks) {
+            if (uid.equals(task.getUid())) {
+                return taskTestManager.getTaskFromServer(parse(folderID), task.getObjectID());
+            }
+        }
+        return null;
+    }
+
     /**
      * Remembers the supplied appointment for deletion after the test is
      * finished in the <code>tearDown()</code> method.
@@ -362,7 +383,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         return appointment;
     }
 
-    protected static String generateICal(Date start, Date end, String uid, String summary, String location) {
+    protected static String generateICal(Date start, Date due, String uid, String summary, String location) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
         .append("BEGIN:VCALENDAR").append("\r\n")
@@ -392,8 +413,8 @@ public abstract class CalDAVTest extends WebDAVTest {
         if (null != uid) {
             stringBuilder.append("UID:").append(uid).append("\r\n");
         }
-        if (null != end) {
-            stringBuilder.append("DTEND;TZID=Europe/Amsterdam:").append(format(end, "Europe/Amsterdam")).append("\r\n");
+        if (null != due) {
+            stringBuilder.append("DUE;TZID=Europe/Amsterdam:").append(format(due, "Europe/Amsterdam")).append("\r\n");
         }
         stringBuilder.append("TRANSP:OPAQUE").append("\r\n");
         if (null != summary) {
@@ -410,6 +431,59 @@ public abstract class CalDAVTest extends WebDAVTest {
         .append("SEQUENCE:0").append("\r\n")
         .append("END:VEVENT").append("\r\n")
         .append("END:VCALENDAR").append("\r\n")
+        ;
+
+        return stringBuilder.toString();
+    }
+
+    protected static String generateVTodo(Date start, Date end, String uid, String summary, String location) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+            .append("BEGIN:VCALENDAR").append("\r\n")
+            .append("VERSION:2.0").append("\r\n")
+            .append("PRODID:-//Apple Inc.//iCal 5.0.2//EN").append("\r\n")
+            .append("CALSCALE:GREGORIAN").append("\r\n")
+            .append("BEGIN:VTIMEZONE").append("\r\n")
+            .append("TZID:Europe/Amsterdam").append("\r\n")
+            .append("BEGIN:DAYLIGHT").append("\r\n")
+            .append("TZOFFSETFROM:+0100").append("\r\n")
+            .append("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU").append("\r\n")
+            .append("DTSTART:19810329T020000").append("\r\n")
+            .append("TZNAME:CEST").append("\r\n")
+            .append("TZOFFSETTO:+0200").append("\r\n")
+            .append("END:DAYLIGHT").append("\r\n")
+            .append("BEGIN:STANDARD").append("\r\n")
+            .append("TZOFFSETFROM:+0200").append("\r\n")
+            .append("RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU").append("\r\n")
+            .append("DTSTART:19961027T030000").append("\r\n")
+            .append("TZNAME:CET").append("\r\n")
+            .append("TZOFFSETTO:+0100").append("\r\n")
+            .append("END:STANDARD").append("\r\n")
+            .append("END:VTIMEZONE").append("\r\n")
+            .append("BEGIN:VTODO").append("\r\n")
+            .append("CREATED:").append(formatAsUTC(new Date())).append("\r\n")
+        ;
+        if (null != uid) {
+            stringBuilder.append("UID:").append(uid).append("\r\n");
+        }
+        if (null != end) {
+            stringBuilder.append("DTEND;TZID=Europe/Amsterdam:").append(format(end, "Europe/Amsterdam")).append("\r\n");
+        }
+        stringBuilder.append("TRANSP:OPAQUE").append("\r\n");
+        if (null != summary) {
+            stringBuilder.append("SUMMARY:").append(summary).append("\r\n");
+        }
+        if (null != location) {
+            stringBuilder.append("LOCATION:").append(location).append("\r\n");
+        }
+        if (null != start) {
+            stringBuilder.append("DTSTART;TZID=Europe/Amsterdam:").append(format(start, "Europe/Amsterdam")).append("\r\n");
+        }
+        stringBuilder
+            .append("DTSTAMP:").append(formatAsUTC(new Date())).append("\r\n")
+            .append("SEQUENCE:0").append("\r\n")
+            .append("END:VTODO").append("\r\n")
+            .append("END:VCALENDAR").append("\r\n")
         ;
 
         return stringBuilder.toString();

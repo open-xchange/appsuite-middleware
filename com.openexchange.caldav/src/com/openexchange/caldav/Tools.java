@@ -134,6 +134,10 @@ public class Tools {
         return OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.equals(e) || TaskExceptionCode.TRUNCATED.equals(e);
     }
 
+    public static boolean isIncorrectString(OXException e) {
+        return OXCalendarExceptionCodes.INVALID_CHARACTER.equals(e) || TaskExceptionCode.INCORRECT_STRING.equals(e);
+    }
+
     public static String formatAsUTC(Date date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));

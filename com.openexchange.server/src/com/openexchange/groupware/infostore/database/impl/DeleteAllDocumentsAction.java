@@ -52,38 +52,52 @@ package com.openexchange.groupware.infostore.database.impl;
 import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.session.Session;
 
 public class DeleteAllDocumentsAction extends AbstractDocumentListAction {
 
+    /**
+     * Initializes a new {@link DeleteAllDocumentsAction}.
+     *
+     * @param optSession The optional session
+     */
+    public DeleteAllDocumentsAction(Session optSession) {
+        super(optSession);
+    }
+
     @Override
     protected void undoAction() throws OXException {
-        if(getDocuments().size() == 0) {
+        if (getDocuments().isEmpty()) {
             return;
         }
         final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()];
         int i = 0;
-        for(final DocumentMetadata doc : getDocuments()) {
+        for (final DocumentMetadata doc : getDocuments()) {
             updates[i++] = new Update(getQueryCatalog().getDocumentInsert()) {
 
                 @Override
                 public void fillStatement() throws SQLException {
-                    fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
+                    fillStmt(stmt, getQueryCatalog().getWritableDocumentFields(), doc, Integer.valueOf(getContext().getContextId()));
                 }
 
             };
         }
 
-        doUpdates(updates);
+        try {
+            doUpdates(updates);
+        } catch (OXException e) {
+            throw launderOXException(e, optSession);
+        }
     }
 
     @Override
     public void perform() throws OXException {
-        if(getDocuments().size() == 0) {
+        if (getDocuments().isEmpty()) {
             return;
         }
         final UpdateBlock[] updates = new UpdateBlock[1];
 
-        updates[0] = new Update("DELETE FROM infostore WHERE cid = ?"){ // REFACTOR!
+        updates[0] = new Update("DELETE FROM infostore WHERE cid = ?") { // REFACTOR!
 
             @Override
             public void fillStatement() throws SQLException {
@@ -92,8 +106,11 @@ public class DeleteAllDocumentsAction extends AbstractDocumentListAction {
 
         };
 
-
-        doUpdates(updates);
+        try {
+            doUpdates(updates);
+        } catch (OXException e) {
+            throw launderOXException(e, optSession);
+        }
     }
 
     @Override

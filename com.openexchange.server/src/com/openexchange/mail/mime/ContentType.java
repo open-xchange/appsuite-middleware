@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.java.Strings.toUpperCase;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.Iterator;
 import java.util.Locale;
@@ -409,168 +410,172 @@ public class ContentType extends ParameterizedHeader {
             setContentType(DEFAULT_CONTENT_TYPE);
             return;
         }
-        final String cts = prepareParameterizedHeader(contentType);
-        int semicolonPos = cts.indexOf(';');
-        int commaPos = -1;
-        final String type = semicolonPos < 0 ? cts : cts.substring(0, semicolonPos);
-        // Check for '/' character
-        final int slashPos = type.indexOf(DELIMITER);
-        if (slashPos >= 0) {
-            try {
-                // Primary type
-                {
-                    String pt = 0 == slashPos ? DEFAULT_PRIMTYPE : type.substring(0, slashPos).trim();
-                    if (pt.indexOf('%') >= 0) {
-                        // Possibly encoded
-                        pt = decodeUrl(pt);
-                    }
-                    char fc;
-                    while ((fc = pt.charAt(0)) == '"' || fc == '\'') {
-                        pt = pt.substring(1);
-                    }
-                    if (Strings.toLowerCase(pt).startsWith("content-type:")) {
-                        pt = pt.substring(13);
-                        if ((fc = pt.charAt(0)) == '"' || fc == '\'') {
+        try {
+            final String cts = prepareParameterizedHeader(contentType);
+            int semicolonPos = cts.indexOf(';');
+            int commaPos = -1;
+            final String type = semicolonPos < 0 ? cts : cts.substring(0, semicolonPos);
+            // Check for '/' character
+            final int slashPos = type.indexOf(DELIMITER);
+            if (slashPos >= 0) {
+                try {
+                    // Primary type
+                    {
+                        String pt = 0 == slashPos ? DEFAULT_PRIMTYPE : type.substring(0, slashPos).trim();
+                        if (pt.indexOf('%') >= 0) {
+                            // Possibly encoded
+                            pt = decodeUrl(pt);
+                        }
+                        char fc;
+                        while ((fc = pt.charAt(0)) == '"' || fc == '\'') {
                             pt = pt.substring(1);
                         }
-                    }
-                    if (isInvalidToken(pt)) {
-                        throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
-                    }
-                    primaryType = pt.length() <= 0 ? DEFAULT_PRIMTYPE : pt;
-                }
-                // Subtype
-                {
-                    String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
-                    {
-                        commaPos = st.indexOf(',');
-                        st = commaPos > 0 ? st.substring(0, commaPos) : st;
-                    }
-                    if (st.indexOf('%') >= 0) {
-                        // Possibly encoded
-                        st = decodeUrl(st);
-                    }
-                    int mlen;
-                    char lc;
-                    while ((mlen = st.length() - 1) > 0 && ((lc = st.charAt(mlen)) == '"' || lc == '\'')) {
-                        st = st.substring(0, mlen);
-                    }
-                    if (isInvalidToken(st)) {
-                        throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
-                    }
-                    if (st.trim().length() <= 0) {
-                        if ("multipart".equals(primaryType)) {
-                            subType = "mixed";
-                        } else if ("text".equals(primaryType)) {
-                            subType = "plain";
-                        } else {
-                            subType = DEFAULT_SUBTYPE;
+                        if (Strings.toLowerCase(pt).startsWith("content-type:")) {
+                            pt = pt.substring(13);
+                            if ((fc = pt.charAt(0)) == '"' || fc == '\'') {
+                                pt = pt.substring(1);
+                            }
                         }
-                    } else {
-                        subType = st;
+                        if (isInvalidToken(pt)) {
+                            throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                        }
+                        primaryType = pt.length() <= 0 ? DEFAULT_PRIMTYPE : pt;
                     }
-                }
-                baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-                lcBaseType = toLowerCase(baseType);
-                if (paramList) {
-                    if (semicolonPos < 0) {
-                        if (commaPos < 0) {
-                            parameterList = new ParameterList();
+                    // Subtype
+                    {
+                        String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
+                        {
+                            commaPos = st.indexOf(',');
+                            st = commaPos > 0 ? st.substring(0, commaPos) : st;
+                        }
+                        if (st.indexOf('%') >= 0) {
+                            // Possibly encoded
+                            st = decodeUrl(st);
+                        }
+                        int mlen;
+                        char lc;
+                        while ((mlen = st.length() - 1) > 0 && ((lc = st.charAt(mlen)) == '"' || lc == '\'')) {
+                            st = st.substring(0, mlen);
+                        }
+                        if (isInvalidToken(st)) {
+                            throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                        }
+                        if (st.trim().length() <= 0) {
+                            if ("multipart".equals(primaryType)) {
+                                subType = "mixed";
+                            } else if ("text".equals(primaryType)) {
+                                subType = "plain";
+                            } else {
+                                subType = DEFAULT_SUBTYPE;
+                            }
                         } else {
-                            // Encountered a comma during sub-type parsing
+                            subType = st;
+                        }
+                    }
+                    baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                    lcBaseType = toLowerCase(baseType);
+                    if (paramList) {
+                        if (semicolonPos < 0) {
+                            if (commaPos < 0) {
+                                parameterList = new ParameterList();
+                            } else {
+                                // Encountered a comma during sub-type parsing
+                                try {
+                                    commaPos = cts.indexOf(','); // Detect comma's real position
+                                    parameterList = commaPos < cts.length() ? new ParameterList(cts.substring(commaPos + 1)) : new ParameterList();
+                                } catch (final RuntimeException e) {
+                                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
+                                }
+                            }
+                        } else {
                             try {
-                                commaPos = cts.indexOf(','); // Detect comma's real position
-                                parameterList = commaPos < cts.length() ? new ParameterList(cts.substring(commaPos + 1)) : new ParameterList();
+                                parameterList = semicolonPos < cts.length() ? new ParameterList(cts.substring(semicolonPos + 1)) : new ParameterList();
                             } catch (final RuntimeException e) {
                                 throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
                             }
                         }
-                    } else {
-                        try {
-                            parameterList = semicolonPos < cts.length() ? new ParameterList(cts.substring(semicolonPos + 1)) : new ParameterList();
-                        } catch (final RuntimeException e) {
-                            throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
-                        }
                     }
-                }
-                return;
-            } catch (final OXException e) {
-                if (!contentTypeRegexFallback()) {
-                    throw e;
-                }
-                // Content-Type could not be parsed the simple way
-                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ContentType.class);
-                logger.debug("", e);
-            }
-        }
-        // Try with regex-based parsing
-        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(type);
-        if (ctMatcher.find()) {
-            if (ctMatcher.start() != 0) {
-                throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
-            }
-            final String alt = ctMatcher.group(3);
-            if (null != alt) {
-                primaryType = DEFAULT_PRIMTYPE;
-                final String decoded = clearWhitespaces(decodeMultiEncodedHeader(alt));
-                subType = null == decoded ? alt : decoded;
-                if ((subType == null) || (subType.length() == 0)) {
-                    subType = DEFAULT_SUBTYPE;
-                }
-            } else {
-                {
-                    final String pt = ctMatcher.group(1);
-                    final String decoded = clearWhitespaces(decodeMultiEncodedHeader(pt));
-                    primaryType = null == decoded ? pt : decoded;
-                    if ((primaryType == null) || (primaryType.length() == 0)) {
-                        primaryType = DEFAULT_PRIMTYPE;
+                    return;
+                } catch (final OXException e) {
+                    if (!contentTypeRegexFallback()) {
+                        throw e;
                     }
+                    // Content-Type could not be parsed the simple way
+                    final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ContentType.class);
+                    logger.debug("", e);
                 }
-                semicolonPos = primaryType.indexOf(DELIMITER);
-                if (semicolonPos >= 0) {
-                    subType = primaryType.substring(semicolonPos + 1);
-                    primaryType = primaryType.substring(0, semicolonPos);
+            }
+            // Try with regex-based parsing
+            final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(type);
+            if (ctMatcher.find()) {
+                if (ctMatcher.start() != 0) {
+                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                }
+                final String alt = ctMatcher.group(3);
+                if (null != alt) {
+                    primaryType = DEFAULT_PRIMTYPE;
+                    final String decoded = clearWhitespaces(decodeMultiEncodedHeader(alt));
+                    subType = null == decoded ? alt : decoded;
+                    if ((subType == null) || (subType.length() == 0)) {
+                        subType = DEFAULT_SUBTYPE;
+                    }
                 } else {
                     {
-                        final String st = ctMatcher.group(2);
-                        final String decoded = clearWhitespaces(decodeMultiEncodedHeader(st));
-                        subType = null == decoded ? st : decoded;
+                        final String pt = ctMatcher.group(1);
+                        final String decoded = clearWhitespaces(decodeMultiEncodedHeader(pt));
+                        primaryType = null == decoded ? pt : decoded;
+                        if ((primaryType == null) || (primaryType.length() == 0)) {
+                            primaryType = DEFAULT_PRIMTYPE;
+                        }
+                    }
+                    semicolonPos = primaryType.indexOf(DELIMITER);
+                    if (semicolonPos >= 0) {
+                        subType = primaryType.substring(semicolonPos + 1);
+                        primaryType = primaryType.substring(0, semicolonPos);
+                    } else {
+                        {
+                            final String st = ctMatcher.group(2);
+                            final String decoded = clearWhitespaces(decodeMultiEncodedHeader(st));
+                            subType = null == decoded ? st : decoded;
+                        }
+                        if ((subType == null) || (subType.length() == 0)) {
+                            subType = DEFAULT_SUBTYPE;
+                        }
                     }
                     if ((subType == null) || (subType.length() == 0)) {
                         subType = DEFAULT_SUBTYPE;
                     }
                 }
-                if ((subType == null) || (subType.length() == 0)) {
-                    subType = DEFAULT_SUBTYPE;
+                baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                lcBaseType = null;
+                if (paramList) {
+                    parameterList = new ParameterList(cts.substring(ctMatcher.end()));
                 }
-            }
-            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-            lcBaseType = null;
-            if (paramList) {
-                parameterList = new ParameterList(cts.substring(ctMatcher.end()));
-            }
-        } else {
-            primaryType = "text";
-            subType = "plain";
-            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-            lcBaseType = null;
-            if (paramList) {
-                parameterList = new ParameterList(semicolonPos < 0 ? cts : cts.substring(semicolonPos));
-                final String name = parameterList.getParameter("name");
-                if (null != name) {
-                    final String byName = MimeType2ExtMap.getContentType(name);
-                    if (null != byName) {
-                        final int slash = byName.indexOf('/');
-                        primaryType = byName.substring(0, slash);
-                        subType = byName.substring(slash + 1);
-                        if ((subType == null) || (subType.length() == 0)) {
-                            subType = DEFAULT_SUBTYPE;
+            } else {
+                primaryType = "text";
+                subType = "plain";
+                baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                lcBaseType = null;
+                if (paramList) {
+                    parameterList = new ParameterList(semicolonPos < 0 ? cts : cts.substring(semicolonPos));
+                    final String name = parameterList.getParameter("name");
+                    if (null != name) {
+                        final String byName = MimeType2ExtMap.getContentType(name);
+                        if (null != byName) {
+                            final int slash = byName.indexOf('/');
+                            primaryType = byName.substring(0, slash);
+                            subType = byName.substring(slash + 1);
+                            if ((subType == null) || (subType.length() == 0)) {
+                                subType = DEFAULT_SUBTYPE;
+                            }
+                            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                            lcBaseType = null;
                         }
-                        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-                        lcBaseType = null;
                     }
                 }
             }
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
         }
     }
 
@@ -936,9 +941,20 @@ public class ContentType extends ParameterizedHeader {
      * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
      * @return A RFC2045 style (ASCII-only) string representation of this content type
      */
-    public String toString(final boolean skipEmptyParams) {
+    public String toString(boolean skipEmptyParams) {
+        return toString(skipEmptyParams, false);
+    }
+
+    /**
+     * Returns a RFC2045 style (ASCII-only) string representation of this content type.
+     *
+     * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
+     * @param upperCase <code>true</code> to write base type upper-case; otherwise <code>false</code>
+     * @return A RFC2045 style (ASCII-only) string representation of this content type
+     */
+    public String toString(boolean skipEmptyParams, boolean upperCase) {
         final StringBuilder sb = new StringBuilder(64);
-        sb.append(primaryType).append(DELIMITER).append(subType);
+        sb.append(upperCase ? toUpperCase(primaryType) : primaryType).append(DELIMITER).append(upperCase ? toUpperCase(subType) : subType);
         if (null != parameterList) {
             parameterList.appendRFC2045String(sb, skipEmptyParams);
         }

@@ -89,7 +89,9 @@ public class DBMigrationActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class);
-        logger.info("Starting bundle: {}", this.context.getBundle().getSymbolicName());
+
+        final BundleContext context = this.context;
+        logger.info("Starting bundle: {}", context.getBundle().getSymbolicName());
 
         Services.setServiceLookup(this);
         // Important: Enable liquibase to load required classes (e.g. liquibase.logging.Logger implementation) from this bundle
@@ -97,7 +99,6 @@ public class DBMigrationActivator extends HousekeepingActivator {
 
         final DatabaseService databaseService = getService(DatabaseService.class);
         final ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
-        final BundleContext context = this.context;
         threadPoolService.submit(new AbstractTask<Void>() {
 
             @Override

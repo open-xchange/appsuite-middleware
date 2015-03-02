@@ -273,6 +273,9 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             if (confirm != -1) {
                 up.setConfirm(confirm);
             }
+            if (message != null) {
+                up.setConfirmMessage(message);
+            }
             UserParticipant[] tmp = appointment.getUsers();
             List<UserParticipant> participantList = (tmp == null) ? new ArrayList<UserParticipant>(1) : new ArrayList<UserParticipant>(Arrays.asList(tmp));
             participantList.add(up);

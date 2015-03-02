@@ -51,6 +51,7 @@ package com.openexchange.imap.cache;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -62,6 +63,7 @@ import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.Logger;
+import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.exception.OXException;
@@ -615,7 +617,7 @@ public final class ListLsubCache {
      * @throws MessagingException If a messaging error occurs
      */
     public static ListLsubEntry[] getCachedEntries(String fullName, int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
-        ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             ListLsubEntry listEntry = collection.getList(fullName);
             if (seemsValid(listEntry)) {
@@ -650,18 +652,18 @@ public final class ListLsubCache {
     }
 
     /**
-     * Gets the LIST entry marked with "\Drafts" attribute.
+     * Gets the LIST entries marked with "\Drafts" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
      * @param accountId The account identifier
      * @param imapFolder The IMAP folder
      * @param session The session
-     * @return The entry or <code>null</code>
-     * @throws OXException If loading the entry fails
+     * @return The entries
+     * @throws OXException If loading the entries fails
      * @throws MessagingException If a messaging error occurs
      */
-    public static ListLsubEntry getDraftsEntry(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
+    public static Collection<ListLsubEntry> getDraftsEntry(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
         ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             return collection.getDraftsEntry();
@@ -678,21 +680,21 @@ public final class ListLsubCache {
     }
 
     /**
-     * Gets the LIST entry marked with "\Junk" attribute.
+     * Gets the LIST entries marked with "\Junk" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
      * @param accountId The account identifier
      * @param imapFolder The IMAP folder
      * @param session The session
-     * @return The entry or <code>null</code>
-     * @throws OXException If loading the entry fails
+     * @return The entries
+     * @throws OXException If loading the entries fails
      * @throws MessagingException If a messaging error occurs
      */
-    public static ListLsubEntry getJunkEntry(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
+    public static Collection<ListLsubEntry> getJunkEntry(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
         ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
-            return collection.getJunkEntry();
+            return  collection.getJunkEntry();
         }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
@@ -706,18 +708,18 @@ public final class ListLsubCache {
     }
 
     /**
-     * Gets the LIST entry marked with "\Sent" attribute.
+     * Gets the LIST entries marked with "\Sent" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
      * @param accountId The account identifier
      * @param imapFolder The IMAP folder
      * @param session The session
-     * @return The entry or <code>null</code>
-     * @throws OXException If loading the entry fails
+     * @return The entries
+     * @throws OXException If loading the entries fails
      * @throws MessagingException If a messaging error occurs
      */
-    public static ListLsubEntry getSentEntry(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
+    public static Collection<ListLsubEntry> getSentEntry(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
         ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             return collection.getSentEntry();
@@ -734,18 +736,18 @@ public final class ListLsubCache {
     }
 
     /**
-     * Gets the LIST entry marked with "\Trash" attribute.
+     * Gets the LIST entries marked with "\Trash" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
      * @param accountId The account identifier
      * @param imapFolder The IMAP folder
      * @param session The session
-     * @return The entry or <code>null</code>
-     * @throws OXException If loading the entry fails
+     * @return The entries
+     * @throws OXException If loading the entries fails
      * @throws MessagingException If a messaging error occurs
      */
-    public static ListLsubEntry getTrashEntry(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
+    public static Collection<ListLsubEntry> getTrashEntry(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
         ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             return collection.getTrashEntry();
@@ -926,8 +928,20 @@ public final class ListLsubCache {
         }
     }
 
-    private static CacheEvent newCacheEventFor(int userId, int contextId) {
-        return CacheEvent.INVALIDATE(REGION, null, new StringBuilder(16).append(userId).append('@').append(contextId).toString());
+    /**
+     * Creates a new cache event
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The cache event
+     */
+    public static CacheEvent newCacheEventFor(int userId, int contextId) {
+        CacheService service = Services.optService(CacheService.class);
+        if (null == service) {
+            return null;
+        }
+
+        return CacheEvent.INVALIDATE(REGION, Integer.toString(contextId), service.newCacheKey(contextId, userId));
     }
 
 }

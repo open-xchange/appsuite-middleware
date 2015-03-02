@@ -86,6 +86,7 @@ import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.i18n.Localizable;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.json.io.Jsonable;
@@ -502,7 +503,8 @@ public final class ResponseWriter {
             } else {
                 final JSONArray jArgs = new JSONArray(args.length);
                 for (int i = 0; i < args.length; i++) {
-                    jArgs.put(args[i]);
+                    Object obj = args[i];
+                    jArgs.put(obj instanceof Localizable ? obj.toString() : obj);
                 }
                 json.put(ERROR_PARAMS, jArgs);
             }
@@ -818,7 +820,8 @@ public final class ResponseWriter {
             } else {
                 final JSONArray jArgs = new JSONArray(args.length);
                 for (int i = 0; i < args.length; i++) {
-                    jArgs.put(args[i]);
+                    Object obj = args[i];
+                    jArgs.put(obj instanceof Localizable ? obj.toString() : obj);
                 }
                 writer.key(ResponseFields.ERROR_PARAMS).value(jArgs);
             }

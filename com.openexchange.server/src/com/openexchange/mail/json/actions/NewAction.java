@@ -100,6 +100,7 @@ import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MtaStatusInfo;
+import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -144,25 +145,34 @@ public final class NewAction extends AbstractMailAction {
         final AJAXRequestData request = req.getRequest();
         final List<OXException> warnings = new ArrayList<OXException>();
         try {
-            UserSettingMail usm = req.getSession().getUserSettingMail();
-            long maxFileSize = usm.getUploadQuotaPerFile();
-            if (maxFileSize <= 0) {
+            long maxSize;
+            long maxFileSize;
+            if (TransportProperties.getInstance().isPublishOnExceededQuota() && req.getSession().getUserPermissionBits().hasInfostore()) {
+                // No chance to check account prior to parsing multipart upload
+                // Thus w/o: (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))
+                maxSize = -1L;
                 maxFileSize = -1L;
-            }
-            long maxSize = usm.getUploadQuota();
-            if (maxSize <= 0) {
-                if (maxSize == 0) {
-                    maxSize = -1L;
-                } else {
-                    LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-                    int globalQuota;
-                    try {
-                        globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
-                    } catch (final OXException e) {
-                        LOG.error("", e);
-                        globalQuota = 0;
+            } else {
+                UserSettingMail usm = req.getSession().getUserSettingMail();
+                maxFileSize = usm.getUploadQuotaPerFile();
+                if (maxFileSize <= 0) {
+                    maxFileSize = -1L;
+                }
+                maxSize = usm.getUploadQuota();
+                if (maxSize <= 0) {
+                    if (maxSize == 0) {
+                        maxSize = -1L;
+                    } else {
+                        LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
+                        int globalQuota;
+                        try {
+                            globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
+                        } catch (final OXException e) {
+                            LOG.error("", e);
+                            globalQuota = 0;
+                        }
+                        maxSize = globalQuota <= 0 ? -1L : globalQuota;
                     }
-                    maxSize = globalQuota <= 0 ? -1L : globalQuota;
                 }
             }
             if (request.hasUploads(maxFileSize, maxSize) || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {

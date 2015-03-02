@@ -1,3 +1,15 @@
+open-xchange-munin-scripts-jolokia (7.6.2-8) stable; urgency=low
+
+  * Eighth candidate for 7.6.2 release
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Tue, 24 Feb 2015 16:15:17 +0100
+
+open-xchange-munin-scripts-jolokia (7.6.2-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.2 release
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Wed, 11 Feb 2015 15:42:55 +0100
+
 open-xchange-munin-scripts-jolokia (7.6.2-6) stable; urgency=low
 
   * Sixth candidate for 7.6.2 release
@@ -39,6 +51,30 @@ open-xchange-munin-scripts-jolokia (7.6.2-0) unstable; urgency=medium
   * prepare for 7.6.2 release
 
  -- Felix Marx <felix.marx@open-xchange.com>  Wed, 17 Sep 2014 12:36:24 +0200
+
+open-xchange-munin-scripts-jolokia (7.6.1-21) stable; urgency=low
+
+  * Build for patch 2015-02-23
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Thu, 26 Feb 2015 10:36:53 +0100
+
+open-xchange-munin-scripts-jolokia (7.6.1-20) stable; urgency=low
+
+  * Build for patch 2015-02-25
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Mon, 23 Feb 2015 12:30:12 +0100
+
+open-xchange-munin-scripts-jolokia (7.6.1-19) stable; urgency=low
+
+  * Build for patch 2015-02-10
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Fri, 06 Feb 2015 11:24:11 +0100
+
+open-xchange-munin-scripts-jolokia (7.6.1-18) stable; urgency=low
+
+  * Build for patch 2015-02-09
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Fri, 06 Feb 2015 10:32:42 +0100
 
 open-xchange-munin-scripts-jolokia (7.6.1-17) stable; urgency=low
 

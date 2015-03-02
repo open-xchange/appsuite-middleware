@@ -49,16 +49,20 @@
 
 package com.openexchange.folderstorage.cache.memory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
+import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
-import com.openexchange.folderstorage.cache.osgi.FolderMapInvalidator;
-import com.openexchange.mailaccount.Tools;
+import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -158,7 +162,7 @@ public final class FolderMapManagement {
      * @param session The session
      * @return The folder map
      */
-    public FolderMap getFor(final Session session) {
+    public FolderMap getFor(Session session) {
         final Integer cid = Integer.valueOf(session.getContextId());
         ConcurrentMap<Integer, FolderMap> contextMap = map.get(cid);
         if (null == contextMap) {
@@ -186,7 +190,7 @@ public final class FolderMapManagement {
      * @param session The session
      * @return The folder map or <code>null</code> if absent
      */
-    public FolderMap optFor(final Session session) {
+    public FolderMap optFor(Session session) {
         final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(session.getContextId()));
         if (null == contextMap) {
             return null;
@@ -201,7 +205,7 @@ public final class FolderMapManagement {
      * @param contextId The context identifier
      * @return The folder map or <code>null</code> if absent
      */
-    public FolderMap optFor(final int userId, final int contextId) {
+    public FolderMap optFor(int userId, int contextId) {
         final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
         if (null == contextMap) {
             return null;
@@ -217,7 +221,7 @@ public final class FolderMapManagement {
      * @param optUser The optional user identifier
      * @param contextId The context identifier
      */
-    public void dropFor(final String folderId, final String treeId, final int optUser, final int contextId) {
+    public void dropFor(String folderId, String treeId, int optUser, int contextId) {
         dropFor(folderId, treeId, optUser, contextId, null);
     }
 
@@ -232,6 +236,59 @@ public final class FolderMapManagement {
      */
     public void dropFor(String folderId, String treeId, int optUser, int contextId, Session optSession) {
         dropFor(folderId, treeId, optUser, contextId, optSession, true);
+    }
+
+    /**
+     * Drop folders from all user caches for given context.
+     *
+     * @param folderIds The folder identifiers
+     * @param treeId The tree id
+     * @param optUser The optional user identifier
+     * @param contextId The context identifier
+     * @param optSession The optional session
+     */
+    public void dropFor(List<String> folderIds, String treeId, int optUser, int contextId, Session optSession) {
+        dropFor(folderIds, treeId, optUser, contextId, optSession, true);
+    }
+
+    /**
+     * Drop folders from all user caches for given context.
+     *
+     * @param folderIds The folder identifiers
+     * @param treeId The tree id
+     * @param optUser The optional user identifier
+     * @param contextId The context identifier
+     * @param optSession The optional session
+     * @param notify Whether to post notification or not
+     */
+    public void dropFor(List<String> folderIds, String treeId, int optUser, int contextId, Session optSession, boolean notify) {
+        if ((null == folderIds) || (null == treeId)) {
+            return;
+        }
+        ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+        if (null == contextMap) {
+            return;
+        }
+        for (String folderId : folderIds) {
+            if (optUser > 0 && Tools.getUnsignedInteger(folderId) < 0) {
+                final FolderMap folderMap = contextMap.get(Integer.valueOf(optUser));
+                if (null != folderMap) {
+                    folderMap.remove(folderId, treeId, optSession);
+                }
+            } else {
+                // Delete all known
+                for (final FolderMap folderMap : contextMap.values()) {
+                    if (null == optSession) {
+                        folderMap.remove(folderId, treeId);
+                    } else {
+                        folderMap.remove(folderId, treeId, optSession);
+                    }
+                }
+            }
+        }
+        if (notify) {
+            fireInvalidateCacheEvent(folderIds, treeId, optUser, contextId);
+        }
     }
 
     /**
@@ -278,26 +335,46 @@ public final class FolderMapManagement {
     // -------------------------------------------------------------------------------------------------------
 
     private static void fireInvalidateCacheEvent(int contextId) {
-        CacheEventService cacheEventService = CacheServiceRegistry.getServiceRegistry().getOptionalService(CacheEventService.class);
-        if (null != cacheEventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(REGION, null, FolderMapInvalidator.keyFor(null, null, -1, contextId));
-            cacheEventService.notify(INSTANCE, event, false);
-        }
+        fireInvalidateCacheEvent(-1, contextId);
     }
 
     private static void fireInvalidateCacheEvent(int userId, int contextId) {
-        CacheEventService cacheEventService = CacheServiceRegistry.getServiceRegistry().getOptionalService(CacheEventService.class);
-        if (null != cacheEventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(REGION, null, FolderMapInvalidator.keyFor(null, null, userId, contextId));
-            cacheEventService.notify(INSTANCE, event, false);
-        }
+        fireInvalidateCacheEvent((String) null, null, userId, contextId);
     }
 
     private static void fireInvalidateCacheEvent(String folderId, String treeId, int optUser, int contextId) {
+        fireInvalidateCacheEvent(Collections.singletonList(folderId), treeId, optUser, contextId);
+    }
+
+    private static void fireInvalidateCacheEvent(List<String> folderIds, String treeId, int optUser, int contextId) {
         CacheEventService cacheEventService = CacheServiceRegistry.getServiceRegistry().getOptionalService(CacheEventService.class);
         if (null != cacheEventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(REGION, null, FolderMapInvalidator.keyFor(folderId, treeId, optUser, contextId));
-            cacheEventService.notify(INSTANCE, event, false);
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null == cacheService) {
+                return;
+            }
+            if ((null == folderIds || folderIds.isEmpty()) || (1 == folderIds.size() && null == folderIds.get(0))) {
+                /*
+                 * Context-/user-wide invalidation
+                 */
+                CacheEvent event = CacheEvent.INVALIDATE(REGION, String.valueOf(contextId), cacheService.newCacheKey(optUser));
+                cacheEventService.notify(INSTANCE, event, false);
+            } else {
+                /*
+                 * Explicit invalidation of one or more folders
+                 */
+                List<String> keys = new ArrayList<String>();
+                keys.add(treeId);
+                for (String folderId : folderIds) {
+                    if (false == Tools.isGlobalId(folderId)) {
+                        keys.add(folderId);
+                    }
+                }
+                if (false == keys.isEmpty()) {
+                    CacheEvent event = CacheEvent.INVALIDATE(REGION, String.valueOf(contextId), cacheService.newCacheKey(optUser, keys.toArray(new String[keys.size()])));
+                    cacheEventService.notify(INSTANCE, event, false);
+                }
+            }
         }
     }
 

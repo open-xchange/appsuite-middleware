@@ -50,6 +50,7 @@
 package com.openexchange.sessionstorage.hazelcast.serialization;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -173,22 +174,25 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
             } else {
-                StringAppender names = null;
-                StringAppender values = null;
+                int capacity = remoteParameterNames.size() << 4;
+                StringAppender names = new StringAppender(':', capacity);
+                StringAppender values = new StringAppender(':', capacity);
                 for (String parameterName : remoteParameterNames) {
                     Object value = parameters.get(parameterName);
-                    if (value instanceof String) {
+                    if (isSerializablePojo(value)) {
                         String sValue = value.toString();
-                        if (null == names) {
-                            int capacity = remoteParameterNames.size() << 4;
-                            names = new StringAppender(':', capacity);
-                            values = new StringAppender(':', capacity);
-                        }
                         names.append(parameterName);
                         values.append(getSafeValue(sValue));
+                    } else {
+                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
+                        if (null == value) {
+                            logger.warn("Denied remote parameter for null value.");
+                        } else {
+                            logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
+                        }
                     }
                 }
-                if (null == names) {
+                if (names.length() == 0) {
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
                 } else {
@@ -233,7 +237,8 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 List<String> values = parseColonString(reader.readUTF(PARAMETER_REMOTE_PARAMETER_VALUES)); // Expect them, too
                 for (int i = 0, size = names.size(); i < size; i++) {
                     try {
-                        parameters.put(names.get(i), decodeSafeValue(values.get(i)));
+                        Object value = parseToSerializablePojo(decodeSafeValue(values.get(i)));
+                        parameters.put(names.get(i), value);
                     } catch (DecoderException e) {
                         // Ignore
                     }
@@ -267,6 +272,51 @@ public class PortableSession extends StoredSession implements CustomPortable {
 
     private static String decodeSafeValue(String value) throws DecoderException {
         return value.indexOf('%') < 0 ? value : new String(URLCodec.decodeUrl(Charsets.toAsciiBytes(value)), Charsets.UTF_8);
+    }
+
+    private static final String POJO_PACKAGE = "java.lang.";
+
+    private static boolean isSerializablePojo(Object obj) {
+        return null == obj ? false : ((obj instanceof Serializable) && obj.getClass().getName().startsWith(POJO_PACKAGE));
+    }
+
+    private static Object parseToSerializablePojo(String value) {
+        if ("true".equalsIgnoreCase(value)) {
+            return Boolean.TRUE;
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return Boolean.FALSE;
+        }
+
+        Object obj = parseObjectFromString(value, Integer.class);
+        if (null != obj) {
+            return obj;
+        }
+
+        obj = parseObjectFromString(value, Long.class);
+        if (null != obj) {
+            return obj;
+        }
+
+        obj = parseObjectFromString(value, Float.class);
+        if (null != obj) {
+            return obj;
+        }
+
+        obj = parseObjectFromString(value, Double.class);
+        if (null != obj) {
+            return obj;
+        }
+
+        return value;
+    }
+
+    private static <T> T parseObjectFromString(String s, Class<T> clazz) {
+        try {
+            return clazz.getConstructor(new Class[] {String.class }).newInstance(s);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

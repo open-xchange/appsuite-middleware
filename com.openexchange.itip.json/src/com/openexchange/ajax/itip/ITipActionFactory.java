@@ -57,7 +57,10 @@ import com.openexchange.ajax.itip.actions.DingeMacherAction;
 import com.openexchange.ajax.itip.actions.ShowMailAction;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.calendar.itip.ITipAnalyzerService;
+import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -72,11 +75,11 @@ public class ITipActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
 
-    public ITipActionFactory(final ServiceLookup services) {
+    public ITipActionFactory(final ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing, RankingAwareNearRegistryServiceTracker<ITipDingeMacherFactoryService> factoryListing) throws OXException {
         super();
-        actions.put("analyze",  new AnalyzeAction(services));
+        actions.put("analyze",  new AnalyzeAction(services, analyzerListing));
         actions.put("showMail", new ShowMailAction(services));
-        final DingeMacherAction dingeMacherAction = new DingeMacherAction(services);
+        final DingeMacherAction dingeMacherAction = new DingeMacherAction(services, analyzerListing, factoryListing);
         for (final String actionName : dingeMacherAction.getActionNames()) {
             actions.put(actionName, dingeMacherAction);
         }

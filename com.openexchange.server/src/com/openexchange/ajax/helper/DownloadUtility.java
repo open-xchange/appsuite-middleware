@@ -51,8 +51,8 @@ package com.openexchange.ajax.helper;
 
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -62,6 +62,10 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.container.ByteArrayRandomAccess;
+import com.openexchange.ajax.container.IFileHolder.RandomAccess;
+import com.openexchange.ajax.container.InputStreamReadable;
+import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
@@ -108,7 +112,7 @@ public final class DownloadUtility {
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String contentTypeStr, String userAgent, ServerSession session) throws OXException {
+    public static CheckedDownload checkInlineDownload(Readable inputStream, String fileName, String contentTypeStr, String userAgent, ServerSession session) throws OXException {
         return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent, session);
     }
 
@@ -124,7 +128,7 @@ public final class DownloadUtility {
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(InputStream inputStream, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
+    public static CheckedDownload checkInlineDownload(Readable inputStream, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
         return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent, session);
     }
 
@@ -144,7 +148,7 @@ public final class DownloadUtility {
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(InputStream inputStream, long sizer, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
+    public static CheckedDownload checkInlineDownload(Readable inputStream, long sizer, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             /*
@@ -163,10 +167,9 @@ public final class DownloadUtility {
             }
             String sContentDisposition = overridingDisposition;
             long sz = sizer;
-            InputStream in = inputStream;
+            Readable in = inputStream;
             // Some variables
             String fn = fileName;
-            byte[] bytes;
             // Check by Content-Type and file name
             if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "htm", "xhtm")) {
                 /*
@@ -178,7 +181,6 @@ public final class DownloadUtility {
                     /*
                      * Sanitizing of HTML content needed
                      */
-                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     sink = new ThresholdFileHolder();
                     sink.write(in);
                     in = null;
@@ -198,6 +200,7 @@ public final class DownloadUtility {
                         htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
                     } else {
                         htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                        HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                         htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     }
                     sink.close();
@@ -205,7 +208,7 @@ public final class DownloadUtility {
                     contentType.setCharsetParameter("UTF-8");
                     byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
                     sz = tmp.length;
-                    in = Streams.newByteArrayInputStream(tmp);
+                    in = new ByteArrayRandomAccess(tmp);
                 }
             } else if (contentType.startsWith("text/xml")) {
                 /*
@@ -217,7 +220,6 @@ public final class DownloadUtility {
                     /*
                      * Escaping of XML content needed
                      */
-                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     sink = new ThresholdFileHolder();
                     sink.write(in);
                     in = null;
@@ -236,6 +238,7 @@ public final class DownloadUtility {
                         try {
                             r = new InputStreamReader(sink.getClosingStream(), Charsets.forName(cs));
                             w = new OutputStreamWriter(copy.asOutputStream(), Charsets.UTF_8);
+                            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                             final int buflen = 8192;
                             final char[] cbuf = new char[buflen];
                             for (int read; (read = r.read(cbuf, 0, buflen)) > 0;) {
@@ -252,7 +255,7 @@ public final class DownloadUtility {
                     contentType.setSubType("html");
                     contentType.setCharsetParameter("UTF-8");
                     sz = sink.getLength();
-                    in = sink.getClosingStream();
+                    in = sink.getClosingRandomAccess();
                     sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
             } else if (contentType.startsWith("text/plain")) {
@@ -281,7 +284,7 @@ public final class DownloadUtility {
                 if (null == sContentDisposition) {
                     if (null != sink) {
                         sz = sink.getLength();
-                        in = sink.getClosingStream();
+                        in = sink.getClosingRandomAccess();
                         sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                     }
                     sContentDisposition = "attachment";
@@ -322,12 +325,12 @@ public final class DownloadUtility {
                     }
                     contentType.setCharsetParameter("UTF-8");
                     sz = sink.getLength();
-                    in = sink.getClosingStream();
+                    in = sink.getClosingRandomAccess();
                     sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 } else {
                     if (null != sink) {
                         sz = sink.getLength();
-                        in = sink.getClosingStream();
+                        in = sink.getClosingRandomAccess();
                         sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                     }
                 }
@@ -356,7 +359,7 @@ public final class DownloadUtility {
                          * Check for HTML since no corresponding file extension is known
                          */
                         if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
-                            final CheckedDownload ret = asAttachment(sink.getClosingStream(), preparedFileName, sink.getLength());
+                            final CheckedDownload ret = asAttachment(sink.getClosingRandomAccess(), preparedFileName, sink.getLength());
                             sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                             return ret;
                         }
@@ -376,7 +379,7 @@ public final class DownloadUtility {
                                  * No content type known
                                  */
                                 if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
-                                    final CheckedDownload ret = asAttachment(sink.getClosingStream(), preparedFileName, sink.getLength());
+                                    final CheckedDownload ret = asAttachment(sink.getClosingRandomAccess(), preparedFileName, sink.getLength());
                                     sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                                     return ret;
                                 }
@@ -398,7 +401,7 @@ public final class DownloadUtility {
                              * Unknown magic bytes. Check for HTML.
                              */
                             if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
-                                final CheckedDownload ret = asAttachment(sink.getClosingStream(), preparedFileName, sink.getLength());
+                                final CheckedDownload ret = asAttachment(sink.getClosingRandomAccess(), preparedFileName, sink.getLength());
                                 sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                                 return ret;
                             }
@@ -412,10 +415,10 @@ public final class DownloadUtility {
                     /*
                      * New combined input stream (with original size)
                      */
-                    in = sink.getClosingStream();
+                    in = sink.getClosingRandomAccess();
                     sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
-            } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)), true)) {
+            } else if (fileNameImpliesHtml(fileName)) {
                 /*
                  * HTML content requested for download...
                  */
@@ -425,34 +428,38 @@ public final class DownloadUtility {
                     /*
                      * Sanitizing of HTML content needed
                      */
-                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     sink = new ThresholdFileHolder();
                     sink.write(in);
                     in = null;
-                    String cs = contentType.getCharsetParameter();
-                    if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(sink.getStream());
-                        if ("US-ASCII".equalsIgnoreCase(cs)) {
-                            cs = "ISO-8859-1";
+                    if (HTMLDetector.containsHTMLTags(sink.getStream(), true)) {
+                        String cs = contentType.getCharsetParameter();
+                        if (!CharsetDetector.isValid(cs)) {
+                            cs = CharsetDetector.detectCharset(sink.getStream());
+                            if ("US-ASCII".equalsIgnoreCase(cs)) {
+                                cs = "ISO-8859-1";
+                            }
                         }
-                    }
-                    // Check size
-                    String htmlContent;
-                    if (sink.getLength() > HtmlServices.htmlThreshold()) {
-                        // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
-                        OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
-                        Locale locale = session.getUser().getLocale();
-                        htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                        // Check size
+                        String htmlContent;
+                        if (sink.getLength() > HtmlServices.htmlThreshold()) {
+                            // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
+                            OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
+                            Locale locale = session.getUser().getLocale();
+                            htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                        } else {
+                            htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                            htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+                        }
+                        sink.close();
+                        sink = null; // Null'ify as not needed anymore
+                        contentType.setCharsetParameter("UTF-8");
+                        byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
+                        sz = tmp.length;
+                        in = new ByteArrayRandomAccess(tmp);
                     } else {
-                        htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
-                        htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+                        in = sink.getClosingRandomAccess();
                     }
-                    sink.close();
-                    sink = null; // Null'ify as not needed anymore
-                    final byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
-                    contentType.setCharsetParameter("UTF-8");
-                    sz = tmp.length;
-                    in = Streams.newByteArrayInputStream(tmp);
                 }
             }
             /*
@@ -570,11 +577,11 @@ public final class DownloadUtility {
         return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
     }
 
-    private static CheckedDownload asAttachment(final InputStream inputStream, final String preparedFileName, final long size) {
+    private static CheckedDownload asAttachment(final RandomAccess randomAccess, final String preparedFileName, final long size) {
         /*
          * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
          */
-        return new CheckedDownload(MIME_APPL_OCTET, new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(), inputStream, size);
+        return new CheckedDownload(MIME_APPL_OCTET, new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(), randomAccess, size);
     }
 
     // private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
@@ -657,10 +664,10 @@ public final class DownloadUtility {
 
         private final String contentType;
         private final String contentDisposition;
-        private final InputStream inputStream;
+        private final Readable inputStream;
         private final long size;
 
-        CheckedDownload(final String contentType, final String contentDisposition, final InputStream inputStream, final long size) {
+        CheckedDownload(final String contentType, final String contentDisposition, final Readable inputStream, final long size) {
             super();
             this.contentType = contentType;
             this.contentDisposition = contentDisposition;
@@ -709,8 +716,28 @@ public final class DownloadUtility {
          *
          * @return The input stream
          */
-        public InputStream getInputStream() {
+        public Readable getInputStream() {
             return inputStream;
+        }
+    }
+
+    private static byte[] stream2bytes(final Readable r) throws IOException {
+        if (null == r) {
+            return new byte[0];
+        }
+        if (r instanceof InputStreamReadable) {
+            return Streams.stream2bytes(((InputStreamReadable) r).getInputStream());
+        }
+        try {
+            final ByteArrayOutputStream bos = Streams.newByteArrayOutputStream(4096);
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
+            for (int read; (read = r.read(buf, 0, buflen)) > 0;) {
+                bos.write(buf, 0, read);
+            }
+            return bos.toByteArray();
+        } finally {
+            Streams.close(r);
         }
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -222,8 +222,21 @@ public final class CharsetDetector {
      * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
      */
     public static String detectCharset(final InputStream in) {
+        return detectCharset(in, getFallback(), true);
+    }
+
+    /**
+     * Detects the charset of specified input stream's data.
+     *
+     * @param in The input stream to examine
+     * @param fallback The fallback charset to return if detection was not successful
+     * @param close <code>true</code> to close the input stream after detection, <code>false</code>, otherwise
+     * @throws NullPointerException If input stream is <code>null</code>
+     * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
+     */
+    public static String detectCharset(final InputStream in, String fallback, boolean close) {
         try {
-            return detectCharsetFailOnError(in);
+            return detectCharsetFailOnError(in, fallback, close);
         } catch (final IOException e) {
             LOG.error("", e);
             return FALLBACK;
@@ -241,6 +254,20 @@ public final class CharsetDetector {
      * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
      */
     public static String detectCharsetFailOnError(final InputStream in) throws IOException {
+        return detectCharsetFailOnError(in, getFallback(), true);
+    }
+
+    /**
+     * Detects the charset of specified input stream's data.
+     *
+     * @param in The input stream to examine
+     * @param fallback The fallback charset to return if detection was not successful
+     * @param close <code>true</code> to close the input stream after detection, <code>false</code>, otherwise
+     * @throws NullPointerException If input stream is <code>null</code>
+     * @throws IOException If reading from stream fails
+     * @return The detected charset or the supplied fallback if no matching/supported charset could be found
+     */
+    public static String detectCharsetFailOnError(final InputStream in, String fallback, boolean close) throws IOException {
         if (null == in) {
             throw new NullPointerException("input stream is null");
         }
@@ -254,16 +281,26 @@ public final class CharsetDetector {
         } catch (IOException e) {
             LOG.warn("", e);
         } finally {
-            Streams.close(in);
+            if (close) {
+                Streams.close(in);
+            }
         }
         detector.dataEnd();
-        return getResultingCharset(detector);
+        return getResultingCharset(detector, fallback);
     }
 
     private static String getResultingCharset(UniversalDetector detector) {
         String detectedCharset = detector.getDetectedCharset();
         if (null == detectedCharset || false == isValid(detectedCharset)) {
             return FALLBACK;
+        }
+        return detectedCharset;
+    }
+
+    private static String getResultingCharset(UniversalDetector detector, String fallback) {
+        String detectedCharset = detector.getDetectedCharset();
+        if (null == detectedCharset || false == isValid(detectedCharset)) {
+            return fallback;
         }
         return detectedCharset;
     }

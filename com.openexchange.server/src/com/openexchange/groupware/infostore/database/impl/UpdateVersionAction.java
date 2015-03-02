@@ -61,14 +61,15 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.session.Session;
 
 public class UpdateVersionAction extends AbstractDocumentUpdateAction {
 
     /**
      * Initializes a new {@link UpdateVersionAction}.
      */
-    public UpdateVersionAction() {
-        super();
+    public UpdateVersionAction(Session session) {
+        super(session);
     }
 
     /**
@@ -83,8 +84,8 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
      * @param The sequence number to catch concurrent modifications
      */
     public UpdateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata version,
-        DocumentMetadata oldVersion, Metadata[] modifiedColums, long sequenceNumber) {
-        this(provider, queryCatalog, context, Collections.singletonList(version), Collections.singletonList(oldVersion), modifiedColums, sequenceNumber);
+        DocumentMetadata oldVersion, Metadata[] modifiedColums, long sequenceNumber, Session session) {
+        this(provider, queryCatalog, context, Collections.singletonList(version), Collections.singletonList(oldVersion), modifiedColums, sequenceNumber, session);
     }
 
     /**
@@ -99,8 +100,8 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
      * @param The sequence number to catch concurrent modifications
      */
     public UpdateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
-        List<DocumentMetadata> versions, List<DocumentMetadata> oldVersions, Metadata[] modifiedColums, long sequenceNumber) {
-        super(provider, queryCatalog, context, versions, oldVersions, modifiedColums, sequenceNumber);
+        List<DocumentMetadata> versions, List<DocumentMetadata> oldVersions, Metadata[] modifiedColums, long sequenceNumber, Session session) {
+        super(provider, queryCatalog, context, versions, oldVersions, modifiedColums, sequenceNumber, session);
     }
 
     @Override

@@ -52,19 +52,16 @@ package com.openexchange.ajax;
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
-import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletConfig;
@@ -75,16 +72,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.login.AutoLogin;
 import com.openexchange.ajax.login.FormLogin;
+import com.openexchange.ajax.login.HTTPAuthLogin;
+import com.openexchange.ajax.login.HasAutoLogin;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.Login;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.login.OAuthLogin;
 import com.openexchange.ajax.login.RampUp;
@@ -93,7 +90,6 @@ import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
@@ -108,15 +104,11 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
-import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRampUpService;
-import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -125,8 +117,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.http.Authorization;
-import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
@@ -654,14 +644,16 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf, rampUpServices));
         handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
+        handlerMap.put("hasAutologin", new HasAutoLogin(conf));
+        handlerMap.put("/httpAuth", new HTTPAuthLogin(conf));
     }
 
-    public void addRequestHandler(String action, LoginRequestHandler handler) {
-        handlerMap.put(action, handler);
+    public LoginRequestHandler addRequestHandler(String action, LoginRequestHandler handler) {
+        return handlerMap.put(action, handler);
     }
 
-    public void removeRequestHandler(String action) {
-        handlerMap.remove(action);
+    public LoginRequestHandler removeRequestHandler(String action) {
+        return handlerMap.remove(action);
     }
 
     @Override
@@ -670,26 +662,10 @@ public class LoginServlet extends AJAXServlet {
             final String action = req.getParameter(PARAMETER_ACTION);
             final String subPath = getServletSpecificURI(req);
             if (null != subPath && subPath.startsWith("/httpAuth")) {
-                doHttpAuth(req, resp);
+                handlerMap.get("/httpAuth").handleRequest(req, resp);
             } else if (null != action) {
-                // Check if autologin is enabled
-                if (action.equalsIgnoreCase("hasAutologin")) {
-                    // The magic spell to disable caching
-                    Tools.disableCaching(resp);
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                    resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
-                    try {
-                        final JSONObject jo = new JSONObject(2);
-                        jo.put(ACTION_AUTOLOGIN, confReference.get().isSessiondAutoLogin());
-                        jo.write(resp.getWriter());
-                    } catch (final JSONException e) {
-                        LOG.error(LoginServlet.RESPONSE_ERROR, e);
-                        LoginServlet.sendError(resp);
-                    }
-                } else {
-                    // Regular login handling
-                    doJSONAuth(req, resp, action);
-                }
+                // Regular login handling
+                doJSONAuth(req, resp, action);
             } else {
                 logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
                 return;
@@ -713,17 +689,6 @@ public class LoginServlet extends AJAXServlet {
             return;
         }
         handler.handleRequest(req, resp);
-    }
-
-    private void doHttpAuth(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        try {
-            doAuthHeaderLogin(req, resp);
-        } catch (final OXException e) {
-            LOG.error("", e);
-            resp.addHeader("WWW-Authenticate", "NEGOTIATE");
-            resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        }
     }
 
     /**
@@ -818,14 +783,6 @@ public class LoginServlet extends AJAXServlet {
         return new Cookie(cookie.getName(), cookie.getValue());
     }
 
-    private String parseClient(final HttpServletRequest req) {
-        try {
-            return LoginTools.parseClient(req, false, confReference.get().getDefaultClient());
-        } catch (final OXException e) {
-            return confReference.get().getDefaultClient();
-        }
-    }
-
     /**
      * Appends the modules to given JSON object.
      *
@@ -855,138 +812,6 @@ public class LoginServlet extends AJAXServlet {
      */
     public static boolean parseBoolean(final String parameter) {
         return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "y".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
-    }
-
-    private void doAuthHeaderLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
-        LoginConfiguration conf = confReference.get();
-        /*
-         * Try to lookup session by auto-login
-         */
-        LoginResult loginResult = tryAutologin(req);
-        if (null == loginResult) {
-            /*
-             * continue with auth header login
-             */
-
-            final String auth = req.getHeader(Header.AUTH_HEADER);
-            if (null == auth) {
-                resp.addHeader("WWW-Authenticate", "NEGOTIATE");
-                resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
-                return;
-            }
-            final String version;
-            final Credentials creds;
-            if (!Authorization.checkForAuthorizationHeader(auth)) {
-                throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
-            }
-            if (Authorization.checkForBasicAuthorization(auth)) {
-                creds = Authorization.decode(auth);
-                version = conf.getClientVersion();
-            } else if (Authorization.checkForKerberosAuthorization(auth)) {
-                creds = new Credentials("kerberos", "");
-                version = "Kerberos";
-            } else {
-                throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
-            }
-            final String client = parseClient(req);
-            final String clientIP = LoginTools.parseClientIP(req);
-            final String userAgent = LoginTools.parseUserAgent(req);
-            final Map<String, List<String>> headers = copyHeaders(req);
-            final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
-            final String httpSessionId = req.getSession(true).getId();
-            final LoginRequest request = new LoginRequestImpl(
-                creds.getLogin(),
-                creds.getPassword(),
-                clientIP,
-                userAgent,
-                UUIDs.getUnformattedString(UUID.randomUUID()),
-                client,
-                version,
-                HashCalculator.getInstance().getHash(req, userAgent, client),
-                Interface.HTTP_JSON,
-                headers,
-                cookies,
-                Tools.considerSecure(req, conf.isCookieForceHTTPS()),
-                req.getServerName(),
-                req.getServerPort(),
-                httpSessionId);
-            final Map<String, Object> properties = new HashMap<String, Object>(1);
-            {
-                final String capabilities = req.getParameter("capabilities");
-                if (null != capabilities) {
-                    properties.put("client.capabilities", capabilities);
-                }
-            }
-            loginResult = LoginPerformer.getInstance().doLogin(request, properties);
-        }
-        /*
-         * render redirect response
-         */
-        Session session = loginResult.getSession();
-        Tools.disableCaching(resp);
-        writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
-        addHeadersAndCookies(loginResult, resp);
-        resp.sendRedirect(LoginTools.generateRedirectURL(null, conf.getHttpAuthAutoLogin(), session.getSessionID(), conf.getUiWebPath()));
-    }
-
-    /**
-     * Tries to lookup an exiting session by the cookies supplied with the request.
-     *
-     * @param request The request to try and perform the auto-login for
-     * @return The login result if a valid session was found, or <code>null</code>, otherwise
-     * @throws OXException
-     */
-    private LoginResult tryAutologin(HttpServletRequest request) throws OXException {
-        LoginConfiguration conf = confReference.get();
-        Cookie[] cookies = request.getCookies();
-        if (Boolean.valueOf(conf.getHttpAuthAutoLogin()).booleanValue() && null != cookies && 0 < cookies.length) {
-            /*
-             * extract session & secret from supplied cookies
-             */
-            String sessionID = null;
-            String secret = null;
-            String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), parseClient(request));
-            String sessionCookieName = LoginServlet.SESSION_PREFIX + hash;
-            String secretCookieName = LoginServlet.SECRET_PREFIX + hash;
-            for (int i = 0; i < cookies.length && (null == sessionID || null == secret); i++) {
-                String name = cookies[i].getName();
-                if (name.startsWith(sessionCookieName)) {
-                    sessionID = cookies[i].getValue();
-                } else if (name.startsWith(secretCookieName)) {
-                    secret = cookies[i].getValue();
-                }
-            }
-            if (null != sessionID && null != secret) {
-                /*
-                 * lookup matching session
-                 */
-                Session session = ServerServiceRegistry.getInstance().getService(SessiondService.class).getSession(sessionID);
-                if (null != session && session.getSecret().equals(secret)) {
-                    /*
-                     * check & take over remote IP
-                     */
-                    String remoteAddress = request.getRemoteAddr();
-                    if (conf.isIpCheck()) {
-                        SessionUtility.checkIP(true, conf.getRanges(), session, remoteAddress, conf.getIpCheckWhitelist());
-                    }
-                    LoginTools.updateIPAddress(conf, remoteAddress, session);
-                    /*
-                     * ensure user & context are enabled
-                     */
-                    Context context = ContextStorage.getInstance().getContext(session.getContextId());
-                    User user = UserStorage.getInstance().getUser(session.getUserId(), context);
-                    if (false == context.isEnabled() || false == user.isMailEnabled()) {
-                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                    }
-                    /*
-                     * wrap valid session into login result
-                     */
-                    return new LoginResultImpl(session, context, user);
-                }
-            }
-        }
-        return null;
     }
 
     /**

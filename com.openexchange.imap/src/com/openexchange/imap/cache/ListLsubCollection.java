@@ -54,17 +54,18 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.Folder;
@@ -76,6 +77,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -113,10 +115,10 @@ final class ListLsubCollection implements Serializable {
     private final String[] user;
     private Boolean mbox;
     private long stamp;
-    private ListLsubEntryImpl draftsEntry;
-    private ListLsubEntryImpl junkEntry;
-    private ListLsubEntryImpl sentEntry;
-    private ListLsubEntryImpl trashEntry;
+    private final ConcurrentMap<String, ListLsubEntry> draftsEntries;
+    private final ConcurrentMap<String, ListLsubEntry> junkEntries;
+    private final ConcurrentMap<String, ListLsubEntry> sentEntries;
+    private final ConcurrentMap<String, ListLsubEntry> trashEntries;
 
     /**
      * Initializes a new {@link ListLsubCollection}.
@@ -130,8 +132,12 @@ final class ListLsubCollection implements Serializable {
      */
     protected ListLsubCollection(final IMAPFolder imapFolder, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
         super();
-        listMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
-        lsubMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
+        listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
+        lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
+        draftsEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        junkEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        sentEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        trashEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
@@ -152,6 +158,10 @@ final class ListLsubCollection implements Serializable {
         super();
         listMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
         lsubMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
+        draftsEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        junkEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        sentEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        trashEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
@@ -774,13 +784,13 @@ final class ListLsubCollection implements Serializable {
                     final Set<String> attrs = entryImpl.getAttributes();
                     if (null != attrs && !attrs.isEmpty()) {
                         if (attrs.contains(ATTRIBUTE_DRAFTS)) {
-                            this.draftsEntry = entryImpl;
+                            this.draftsEntries.put(entryImpl.getFullName(), entryImpl);
                         } else if (attrs.contains(ATTRIBUTE_JUNK)) {
-                            this.junkEntry = entryImpl;
+                            this.junkEntries.put(entryImpl.getFullName(), entryImpl);
                         } else if (attrs.contains(ATTRIBUTE_SENT)) {
-                            this.sentEntry = entryImpl;
+                            this.sentEntries.put(entryImpl.getFullName(), entryImpl);
                         } else if (attrs.contains(ATTRIBUTE_TRASH)) {
-                            this.trashEntry = entryImpl;
+                            this.trashEntries.put(entryImpl.getFullName(), entryImpl);
                         }
                     }
                     r[i] = null;
@@ -873,13 +883,13 @@ final class ListLsubCollection implements Serializable {
                     Set<String> attrs = listLsubEntry.getAttributes();
                     if (null != attrs && !attrs.isEmpty()) {
                         if (attrs.contains(ATTRIBUTE_DRAFTS)) {
-                            this.draftsEntry = listLsubEntry;
+                            this.draftsEntries.put(listLsubEntry.getFullName(), listLsubEntry);
                         } else if (attrs.contains(ATTRIBUTE_JUNK)) {
-                            this.junkEntry = listLsubEntry;
+                            this.junkEntries.put(listLsubEntry.getFullName(), listLsubEntry);
                         } else if (attrs.contains(ATTRIBUTE_SENT)) {
-                            this.sentEntry = listLsubEntry;
+                            this.sentEntries.put(listLsubEntry.getFullName(), listLsubEntry);
                         } else if (attrs.contains(ATTRIBUTE_TRASH)) {
-                            this.trashEntry = listLsubEntry;
+                            this.trashEntries.put(listLsubEntry.getFullName(), listLsubEntry);
                         }
                     }
                 }
@@ -1419,47 +1429,47 @@ final class ListLsubCollection implements Serializable {
     }
 
     /**
-     * Gets the LIST entry marked with "\Drafts" attribute.
+     * Gets the LIST entries marked with "\Drafts" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
-     * @return The entry or <code>null</code>
+     * @return The entries
      */
-    public ListLsubEntryImpl getDraftsEntry() {
-        return draftsEntry;
+    public Collection<ListLsubEntry> getDraftsEntry() {
+        return Collections.unmodifiableCollection(draftsEntries.values());
     }
 
     /**
-     * Gets the LIST entry marked with "\Junk" attribute.
+     * Gets the LIST entries marked with "\Junk" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
-     * @return The entry or <code>null</code>
+     * @return The entries
      */
-    public ListLsubEntryImpl getJunkEntry() {
-        return junkEntry;
+    public Collection<ListLsubEntry> getJunkEntry() {
+        return Collections.unmodifiableCollection(junkEntries.values());
     }
 
     /**
-     * Gets the LIST entry marked with "\Sent" attribute.
+     * Gets the LIST entries marked with "\Sent" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
-     * @return The entry or <code>null</code>
+     * @return The entries
      */
-    public ListLsubEntryImpl getSentEntry() {
-        return sentEntry;
+    public Collection<ListLsubEntry> getSentEntry() {
+        return Collections.unmodifiableCollection(sentEntries.values());
     }
 
     /**
-     * Gets the LIST entry marked with "\Trash" attribute.
+     * Gets the LIST entries marked with "\Trash" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
-     * @return The entry or <code>null</code>
+     * @return The entries
      */
-    public ListLsubEntryImpl getTrashEntry() {
-        return trashEntry;
+    public Collection<ListLsubEntry> getTrashEntry() {
+        return Collections.unmodifiableCollection(trashEntries.values());
     }
 
     /**
@@ -1542,7 +1552,7 @@ final class ListLsubCollection implements Serializable {
              */
             attributes = new HashSet<String>(s.length);
             for (int i = 0; i < s.length; i++) {
-                final String attr = s[i].toLowerCase(Locale.US);
+                String attr = Strings.asciiLowerCase(s[i]);
                 switch (POS_MAP.get(attr)) {
                 case 1:
                     changeState = ListLsubEntry.ChangeState.CHANGED;

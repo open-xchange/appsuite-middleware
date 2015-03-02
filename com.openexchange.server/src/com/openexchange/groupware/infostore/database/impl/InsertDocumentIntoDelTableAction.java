@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.session.Session;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -61,6 +62,15 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction{
 
     private static final int batchSize = 1000;
+
+    /**
+     * Initializes a new {@link InsertDocumentIntoDelTableAction}.
+     *
+     * @param session The session
+     */
+    public InsertDocumentIntoDelTableAction(Session session) {
+        super(session);
+    }
 
     @Override
     protected Object[] getAdditionals(final DocumentMetadata doc) {

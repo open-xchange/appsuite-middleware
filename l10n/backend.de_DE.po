@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-01-29 11:30+0100\n"
+"PO-Revision-Date: 2015-02-26 15:52+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -84,6 +84,7 @@ msgid "Events"
 msgstr "Ereignisse"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
 msgid "Location"
 msgstr "Ort"
 
@@ -986,7 +987,10 @@ msgstr "Zweiter Vorname"
 msgid "Suffix"
 msgstr "Endung"
 
+#. A document's title
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:70
 msgid "Title"
 msgstr "Anrede"
 
@@ -1243,6 +1247,7 @@ msgid "URL"
 msgstr "URL"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:131
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:63
 msgid "Categories"
 msgstr "Kategorien"
 
@@ -1355,8 +1360,10 @@ msgid "UID"
 msgstr "Mitarbeiter-ID"
 
 #. Search in file name.
+#. A document's file name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:76
 msgid "File name"
 msgstr "Dateiname"
 
@@ -3288,6 +3295,11 @@ msgstr ""
 msgid "The session is no longer available. Please try again."
 msgstr "Ihre Sitzung ist abgelaufen. Bitte versuchen Sie es erneut."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:69
+msgid "Kerberos ticket in session is missing. Pleasy try again."
+msgstr ""
+"Das Kerberos-Ticket für die Sitzung fehlt. Bitte versuchen Sie es erneut."
+
 #. No Linked-In account available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
 msgid "No Linked-In account available."
@@ -3749,6 +3761,14 @@ msgid "Import limit exceeded. Only imported the first %1$s contacts"
 msgstr ""
 "Das Limit für den Import wurde überschritten. Es wurden nur die ersten %1$s "
 "Kontakte importiert."
+
+#. The character encoding \"%1$s\" is not supported. Please choose another one.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:136
+msgid ""
+"The character encoding \"%1$s\" is not supported. Please choose another one."
+msgstr ""
+"Die Zeichenkodierung \"%1$s\" wird nicht unterstützt. Bitte wählen Sie eine "
+"andere Kodierung."
 
 #. You do not have the appropriate permissions to search within this module.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:70
@@ -5100,6 +5120,18 @@ msgstr ""
 msgid "Attachments"
 msgstr "Anlagen"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:64
+msgid "Label"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:65
+msgid "Note"
+msgstr "Hinweis"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:66
+msgid "Timezone"
+msgstr "Zeitzone"
+
 #. *
 #. * Appointments must have at least one participant.
 #.
@@ -5317,11 +5349,11 @@ msgstr ""
 "Ordner verwendet werden."
 
 #. *
-#. * Invalid characters in field %1$s.
+#. * Invalid characters (%2$s) in field %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:198
-msgid "Invalid characters in field %1$s."
-msgstr "Ungültige Zeichen im Feld %1$s. "
+msgid "Invalid characters (%2$s) in field %1$s."
+msgstr "Ungültige Zeichen (%2$s) im Feld %1$s. "
 
 #. *
 #. * Series end is before start date.
@@ -5545,6 +5577,14 @@ msgstr ""
 msgid "Getting the value of %s requires at least a ContactObject"
 msgstr "Die Abfrage des Werts %s erfordert mindestens ein ContactObject"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:139
+msgid ""
+"The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
+"problematic character and try again."
+msgstr ""
+"Das Zeichen \"%1$s\" im Feld \"%2$s\" kann nicht gespeichert werden. Bitte "
+"entfernen Sie das Zeichen und versuchen Sie es erneut."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
 msgstr "Der Account %1$d wurde nicht gefunden."
@@ -5644,6 +5684,11 @@ msgstr "Gelöschte Dateien"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:112
 msgid "Other files"
 msgstr "Weitere Dateien"
+
+#. -----------------------------------------------------------------------------------------------------
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:116
+msgid "Folder name"
+msgstr "Ordnername"
 
 #. Display name of group with identifier 0. This group always contains all existing users of a context.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
@@ -7124,6 +7169,32 @@ msgstr ""
 "Bei diesem Ordner handelt es sich um einen virtuellen Ordner. Er kann keine "
 "Dokumente enthalten. Bitte wählen Sie einen anderen Ordner."
 
+#. Unsupported character "%1$s" in field "%2$s". Please remove that character.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:122
+msgid ""
+"Unsupported character \"%1$s\" in field \"%2$s\". Please remove that "
+"character."
+msgstr ""
+"Das Zeichen \"%1$s\" im Feld \"%2$s\" wird nicht unterstützt. Bitte "
+"entfernen Sie dieses Zeichen."
+
+#. Unsupported character. Please correct your input.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:125
+msgid "Unsupported character. Please correct your input."
+msgstr "Nicht unterstütztes Zeichen. Bitte korrigieren Sie Ihre Eingabe."
+
+#. A document's description
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
+msgid "Description"
+msgstr "Beschreibung"
+
+#. A document's version comment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
+msgid "Version comment"
+msgstr "Hinweis zur Version"
+
 #. *
 #. * Problem putting an object into the cache.
 #.
@@ -8371,14 +8442,16 @@ msgstr ""
 "Diese Mailbox wird bereits verwendet. Bitte versuchen Sie es später erneut. "
 
 #. *
-#. * The mailbox on mail server %1$s is already in use. Please try again later.
+#. * The mailbox on mail server %1$s for login %2$s is already in use by one of your other processes or clients. Please try again later.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid ""
-"The mailbox on mail server %1$s is already in use. Please try again later."
+"The mailbox on mail server %1$s for login %2$s is already in use by one of "
+"your other processes or clients. Please try again later."
 msgstr ""
-"Die Mailbox auf dem Mailserver %1$s wird bereits verwendet. Bitte versuchen "
-"Sie es später erneut."
+"Die Mailbox auf dem Mailserver %1$s für das Login %2$s wird bereits von "
+"einem Ihrer anderen Prozesse oder Clients verwendet. Bitte versuchen Sie es "
+"später erneut."
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
@@ -11453,9 +11526,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Sie haben nicht die entsprechenden Berechtigungen zum Ändern von Objekten "
 #~ "im Ordner \"%2$s\"."
-
-#~ msgid "Time"
-#~ msgstr "Zeit"
 
 #~ msgid "in appointments"
 #~ msgstr "in Terminen"

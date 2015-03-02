@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -57,11 +58,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.java.util.Pair;
+import com.openexchange.mailaccount.Tools;
 
 
 /**
@@ -94,18 +97,18 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
 
-            String region = cacheEvent.getRegion();
-            if (REGION.equals(region)) {
+            if (REGION.equals(cacheEvent.getRegion())) {
                 List<Serializable> keys = cacheEvent.getKeys();
                 Set<Pair<Integer, Integer>> pairs = new LinkedHashSet<Pair<Integer,Integer>>(keys.size());
                 for (Serializable cacheKey : keys) {
-                    String key = String.valueOf(cacheKey); // <user-id> + "@" + <context-id>
-                    int pos = key.indexOf('@');
-                    if (pos > 0) {
-                        Integer userId = Integer.valueOf(key.substring(0, pos));
-                        Integer contextId = Integer.valueOf(key.substring(pos + 1));
-                        if (pairs.add(new Pair<Integer, Integer>(contextId, userId))) {
-                            ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false);
+                    if (cacheKey instanceof CacheKey) {
+                        CacheKey ckey = (CacheKey) cacheKey;
+                        int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
+                        if (contextId > 0) {
+                            int userId = Integer.parseInt(ckey.getKeys()[0].toString());
+                            if (pairs.add(new Pair<Integer, Integer>(I(contextId), I(userId)))) {
+                                ListLsubCache.dropFor(userId, contextId, false);
+                            }
                         }
                     }
                 }

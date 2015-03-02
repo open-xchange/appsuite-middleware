@@ -395,7 +395,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             permissionBits |= BIT_USER_FLAG;
         }
         final int canRename = mp.canRename();
-        if (canRename > 0) {
+        if (canRename > 0 && !STANDARD_FOLDER_TYPES.contains(this.mailFolderType)) {
+            // Rename only allowed to non-standard folders
             permissionBits |= BIT_RENAME_FLAG;
         }
         bits = permissionBits;

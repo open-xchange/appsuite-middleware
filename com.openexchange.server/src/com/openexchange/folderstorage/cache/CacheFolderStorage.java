@@ -92,6 +92,7 @@ import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
 import com.openexchange.folderstorage.internal.performers.CreatePerformer;
 import com.openexchange.folderstorage.internal.performers.DeletePerformer;
@@ -195,7 +196,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
      */
     public void removeFromGlobalCache(String folderId, String treeId, int contextId) {
         Cache cache = globalCache;
-        if (null != cache) {
+        if (null != cache && Tools.isGlobalId(folderId)) {
             try {
                 cache.removeFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
             } catch (Exception e) {
@@ -504,20 +505,28 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             String sContextId = Integer.toString(contextId);
             List<Serializable> keys = new LinkedList<Serializable>();
             for (String tid : new String[] { treeId, realTreeId }) {
-                keys.add(newCacheKey(folder.getParentID(), tid));
+                if (Tools.isGlobalId(folder.getParentID())) {
+                    keys.add(newCacheKey(folder.getParentID(), tid));
+                }
                 // Cleanse parent from caches, too
                 folderMapManagement.dropFor(folder.getParentID(), tid, userId, contextId, session);
             }
-            cache.removeFromGroup(keys, sContextId);
+            if (null != cache && !keys.isEmpty()) {
+                cache.removeFromGroup(keys, sContextId);
+            }
 
             if (null != createdFolder && false == createdFolder.getParentID().equals(folder.getParentID())) {
                 keys.clear();
                 for (String tid : new String[] { treeId, realTreeId }) {
-                    keys.add(newCacheKey(createdFolder.getParentID(), tid));
+                    if (Tools.isGlobalId(createdFolder.getParentID())) {
+                        keys.add(newCacheKey(createdFolder.getParentID(), tid));
+                    }
                     // Cleanse parent from caches, too
                     folderMapManagement.dropFor(createdFolder.getParentID(), tid, userId, contextId, session);
                 }
-                cache.removeFromGroup(keys, sContextId);
+                if (null != cache && !keys.isEmpty()) {
+                    cache.removeFromGroup(keys, sContextId);
+                }
             }
             /*
              * Load parent from real tree
@@ -552,11 +561,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
          * Put to cache
          */
         if (folder.isGlobalID()) {
-            globalCache.putInGroup(
-                newCacheKey(folder.getID(), treeId),
-                Integer.toString(storageParameters.getContextId()),
-                folder,
-                invalidate);
+            globalCache.putInGroup(newCacheKey(folder.getID(), treeId), Integer.toString(storageParameters.getContextId()), folder, invalidate);
         } else {
             getFolderMapFor(storageParameters.getSession()).put(treeId, folder, storageParameters.getSession());
         }
@@ -662,20 +667,27 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             if (realTreeId.equals(treeId)) {
                 List<Serializable> keys = new LinkedList<Serializable>();
                 for (String folderId : ids) {
-                    keys.add(newCacheKey(folderId, treeId));
+                    if (Tools.isGlobalId(folderId)) {
+                        keys.add(newCacheKey(folderId, treeId));
+                    }
                     folderMapManagement.dropFor(folderId, treeId, userId, contextId);
                 }
-                cache.removeFromGroup(keys, Integer.toString(contextId));
+                if (!keys.isEmpty()) {
+                    cache.removeFromGroup(keys, Integer.toString(contextId));
+                }
             } else {
                 List<Serializable> keys = new LinkedList<Serializable>();
                 for (String folderId : ids) {
-                    keys.add(newCacheKey(folderId, treeId));
+                    if (Tools.isGlobalId(folderId)) {
+                        keys.add(newCacheKey(folderId, treeId));
+                        keys.add(newCacheKey(folderId, realTreeId));
+                    }
                     folderMapManagement.dropFor(folderId, treeId, userId, contextId);
-                    // Now for real tree, too
-                    keys.add(newCacheKey(folderId, realTreeId));
                     folderMapManagement.dropFor(folderId, realTreeId, userId, contextId);
                 }
-                cache.removeFromGroup(keys, Integer.toString(contextId));
+                if (!keys.isEmpty()) {
+                    cache.removeFromGroup(keys, Integer.toString(contextId));
+                }
             }
         }
     }
@@ -721,7 +733,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                     }
                 }
             } else {
-                List<Serializable> cacheKeys = new LinkedList<Serializable>();
+                List<Serializable> keys = new LinkedList<Serializable>();
                 for (String tid : new HashSet<String>(Arrays.asList(treeId, realTreeId))) {
                     for (String id : ids) {
                         // Add affected cache keys
@@ -733,16 +745,20 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                                  * Drop parent, too
                                  */
                                 String parentID = cachedFolder.getParentID();
-                                if (null != parentID) {
-                                    cacheKeys.add(newCacheKey(parentID, tid));
+                                if (Tools.isGlobalId(parentID)) {
+                                    keys.add(newCacheKey(parentID, tid));
                                 }
                             }
                         }
-                        cacheKeys.add(cacheKey);
+                        if (Tools.isGlobalId(id)) {
+                            keys.add(cacheKey);
+                        }
                         // Cleanse from folder management
                         cleanseFromFolderManagement(optUserId, contextId, deleted, optSession, tid, id);
                     }
-                    cache.removeFromGroup(cacheKeys, sContextId);
+                }
+                if (!keys.isEmpty()) {
+                    cache.removeFromGroup(keys, sContextId);
                 }
             }
         } catch (Exception x) {
@@ -775,7 +791,6 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
     @Override
     public void clearFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
         boolean cacheable;
-        boolean global;
         int contextId = storageParameters.getContextId();
         int userId = storageParameters.getUserId();
         Session session = storageParameters.getSession();
@@ -795,13 +810,12 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                 folderMapManagement.dropFor(clearMe.getParentID(), realTreeId, userId, contextId, session);
             }
             cacheable = clearMe.isCacheable();
-            global = clearMe.isGlobalID();
         }
         if (cacheable) {
             /*
              * Delete from cache
              */
-            if (global) {
+            if (Tools.isGlobalId(folderId)) {
                 globalCache.removeFromGroup(newCacheKey(folderId, treeId), sContextId);
             } else {
                 FolderMapManagement.getInstance().dropFor(folderId, treeId, userId, contextId, session);
@@ -836,8 +850,6 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
     public void deleteFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
         String parentId;
         String realParentId;
-        boolean cacheable;
-        boolean global;
         int contextId = storageParameters.getContextId();
         int userId = storageParameters.getUserId();
         Session session = storageParameters.getSession();
@@ -855,19 +867,12 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                 /*
                  * Obviously folder does not exist
                  */
-                globalCache.removeFromGroup(newCacheKey(folderId, treeId), sContextId);
+                if (Tools.isGlobalId(folderId)) {
+                    globalCache.removeFromGroup(newCacheKey(folderId, treeId), sContextId);
+                }
                 FolderMapManagement.getInstance().dropFor(folderId, treeId, userId, contextId, session);
                 return;
             }
-            {
-                FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-                folderMapManagement.dropFor(folderId, treeId, userId, contextId, session);
-                folderMapManagement.dropFor(folderId, realTreeId, userId, contextId, session);
-                folderMapManagement.dropFor(deleteMe.getParentID(), treeId, userId, contextId, session);
-                folderMapManagement.dropFor(deleteMe.getParentID(), realTreeId, userId, contextId, session);
-            }
-            cacheable = deleteMe.isCacheable();
-            global = deleteMe.isGlobalID();
             parentId = deleteMe.getParentID();
             if (!realTreeId.equals(treeId)) {
                 StorageParameters parameters = newStorageParameters(storageParameters);
@@ -890,23 +895,38 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                 realParentId = null;
             }
         }
-        if (cacheable) {
-            /*
-             * Delete from cache
-             */
-            if (global) {
-                globalCache.removeFromGroup(newCacheKey(folderId, treeId), sContextId);
-            } else {
-                FolderMapManagement.getInstance().dropFor(folderId, treeId, userId, contextId, session);
-            }
-            /*
-             * ... and from parent folder's sub-folder list
-             */
-            removeFromSubfolders(treeId, parentId, sContextId, session);
-            if (null != realParentId) {
-                removeFromSubfolders(realTreeId, realParentId, sContextId, session);
+        /*
+         * Delete from cache
+         */
+        {
+            FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+            folderMapManagement.dropFor(Arrays.asList(folderId, parentId), treeId, userId, contextId, session);
+            if (!treeId.equals(realTreeId)) {
+                List<String> fids = new ArrayList<String>(Arrays.asList(folderId, parentId));
+                if (null != realParentId) {
+                    fids.add(realParentId);
+                }
+                folderMapManagement.dropFor(fids, realTreeId, userId, contextId, session);
             }
         }
+        {
+            List<Serializable> keys = new LinkedList<Serializable>();
+            if (Tools.isGlobalId(folderId)) {
+                keys.add(newCacheKey(folderId, treeId));
+            }
+            if (Tools.isGlobalId(parentId)) {
+                keys.add(newCacheKey(parentId, treeId));
+            }
+            if (null != realParentId && !realParentId.equals(parentId)) {
+                if (Tools.isGlobalId(realParentId)) {
+                    keys.add(newCacheKey(realParentId, realTreeId));
+                }
+            }
+            if (!keys.isEmpty()) {
+                globalCache.removeFromGroup(keys, sContextId);
+            }
+        }
+        registry.clearCaches(storageParameters.getUserId(), storageParameters.getContextId());
         /*
          * Drop subfolders from cache
          */
@@ -925,21 +945,6 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
                 folderId,
                 storageParameters.getTimeStamp());
         }
-        /*
-         * Refresh
-         */
-        if (null != realParentId && !ROOT_ID.equals(realParentId)) {
-            removeFromCache(realParentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
-        }
-        if (!ROOT_ID.equals(parentId)) {
-            removeFromCache(parentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
-        }
-    }
-
-    private void removeFromSubfolders(String treeId, String parentId, String contextId, Session session) throws OXException {
-        registry.clearCaches(session.getUserId(), session.getContextId());
-        globalCache.removeFromGroup(newCacheKey(parentId, treeId), contextId);
-        FolderMapManagement.getInstance().dropFor(parentId, treeId, session.getUserId(), session.getContextId(), session);
     }
 
     @Override
@@ -1430,43 +1435,57 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         /*
          * Refresh/Invalidate folder
          */
+        Folder updatedFolder = loadFolder(treeId, newFolderId, StorageType.WORKING, true, storageParameters);
         int userId = storageParameters.getUserId();
-        if (isMove) {
-            removeSingleFromCache(Collections.singletonList(oldFolderId), treeId, userId, session, false);
-            removeFromCache(oldParentId, treeId, session, newPathPerformer(storageParameters));
-        } else {
-            removeFromCache(newFolderId, treeId, session, newPathPerformer(storageParameters));
+        int contextId = storageParameters.getContextId();
+        {
+            FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+            List<String> ids = isMove ? Arrays.asList(oldFolderId, oldParentId, updatedFolder.getParentID()) : Arrays.asList(oldFolderId);
+            folderMapManagement.dropFor(ids, treeId, userId, contextId, session);
+            if (!treeId.equals(realTreeId)) {
+                folderMapManagement.dropFor(ids, realTreeId, userId, contextId, session);
+            }
+
+            List<Serializable> keys = new LinkedList<Serializable>();
+            if (Tools.isGlobalId(oldFolderId)) {
+                keys.add(newCacheKey(oldFolderId, treeId));
+            }
+            if (isMove) {
+                if (Tools.isGlobalId(oldParentId)) {
+                    keys.add(newCacheKey(oldParentId, treeId));
+                }
+                if (Tools.isGlobalId(updatedFolder.getParentID())) {
+                    keys.add(newCacheKey(updatedFolder.getParentID(), treeId));
+                }
+            }
+            if (!treeId.equals(realTreeId)) {
+                if (Tools.isGlobalId(oldFolderId)) {
+                    keys.add(newCacheKey(oldFolderId, realTreeId));
+                }
+                if (isMove) {
+                    if (Tools.isGlobalId(oldParentId)) {
+                        keys.add(newCacheKey(oldParentId, realTreeId));
+                    }
+                    if (Tools.isGlobalId(updatedFolder.getParentID())) {
+                        keys.add(newCacheKey(updatedFolder.getParentID(), realTreeId));
+                    }
+                }
+            }
+            if (!keys.isEmpty()) {
+                globalCache.removeFromGroup(keys, Integer.toString(contextId));
+            }
+
+            registry.clearCaches(storageParameters.getUserId(), storageParameters.getContextId());
         }
+
         /*
          * Put updated folder
          */
-        Folder updatedFolder = loadFolder(treeId, newFolderId, StorageType.WORKING, true, storageParameters);
-        {
-            int contextId = storageParameters.getContextId();
-            FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-            folderMapManagement.dropFor(newFolderId, treeId, userId, contextId, session);
-            folderMapManagement.dropFor(newFolderId, realTreeId, userId, contextId, session);
-            folderMapManagement.dropFor(updatedFolder.getParentID(), treeId, userId, contextId, session);
-            folderMapManagement.dropFor(updatedFolder.getParentID(), realTreeId, userId, contextId, session);
-            // Others
-            folderMapManagement.dropFor(oldFolderId, treeId, userId, contextId, session);
-            folderMapManagement.dropFor(oldFolderId, realTreeId, userId, contextId, session);
-            folderMapManagement.dropFor(storageVersion.getParentID(), treeId, userId, contextId, session);
-            folderMapManagement.dropFor(storageVersion.getParentID(), realTreeId, userId, contextId, session);
-        }
         if (isMove) {
-            /*
-             * Invalidate new parent folder
-             */
-            String newParentId = updatedFolder.getParentID();
-            if (null != newParentId && !newParentId.equals(oldParentId)) {
-                removeSingleFromCache(Collections.singletonList(newParentId), treeId, userId, storageParameters.getSession(), false);
-            }
             /*
              * Reload folders
              */
             Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
-            removeSingleFromCache(Collections.singletonList(f.getParentID()), treeId, userId, storageParameters.getSession(), false);
             if (f.isCacheable()) {
                 putFolder(f, realTreeId, storageParameters, true);
             }
@@ -1474,7 +1493,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             if (f.isCacheable()) {
                 putFolder(f, realTreeId, storageParameters, true);
             }
-            f = loadFolder(realTreeId, newParentId, StorageType.WORKING, true, storageParameters);
+            f = loadFolder(realTreeId, updatedFolder.getParentID(), StorageType.WORKING, true, storageParameters);
             if (f.isCacheable()) {
                 putFolder(f, realTreeId, storageParameters, true);
             }

@@ -51,7 +51,6 @@ package com.openexchange.unifiedinbox.utility;
 
 import static com.openexchange.mail.MailPath.SEPERATOR;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
-import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
@@ -62,9 +61,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
-import com.openexchange.unifiedinbox.UnifiedInboxUID;
 import com.openexchange.unifiedinbox.services.Services;
 
 /**
@@ -149,22 +148,7 @@ public final class UnifiedInboxUtility {
      * @throws OXException If specified nested full name is invalid
      */
     public static FullnameArgument parseNestedFullName(String nestedFullName) throws OXException {
-        // INBOX/default0/INBOX
-        if (!startsWithKnownFullname(nestedFullName)) {
-            throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(prepareMailFolderParam(nestedFullName).getFullname());
-        }
-        // Cut off starting known full name and its separator character
-        final String fn = nestedFullName.substring(nestedFullName.indexOf(SEPERATOR) + 1);
-        return prepareMailFolderParam(fn);
-    }
-
-    private static boolean startsWithKnownFullname(String fullName) {
-        for (final String knownFullname : UnifiedInboxAccess.KNOWN_FOLDERS) {
-            if (fullName.startsWith(knownFullname)) {
-                return true;
-            }
-        }
-        return false;
+        return UnifiedInboxUID.parseNestedFullName(nestedFullName);
     }
 
     /**

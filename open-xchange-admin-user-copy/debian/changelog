@@ -1,3 +1,15 @@
+open-xchange-admin-user-copy (7.6.2-8) stable; urgency=low
+
+  * Eighth candidate for 7.6.2 release
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 24 Feb 2015 16:13:53 +0100
+
+open-xchange-admin-user-copy (7.6.2-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.2 release
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 11 Feb 2015 15:41:34 +0100
+
 open-xchange-admin-user-copy (7.6.2-6) stable; urgency=low
 
   * Sixth candidate for 7.6.2 release
@@ -39,6 +51,30 @@ open-xchange-admin-user-copy (7.6.2-0) unstable; urgency=medium
   * prepare for 7.6.2 release
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 17 Sep 2014 12:35:54 +0200
+
+open-xchange-admin-user-copy (7.6.1-21) stable; urgency=low
+
+  * Build for patch 2015-02-23
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 26 Feb 2015 10:35:34 +0100
+
+open-xchange-admin-user-copy (7.6.1-20) stable; urgency=low
+
+  * Build for patch 2015-02-25
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 23 Feb 2015 12:28:54 +0100
+
+open-xchange-admin-user-copy (7.6.1-19) stable; urgency=low
+
+  * Build for patch 2015-02-10
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 06 Feb 2015 11:22:48 +0100
+
+open-xchange-admin-user-copy (7.6.1-18) stable; urgency=low
+
+  * Build for patch 2015-02-09
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 06 Feb 2015 10:31:23 +0100
 
 open-xchange-admin-user-copy (7.6.1-17) stable; urgency=low
 

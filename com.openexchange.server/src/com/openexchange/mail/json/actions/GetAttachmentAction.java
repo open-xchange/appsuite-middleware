@@ -65,6 +65,7 @@ import java.util.regex.Pattern;
 import javax.mail.MessageRemovedException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.Mail;
@@ -192,8 +193,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     private AJAXRequestResult performGET(final MailRequest req) throws OXException {
         try {
             // Read in parameters
-            String folderPath = req.checkParameter(PARAMETER_FOLDERID);
-            String uid = req.checkParameter(PARAMETER_ID);
+            final String folderPath = req.checkParameter(PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(PARAMETER_ID);
             String sequenceId = req.getParameter(PARAMETER_MAILATTCHMENT);
             String imageContentId = req.getParameter(PARAMETER_MAILCID);
             String fileNameFromRequest = req.getParameter("save_as");
@@ -212,16 +213,23 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 String fromStructureParam = req.getParameter("from_structure");
                 fromStructure = Boolean.parseBoolean(fromStructureParam) || "1".equals(fromStructureParam);
             }
-
-            // Get mail interface
-            MailServletInterface mailInterface = getMailInterface(req);
+            boolean unseen;
+            {
+                String tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
+                unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+            }
             if (sequenceId == null && imageContentId == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
             }
 
+            // Get mail interface
+            MailServletInterface mailInterface = getMailInterface(req);
+
             long size = -1L; /* mail system does not provide exact size */
             MailPart mailPart = null;
             IFileHolder.InputStreamClosure isClosure = null;
+            ThresholdFileHolder sink = null;
+            Boolean markUnseen = null;
 
             if (imageContentId == null) {
                 // Check if part should be fetched from a previously "fixed" message
@@ -230,6 +238,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     if (null == mail) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                     }
+                    boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                    markUnseen = Boolean.valueOf(unseen && wasUnseen);
                     if (MimeStructureFixer.getInstance().isApplicableFor(mail)) {
                         // Assume as being "fixed" before passing to client
                         mail = MimeStructureFixer.getInstance().process(mail);
@@ -241,23 +251,33 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                             throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, uid, folderPath);
                         }
 
-                        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
-                        if (exactLength) {
-                            size = Streams.countInputStream(ret.getInputStream());
-                        }
-
                         mailPart = ret;
-                        isClosure = new IFileHolder.InputStreamClosure() {
+                        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+                        if (exactLength) {
+                            sink = new ThresholdFileHolder();
+                            InputStream in = Streams.getNonEmpty(ret.getInputStream());
+                            sink.write(null == in ? Streams.EMPTY_INPUT_STREAM : in);
+                            size = sink.getLength();
+                        } else {
+                            isClosure = new IFileHolder.InputStreamClosure() {
 
-                            @Override
-                            public InputStream newStream() throws OXException, IOException {
-                                return ret.getInputStream();
-                            }
-                        };
+                                @Override
+                                public InputStream newStream() throws OXException, IOException {
+                                    return ret.getInputStream();
+                                }
+                            };
+                        }
                     }
                 }
 
                 if (null == mailPart) {
+                    if (null == markUnseen && unseen) {
+                        MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                        if (null == mail) {
+                            throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
+                        }
+                        markUnseen = Boolean.valueOf(mail.containsPrevSeen() && !mail.isPrevSeen());
+                    }
                     mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
                     if (mailPart == null) {
                         throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
@@ -300,47 +320,101 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                             return Streams.newByteArrayInputStream(bytes);
                         }
                     };
+                    if (null != sink) {
+                        Streams.close(sink);
+                        sink = null;
+                    }
                 } else {
                     if (isEmpty(mailPart.getFileName())) {
                         mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
                     }
-                    boolean exactLength = !saveToDisk || AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                    boolean exactLength = !saveToDisk || AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
                     if (exactLength) {
-                        size = Streams.countInputStream(mailPart.getInputStream());
-                    }
-                    if (null == isClosure) {
-                        isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, sequenceId, false, req.getSession());
+                        if (null == sink) {
+                            sink = new ThresholdFileHolder();
+                            InputStream in = Streams.getNonEmpty(mailPart.getInputStream());
+                            sink.write(null == in ? Streams.EMPTY_INPUT_STREAM : in);
+                            size = sink.getLength();
+                        }
+                    } else {
+                        if (null == isClosure) {
+                            isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, sequenceId, false, req.getSession());
+                        }
                     }
                 }
             } else {
+                if (unseen) {
+                    MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                    if (null == mail) {
+                        throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
+                    }
+                    markUnseen = Boolean.valueOf(mail.containsPrevSeen() && !mail.isPrevSeen());
+                }
+
                 mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
 
-                boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
                 if (exactLength) {
-                    size = Streams.countInputStream(mailPart.getInputStream());
+                    sink = new ThresholdFileHolder();
+                    InputStream in = Streams.getNonEmpty(mailPart.getInputStream());
+                    sink.write(null == in ? Streams.EMPTY_INPUT_STREAM : in);
+                    size = sink.getLength();
+                } else {
+                    isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, imageContentId, true, req.getSession());
                 }
-                isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, imageContentId, true, req.getSession());
             }
 
             // Check for image data
             AJAXRequestData requestData = req.getRequest();
             boolean isPreviewImage = "preview_image".equals(requestData.getFormat());
+            String baseType = mailPart.getContentType().getBaseType();
+            String filename = getFileName(fileNameFromRequest, mailPart.getFileName(), baseType);
 
             // Read from stream
-            FileHolder fileHolder;
+            IFileHolder fileHolder;
             if (saveToDisk) {
-                String filename = getFileName(fileNameFromRequest, mailPart.getFileName(), mailPart.getContentType().getBaseType());
-                fileHolder = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
-                fileHolder.setDelivery("download");
+                if (null == sink) {
+                    @SuppressWarnings("resource")
+                    FileHolder tmp = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
+                    tmp.setDelivery("download");
+                    fileHolder = tmp;
+                } else {
+                    sink.setContentType(baseType);
+                    sink.setName(filename);
+                    sink.setDelivery("download");
+                    fileHolder = sink;
+                }
                 req.getRequest().putParameter(PARAMETER_DELIVERY, "download");
             } else {
-                String baseType = mailPart.getContentType().getBaseType();
-                fileHolder = new FileHolder(isClosure, size, baseType, getFileName(fileNameFromRequest, mailPart.getFileName(), baseType));
+                if (null == sink) {
+                    fileHolder = new FileHolder(isClosure, size, baseType, filename);
+                } else {
+                    sink.setContentType(baseType);
+                    sink.setName(filename);
+                    fileHolder = sink;
+                }
             }
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+
+            if (null != markUnseen && markUnseen.booleanValue()) {
+                fileHolder.addPostProcessingTask(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            // Get mail interface
+                            MailServletInterface mailInterface = getMailInterface(req);
+                            mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                        } catch (Exception e) {
+                            Logger logger = org.slf4j.LoggerFactory.getLogger(GetAttachmentAction.class);
+                            logger.warn("Failed to unset \\Seen flag for message {} in folder {}", uid, folderPath, e);
+                        }
+                    }
+                });
+            }
 
             // Set format and disallow resource caching
             requestData.putParameter("cache", "false");
@@ -362,6 +436,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private boolean clientRequestsRange(MailRequest req) {
+        return Tools.hasRangeHeader(req.getRequest().optHttpServletRequest());
     }
 
     private boolean fileNameIndicatesHtml(String fileName) {

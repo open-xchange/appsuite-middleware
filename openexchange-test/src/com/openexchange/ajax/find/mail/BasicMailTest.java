@@ -49,10 +49,8 @@
 
 package com.openexchange.ajax.find.mail;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -68,8 +66,6 @@ import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.TestDisplayItem;
-import com.openexchange.ajax.mail.actions.ImportMailRequest;
-import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.configuration.MailConfig;
@@ -85,7 +81,6 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.MailFacetType;
-import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -93,8 +88,6 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
-import com.openexchange.mail.utils.DateUtils;
-import com.openexchange.test.ContactTestManager;
 
 
 /**
@@ -106,8 +99,6 @@ import com.openexchange.test.ContactTestManager;
 public class BasicMailTest extends AbstractMailFindTest {
 
     private FolderObject testFolder;
-
-    private ContactTestManager contactManager;
 
     public BasicMailTest(String name) {
         super(name);
@@ -123,12 +114,10 @@ public class BasicMailTest extends AbstractMailFindTest {
         testFolder.setFullName(inboxFolder + "/" + folderName);
         testFolder.setFolderName(folderName);
         testFolder = folderManager.insertFolderOnServer(testFolder);
-        contactManager = new ContactTestManager(client);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        contactManager.cleanUp();
         super.tearDown();
     }
 
@@ -214,7 +203,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         /*
          * Import test mail
          */
-        String[][] mailIds = importMail(defaultAddress, "Find me", "");
+        String[][] mailIds = importMail(testFolder.getFullName(), defaultAddress, "Find me", "");
         assertNotNull("mail was not imported", mailIds);
 
         /*
@@ -247,7 +236,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         /*
          * Import test mail
          */
-        String[][] mailIds = importMail(defaultAddress, "Find me", "");
+        String[][] mailIds = importMail(testFolder.getFullName(), defaultAddress, "Find me", "");
         assertNotNull("mail was not imported", mailIds);
 
         /*
@@ -274,7 +263,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         /*
          * Import test mails
          */
-        String[][] mailIds = importMails(3, defaultAddress, defaultAddress);
+        String[][] mailIds = importMails(testFolder.getFullName(), 3, defaultAddress, defaultAddress);
         assertNotNull("mails not imported", mailIds);
         assertEquals("mails not imported", 3, mailIds.length);
 
@@ -297,19 +286,19 @@ public class BasicMailTest extends AbstractMailFindTest {
         Calendar calWithinLastWeek = new GregorianCalendar(TimeZones.UTC);
         calWithinLastWeek.add(Calendar.WEEK_OF_YEAR, -1);
         calWithinLastWeek.add(Calendar.DAY_OF_YEAR, 1);
-        String idWithinLastWeek = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), calWithinLastWeek.getTime())[0][1];
+        String idWithinLastWeek = importMail(testFolder.getFullName(), defaultAddress, defaultAddress, randomUID(), randomUID(), calWithinLastWeek.getTime())[0][1];
         Calendar calWithinLastMonth = new GregorianCalendar(TimeZones.UTC);
         calWithinLastMonth.add(Calendar.MONTH, -1);
         calWithinLastMonth.add(Calendar.DAY_OF_YEAR, 1);
-        String idWithinLastMonth = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), calWithinLastMonth.getTime())[0][1];
+        String idWithinLastMonth = importMail(testFolder.getFullName(), defaultAddress, defaultAddress, randomUID(), randomUID(), calWithinLastMonth.getTime())[0][1];
         Calendar calWithinLastYear = new GregorianCalendar(TimeZones.UTC);
         calWithinLastYear.add(Calendar.YEAR, -1);
         calWithinLastYear.add(Calendar.DAY_OF_YEAR, 1);
-        String idWithinLastYear = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), calWithinLastYear.getTime())[0][1];
+        String idWithinLastYear = importMail(testFolder.getFullName(), defaultAddress, defaultAddress, randomUID(), randomUID(), calWithinLastYear.getTime())[0][1];
         Calendar calBeforeLastYear = new GregorianCalendar(TimeZones.UTC);
         calBeforeLastYear.add(Calendar.YEAR, -1);
         calBeforeLastYear.add(Calendar.DAY_OF_YEAR, -1);
-        String idBeforeLastYear = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), calBeforeLastYear.getTime())[0][1];
+        String idBeforeLastYear = importMail(testFolder.getFullName(), defaultAddress, defaultAddress, randomUID(), randomUID(), calBeforeLastYear.getTime())[0][1];
 
         List<ActiveFacet> facets = prepareFacets();
         facets.add(createActiveFacet(CommonFacetType.DATE, CommonConstants.QUERY_LAST_WEEK, CommonConstants.FIELD_DATE, CommonConstants.QUERY_LAST_WEEK));
@@ -406,10 +395,10 @@ public class BasicMailTest extends AbstractMailFindTest {
         String H = randomUID();
         String I = randomUID();
 
-        importMail(A, B, D);
-        importMail(A, B, E);
-        importMail(A, C, F);
-        importMail(G, H, I);
+        importMail(testFolder.getFullName(), A, B, D);
+        importMail(testFolder.getFullName(), A, B, E);
+        importMail(testFolder.getFullName(), A, C, F);
+        importMail(testFolder.getFullName(), G, H, I);
 
         List<ActiveFacet> facets = prepareFacets();
         List<PropDocument> documents = query(facets);
@@ -468,7 +457,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         /*
          * Import test mail
          */
-        String[][] mailIds = importMail(defaultAddress, "Find me", "");
+        String[][] mailIds = importMail(testFolder.getFullName(), defaultAddress, "Find me", "");
         assertNotNull("mail was not imported", mailIds);
 
         List<ActiveFacet> facets = prepareFacets();
@@ -499,7 +488,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         /*
          * Import test mail
          */
-        String[][] mailIds = importMail(defaultAddress, "Find me", "");
+        String[][] mailIds = importMail(testFolder.getFullName(), defaultAddress, "Find me", "");
         assertNotNull("mail was not imported", mailIds);
 
         List<ActiveFacet> facets = prepareFacets();
@@ -530,7 +519,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         String t1 = randomUID();
         String t2 = randomUID();
         String t3 = randomUID();
-        String[][] mailIds = importMail(defaultAddress, t1 + " " + t2 + " " + t3, "");
+        String[][] mailIds = importMail(testFolder.getFullName(), defaultAddress, t1 + " " + t2 + " " + t3, "");
 
 
         List<ActiveFacet> facets = prepareFacets();
@@ -567,7 +556,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         }
 
         String subject = randomUID();
-        String[][] mailIDs = importMail(defaultAddress, subject, subject);
+        String[][] mailIDs = importMail(testFolder.getFullName(), defaultAddress, subject, subject);
         com.openexchange.ajax.mail.actions.GetRequest getMailReq = new com.openexchange.ajax.mail.actions.GetRequest(mailIDs[0][0], mailIDs[0][1]);
         getMailReq.setTimeZone(clientTimeZone);
         com.openexchange.ajax.mail.actions.GetResponse getMailResp = client.execute(getMailReq);
@@ -582,74 +571,8 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertEquals("Wrong date conversion", origReceivedDate, foundReceivedDate);
     }
 
-    private void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {
-        for (Contact contact : contacts) {
-            boolean found = false;
-            String contactDN = DisplayItems.convert(contact).getDisplayName();
-            for (FacetValue value : values) {
-                String valueDN = value.getDisplayItem().getDisplayName();
-                if (contactDN.equals(valueDN)) {
-                    found = true;
-                    break;
-                }
-            }
-
-            assertTrue("Did not find contact '" + contactDN + "'", found);
-        }
-    }
-
     protected List<ActiveFacet> prepareFacets() throws OXException, IOException, JSONException {
         return prepareFacets(testFolder.getFullName());
     }
-    
-    private String[][] importMails(int num, String fromHeader, String toHeader) throws OXException, IOException, JSONException {
-        InputStream[] streams = new InputStream[num];
-        for (int i = 0; i < num; i++) {
-            String mail = MAIL
-                .replaceAll("#FROM#", fromHeader)
-                .replaceAll("#TO#", toHeader)
-                .replaceAll("#DATE#", DateUtils.toStringRFC822(new Date(), TimeZones.UTC))
-                .replaceAll("#SUBJECT#", randomUID())
-                .replaceAll("#BODY#", randomUID());
-            streams[i] = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
-        }
-
-        ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, true, true, streams);
-        ImportMailResponse response = client.execute(request);
-        return response.getIds();
-    }
-
-    private String[][] importMail(String fromHeader, String subject, String body) throws OXException, IOException, JSONException {
-        return importMail(defaultAddress, fromHeader, subject, body, new Date());
-    }
-
-    private String[][] importMail(String toHeader, String fromHeader, String subject, String body, Date received) throws OXException, IOException, JSONException {
-        String mail = MAIL
-            .replaceAll("#FROM#", fromHeader)
-            .replaceAll("#TO#", toHeader)
-            .replaceAll("#DATE#", DateUtils.toStringRFC822(received, TimeZones.UTC))
-            .replaceAll("#SUBJECT#", subject)
-            .replaceAll("#BODY#", body);
-        ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
-        ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, true, true, new ByteArrayInputStream[] { mailStream });
-        ImportMailResponse response = client.execute(request);
-        return response.getIds();
-    }
-    
-    private static final String MAIL =
-        "From: #FROM#\n" +
-        "To: #TO#\n" +
-        "CC: #TO#\n" +
-        "BCC: #TO#\n" +
-        "Received: from ox.open-xchange.com;#DATE#\n" +
-        "Date: #DATE#\n" +
-        "Subject: #SUBJECT#\n" +
-        "Disposition-Notification-To: #FROM#\n" +
-        "Mime-Version: 1.0\n" +
-        "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-        "Content-Transfer-Encoding: 8bit\n" +
-        "\n" +
-        "Content\n" +
-        "#BODY#\n";
 
 }

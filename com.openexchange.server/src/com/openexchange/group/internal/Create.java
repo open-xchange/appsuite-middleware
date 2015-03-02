@@ -83,34 +83,25 @@ public final class Create {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Create.class);
 
     /**
-     * Context.
-     */
-    private final Context ctx;
-
-    /**
-     * User for permission checks.
-     */
-    private final User user;
-
-    /**
-     * Group to insert.
-     */
-    private final Group group;
-
-    /**
      * Storage API for groups.
      */
-    private static final GroupStorage storage = GroupStorage.getInstance();
+    private static final GroupStorage STORAGE = GroupStorage.getInstance();
+
+    private final Context ctx;
+    private final User user;
+    private final Group group;
+    private final boolean checkI18nNames;
 
     /**
      * Default constructor.
      * @param user
      */
-    public Create(final Context ctx, final User user, final Group group) {
+    public Create(Context ctx, User user, Group group, boolean checkI18nNames) {
         super();
         this.ctx = ctx;
         this.user = user;
         this.group = group;
+        this.checkI18nNames = checkI18nNames;
     }
 
     /**
@@ -147,7 +138,7 @@ public final class Create {
         Logic.checkMandatoryForCreate(group);
         Logic.validateSimpleName(group);
         Logic.checkData(group);
-        Logic.checkForDuplicate(storage, ctx, group);
+        Logic.checkForDuplicate(STORAGE, ctx, group, checkI18nNames);
         Logic.doMembersExist(ctx, group);
     }
 
@@ -187,8 +178,8 @@ public final class Create {
             final int identifier = IDGenerator.getId(ctx.getContextId(),
                 Types.PRINCIPAL, con);
             group.setIdentifier(identifier);
-            storage.insertGroup(ctx, con, group);
-            storage.insertMember(ctx, con, group, group.getMember());
+            STORAGE.insertGroup(ctx, con, group);
+            STORAGE.insertMember(ctx, con, group, group.getMember());
         } catch (final SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }

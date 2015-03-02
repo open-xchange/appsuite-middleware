@@ -189,16 +189,12 @@ public class SnippetProcessor {
                                 continue;
                             }
                         } else {
-                            LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id);
-                            // Anyway, replace image tag
-                            m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
+                            // Leave it
                             continue;
                         }
 
                     } else {
-                        LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", m.getImageId());
-                        // Anyway, replace image tag
-                        m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
+                        // Leave it
                         continue;
                     }
                     boolean appendBodyPart = trackedIds.add(id);

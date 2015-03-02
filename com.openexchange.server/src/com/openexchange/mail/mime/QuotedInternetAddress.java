@@ -52,17 +52,23 @@ package com.openexchange.mail.mime;
 import static com.openexchange.java.Strings.toUpperCase;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link QuotedInternetAddress} - A quoted version of {@link InternetAddress} originally written by <b>Bill Shannon</b> and <b>John
@@ -93,6 +99,42 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static boolean getBooleanSystemProperty(final String name, final boolean def) {
         return Boolean.parseBoolean(System.getProperty(name, def ? "true" : "false"));
+    }
+
+    private static volatile Boolean preferSimpleAddressParsing;
+    private static boolean preferSimpleAddressParsing() {
+        Boolean tmp = preferSimpleAddressParsing;
+        if (null == tmp) {
+            synchronized (QuotedInternetAddress.class) {
+                tmp = preferSimpleAddressParsing;
+                if (null == tmp) {
+                    boolean defaultValue = true;
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.preferSimpleAddressParsing", defaultValue));
+                    preferSimpleAddressParsing = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                preferSimpleAddressParsing = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     /**
@@ -139,6 +181,14 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @exception AddressException If the parse failed
      */
     public static InternetAddress[] parse(final String addresslist, final boolean strict) throws AddressException {
+        if (preferSimpleAddressParsing()) {
+            return parseSimple(addresslist, strict);
+        }
+
+        return parse0(addresslist, strict);
+    }
+
+    private static InternetAddress[] parse0(String addresslist, boolean strict) throws AddressException {
         try {
             return parse(addresslist, strict, false, true);
         } catch (AddressException e) {
@@ -162,11 +212,28 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @exception AddressException If the parse failed
      */
     public static InternetAddress[] parseHeader(final String addresslist, final boolean strict) throws AddressException {
+        if (preferSimpleAddressParsing()) {
+            return parseSimple(addresslist, strict);
+        }
+
         try {
             return parse(addresslist, strict, true, true);
         } catch (AddressException e) {
             return parse(addresslist, strict, true, false);
         }
+    }
+
+    private static InternetAddress[] parseSimple(String str, boolean strict) throws AddressException {
+        String[] addrs = Strings.splitByCommaNotInQuotes(str);
+        List<InternetAddress> l = new ArrayList<InternetAddress>(addrs.length);
+        for (String addr : addrs) {
+            if (addr.lastIndexOf('<') < 0 && addr.indexOf("=?") >= 0) {
+                addr = MimeMessageUtility.decodeMultiEncodedHeader(addr);
+            }
+            QuotedInternetAddress a = new QuotedInternetAddress(addr, strict);
+            l.add(a);
+        }
+        return l.toArray(new InternetAddress[l.size()]);
     }
 
     /*
@@ -177,18 +244,17 @@ public final class QuotedInternetAddress extends InternetAddress {
         int start, end, index, nesting;
         int start_personal = -1, end_personal = -1;
         String s = decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str;
-        final int length = s.length();
-        final boolean ignoreErrors = parseHdr && !strict;
+        int length = s.length();
+        boolean ignoreErrors = parseHdr && !strict;
+        List<InternetAddress> list = new LinkedList<InternetAddress>();
+
         boolean in_group = false; // we're processing a group term
         boolean route_addr = false; // address came from route-addr term
         boolean rfc822 = false; // looks like an RFC822 address
-        char c;
-        final List<InternetAddress> list = new ArrayList<InternetAddress>();
         QuotedInternetAddress qia;
 
         for (start = end = -1, index = 0; index < length; index++) {
-            c = s.charAt(index);
-
+            char c = s.charAt(index);
             switch (c) {
             case '(': // We are parsing a Comment. Ignore everything inside.
                 // XXX - comment fields should be parsed as whitespace,
@@ -948,7 +1014,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         InternetAddress[] a;
         try {
             // use our address parsing utility routine to parse the string
-            a = parse(address, true);
+            a = parse0(address, true);
 
             // if we got back anything other than a single address, it's an error
             if (a.length != 1) {

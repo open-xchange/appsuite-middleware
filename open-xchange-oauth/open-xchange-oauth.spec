@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -49,7 +49,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-CONFFILES="deferrer.properties oauth.properties facebookoauth.properties linkedinoauth.properties twitteroauth.properties yahoooauth.properties"
+CONFFILES="deferrer.properties oauth.properties facebookoauth.properties twitteroauth.properties yahoooauth.properties"
 for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
@@ -60,7 +60,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    PROTECT="facebookoauth.properties linkedinoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+    PROTECT="facebookoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
     for FILE in $PROTECT; do
         ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
     done
@@ -72,14 +72,6 @@ if [ ${1:-0} -eq 2 ]; then
            ox_set_property com.openexchange.oauth.yahoo false $pfile
        else
            ox_set_property com.openexchange.oauth.yahoo true $pfile
-       fi
-    fi
-    pfile=/opt/open-xchange/etc/linkedinoauth.properties
-    if ! ox_exists_property com.openexchange.oauth.linkedin $pfile; then
-       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_THE_KEY_FROM' $pfile > /dev/null; then
-           ox_set_property com.openexchange.oauth.linkedin false $pfile
-       else
-           ox_set_property com.openexchange.oauth.linkedin true $pfile
        fi
     fi
     pfile=/opt/open-xchange/etc/facebookoauth.properties
@@ -113,7 +105,6 @@ fi
 %dir /opt/open-xchange/etc/
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
@@ -124,6 +115,18 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Thu Feb 26 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-02-23
+* Tue Feb 24 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Eighth candidate for 7.6.2 release
+* Mon Feb 23 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-02-25
+* Wed Feb 11 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Seventh candidate for 7.6.2 release
+* Fri Feb 06 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-02-10
+* Fri Feb 06 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-02-09
 * Fri Jan 30 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Sixth candidate for 7.6.2 release
 * Wed Jan 28 2015 Steffen Templin <marcus.klein@open-xchange.com>

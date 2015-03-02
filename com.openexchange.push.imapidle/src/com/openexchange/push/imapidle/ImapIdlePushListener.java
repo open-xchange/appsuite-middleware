@@ -54,10 +54,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.slf4j.Logger;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
@@ -82,6 +86,7 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -94,6 +99,9 @@ import com.sun.mail.imap.IMAPStore;
 public final class ImapIdlePushListener implements PushListener, Runnable {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListener.class);
+
+    /** The timeout threshold; cluster lock timeout minus one minute */
+    private static final long TIMEOUT_THRESHOLD_NANOS = TimeUnit.MILLISECONDS.toNanos(ImapIdleClusterLock.TIMEOUT_MILLIS - 60000L);
 
     /**
      * A simple task that actually performs the {@link IMAPFolder#idle() IMAP IDLE call}.
@@ -168,10 +176,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private ScheduledTimerTask timerTask;
     private final int accountId;
     private final String fullName;
-    private final long delay;
+    private final long delayNanos;
     private final PushMode pushMode;
     private final AtomicBoolean canceled;
     private volatile IMAPFolder imapFolderInUse;
+    private volatile long lastLockRefreshNanos;
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
@@ -182,9 +191,26 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.fullName = fullName;
         this.accountId = accountId;
         this.session = session;
-        this.delay = delay <= 0 ? 5000L : delay;
+        this.delayNanos = TimeUnit.MILLISECONDS.toNanos(delay <= 0 ? 5000L : delay);
         this.services = services;
         this.pushMode = pushMode;
+        lastLockRefreshNanos = System.nanoTime();
+    }
+
+    private boolean isUserValid() {
+        try {
+            ContextService contextService = services.getService(ContextService.class);
+            Context context = contextService.loadContext(session.getContextId());
+            if (!context.isEnabled()) {
+                return false;
+            }
+
+            UserService userService = services.getService(UserService.class);
+            User user = userService.getUser(session.getUserId(), context);
+            return user.isMailEnabled();
+        } catch (OXException e) {
+            return false;
+        }
     }
 
     @Override
@@ -195,6 +221,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     @Override
     public void run() {
         if (canceled.get()) {
+            return;
+        }
+
+        if (!isUserValid()) {
+            cancel(false);
             return;
         }
 
@@ -241,18 +272,39 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     }
 
                     // Refresh lock prior to entering IMAP-IDLE
-                    ImapIdlePushManagerService.getInstance().refreshLock(session);
+                    if (doRefreshLock()) {
+                        ImapIdlePushManagerService.getInstance().refreshLock(session);
+                    }
+
+                    // Are there already new messages?
+                    {
+                        int newMessageCount = imapFolder.getNewMessageCount();
+                        if (newMessageCount > 0) {
+                            LOGGER.debug("IMAP-IDLE result for user {} in context {}: Doing push due to {} new mail(s)", sUserId, sContextId, Integer.toString(newMessageCount));
+                            notifyNewMail();
+                            notified = true;
+                        }
+                    }
 
                     // Do the IMAP IDLE connect
-                    mailAccess.setWaiting(true);
-                    try {
-                        if (false == doImapIdleTimeoutAware(imapFolder)) {
-                            // Timeout elapsed
-                            error = false;
-                            return;
+                    {
+                        long st = System.nanoTime();
+
+                        mailAccess.setWaiting(true);
+                        try {
+                            if (false == doImapIdleTimeoutAware(imapFolder)) {
+                                // Timeout elapsed
+                                error = false;
+                                return;
+                            }
+                        } finally {
+                            mailAccess.setWaiting(false);
                         }
-                    } finally {
-                        mailAccess.setWaiting(false);
+
+                        long parkNanos = delayNanos - (System.nanoTime() - st);
+                        if (parkNanos > 0L) {
+                            LockSupport.parkNanos(parkNanos);
+                        }
                     }
 
                     // Check if canceled meanwhile
@@ -359,6 +411,21 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     }
 
     /**
+     * Checks whether held cluster lock needs to be refreshed.
+     *
+     * @return <code>true</code> if refresh is needed; otherwise <code>false</code>
+     */
+    private boolean doRefreshLock() {
+        long last = lastLockRefreshNanos;
+        long nanos = System.nanoTime();
+        if (nanos - last > TIMEOUT_THRESHOLD_NANOS) {
+            lastLockRefreshNanos = nanos;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Actually enters the IMAP-IDLE to IMAP server with respect to frequent cluster lock <i><tt>touch</tt></i>ing.
      * <p>
      * IMAP-IDLE is performed until either
@@ -375,12 +442,13 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      * @throws MessagingException If IMAP-IDLE fails for any reason
      */
     private boolean doImapIdleTimeoutAware(final IMAPFolder imapFolder) throws InterruptedException, MessagingException {
+        Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
         try {
-            Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
-            f.get(ImapIdleClusterLock.TIMEOUT_MILLIS - 60000, TimeUnit.MILLISECONDS);
+            f.get(TIMEOUT_THRESHOLD_NANOS, TimeUnit.NANOSECONDS);
             return true;
         } catch (TimeoutException e) {
             // Next run...
+            f.cancel(true);
             return false;
         } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, MessagingException.class);
@@ -427,6 +495,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             }
         }
 
+        long delay = TimeUnit.NANOSECONDS.toMillis(delayNanos);
         timerTask = timerService.scheduleAtFixedRate(this, delay, delay);
     }
 

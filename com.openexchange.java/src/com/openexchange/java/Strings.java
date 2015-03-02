@@ -266,43 +266,58 @@ public class Strings {
     }
 
     /**
-     * Splits given string by comma separator.
+     * Splits given string by specifies delimiter.
      *
-     * @param s The string to split
-     * @return The splitted string
+     * @param str The string to split
+     * @param delim The delimiting character
+     * @return The split string
      */
-    public static String[] splitByCommaNotInQuotes(String str) {
+    public static String[] splitByDelimNotInQuotes(String str, char delim) {
         if (null == str) {
             return null;
         }
         List<String> splitted = new LinkedList<String>();
-        int skipCommas = 0;
         boolean inQuotes = false;
-        String s = "";
+        boolean escaped = false;
+        StringBuilder s = new StringBuilder(16);
 
         int length = str.length();
         for (int i = 0; i < length; i++) {
             char c = str.charAt(i);
-            if (c == ',' && skipCommas == 0 && !inQuotes) {
-                splitted.add(s);
-                s = "";
+            if (c == delim) {
+                if (inQuotes) {
+                    if ('"' == c && !escaped) {
+                        inQuotes = !inQuotes;
+                    }
+                    s.append(c);
+                    escaped = false;
+                } else {
+                    splitted.add(s.toString().trim());
+                    s.setLength(0);
+                }
+            } else if ('\\' == c) {
+                escaped = !escaped;
+                s.append(c);
             } else {
-                /*
-                if (c == '(') {
-                    skipCommas++;
-                }
-                if (c == ')') {
-                    skipCommas--;
-                }
-                */
-                if ('"' == c) {
+                if ('"' == c && !escaped) {
                     inQuotes = !inQuotes;
                 }
-                s += c;
+                s.append(c);
+                escaped = false;
             }
         }
-        splitted.add(s);
+        splitted.add(s.toString().trim());
         return splitted.toArray(new String[splitted.size()]);
+    }
+
+    /**
+     * Splits given string by comma separator.
+     *
+     * @param str The string to split
+     * @return The split string
+     */
+    public static String[] splitByCommaNotInQuotes(String str) {
+        return splitByDelimNotInQuotes(str, ',');
     }
 
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
@@ -1083,6 +1098,33 @@ public class Strings {
             }
         }
         return string;
+    }
+
+    /**
+     * Converts specified wildcard string to a regular expression
+     *
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    public static String wildcardToRegex(String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
+                s.append('\\');
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
     private static boolean contains(char c, char[] charArray) {
