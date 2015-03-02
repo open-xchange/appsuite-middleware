@@ -433,7 +433,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         /*
          * return handled document
          */
-        return handleDocumentStream(fileID, version, document);
+        return handleDocumentStream(fileID, version, fixIDs(document, fileID.getService(), fileID.getAccountId()));
     }
 
     @Override
