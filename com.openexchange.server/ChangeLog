@@ -1,3 +1,7 @@
+* 2015-03-02 - backend@open-xchange.com
+
+ - Fix for bug 36943: Introduced special handling for situations when a string could not be stored successfully by MySQL
+
 * 2015-02-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 35122: Ensure proper runtime values
