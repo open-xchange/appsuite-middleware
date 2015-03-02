@@ -123,7 +123,7 @@ public enum ResourceExceptionCode implements DisplayableOXExceptionCode {
     private final int detailNumber;
 
     /** Message displayed to the user */
-    private String displayMessage;
+    private final String displayMessage;
 
     /**
      * Initializes a new {@link ResourceExceptionCode}.
