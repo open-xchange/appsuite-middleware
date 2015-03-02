@@ -207,9 +207,13 @@ public final class SimHttpServletResponse implements HttpServletResponse {
         return headers;
     }
 
+    public String getHeader(String name) {
+        return headers.get(name.toLowerCase());
+    }
+
     @Override
     public boolean containsHeader(String name) {
-        return headers.containsKey(name);
+        return headers.containsKey(name.toLowerCase());
     }
 
     @Override
@@ -249,8 +253,8 @@ public final class SimHttpServletResponse implements HttpServletResponse {
 
     @Override
     public void sendRedirect(String location) throws IOException {
-        // TODO Auto-generated method stub
-
+        setStatus(HttpServletResponse.SC_FOUND);
+        setHeader("location", location);
     }
 
     @Override
