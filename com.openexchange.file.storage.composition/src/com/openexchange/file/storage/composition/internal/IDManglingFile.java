@@ -64,11 +64,17 @@ import com.openexchange.file.storage.composition.FolderID;
 public class IDManglingFile implements File {
 
     private final File file;
-
     private final String id;
-
     private final String folder;
 
+    /**
+     * Initializes a new {@link IDManglingFile} instance delegating all regular calls to the supplied file, but returning the unique ID
+     * representations of the file's own object and the parent folder ID properties based on the underlying service- and account IDs.
+     *
+     * @param file The file delegate
+     * @param service The service identifier
+     * @param account The account identifier
+     */
     public IDManglingFile(final File file, final String service, final String account) {
         id = new FileID(service, account, file.getFolderId(), file.getId()).toUniqueID();
         folder = new FolderID(service, account, file.getFolderId()).toUniqueID();
@@ -234,7 +240,7 @@ public class IDManglingFile implements File {
     public boolean isCurrentVersion() {
         return file.isCurrentVersion();
     }
-    
+
     @Override
     public Map<String, Object> getMeta() {
         return file.getMeta();
@@ -339,10 +345,15 @@ public class IDManglingFile implements File {
     public void setVersionComment(final String string) {
         file.setVersionComment(string);
     }
-    
+
     @Override
     public void setMeta(Map<String, Object> properties) {
         file.setMeta(properties);
+    }
+
+    @Override
+    public String toString() {
+        return "IDManglingFile [id=" + id + ", delegateId=" + file.getId() + "]";
     }
 
 }
