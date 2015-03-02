@@ -1,3 +1,9 @@
+open-xchange-mailfilter (7.6.0-38) stable; urgency=low
+
+  * Build for patch 2015-02-23
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 12 Feb 2015 10:53:30 +0100
+
 open-xchange-mailfilter (7.6.0-37) stable; urgency=low
 
   * Build for patch 2015-01-29
