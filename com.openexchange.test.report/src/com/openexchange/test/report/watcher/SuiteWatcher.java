@@ -64,10 +64,10 @@ import com.openexchange.test.report.util.FileUtil;
  */
 public class SuiteWatcher extends TestWatcher {
 
-    private String name;
-    private String formatterId;
-    private String writerId;
-    private String path;
+    private final String name;
+    private final String formatterId;
+    private final String writerId;
+    private final String path;
 
     /**
      * Initializes a new {@link SuiteWatcher}.
@@ -114,8 +114,44 @@ public class SuiteWatcher extends TestWatcher {
         Document doc = Document.createShell("");
         doc.select("body").first().remove();
         Element frameset = doc.select("html").first().appendElement("frameset").attr("cols", "250,*");
-        frameset.appendElement("frame").attr("src", "tests" + name + ".html");
-        frameset.appendElement("frame").attr("src", "").attr("name", "display");
+        frameset.appendElement("frame").attr("src", "tests" + name + ".html").attr("frameborder", "0");
+        frameset.appendElement("frame").attr("src", "").attr("name", "display").attr("frameborder", "0");
         return doc.toString();
+    }
+
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the formatterId
+     *
+     * @return The formatterId
+     */
+    public String getFormatterId() {
+        return formatterId;
+    }
+
+    /**
+     * Gets the writerId
+     *
+     * @return The writerId
+     */
+    public String getWriterId() {
+        return writerId;
+    }
+
+    /**
+     * Gets the path
+     *
+     * @return The path
+     */
+    public String getPath() {
+        return path;
     }
 }
