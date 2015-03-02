@@ -66,8 +66,8 @@ import com.openexchange.mobilepush.events.MobilePushPublisher;
 import com.openexchange.mobilepush.events.gcm.osgi.Services;
 import com.openexchange.mobilepush.events.storage.ContextUsers;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
+import com.openexchange.mobilepush.events.storage.PushUtility;
 import com.openexchange.mobilepush.events.storage.Subscription;
-import com.openexchange.mobilepush.events.storage.UserToken;
 
 /**
  * {@link MobilePushGCMPublisherImpl}
@@ -104,6 +104,11 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
             LOG.error("Could not get subscription {}", SERVICE_ID, e);
         }
         publishBySubscriptions(subscriptions, event);
+    }
+
+    public int length(Map<String, String> map) {
+
+        return 0;
     }
 
     private void publishByContextUsers(List<String> subscriptions, MobilePushEvent loginEvent) {
@@ -282,7 +287,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
         try {
             MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
             if (event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
-                int contextId = getContextIdForToken(event.getContextUsers(), oldRegistrationID);
+                int contextId = PushUtility.getContextIdForToken(event.getContextUsers(), oldRegistrationID);
                 if (contextId > -1 && true == mnss.updateToken(contextId, oldRegistrationID, SERVICE_ID, newRegistrationID)) {
                     LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
                 } else {
@@ -303,13 +308,19 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     private static void removeRegistrations(MobilePushEvent event, String registrationID) {
         try {
             MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
+            /**
+             * Removes subscriptions for a set of context users, happens if the 'new login' request is fired
+             */
             if (event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
-                int contextId = getContextIdForToken(event.getContextUsers(), registrationID);
+                int contextId = PushUtility.getContextIdForToken(event.getContextUsers(), registrationID);
                 if (contextId > -1 && true == mnss.deleteSubscription(contextId, registrationID, SERVICE_ID)) {
                     LOG.info("Successfully removed registration ID {}.", registrationID);
                 } else {
                     LOG.warn("Registration ID {} not removed.", registrationID);
                 }
+            /**
+             * Removes subscriptions for a user for the given registration id
+             */
             } else {
                 if (true == mnss.deleteSubscription(event.getContextId(), registrationID, SERVICE_ID)) {
                     LOG.info("Successfully removed registration ID {}.", registrationID);
@@ -320,19 +331,6 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
         } catch (OXException e) {
             LOG.error("Error removing registrations", e);
         }
-    }
-
-    private static int getContextIdForToken(List<ContextUsers> contextUsers, String registrationId) {
-        if (contextUsers != null && contextUsers.isEmpty()) {
-            for (ContextUsers cu : contextUsers) {
-                for (UserToken ut : cu.getUserTokens()) {
-                    if (ut.getToken().equals(registrationId)) {
-                        return cu.getContextId();
-                    }
-                }
-            }
-        }
-        return -1;
     }
 
     /**
