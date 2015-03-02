@@ -61,6 +61,7 @@ public class ConversationProtocol {
     private String action;
     private long requestDuration;
     private Map<String, String> requestParameters;
+    private Object body;
 
     /**
      * Initializes a new {@link ConversationProtocol}.
@@ -121,5 +122,23 @@ public class ConversationProtocol {
      */
     public void setRequestParameters(Map<String, String> requestParameters) {
         this.requestParameters = requestParameters;
+    }
+
+    /**
+     * Gets the body
+     *
+     * @return The body
+     */
+    public Object getBody() {
+        return body;
+    }
+
+    /**
+     * Sets the body
+     *
+     * @param body The body to set
+     */
+    public void setBody(Object body) {
+        this.body = body;
     }
 }

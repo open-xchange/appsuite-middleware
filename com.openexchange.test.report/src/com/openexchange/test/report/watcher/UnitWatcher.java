@@ -112,6 +112,9 @@ public class UnitWatcher extends TestWatcher {
                         result.setParameters(p.getRequestParameters());
                         result.setDuration(p.getRequestDuration());
                         result.setAssertationStatus(succeeded);
+                        if (p.getBody() != null) {
+                            result.setBody(p.getBody());
+                        }
                         if (e != null) {
                             result.setFailureReason(e.getMessage());
                             result.setThrowable(e);

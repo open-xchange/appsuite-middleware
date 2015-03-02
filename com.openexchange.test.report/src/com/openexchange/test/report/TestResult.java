@@ -66,6 +66,7 @@ public class TestResult {
 
     private String action;
     private Map<String, String> parameters;
+    private Object body;
     private long duration;
 
     private boolean assertationStatus;
@@ -226,5 +227,23 @@ public class TestResult {
      */
     public void setAction(String action) {
         this.action = action;
+    }
+
+    /**
+     * Gets the body
+     *
+     * @return The body
+     */
+    public Object getBody() {
+        return body;
+    }
+
+    /**
+     * Sets the body
+     *
+     * @param body The body to set
+     */
+    public void setBody(Object body) {
+        this.body = body;
     }
 }

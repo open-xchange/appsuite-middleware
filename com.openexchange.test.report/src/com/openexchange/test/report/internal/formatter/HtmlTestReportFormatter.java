@@ -117,6 +117,11 @@ public class HtmlTestReportFormatter implements TestReportFormatter {
         request.appendElement("div").attr("class", "sideHeader").text("Request Parameters:");
         request.appendElement("div").attr("class", "content").text(result.getParameters().toString());
         request.appendElement("div").attr("class", "nbsp");
+        if (result.getBody() != null) {
+            request.appendElement("div").attr("class", "sideHeader").text("Request Body:");
+            request.appendElement("div").attr("class", "content").text(result.getBody().toString());
+            request.appendElement("div").attr("class", "nbsp");
+        }
         request.appendElement("div").attr("class", "sideHeader").text("Request Duration:");
         request.appendElement("div").attr("class", "content").text(Long.toString(result.getDuration()) + " ms.");
         request.appendElement("div").attr("class", "nbsp");
