@@ -184,6 +184,12 @@ open-xchange-spamsettings-generic (7.6.1-0) unstable; urgency=medium
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 26 Jun 2014 11:40:09 +0200
 
+open-xchange-spamsettings-generic (7.6.0-38) stable; urgency=low
+
+  * Build for patch 2015-02-23
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 12 Feb 2015 10:54:18 +0100
+
 open-xchange-spamsettings-generic (7.6.0-37) stable; urgency=low
 
   * Build for patch 2015-01-29

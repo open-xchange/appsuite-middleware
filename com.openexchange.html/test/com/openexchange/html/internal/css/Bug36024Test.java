@@ -49,15 +49,14 @@
 
 package com.openexchange.html.internal.css;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Map;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
-
 
 /**
  * {@link Bug36024Test}
@@ -92,14 +91,13 @@ public class Bug36024Test  {
 
     @Test
     public void testPositionFixedReplacedByDisplayBlock() {
-        String content2 = "<a href=\"http://example.com/attack.html\" style=\"position     :   fixed; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>";
-        String santized2 = service.sanitize(content2, null, true, null, null);
-        Assert.assertEquals("CSS style not ", "<a href=\"http://example.com/attack.html\" style=\"display: block; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>",
-            santized2);
-
         String content = "<a href=\"http://example.com/attack.html\" style=\"position: fixed; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>";
-        String santized = service.sanitize(content, null, true, null, null);
-        Assert.assertEquals("CSS style not ", "<a href=\"http://example.com/attack.html\" style=\"display: block; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>",
-            santized);
+        String sanitized = service.sanitize(content, null, true, null, null);
+        assertTrue("CSS style not sanitized", (sanitized.indexOf("display: block") > -1));
+
+        String content2 = "<a href=\"http://example.com/attack.html\" style=\"position     :   fixed; top: 0px; left: 0; width: 1000000px; height: 100000px; background-color: red;\"></a>";
+        String sanitized2 = service.sanitize(content2, null, true, null, null);
+        assertTrue("CSS style not sanitized", (sanitized2.indexOf("display: block") > -1));
+
     }
 }
