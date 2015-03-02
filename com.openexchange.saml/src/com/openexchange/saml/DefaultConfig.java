@@ -233,4 +233,16 @@ public class DefaultConfig implements SAMLConfig {
         return null;
     }
 
+    @Override
+    public String getIDPCertificateAlias() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getIdentityProviderEntityID() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

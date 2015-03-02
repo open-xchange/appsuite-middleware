@@ -93,4 +93,8 @@ public interface SAMLConfig {
 
     String getEncryptionKeyPassword();
 
+    String getIDPCertificateAlias();
+
+    String getIdentityProviderEntityID();
+
 }

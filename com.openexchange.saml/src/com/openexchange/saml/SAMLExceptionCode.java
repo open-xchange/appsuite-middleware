@@ -71,7 +71,13 @@ public enum SAMLExceptionCode implements DisplayableOXExceptionCode {
 
     MARSHALLING_PROBLEM("An error occurred while trying to marshall a SAML object to XML: %1$s", Category.CATEGORY_ERROR, 2),
 
-    ENCODING_ERROR("An error occurred while trying to encode a SAML message for transport: %1$s", Category.CATEGORY_ERROR, 3)
+    ENCODING_ERROR("An error occurred while trying to encode a SAML message for transport: %1$s", Category.CATEGORY_ERROR, 3),
+
+    DECODING_ERROR("An error occurred while decoding a SAML message: %1$s", Category.CATEGORY_ERROR, 4),
+
+    DECRYPTION_FAILED("Could not decrypt a SAML message: %1$s", Category.CATEGORY_ERROR, 5),
+
+    SIGNATURE_VALIDATION_FAILED("Could not validate signature of a SAML element: %1$s", Category.CATEGORY_ERROR, 6)
     ;
 
     private final Category category;

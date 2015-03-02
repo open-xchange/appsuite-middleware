@@ -59,7 +59,10 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.zip.Deflater;
@@ -69,18 +72,36 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.utils.URIBuilder;
 import org.joda.time.DateTime;
+import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLVersion;
+import org.opensaml.common.binding.BasicSAMLMessageContext;
+import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
 import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
+import org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder;
+import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDPolicy;
 import org.opensaml.saml2.core.NameIDType;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.encryption.Decrypter;
+import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.KeyDescriptor;
 import org.opensaml.saml2.metadata.NameIDFormat;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.SingleLogoutService;
+import org.opensaml.security.SAMLSignatureProfileValidator;
+import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
+import org.opensaml.xml.encryption.DecryptionException;
+import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
+import org.opensaml.xml.encryption.SimpleKeyInfoReferenceEncryptedKeyResolver;
+import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.Criteria;
 import org.opensaml.xml.security.CriteriaSet;
@@ -91,9 +112,19 @@ import org.opensaml.xml.security.credential.KeyStoreCredentialResolver;
 import org.opensaml.xml.security.credential.UsageType;
 import org.opensaml.xml.security.criteria.EntityIDCriteria;
 import org.opensaml.xml.security.keyinfo.KeyInfoGenerator;
+import org.opensaml.xml.security.keyinfo.KeyInfoProvider;
+import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
+import org.opensaml.xml.security.keyinfo.provider.DEREncodedKeyValueProvider;
+import org.opensaml.xml.security.keyinfo.provider.DSAKeyValueProvider;
+import org.opensaml.xml.security.keyinfo.provider.InlineX509DataProvider;
+import org.opensaml.xml.security.keyinfo.provider.KeyInfoReferenceProvider;
+import org.opensaml.xml.security.keyinfo.provider.RSAKeyValueProvider;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
 import org.opensaml.xml.signature.KeyInfo;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.xml.validation.ValidationException;
 import org.w3c.dom.Element;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
@@ -125,7 +156,11 @@ public class SAMLServiceProvider {
 
     private Credential encryptionCredential;
 
+    private Credential idpCertificateCredential;
+
     private boolean initialized;
+
+    private KeyStoreCredentialResolver keyStoreCredentialResolver;
 
     public SAMLServiceProvider(SAMLConfig config, OpenSAML openSAML) throws OXException {
         super();
@@ -180,57 +215,47 @@ public class SAMLServiceProvider {
     }
 
     private void initCredentials() throws OXException {
-        boolean signAuthnRequest = config.signAuthnRequest();
-        boolean wantAssertionsSigned = config.wantAssertionsSigned();
-        if (signAuthnRequest || wantAssertionsSigned) {
-            String signingKeyAlias = config.getSigningKeyAlias();
-            String signingKeyPassword = config.getSigningKeyPassword();
-            String encryptionKeyAlias = config.getEncryptionKeyAlias();
-            String encryptionKeyPassword = config.getEncryptionKeyPassword();
-            Map<String, String> passwordMap = new HashMap<String, String>(4);
-            if (signingKeyAlias != null && signingKeyPassword != null) {
-                passwordMap.put(signingKeyAlias, signingKeyPassword);
-            }
-            if (encryptionKeyAlias != null && encryptionKeyPassword != null) {
-                passwordMap.put(encryptionKeyAlias, encryptionKeyPassword);
-            }
+        String signingKeyAlias = config.getSigningKeyAlias();
+        String signingKeyPassword = config.getSigningKeyPassword();
+        String encryptionKeyAlias = config.getEncryptionKeyAlias();
+        String encryptionKeyPassword = config.getEncryptionKeyPassword();
+        String idpCertificateAlias = config.getIDPCertificateAlias();
+        Map<String, String> passwordMap = new HashMap<String, String>(4);
+        if (!Strings.isEmpty(signingKeyAlias) && !Strings.isEmpty(signingKeyPassword)) {
+            passwordMap.put(signingKeyAlias, signingKeyPassword);
+        }
+        if (!Strings.isEmpty(encryptionKeyAlias) && !Strings.isEmpty(encryptionKeyPassword)) {
+            passwordMap.put(encryptionKeyAlias, encryptionKeyPassword);
+        }
 
-            KeyStoreCredentialResolver resolver = new KeyStoreCredentialResolver(keystore, passwordMap);
-            if (signAuthnRequest) {
-                try {
-                    Criteria criteria = new EntityIDCriteria(signingKeyAlias);
-                    CriteriaSet criteriaSet = new CriteriaSet(criteria);
-                    Credential credential = resolver.resolveSingle(criteriaSet);
-                    if (credential == null) {
-                        throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("Found no signing key for alias '" + signingKeyAlias + "'");
-                    }
+        keyStoreCredentialResolver = new KeyStoreCredentialResolver(keystore, passwordMap);
+        if (config.signAuthnRequest()) {
+            signingCredential = resolveCredential(keyStoreCredentialResolver, signingKeyAlias);
+        }
 
-                    // TODO validate algorithm
-                    signingCredential = credential;
-                } catch (SecurityException e) {
-                    throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-                }
-            }
+        if (config.wantAssertionsSigned()) {
+            idpCertificateCredential = resolveCredential(keyStoreCredentialResolver, idpCertificateAlias);
+        }
 
-            if (wantAssertionsSigned) {
-                try {
-                    Criteria criteria = new EntityIDCriteria(encryptionKeyAlias);
-                    CriteriaSet criteriaSet = new CriteriaSet(criteria);
-                    Credential credential = resolver.resolveSingle(criteriaSet);
-                    if (credential == null) {
-                        throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("Found no encryption key for alias '" + signingKeyAlias + "'");
-                    }
-
-
-                    // TODO validate algorithm
-                    encryptionCredential = credential;
-                } catch (SecurityException e) {
-                    throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-                }
-            }
+        if (!Strings.isEmpty(encryptionKeyAlias)) {
+            encryptionCredential = resolveCredential(keyStoreCredentialResolver, encryptionKeyAlias);
         }
     }
 
+    private static Credential resolveCredential(KeyStoreCredentialResolver resolver, String alias) throws OXException {
+        try {
+            Criteria criteria = new EntityIDCriteria(alias);
+            CriteriaSet criteriaSet = new CriteriaSet(criteria);
+            Credential credential = resolver.resolveSingle(criteriaSet);
+            if (credential == null) {
+                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("Found no key store entry for alias '" + alias + "'");
+            }
+
+            return credential;
+        } catch (SecurityException e) {
+            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+        }
+    }
 
     KeyStore getKeystore() {
         return keystore;
@@ -239,10 +264,10 @@ public class SAMLServiceProvider {
     public String getMetadataXML() throws OXException {
         checkInitialized();
 
-//        AssertionConsumerService redirectACS = openSAML.buildSAMLObject(AssertionConsumerService.class);
-//        redirectACS.setIndex(1);
-//        redirectACS.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
-//        redirectACS.setLocation(config.getAssertionConsumerServiceURL());
+        // AssertionConsumerService redirectACS = openSAML.buildSAMLObject(AssertionConsumerService.class);
+        // redirectACS.setIndex(1);
+        // redirectACS.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+        // redirectACS.setLocation(config.getAssertionConsumerServiceURL());
 
         AssertionConsumerService postACS = openSAML.buildSAMLObject(AssertionConsumerService.class);
         postACS.setIndex(1);
@@ -250,7 +275,7 @@ public class SAMLServiceProvider {
         postACS.setLocation(config.getAssertionConsumerServiceURL());
 
         SPSSODescriptor spssoDescriptor = openSAML.buildSAMLObject(SPSSODescriptor.class);
-//        spssoDescriptor.getAssertionConsumerServices().add(redirectACS);
+        // spssoDescriptor.getAssertionConsumerServices().add(redirectACS);
         spssoDescriptor.getAssertionConsumerServices().add(postACS);
         spssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
 
@@ -320,14 +345,14 @@ public class SAMLServiceProvider {
         try {
             String authnRequestXML = openSAML.marshall(authnRequest);
             switch (config.getProtocolBinding()) {
-                case HTTP_POST:
-//                    sendFormResponse(authnRequestXML, httpResponse);
-                    break;
-                case HTTP_REDIRECT:
-                    sendRedirect(authnRequestXML, httpResponse);
-                    break;
-                default:
-//                    throw new ServletException("Cannot handle SAML 2.0 protocol binding '" + config.getProtocolBinding().name() + "'!");
+            case HTTP_POST:
+                // sendFormResponse(authnRequestXML, httpResponse);
+                break;
+            case HTTP_REDIRECT:
+                sendRedirect(authnRequestXML, httpResponse);
+                break;
+            default:
+                // throw new ServletException("Cannot handle SAML 2.0 protocol binding '" + config.getProtocolBinding().name() + "'!");
             }
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
@@ -352,9 +377,13 @@ public class SAMLServiceProvider {
             // TODO: Do we need a RelayState?
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderURL()).setParameter("SAMLRequest", encoded);
             if (config.signAuthnRequest()) {
-                String sigAlg = openSAML.getGlobalSecurityConfiguration().getSignatureAlgorithmURI(signingCredential.getPrivateKey().getAlgorithm());
+                String sigAlg = openSAML.getGlobalSecurityConfiguration().getSignatureAlgorithmURI(
+                    signingCredential.getPrivateKey().getAlgorithm());
                 redirectLocationBuilder.setParameter("SigAlg", sigAlg);
-                byte[] rawSignature = SigningUtil.signWithURI(signingCredential, sigAlg, redirectLocationBuilder.build().getRawQuery().getBytes(Charsets.UTF_8));
+                byte[] rawSignature = SigningUtil.signWithURI(
+                    signingCredential,
+                    sigAlg,
+                    redirectLocationBuilder.build().getRawQuery().getBytes(Charsets.UTF_8));
                 String signature = Base64.encodeBase64String(rawSignature);
                 redirectLocationBuilder.setParameter("Signature", signature);
             }
@@ -400,7 +429,7 @@ public class SAMLServiceProvider {
         authnRequest.setIsPassive(Boolean.FALSE);
         authnRequest.setForceAuthn(Boolean.FALSE);
         authnRequest.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
-        authnRequest.setIssueInstant(new DateTime()); // FIXME: joda time must be a global lib
+        authnRequest.setIssueInstant(new DateTime());
 
         // TODO:
         // - make configurable?
@@ -413,6 +442,103 @@ public class SAMLServiceProvider {
         return authnRequest;
     }
 
+    private Decrypter getDecrypter() {
+        /*
+         * Currently this decrypter is only able to decrypt assertions
+         * that come along with their symmetric encrytion keys which are
+         * in turn encrypted with the public key of 'encryptionCredential'
+         */
+        List<KeyInfoProvider> keyInfoProviders = new ArrayList<KeyInfoProvider>(4);
+        keyInfoProviders.add(new InlineX509DataProvider());
+        keyInfoProviders.add(new KeyInfoReferenceProvider());
+        keyInfoProviders.add(new DEREncodedKeyValueProvider());
+        keyInfoProviders.add(new RSAKeyValueProvider());
+        keyInfoProviders.add(new DSAKeyValueProvider());
+
+        ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
+        encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
+        encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
+        encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
+        encryptedKeyResolver.getResolverChain().add(new SimpleKeyInfoReferenceEncryptedKeyResolver());
+
+        StaticKeyInfoCredentialResolver skicr = new StaticKeyInfoCredentialResolver(encryptionCredential);
+        Decrypter decrypter = new Decrypter(null, skicr, new InlineEncryptedKeyResolver());
+        decrypter.setRootInNewDocument(true);
+        return decrypter;
+    }
+
+    public void handleRedirectAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+        handleAuthnResponse(httpRequest, httpResponse, new HTTPRedirectDeflateDecoder());
+    }
+
+    public void handlePOSTAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+        handleAuthnResponse(httpRequest, httpResponse, new HTTPPostDecoder());
+    }
+
+    private void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, SAMLMessageDecoder decoder) throws OXException {
+        BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject> context = new BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject>();
+        context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
+        context.setInboundMessageTransport(new HttpServletRequestAdapter(httpRequest));
+        context.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
+        context.setPeerEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+
+        try {
+            decoder.decode(context);
+            Response response = (Response) context.getInboundSAMLMessage();
+
+            SAMLSignatureProfileValidator profileValidator = new SAMLSignatureProfileValidator();
+            SignatureValidator signatureValidator = new SignatureValidator(idpCertificateCredential);
+            if (response.isSigned() && validateSignatures()) {
+                Signature signature = response.getSignature();
+                profileValidator.validate(signature);
+                signatureValidator.validate(signature);
+            }
+
+            List<Assertion> assertions = decryptAndCollectAssertions(response);
+            for (Assertion assertion : assertions) {
+                if (assertion.isSigned()) {
+                    Signature signature = assertion.getSignature();
+                    profileValidator.validate(signature);
+                    signatureValidator.validate(signature);
+                }
+            }
+
+            System.out.println(assertions);
+        } catch (MessageDecodingException e) {
+            throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
+        } catch (SecurityException e) {
+            throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
+        } catch (ValidationException e) {
+            throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create(e, e.getMessage());
+        } catch (DecryptionException e) {
+            throw SAMLExceptionCode.DECRYPTION_FAILED.create(e, e.getMessage());
+        }
+
+        /*
+         * TODO: - resolve user and context - acquire token - redirect to token-login
+         */
+    }
+
+    private List<Assertion> decryptAndCollectAssertions(Response response) throws DecryptionException {
+        List<Assertion> assertions = new LinkedList<Assertion>();
+        List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
+        if (encryptedAssertions.size() > 0) {
+            Decrypter decrypter = getDecrypter();
+            for (EncryptedAssertion encryptedAssertion : encryptedAssertions) {
+                assertions.add(decrypter.decrypt(encryptedAssertion));
+            }
+        }
+
+        for (Assertion assertion : response.getAssertions()) {
+            assertions.add(assertion);
+        }
+
+        return assertions;
+    }
+
+    private boolean validateSignatures() {
+        return idpCertificateCredential != null;
+    }
 
     public void setCustomizer(ServiceProviderCustomizer customizer) {
         this.customizer = customizer;
@@ -426,12 +552,12 @@ public class SAMLServiceProvider {
 
     private static String getBindingURI(Binding binding) {
         switch (binding) {
-            case HTTP_POST:
-                return SAMLConstants.SAML2_POST_BINDING_URI;
-            case HTTP_REDIRECT:
-                return SAMLConstants.SAML2_REDIRECT_BINDING_URI;
-            default:
-                return null;
+        case HTTP_POST:
+            return SAMLConstants.SAML2_POST_BINDING_URI;
+        case HTTP_REDIRECT:
+            return SAMLConstants.SAML2_REDIRECT_BINDING_URI;
+        default:
+            return null;
         }
     }
 
