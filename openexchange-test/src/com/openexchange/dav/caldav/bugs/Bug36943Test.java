@@ -49,12 +49,26 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import java.io.IOException;
 import java.util.Date;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.client.methods.PropPatchMethod;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
+import org.w3c.dom.Document;
+import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.dav.caldav.methods.CustomXmlRequestEntity;
+import com.openexchange.dav.caldav.properties.SupportedCalendarComponentSetProperty;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -129,6 +143,126 @@ public class Bug36943Test extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVTodo().getUID());
         assertNotNull("No SUMMARY in iCal found", iCalResource.getVTodo().getSummary());
         assertEquals("SUMMARY wrong", expectedTitle, iCalResource.getVTodo().getSummary());
+    }
+
+    public void testCreateCollectionWithAstralSymbols() throws Exception {
+        /*
+         * perform mkcalendar request
+         */
+        String uid = randomUID();
+        String name = "Pile of \uD83D\uDCA9 poo " + randomUID();
+        DavPropertySet setProperties = new DavPropertySet();
+        setProperties.add(new SupportedCalendarComponentSetProperty(SupportedCalendarComponentSetProperty.Comp.VEVENT));
+        setProperties.add(new DefaultDavProperty<String>(PropertyNames.DISPLAYNAME, name));
+        mkCalendar(uid, setProperties);
+        /*
+         * verify calendar on server
+         */
+        String expectedName = name.replaceAll("\uD83D\uDCA9", "");
+        FolderObject folder = super.getCalendarFolder(expectedName);
+        assertNotNull("folder not found on server", folder);
+        rememberForCleanUp(folder);
+        assertEquals("folder name wrong", expectedName, folder.getFolderName());
+        /*
+         * verify calendar on client
+         */
+        DavPropertyNameSet props = new DavPropertyNameSet();
+        props.add(PropertyNames.DISPLAYNAME);
+        props.add(PropertyNames.RESOURCE_ID);
+        props.add(PropertyNames.RESOURCETYPE);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/",
+                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
+        assertNotNull("got no response", responses);
+        assertTrue("got no response", 0 < responses.length);
+        MultiStatusResponse folderResponse = null;
+        for (MultiStatusResponse response : responses) {
+            if (response.getPropertyNames(HttpServletResponse.SC_OK).contains(PropertyNames.DISPLAYNAME)) {
+                if (expectedName.equals(super.extractTextContent(PropertyNames.DISPLAYNAME, response))) {
+                    folderResponse = response;
+                    break;
+                }
+
+            }
+        }
+        assertNotNull("no response for new folder", folderResponse);
+    }
+
+    public void testRenameCollectionWithAstralSymbols() throws Exception {
+        /*
+         * create calendar folder on server
+         */
+        String originalName = randomUID();
+        FolderObject folder = createFolder(originalName);
+        /*
+         * verify calendar on client
+         */
+        DavPropertyNameSet props = new DavPropertyNameSet();
+        props.add(PropertyNames.DISPLAYNAME);
+        props.add(PropertyNames.RESOURCE_ID);
+        props.add(PropertyNames.RESOURCETYPE);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/",
+                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
+        assertNotNull("got no response", responses);
+        assertTrue("got no response", 0 < responses.length);
+        MultiStatusResponse folderResponse = null;
+        for (MultiStatusResponse response : responses) {
+            if (response.getPropertyNames(HttpServletResponse.SC_OK).contains(PropertyNames.DISPLAYNAME)) {
+                if (originalName.equals(super.extractTextContent(PropertyNames.DISPLAYNAME, response))) {
+                    folderResponse = response;
+                    break;
+                }
+
+            }
+        }
+        assertNotNull("no response for new folder", folderResponse);
+        /*
+         * rename folder on client
+         */
+        String newName = "Pile of \uD83D\uDCA9 poo " + randomUID();
+        DavPropertySet setProperties = new DavPropertySet();
+        setProperties.add(new DefaultDavProperty<String>(PropertyNames.DISPLAYNAME, newName));
+        PropPatchMethod propPatch = new PropPatchMethod(getWebDAVClient().getBaseURI() + folderResponse.getHref(), setProperties, new DavPropertyNameSet()) {
+
+            @Override
+            public void setRequestBody(Document requestBody) throws IOException {
+                setRequestEntity(new CustomXmlRequestEntity(requestBody, "UTF-16"));
+            }
+        };
+        responses = super.getWebDAVClient().doPropPatch(propPatch, StatusCodes.SC_MULTISTATUS);
+        assertNotNull("got no response", responses);
+        assertTrue("got no response", 0 < responses.length);
+        /*
+         * verify calendar folder on server
+         */
+        String expectedName = newName.replaceAll("\uD83D\uDCA9", "");
+        folder = getCalendarFolder(expectedName);
+        assertNotNull("folder not found on server", folder);
+        rememberForCleanUp(folder);
+        assertEquals("folder name wrong", expectedName, folder.getFolderName());
+        /*
+         * verify calendar on client
+         */
+        props = new DavPropertyNameSet();
+        props.add(PropertyNames.DISPLAYNAME);
+        props.add(PropertyNames.RESOURCE_ID);
+        props.add(PropertyNames.RESOURCETYPE);
+        propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        responses = getWebDAVClient().doPropFind(propFind);
+        assertNotNull("got no response", responses);
+        assertTrue("got no response", 0 < responses.length);
+        folderResponse = null;
+        for (MultiStatusResponse response : responses) {
+            if (response.getPropertyNames(HttpServletResponse.SC_OK).contains(PropertyNames.DISPLAYNAME)) {
+                if (expectedName.equals(super.extractTextContent(PropertyNames.DISPLAYNAME, response))) {
+                    folderResponse = response;
+                    break;
+                }
+
+            }
+        }
+        assertNotNull("no response for renamed folder", folderResponse);
     }
 
 }

@@ -50,7 +50,6 @@
 package com.openexchange.dav;
 
 import java.io.IOException;
-import org.junit.Assert;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -63,9 +62,11 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.client.methods.PropPatchMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.junit.Assert;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionReportMethod;
@@ -203,17 +204,29 @@ public class WebDAVClient {
 		return response;
 	}
 
-	public MultiStatusResponse[] doPropFind(final PropFindMethod propFind, final int expectedStatus) throws HttpException, IOException, DavException {
-		try {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(propFind));
-	    	return propFind.getResponseBodyAsMultiStatus().getResponses();
-		} catch (final DavException e) {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
-			return null;
-		} finally {
-			release(propFind);
-		}
-	}
+    public MultiStatusResponse[] doPropFind(final PropFindMethod propFind, final int expectedStatus) throws HttpException, IOException, DavException {
+        try {
+            Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(propFind));
+            return propFind.getResponseBodyAsMultiStatus().getResponses();
+        } catch (final DavException e) {
+            Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
+            return null;
+        } finally {
+            release(propFind);
+        }
+    }
+
+    public MultiStatusResponse[] doPropPatch(PropPatchMethod propPatch, int expectedStatus) throws HttpException, IOException, DavException {
+        try {
+            Assert.assertEquals("unexpected http status", expectedStatus, httpClient.executeMethod(propPatch));
+            return propPatch.getResponseBodyAsMultiStatus().getResponses();
+        } catch (DavException e) {
+            Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
+            return null;
+        } finally {
+            release(propPatch);
+        }
+    }
 
 	public MultiStatusResponse[] doPropFind(final PropFindMethod propFind) throws HttpException, IOException, DavException {
 		return this.doPropFind(propFind, StatusCodes.SC_MULTISTATUS);

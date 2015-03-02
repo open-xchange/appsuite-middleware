@@ -49,77 +49,65 @@
 
 package com.openexchange.dav.caldav.methods;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import javax.xml.parsers.ParserConfigurationException;
-import org.apache.commons.httpclient.HttpConnection;
-import org.apache.commons.httpclient.HttpState;
-import org.apache.jackrabbit.webdav.DavServletResponse;
-import org.apache.jackrabbit.webdav.MultiStatus;
-import org.apache.jackrabbit.webdav.MultiStatusResponse;
-import org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
-import org.apache.jackrabbit.webdav.property.DavPropertySet;
-import org.apache.jackrabbit.webdav.xml.DomUtil;
+import java.io.OutputStream;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.jackrabbit.webdav.client.methods.XmlRequestEntity;
+import org.apache.jackrabbit.webdav.xml.ResultHelper;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import com.openexchange.dav.PropertyNames;
+import org.xml.sax.SAXException;
 
 /**
- * {@link MkCalendarMethod}
+ * {@link CustomXmlRequestEntity}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class MkCalendarMethod extends DavMethodBase {
+public class CustomXmlRequestEntity implements RequestEntity {
 
-    public static final String METHOD_MKCALENDAR = "MKCALENDAR";
+    private final ByteArrayOutputStream xml = new ByteArrayOutputStream();
 
-    /**
-     * Initializes a new {@link MkCalendarMethod}.
-     *
-     * @param uri
-     * @param setProperties
-     * @throws IOException
-     */
-    public MkCalendarMethod(String uri, DavPropertySet setProperties) throws IOException {
-        super(uri);
-        if (null == setProperties) {
-            throw new IllegalArgumentException("setProperties must not be null.");
-        }
-        if (setProperties.isEmpty()) {
-            throw new IllegalArgumentException("setProperties cannot be empty.");
-        }
+    public CustomXmlRequestEntity(Document xmlDocument, String encoding) throws IOException {
         try {
-            Document document = DomUtil.createDocument();
-            Element propupdate = DomUtil.addChildElement(
-                document, PropertyNames.MKCALENDAR.getName(), PropertyNames.MKCALENDAR.getNamespace());
-            Element set = DomUtil.addChildElement(propupdate, XML_SET, NAMESPACE);
-            set.appendChild(setProperties.toXml(document));
-            setRequestBody(document);
-        } catch (ParserConfigurationException e) {
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            if (null != encoding) {
+                transformer.setOutputProperty(javax.xml.transform.OutputKeys.ENCODING, encoding);
+            }
+            transformer.transform(new DOMSource(xmlDocument), ResultHelper.getResult(new StreamResult(xml)));
+        } catch (TransformerException e) {
+            LoggerFactory.getLogger(XmlRequestEntity.class).error(e.getMessage());
+            throw new IOException(e.getMessage());
+        } catch (SAXException e) {
+            LoggerFactory.getLogger(XmlRequestEntity.class).error(e.getMessage());
             throw new IOException(e.getMessage());
         }
     }
 
     @Override
-    public void setRequestBody(Document requestBody) throws IOException {
-        setRequestEntity(new CustomXmlRequestEntity(requestBody, "UTF-16"));
+    public boolean isRepeatable() {
+        return true;
     }
 
     @Override
-    public String getName() {
-        return METHOD_MKCALENDAR;
+    public String getContentType() {
+        // TODO: Shouldn't this be application/xml? See JCR-1621
+        return "text/xml; charset=UTF-8";
     }
 
     @Override
-    protected boolean isSuccess(int statusCode) {
-        return statusCode == DavServletResponse.SC_CREATED;
+    public void writeRequest(OutputStream out) throws IOException {
+        xml.writeTo(out);
     }
 
     @Override
-    protected void processMultiStatusBody(MultiStatus multiStatus, HttpState httpState, HttpConnection httpConnection) {
-        MultiStatusResponse[] resp = multiStatus.getResponses();
-        if (0 < resp.length) {
-            super.processMultiStatusBody(multiStatus, httpState, httpConnection);
-        }
+    public long getContentLength() {
+        return xml.size();
     }
 
 }
