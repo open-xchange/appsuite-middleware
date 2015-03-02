@@ -209,7 +209,7 @@ public final class UploadUtility {
      * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
      * <b>NOTE</b>:<br>
      * An attempt calling {@link FileUploadBase#parseRequest(org.apache.commons.fileupload.RequestContext) parseRequest()} with the returned
-     * <code>ServletFileUpload</code> instance will throw a {@link NullPointerException}.
+     * <code>ServletFileUpload</code> instance will throw a {@code FileUploadException}.
      * </div>
      *
      * @param maxFileSize The maximum allowed size of a single uploaded file
@@ -223,7 +223,7 @@ public final class UploadUtility {
         sfu.setFileSizeMax(maxFileSize);
         // Set overall request size constraint
         sfu.setSizeMax(maxOverallSize);
-        return sfu;
+        return new IteratorOnlyServletFileUpload(sfu);
     }
 
     /**
