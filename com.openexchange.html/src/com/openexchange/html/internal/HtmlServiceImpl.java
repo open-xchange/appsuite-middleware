@@ -51,6 +51,7 @@ package com.openexchange.html.internal;
 
 import static com.openexchange.java.Strings.isEmpty;
 import gnu.inet.encoding.IDNAException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -105,6 +106,7 @@ import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
@@ -610,6 +612,7 @@ public final class HtmlServiceImpl implements HtmlService {
             // Replace HTML entities
             html = keepUnicodeForEntities(html);
             htmlSanitizeResult.setContent(html);
+
             return htmlSanitizeResult;
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized.", e);
@@ -1918,6 +1921,25 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             LOG.warn("HtmlCleaner library failed to pretty-print HTML content", rte);
             return htmlContent;
+        }
+    }
+
+    /**
+     * Writes given string to specified file
+     *
+     * @param str The string to write
+     * @param file The file to write to
+     */
+    protected static void writeTo(String str, String file) {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file, false);
+            fos.write(str.getBytes(Charsets.UTF_8));
+            fos.flush();
+        } catch (Exception x) {
+            // Ignore
+        } finally {
+            Streams.close(fos);
         }
     }
 

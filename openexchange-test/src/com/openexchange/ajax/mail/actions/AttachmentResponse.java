@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
@@ -56,15 +57,49 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  * {@link AttachmentResponse}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public class AttachmentResponse extends AbstractAJAXResponse {
 
-	/**
-	 * @param response
-	 */
-	AttachmentResponse(final Response response) {
-		super(response);
-	}
+    private final String stringBody;
+    private final byte[] binaryBody;
+
+    AttachmentResponse(String stringBody) {
+        super(new Response(new JSONObject(0)));
+        this.stringBody = stringBody;
+        binaryBody = null;
+    }
+
+    AttachmentResponse(byte[] binaryBody) {
+        super(new Response(new JSONObject(0)));
+        this.binaryBody = binaryBody;
+        stringBody = null;
+    }
+
+    /**
+     * Initializes a new {@link AttachmentResponse}.
+     */
+    public AttachmentResponse(Response response) {
+        super(response);
+        binaryBody = null;
+        stringBody = null;
+    }
+
+    /**
+     * Gets the binary body
+     *
+     * @return The binary body
+     */
+    public byte[] getBinaryBody() {
+        return binaryBody;
+    }
+
+    /**
+     * Gets the string body
+     *
+     * @return The string body
+     */
+    public String getStringBody() {
+        return stringBody;
+    }
 
 }

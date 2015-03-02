@@ -55,6 +55,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.html.internal.Bug27708Test;
 import com.openexchange.html.internal.HtmlServiceImplTest;
 import com.openexchange.html.internal.css.Bug30114Test;
+import com.openexchange.html.internal.css.Bug36024Test;
 import com.openexchange.html.internal.css.CSSMatcherTest;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
 
@@ -64,18 +65,22 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(Suite.class)
-@SuiteClasses({ 
-    Bug26237Test.class, 
-    Bug26611Test.class, 
-    Bug27335Test.class, 
-    Bug27708Test.class, 
-    CSSMatcherTest.class, 
-    Bug30114Test.class, 
-    Bug31826Test.class, 
+@SuiteClasses({
+    Bug26237Test.class,
+    Bug26611Test.class,
+    Bug27335Test.class,
+    Bug27708Test.class,
+    CSSMatcherTest.class,
+    Bug30114Test.class,
+    Bug31826Test.class,
+    Bug35982Test.class,
+    Bug36024Test.class,
+    Bug36412Test.class,
     ConformHtmlTest.class,
     HtmlServiceImplTest.class,
     FilterJerichoHandlerTest.class
 })
+
 public class UnitTests {
 
     private UnitTests() {

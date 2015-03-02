@@ -50,15 +50,14 @@
 package com.openexchange.mail.mime;
 
 import static com.openexchange.java.Strings.toLowerCase;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -66,9 +65,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -90,7 +92,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MimeType2ExtMap {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeType2ExtMap.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeType2ExtMap.class);
 
     private static volatile ConcurrentMap<String, String> typeMap;
 
@@ -146,12 +148,12 @@ public final class MimeType2ExtMap {
                 try {
                     typeMap = new ConcurrentHashMap<String, String>(1024);
                     extMap = new ConcurrentHashMap<String, List<String>>(1024);
-                    final StringBuilder sb = new StringBuilder(128);
-                    final boolean debugEnabled = LOG.isDebugEnabled();
+                    StringBuilder sb = new StringBuilder(128);
+                    boolean debugEnabled = LOG.isDebugEnabled();
                     {
-                        final String homeDir = System.getProperty("user.home");
+                        String homeDir = System.getProperty("user.home");
                         if (homeDir != null) {
-                            final File file = new File(sb.append(homeDir).append(File.separatorChar).append(".mime.types").toString());
+                            File file = new File(sb.append(homeDir).append(File.separatorChar).append(".mime.types").toString());
                             if (file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
@@ -162,12 +164,11 @@ public final class MimeType2ExtMap {
                         }
                     }
                     {
-                        final String javaHome = System.getProperty("java.home");
+                        String javaHome = System.getProperty("java.home");
                         if (javaHome != null) {
                             sb.setLength(0);
-                            final File file =
-                                new File(sb.append(javaHome).append(File.separatorChar).append("lib").append(File.separator).append(
-                                    "mime.types").toString());
+                            File file =
+                                new File(sb.append(javaHome).append(File.separatorChar).append("lib").append(File.separator).append("mime.types").toString());
                             if (file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
@@ -178,8 +179,8 @@ public final class MimeType2ExtMap {
                         }
                     }
                     {
-                        for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mime.types"); e.hasMoreElements();) {
-                            final URL url = e.nextElement();
+                        for (Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mime.types"); e.hasMoreElements();) {
+                            URL url = e.nextElement();
                             if (debugEnabled) {
                                 sb.setLength(0);
                                 LOG.debug(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
@@ -188,8 +189,8 @@ public final class MimeType2ExtMap {
                         }
                     }
                     {
-                        for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mimetypes.default"); e.hasMoreElements();) {
-                            final URL url = e.nextElement();
+                        for (Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mimetypes.default"); e.hasMoreElements();) {
+                            URL url = e.nextElement();
                             if (debugEnabled) {
                                 sb.setLength(0);
                                 LOG.debug(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
@@ -200,8 +201,8 @@ public final class MimeType2ExtMap {
                     {
                         String mimeTypesFileName = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFileName);
                         if ((mimeTypesFileName != null) && ((mimeTypesFileName = mimeTypesFileName.trim()).length() > 0)) {
-                            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                            final File file = service.getFileByName(mimeTypesFileName);
+                            ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                            File file = service.getFileByName(mimeTypesFileName);
                             if (file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
@@ -213,7 +214,7 @@ public final class MimeType2ExtMap {
 
                     }
                     LOG.debug("MIMEType2ExtMap successfully initialized");
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     LOG.error("", e);
                 }
             }
@@ -226,7 +227,7 @@ public final class MimeType2ExtMap {
      * @param mimeType The MIME type
      * @param fileExtension The file extension
      */
-    public static void addMimeType(final String mimeType, final String fileExtension) {
+    public static void addMimeType(String mimeType, String fileExtension) {
         addMimeType(mimeType, Collections.singletonList(fileExtension));
     }
 
@@ -236,17 +237,17 @@ public final class MimeType2ExtMap {
      * @param mimeType The MIME type
      * @param fileExtensions The file extensions
      */
-    public static void addMimeType(final String mimeType, final List<String> fileExtensions) {
+    public static void addMimeType(String mimeType, List<String> fileExtensions) {
         init();
-        final ConcurrentMap<String, String> tm = typeMap;
+        ConcurrentMap<String, String> tm = typeMap;
         for (String ext : fileExtensions) {
             tm.put(ext, mimeType);
         }
 
-        final ConcurrentMap<String, List<String>> em = extMap;
+        ConcurrentMap<String, List<String>> em = extMap;
         List<String> list = em.get(mimeType);
         if (null == list) {
-            final List<String> nl = new ArrayList<String>(2);
+            List<String> nl = new CopyOnWriteArrayList<String>();
             list = em.putIfAbsent(mimeType, nl);
             if (null == list) {
                 list = nl;
@@ -263,7 +264,7 @@ public final class MimeType2ExtMap {
      * @param file The file
      * @return The MIME type associated with given file or <code>"application/octet-stream"</code> if none found
      */
-    public static String getContentType(final File file) {
+    public static String getContentType(File file) {
         return getContentType(file.getName(), MIME_APPL_OCTET);
     }
 
@@ -274,7 +275,7 @@ public final class MimeType2ExtMap {
      * @param fallBack The fall-back value to return in case file extension is unknown
      * @return The MIME type associated with given file or <code>"application/octet-stream"</code> if none found
      */
-    public static String getContentType(final File file, String fallBack) {
+    public static String getContentType(File file, String fallBack) {
         return getContentType(file.getName(), fallBack);
     }
 
@@ -287,7 +288,7 @@ public final class MimeType2ExtMap {
      * @return The MIME type associated with given file name or <code>"application/octet-stream"</code> if none found
      * @see #getContentType(String, String)
      */
-    public static String getContentType(final String fileName) {
+    public static String getContentType(String fileName) {
         return getContentType(fileName, MIME_APPL_OCTET);
     }
 
@@ -298,21 +299,21 @@ public final class MimeType2ExtMap {
      * @param fallBack The fall-back value to return in case file extension is unknown
      * @return The MIME type associated with given file name or <code>fallBack</code> if none found
      */
-    public static String getContentType(final String fileName, final String fallBack) {
+    public static String getContentType(String fileName, String fallBack) {
         init();
         if (Strings.isEmpty(fileName)) {
             return fallBack;
         }
-        final String fn = Strings.unquote(fileName);
-        final int pos = fn.lastIndexOf('.');
+        String fn = Strings.unquote(fileName);
+        int pos = fn.lastIndexOf('.');
         if (pos < 0) {
             return fallBack;
         }
-        final String s1 = fn.substring(pos + 1);
+        String s1 = fn.substring(pos + 1);
         if (s1.length() == 0) {
             return fallBack;
         }
-        final String type = typeMap.get(toLowerCase(s1));
+        String type = typeMap.get(toLowerCase(s1));
         return null == type ? fallBack : type;
     }
 
@@ -343,7 +344,7 @@ public final class MimeType2ExtMap {
         if (Strings.isEmpty(extension)) {
             return fallBack;
         }
-        final String type = typeMap.get(toLowerCase(extension));
+        String type = typeMap.get(toLowerCase(extension));
         return null == type ? fallBack : type;
     }
 
@@ -365,7 +366,7 @@ public final class MimeType2ExtMap {
         if (!extMap.containsKey(toLowerCase(mimeType))) {
             return DEFAULT_EXTENSIONS;
         }
-        final List<String> list = extMap.get(mimeType);
+        List<String> list = extMap.get(mimeType);
         return null == list ? DEFAULT_EXTENSIONS : Collections.unmodifiableList(list);
     }
 
@@ -376,15 +377,26 @@ public final class MimeType2ExtMap {
      * @return The file extension for given MIME type or <code>dat</code> if none found
      */
     public static String getFileExtension(String mimeType) {
+        return getFileExtension(mimeType, DEFAULT_EXT);
+    }
+
+    /**
+     * Gets the file extension for given MIME type.
+     *
+     * @param mimeType The MIME type
+     * @param defaultExt The default extension to return
+     * @return The file extension for given MIME type or <code>defaultExt</code> if none found
+     */
+    public static String getFileExtension(String mimeType, String defaultExt) {
         init();
         if (Strings.isEmpty(mimeType)) {
-            return DEFAULT_EXT;
+            return defaultExt;
         }
         if (!extMap.containsKey(toLowerCase(mimeType))) {
-            return DEFAULT_EXT;
+            return defaultExt;
         }
-        final List<String> list = extMap.get(mimeType);
-        return null == list || list.isEmpty() ? DEFAULT_EXT : list.get(0);
+        List<String> list = extMap.get(mimeType);
+        return null == list || list.isEmpty() ? defaultExt : list.get(0);
     }
 
     /**
@@ -392,7 +404,7 @@ public final class MimeType2ExtMap {
      *
      * @param fileStr The MIME type file to load
      */
-    public static void load(final String fileStr) {
+    public static void load(String fileStr) {
         init();
         load(new File(fileStr));
     }
@@ -402,7 +414,7 @@ public final class MimeType2ExtMap {
      *
      * @param file The MIME type file to load
      */
-    public static void load(final File file) {
+    public static void load(File file) {
         init();
         loadInternal(file);
     }
@@ -412,25 +424,17 @@ public final class MimeType2ExtMap {
      *
      * @param file The MIME type file to load
      */
-    private static void loadInternal(final File file) {
+    private static void loadInternal(File file) {
+        InputStream stream = null;
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), com.openexchange.java.Charsets.ISO_8859_1));
+            stream = new FileInputStream(file);
+            reader = new BufferedReader(new InputStreamReader(stream, com.openexchange.java.Charsets.ISO_8859_1));
             parse(reader);
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("", e);
-        } catch (final FileNotFoundException e) {
-            LOG.error("", e);
-        } catch (final IOException e) {
+        } catch (Exception e) {
             LOG.error("", e);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    LOG.error("", e);
-                }
-            }
+            Streams.close(reader, stream);
         }
     }
 
@@ -439,33 +443,25 @@ public final class MimeType2ExtMap {
      *
      * @param url The URL to a MIME type file
      */
-    private static void loadInternal(final URL url) {
+    private static void loadInternal(URL url) {
+        InputStream stream = null;
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(url.openStream(), com.openexchange.java.Charsets.ISO_8859_1));
+            stream = url.openStream();
+            reader = new BufferedReader(new InputStreamReader(stream, com.openexchange.java.Charsets.ISO_8859_1));
             parse(reader);
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("", e);
-        } catch (final FileNotFoundException e) {
-            LOG.error("", e);
-        } catch (final IOException e) {
+        } catch (Exception e) {
             LOG.error("", e);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    LOG.error("", e);
-                }
-            }
+            Streams.close(reader, stream);
         }
     }
 
-    private static void parse(final BufferedReader reader) throws IOException {
+    private static void parse( BufferedReader reader) throws IOException {
         String line = null;
-        final StringBuilder strBuilder = new StringBuilder(64);
+        StringBuilder strBuilder = new StringBuilder(64);
         while ((line = reader.readLine()) != null) {
-            final int i = strBuilder.length();
+            int i = strBuilder.length();
             strBuilder.append(line);
             if ((i > 0) && (strBuilder.charAt(i - 1) == '\\')) {
                 strBuilder.delete(0, i - 1);
@@ -479,20 +475,20 @@ public final class MimeType2ExtMap {
         }
     }
 
-    private static void parseEntry(final String entry) {
+    private static void parseEntry(String entry) {
         if (entry.length() == 0) {
             return;
         } else if (entry.charAt(0) == '#') {
             return;
         }
-        final Map<String, List<String>> extMap = MimeType2ExtMap.extMap;
-        final Map<String, String> typeMap = MimeType2ExtMap.typeMap;
+        Map<String, List<String>> extMap = MimeType2ExtMap.extMap;
+        Map<String, String> typeMap = MimeType2ExtMap.typeMap;
         if (entry.indexOf('=') > 0) {
-            final MimeTypeFileLineParser parser = new MimeTypeFileLineParser(entry);
-            final String type = parser.getType();
-            final List<String> exts = parser.getExtensions();
+            MimeTypeFileLineParser parser = new MimeTypeFileLineParser(entry);
+            String type = parser.getType();
+             List<String> exts = parser.getExtensions();
             if ((type != null) && (exts != null)) {
-                for (final String ext : exts) {
+                for (String ext : exts) {
                     typeMap.put(ext, type);
                 }
                 if (extMap.containsKey(type)) {
@@ -502,12 +498,12 @@ public final class MimeType2ExtMap {
                 }
             }
         } else {
-            final String[] tokens = entry.split("[ \t\n\r\f]+");
+            String[] tokens = entry.split("[ \t\n\r\f]+");
             if (tokens.length > 1) {
-                final String type = toLowerCase(tokens[0]);
-                final List<String> set = new ArrayList<String>();
+                String type = toLowerCase(tokens[0]);
+                List<String> set = new CopyOnWriteArrayList<String>();
                 for (int i = 1; i < tokens.length; i++) {
-                    final String ext = toLowerCase(tokens[i]);
+                    String ext = toLowerCase(tokens[i]);
                     set.add(ext);
                     typeMap.put(ext, type);
                 }

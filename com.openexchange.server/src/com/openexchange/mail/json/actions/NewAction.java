@@ -52,13 +52,16 @@ package com.openexchange.mail.json.actions;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.DataFields;
@@ -67,6 +70,8 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -98,6 +103,7 @@ import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MtaStatusInfo;
+import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -142,14 +148,35 @@ public final class NewAction extends AbstractMailAction {
         final AJAXRequestData request = req.getRequest();
         final List<OXException> warnings = new ArrayList<OXException>();
         try {
-            UserSettingMail usm = req.getSession().getUserSettingMail();
-            long maxFileSize = usm.getUploadQuotaPerFile();
-            if (maxFileSize <= 0) {
-                maxFileSize = -1L;
-            }
-            long maxSize = usm.getUploadQuota();
-            if (maxSize <= 0) {
+            long maxSize;
+            long maxFileSize;
+            if (TransportProperties.getInstance().isPublishOnExceededQuota() && req.getSession().getUserPermissionBits().hasInfostore()) {
+                // No chance to check account prior to parsing multipart upload
+                // Thus w/o: (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))
                 maxSize = -1L;
+                maxFileSize = -1L;
+            } else {
+                UserSettingMail usm = req.getSession().getUserSettingMail();
+                maxFileSize = usm.getUploadQuotaPerFile();
+                if (maxFileSize <= 0) {
+                    maxFileSize = -1L;
+                }
+                maxSize = usm.getUploadQuota();
+                if (maxSize <= 0) {
+                    if (maxSize == 0) {
+                        maxSize = -1L;
+                    } else {
+                        LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
+                        int globalQuota;
+                        try {
+                            globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
+                        } catch (final OXException e) {
+                            LOG.error("", e);
+                            globalQuota = 0;
+                        }
+                        maxSize = globalQuota <= 0 ? -1L : globalQuota;
+                    }
+                }
             }
             if (request.hasUploads(maxFileSize, maxSize) || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
                 return performWithUploads(req, request, warnings);

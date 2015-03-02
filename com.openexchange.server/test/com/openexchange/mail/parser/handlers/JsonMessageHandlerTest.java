@@ -49,16 +49,19 @@
 
 package com.openexchange.mail.parser.handlers;
 
-import java.io.File;
 import java.io.FileInputStream;
+
 import junit.framework.TestCase;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -75,7 +78,7 @@ import com.openexchange.tools.session.SimServerSession;
  */
 public class JsonMessageHandlerTest extends TestCase {
 
-    /**
+	/**
      * Initializes a new {@link JsonMessageHandlerTest}.
      */
     public JsonMessageHandlerTest() {
@@ -87,6 +90,12 @@ public class JsonMessageHandlerTest extends TestCase {
      */
     public JsonMessageHandlerTest(String name) {
         super(name);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        MimeType2ExtMap.addMimeType("application/pdf", "pdf");
     }
 
     /**
@@ -375,6 +384,9 @@ public class JsonMessageHandlerTest extends TestCase {
             final MailMessage mail = MimeMessageConverter.convertMessage(bytes);
 
             // Preps
+            MimeType2ExtMap.addMimeType("application/pdf", "pdf");
+            MimeType2ExtMap.addMimeType("application/rtf", "rtf");
+            MimeType2ExtMap.addMimeType("application/ics", "ics");
 
             ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
 
@@ -427,6 +439,9 @@ public class JsonMessageHandlerTest extends TestCase {
             final MailMessage mail = MimeMessageConverter.convertMessage(new FileInputStream("./test/com/openexchange/mail/parser/handlers/tnef_oloxproblemmail.eml"));
 
             // Preps
+            MimeType2ExtMap.addMimeType("application/pdf", "pdf");
+            MimeType2ExtMap.addMimeType("application/rtf", "rtf");
+            MimeType2ExtMap.addMimeType("image/png", "png");
 
             ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
 
@@ -458,12 +473,12 @@ public class JsonMessageHandlerTest extends TestCase {
             final JSONObject jAttachment4 = jAttachments.getJSONObject(3);
             assertNotNull(jAttachment4);
 
+            System.out.println("------- Debug Output ------");
+            System.out.println(jMail.toString(2));
             assertTrue("Unexpected content", jAttachment1.getString("content_type").startsWith("text/plain"));
             assertTrue("Unexpected content", jAttachment2.getString("content_type").startsWith("application/rtf"));
             assertTrue("Unexpected content", jAttachment3.getString("content_type").startsWith("application/pdf"));
             assertTrue("Unexpected content", jAttachment4.getString("content_type").startsWith("image/png"));
-
-            // System.out.println(jMail.toString(2));
 
         } catch (Exception e) {
             e.printStackTrace();

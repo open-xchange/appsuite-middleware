@@ -50,11 +50,13 @@
 package com.openexchange.mail.mime;
 
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.multipartFor;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -63,22 +65,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.activation.DataHandler;
 import javax.mail.BodyPart;
-import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimePart;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -162,34 +162,64 @@ public final class MimeStructureFixer {
             return message;
         }
 
-        // Fix it...
-        MimeMessage mimeMessage = (MimeMessage) MimeMessageConverter.convertMailMessage(message);
-        ContentType contentType = message.getContentType();
-        MimeMessage processed = process0(mimeMessage, contentType);
-        MailMessage processedMessage = MimeMessageConverter.convertMessage(processed, true);
-        processedMessage.setMailId(message.getMailId());
-        if (message.containsReceivedDate()) {
-            processedMessage.setReceivedDate(message.getReceivedDate());
+        ThresholdFileHolder sink = null;
+        boolean closeSink = true;
+        try {
+            // Convert to a MIME message
+            MimeMessage mimeMessage;
+            {
+                sink = new ThresholdFileHolder();
+                message.writeTo(sink.asOutputStream());
+                File tempFile = sink.getTempFile();
+                if (null == tempFile) {
+                    mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                } else {
+                    mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile);
+                }
+            }
+
+            // Process it
+            MimeMessage processed = process0(mimeMessage, message.getContentType());
+
+            // Yield appropriate MailMessage instance
+            MailMessage processedMessage = MimeMessageConverter.convertMessage(processed, false);
+
+            // Apply fields/attributes from original message
+            processedMessage.setMailId(message.getMailId());
+            if (message.containsReceivedDate()) {
+                processedMessage.setReceivedDate(message.getReceivedDate());
+            }
+            if (!processedMessage.containsSize() && message.containsSize()) {
+                processedMessage.setSize(message.getSize());
+            }
+            if (message.containsAccountId()) {
+                processedMessage.setAccountId(message.getAccountId());
+            }
+            if (message.containsFolder()) {
+                processedMessage.setFolder(message.getFolder());
+            }
+            if (message.containsFlags()) {
+                processedMessage.setFlags(message.getFlags());
+            }
+            if (message.containsColorLabel()) {
+                processedMessage.setColorLabel(message.getColorLabel());
+            }
+            if (message.containsUserFlags()) {
+                processedMessage.addUserFlags(message.getUserFlags());
+            }
+
+            // Return result
+            closeSink = false;
+            return processedMessage;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink && null != sink) {
+                sink.close();
+            }
         }
-        if (!processedMessage.containsSize() && message.containsSize()) {
-            processedMessage.setSize(message.getSize());
-        }
-        if (message.containsAccountId()) {
-            processedMessage.setAccountId(message.getAccountId());
-        }
-        if (message.containsFolder()) {
-            processedMessage.setFolder(message.getFolder());
-        }
-        if (message.containsFlags()) {
-            processedMessage.setFlags(message.getFlags());
-        }
-        if (message.containsColorLabel()) {
-            processedMessage.setColorLabel(message.getColorLabel());
-        }
-        if (message.containsUserFlags()) {
-            processedMessage.addUserFlags(message.getUserFlags());
-        }
-        return processedMessage;
     }
 
 
@@ -206,62 +236,71 @@ public final class MimeStructureFixer {
         if (null == mimeMessage) {
             return mimeMessage;
         }
-        final ContentType contentType = getContentType(mimeMessage);
-        if (!contentType.startsWith("multipart/")) {
-            // Nothing to filter
-            return mimeMessage;
-        }
+        ThresholdFileHolder sink = null;
+        boolean closeSink = true;
         try {
-            // Check mailer/boundary for "Apple"
-            {
-                final String mailer = mimeMessage.getHeader(MessageHeaders.HDR_X_MAILER, null);
-                final boolean noAppleMailer;
-                if (null == mailer || (noAppleMailer = (toLowerCase(mailer).indexOf("apple") < 0))) {
-                    // Not composed by Apple mailer
-                    return mimeMessage;
-                }
-                final String boundary = contentType.getParameter("boundary");
-                if (noAppleMailer && (null == boundary || toLowerCase(boundary).indexOf("apple") < 0)) {
-                    // Not composed by Apple mailer
-                    return mimeMessage;
-                }
+            final ContentType contentType = getContentType(mimeMessage);
+            if (!contentType.startsWith("multipart/")) {
+                // Nothing to filter
+                return mimeMessage;
             }
-            // Start to check & fix multipart structure
-            return process0(mimeMessage, contentType);
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+            try {
+                // Check mailer/boundary for "Apple"
+                {
+                    final String mailer = mimeMessage.getHeader(MessageHeaders.HDR_X_MAILER, null);
+                    final boolean noAppleMailer;
+                    if (null == mailer || (noAppleMailer = (toLowerCase(mailer).indexOf("apple") < 0))) {
+                        // Not composed by Apple mailer
+                        return mimeMessage;
+                    }
+                    final String boundary = contentType.getParameter("boundary");
+                    if (noAppleMailer && (null == boundary || toLowerCase(boundary).indexOf("apple") < 0)) {
+                        // Not composed by Apple mailer
+                        return mimeMessage;
+                    }
+                }
+                // Remember original Message-ID
+                String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
+                // Start to check & fix multipart structure
+                MimeMessage mime;
+                if (mimeMessage instanceof com.sun.mail.util.ReadableMime) {
+                    sink = new ThresholdFileHolder();
+                    mimeMessage.writeTo(sink.asOutputStream());
+                    File tempFile = sink.getTempFile();
+                    if (null == tempFile) {
+                        mime = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                    } else {
+                        mime = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile);
+                    }
+                } else {
+                    mime = mimeMessage;
+                }
+                MimeMessage retval = process0(mime, contentType);
+                MimeMessageConverter.saveChanges(retval);
+                // Restore original Message-Id header
+                if (null == messageId) {
+                    retval.removeHeader(MESSAGE_ID);
+                } else {
+                    retval.setHeader(MESSAGE_ID, messageId);
+                }
+                closeSink = false;
+                return retval;
+            } catch (MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } catch (IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        } finally {
+            if (closeSink && null != sink) {
+                sink.close();
+            }
         }
     }
 
     private MimeMessage process0(final MimeMessage mimeMessage, final ContentType contentType) throws OXException {
         try {
             // Start to check & fix multipart structure
-            final MimeMultipart newMultipart = new MimeMultipart(contentType.getSubType(), getParametersFrom(contentType, EXCLUDE_BOUNDARY));
-            final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
-            // Possible root multipart for unexpectedly found file attachments
-            final AtomicReference<MimeMultipart> artificialRoot = new AtomicReference<MimeMultipart>();
-            final LinkedList<MimeMultipart> mpStack = new LinkedList<MimeMultipart>();
-            mpStack.add(newMultipart);
-            handlePart(multipartFor(mimeMessage, contentType), new AtomicReference<MimeMultipart>(newMultipart), artificialRoot, mpStack);
-            // Check if a new root has been set
-            final MimeMultipart artificialRootMimeMultipart = artificialRoot.get();
-            if (null == artificialRootMimeMultipart) {
-                MessageUtility.setContent(newMultipart, mimeMessage);
-            } else {
-                // Need to create a new body part for deprecated root multipart
-                final MimeBodyPart mimeBodyPart = new MimeBodyPart();
-                MessageUtility.setContent(newMultipart, mimeBodyPart);
-                artificialRootMimeMultipart.addBodyPart(mimeBodyPart, 0);
-                MessageUtility.setContent(artificialRootMimeMultipart, mimeMessage);
-            }
-            // mimeMessage.setContent(newMultipart);
-            MimeMessageConverter.saveChanges(mimeMessage);
-            // Restore original Message-Id header
-            if (null == messageId) {
-                mimeMessage.removeHeader(MESSAGE_ID);
-            } else {
-                mimeMessage.setHeader(MESSAGE_ID, messageId);
-            }
+            handlePart(multipartFor(mimeMessage, contentType));
             return mimeMessage;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -272,15 +311,16 @@ public final class MimeStructureFixer {
         }
     }
 
-    private void handlePart(final Multipart multipart, final AtomicReference<MimeMultipart> newMultipartRef, final AtomicReference<MimeMultipart> artificialRoot, final LinkedList<MimeMultipart> mpStack) throws MessagingException, IOException, OXException {
+    private void handlePart(Multipart multipart) throws MessagingException, IOException, OXException {
         final int count = multipart.getCount();
         if (toLowerCase(multipart.getContentType()).startsWith("multipart/mixed")) {
-            final String prefixImage = "image/";
-            final String prefixHtm = "text/htm";
-            final String prefixText = "text/plain";
+            String prefixImage = "image/";
+            String prefixHtm = "text/htm";
+            String prefixText = "text/plain";
             int inlineCount = 0;
             int inlineImageCount = 0;
             boolean isHtml = true;
+
             /*-
              * Check for multiple inline HTML parts
              *
@@ -290,8 +330,8 @@ public final class MimeStructureFixer {
              */
             {
                 for (int i = 0; i < count; i++) {
-                    final BodyPart bodyPart = multipart.getBodyPart(i);
-                    final ContentType contentType = getContentType(bodyPart);
+                    BodyPart bodyPart = multipart.getBodyPart(i);
+                    ContentType contentType = getContentType(bodyPart);
                     if (isInline(bodyPart, contentType)) {
                         if (contentType.startsWith(prefixHtm)) {
                             inlineCount++;
@@ -301,6 +341,7 @@ public final class MimeStructureFixer {
                     }
                 }
             }
+
             if (inlineImageCount > 0 && inlineCount <= 1) {
                 /*-
                  * Check for multiple inline TEXT parts
@@ -313,8 +354,8 @@ public final class MimeStructureFixer {
                 inlineImageCount = 0;
                 isHtml = false;
                 for (int i = 0; i < count; i++) {
-                    final BodyPart bodyPart = multipart.getBodyPart(i);
-                    final ContentType contentType = getContentType(bodyPart);
+                    BodyPart bodyPart = multipart.getBodyPart(i);
+                    ContentType contentType = getContentType(bodyPart);
                     if (isInline(bodyPart, contentType)) {
                         if (contentType.startsWith(prefixText)) {
                             inlineCount++;
@@ -324,169 +365,142 @@ public final class MimeStructureFixer {
                     }
                 }
             }
+
             if (inlineImageCount > 0 && inlineCount > 1) {
                 String textContent = null;
                 String firstCharset = null;
-                final List<BodyPart> bodyParts = new ArrayList<BodyPart>(count);
-                final List<BodyPart> others = new LinkedList<BodyPart>();
+                List<BodyPart> bodyParts = new ArrayList<BodyPart>(count);
+                List<BodyPart> others = new LinkedList<BodyPart>();
+                TIntList indexes = new TIntArrayList(count);
+
                 for (int i = 0; i < count; i++) {
-                    final BodyPart bodyPart = multipart.getBodyPart(i);
-                    final ContentType contentType = getContentType(bodyPart);
+                    BodyPart bodyPart = multipart.getBodyPart(i);
+                    ContentType contentType = getContentType(bodyPart);
                     if (contentType.startsWith(isHtml ? prefixHtm : prefixText)) {
-                        final String charset = MessageUtility.checkCharset(bodyPart, contentType);
+                        String charset = MessageUtility.checkCharset(bodyPart, contentType);
                         if (null == firstCharset) {
                             firstCharset = charset;
                         }
-                        final String text = MessageUtility.readMimePart(bodyPart, charset);
+                        String text = MessageUtility.readMimePart(bodyPart, charset);
                         if (null == textContent) {
                             textContent = text;
                         } else {
                             textContent = isHtml ? mergeInto(text, textContent) : textContent + text;
                         }
+                        indexes.add(i);
                     } else if (contentType.startsWith(prefixImage)) {
                         if (isHtml) {
-                            final MimeBodyPart imageBodyPart = new MimeBodyPart();
-                            // Set content
-                            imageBodyPart.setDataHandler(new DataHandler(new javax.mail.internet.MimePartDataSource((MimePart) bodyPart)));
-                            // Set headers
-                            imageBodyPart.setHeader(CONTENT_TYPE, contentType.toString());
-                            String contentId = null;
-                            for (@SuppressWarnings("unchecked") final Enumeration<Header> headers = bodyPart.getAllHeaders(); headers.hasMoreElements();) {
-                                final Header header = headers.nextElement();
-                                final String name = toLowerCase(header.getName());
-                                if (!"content-type".equals(name)) {
-                                    if ("content-id".equals(name)) {
-                                        contentId = header.getValue();
-                                    }
-                                    imageBodyPart.addHeader(header.getName(), header.getValue());
-                                }
-                            }
+                            MimeBodyPart imageBodyPart = (MimeBodyPart) bodyPart;
+                            String contentId = imageBodyPart.getHeader("Content-Id", null);
                             if (null == contentId) {
                                 contentId = new StringBuilder(48).append('<').append(UUID.randomUUID().toString()).append('>').toString();
                                 imageBodyPart.setContentID(contentId);
                             }
-                            bodyParts.add(imageBodyPart);
+
                             // Append <img> tag
-                            final String text = new StringBuilder(64).append("<img src=\"cid:").append(getContentId(contentId)).append("\">").toString();
+                            String text = new StringBuilder(64).append("<img src=\"cid:").append(getContentId(contentId)).append("\">").toString();
                             if (null == textContent) {
                                 textContent = text;
                             } else {
                                 textContent = mergeInto(text, textContent);
                             }
-                        } else {
-                            bodyParts.add(bodyPart);
                         }
+                        bodyParts.add(bodyPart);
+                        indexes.add(i);
                     } else {
-                        if (isHtml || mpStack.size() > 1) {
+                        if (isHtml) {
                             others.add(bodyPart);
                         } else {
                             bodyParts.add(bodyPart);
                         }
+                        indexes.add(i);
                     }
                 }
+
+                indexes.reverse();
+                for (int i : indexes.toArray()) {
+                    multipart.removeBodyPart(i);
+                }
+
                 // Get "multipart/mixed" (TEXT) or create "multipart/related" (HTML)
-                final MimeMultipart newSubMultipart = isHtml ? new MimeMultipart("related") : newMultipartRef.get();
-                final MimeBodyPart contentBodyPart;
                 if (isHtml) {
-                    contentBodyPart = new MimeBodyPart();
-                    final String charset = null == firstCharset ? "ISO-8859-1" : firstCharset;
+                    MimeMultipart newSubMultipart = new MimeMultipart("related");
+
+                    MimeBodyPart contentBodyPart = new MimeBodyPart();
+                    String charset = null == firstCharset ? "ISO-8859-1" : firstCharset;
                     contentBodyPart.setText(textContent, charset, "html");
                     contentBodyPart.setHeader(CONTENT_TYPE, MimeMessageUtility.foldContentType("text/html; charset=\"" + charset + "\""));
+                    contentBodyPart.setHeader(CONTENT_DISPOSITION, "inline");
+                    contentBodyPart.setHeader(MIME_VERSION, "1.0");
+                    contentBodyPart.setHeader(CONTENT_TRANSFER_ENC, "quoted-printable");
+                    newSubMultipart.addBodyPart(contentBodyPart);
+
+                    // Add body parts
+                    for (final BodyPart nextBodyPart : bodyParts) {
+                        newSubMultipart.addBodyPart(nextBodyPart);
+                    }
+
+                    MimeBodyPart mimeBodyPart = new MimeBodyPart();
+                    MessageUtility.setContent(newSubMultipart, mimeBodyPart);
+                    multipart.addBodyPart(mimeBodyPart, 0);
                 } else {
-                    contentBodyPart = new MimeBodyPart();
+                    MimeBodyPart contentBodyPart = new MimeBodyPart();
                     final String charset = null == firstCharset ? "ISO-8859-1" : firstCharset;
                     contentBodyPart.setText(textContent, charset, "plain");
                     contentBodyPart.setHeader(CONTENT_TYPE, MimeMessageUtility.foldContentType("text/plain; charset=\"" + charset + "\""));
+                    multipart.addBodyPart(contentBodyPart);
+                    contentBodyPart.setHeader(CONTENT_DISPOSITION, "inline");
+                    contentBodyPart.setHeader(MIME_VERSION, "1.0");
+                    contentBodyPart.setHeader(CONTENT_TRANSFER_ENC, "quoted-printable");
+
+                    // Add body parts
+                    for (final BodyPart nextBodyPart : bodyParts) {
+                        multipart.addBodyPart(nextBodyPart);
+                    }
                 }
-                contentBodyPart.setHeader(CONTENT_DISPOSITION, "inline");
-                contentBodyPart.setHeader(MIME_VERSION, "1.0");
-                contentBodyPart.setHeader(CONTENT_TRANSFER_ENC, "quoted-printable");
-                newSubMultipart.addBodyPart(contentBodyPart);
-                // Add body parts
-                for (final BodyPart nextBodyPart : bodyParts) {
-                    newSubMultipart.addBodyPart(nextBodyPart);
-                }
-                // Replace new multipart
-                if (isHtml && 1 == mpStack.size()) {
-                    final MimeMultipart mimeMultipart = newMultipartRef.get();
-                    final MimeBodyPart mimeBodyPart = new MimeBodyPart();
-                    MessageUtility.setContent(newSubMultipart, mimeBodyPart);
-                    mimeMultipart.addBodyPart(mimeBodyPart, 0);
-                } else {
-                    newMultipartRef.set(newSubMultipart);
-                }
+
                 // Check for others
                 if (!others.isEmpty()) {
-                    if (isHtml) {
-                        MimeMultipart mixedMultipart;
-                        if (toLowerCase(mpStack.getFirst().getContentType()).indexOf("multipart/mixed") < 0) {
-                            // This means we processed a multipart below root-level multipart that is not of type "multipart/mixed"
-                            // Need to create an artificial one
-                            mixedMultipart = artificialRoot.get();
-                            if (null == mixedMultipart) {
-                                mixedMultipart = new MimeMultipart("mixed");
-                                artificialRoot.set(mixedMultipart);
-                            }
-                        } else {
-                            mixedMultipart = mpStack.getFirst();
-                        }
-                        for (final BodyPart otherBodyPart : others) {
-                            mixedMultipart.addBodyPart(otherBodyPart);
-                        }
-                    } else {
-                        final MimeMultipart mixedMultipart = newSubMultipart;
-                        for (final BodyPart otherBodyPart : others) {
-                            mixedMultipart.addBodyPart(otherBodyPart);
-                        }
+                    for (BodyPart otherBodyPart : others) {
+                        multipart.addBodyPart(otherBodyPart);
                     }
                 }
                 return;
             }
         }
+
         // Process other multipart
-        final MimeMultipart newMimeMultipart = newMultipartRef.get();
         for (int i = 0; i < count; i++) {
             final BodyPart bodyPart = multipart.getBodyPart(i);
             String sContentType = bodyPart.getContentType();
-            if (isEmpty(sContentType)) {
-                newMimeMultipart.addBodyPart(bodyPart);
-            } else {
+            if (!isEmpty(sContentType)) {
                 final ContentType contentType = new ContentType(sContentType);
                 if (contentType.startsWith("multipart/")) {
-                    final MimeMultipart newMimeMultipart2 = new MimeMultipart(contentType.getSubType());
-                    final AtomicReference<MimeMultipart> mpReference = new AtomicReference<MimeMultipart>(newMimeMultipart2);
+                    Multipart mpContent;
                     {
-                        final Multipart mpContent;
-                        final Object content = bodyPart.getContent();
+                        Object content = bodyPart.getContent();
                         if (content instanceof Multipart) {
                             mpContent = (Multipart) content;
                         } else {
                             mpContent = new MimeMultipart(bodyPart.getDataHandler().getDataSource());
                         }
-                        mpStack.add(newMimeMultipart2);
-                        handlePart(mpContent, mpReference, artificialRoot, mpStack);
-                        mpStack.removeLast();
                     }
-                    final MimeBodyPart mimeBodyPart = new MimeBodyPart();
-                    MessageUtility.setContent(mpReference.get(), mimeBodyPart);
-                    // mimeBodyPart.setContent(newSubMultipart);
-                    newMimeMultipart.addBodyPart(mimeBodyPart);
+                    handlePart(mpContent);
                 } else if (contentType.startsWith("message/rfc822") || (contentType.getNameParameter() != null && contentType.getNameParameter().endsWith(".eml"))) {
-                    final MimeMessage filteredMessage;
+                    MimeMessage filteredMessage;
                     {
-                        final Object content = bodyPart.getContent();
+                        Object content = bodyPart.getContent();
                         if (content instanceof MimeMessage) {
                             filteredMessage = process((MimeMessage) content);
                         } else {
                             filteredMessage = process(new MimeMessage(MimeDefaultSession.getDefaultSession(), bodyPart.getInputStream()));
                         }
                     }
-                    final MimeBodyPart mimeBodyPart = new MimeBodyPart();
+                    MimeBodyPart mimeBodyPart = new MimeBodyPart();
                     MessageUtility.setContent(filteredMessage, mimeBodyPart);
                     // mimeBodyPart.setContent(filteredMessage, "message/rfc822");
-                    newMimeMultipart.addBodyPart(mimeBodyPart);
-                } else {
-                    newMimeMultipart.addBodyPart(bodyPart);
+                    multipart.removeBodyPart(i);
+                    multipart.addBodyPart(mimeBodyPart, i);
                 }
             }
         }

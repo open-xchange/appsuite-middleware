@@ -80,6 +80,7 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.CountingOutputStream;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -729,9 +730,9 @@ public final class MailMessageParser {
                                     HDR_CONTENT_DISPOSITION,
                                     MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
-                            os.reset();
-                            attachment.writeTo(os);
-                            bodyPart.setSize(os.size());
+                            CountingOutputStream counter = new CountingOutputStream();
+                            attachment.writeTo(counter);
+                            bodyPart.setSize((int) counter.getCount());
                             parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
