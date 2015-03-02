@@ -770,7 +770,7 @@ final class ListLsubCollection implements Serializable {
         {
             final String sCmd = new StringBuilder(command).append(" (SPECIAL-USE) \"\" \"*\"").toString();
             r = performCommand(protocol, sCmd);
-            LOG.debug("{0} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
+            LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {
