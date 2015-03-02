@@ -197,7 +197,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 // Drop Open-Xchange cookies
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 final String sessionId = SessionUtility.getSessionId(req);
-                final ServerSession session = SessionUtility.getSession(req, sessionId, sessiondService);
+                final ServerSession session = SessionUtility.getSession(req, resp, sessionId, sessiondService);
                 SessionUtility.removeOXCookies(session.getHash(), req, resp);
                 SessionUtility.removeJSESSIONID(req, resp);
                 sessiondService.removeSession(sessionId);

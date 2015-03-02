@@ -708,7 +708,7 @@ public class LoginServlet extends AJAXServlet {
         if (null == sessionId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
         }
-        final Session session = SessionUtility.getSession(conf.getHashSource(), req, sessionId, sessiond);
+        final Session session = SessionUtility.getSession(conf.getHashSource(), req, resp, sessionId, sessiond);
         try {
             SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
             if (type == CookieType.SESSION) {

@@ -261,7 +261,7 @@ public class DispatcherServlet extends SessionServlet {
             String sessionId = req.getParameter(PARAMETER_SESSION);
             if (sessionId != null && sessionId.length() > 0) {
                 try {
-                    session = SessionUtility.getSession(req, sessionId, sessiondService);
+                    session = SessionUtility.getSession(req, resp, sessionId, sessiondService);
                 } catch (OXException e) {
                     if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
                         throw e;
@@ -273,7 +273,7 @@ public class DispatcherServlet extends SessionServlet {
                         throw e;
                     }
                     // Missing secret cookie
-                    session = SessionUtility.getSession(SessionUtility.getHashSource(), req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
+                    session = SessionUtility.getSession(SessionUtility.getHashSource(), req, resp, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
                 }
                 SessionUtility.verifySession(req, sessiondService, sessionId, session);
                 SessionUtility.rememberSession(req, session);

@@ -112,7 +112,7 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
 
     private void doAuthHeaderTicketReload(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
         final String sessionId = getSessionId(req);
-        ServerSession session = getSession(req, sessionId, sessiondService);
+        ServerSession session = getSession(req, resp, sessionId, sessiondService);
         verifySession(req, sessiondService, sessionId, session);
         if (session.containsParameter(SESSION_PRINCIPAL)) {
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);

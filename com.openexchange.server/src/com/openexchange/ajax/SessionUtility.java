@@ -91,8 +91,10 @@ import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.services.SessionInspector;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSecretChecker;
+import com.openexchange.session.inspector.InspectorReply;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
@@ -229,7 +231,7 @@ public final class SessionUtility {
             final String sSession = req.getParameter(PARAMETER_SESSION);
             if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
-                session = getSession(req, sessionId, sessiondService);
+                session = getSession(req, resp, sessionId, sessiondService);
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
                 checkPublicSessionCookie(req, resp, session, sessiondService);
@@ -461,44 +463,64 @@ public final class SessionUtility {
     /**
      * Finds appropriate local session.
      *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return the session.
      * @throws OXException if the session can not be found.
      */
-    public static ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
-        return getSession(hashSource, req, sessionId, sessiondService);
+    public static ServerSession getSession(HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
+        return getSession(hashSource, req, resp, sessionId, sessiondService);
     }
 
     /**
      * Finds appropriate local session.
      *
      * @param source defines how the cookie should be found
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
-        return getSession(source, req, sessionId, sessiondService, null);
+    public static ServerSession getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
+        return getSession(source, req, resp, sessionId, sessiondService, null);
     }
 
     /**
      * Finds appropriate local session.
      *
      * @param source defines how the cookie should be found
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService, final SessionSecretChecker optChecker) throws OXException {
+    public static ServerSession getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService, SessionSecretChecker optChecker) throws OXException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (!"unset".equals(sessionId)) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
             }
+            /*
+             * Session MISS -- Consult session inspector
+             */
+            if (InspectorReply.STOP == SessionInspector.getInstance().getChain().onSessionMiss(sessionId, req, resp)) {
+                return null;
+            }
+
+            // Otherwise throw appropriate error
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+        }
+        /*
+         * Session HIT -- Consult session inspector
+         */
+        if (InspectorReply.STOP == SessionInspector.getInstance().getChain().onSessionHit(session, req, resp)) {
+            return null;
         }
         /*
          * Get session secret
