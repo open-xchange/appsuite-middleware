@@ -179,18 +179,31 @@ public final class Logic {
      * @param group Group to check for duplicates.
      * @throws OXException if a duplicate is detected.
      */
-    final static void checkForDuplicate(final GroupStorage storage,
-        final Context ctx, final Group group)
-        throws OXException {
-        if (!group.isSimpleNameSet()) {
-            return;
+    final static void checkForDuplicate(GroupStorage storage, Context ctx, Group group, boolean checki18nNames) throws OXException {
+        if (group.isSimpleNameSet()) {
+            Group[] others = storage.searchGroups(group.getSimpleName(), true, ctx);
+            for (Group other : others) {
+                if (group.getSimpleName().equals(other.getSimpleName()) && group.getIdentifier() != other.getIdentifier()) {
+                    throw GroupExceptionCodes.DUPLICATE.create(Integer.valueOf(other.getIdentifier()));
+                }
+            }
         }
-        final Group[] others = storage.searchGroups(group.getSimpleName(), true, ctx);
-        for (final Group other : others) {
-            if (group.getSimpleName().equals(other.getSimpleName())
-                && group.getIdentifier() != other.getIdentifier()) {
-                throw GroupExceptionCodes.DUPLICATE.create(Integer.valueOf(other
-                    .getIdentifier()));
+        if (group.isDisplayNameSet()) {
+            String displayName = group.getDisplayName();
+
+            if (checki18nNames) {
+                for (String i18nName : GroupI18nNamesService.getInstance().getI18nNames()) {
+                    if (displayName.equals(i18nName)) {
+                        throw GroupExceptionCodes.RESERVED_DISPLAY_NAME.create(displayName);
+                    }
+                }
+            }
+
+            Group[] others = storage.searchGroups(displayName, true, ctx);
+            for (Group other : others) {
+                if (displayName.equals(other.getDisplayName()) && group.getIdentifier() != other.getIdentifier()) {
+                    throw GroupExceptionCodes.DUPLICATE.create(Integer.valueOf(other.getIdentifier()));
+                }
             }
         }
     }

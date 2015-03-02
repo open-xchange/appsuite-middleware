@@ -1,3 +1,7 @@
+* 2015-03-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37039: Do also check a group's display name on create/update call
+
 * 2015-03-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 36868: Removed fix for bug 32947 from replication monitor.
