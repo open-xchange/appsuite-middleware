@@ -91,7 +91,7 @@ public enum ResourceExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Missing mandatory field(s) in given resource.
      */
-    MANDATORY_FIELD("Missing mandatory field(s) in given resource.", Category.CATEGORY_ERROR, 8),
+    MANDATORY_FIELD("Missing mandatory field(s) in given resource.", Category.CATEGORY_USER_INPUT, 8, ResourceExceptionMessage.MANDATORY_FIELD_MSG_DISPLAY),
     /**
      * No permission to modify resources in context %1$s
      */

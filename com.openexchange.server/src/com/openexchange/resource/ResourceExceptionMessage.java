@@ -92,4 +92,7 @@ public class ResourceExceptionMessage implements LocalizableStrings {
     // The selected resource \"%1$s\" has been changed in the meantime.
     public final static String CONCURRENT_MODIFICATION_MSG_DISPLAY = "The selected resource \"%1$s\" has been changed in the meantime.";
 
+    // Missing mandatory field(s) in given resource.
+    public static final String MANDATORY_FIELD_MSG_DISPLAY = "Missing mandatory field(s) in given resource.";
+
 }
