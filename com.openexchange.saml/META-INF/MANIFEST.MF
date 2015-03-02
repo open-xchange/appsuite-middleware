@@ -282,4 +282,4 @@ Export-Package: org.opensaml,
  org.opensaml.xml.signature.validator,
  org.opensaml.xml.util,
  org.opensaml.xml.validation
-Bundle-Activator: com.openexchange.saml.osgi.Activator
+Bundle-Activator: com.openexchange.saml.osgi.SamlActivator
