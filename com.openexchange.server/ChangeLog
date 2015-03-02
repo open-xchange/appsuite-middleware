@@ -1,3 +1,7 @@
+* 2015-03-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36868: Removed fix for bug 32947 from replication monitor.
+
 * 2015-03-02 - backend@open-xchange.com
 
  - Fix for bug 36943: Introduced special handling for situations when a string could not be stored successfully by MySQL
