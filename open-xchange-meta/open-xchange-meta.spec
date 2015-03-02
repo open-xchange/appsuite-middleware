@@ -419,6 +419,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Thu Feb 26 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-02-23
 * Tue Feb 24 2015 Carsten Hoeger <choeger@open-xchange.com>
 Eighth candidate for 7.6.2 release
 * Mon Feb 23 2015 Carsten Hoeger <choeger@open-xchange.com>
