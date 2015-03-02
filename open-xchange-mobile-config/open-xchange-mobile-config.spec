@@ -76,6 +76,8 @@ Eighth candidate for 7.6.2 release
 Build for patch 2015-02-25
 * Thu Feb 12 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-02-23
+* Thu Feb 12 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2015-02-23
 * Wed Feb 11 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Seventh candidate for 7.6.2 release
 * Fri Feb 06 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
