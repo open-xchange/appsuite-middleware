@@ -83,6 +83,7 @@ import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.event.impl.EventClient;
@@ -110,6 +111,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -120,6 +122,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.exceptions.SimpleIncorrectStringAttribute;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnInsert;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnRemove;
@@ -384,6 +387,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     }
                 } catch (final DataTruncation e) {
                     throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
+                } catch (final IncorrectStringSQLException e) {
+                    throw handleIncorrectStringError(e, session);
                 } catch (final SQLException e) {
                     throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                 }
@@ -409,6 +414,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             folderObj.setObjectID(fuid);
         } catch (final DataTruncation e) {
             throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
+        } catch (final IncorrectStringSQLException e) {
+            throw handleIncorrectStringError(e, session);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -794,6 +801,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     }
                 } catch (final DataTruncation e) {
                     throw parseTruncated(e, fo, TABLE_OXFOLDER_TREE);
+                } catch (final IncorrectStringSQLException e) {
+                    throw handleIncorrectStringError(e, session);
                 } catch (final SQLException e) {
                     throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                 }
@@ -815,6 +824,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             OXFolderSQL.updateFolderSQL(user.getId(), fo, lastModified, ctx, writeCon);
         } catch (final DataTruncation e) {
             throw parseTruncated(e, fo, TABLE_OXFOLDER_TREE);
+        } catch (final IncorrectStringSQLException e) {
+            throw handleIncorrectStringError(e, session);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -831,6 +842,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
             } catch (final DataTruncation e) {
                 throw parseTruncated(e, fo, TABLE_OXFOLDER_TREE);
+            } catch (final IncorrectStringSQLException e) {
+                throw handleIncorrectStringError(e, session);
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } catch (final ProcedureFailedException e) {
@@ -978,6 +991,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     }
                 } catch (final DataTruncation e) {
                     throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
+                } catch (final IncorrectStringSQLException e) {
+                    throw handleIncorrectStringError(e, session);
                 } catch (final SQLException e) {
                     throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                 }
@@ -991,6 +1006,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             OXFolderSQL.renameFolderSQL(user.getId(), folderObj, lastModified, ctx, writeCon);
         } catch (final DataTruncation e) {
             throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
+        } catch (final IncorrectStringSQLException e) {
+            throw handleIncorrectStringError(e, session);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -1097,6 +1114,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, readCon, writeCon);
         } catch (DataTruncation e) {
             throw parseTruncated(e, storageSrc, TABLE_OXFOLDER_TREE);
+        } catch (final IncorrectStringSQLException e) {
+            throw handleIncorrectStringError(e, session);
+        } catch (final SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
          * Now treat as an insert after actual move if not moved below trash
@@ -2010,6 +2031,33 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         fieldMapping.put("changing_date", Integer.valueOf(DataObject.LAST_MODIFIED));
         fieldMapping.put("changed_from", Integer.valueOf(DataObject.MODIFIED_BY));
         OXFolderManagerImpl.fieldMapping = Collections.unmodifiableMap(fieldMapping);
+    }
+
+    private static User getUser(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+        return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+    }
+
+    private static OXException handleIncorrectStringError(IncorrectStringSQLException e, Session session) throws OXException {
+        String column = e.getColumn();
+        if (null == column) {
+            return OXFolderExceptionCode.INVALID_CHARACTER_SIMPLE.create(e);
+        }
+
+        String displayName = OXFolderUtility.column2Field(column);
+        if (null == displayName) {
+            return OXFolderExceptionCode.INVALID_CHARACTER.create(e, e.getIncorrectString(), e.getColumn());
+        }
+        if (null == session) {
+            return OXFolderExceptionCode.INVALID_CHARACTER.create(e, e.getIncorrectString(), displayName);
+        }
+
+        String translatedName = StringHelper.valueOf(getUser(session).getLocale()).getString(displayName);
+        OXException oxe = OXFolderExceptionCode.INVALID_CHARACTER.create(e, e.getIncorrectString(), translatedName);
+        oxe.addProblematic(new SimpleIncorrectStringAttribute(fieldMapping.get(column).intValue(), e.getIncorrectString()));
+        return oxe;
     }
 
     private static Object getFolderValue(final int folderField, final FolderObject folder) {

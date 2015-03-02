@@ -106,27 +106,51 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
      * @return The appropriate <code>OXException</code> instance
      * @throws OXException If operation fails
      */
-    protected static OXException launderOXException(OXException e, Session optSession) throws OXException {
+    public static OXException launderOXException(OXException e, Session optSession) throws OXException {
         Throwable cause = e.getCause();
         if (!(cause instanceof IncorrectStringSQLException)) {
             return e;
         }
 
-        IncorrectStringSQLException incorrectStringError = (IncorrectStringSQLException) cause;
+        return handleIncorrectStringError((IncorrectStringSQLException) cause, optSession);
+    }
+
+    /**
+     * Handles specified <code>IncorrectStringSQLException</code> instance.
+     *
+     * @param incorrectStringError The incorrect string error to handle
+     * @param optSession The optional session
+     * @return The appropriate <code>OXException</code> instance
+     * @throws OXException If operation fails
+     */
+    public static OXException handleIncorrectStringError(IncorrectStringSQLException incorrectStringError, Session optSession) throws OXException {
         Metadata metadata = Metadata.get(incorrectStringError.getColumn());
         if (null == metadata) {
-            return InfostoreExceptionCodes.INVALID_CHARACTER_SIMPLE.create(cause);
+            return InfostoreExceptionCodes.INVALID_CHARACTER_SIMPLE.create(incorrectStringError);
         }
+        return handleIncorrectStringError(incorrectStringError, metadata, optSession);
+    }
+
+    /**
+     * Handles specified <code>IncorrectStringSQLException</code> instance.
+     *
+     * @param incorrectStringError The incorrect string error to handle
+     * @param metadata The associated meta data
+     * @param optSession The optional session
+     * @return The appropriate <code>OXException</code> instance
+     * @throws OXException If operation fails
+     */
+    public static OXException handleIncorrectStringError(IncorrectStringSQLException incorrectStringError, Metadata metadata, Session optSession) throws OXException {
         if (null == optSession) {
-            return InfostoreExceptionCodes.INVALID_CHARACTER.create(cause, incorrectStringError.getIncorrectString(), incorrectStringError.getColumn());
+            return InfostoreExceptionCodes.INVALID_CHARACTER.create(incorrectStringError, incorrectStringError.getIncorrectString(), incorrectStringError.getColumn());
         }
         String displayName = metadata.getDisplayName();
         if (null == displayName) {
-            return InfostoreExceptionCodes.INVALID_CHARACTER.create(cause, incorrectStringError.getIncorrectString(), incorrectStringError.getColumn());
+            return InfostoreExceptionCodes.INVALID_CHARACTER.create(incorrectStringError, incorrectStringError.getIncorrectString(), incorrectStringError.getColumn());
         }
 
         String translatedName = StringHelper.valueOf(getUser(optSession).getLocale()).getString(displayName);
-        OXException oxe = InfostoreExceptionCodes.INVALID_CHARACTER.create(cause, incorrectStringError.getIncorrectString(), translatedName);
+        OXException oxe = InfostoreExceptionCodes.INVALID_CHARACTER.create(incorrectStringError, incorrectStringError.getIncorrectString(), translatedName);
         oxe.addProblematic(new SimpleIncorrectStringAttribute(metadata.getId(), incorrectStringError.getIncorrectString()));
         return oxe;
     }

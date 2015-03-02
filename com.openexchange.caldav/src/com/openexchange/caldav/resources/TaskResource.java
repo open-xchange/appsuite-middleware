@@ -64,6 +64,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -177,6 +178,22 @@ public class TaskResource extends CalDAVResource<Task> {
                 final String stringValue = (String)value;
                 if (stringValue.length() > truncated.getMaxSize()) {
                     taskToSave.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean replaceIncorrectStrings(IncorrectString incorrectString, String replacement) {
+        if (null != taskToSave) {
+            Object value = taskToSave.get(incorrectString.getId());
+            if (null != value && String.class.isInstance(value)) {
+                String stringValue = (String) value;
+                String replacedString = stringValue.replaceAll(incorrectString.getIncorrectString(), replacement);
+                if (false == stringValue.equals(replacedString)) {
+                    taskToSave.set(incorrectString.getId(), replacedString);
                     return true;
                 }
             }

@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -68,6 +69,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.i18n.LocalizableArgument;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -231,4 +233,20 @@ public final class Tools {
         return UserStorage.getInstance().getUser(userId, ctx);
     }
 
+    public static OXException parseIncorrectString(IncorrectStringSQLException e) {
+        final Mapper<?> mapper = SQL.mapColumn(e.getColumn());
+        final String incorrectString = e.getIncorrectString();
+        OXException incorrectStringException = TaskExceptionCode.INCORRECT_STRING.create(e, incorrectString, new LocalizableArgument(mapper.getDisplayName()));
+        incorrectStringException.addProblematic(new OXException.IncorrectString() {
+            @Override
+            public int getId() {
+                return mapper.getId();
+            }
+            @Override
+            public String getIncorrectString() {
+                return incorrectString;
+            }
+        });
+        return incorrectStringException;
+    }
 }

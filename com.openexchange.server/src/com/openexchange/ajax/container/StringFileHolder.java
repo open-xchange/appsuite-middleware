@@ -52,6 +52,8 @@ package com.openexchange.ajax.container;
 import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -68,6 +70,7 @@ public final class StringFileHolder implements IFileHolder {
     private String contentType;
     private String disposition;
     private String delivery;
+    private final List<Runnable> tasks;
 
     /**
      * Initializes a new {@link StringFileHolder} with default encoding (UTF-8).
@@ -90,8 +93,21 @@ public final class StringFileHolder implements IFileHolder {
         try {
             this.bytes = string.getBytes(Charsets.forName(encoding));
             contentType = "application/octet-stream";
+            tasks = new LinkedList<Runnable>();
         } catch (final UnsupportedCharsetException e) {
             throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public List<Runnable> getPostProcessingTasks() {
+        return tasks;
+    }
+
+    @Override
+    public void addPostProcessingTask(Runnable task) {
+        if (null != task) {
+            tasks.add(task);
         }
     }
 

@@ -1,3 +1,38 @@
+* 2015-03-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37037: Appropriate display message for error code RES-0010 "Found resource(s) with same email address %1$s."
+ - Fix for bug 37039: Do also check a group's display name on create/update call
+
+* 2015-03-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36868: Removed fix for bug 32947 from replication monitor.
+
+* 2015-03-02 - backend@open-xchange.com
+
+ - Fix for bug 36943: Introduced special handling for situations when a string could not be stored successfully by MySQL
+
+* 2015-02-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35122: Ensure proper runtime values
+ - Fix for bug 36786: Deal with possibly multiple folders having the same SPECIAL-USE marker and prefer the one matching to remembered name/full name
+
+* 2015-02-26 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 36321: Partial fix. New ical4j library to avoid parsing error.
+
+* 2015-02-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36860: Perform simple search if no search term is supported by storage
+
+* 2015-02-26 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 36969: Include session information (sessionId, contextId and userId) to all relevant servlets.Remove filter artifacts. Correctly assert the filter rule.
+
+* 2015-02-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36666: Allow "unseen=1" parameter for /ajax/mail?action=attachment call to leave the associated message as unseen
+ - Fix for bug 36993: Refer to year 2015 in copyright note
+
 * 2015-02-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 36960: Select an appropriate predecessor for 'com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob' update task

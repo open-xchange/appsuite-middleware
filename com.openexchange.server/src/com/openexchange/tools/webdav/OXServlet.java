@@ -68,6 +68,7 @@ import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
@@ -263,7 +264,11 @@ public abstract class OXServlet extends WebDavServlet {
             return;
         }
         try {
-            LOG.trace("Entering HTTP sub method. Session: {}", getSession(req));
+            Session session = getSession(req);
+            if (session != null) {
+                LogProperties.putSessionProperties(session);
+                LOG.trace("Entering HTTP sub method. Session: {}", session);
+            }
             super.service(req, resp);
         } catch (final ServletException e) {
             throw e;

@@ -53,6 +53,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -111,7 +112,13 @@ public abstract class ContactImporter extends AbstractImporter {
     }
 
     protected boolean handle(OXException e, Contact contact) {
-        return ContactExceptionCodes.DATA_TRUNCATION.equals(e) && null != e.getProblematics() && trimTruncatedAttributes(e, contact);
+        if (ContactExceptionCodes.DATA_TRUNCATION.equals(e)) {
+            return null != e.getProblematics() && trimTruncatedAttributes(e, contact);
+        }
+        if (ContactExceptionCodes.INCORRECT_STRING.equals(e)) {
+            return null != e.getProblematics() && removeIncorrectStrings(e, contact);
+        }
+        return false;
     }
 
     private static boolean trimTruncatedAttributes(OXException e, Contact contact) {
@@ -119,6 +126,15 @@ public abstract class ContactImporter extends AbstractImporter {
             return MappedTruncation.truncate(e.getProblematics(), contact);
         } catch (OXException x) {
             LOG.warn("error trying to handle truncated attributes", x);
+            return false;
+        }
+    }
+
+    private static boolean removeIncorrectStrings(OXException e, Contact contact) {
+        try {
+            return MappedIncorrectString.replace(e.getProblematics(), contact, "");
+        } catch (OXException x) {
+            LOG.warn("error trying to handle incorrect strings", x);
             return false;
         }
     }

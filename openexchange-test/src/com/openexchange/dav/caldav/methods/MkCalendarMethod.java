@@ -65,7 +65,7 @@ import com.openexchange.dav.PropertyNames;
 
 /**
  * {@link MkCalendarMethod}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class MkCalendarMethod extends DavMethodBase {
@@ -74,7 +74,7 @@ public class MkCalendarMethod extends DavMethodBase {
 
     /**
      * Initializes a new {@link MkCalendarMethod}.
-     * 
+     *
      * @param uri
      * @param setProperties
      * @throws IOException
@@ -97,8 +97,11 @@ public class MkCalendarMethod extends DavMethodBase {
         } catch (ParserConfigurationException e) {
             throw new IOException(e.getMessage());
         }
+    }
 
-        
+    @Override
+    public void setRequestBody(Document requestBody) throws IOException {
+        setRequestEntity(new CustomXmlRequestEntity(requestBody, "UTF-16"));
     }
 
     @Override
@@ -110,7 +113,7 @@ public class MkCalendarMethod extends DavMethodBase {
     protected boolean isSuccess(int statusCode) {
         return statusCode == DavServletResponse.SC_CREATED;
     }
-    
+
     @Override
     protected void processMultiStatusBody(MultiStatus multiStatus, HttpState httpState, HttpConnection httpConnection) {
         MultiStatusResponse[] resp = multiStatus.getResponses();
@@ -118,5 +121,6 @@ public class MkCalendarMethod extends DavMethodBase {
             super.processMultiStatusBody(multiStatus, httpState, httpConnection);
         }
     }
+
 }
 

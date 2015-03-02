@@ -72,6 +72,7 @@ public final class CardDAVBugSuite {
         suite.addTestSuite(Bug23078Test.class);
         suite.addTestSuite(Bug28672Test.class);
         suite.addTestSuite(Bug30449Test.class);
+        suite.addTestSuite(Bug36943Test.class);
         return suite;
     }
 }

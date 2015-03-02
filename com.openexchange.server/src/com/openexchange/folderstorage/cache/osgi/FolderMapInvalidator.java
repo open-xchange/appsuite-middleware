@@ -57,13 +57,11 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheKey;
-import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.internal.Tools;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link FolderMapInvalidator} - Invalidates folder map.
@@ -75,30 +73,6 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FolderMapInvalidator.class);
 
     private static final String REGION = FolderMapManagement.REGION;
-
-    /**
-     * Gets the invalidation key for given arguments.
-     *
-     * @param folderId The folder identifier
-     * @param treeId The tree identifier
-     * @param optUser The optional user identifier
-     * @param contextId The context identifier
-     * @return The appropriate invalidation key
-     */
-    public static CacheKey keyFor(String folderId, String treeId, int optUser, int contextId) {
-        CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null == service) {
-            return null;
-        }
-
-        if (null != folderId && null != treeId) {
-            return service.newCacheKey(contextId, Integer.toString(optUser), treeId, folderId);
-        }
-        if (optUser > 0) {
-            return service.newCacheKey(contextId, Integer.toString(optUser));
-        }
-        return service.newCacheKey(contextId, new String[0]);
-    }
 
     private final BundleContext context;
 
@@ -138,14 +112,27 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
     public static void handleCacheKey(Serializable cacheKey, int contextId) {
         if (cacheKey instanceof CacheKey) {
             CacheKey key = (CacheKey) cacheKey;
+            int optUser = key.getContextId();
             Serializable[] keys = key.getKeys();
-            int length = keys.length;
-            if (0 == length) {
-                FolderMapManagement.getInstance().dropFor(contextId, false);
-            } else if (1 == length) {
-                FolderMapManagement.getInstance().dropFor(Integer.parseInt(keys[0].toString()), contextId, false);
-            } else if (3 == length) {
-                FolderMapManagement.getInstance().dropFor(keys[2].toString(), keys[1].toString(), Tools.getUnsignedInteger(keys[0].toString()), contextId, null, false);
+            if (null == keys || 0 == keys.length) {
+                /*
+                 * context-/user-wide invalidation
+                 */
+                if (0 < optUser) {
+                    FolderMapManagement.getInstance().dropFor(optUser, contextId, false);
+                } else {
+                    FolderMapManagement.getInstance().dropFor(contextId, false);
+                }
+            } else {
+                /*
+                 * explicit invalidation of one or more folders
+                 */
+                String treeId = String.valueOf(keys[0]);
+                List<String> folderIds = new ArrayList<String>(keys.length - 1);
+                for (int i = 1; i < keys.length; i++) {
+                    folderIds.add(String.valueOf(keys[i]));
+                }
+                FolderMapManagement.getInstance().dropFor(folderIds, treeId, optUser, contextId, null, false);
             }
         }
     }

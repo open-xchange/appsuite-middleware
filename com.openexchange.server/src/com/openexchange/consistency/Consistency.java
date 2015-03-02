@@ -546,7 +546,7 @@ public abstract class Consistency implements ConsistencyMBean {
             if (FileStorageCodes.NO_SUCH_FILE_STORAGE.equals(e)) {
                 // Does not (yet) exist
                 Object[] logArgs = e.getLogArgs();
-                LOG.info("Cannot check files in filestore for context {} since associated filestore does not (yet) exist: {}", ctx.getContextId(), null == logArgs || 0 == logArgs.length ? e.getMessage() : (String) logArgs[0]);
+                LOG.info("Cannot check files in filestore for context {} since associated filestore does not (yet) exist: {}", ctx.getContextId(), null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
                 return;
             }
 

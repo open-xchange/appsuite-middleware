@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Copy resouces">
+
+    <description>
+        This script just copies resources, so that the bundle work in eclipse as in production.
+    </description>
+
+    <target name="copyResources">
+        <copy todir="${basedir}">
+            <fileset dir="resource"/>
+        </copy>
+    </target>
+
+</project>

@@ -143,6 +143,7 @@ public abstract class SessionServlet extends AJAXServlet {
                     session.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), dbSchema);
                 }
                 LogProperties.put(LogProperties.Name.DATABASE_SCHEMA, dbSchema);
+                LogProperties.putSessionProperties(session);
 
                 /*
                  * Check max. concurrent AJAX requests

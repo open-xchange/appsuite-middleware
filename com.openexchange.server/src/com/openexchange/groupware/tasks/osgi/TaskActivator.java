@@ -70,6 +70,7 @@ import com.openexchange.groupware.tasks.database.RemoveUselessExternalParticipan
 import com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.osgi.UpdateTaskRegisterer;
+import com.openexchange.i18n.I18nService;
 import com.openexchange.osgi.DependentServiceRegisterer;
 import com.openexchange.quota.QuotaProvider;
 
@@ -92,7 +93,7 @@ public class TaskActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(CreateTableService.class, new CreateTaskTables());
-
+        track(I18nService.class, new TranslatorCustomizer(context));
         track(DatabaseService.class, new UpdateTaskRegisterer(context) {
             @Override
             protected Collection<? extends UpdateTaskV2> createTasks(DatabaseService service) {

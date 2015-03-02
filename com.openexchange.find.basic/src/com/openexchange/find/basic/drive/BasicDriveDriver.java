@@ -61,19 +61,24 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.DescriptionTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
+import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
@@ -238,18 +243,36 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      */
     private static List<File> filter(List<File> files, String fileType) {
         if (null != files && 0 < files.size()) {
+            /*
+             * determine patterns to check the MIME type against
+             */
+            List<String> patterns;
+            boolean negate;
             if (FileType.OTHER.getIdentifier().equals(fileType)) {
+                negate = true;
+                patterns = new ArrayList<String>();
                 String[] typesToNegate = new String[] {
                     FileType.AUDIO.getIdentifier(), FileType.IMAGES.getIdentifier(), FileType.DOCUMENTS.getIdentifier(), FileType.VIDEO.getIdentifier()
                 };
                 for (String typeToNegate : typesToNegate) {
-                    for (String regex : getPatternsForFileType(typeToNegate)) {
-                        files = filter(files, regex, true);
-                    }
+                    patterns.addAll(getPatternsForFileType(typeToNegate));
                 }
             } else {
-                for (String regex : getPatternsForFileType(fileType)) {
-                    files = filter(files, regex, false);
+                negate = false;
+                patterns = getPatternsForFileType(fileType);
+            }
+            /*
+             * filter files
+             */
+            Iterator<File> iterator = files.iterator();
+            while (iterator.hasNext()) {
+                File file = iterator.next();
+                if (matchesAny(file, patterns)) {
+                    if (negate) {
+                        iterator.remove();
+                    }
+                } else if (false == negate) {
+                    iterator.remove();
                 }
             }
         }
@@ -270,6 +293,23 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             }
         }
         return files;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied file's MIME type matches any of the specified patterns.
+     *
+     * @param file The file to check
+     * @param patterns The patterns to check the file's MIME type against
+     * @return <code>true</code> if the file's MIME type matches at least one of the supplied patterns, <code>false</code>, otherwise
+     */
+    private static boolean matchesAny(File file, List<String> patterns) {
+        String mimeType = null != file.getFileMIMEType() ? file.getFileMIMEType() : MimeType2ExtMap.getContentType(file.getFileName());
+        for (String regex : patterns) {
+            if (Pattern.matches(regex, mimeType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -307,7 +347,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         final List<Facet> facets = new LinkedList<Facet>();
 
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+        if (!Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
             List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
             if (prefixTokens.isEmpty()) {
                 prefixTokens = Collections.singletonList(prefix);
@@ -318,18 +358,22 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 .withSimpleDisplayItem(prefix)
                 .withFilter(Filter.of(Constants.FIELD_GLOBAL, prefixTokens))
                 .build());
-            facets.add(newSimpleBuilder(DriveFacetType.FILE_NAME)
-                .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix)
-                .withFilter(Filter.of(Constants.FIELD_FILE_NAME, prefixTokens))
-                .build());
-            facets.add(newSimpleBuilder(DriveFacetType.FILE_DESCRIPTION)
-                .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix)
-                .withFilter(Filter.of(Constants.FIELD_FILE_DESC, prefixTokens))
-                .build());
-            facets.add(newSimpleBuilder(DriveFacetType.FILE_CONTENT)
-                .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix)
-                .withFilter(Filter.of(Constants.FIELD_FILE_CONTENT, prefixTokens))
-                .build());
+
+            // Add filename/type/content facets if search by term is supported
+            if (supportsSearchByTerm(session, null, autocompleteRequest)) {
+                facets.add(newSimpleBuilder(DriveFacetType.FILE_NAME)
+                    .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix)
+                    .withFilter(Filter.of(Constants.FIELD_FILE_NAME, prefixTokens))
+                    .build());
+                facets.add(newSimpleBuilder(DriveFacetType.FILE_DESCRIPTION)
+                    .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix)
+                    .withFilter(Filter.of(Constants.FIELD_FILE_DESC, prefixTokens))
+                    .build());
+                facets.add(newSimpleBuilder(DriveFacetType.FILE_CONTENT)
+                    .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix)
+                    .withFilter(Filter.of(Constants.FIELD_FILE_CONTENT, prefixTokens))
+                    .build());
+            }
         }
         // Add static file type facet
         {
@@ -400,6 +444,57 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             SearchIterators.close(it);
             access.finish();
         }
+    }
+
+    /**
+     * Gets a value indicating whether the "search by term" capability is available based on the parameters of the supplied find request.
+     *
+     * @param session The current session
+     * @param fileAccess An existing file access reference, or <code>null</code> if not available
+     * @param findRequest The find request
+     * @return <code>true</code> if searching by term is supported, <code>false</code>, otherwise
+     */
+    private static boolean supportsSearchByTerm(ServerSession session, IDBasedFileAccess fileAccess, AbstractFindRequest findRequest) throws OXException {
+        /*
+         * check capability of all concrete file storage if folder ID is specified
+         */
+        if (null != findRequest.getFolderId()) {
+            FolderID folderID = new FolderID(findRequest.getFolderId());
+            if (null != fileAccess) {
+                return fileAccess.supports(folderID.getService(), folderID.getAccountId(), FileStorageCapability.SEARCH_BY_TERM);
+            }
+            IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
+            if (null == fileAccessFactory) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
+            }
+            fileAccess = fileAccessFactory.createAccess(session);
+            try {
+                return fileAccess.supports(folderID.getService(), folderID.getAccountId(), FileStorageCapability.SEARCH_BY_TERM);
+            } finally {
+                fileAccess.finish();
+            }
+        }
+        /*
+         * check capability of all available storages, otherwise
+         */
+        FileStorageServiceRegistry registry = Services.getFileStorageServiceRegistry();
+        if (null == registry) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageServiceRegistry.class.getName());
+        }
+        for (FileStorageService service : registry.getAllServices()) {
+            List<FileStorageAccount> accounts;
+            if (AccountAware.class.isInstance(service)) {
+                accounts = ((AccountAware) service).getAccounts(session);
+            } else {
+                accounts = service.getAccountManager().getAccounts(session);
+            }
+            for (FileStorageAccount account : accounts) {
+                if (false == fileAccess.supports(service.getId(), account.getId(), FileStorageCapability.SEARCH_BY_TERM)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 }

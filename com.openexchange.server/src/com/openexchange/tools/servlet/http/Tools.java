@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.Cookie;
@@ -786,4 +787,33 @@ public final class Tools {
         sb.append("</body></html>").append(lineSep);
         return sb.toString();
     }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
+
+    /**
+     * Checks if given HTTP request provides a "Range" header, whose value matches format "bytes=n-n,n-n,n-n..."
+     *
+     * @param req The HTTP request to check
+     * @return <code>true</code> if request queries a byte range; otherwise <code>false</code>
+     */
+    public static boolean hasRangeHeader(HttpServletRequest req) {
+        if (null == req) {
+            return false;
+        }
+        return isByteRangeHeader(req.getHeader("Range"));
+    }
+
+    /**
+     * Checks if given "Range" header matches format "bytes=n-n,n-n,n-n..."
+     *
+     * @param range The "Range" header
+     * @return <code>true</code> for a byte range; otherwise <code>false</code>
+     */
+    public static boolean isByteRangeHeader(String range) {
+        // Range header should match format "bytes=n-n,n-n,n-n...".
+        return ((null != range) && PATTERN_BYTE_RANGES.matcher(range).matches());
+    }
+
 }
