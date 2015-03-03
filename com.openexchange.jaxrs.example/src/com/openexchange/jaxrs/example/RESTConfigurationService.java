@@ -50,11 +50,14 @@
 package com.openexchange.jaxrs.example;
 
 import java.util.Map;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.ServiceUnavailableException;
+import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -90,6 +93,8 @@ public class RESTConfigurationService {
      * GET /rest/configuration/property/com.openexchange.some.property
      * Retrieves the value of a named property. Return an Object with a property to value mapping or a status 404 if a property is not set.
      */
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     @Path("/property/{property}")
     public JSONObject getProperty(@PathParam("property") String property) throws OXException {
@@ -101,6 +106,8 @@ public class RESTConfigurationService {
      * Retrieves the value of a named property as configured for the given context and user.
      * Return an Object with a property to value mapping or a status 404 if a property is not set.
      */
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     @Path("/property/{property}/{context}/{user}")
     public JSONObject getProperty(@PathParam("property") String property, @PathParam("context") int context, @PathParam("user") int user) throws OXException {
@@ -123,6 +130,8 @@ public class RESTConfigurationService {
      * GET /rest/configuration/withPrefix/com.openexchange.mymodule
      * Retrieves all properties with a given prefix, e.g. all properties starting with com.openexchange.mymodule as an Object.
      */
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     @Path("/withPrefix/{prefix}")
     public JSONObject getWithPrefix(@PathParam("prefix") String prefix) throws OXException {
@@ -133,6 +142,8 @@ public class RESTConfigurationService {
      * GET /rest/configuration/withPrefix/com.openexchange.mymodule/[contextId]/[userId]
      * Retrieves all properties with a given prefix for a given context and user, e.g. all properties starting with com.openexchange.mymodule as an Object.
      */
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     @Path("/withPrefix/{prefix}/{context}/{user}")
     public JSONObject getWithPrefix(@PathParam("prefix") String prefix, @PathParam("context") int context, @PathParam("user") int user) throws OXException {
