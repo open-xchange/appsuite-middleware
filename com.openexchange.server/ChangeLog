@@ -1,3 +1,7 @@
+* 2015-03-03 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 37064: Sanitize passwords during logging.
+
 * 2015-03-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 37037: Appropriate display message for error code RES-0010 "Found resource(s) with same email address %1$s."
