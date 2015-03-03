@@ -77,6 +77,7 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class RdbMobilePushStorageImpl implements MobilePushStorageService {
+
     private final DatabaseService databaseService;
 
     /**
@@ -156,7 +157,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
 
     @Override
     public boolean blockLoginPush(List<ContextUsers> contextUsers, long blockUntil) throws OXException {
-        for(ContextUsers cu : contextUsers) {
+        for (ContextUsers cu : contextUsers) {
             int contextId = cu.getContextId();
             Connection connection = databaseService.getWritable(contextId);
             try {
@@ -180,7 +181,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             //WHERE:
             stmt.setInt(++index, contextId);
             //IN(?, ?, ...)
-            for(UserToken userToken : userTokens) {
+            for (UserToken userToken : userTokens) {
                 stmt.setInt(++index, userToken.getUserId());
             }
             return stmt.executeUpdate();
@@ -194,8 +195,8 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
         ContextService contextService = Services.getService(ContextService.class);
         Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
         List<ContextUsers> contextUser = new LinkedList<ContextUsers>();
-        if(false == allContextIDs.isEmpty()) {
-            for(Iterator<Integer> iter = allContextIDs.iterator(); iter.hasNext();) {
+        if (false == allContextIDs.isEmpty()) {
+            for (Iterator<Integer> iter = allContextIDs.iterator(); iter.hasNext();) {
                 int ctx = iter.next().intValue();
                 Connection connection = databaseService.getReadOnly(ctx);
                 try {
@@ -224,14 +225,14 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             List<UserToken> userIds = new LinkedList<UserToken>();
             int contextId = -1;
 
-            while(results.next()) {
+            while (results.next()) {
                 contextId = results.getInt(1);
 
                 int userId = results.getInt(2);
                 String token = results.getString(3);
                 userIds.add(new UserToken(userId, token));
             }
-            if(false == userIds.isEmpty()) {
+            if (false == userIds.isEmpty()) {
                 contextUser.add(new ContextUsers(contextId, userIds));
             }
         } finally {
@@ -269,7 +270,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
     public boolean deleteSubscription(int contextId, String token, String serviceId) throws OXException {
         Connection connection = databaseService.getWritable(contextId);
         try {
-            return 0 < deleteSubscriptions(connection, contextId, token, serviceId);
+            return 0 < deleteSubscription(connection, contextId, token, serviceId);
         } catch (SQLException e) {
             throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -277,7 +278,29 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
         }
     }
 
-    private static int deleteSubscriptions(Connection connection, int contextId, String token, String serviceId) throws SQLException, OXException {
+    @Override
+    public int deleteSubscription(String token, String serviceId) throws OXException {
+        int removed = 0;
+        ContextService contextService = Services.getService(ContextService.class);
+        Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
+        while (false == allContextIDs.isEmpty()) {
+            /*
+             * Delete for whole schema using connection for first context
+             */
+            int contextId = allContextIDs.iterator().next().intValue();
+            Connection connection = databaseService.getWritable(contextId);
+            try {
+                removed += deleteSubscription(connection, contextId, token, serviceId);
+            } catch (SQLException e) {
+                throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                databaseService.backWritable(contextId, connection);
+            }
+        }
+        return removed;
+    }
+
+    private static int deleteSubscription(Connection connection, int contextId, String token, String serviceId) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(Statements.DELETE_TOKEN_BY_SERVICE_ID);
@@ -313,7 +336,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             stmt.setString(++index, service);
             stmt.setString(++index, providerName);
             ResultSet results = stmt.executeQuery();
-            while(results.next()) {
+            while (results.next()) {
                 int cid = results.getInt(1);
                 String resService = results.getString(2);
                 String resToken = results.getString(3);
@@ -331,8 +354,8 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
     @Override
     public List<String> getTokens(List<ContextUsers> contextUser, String serviceId, MobilePushProviders provider) throws OXException {
         List<String> subscriptions = new LinkedList<String>();
-        if(false == contextUser.isEmpty()) {
-            for(ContextUsers cu : contextUser) {
+        if (false == contextUser.isEmpty()) {
+            for (ContextUsers cu : contextUser) {
                 int contextId = cu.getContextId();
                 Connection connection = databaseService.getReadOnly(contextId);
                 try {
@@ -350,19 +373,18 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
     private List<String> selectTokensFromContext(Connection connection, int contextId, List<UserToken> userTokens, String serviceId, MobilePushProviders provider) throws SQLException {
         PreparedStatement stmt = null;
         try {
-
             List<String> tokens = new LinkedList<String>();
 
             stmt = connection.prepareStatement(Statements.SELECT_TOKENS);
 
-            for(UserToken userToken : userTokens) {
+            for (UserToken userToken : userTokens) {
                 int index = 0;
                 stmt.setInt(++index, contextId);
                 stmt.setInt(++index, userToken.getUserId());
                 stmt.setString(++index, provider.getProviderName());
 
                 ResultSet results = stmt.executeQuery();
-                while(results.next()) {
+                while (results.next()) {
                     tokens.add(results.getString(1));
                 }
             }
