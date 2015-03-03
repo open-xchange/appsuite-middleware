@@ -69,6 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.LocalizableArgument;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -146,11 +147,19 @@ final class Update {
             throw GroupExceptionCodes.NULL.create();
         }
         if (GroupStorage.GROUP_ZERO_IDENTIFIER == changed.getIdentifier()) {
-            throw GroupExceptionCodes.NO_GROUP_UPDATE.create(getOrig().getDisplayName());
+            throw GroupExceptionCodes.NO_GROUP_UPDATE.create(new LocalizableArgument(getOrig().getDisplayName()));
         }
         // Does the group exist? Are timestamps okay?
         if (getOrig().getLastModified().after(lastRead)) {
             throw GroupExceptionCodes.MODIFIED.create();
+        }
+        if (GroupStorage.GROUP_STANDARD_SIMPLE_NAME.equals(getOrig().getSimpleName())) {
+            if (changed.isSimpleNameSet() && !changed.getSimpleName().equals(getOrig().getSimpleName())) {
+                throw GroupExceptionCodes.NO_GROUP_UPDATE.create(new LocalizableArgument(getOrig().getDisplayName()));
+            }
+            if (changed.isDisplayNameSet() && !changed.getDisplayName().equals(getOrig().getDisplayName())) {
+                throw GroupExceptionCodes.NO_GROUP_UPDATE.create(new LocalizableArgument(getOrig().getDisplayName()));
+            }
         }
         Logic.checkMandatoryForUpdate(changed);
         Logic.validateSimpleName(changed);

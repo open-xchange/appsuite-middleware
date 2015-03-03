@@ -1,3 +1,7 @@
+* 2015-03-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37058: Deny renaming standard groups
+
 * 2015-03-03 - martin.herfurth@open-xchange.com
 
  - Fix for bug 37064: Sanitize passwords during logging.

@@ -64,6 +64,8 @@ public abstract class GroupStorage {
 
     public static final int GROUP_ZERO_IDENTIFIER = 0;
 
+    public static final String GROUP_STANDARD_SIMPLE_NAME = "users";
+
     private static volatile GroupStorage instance;
 
     /**
