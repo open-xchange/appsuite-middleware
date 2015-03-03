@@ -91,7 +91,7 @@ import com.openexchange.tools.servlet.http.Tools;
  * {@link HTTPAuthLogin}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @since 7.6.2
+ * @since 7.6.1
  */
 public final class HTTPAuthLogin implements LoginRequestHandler {
 
