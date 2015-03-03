@@ -8,6 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.exception,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.tools.servlet,
