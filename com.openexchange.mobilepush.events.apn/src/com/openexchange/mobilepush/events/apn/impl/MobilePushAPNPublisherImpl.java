@@ -199,8 +199,8 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         if (null != devices && 0 < devices.size()) {
             for (Device device : devices) {
                 LOG.debug("Got feedback for device with token: {}, last registered: {}", device.getToken(), device.getLastRegister());
-                // int removed = removeSubscriptions(device.getDeviceId());
-                // LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
+                 int removed = removeSubscriptions(device);
+                 LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
             }
         } else {
             LOG.debug("No devices to unregister received from feedback service.");
@@ -265,6 +265,19 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
             LOG.error("Error removing subscription", e);
         }
         return false;
+    }
+
+    private int removeSubscriptions(Device device) {
+        if (null != device && null != device.getToken() && null != device.getLastRegister()) {
+            try {
+                return Services.getService(MobilePushStorageService.class, true).deleteSubscription(device.getToken(), SERVICE_ID);
+            } catch (OXException e) {
+                LOG.error("Error removing subscription", e);
+            }
+        } else {
+            LOG.warn("Unsufficient device information to remove subscriptions for: {}", device);
+        }
+        return 0;
     }
 
     private boolean removeSubscriptions(MobilePushEvent event, Device device) {

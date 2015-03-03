@@ -97,12 +97,21 @@ public interface MobilePushStorageService {
      * Deletes a subscription by the userId, token and serviceId.
      *
      * @param contextId - The context id
-     * @param token - The hardware token provided by the push provider
+     * @param token - The device token provided by the device
      * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
      * @return <code>true</true> if the subscriptions could be successfully removed; <code>false</code> if not.
      */
     boolean deleteSubscription(int contextId, String token, String serviceId) throws OXException;
 
+    /**
+     * Deletes a subscription by the given token and service id; iterates threw all contexts
+     *
+     * @param token - The device token provided by the device
+     * @param serviceId
+     * @return
+     * @throws OXException
+     */
+    int deleteSubscription(String token, String serviceId) throws OXException;
     /**
      * Gets subscriptions of the specified contextId, userId, serviceId and provider.
      *
