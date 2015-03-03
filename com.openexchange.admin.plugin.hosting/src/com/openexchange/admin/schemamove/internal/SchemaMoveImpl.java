@@ -106,9 +106,7 @@ public class SchemaMoveImpl implements SchemaMoveService {
         /*
          * Disable all enabled contexts with configured maintenance reason
          */
-        Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
-            "SCHEMA_MOVE_MAINTENANCE_REASON",
-            Integer.toString(DEFAULT_REASON)));
+        Integer reasonId = Integer.valueOf(ClientAdminThreadExtended.cache.getProperties().getProp("SCHEMA_MOVE_MAINTENANCE_REASON", Integer.toString(DEFAULT_REASON)));
         OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
         contextStorage.disable(schemaName, new MaintenanceReason(reasonId));
     }
@@ -174,7 +172,7 @@ public class SchemaMoveImpl implements SchemaMoveService {
             int[] contextIdArray = Autoboxing.I2i(contextIds);
             dbService.invalidate(contextIdArray);
             contextService.invalidateContexts(contextIdArray);
-            LOG.info("Invalidated {} cached context objects for schema '{}'", contextIdArray.length, schemaName);
+            LOG.info("Invalidated {} cached context objects for schema '{}'", Integer.valueOf(contextIdArray.length), schemaName);
         } catch (OXException e) {
             throw StorageException.wrapForRMI(e);
         }
@@ -197,9 +195,7 @@ public class SchemaMoveImpl implements SchemaMoveService {
         /*
          * Disable all enabled contexts with configured maintenance reason
          */
-        Integer reasonId = Integer.parseInt(ClientAdminThreadExtended.cache.getProperties().getProp(
-            "SCHEMA_MOVE_MAINTENANCE_REASON",
-            Integer.toString(DEFAULT_REASON)));
+        Integer reasonId = Integer.valueOf(ClientAdminThreadExtended.cache.getProperties().getProp("SCHEMA_MOVE_MAINTENANCE_REASON", Integer.toString(DEFAULT_REASON)));
         OXContextStorageInterface contextStorage = OXContextStorageInterface.getInstance();
         contextStorage.enable(schemaName, new MaintenanceReason(reasonId));
     }

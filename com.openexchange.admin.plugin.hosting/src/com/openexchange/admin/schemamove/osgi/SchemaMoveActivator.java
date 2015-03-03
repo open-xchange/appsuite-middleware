@@ -52,21 +52,13 @@ package com.openexchange.admin.schemamove.osgi;
 import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.management.ObjectName;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.schemamove.SchemaMoveService;
 import com.openexchange.admin.schemamove.internal.SchemaMoveImpl;
-import com.openexchange.admin.schemamove.internal.SchemaMoveMBeanImpl;
 import com.openexchange.admin.schemamove.internal.SchemaMoveRemoteImpl;
-import com.openexchange.admin.schemamove.mbean.SchemaMoveMBean;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.Managements;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -91,9 +83,9 @@ public class SchemaMoveActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Logger logger = LoggerFactory.getLogger(SchemaMoveActivator.class);
+        Logger logger = LoggerFactory.getLogger(SchemaMoveActivator.class);
 
-        final SchemaMoveImpl schemaMoveImpl = new SchemaMoveImpl();
+        SchemaMoveImpl schemaMoveImpl = new SchemaMoveImpl();
         registerService(SchemaMoveService.class, schemaMoveImpl);
 
         // Register RMI
@@ -101,41 +93,7 @@ public class SchemaMoveActivator extends HousekeepingActivator {
         serviceProperties.put("RMI_NAME", SchemaMoveRemote.RMI_NAME);
         registerService(Remote.class, new SchemaMoveRemoteImpl(this.context, schemaMoveImpl), serviceProperties);
 
-
-        final BundleContext context = this.context;
-        ServiceTrackerCustomizer<ManagementService, ManagementService> managementTracker = new ServiceTrackerCustomizer<ManagementService, ManagementService>() {
-
-            @Override
-            public void removedService(ServiceReference<ManagementService> reference, ManagementService management) {
-                try {
-                    management.unregisterMBean(Managements.getObjectName(SchemaMoveMBean.class.getName(), SchemaMoveMBean.DOMAIN));
-                } catch (Exception e) {
-                    logger.error("Failed to unregister {}", SchemaMoveMBean.class.getName(), e);
-                }
-                context.ungetService(reference);
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<ManagementService> reference, ManagementService arg1) {
-                // Ignore
-            }
-
-            @Override
-            public ManagementService addingService(ServiceReference<ManagementService> reference) {
-                ManagementService management = context.getService(reference);
-                try {
-                    ObjectName objectName = Managements.getObjectName(SchemaMoveMBean.class.getName(), SchemaMoveMBean.DOMAIN);
-                    management.registerMBean(objectName, new SchemaMoveMBeanImpl(schemaMoveImpl));
-                    return management;
-                } catch (Exception e) {
-                    logger.error("Failed to register {}", SchemaMoveMBean.class.getName(), e);
-                    context.ungetService(reference);
-                    return null;
-                }
-            }
-        };
-        track(ManagementService.class, managementTracker);
-        openTrackers();
+        logger.info("Successfully started bundle {}", context.getBundle().getSymbolicName());
     }
 
 }

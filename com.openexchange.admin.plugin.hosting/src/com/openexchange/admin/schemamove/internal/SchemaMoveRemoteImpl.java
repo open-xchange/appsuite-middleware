@@ -50,7 +50,6 @@
 package com.openexchange.admin.schemamove.internal;
 
 import java.util.Map;
-import javax.management.NotCompliantMBeanException;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -84,11 +83,10 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
     private final static String THE_TARGET_CLUSTER_ID_IS_INVALID = "The target cluster id is invalid.";
 
     /**
-     * Initializes a new {@link SchemaMoveMBeanImpl}.
-     *
-     * @throws NotCompliantMBeanException If initialization fails
+     * Initializes a new {@link SchemaMoveRemoteImpl}.
      */
-    public SchemaMoveRemoteImpl(BundleContext context, SchemaMoveService schemaMoveService) throws NotCompliantMBeanException {
+    public SchemaMoveRemoteImpl(BundleContext context, SchemaMoveService schemaMoveService) {
+        super();
         this.schemaMoveService = schemaMoveService;
         this.context = context;
     }
