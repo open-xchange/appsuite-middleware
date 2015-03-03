@@ -52,18 +52,23 @@ package com.openexchange.jaxrs.configuration;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.omg.CORBA.UserException;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -116,14 +121,20 @@ public class ConfigurationRESTService {
         ConfigView view = factory.getView(user, context);
 
         ComposedConfigProperty<String> p = view.property(property, String.class);
-        if (!p.isDefined()) {
-            throw new NotFoundException();
-        }
-
         try {
-            return new JSONObject().put(property, p.get());
+            if (p.isDefined()) {
+                return new JSONObject().put(property, p.get());
+            } else {
+                throw new NotFoundException();
+            }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        } catch (OXException e) {
+            if (UserExceptionCode.USER_NOT_FOUND.equals(e) || ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                throw new NotFoundException();
+            } else {
+                throw new InternalServerErrorException();
+            }
         }
     }
 
