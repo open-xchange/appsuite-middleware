@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,45 +51,20 @@ package com.openexchange.tools.images.impl;
 
 import java.awt.Dimension;
 
+
 /**
- * {@link ContainDimensionConstrain}
+ * {@link DimensionConstrain}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContainDimensionConstrain implements DimensionConstrain {
+public interface DimensionConstrain  {
 
-    private final int maxWidth;
-
-    private final int maxHeight;
-
-    public ContainDimensionConstrain(int maxWidth, int maxHeight) {
-        this.maxWidth = maxWidth;
-        this.maxHeight = maxHeight;
-    }
-
-    @Override
-    public Dimension getDimension(Dimension dimension) {
-        if (maxWidth <= 0 && maxHeight <= 0) {
-            return dimension;
-        }
-
-        double scaleWidth = maxWidth <= 0 ? 1.0 : maxWidth / (double) dimension.width; // Calculate Width factor
-        double scaleHeight = maxHeight <= 0 ? 1.0 : maxHeight / (double) dimension.height; // Calculate Height factor
-
-        double scale = Math.min(scaleWidth, scaleHeight); // Choose smallest boundary
-        scale = Math.min(scale, 1); // Don't enlarge
-
-        int dstWidth = (int) Math.round(dimension.width * scale);
-        int dstHeight = (int) Math.round(dimension.height * scale);
-
-        if (dstWidth < 3) {
-            dstWidth = 3;
-        }
-        if (dstHeight < 3) {
-            dstHeight = 3;
-        }
-
-        return new Dimension(dstWidth, dstHeight);
-    }
+    /**
+     * Determines the target dimension based on the actual constraints and input dimension of the source image.
+     *
+     * @param dimension The original dimension of the source image
+     * @return The target dimensions
+     */
+    Dimension getDimension(Dimension dimension);
 
 }

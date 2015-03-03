@@ -54,12 +54,12 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
-import com.mortennobel.imagescaling.DimensionConstrain;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.impl.AutoDimensionConstrain;
 import com.openexchange.tools.images.impl.ContainDimensionConstrain;
 import com.openexchange.tools.images.impl.CoverDimensionConstrain;
+import com.openexchange.tools.images.impl.DimensionConstrain;
 import com.openexchange.tools.images.impl.ImageInformation;
 
 /**

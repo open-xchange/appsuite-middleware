@@ -50,14 +50,13 @@
 package com.openexchange.tools.images.impl;
 
 import java.awt.Dimension;
-import com.mortennobel.imagescaling.DimensionConstrain;
 
 /**
  * {@link CoverDimensionConstrain}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class CoverDimensionConstrain extends DimensionConstrain {
+public class CoverDimensionConstrain implements DimensionConstrain {
 
     private final int minWidth;
 
