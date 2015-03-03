@@ -272,6 +272,7 @@ public class DispatcherServlet extends SessionServlet {
 
         // Check for possible session inspector chain
         if (!SessionInspector.getInstance().getChain().isEmpty()) {
+            // Session inspectors available -- bypass those requests that do not require a session
             if (!sessionParamFound) {
                 AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
                 String module = requestDataTools.getModule(PREFIX.get(), req);
@@ -279,10 +280,9 @@ public class DispatcherServlet extends SessionServlet {
                 pair = new Pair<String, String>(module, action);
                 Dispatcher dispatcher = DISPATCHER.get();
                 mayOmitSession = dispatcher.mayOmitSession(module, action);
-            }
-
-            if (mayOmitSession) {
-                return new SessionResult<ServerSession>(Reply.CONTINUE, session);
+                if (mayOmitSession) {
+                    return new SessionResult<ServerSession>(Reply.CONTINUE, session);
+                }
             }
         }
 
