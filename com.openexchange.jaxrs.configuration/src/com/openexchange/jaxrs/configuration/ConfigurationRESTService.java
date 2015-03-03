@@ -58,6 +58,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ServiceUnavailableException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,11 +129,7 @@ public class ConfigurationRESTService {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         } catch (OXException e) {
-            if (UserExceptionCode.USER_NOT_FOUND.equals(e) || ContextExceptionCodes.NOT_FOUND.equals(e)) {
-                throw new NotFoundException();
-            } else {
-                throw new InternalServerErrorException();
-            }
+            throw handleNotFoundException(e);
         }
     }
 
@@ -159,9 +156,10 @@ public class ConfigurationRESTService {
     public JSONObject getWithPrefix(@PathParam("prefix") String prefix, @PathParam("context") int context, @PathParam("user") int user) throws OXException {
         ConfigViewFactory factory = getConfigViewFactory();
         ConfigView view = factory.getView(user, context);
-        Map<String, ComposedConfigProperty<String>> all = view.all();
         JSONObject json = new JSONObject();
         try {
+            Map<String, ComposedConfigProperty<String>> all = view.all();
+
             for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
                 if (entry.getKey().startsWith(prefix)) {
                     json.put(entry.getKey(), entry.getValue().get());
@@ -169,6 +167,8 @@ public class ConfigurationRESTService {
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        } catch (OXException e) {
+            throw handleNotFoundException(e);
         }
 
         return json;
@@ -186,5 +186,19 @@ public class ConfigurationRESTService {
         }
 
         return configViewFactory;
+    }
+
+    /**
+     * Handle the UserNotFound or the ContextNotFound exceptions.
+     * 
+     * @param The OXException
+     * @return NotFoundException or InternalServerExcetpion
+     */
+    private WebApplicationException handleNotFoundException(OXException e) {
+        if (UserExceptionCode.USER_NOT_FOUND.equals(e) || ContextExceptionCodes.NOT_FOUND.equals(e)) {
+            return new NotFoundException();
+        } else {
+            return new InternalServerErrorException();
+        }
     }
 }
