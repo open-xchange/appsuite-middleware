@@ -50,7 +50,7 @@
 package com.openexchange.session;
 
 /**
- * {@link SessionResult}
+ * {@link SessionResult} - Result of a session look-up attempt.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
