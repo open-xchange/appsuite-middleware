@@ -109,7 +109,9 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
@@ -117,6 +119,7 @@ import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * Servlet doing the login and logout stuff.
@@ -708,7 +711,15 @@ public class LoginServlet extends AJAXServlet {
         if (null == sessionId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
         }
-        final Session session = SessionUtility.getSession(conf.getHashSource(), req, resp, sessionId, sessiond);
+        SessionResult<ServerSession> result = SessionUtility.getSession(conf.getHashSource(), req, resp, sessionId, sessiond);
+        if (Reply.STOP == result.getReply()) {
+            return;
+        }
+        Session session = result.getSession();
+        if (null == session) {
+            // Should not occur
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+        }
         try {
             SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
             if (type == CookieType.SESSION) {

@@ -60,5 +60,11 @@ import com.openexchange.osgi.annotation.SingletonService;
  */
 @SingletonService
 public interface SessionInspectorChain extends SessionInspectorService {
-    // Extends SessionInspectorService
+
+    /**
+     * Checks if this chain is empty.
+     *
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    boolean isEmpty();
 }

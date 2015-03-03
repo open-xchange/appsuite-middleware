@@ -77,6 +77,11 @@ public class SessionInspectorChainImpl implements SessionInspectorChain {
     }
 
     @Override
+    public boolean isEmpty() {
+        return chain.isEmpty();
+    }
+
+    @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         for (SessionInspectorService inspector : chain) {
             Reply r = inspector.onSessionHit(session, request, response);

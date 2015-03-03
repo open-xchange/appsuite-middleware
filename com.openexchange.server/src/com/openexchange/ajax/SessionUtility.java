@@ -94,6 +94,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionSecretChecker;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -217,30 +218,42 @@ public final class SessionUtility {
      * @param resp The response
      * @throws OXException If initialization fails
      */
-    public static void defaultInitializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
-        if (null != getSessionObject(req, true)) {
-            return;
+    public static SessionResult<ServerSession> defaultInitializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
+        ServerSession session = getSessionObject(req, true);
+        if (null != session) {
+            return new SessionResult<ServerSession>(Reply.CONTINUE, session);
         }
-        // Remember session
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+
+        // Require SessionD service
+        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        final ServerSession session;
+
+        // Look-up & remember session
+        SessionResult<ServerSession> result;
         {
-            final String sSession = req.getParameter(PARAMETER_SESSION);
+            String sSession = req.getParameter(PARAMETER_SESSION);
             if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
-                session = getSession(req, resp, sessionId, sessiondService);
+                result = getSession(req, resp, sessionId, sessiondService);
+                if (Reply.STOP == result.getReply()) {
+                    return result;
+                }
+                session = result.getSession();
+                if (null == session) {
+                    // Should not occur
+                    throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                }
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
                 checkPublicSessionCookie(req, resp, session, sessiondService);
-            } else {
-                session = null;
             }
         }
+
         // Try public session
         findPublicSessionId(req, session, sessiondService, false, false);
+        return new SessionResult<ServerSession>(Reply.CONTINUE, session);
     }
 
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
@@ -467,10 +480,10 @@ public final class SessionUtility {
      * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
-     * @return the session.
-     * @throws OXException if the session can not be found.
+     * @return The session result
+     * @throws OXException If the session can not be found.
      */
-    public static ServerSession getSession(HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
+    public static SessionResult<ServerSession> getSession(HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
         return getSession(hashSource, req, resp, sessionId, sessiondService);
     }
 
@@ -482,10 +495,10 @@ public final class SessionUtility {
      * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
-     * @return the session.
-     * @throws SessionException if the session can not be found.
+     * @return The session result
+     * @throws SessionException If the session can not be found.
      */
-    public static ServerSession getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
+    public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
         return getSession(source, req, resp, sessionId, sessiondService, null);
     }
 
@@ -497,11 +510,11 @@ public final class SessionUtility {
      * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
-     * @return the session.
-     * @throws SessionException if the session can not be found.
+     * @return The session result
+     * @throws SessionException If the session can not be found.
      */
-    public static ServerSession getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService, SessionSecretChecker optChecker) throws OXException {
-        final Session session = sessiondService.getSession(sessionId);
+    public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService, SessionSecretChecker optChecker) throws OXException {
+        Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (!"unset".equals(sessionId)) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
@@ -510,7 +523,7 @@ public final class SessionUtility {
              * Session MISS -- Consult session inspector
              */
             if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionMiss(sessionId, req, resp)) {
-                return null;
+                return new SessionResult<ServerSession>(Reply.STOP, null);
             }
 
             // Otherwise throw appropriate error
@@ -520,7 +533,7 @@ public final class SessionUtility {
          * Session HIT -- Consult session inspector
          */
         if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionHit(session, req, resp)) {
-            return null;
+            return new SessionResult<ServerSession>(Reply.STOP, ServerSessionAdapter.valueOf(session));
         }
         /*
          * Get session secret
@@ -531,13 +544,13 @@ public final class SessionUtility {
             optChecker.checkSecret(session, req, source.name());
         }
         try {
-            final User user = UserStorage.getInstance().getUser(session.getUserId(), ContextStorage.getInstance().getContext(session.getContextId()));
+            User user = UserStorage.getInstance().getUser(session.getUserId(), ContextStorage.getInstance().getContext(session.getContextId()));
             if (!user.isMailEnabled()) {
                 LOG.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
-            return ServerSessionAdapter.valueOf(session);
-        } catch (final OXException e) {
+            return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
+        } catch (OXException e) {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
                 // An outdated session; context absent
                 sessiondService.removeSession(sessionId);
@@ -545,7 +558,7 @@ public final class SessionUtility {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
-                final int code = e.getCode();
+                int code = e.getCode();
                 if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
                     // An outdated session; user absent
                     sessiondService.removeSession(sessionId);
@@ -554,7 +567,7 @@ public final class SessionUtility {
                 }
             }
             throw e;
-        } catch (final UndeclaredThrowableException e) {
+        } catch (UndeclaredThrowableException e) {
             throw UserExceptionCode.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
         }
     }

@@ -71,7 +71,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.kerberos.ClientPrincipal;
 import com.openexchange.kerberos.KerberosService;
 import com.openexchange.kerberos.KerberosUtils;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.encoding.Base64;
@@ -112,7 +115,15 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
 
     private void doAuthHeaderTicketReload(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
         final String sessionId = getSessionId(req);
-        ServerSession session = getSession(req, resp, sessionId, sessiondService);
+        SessionResult<ServerSession> result = getSession(req, resp, sessionId, sessiondService);
+        if (Reply.STOP == result.getReply()) {
+            return;
+        }
+        ServerSession session = result.getSession();
+        if (null == session) {
+            // Should not occur
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+        }
         verifySession(req, sessiondService, sessionId, session);
         if (session.containsParameter(SESSION_PRINCIPAL)) {
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);

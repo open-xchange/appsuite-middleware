@@ -73,6 +73,7 @@ public class ServiceSet<E> implements NavigableSet<E>, ServiceTrackerCustomizer<
     private final ConcurrentHashMap<E, Integer> serviceRankings;
     private final ConcurrentHashMap<E, Long> serviceIds;
     private final ConcurrentSkipListSet<E> entries;
+    private volatile boolean empty;
 
     /**
      * Initializes a new {@link ServiceSet}.
@@ -84,6 +85,7 @@ public class ServiceSet<E> implements NavigableSet<E>, ServiceTrackerCustomizer<
         this.serviceRankings = serviceRankings;
         final ConcurrentHashMap<E, Long> serviceIds = new ConcurrentHashMap<E, Long>();
         this.serviceIds = serviceIds;
+        empty = true;
         entries = new ConcurrentSkipListSet<E>(new Comparator<E>() {
 
             @Override
@@ -164,7 +166,7 @@ public class ServiceSet<E> implements NavigableSet<E>, ServiceTrackerCustomizer<
 
     @Override
     public boolean isEmpty() {
-        return entries.isEmpty();
+        return empty;
     }
 
     /**
@@ -225,6 +227,7 @@ public class ServiceSet<E> implements NavigableSet<E>, ServiceTrackerCustomizer<
         Long id = (Long) reference.getProperty(Constants.SERVICE_ID);
         serviceIds.put(service, id);
         entries.add(service);
+        empty = false;
         return service;
     }
 
@@ -235,6 +238,7 @@ public class ServiceSet<E> implements NavigableSet<E>, ServiceTrackerCustomizer<
 
     @Override
     public void removedService(ServiceReference<E> reference, E service) {
+        empty = entries.isEmpty();
         entries.remove(service);
         serviceRankings.remove(service);
         serviceIds.remove(service);
