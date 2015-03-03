@@ -92,7 +92,7 @@ public class SessionInspector {
      * Sets the tracked <code>SessionInspectorChain</code> instance.
      *
      * @param service The tracked <code>SessionInspectorChain</code> instance
-     * @return If given <code>SessionInspectorChain</code> instance could be successfully supplied
+     * @return <code>true</code> if given <code>SessionInspectorChain</code> instance could be successfully supplied; otherwise <code>false</code>
      */
     public boolean setService(final SessionInspectorChain service) {
         return reference.compareAndSet(null, service);
@@ -102,7 +102,7 @@ public class SessionInspector {
      * Drops the tracked <code>SessionInspectorChain</code> instance.
      *
      * @param service The tracked <code>SessionInspectorChain</code> instance
-     * @return If given <code>SessionInspectorChain</code> instance could be successfully dropped
+     * @return <code>true</code> if given <code>SessionInspectorChain</code> instance could be successfully dropped; otherwise <code>false</code>
      */
     public boolean dropService(final SessionInspectorChain service) {
         return reference.compareAndSet(service, null);
