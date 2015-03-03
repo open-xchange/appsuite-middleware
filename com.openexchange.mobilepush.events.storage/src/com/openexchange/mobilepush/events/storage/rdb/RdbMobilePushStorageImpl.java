@@ -126,6 +126,9 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
     public boolean updateToken(int contextId, String token, String serviceId, String newToken) throws OXException {
         Connection connection = databaseService.getWritable(contextId);
         try {
+            // Delete existing new tokens first if any
+            deleteSubscription(contextId, newToken, serviceId);
+
             return 0 < updateSubscriptions(connection, contextId, serviceId, token, newToken);
         } catch (SQLException e) {
             throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
