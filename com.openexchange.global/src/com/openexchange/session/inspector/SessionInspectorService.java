@@ -52,6 +52,7 @@ package com.openexchange.session.inspector;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 
 /**
@@ -72,7 +73,7 @@ public interface SessionInspectorService {
      * @return The reply
      * @throws OXException If inspector raises an exception
      */
-    InspectorReply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
     /**
      * Called when no such session for specified identifier exists in session container.
@@ -83,7 +84,7 @@ public interface SessionInspectorService {
      * @return The reply
      * @throws OXException If inspector raises an exception
      */
-    InspectorReply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
     /**
      * Called when a session was newly established in session container.
@@ -94,6 +95,6 @@ public interface SessionInspectorService {
      * @return The reply
      * @throws OXException If inspector raises an exception
      */
-    InspectorReply onSessionCreation(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    Reply onSessionCreation(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
 }

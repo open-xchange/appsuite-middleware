@@ -47,30 +47,30 @@
  *
  */
 
-package com.openexchange.session.inspector;
+package com.openexchange.session;
 
 /**
- * This enumeration represents the possible replies that a session inspector invocation can return.
+ * This enumeration represents the possible replies that a session handling can return.
  *
- * Based on the order that the InspectorReply values are declared,
- * InspectorReply.CONTINUE.compareTo(InspectorReply.STOP) will return
+ * Based on the order that the Reply values are declared,
+ * Reply.CONTINUE.compareTo(Reply.STOP) will return
  * a positive value.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
  */
-public enum InspectorReply {
+public enum Reply {
 
     /**
-     * The session inspector requests to stop further processing.
+     * The session handling requests to stop further processing.
      */
     STOP,
     /**
-     * The session inspector has no interest, therefore delegates to the next one in chain.
+     * The session handling has no interest, therefore delegates to the next one in chain.
      */
     NEUTRAL,
     /**
-     * The session inspector signals to continue further handling.
+     * The session handling signals to continue further handling.
      */
     CONTINUE;
 

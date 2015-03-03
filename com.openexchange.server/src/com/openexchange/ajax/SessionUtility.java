@@ -92,9 +92,9 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSecretChecker;
-import com.openexchange.session.inspector.InspectorReply;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
@@ -509,7 +509,7 @@ public final class SessionUtility {
             /*
              * Session MISS -- Consult session inspector
              */
-            if (InspectorReply.STOP == SessionInspector.getInstance().getChain().onSessionMiss(sessionId, req, resp)) {
+            if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionMiss(sessionId, req, resp)) {
                 return null;
             }
 
@@ -519,7 +519,7 @@ public final class SessionUtility {
         /*
          * Session HIT -- Consult session inspector
          */
-        if (InspectorReply.STOP == SessionInspector.getInstance().getChain().onSessionHit(session, req, resp)) {
+        if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionHit(session, req, resp)) {
             return null;
         }
         /*

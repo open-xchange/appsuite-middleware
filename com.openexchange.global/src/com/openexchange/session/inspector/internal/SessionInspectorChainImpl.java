@@ -52,8 +52,8 @@ package com.openexchange.session.inspector.internal;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
-import com.openexchange.session.inspector.InspectorReply;
 import com.openexchange.session.inspector.SessionInspectorChain;
 import com.openexchange.session.inspector.SessionInspectorService;
 
@@ -77,36 +77,36 @@ public class SessionInspectorChainImpl implements SessionInspectorChain {
     }
 
     @Override
-    public InspectorReply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         for (SessionInspectorService inspector : chain) {
-            InspectorReply r = inspector.onSessionHit(session, request, response);
-            if (r != InspectorReply.NEUTRAL) {
+            Reply r = inspector.onSessionHit(session, request, response);
+            if (r != Reply.NEUTRAL) {
                 return r;
             }
         }
-        return InspectorReply.NEUTRAL;
+        return Reply.NEUTRAL;
     }
 
     @Override
-    public InspectorReply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
         for (SessionInspectorService inspector : chain) {
-            InspectorReply r = inspector.onSessionMiss(sessionId, request, response);
-            if (r != InspectorReply.NEUTRAL) {
+            Reply r = inspector.onSessionMiss(sessionId, request, response);
+            if (r != Reply.NEUTRAL) {
                 return r;
             }
         }
-        return InspectorReply.NEUTRAL;
+        return Reply.NEUTRAL;
     }
 
     @Override
-    public InspectorReply onSessionCreation(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public Reply onSessionCreation(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         for (SessionInspectorService inspector : chain) {
-            InspectorReply r = inspector.onSessionCreation(session, request, response);
-            if (r != InspectorReply.NEUTRAL) {
+            Reply r = inspector.onSessionCreation(session, request, response);
+            if (r != Reply.NEUTRAL) {
                 return r;
             }
         }
-        return InspectorReply.NEUTRAL;
+        return Reply.NEUTRAL;
     }
 
 }
