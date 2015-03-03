@@ -103,15 +103,4 @@ public class SessionInspectorChainImpl implements SessionInspectorChain {
         return Reply.NEUTRAL;
     }
 
-    @Override
-    public Reply onSessionCreation(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        for (SessionInspectorService inspector : chain) {
-            Reply r = inspector.onSessionCreation(session, request, response);
-            if (r != Reply.NEUTRAL) {
-                return r;
-            }
-        }
-        return Reply.NEUTRAL;
-    }
-
 }
