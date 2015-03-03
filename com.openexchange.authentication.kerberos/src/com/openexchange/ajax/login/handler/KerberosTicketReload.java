@@ -121,7 +121,7 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
         }
         ServerSession session = result.getSession();
         if (null == session) {
-            // Should not occur
+            // No such session
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
         verifySession(req, sessiondService, sessionId, session);
