@@ -70,7 +70,8 @@ public interface SessionInspectorService {
      * @param session The fetched session
      * @param request The HTTP request
      * @param response The HTTP response
-     * @return The reply
+     * @return The reply; either {@link Reply#NEUTRAL} to select next in chain, {@link Reply#CONTINUE} to leave chain and signal to
+     *         continue further processing or {@link Reply#STOP} to leave chain and signal to stop further processing
      * @throws OXException If inspector raises an exception
      */
     Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException;
@@ -81,20 +82,10 @@ public interface SessionInspectorService {
      * @param sessionId The session identifier
      * @param request The HTTP request
      * @param response The HTTP response
-     * @return The reply
+     * @return The reply; either {@link Reply#NEUTRAL} to select next in chain, {@link Reply#CONTINUE} to leave chain and signal to
+     *         continue further processing or {@link Reply#STOP} to leave chain and signal to stop further processing
      * @throws OXException If inspector raises an exception
      */
     Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException;
-
-    /**
-     * Called when a session was newly established in session container.
-     *
-     * @param session The new session
-     * @param request The HTTP request
-     * @param response The HTTP response
-     * @return The reply
-     * @throws OXException If inspector raises an exception
-     */
-    Reply onSessionCreation(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
 }
