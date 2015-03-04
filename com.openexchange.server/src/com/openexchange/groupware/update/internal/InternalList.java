@@ -757,6 +757,9 @@ public final class InternalList {
         // Check for possibly preset message format preference in JSLob and aligns the DB value accordingly
         list.add(new com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob());
 
+        // Delete remnants for removed Facebook subscription
+        list.add(new com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
