@@ -32,7 +32,7 @@ Import-Package: com.openexchange.ajax,
  org.glassfish.jersey.server.model,
  org.json,
  org.osgi.framework,
- org.osgi.service.cm;version="1.5.0",
+ org.osgi.service.cm,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy
