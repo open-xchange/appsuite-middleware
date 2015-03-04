@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.ajax.login.AutoLoginTools;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
@@ -106,26 +107,43 @@ public final class ShareServletUtils {
      */
     public static LoginResult login(GuestShare share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient) throws OXException, IOException {
         /*
-         * parse login request
+         * acquire guest information associated with the share
          */
         GuestInfo guestInfo = share.getGuest();
-        Context context = ShareServiceLookup.getService(UserService.class, true).getContext(guestInfo.getContextID());
-        User user = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getGuestID(), context);
+        UserService userService = ShareServiceLookup.getService(UserService.class, true);
+        Context context = userService.getContext(guestInfo.getContextID());
+        User user = userService.getUser(guestInfo.getGuestID(), context);
+        if (false == context.isEnabled() || false == user.isMailEnabled()) {
+            return null;
+        }
+        /*
+         * parse login request
+         */
         String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
         LoginRequestImpl loginRequest = LoginTools.parseLogin(request, user.getMail(), user.getUserPassword(), false,
             loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false, additionalsForHash);
         loginRequest.setTransient(tranzient);
         /*
-         * login
+         * try auto-login at this stage if enabled
+         */
+        LoginResult loginResult = AutoLoginTools.tryAutologin(loginConfig, request, loginRequest.getHash());
+        if (null != loginResult) {
+            LOG.debug("Successful autologin for share {} with guest user {} in context {}, using session {}.",
+                guestInfo.getBaseToken(), guestInfo.getGuestID(), guestInfo.getContextID(), loginResult.getSession().getSessionID());
+            return loginResult;
+        }
+        /*
+         * perform regular guest login
          */
         ShareLoginMethod loginMethod = new ShareLoginMethod(context, user);
         Map<String, Object> properties = new HashMap<String, Object>();
-        LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, properties, loginMethod);
+        loginResult = LoginPerformer.getInstance().doLogin(loginRequest, properties, loginMethod);
         if (null == loginResult || null == loginResult.getSession()) {
             loginMethod.sendUnauthorized(request, response);
             return null;
         }
-        LOG.debug("Successful login for share {} with guest user {} in context {}.", guestInfo.getBaseToken(), guestInfo.getGuestID(), guestInfo.getContextID());
+        LOG.debug("Successful login for share {} with guest user {} in context {}, using session {}.",
+            guestInfo.getBaseToken(), guestInfo.getGuestID(), guestInfo.getContextID(), loginResult.getSession().getSessionID());
         loginResult.getSession().setParameter(Session.PARAM_GUEST, Boolean.TRUE);
         return loginResult;
     }
