@@ -97,14 +97,14 @@ public class ExtendedMDCFilter extends TurboFilter {
         boolean loggerCheck = false;
         if (check) {
             for (String s : levels.keySet()) {
-                if (logger.getName().startsWith(s) && level.isGreaterOrEqual(levels.get(s))) {
+                if (logger.getName().startsWith(s) && level.levelInt <= levels.get(s).levelInt) {
                     loggerCheck = true;
                     break;
                 }
             }
         }
 
-        if ((check && loggerCheck)) {
+        if (check && loggerCheck) {
             for (Tuple t : tuples) {
                 String v = MDC.get(t.getKey());
                 if (v == null) {
