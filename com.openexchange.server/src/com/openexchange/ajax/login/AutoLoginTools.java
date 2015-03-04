@@ -51,9 +51,11 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Collections;
 import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.authentication.Authenticated;
@@ -72,6 +74,7 @@ import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -124,10 +127,11 @@ public class AutoLoginTools {
      *
      * @param loginConfig A reference to the login configuration
      * @param request The request to try and perform the auto-login for
+     * @param response The corresponding response
      * @return The login result if a valid session was found, or <code>null</code>, otherwise
      */
-    public static LoginResult tryAutologin(LoginConfiguration loginConfig, HttpServletRequest request) throws OXException {
-        return tryAutologin(loginConfig, request, HashCalculator.getInstance().getHash(request));
+    public static LoginResult tryAutologin(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        return tryAutologin(loginConfig, request, response, HashCalculator.getInstance().getHash(request));
     }
 
     /**
@@ -135,10 +139,11 @@ public class AutoLoginTools {
      *
      * @param loginConfig A reference to the login configuration
      * @param request The request to try and perform the auto-login for
+     * @param response The corresponding response
      * @param hash The client-specific hash for the cookie names
      * @return The login result if a valid session was found, or <code>null</code>, otherwise
      */
-    public static LoginResult tryAutologin(LoginConfiguration loginConfig, HttpServletRequest request, String hash) throws OXException {
+    public static LoginResult tryAutologin(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response, String hash) throws OXException {
         Cookie[] cookies = request.getCookies();
         if (loginConfig.isSessiondAutoLogin() && null != cookies && 0 < cookies.length) {
             /*
@@ -148,25 +153,38 @@ public class AutoLoginTools {
             String secret = null;
             String sessionCookieName = LoginServlet.SESSION_PREFIX + hash;
             String secretCookieName = LoginServlet.SECRET_PREFIX + hash;
-            for (int i = 0; i < cookies.length; i++) {
-                String name = cookies[i].getName();
-                if (name.startsWith(sessionCookieName)) {
-                    sessionID = cookies[i].getValue();
-                    /*
-                     * try to auto-login once matching session- and secret cookies found
-                     */
-                    if (null != secret) {
-                        return tryAutoLogin(loginConfig, request, sessionID, secret);
-                    }
-                } else if (name.startsWith(secretCookieName)) {
-                    secret = cookies[i].getValue();
-                    /*
-                     * try to auto-login once matching session- and secret cookies found
-                     */
-                    if (null != sessionID) {
-                        return tryAutoLogin(loginConfig, request, sessionID, secret);
+            try {
+                for (int i = 0; i < cookies.length; i++) {
+                    String name = cookies[i].getName();
+                    if (name.startsWith(sessionCookieName)) {
+                        sessionID = cookies[i].getValue();
+                        /*
+                         * try to auto-login once matching session- and secret cookies found
+                         */
+                        if (null != secret) {
+                            return tryAutoLogin(loginConfig, request, sessionID, secret);
+                        }
+                    } else if (name.startsWith(secretCookieName)) {
+                        secret = cookies[i].getValue();
+                        /*
+                         * try to auto-login once matching session- and secret cookies found
+                         */
+                        if (null != sessionID) {
+                            return tryAutoLogin(loginConfig, request, sessionID, secret);
+                        }
                     }
                 }
+            } catch (OXException e) {
+                if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
+                    /*
+                     * session found, but IP changed -> discard session & cancel auto-login,
+                     * invalidate session-cookie (public- and secret-cookies are re-written later)
+                     */
+                    SessionUtility.removeOXCookies(request, response, Collections.singletonList(sessionCookieName));
+                    LoginPerformer.getInstance().doLogout(sessionID);
+                    return null;
+                }
+                throw e;
             }
         }
         return null;

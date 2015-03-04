@@ -126,7 +126,7 @@ public final class ShareServletUtils {
         /*
          * try auto-login at this stage if enabled
          */
-        LoginResult loginResult = AutoLoginTools.tryAutologin(loginConfig, request, loginRequest.getHash());
+        LoginResult loginResult = AutoLoginTools.tryAutologin(loginConfig, request, response, loginRequest.getHash());
         if (null != loginResult) {
             LOG.debug("Successful autologin for share {} with guest user {} in context {}, using session {}.",
                 guestInfo.getBaseToken(), guestInfo.getGuestID(), guestInfo.getContextID(), loginResult.getSession().getSessionID());
