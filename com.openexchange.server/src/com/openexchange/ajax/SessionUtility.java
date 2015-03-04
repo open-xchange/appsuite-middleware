@@ -846,7 +846,7 @@ public final class SessionUtility {
             }
             final String queryString = httpRequest.getQueryString();
             if (null != queryString) {
-                LogProperties.put(LogProperties.Name.SERVLET_QUERY_STRING, queryString);
+                LogProperties.put(LogProperties.Name.SERVLET_QUERY_STRING, LogProperties.getSanitizedQueryString(queryString));
             }
         }
         return null;

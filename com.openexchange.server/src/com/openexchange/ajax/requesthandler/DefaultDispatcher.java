@@ -51,14 +51,12 @@ package com.openexchange.ajax.requesthandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -372,7 +370,7 @@ public class DefaultDispatcher implements Dispatcher {
                         } else {
                             sb.append('&');
                         }
-                        String value = getSanitizedValue(entry);
+                        String value = LogProperties.getSanitizedValue(entry.getKey(), entry.getValue());
                         sb.append(entry.getKey()).append('=').append(value);
                     }
                     sb.append('"');
@@ -382,20 +380,6 @@ public class DefaultDispatcher implements Dispatcher {
         }
     }
 
-    private static final Set<String> SANITIZE = new HashSet<String>() {
-
-        private static final long serialVersionUID = -848496230304263850L;
-        {
-            add("password");
-        }
-    };
-
-    private static final String REPLACEMENT = "xxx";
-
-    private String getSanitizedValue(Entry<String, String> entry) {
-        return SANITIZE.contains(entry.getKey()) ? REPLACEMENT : entry.getValue();
-    }
-    
     // private static final Pattern SPLIT_SLASH = Pattern.compile("/");
 
     /**

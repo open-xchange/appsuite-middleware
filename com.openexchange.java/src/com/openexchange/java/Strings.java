@@ -389,13 +389,28 @@ public class Strings {
      * Splits given string by dots.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByDots(final String s) {
         if (null == s) {
             return null;
         }
         return P_SPLIT_DOT.split(s, 0);
+    }
+
+    private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
+
+    /**
+     * Splits given string by ampersands <code>'&'</code>.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByAmps(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_AMP.split(s, 0);
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
