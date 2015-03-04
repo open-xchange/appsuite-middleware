@@ -47,66 +47,83 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.spi;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Response;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.saml.OpenSAML;
 
 /**
- * {@link Services}
+ * {@link AuthnResponseHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class Services {
+public interface AuthnResponseHandler {
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+    public static class Principal {
 
-    private Services() {
-        super();
-    }
+        private final int contextId;
 
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
+        private final int userId;
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if not available or not tracked
-     * @throws IllegalStateException If no service lookup was set
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.saml\" not started?");
+        /**
+         * Initializes a new {@link Principal}.
+         *
+         * @param contextId
+         * @param userId
+         */
+        public Principal(int contextId, int userId) {
+            super();
+            this.contextId = contextId;
+            this.userId = userId;
         }
-        return serviceLookup.getService(clazz);
+
+        public int getContextId() {
+            return contextId;
+        }
+
+        public int getUserId() {
+            return userId;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Principal other = (Principal) obj;
+            if (contextId != other.contextId)
+                return false;
+            if (userId != other.userId)
+                return false;
+            return true;
+        }
+
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws OXException If the service is unavailable
-     * @throws IllegalStateException If no service lookup was set
-     */
-    public static <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
-        S service = getService(clazz);
-        if (service == null) {
-            throw ServiceExceptionCode.serviceUnavailable(clazz);
-        }
-        return service;
-    }
+    boolean beforeDecode(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OpenSAML openSAML) throws OXException;
+
+    boolean beforeValidate(Response response, OpenSAML openSAML) throws OXException;
+
+    boolean afterValidate(Response response, List<Assertion> assertions, OpenSAML openSAML) throws OXException;
+
+    Principal resolvePrincipal(Response response, List<Assertion> assertions, OpenSAML openSAML) throws OXException;
 
 }

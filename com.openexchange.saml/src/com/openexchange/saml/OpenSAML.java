@@ -66,16 +66,10 @@ import org.opensaml.xml.validation.ValidatorSuite;
 import org.w3c.dom.Element;
 
 /**
- * A wrapper class around {@link Configuration} that is registered as OSGi service.
- * Always depend on this service when working with OpenSAML, as it is registered after
- * the library was fully initialized. <strong>Working directly with {@link Configuration}
- * can lead to runtime errors and is strongly discouraged!</strong>
- *
- * Additionally this class defines a helper method {@link #buildSAMLObject(Class)} for
- * convenient creation of SAML objects.
+ * A wrapper class around {@link Configuration} combined with some utility methods.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.6.1
  */
 public final class OpenSAML {
 

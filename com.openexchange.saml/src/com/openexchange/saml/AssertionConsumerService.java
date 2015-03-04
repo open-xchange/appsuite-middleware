@@ -60,7 +60,7 @@ import javax.servlet.http.HttpServletResponse;
  * {@link AssertionConsumerService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.6.1
  */
 public class AssertionConsumerService extends HttpServlet {
 

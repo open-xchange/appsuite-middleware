@@ -68,10 +68,11 @@ import com.openexchange.saml.DefaultConfig;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLServiceProvider;
 import com.openexchange.saml.Services;
+import com.openexchange.saml.spi.AuthnResponseHandler;
 import com.openexchange.saml.spi.ServiceProviderCustomizer;
 
 /**
- * {@link SamlActivator} - The activator for <i>com.openexchange.saml</i> bundle.
+ * {@link SAMLActivator} - The activator for <i>com.openexchange.saml</i> bundle.
  */
 public class SamlActivator extends HousekeepingActivator {
 
@@ -81,7 +82,7 @@ public class SamlActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, DispatcherPrefixService.class };
+        return new Class[] { ConfigurationService.class, DispatcherPrefixService.class, AuthnResponseHandler.class };
     }
 
     @Override
@@ -93,7 +94,7 @@ public class SamlActivator extends HousekeepingActivator {
         boolean enabled = configService.getBoolProperty("com.openexchange.saml.sp.enabled", false);
         if (enabled) {
             OpenSAML openSAML = initOpenSAML();
-            serviceProvider = new SAMLServiceProvider(DefaultConfig.init(configService), openSAML);
+            serviceProvider = new SAMLServiceProvider(DefaultConfig.init(configService), openSAML, getService(AuthnResponseHandler.class));
             serviceProvider.init();
 
             trackService(HostnameService.class);

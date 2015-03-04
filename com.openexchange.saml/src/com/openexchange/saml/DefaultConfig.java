@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
  * {@link DefaultConfig}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.6.1
  */
 public class DefaultConfig implements SAMLConfig {
 
@@ -73,8 +73,6 @@ public class DefaultConfig implements SAMLConfig {
 
     private static final String PROP_SIGN_AUTHN_REQUEST = "com.openexchange.saml.sp.signAuthnRequest";
 
-    private static final String PROP_WANT_ASSERTIONS_SIGNED = "com.openexchange.saml.sp.wantAssertionsSigned";
-
     private String providerName;
 
     private String entityID;
@@ -86,8 +84,6 @@ public class DefaultConfig implements SAMLConfig {
     private String idpURL;
 
     private boolean signAuthnRequest;
-
-    private boolean wantAssertionsSigned;
 
     private DefaultConfig() {
         super();
@@ -108,8 +104,6 @@ public class DefaultConfig implements SAMLConfig {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(PROP_PROTOCOL_BINDING + " = " + bindingName);
         }
         config.setSignAuthnRequest(configService.getBoolProperty(PROP_SIGN_AUTHN_REQUEST, false));
-        config.setWantAssertionsSigned(configService.getBoolProperty(PROP_WANT_ASSERTIONS_SIGNED, false));
-
         return config;
     }
 
@@ -138,7 +132,7 @@ public class DefaultConfig implements SAMLConfig {
     }
 
     @Override
-    public Binding getProtocolBinding() {
+    public Binding getResponseBinding() {
         return binding;
     }
 
@@ -148,13 +142,8 @@ public class DefaultConfig implements SAMLConfig {
     }
 
     @Override
-    public boolean signAuthnRequest() {
+    public boolean signAuthnRequests() {
         return signAuthnRequest;
-    }
-
-    @Override
-    public boolean wantAssertionsSigned() {
-        return wantAssertionsSigned;
     }
 
     private void setProviderName(String providerName) {
@@ -179,10 +168,6 @@ public class DefaultConfig implements SAMLConfig {
 
     private void setSignAuthnRequest(boolean signAuthnRequest) {
         this.signAuthnRequest = signAuthnRequest;
-    }
-
-    public void setWantAssertionsSigned(boolean wantAssertionsSigned) {
-        this.wantAssertionsSigned = wantAssertionsSigned;
     }
 
     @Override
@@ -241,6 +226,12 @@ public class DefaultConfig implements SAMLConfig {
 
     @Override
     public String getIdentityProviderEntityID() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Binding getRequestBinding() {
         // TODO Auto-generated method stub
         return null;
     }

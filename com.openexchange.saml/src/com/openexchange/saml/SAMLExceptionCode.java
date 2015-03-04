@@ -60,7 +60,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link SAMLExceptionCode}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.6.1
  */
 public enum SAMLExceptionCode implements DisplayableOXExceptionCode {
 
@@ -77,7 +77,15 @@ public enum SAMLExceptionCode implements DisplayableOXExceptionCode {
 
     DECRYPTION_FAILED("Could not decrypt a SAML message: %1$s", Category.CATEGORY_ERROR, 5),
 
-    SIGNATURE_VALIDATION_FAILED("Could not validate signature of a SAML element: %1$s", Category.CATEGORY_ERROR, 6)
+    SIGNATURE_VALIDATION_FAILED("Could not validate signature of a SAML element: %1$s", Category.CATEGORY_ERROR, 6),
+
+    UNSUPPORTED_BINDING("The binding '%1$s' is not supported for this operation", Category.CATEGORY_ERROR, 7),
+
+    INVALID_ASSERTION("The validation of an assertion failed: %1$s", Category.CATEGORY_ERROR, 8),
+
+    INVALID_RESPONSE("The validation of a response failed: %1$s", Category.CATEGORY_ERROR, 9),
+
+    AUTHENTICATION_FAILED("The authentication failed. Message from IDP: %1$s", Category.CATEGORY_ERROR, 10),
     ;
 
     private final Category category;

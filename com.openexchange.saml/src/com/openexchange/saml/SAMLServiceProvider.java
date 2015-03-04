@@ -78,7 +78,6 @@ import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
-import org.opensaml.saml2.binding.decoding.HTTPRedirectDeflateDecoder;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.EncryptedAssertion;
@@ -86,6 +85,12 @@ import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDPolicy;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.Status;
+import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.saml2.core.StatusMessage;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
@@ -97,6 +102,7 @@ import org.opensaml.saml2.metadata.SingleLogoutService;
 import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
+import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
 import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
@@ -125,6 +131,8 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.util.XMLHelper;
 import org.opensaml.xml.validation.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
@@ -132,6 +140,8 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.spi.AuthnResponseHandler;
+import com.openexchange.saml.spi.AuthnResponseHandler.Principal;
 import com.openexchange.saml.spi.ServiceProviderCustomizer;
 import com.openexchange.saml.spi.ServiceProviderCustomizer.RequestContext;
 import com.openexchange.tools.servlet.http.Tools;
@@ -139,18 +149,27 @@ import com.openexchange.tools.servlet.http.Tools;
 /**
  * {@link #init()} must be called before usage!
  *
+ * Several validation steps in this class are commented with excerpts from the SAML 2.0 specification.
+ * Those excerpts are always annotated with their origin. E.g. [core 06 - 1.1p7] means "Cited from core
+ * specification, working draft 06, section 1.1 on page 7". The "errata composite" documents from
+ * https://wiki.oasis-open.org/security/FrontPage have been used as implementation reference.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.6.1
  */
 public class SAMLServiceProvider {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SAMLServiceProvider.class);
 
     private final SAMLConfig config;
 
     private final OpenSAML openSAML;
 
+    private final AuthnResponseHandler responseHandler;
+
     private volatile ServiceProviderCustomizer customizer;
 
-    private KeyStore keystore;
+//    private KeyStore keystore;
 
     private Credential signingCredential;
 
@@ -160,85 +179,58 @@ public class SAMLServiceProvider {
 
     private boolean initialized;
 
-    private KeyStoreCredentialResolver keyStoreCredentialResolver;
+//    private KeyStoreCredentialResolver keyStoreCredentialResolver;
 
-    public SAMLServiceProvider(SAMLConfig config, OpenSAML openSAML) throws OXException {
+
+    public SAMLServiceProvider(SAMLConfig config, OpenSAML openSAML, AuthnResponseHandler responseHandler) throws OXException {
         super();
         this.config = config;
         this.openSAML = openSAML;
+        this.responseHandler = responseHandler;
         initialized = false;
     }
 
     public synchronized void init() throws OXException {
-        initKeystore();
         initCredentials();
         initialized = true;
     }
 
-    private void initKeystore() throws OXException {
-        if (config.signAuthnRequest() || config.wantAssertionsSigned()) {
+    private void initCredentials() throws OXException {
+        String idpCertificateAlias = config.getIDPCertificateAlias();
+        String encryptionKeyAlias = config.getEncryptionKeyAlias();
+        boolean hasEncryptionKey = !Strings.isEmpty(encryptionKeyAlias);
+        boolean hasIDPCertificate = !Strings.isEmpty(idpCertificateAlias);
+        if (config.signAuthnRequests() || hasIDPCertificate || hasEncryptionKey) {
             String keyStorePath = config.getKeyStorePath();
             if (Strings.isEmpty(keyStorePath)) {
                 throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("No keystore path was set");
             }
 
-            File keyStoreFile = new File(keyStorePath);
-            if (!keyStoreFile.exists() || !keyStoreFile.isFile()) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("The keystore path " + keyStorePath + " points to an invalid file");
+            KeyStore keystore = initKeyStore(keyStorePath, config.getKeyStorePassword());
+            String signingKeyAlias = config.getSigningKeyAlias();
+            String signingKeyPassword = config.getSigningKeyPassword();
+            String encryptionKeyPassword = config.getEncryptionKeyPassword();
+
+            Map<String, String> passwordMap = new HashMap<String, String>(4);
+            if (!Strings.isEmpty(signingKeyAlias) && !Strings.isEmpty(signingKeyPassword)) {
+                passwordMap.put(signingKeyAlias, signingKeyPassword);
+            }
+            if (hasEncryptionKey && !Strings.isEmpty(encryptionKeyPassword)) {
+                passwordMap.put(encryptionKeyAlias, encryptionKeyPassword);
             }
 
-            if (!keyStoreFile.canRead()) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("The keystore file " + keyStorePath + " is not readable");
+            KeyStoreCredentialResolver keyStoreCredentialResolver = new KeyStoreCredentialResolver(keystore, passwordMap);
+            if (config.signAuthnRequests()) {
+                signingCredential = resolveCredential(keyStoreCredentialResolver, signingKeyAlias);
             }
 
-            FileInputStream inputStream = null;
-            try {
-                inputStream = new FileInputStream(keyStoreFile);
-                KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-                String keyStorePassword = config.getKeyStorePassword();
-                keystore.load(inputStream, keyStorePassword == null ? null : keyStorePassword.toCharArray());
-                this.keystore = keystore;
-            } catch (KeyStoreException e) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-            } catch (FileNotFoundException e) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-            } catch (NoSuchAlgorithmException e) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-            } catch (CertificateException e) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-            } catch (IOException e) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-            } finally {
-                Streams.close(inputStream);
+            if (hasIDPCertificate) {
+                idpCertificateCredential = resolveCredential(keyStoreCredentialResolver, idpCertificateAlias);
             }
-        }
-    }
 
-    private void initCredentials() throws OXException {
-        String signingKeyAlias = config.getSigningKeyAlias();
-        String signingKeyPassword = config.getSigningKeyPassword();
-        String encryptionKeyAlias = config.getEncryptionKeyAlias();
-        String encryptionKeyPassword = config.getEncryptionKeyPassword();
-        String idpCertificateAlias = config.getIDPCertificateAlias();
-        Map<String, String> passwordMap = new HashMap<String, String>(4);
-        if (!Strings.isEmpty(signingKeyAlias) && !Strings.isEmpty(signingKeyPassword)) {
-            passwordMap.put(signingKeyAlias, signingKeyPassword);
-        }
-        if (!Strings.isEmpty(encryptionKeyAlias) && !Strings.isEmpty(encryptionKeyPassword)) {
-            passwordMap.put(encryptionKeyAlias, encryptionKeyPassword);
-        }
-
-        keyStoreCredentialResolver = new KeyStoreCredentialResolver(keystore, passwordMap);
-        if (config.signAuthnRequest()) {
-            signingCredential = resolveCredential(keyStoreCredentialResolver, signingKeyAlias);
-        }
-
-        if (config.wantAssertionsSigned()) {
-            idpCertificateCredential = resolveCredential(keyStoreCredentialResolver, idpCertificateAlias);
-        }
-
-        if (!Strings.isEmpty(encryptionKeyAlias)) {
-            encryptionCredential = resolveCredential(keyStoreCredentialResolver, encryptionKeyAlias);
+            if (hasEncryptionKey) {
+                encryptionCredential = resolveCredential(keyStoreCredentialResolver, encryptionKeyAlias);
+            }
         }
     }
 
@@ -257,27 +249,55 @@ public class SAMLServiceProvider {
         }
     }
 
-    KeyStore getKeystore() {
-        return keystore;
+    private static KeyStore initKeyStore(String path, String password) throws OXException {
+        File keyStoreFile = new File(path);
+        if (!keyStoreFile.exists() || !keyStoreFile.isFile()) {
+            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("The keystore path " + path + " points to an invalid file");
+        }
+
+        if (!keyStoreFile.canRead()) {
+            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("The keystore file " + path + " is not readable");
+        }
+
+        FileInputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(keyStoreFile);
+            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.load(inputStream, password == null ? null : password.toCharArray());
+            return keystore;
+        } catch (KeyStoreException e) {
+            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+        } catch (FileNotFoundException e) {
+            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+        } catch (CertificateException e) {
+            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Streams.close(inputStream);
+        }
     }
+
+
+
+//    KeyStore getKeystore() {
+//        return keystore;
+//    }
 
     public String getMetadataXML() throws OXException {
         checkInitialized();
 
-        // AssertionConsumerService redirectACS = openSAML.buildSAMLObject(AssertionConsumerService.class);
-        // redirectACS.setIndex(1);
-        // redirectACS.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
-        // redirectACS.setLocation(config.getAssertionConsumerServiceURL());
-
-        AssertionConsumerService postACS = openSAML.buildSAMLObject(AssertionConsumerService.class);
-        postACS.setIndex(1);
-        postACS.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
-        postACS.setLocation(config.getAssertionConsumerServiceURL());
-
         SPSSODescriptor spssoDescriptor = openSAML.buildSAMLObject(SPSSODescriptor.class);
-        // spssoDescriptor.getAssertionConsumerServices().add(redirectACS);
-        spssoDescriptor.getAssertionConsumerServices().add(postACS);
         spssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
+
+        AssertionConsumerService acs = openSAML.buildSAMLObject(AssertionConsumerService.class);
+        acs.setIndex(1);
+        acs.setIsDefault(Boolean.TRUE);
+        acs.setBinding(getBindingURI(config.getResponseBinding()));
+        acs.setLocation(config.getAssertionConsumerServiceURL());
+        spssoDescriptor.getAssertionConsumerServices().add(acs);
 
         if (config.supportSingleLogout()) {
             SingleLogoutService slService = openSAML.buildSAMLObject(SingleLogoutService.class);
@@ -294,7 +314,7 @@ public class SAMLServiceProvider {
             X509KeyInfoGeneratorFactory keyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
             keyInfoGeneratorFactory.setEmitEntityCertificate(true);
             KeyInfoGenerator keyInfoGenerator = keyInfoGeneratorFactory.newInstance();
-            if (config.signAuthnRequest()) {
+            if (config.signAuthnRequests()) {
                 KeyDescriptor signKeyDescriptor = openSAML.buildSAMLObject(KeyDescriptor.class);
                 signKeyDescriptor.setUse(UsageType.SIGNING);
                 KeyInfo keyInfo = keyInfoGenerator.generate(signingCredential);
@@ -303,7 +323,7 @@ public class SAMLServiceProvider {
                 spssoDescriptor.setAuthnRequestsSigned(Boolean.TRUE);
             }
 
-            if (config.wantAssertionsSigned()) {
+            if (encryptionCredential != null) {
                 KeyDescriptor encryptionKeyDescriptor = openSAML.buildSAMLObject(KeyDescriptor.class);
                 encryptionKeyDescriptor.setUse(UsageType.ENCRYPTION);
                 encryptionKeyDescriptor.setKeyInfo(keyInfoGenerator.generate(encryptionCredential));
@@ -320,7 +340,7 @@ public class SAMLServiceProvider {
             spDescriptor.setEntityID(config.getEntityID());
             spDescriptor.getRoleDescriptors().add(spssoDescriptor);
             Element element = openSAML.getMarshallerFactory().getMarshaller(spDescriptor).marshall(spDescriptor);
-            return XMLHelper.prettyPrintXML(element);
+            return XMLHelper.nodeToString(element);
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
         }
@@ -344,7 +364,7 @@ public class SAMLServiceProvider {
          */
         try {
             String authnRequestXML = openSAML.marshall(authnRequest);
-            switch (config.getProtocolBinding()) {
+            switch (config.getRequestBinding()) {
             case HTTP_POST:
                 // sendFormResponse(authnRequestXML, httpResponse);
                 break;
@@ -352,7 +372,7 @@ public class SAMLServiceProvider {
                 sendRedirect(authnRequestXML, httpResponse);
                 break;
             default:
-                // throw new ServletException("Cannot handle SAML 2.0 protocol binding '" + config.getProtocolBinding().name() + "'!");
+                throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(config.getRequestBinding());
             }
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
@@ -376,9 +396,12 @@ public class SAMLServiceProvider {
         try {
             // TODO: Do we need a RelayState?
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderURL()).setParameter("SAMLRequest", encoded);
-            if (config.signAuthnRequest()) {
-                String sigAlg = openSAML.getGlobalSecurityConfiguration().getSignatureAlgorithmURI(
-                    signingCredential.getPrivateKey().getAlgorithm());
+            if (config.signAuthnRequests()) {
+                /*
+                 * The <AuthnRequest> message MAY be signed, if authentication of the request issuer is required.
+                 * [profiles 06 - 4.1.3.3p18]
+                 */
+                String sigAlg = openSAML.getGlobalSecurityConfiguration().getSignatureAlgorithmURI(signingCredential.getPrivateKey().getAlgorithm());
                 redirectLocationBuilder.setParameter("SigAlg", sigAlg);
                 byte[] rawSignature = SigningUtil.signWithURI(
                     signingCredential,
@@ -414,28 +437,39 @@ public class SAMLServiceProvider {
     }
 
     private AuthnRequest prepareAuthnRequest() {
+        AuthnRequest authnRequest = openSAML.buildSAMLObject(AuthnRequest.class);
+
+        /*
+         * The <Issuer> element MUST be present and MUST contain the unique identifier of the requesting
+         * service provider; the Format attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity.
+         * [profiles 06 - 4.1.4.1p19]
+         */
         Issuer issuer = openSAML.buildSAMLObject(Issuer.class);
         issuer.setFormat(NameIDType.ENTITY);
         issuer.setValue(config.getEntityID());
+        authnRequest.setIssuer(issuer);
 
-        String bindingURI = getBindingURI(config.getProtocolBinding());
-        AuthnRequest authnRequest = openSAML.buildSAMLObject(AuthnRequest.class);
         authnRequest.setVersion(SAMLVersion.VERSION_20);
-        authnRequest.setProviderName(config.getProviderName());
-        authnRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+        String providerName = config.getProviderName();
+        if (!Strings.isEmpty(providerName)) {
+            authnRequest.setProviderName(providerName);
+        }
+        authnRequest.setProtocolBinding(getBindingURI(config.getResponseBinding()));
         authnRequest.setAssertionConsumerServiceURL(config.getAssertionConsumerServiceURL());
         authnRequest.setDestination(config.getIdentityProviderURL());
-        authnRequest.setIssuer(issuer);
         authnRequest.setIsPassive(Boolean.FALSE);
         authnRequest.setForceAuthn(Boolean.FALSE);
         authnRequest.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
         authnRequest.setIssueInstant(new DateTime());
 
-        // TODO:
-        // - make configurable?
-        // - really allow create?
+        /*
+         * The use of the AllowCreate attribute MUST NOT be used and SHOULD be ignored in conjunction with
+         * requests for or assertions issued with name identifiers with a Format of
+         * urn:oasis:names:tc:SAML:2.0:nameid-format:transient (they preclude any such state in and of themselves).
+         *
+         * [core06 - 3.4.1.1p51]
+         */
         NameIDPolicy nameIDPolicy = openSAML.buildSAMLObject(NameIDPolicy.class);
-        nameIDPolicy.setAllowCreate(true);
         nameIDPolicy.setFormat(NameIDType.TRANSIENT);
         authnRequest.setNameIDPolicy(nameIDPolicy);
 
@@ -461,21 +495,336 @@ public class SAMLServiceProvider {
         encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
         encryptedKeyResolver.getResolverChain().add(new SimpleKeyInfoReferenceEncryptedKeyResolver());
 
+        // FIXME:
         StaticKeyInfoCredentialResolver skicr = new StaticKeyInfoCredentialResolver(encryptionCredential);
         Decrypter decrypter = new Decrypter(null, skicr, new InlineEncryptedKeyResolver());
         decrypter.setRootInNewDocument(true);
         return decrypter;
     }
 
-    public void handleRedirectAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
-        handleAuthnResponse(httpRequest, httpResponse, new HTTPRedirectDeflateDecoder());
+    private Credential getSignatureValidationCredential(Signature signature) throws OXException {
+        /*
+         * Using certificates that are part of KeyInfo elements in the signed XML itself would require
+         * us to verify those in terms of if we trust them. In case we need to extract and use those certificates at a later point
+         * that is how it works:
+         *
+         *     List<KeyInfoProvider> keyInfoProviders = new ArrayList<KeyInfoProvider>(4);
+         *     keyInfoProviders.add(new InlineX509DataProvider());
+         *     keyInfoProviders.add(new KeyInfoReferenceProvider());
+         *     keyInfoProviders.add(new DEREncodedKeyValueProvider());
+         *     keyInfoProviders.add(new RSAKeyValueProvider());
+         *     keyInfoProviders.add(new DSAKeyValueProvider());
+         *     BasicProviderKeyInfoCredentialResolver keyInfoCredentialResolver = new BasicProviderKeyInfoCredentialResolver(keyInfoProviders);
+         *
+         *     ChainingCredentialResolver credentialResolver = new ChainingCredentialResolver();
+         *     credentialResolver.getResolverChain().add(keyInfoCredentialResolver);
+         *     if (idpCertificateCredential != null) {
+         *         credentialResolver.getResolverChain().add(new StaticCredentialResolver(idpCertificateCredential));
+         *     }
+         *
+         *     Credential credential;
+         *     try {
+         *         credential = credentialResolver.resolveSingle(new CriteriaSet(new KeyInfoCriteria(signature.getKeyInfo())));
+         *     } catch (SecurityException e) {
+         *         throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create(e, e.getMessage());
+         *     }
+         *
+         *     if (credential == null) {
+         *         throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create("Could not find a certificate for signature validation.");
+         *     }
+         */
+
+        Credential credential = idpCertificateCredential;
+        if (credential == null) {
+            throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create("Could not find a certificate for signature validation.");
+        }
+
+        return credential;
     }
 
-    public void handlePOSTAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
-        handleAuthnResponse(httpRequest, httpResponse, new HTTPPostDecoder());
+    public void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException {
+        SAMLMessageDecoder decoder;
+        if (binding == Binding.HTTP_POST) {
+            decoder = new HTTPPostDecoder();
+        } else {
+            /*
+             * The HTTP Redirect binding MUST NOT be used, as the response will
+             * typically exceed the URL length permitted by most user agents.
+             * [profiles 06 - 4.1.2p17]
+             *
+             * We don't support artifact binding yet. If you need it, feel free to implement it ;-)
+             */
+            throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(binding.name());
+        }
+
+        if (responseHandler.beforeDecode(httpRequest, httpResponse, openSAML)) {
+            Response response = decodeResponse(httpRequest, httpResponse, decoder);
+            try {
+                if (responseHandler.beforeValidate(response, openSAML)) {
+                    boolean responseWasSigned = false;
+                    if (response.isSigned()) {
+                        /*
+                         * All SAML protocol request and response messages MAY be signed using XML Signature.
+                         * [core 06 - 5.1p70]
+                         */
+                        Signature signature = response.getSignature();
+                        SAMLSignatureProfileValidator profileValidator = new SAMLSignatureProfileValidator();
+                        profileValidator.validate(signature);
+
+                        Credential validationCredential = getSignatureValidationCredential(signature);
+                        SignatureValidator signatureValidator = new SignatureValidator(validationCredential);
+                        signatureValidator.validate(signature);
+                        responseWasSigned = true;
+                    }
+
+                    Status status = response.getStatus();
+                    if (status == null) {
+                        xmlDebugLog("status missing in response", response);
+                        throw SAMLExceptionCode.INVALID_RESPONSE.create("status was missing");
+                    }
+
+                    if (!StatusCode.SUCCESS_URI.equals(status.getStatusCode().getValue())) {
+                        String idpMessage = "none";
+                        StatusMessage message = status.getStatusMessage();
+                        if (message != null) {
+                            idpMessage = message.getMessage();
+                        }
+
+                        xmlDebugLog("unsuccessful authentication response", response);
+                        throw SAMLExceptionCode.AUTHENTICATION_FAILED.create(idpMessage);
+                    }
+
+                    /*
+                     * If the <Response> message is signed or
+                     * if an enclosed assertion is encrypted, then the <Issuer> element MUST be present. Otherwise it
+                     * MAY be omitted. If present it MUST contain the unique identifier of the issuing identity provider; the
+                     * Format attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity.
+                     * [profiles 06 - 4.1.4.2p19]
+                     */
+                    if (responseWasSigned || response.getEncryptedAssertions().size() > 0) {
+                        Issuer issuer = response.getIssuer();
+                        if (issuer == null) {
+                            xmlDebugLog("issuer missing in response", response);
+                            throw SAMLExceptionCode.INVALID_RESPONSE.create("issuer was missing");
+                        }
+
+                        if (issuer.getFormat() != null && !NameIDType.ENTITY.equals(issuer.getFormat())) {
+                            xmlDebugLog("invalid issuer format in assertion", response);
+                            throw SAMLExceptionCode.INVALID_RESPONSE.create("invalid issuer format");
+                        }
+
+                        if (!issuer.getValue().equals(config.getIdentityProviderEntityID())) {
+                            xmlDebugLog("invalid issuer value in assertion", response);
+                            throw SAMLExceptionCode.INVALID_RESPONSE.create("invalid issuer value");
+                        }
+                    }
+
+                    if (response.getAssertions().size() + response.getEncryptedAssertions().size() == 0) {
+                        xmlDebugLog("no assertion contained in response", response);
+                        throw SAMLExceptionCode.INVALID_RESPONSE.create("no assertion was contained");
+                    }
+
+                    /*
+                     * A SAML assertion may be embedded within another SAML element, such as an enclosing <Assertion>
+                     * or a request or response, which may be signed. When a SAML assertion does not contain a
+                     * <ds:Signature> element, but is contained in an enclosing SAML element that contains a
+                     * <ds:Signature> element, and the signature applies to the <Assertion> element and all its children,
+                     * then the assertion can be considered to inherit the signature from the enclosing element. The resulting
+                     * interpretation should be equivalent to the case where the assertion itself was signed with the same key
+                     * and signature options.
+                     * [core 06 - 5.3p70/71]
+                     *
+                     *
+                     * The <Assertion> element(s) in the <Response> MUST be signed, if the HTTP POST binding is used,
+                     * and MAY be signed if the HTTP-Artifact binding is used.
+                     * [profiles 06 - 4.1.3.5p18]
+                     */
+                    boolean enforceSignature = binding == Binding.HTTP_POST && !responseWasSigned;
+                    List<Assertion> assertions = new LinkedList<Assertion>();
+                    List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
+                    if (encryptedAssertions.size() > 0) {
+                        Decrypter decrypter = getDecrypter();
+                        for (EncryptedAssertion encryptedAssertion : encryptedAssertions) {
+                            Assertion assertion = decrypter.decrypt(encryptedAssertion);
+                            validateAssertion(response, assertion, enforceSignature);
+                            assertions.add(assertion);
+                        }
+                    }
+
+                    for (Assertion assertion : response.getAssertions()) {
+                        validateAssertion(response, assertion, enforceSignature);
+                        assertions.add(assertion);
+                    }
+
+
+
+                    // urn:oasis:names:tc:SAML:2.0:cm:bearer
+
+                    /*
+                     * - at least one assertion MUST contain at least one authentication statement
+                     * [core06 - 3.4p47]
+                     */
+
+                    /*
+                     * TODO: - resolve user and context - acquire token - redirect to token-login
+                     */
+                    Principal principal = responseHandler.resolvePrincipal(response, assertions, openSAML);
+                }
+            } catch (ValidationException e) {
+                xmlDebugLog("Response signature validation failed", response, e);
+                throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create(e, e.getMessage());
+            } catch (DecryptionException e) {
+                xmlDebugLog("Assertion decryption failed", response, e);
+                throw SAMLExceptionCode.DECRYPTION_FAILED.create(e, e.getMessage());
+            }
+
+        }
     }
 
-    private void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, SAMLMessageDecoder decoder) throws OXException {
+    private void validateAssertion(Response response, Assertion assertion, boolean enforceSignature) throws OXException {
+        if (enforceSignature && !assertion.isSigned()) {
+            String msg = "assertion must be signed but was not";
+            xmlDebugLog(msg, assertion);
+            throw SAMLExceptionCode.INVALID_ASSERTION.create(msg);
+        }
+
+        if (assertion.isSigned()) {
+            try {
+                Signature signature = assertion.getSignature();
+                SAMLSignatureProfileValidator profileValidator = new SAMLSignatureProfileValidator();
+                profileValidator.validate(signature);
+                Credential validationCredential = getSignatureValidationCredential(signature);
+                SignatureValidator signatureValidator = new SignatureValidator(validationCredential);
+                signatureValidator.validate(signature);
+            } catch (ValidationException e) {
+                xmlDebugLog("Assertion signature validation failed", assertion, e);
+                throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create(e, e.getMessage());
+            }
+        }
+
+        validateAssertionIssuer(assertion);
+        validateAssertionSubject(assertion);
+    }
+
+    private void validateAssertionSubject(Assertion assertion) throws OXException {
+        /*
+         * Any assertion issued for consumption using this profile MUST contain a <Subject> element with at
+         * least one <SubjectConfirmation> element containing a Method of
+         * urn:oasis:names:tc:SAML:2.0:cm:bearer. Such an assertion is termed a bearer assertion.
+         * Bearer assertions MAY contain additional <SubjectConfirmation> elements.
+         * [profiles 06 - 4.1.4.2p20]
+         */
+        Subject subject = assertion.getSubject();
+        if (subject == null) {
+            xmlDebugLog("subject missing in assertion", assertion);
+            throw SAMLExceptionCode.INVALID_ASSERTION.create("issuer was missing");
+        }
+
+        SubjectConfirmation bearerConfirmation = null;
+        for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
+            if ("urn:oasis:names:tc:SAML:2.0:cm:bearer".equals(confirmation.getMethod()) && confirmation.getSubjectConfirmationData() != null) {
+                bearerConfirmation = confirmation;
+                break;
+            }
+        }
+
+        if (bearerConfirmation == null) {
+            xmlDebugLog("subject confirmation missing in assertion", assertion);
+            throw SAMLExceptionCode.INVALID_ASSERTION.create("subject confirmation was missing");
+        }
+
+        /*
+         * At lease one bearer <SubjectConfirmation> element MUST contain a
+         * <SubjectConfirmationData> element that itself MUST contain a Recipient attribute containing
+         * the service provider's assertion consumer service URL and a NotOnOrAfter attribute that limits the
+         * window during which the assertion can be [E52]confirmed by the relying party. It MAY also contain an
+         * Address attribute limiting the client address from which the assertion can be delivered. It MUST NOT
+         * contain a NotBefore attribute. If the containing message is in response to an <AuthnRequest>,
+         * then the InResponseTo attribute MUST match the request's ID.
+         * [profiles 06 - 4.1.4.2p20]
+         */
+        SubjectConfirmationData confirmationData = bearerConfirmation.getSubjectConfirmationData();
+        String recipient = confirmationData.getRecipient();
+        if (recipient == null) {
+            xmlDebugLog("recipient missing in subject confirmation", assertion);
+            throw SAMLExceptionCode.INVALID_ASSERTION.create("recipient missing in subject confirmation");
+        }
+
+        if (!config.getAssertionConsumerServiceURL().equals(recipient)) {
+            xmlDebugLog("invalid recipient in subject confirmation", assertion);
+            throw SAMLExceptionCode.INVALID_ASSERTION.create("invalid recipient in subject confirmation");
+        }
+
+        DateTime notOnOrAfter = confirmationData.getNotOnOrAfter();
+        if (notOnOrAfter == null) {
+            xmlDebugLog("NotOnOrAfter missing in subject confirmation", assertion);
+            throw SAMLExceptionCode.INVALID_ASSERTION.create("NotOnOrAfter missing in subject confirmation");
+        }
+
+        if (!new DateTime().isBefore(notOnOrAfter)) {
+            xmlDebugLog("subject confirmation is expired already", assertion);
+            throw SAMLExceptionCode.INVALID_ASSERTION.create("subject confirmation is expired already");
+        }
+
+        String inResponseTo = confirmationData.getInResponseTo();
+        if (inResponseTo != null) {
+            // TODO validate
+        }
+
+        /*
+         * The set of one or more bearer assertions MUST contain at least one <AuthnStatement> that
+         * reflects the authentication of the principal to the identity provider. Multiple <AuthnStatement>
+         * elements MAY be included, but the semantics of multiple statements is not defined by this profile.
+         * [profiles 06 - 4.1.4.2p20]
+         */
+
+    }
+
+    private void validateAssertionIssuer(Assertion assertion) throws OXException {
+        Issuer issuer = assertion.getIssuer();
+        if (issuer == null) {
+            xmlDebugLog("issuer missing in assertion", assertion);
+            throw SAMLExceptionCode.INVALID_ASSERTION.create("issuer was missing");
+        } else {
+            if (issuer.getFormat() != null && !NameIDType.ENTITY.equals(issuer.getFormat())) {
+                xmlDebugLog("invalid issuer format in assertion", assertion);
+                throw SAMLExceptionCode.INVALID_ASSERTION.create("invalid issuer format");
+            }
+
+            if (!issuer.getValue().equals(config.getIdentityProviderEntityID())) {
+                xmlDebugLog("invalid issuer value in assertion", assertion);
+                throw SAMLExceptionCode.INVALID_ASSERTION.create("invalid issuer value");
+            }
+        }
+    }
+
+    private void xmlDebugLog(String logMessage, final XMLObject object) {
+        LOG.debug(logMessage + ":\n{}", new Object() {
+            @Override
+            public String toString() {
+                try {
+                    return XMLHelper.prettyPrintXML(openSAML.getMarshallerFactory().getMarshaller(object).marshall(object));
+                } catch (MarshallingException e) {
+                    return "XML not available due to marshalling error: " + e.getMessage();
+                }
+            }
+        });
+    }
+
+    private void xmlDebugLog(String logMessage, final XMLObject object, Throwable t) {
+        LOG.debug(logMessage + ":\n{}", new Object() {
+            @Override
+            public String toString() {
+                try {
+                    return XMLHelper.prettyPrintXML(openSAML.getMarshallerFactory().getMarshaller(object).marshall(object));
+                } catch (MarshallingException e) {
+                    return "XML not available due to marshalling error: " + e.getMessage();
+                }
+            }
+        }, t);
+    }
+
+    private static Response decodeResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, SAMLMessageDecoder decoder) throws OXException {
         BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject> context = new BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject>();
         context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
         context.setInboundMessageTransport(new HttpServletRequestAdapter(httpRequest));
@@ -484,60 +833,12 @@ public class SAMLServiceProvider {
 
         try {
             decoder.decode(context);
-            Response response = (Response) context.getInboundSAMLMessage();
-
-            SAMLSignatureProfileValidator profileValidator = new SAMLSignatureProfileValidator();
-            SignatureValidator signatureValidator = new SignatureValidator(idpCertificateCredential);
-            if (response.isSigned() && validateSignatures()) {
-                Signature signature = response.getSignature();
-                profileValidator.validate(signature);
-                signatureValidator.validate(signature);
-            }
-
-            List<Assertion> assertions = decryptAndCollectAssertions(response);
-            for (Assertion assertion : assertions) {
-                if (assertion.isSigned()) {
-                    Signature signature = assertion.getSignature();
-                    profileValidator.validate(signature);
-                    signatureValidator.validate(signature);
-                }
-            }
-
-            System.out.println(assertions);
+            return (Response) context.getInboundSAMLMessage();
         } catch (MessageDecodingException e) {
             throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
         } catch (SecurityException e) {
             throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
-        } catch (ValidationException e) {
-            throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create(e, e.getMessage());
-        } catch (DecryptionException e) {
-            throw SAMLExceptionCode.DECRYPTION_FAILED.create(e, e.getMessage());
         }
-
-        /*
-         * TODO: - resolve user and context - acquire token - redirect to token-login
-         */
-    }
-
-    private List<Assertion> decryptAndCollectAssertions(Response response) throws DecryptionException {
-        List<Assertion> assertions = new LinkedList<Assertion>();
-        List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
-        if (encryptedAssertions.size() > 0) {
-            Decrypter decrypter = getDecrypter();
-            for (EncryptedAssertion encryptedAssertion : encryptedAssertions) {
-                assertions.add(decrypter.decrypt(encryptedAssertion));
-            }
-        }
-
-        for (Assertion assertion : response.getAssertions()) {
-            assertions.add(assertion);
-        }
-
-        return assertions;
-    }
-
-    private boolean validateSignatures() {
-        return idpCertificateCredential != null;
     }
 
     public void setCustomizer(ServiceProviderCustomizer customizer) {

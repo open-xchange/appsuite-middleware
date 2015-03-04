@@ -54,7 +54,7 @@ package com.openexchange.saml;
  * {@link SAMLConfig}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.6.1
  */
 public interface SAMLConfig {
 
@@ -69,13 +69,19 @@ public interface SAMLConfig {
 
     String getAssertionConsumerServiceURL();
 
-    Binding getProtocolBinding();
+    /**
+     * spec: redirect, post or artifact
+     */
+    Binding getRequestBinding();
+
+    /**
+     * spec: post or artifact
+     */
+    Binding getResponseBinding();
 
     String getIdentityProviderURL();
 
-    boolean signAuthnRequest();
-
-    boolean wantAssertionsSigned();
+    boolean signAuthnRequests();
 
     boolean supportSingleLogout();
 
