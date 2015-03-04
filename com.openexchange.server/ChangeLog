@@ -3,6 +3,7 @@
  - Fix for bug 37078: Allow multiple values inside CSS elements and grant permission for numeric values inside "background-position" element
  - Fix for bug 37087: Avoid possible null dereference if Reloadable signals no configuration files
  - Fix for bug 37098: Check string length prior to performing a String.substring()
+ - Fix for bug 37106: Prevent from preliminary deletion of temporary files
 
 * 2015-03-03 - thorben.betten@open-xchange.com
 
