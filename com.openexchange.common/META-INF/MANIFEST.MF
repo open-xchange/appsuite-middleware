@@ -147,7 +147,7 @@ Bundle-ClassPath: .,
  lib/concurrentlinkedhashmap-1.0.1-custom.jar,
  lib/brownies-collections-0.9.6.jar,
  lib/jdo2-api-2.3-eb.jar,
- lib/commons-validator-1.4.0.jar
+ lib/commons-validator-1.4.0.jar,
  lib/ical4j-1.0.6.jar
 Export-Package: com.googlecode.concurrentlinkedhashmap,
  com.javacodegeeks.concurrent,
