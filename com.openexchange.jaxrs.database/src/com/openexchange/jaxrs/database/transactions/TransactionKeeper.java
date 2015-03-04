@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,40 @@
  *
  */
 
-package com.openexchange.jaxrs.database.osgi;
+package com.openexchange.jaxrs.database.transactions;
 
-import java.util.Arrays;
-import java.util.Collection;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.jaxrs.database.DatabaseRESTService;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTable;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTableTask;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTable;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTableTask;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.timer.TimerService;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
- * {@link DatabaseRESTActivator}
+ * The {@link TransactionKeeper} manages running transactions in the RESTDBService.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DatabaseRESTActivator extends HousekeepingActivator {
+public interface TransactionKeeper {
+    
+    /**
+     * Create a new Transaction. Will switch off autocommit on the connection object and store the transaction
+     */
+    public abstract Transaction newTransaction(Connection con) throws SQLException;
+    
+    /**
+     * Retrieve a transaction by ID.
+     * 
+     * @see Transaction#getID()
+     * @param txId The transaction ID
+     * @return The transaction or null if the transaction could not be found (maybe because it autoexpired). 
+     */
+    public abstract Transaction getTransaction(String txId);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, TimerService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(DatabaseRESTService.class, new DatabaseRESTService(this));
-
-        registerService(CreateTableService.class, new CreateServiceSchemaVersionTable());
-        registerService(CreateTableService.class, new CreateServiceSchemaLockTable());
-
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-
-            @Override
-            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(new CreateServiceSchemaVersionTableTask(getService(DatabaseService.class)), new CreateServiceSchemaLockTableTask(getService(DatabaseService.class)));
-            }
-        });
-    }
+    /**
+     * Commit and then forget the transaction.
+     */
+    public abstract void commit(String txId) throws SQLException;
+    
+    /**
+     * Roll back and then forget the transaction.
+     */
+    public abstract void rollback(String txId) throws SQLException;
 
 }

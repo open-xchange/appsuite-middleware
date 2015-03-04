@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,67 @@
  *
  */
 
-package com.openexchange.jaxrs.database.osgi;
+package com.openexchange.jaxrs.database;
 
-import java.util.Arrays;
-import java.util.Collection;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.jaxrs.database.DatabaseRESTService;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTable;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTableTask;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTable;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTableTask;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.timer.TimerService;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+
 
 /**
- * {@link DatabaseRESTActivator}
+ * {@link DatabaseRESTErrorCodes}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DatabaseRESTActivator extends HousekeepingActivator {
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, TimerService.class };
+public enum DatabaseRESTErrorCodes implements OXExceptionCode {
+    // There is a problem with the database, please try again later.
+    SQL_ERROR(1, Category.CATEGORY_SERVICE_DOWN, DatabaseRESTErrorMessages.SQL_ERROR), 
+    // You have exceeded the query limit for one batch. Maximum %1$d, you sent %2$d queries.
+    QUERY_LIMIT_EXCEEDED(2, Category.CATEGORY_CAPACITY, DatabaseRESTErrorMessages.QUOTA_LIMIT_EXCEEDED),
+    // Version should be known but is unknown for module %1$s
+    VERSION_MUST_BE_KNOWN(3, Category.CATEGORY_ERROR, DatabaseRESTErrorMessages.VERSION_MUST_BE_KNOWN);
+    
+    ;
+    
+    public static final String PREFIX = "REST-DB";
+    
+    private int number;
+    private Category category;
+    private String message;
+    
+    DatabaseRESTErrorCodes(int number, Category category, String message) {
+        this.number = number;
+        this.category = category;
+        this.message = message;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(DatabaseRESTService.class, new DatabaseRESTService(this));
+    public int getNumber() {
+        return number;
+    }
 
-        registerService(CreateTableService.class, new CreateServiceSchemaVersionTable());
-        registerService(CreateTableService.class, new CreateServiceSchemaLockTable());
+    @Override
+    public Category getCategory() {
+        return category;
+    }
 
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
 
-            @Override
-            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(new CreateServiceSchemaVersionTableTask(getService(DatabaseService.class)), new CreateServiceSchemaLockTableTask(getService(DatabaseService.class)));
-            }
-        });
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public boolean equals(OXException e) {
+        return e.getPrefix().equals(PREFIX) && e.getCode() == number;
+    }
+
+    public OXException create(Object...args) {
+        return new OXException(number, message, args);
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,67 @@
  *
  */
 
-package com.openexchange.jaxrs.database.osgi;
+package com.openexchange.jaxrs.database.transactions;
 
-import java.util.Arrays;
-import java.util.Collection;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.jaxrs.database.DatabaseRESTService;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTable;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTableTask;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTable;
-import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTableTask;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.timer.TimerService;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
- * {@link DatabaseRESTActivator}
+ * The {@link InMemoryTransactionKeeper} is an implementation of the TransactionKeeper interface. 
+ * @see TransactionKeeper
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DatabaseRESTActivator extends HousekeepingActivator {
-
+public class InMemoryTransactionKeeper implements TransactionKeeper {
+    
+    private ConcurrentHashMap<String, Transaction> transactions = new ConcurrentHashMap<String, Transaction>();
+    
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, TimerService.class };
+    public Transaction newTransaction(Connection con) throws SQLException {
+        Transaction tx = new Transaction(con, this);
+        con.setAutoCommit(false);
+        
+        transactions.put(tx.getID(), tx);
+        return tx;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(DatabaseRESTService.class, new DatabaseRESTService(this));
+    public Transaction getTransaction(String txId) {
+        return transactions.get(txId);
+    }
 
-        registerService(CreateTableService.class, new CreateServiceSchemaVersionTable());
-        registerService(CreateTableService.class, new CreateServiceSchemaLockTable());
+    @Override
+    public void commit(String txId) throws SQLException {
+        Transaction tx = getTransaction(txId);
+        if (null == tx) {
+            return;
+        }
+        try {
+            tx.getConnection().commit();
+        } finally {
+            transactions.remove(txId);
+        }
+    }
 
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-
-            @Override
-            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(new CreateServiceSchemaVersionTableTask(getService(DatabaseService.class)), new CreateServiceSchemaLockTableTask(getService(DatabaseService.class)));
-            }
-        });
+    @Override
+    public void rollback(String txId) throws SQLException {
+        Transaction tx = getTransaction(txId);
+        if (null == tx) {
+            return;
+        }
+        try {
+            tx.getConnection().rollback();
+        } finally {
+            transactions.remove(txId);        
+        }
+    }
+    
+    public void tick(long now) {
+        for(Transaction tx: transactions.values()) {
+            tx.tick(now);
+        }
     }
 
 }
