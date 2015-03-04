@@ -335,15 +335,16 @@ public final class MessageWriter {
             }
         }
 
-        private Object getHeaderValue(final MailMessage mail) {
+        private Object getHeaderValue(MailMessage mail) {
             final String[] headerValues = mail.getHeader(headerName);
             if (null == headerValues || 0 == headerValues.length) {
                 return null;
             }
-            if (1 == headerValues.length) {
+            int length = headerValues.length;
+            if (1 == length) {
                 return headerValues[0];
             }
-            final JSONArray ja = new JSONArray();
+            JSONArray ja = new JSONArray(length);
             for (String headerValue : headerValues) {
                 ja.put(headerValue);
             }
