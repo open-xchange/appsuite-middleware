@@ -352,6 +352,18 @@ public class CSSMatcherTest {
     }
 
     @Test
+    public void testDoCheckCss_bug37078() {
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("background-position: right -38px;"));
+
+        FilterJerichoHandler.loadWhitelist();
+
+        CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
+
+        String content = "background-position: right -38px;";
+        Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
+    }
+
+    @Test
     public void testCheckCss_threadpoolAvailableAndNotInternallyInvoked_createAdditionalThread() throws InterruptedException, ExecutionException, TimeoutException {
         PowerMockito.mockStatic(ThreadPools.class);
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);

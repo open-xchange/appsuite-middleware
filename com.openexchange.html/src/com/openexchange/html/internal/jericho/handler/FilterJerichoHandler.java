@@ -1040,7 +1040,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 + "html.style.background-attachment=\",scroll,fixed,\"\n"
                 + "html.style.background-color=\"c,transparent,\"\n"
                 + "html.style.background-image=\"u\"\n"
-                + "html.style.background-position=\",top,bottom,center,left,right,\"\n"
+                + "html.style.background-position=\",N,top,bottom,center,left,right,\"\n"
                 + "html.style.background-repeat=\",repeat,repeat-x,repeat-y,no-repeat,\"\n"
                 + "html.style.border=\"\"\n"
                 + "html.style.border-bottom=\"\"\n"

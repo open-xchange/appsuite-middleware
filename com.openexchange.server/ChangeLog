@@ -1,3 +1,7 @@
+* 2015-03-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37078: Allow multiple values inside CSS elements and grant permission for numeric values inside "background-position" element
+
 * 2015-03-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 37058: Deny renaming standard groups

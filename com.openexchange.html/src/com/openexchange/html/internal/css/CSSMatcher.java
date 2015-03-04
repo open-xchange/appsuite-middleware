@@ -232,6 +232,33 @@ public final class CSSMatcher {
      * @return <code>true</code> if value is matched by given allowed values; otherwise <code>false</code>
      */
     public static boolean matches(final String value, final Set<String> allowedValuesSet) {
+        for (String single : Strings.splitByTokensOrQuotedStrings(value)) {
+            if (!matchesSingle(single, allowedValuesSet)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks if specified CSS value is matched by given allowed values
+     * <p>
+     * The allowed values may contain following patterns to cover certain CSS types:
+     * <ul>
+     * <li><b>u</b>:&nbsp;url(&lt;URL&gt;)</li>
+     * <li><b>n</b>:&nbsp;number string without %</li>
+     * <li><b>N</b>:&nbsp;number string</li>
+     * <li><b>c</b>:&nbsp;color</li>
+     * <li><b>d</b>:&nbsp;delete</li>
+     * <li><b>*</b>:&nbsp;any value</li>
+     * <li><b>t</b>:&nbsp;time</li>
+     * </ul>
+     *
+     * @param value The value
+     * @param allowedValuesSet The allowed values
+     * @return <code>true</code> if value is matched by given allowed values; otherwise <code>false</code>
+     */
+    public static boolean matchesSingle(final String value, final Set<String> allowedValuesSet) {
         final Set<String> allowedValues = new HashSet<String>(allowedValuesSet);
         /*
          * Ensure to check against pattern first

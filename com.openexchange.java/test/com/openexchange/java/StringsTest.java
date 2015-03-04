@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,28 +49,31 @@
 
 package com.openexchange.java;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Test;
+
 
 /**
- * {@link UnitTests}
+ * {@link StringsTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UnitTests {
+public class StringsTest {
 
-    public UnitTests() {
+    /**
+     * Initializes a new {@link StringsTest}.
+     */
+    public StringsTest() {
         super();
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTest(new JUnit4TestAdapter(AutoboxingTest.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.java.HTMLDetectorTest.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.java.SimpleTokenizerTest.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.java.StringsTest.class));
-        return tests;
+    @Test
+    public final void testSplitByTokensOrQuotedStrings() {
+        String str = "This is  a string that \"will \\\"be\" highlighted when your \"super-'mega'-duper\" 'regular expr\\'ession' matches something 'really \"heavy\" cool'.";
+
+        String[] tokens = Strings.splitByTokensOrQuotedStrings(str);
+
+        String[] expecteds = new String[] { "This", "is", "a", "string", "that", "\"will \\\"be\"", "highlighted", "when", "your", "\"super-'mega'-duper\"", "'regular expr\\'ession'", "matches", "something", "'really \"heavy\" cool'." };
+        org.junit.Assert.assertArrayEquals("Unexpected array content", expecteds, tokens);
     }
 
 }
