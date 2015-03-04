@@ -49,12 +49,15 @@
 
 package com.openexchange.jaxrs.users.mailmapping;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.PathSegment;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.context.ContextService;
@@ -98,9 +101,12 @@ public class MailMappingRESTService {
     @Path("/resolve/{mail}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public JSONObject resolve(@PathParam("mail") String mail) throws OXException {
+    public JSONObject resolve(@PathParam("mail") PathSegment mail) throws OXException {
         JSONObject response = new JSONObject();
-        String[] mails = mail.split(";");
+        Set<String> mails = new HashSet<String>();
+        mails.add(mail.getPath());
+        mails.addAll(mail.getMatrixParameters().keySet());
+        
         MailResolver resolver = services.getService(MailResolver.class);
         for (String m : mails) {
             ResolvedMail resolved = resolver.resolve(m);
