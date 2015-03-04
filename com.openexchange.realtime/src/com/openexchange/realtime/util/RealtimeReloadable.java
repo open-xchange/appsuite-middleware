@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.util;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -62,6 +63,10 @@ import com.openexchange.config.Reloadable;
  * @since 7.6.2
  */
 public final class RealtimeReloadable implements Reloadable {
+
+    private static final String CONFIGFILE = "realtime.properties";
+
+    private static final String[] PROPERTIES = new String[] {"com.openexchange.realtime.numberOfRunLoops"};
 
     private static final RealtimeReloadable INSTANCE = new RealtimeReloadable();
 
@@ -97,14 +102,16 @@ public final class RealtimeReloadable implements Reloadable {
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        for (final Reloadable reloadable : reloadables) {
+        for (Reloadable reloadable : reloadables) {
             reloadable.reloadConfiguration(configService);
         }
     }
 
     @Override
     public Map<String, String[]> getConfigFileNames() {
-        return null;
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(CONFIGFILE, PROPERTIES);
+        return map;
     }
 
 }
