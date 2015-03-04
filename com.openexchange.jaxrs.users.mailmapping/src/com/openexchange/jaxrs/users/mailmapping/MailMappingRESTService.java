@@ -106,7 +106,7 @@ public class MailMappingRESTService {
         Set<String> mails = new HashSet<String>();
         mails.add(mail.getPath());
         mails.addAll(mail.getMatrixParameters().keySet());
-        
+
         MailResolver resolver = services.getService(MailResolver.class);
         for (String m : mails) {
             ResolvedMail resolved = resolver.resolve(m);
