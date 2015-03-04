@@ -753,7 +753,14 @@ public final class LogProperties {
         }
         String[] pairs = Strings.splitByAmps(queryString);
         StringBuilder sb = new StringBuilder(queryString.length());
+        boolean first = true;
         for (String pair : pairs) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append('&');
+            }
+
             int idx = pair.indexOf('=');
             if (idx <= 0) {
                 sb.append(pair);
