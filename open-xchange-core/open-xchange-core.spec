@@ -1123,6 +1123,9 @@ ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt
 # SoftwareChange_Request-2250
 ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
 
+# SoftwareChange_Request-2270
+ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+
 # SoftwareChange_Request-2335
 PFILE=/opt/open-xchange/etc/ox-scriptconf.sh
 JOPTS=$(eval ox_read_property JAVA_XTRAOPTS $PFILE)
@@ -1131,15 +1134,6 @@ if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
     JOPTS="$JOPTS -Dlogback.threadlocal.put.duplicate=false"
     ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
 fi
-
-# SoftwareChange_Request-2249
-ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt/open-xchange/etc/requestwatcher.properties
-
-# SoftwareChange_Request-2250
-ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
-
-# SoftwareChange_Request-2270
-ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
 # SoftwareChange_Request-2342
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
@@ -1150,6 +1144,10 @@ if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatIn
 !com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob
 EOF
 fi
+
+# SoftwareChange_Request-2350
+ox_add_property com.openexchange.mail.signature.maxImageSize 1 /opt/open-xchange/etc/mail.properties
+ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchange/etc/mail.properties
 
 # SoftwareChange_Request-2353
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
