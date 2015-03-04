@@ -431,7 +431,7 @@ public final class ConfigJSlobService implements JSlobService {
             if (sharedId.startsWith(id)) {
                 try {
                     JSlob sharedJSlob = entry.getValue().getJSlob(session);
-                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                    String newId = id.length() < sharedId.length() ? sharedId.substring(id.length() + 1, sharedId.length()) : sharedId;
                     jsonJSlob.getJsonObject().put(newId, sharedJSlob.getJsonObject());
                 } catch (JSONException e) {
                     // should not happen
