@@ -1,3 +1,9 @@
+open-xchange-freebusy (7.6.2-10) stable; urgency=medium
+
+  * Tenth candidate for 7.6.2 release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Wed, 04 Mar 2015 13:13:58 +0100
+
 open-xchange-freebusy (7.6.2-9) stable; urgency=medium
 
   * Nineth candidate for 7.6.2 release
