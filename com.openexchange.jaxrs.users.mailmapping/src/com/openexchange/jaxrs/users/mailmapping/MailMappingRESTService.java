@@ -49,6 +49,7 @@
 
 package com.openexchange.jaxrs.users.mailmapping;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -95,6 +96,7 @@ public class MailMappingRESTService {
      */
     @GET
     @Path("/resolve/{mail}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public JSONObject resolve(@PathParam("mail") String mail) throws OXException {
         JSONObject response = new JSONObject();
