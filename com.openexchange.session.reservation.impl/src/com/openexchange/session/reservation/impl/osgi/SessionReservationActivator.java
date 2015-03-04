@@ -58,6 +58,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -87,7 +88,7 @@ public class SessionReservationActivator extends HousekeepingActivator implement
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, SessiondService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, SessiondService.class, ContextService.class };
     }
 
     @Override

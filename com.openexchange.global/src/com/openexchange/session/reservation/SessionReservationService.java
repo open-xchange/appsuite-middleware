@@ -49,6 +49,7 @@
 
 package com.openexchange.session.reservation;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -56,7 +57,8 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link SessionReservationService}
+ * {@link SessionReservationService} - Used to reserve a session while obtaining a token and to redeem that token against a valid session
+ * later on.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
@@ -71,16 +73,26 @@ public interface SessionReservationService {
      * @param contextId The context identifier
      * @param timeout The associated timeout
      * @param unit The timeout's time unit
+     * @param optState An optional state that will be applied to resulting reservation
      * @return The generated reservation
      * @throws OXException If operation fails
      */
-    Reservation reserveSessionFor(int userId, int contextId, long timeout, TimeUnit unit) throws OXException;
+    String reserveSessionFor(int userId, int contextId, long timeout, TimeUnit unit, Map<String, String> optState) throws OXException;
+
+    /**
+     * Gets the reservation associated with given token.
+     *
+     * @param token The reservation's token
+     * @return The reservation or <code>null</code> if there is no such reservation or reservation is elapsed
+     * @throws OXException If operation fails
+     */
+    Reservation getReservation(String token) throws OXException;
 
     /**
      * Redeems specified reservation and returns associated session
      *
      * @param reservation The reservation
-     * @return The associated session
+     * @return The associated session or <code>null</code> if there is no such reservation or reservation is elapsed
      * @throws OXException If operation fails
      */
     Session redeemReservation(ReservationInfo reservation) throws OXException;

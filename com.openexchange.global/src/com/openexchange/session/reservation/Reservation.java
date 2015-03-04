@@ -49,6 +49,8 @@
 
 package com.openexchange.session.reservation;
 
+import java.util.Map;
+
 
 /**
  * {@link Reservation} - A session reservation.
@@ -92,5 +94,12 @@ public interface Reservation {
      * @return The creation stamp
      */
     long getCreationStamp();
+
+    /**
+     * Gets the optional state.
+     *
+     * @return The state or <code>null</code> if absent
+     */
+    Map<String, String> getState();
 
 }

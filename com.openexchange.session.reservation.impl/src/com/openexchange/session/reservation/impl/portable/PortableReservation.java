@@ -50,6 +50,8 @@
 package com.openexchange.session.reservation.impl.portable;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
@@ -71,12 +73,14 @@ public class PortableReservation implements CustomPortable {
     public static final String PARAMETER_CREATION_STAMP = "creationStamp";
     public static final String PARAMETER_CONTEXT_ID = "contextId";
     public static final String PARAMETER_USER_ID = "userId";
+    public static final String PARAMETER_STATE = "state";
 
     private int contextId;
     private int userId;
     private String token;
     private long timeout;
     private long creationStamp;
+    private Map<String, String> state;
 
     /**
      * Initializes a new {@link PortableReservation}.
@@ -95,6 +99,7 @@ public class PortableReservation implements CustomPortable {
         token = reservation.getToken();
         timeout = reservation.getTimeoutMillis();
         creationStamp = reservation.getCreationStamp();
+        state = reservation.getState();
     }
 
     @Override
@@ -114,6 +119,7 @@ public class PortableReservation implements CustomPortable {
         writer.writeUTF(PARAMETER_TOKEN, token);
         writer.writeLong(PARAMETER_TIMEOUT, timeout);
         writer.writeLong(PARAMETER_CREATION_STAMP, creationStamp);
+        writer.getRawDataOutput().writeObject(null == state ? new LinkedHashMap<String, String>(0) : state);
     }
 
     @Override
@@ -123,6 +129,8 @@ public class PortableReservation implements CustomPortable {
         token = reader.readUTF(PARAMETER_TOKEN);
         timeout = reader.readLong(PARAMETER_TIMEOUT);
         creationStamp = reader.readLong(PARAMETER_CREATION_STAMP);
+        Map<String, String> m = reader.getRawDataInput().readObject();
+        state = m.isEmpty() ? null : m;
     }
 
     /**
@@ -168,6 +176,15 @@ public class PortableReservation implements CustomPortable {
      */
     public long getCreationStamp() {
         return creationStamp;
+    }
+
+    /**
+     * Gets the state
+     *
+     * @return The state
+     */
+    public Map<String, String> getState() {
+        return state;
     }
 
 }

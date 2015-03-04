@@ -49,6 +49,8 @@
 
 package com.openexchange.session.reservation;
 
+import com.openexchange.authentication.SessionEnhancement;
+
 /**
  * {@link ReservationInfo} - The reservation information.
  *
@@ -58,6 +60,15 @@ package com.openexchange.session.reservation;
 public class ReservationInfo {
 
     private final String token;
+    private String fullLogin;
+    private String password;
+    private String loginInfo;
+    private String clientIp;
+    private String authId;
+    private String hash;
+    private String client;
+    private boolean isTransient;
+    private SessionEnhancement enhancement;
 
     /**
      * Initializes a new {@link ReservationInfo}.
@@ -74,6 +85,170 @@ public class ReservationInfo {
      */
     public String getToken() {
         return token;
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the full login incl. context information; e.g <code>test@foo</code>
+     *
+     * @return The full login
+     */
+    public String getFullLogin() {
+        return fullLogin;
+    }
+
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Gets the user login information.
+     *
+     * @return The user login information
+     */
+    public String getUserLoginInfo() {
+        return loginInfo;
+    }
+
+    /**
+     * Gets the IP address of the connected client.
+     *
+     * @return The IP address
+     */
+    public String getClientIP() {
+        return clientIp;
+    }
+
+    /**
+     * Gets the authentication identifier.
+     *
+     * @return The authentication identifier
+     */
+    public String getAuthId() {
+        return authId;
+    }
+
+    /**
+     * Gets the hash.
+     *
+     * @return The hash
+     */
+    public String getHash() {
+        return hash;
+    }
+
+    /**
+     * @return the identifier of the client using the session.
+     */
+    public String getClient() {
+        return client;
+    }
+
+    /**
+     * Gets a value indicating whether the session should be created in a transient way or not, i.e. the session should not be distributed
+     * to other nodes in the cluster or put into another persistent storage.
+     *
+     * @return <code>true</code> if the session should be transient, <code>false</code>, otherwise.
+     */
+    public boolean isTransient() {
+        return isTransient;
+    }
+
+    /**
+     * A callback for modifying the session after it is created. This allows to put arbitrary additional information into a newly created
+     * session. Normally some parameters are added. Use this to get this arbitrary information published to the whole cluster.
+     *
+     * @return a callback for modifying the session after its creation or <code>null</code> if no modification should take place.
+     */
+    public SessionEnhancement getEnhancement() {
+        return enhancement;
+    }
+
+    /**
+     * Sets the full login
+     *
+     * @param fullLogin The full login to set
+     */
+    public void setFullLogin(String fullLogin) {
+        this.fullLogin = fullLogin;
+    }
+
+    /**
+     * Sets the password
+     *
+     * @param password The password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * Sets the login info
+     *
+     * @param loginInfo The login info to set
+     */
+    public void setLoginInfo(String loginInfo) {
+        this.loginInfo = loginInfo;
+    }
+
+    /**
+     * Sets the clientIp
+     *
+     * @param clientIp The client IP address to set
+     */
+    public void setClientIP(String clientIp) {
+        this.clientIp = clientIp;
+    }
+
+    /**
+     * Sets the authId
+     *
+     * @param authId The authId to set
+     */
+    public void setAuthId(String authId) {
+        this.authId = authId;
+    }
+
+    /**
+     * Sets the hash
+     *
+     * @param hash The hash to set
+     */
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    /**
+     * Sets the client
+     *
+     * @param client The client to set
+     */
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    /**
+     * Sets the isTransient
+     *
+     * @param isTransient The isTransient to set
+     */
+    public void setTransient(boolean isTransient) {
+        this.isTransient = isTransient;
+    }
+
+    /**
+     * Sets the enhancement
+     *
+     * @param enhancement The enhancement to set
+     */
+    public void setEnhancement(SessionEnhancement enhancement) {
+        this.enhancement = enhancement;
     }
 
 }

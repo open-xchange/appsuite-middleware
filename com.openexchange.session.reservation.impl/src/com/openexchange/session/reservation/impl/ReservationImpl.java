@@ -49,6 +49,8 @@
 
 package com.openexchange.session.reservation.impl;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import com.openexchange.session.reservation.Reservation;
 
 /**
@@ -64,6 +66,7 @@ public class ReservationImpl implements Reservation {
     private String token;
     private long timeoutMillis;
     private long creationStamp;
+    private Map<String, String> state;
 
     /**
      * Initializes a new {@link ReservationImpl}.
@@ -95,6 +98,11 @@ public class ReservationImpl implements Reservation {
     @Override
     public long getCreationStamp() {
         return creationStamp;
+    }
+
+    @Override
+    public Map<String, String> getState() {
+        return state;
     }
 
     /**
@@ -140,6 +148,15 @@ public class ReservationImpl implements Reservation {
      */
     public void setTimeoutMillis(long timeoutMillis) {
         this.timeoutMillis = timeoutMillis;
+    }
+
+    /**
+     * Sets the optional state.
+     *
+     * @param optState The state to apply
+     */
+    public void setState(Map<String, String> optState) {
+        this.state = null == optState ? null : new LinkedHashMap<String, String>(optState);
     }
 
 }
