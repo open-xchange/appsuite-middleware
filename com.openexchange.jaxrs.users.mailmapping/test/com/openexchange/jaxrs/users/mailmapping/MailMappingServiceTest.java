@@ -121,7 +121,7 @@ public class MailMappingServiceTest {
         when(segment.getPath()).thenReturn("charlie@test.invalid");
 
         when(segment.getMatrixParameters()).thenReturn(mmap);
-        when(segment.getMatrixParameters().keySet()).thenReturn(Collections.<String> emptySet());
+        when(mmap.keySet()).thenReturn(Collections.<String> emptySet());
 
         JSONObject resolved = service.resolve(segment);
         assertEquals(1, resolved.length());
