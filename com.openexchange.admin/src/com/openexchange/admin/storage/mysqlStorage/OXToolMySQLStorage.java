@@ -2298,7 +2298,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         return;
                     }
                 } catch (final OXException e) {
-                    throw new InvalidDataException(e.getMessage());
+                    throw new InvalidDataException(e.getMessage(), e);
                 }
 
             }
