@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.util.Collections;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import org.json.JSONException;
@@ -84,7 +85,6 @@ public class MailMappingServiceTest {
     public void setup() throws OXException {
         services = new MockingServiceLookup();
         service = new MailMappingRESTService(services);
-        resolver = mock(MailResolver.class);
 
         mockContext();
     }
@@ -106,17 +106,22 @@ public class MailMappingServiceTest {
         UserService users = services.mock(UserService.class);
         when(users.getUser(12, ctx)).thenReturn(charlie);
         when(users.getUser(13, ctx)).thenReturn(linus);
+
+        resolver = services.mock(MailResolver.class);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testResolveMail() throws OXException, JSONException {
         when(resolver.resolve("charlie@test.invalid")).thenReturn(new ResolvedMail(12, 42));
 
-        @SuppressWarnings("unchecked") MultivaluedMap<String, String> mmap = mock(MultivaluedMap.class);
+        MultivaluedMap<String, String> mmap = mock(MultivaluedMap.class);
 
         PathSegment segment = mock(PathSegment.class);
         when(segment.getPath()).thenReturn("charlie@test.invalid");
+
         when(segment.getMatrixParameters()).thenReturn(mmap);
+        when(segment.getMatrixParameters().keySet()).thenReturn(Collections.<String> emptySet());
 
         JSONObject resolved = service.resolve(segment);
         assertEquals(1, resolved.length());
@@ -132,16 +137,17 @@ public class MailMappingServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testResolveMultipleMails() throws OXException, JSONException {
         when(resolver.resolve("charlie@test.invalid")).thenReturn(new ResolvedMail(12, 42));
         when(resolver.resolve("linus@test.invalid")).thenReturn(new ResolvedMail(13, 42));
 
-        @SuppressWarnings("unchecked") MultivaluedMap<String, String> mmap = mock(MultivaluedMap.class);
-        mmap.add("linux@test.invalid", "");
+        MultivaluedMap<String, String> mmap = mock(MultivaluedMap.class);
 
         PathSegment segment = mock(PathSegment.class);
         when(segment.getPath()).thenReturn("charlie@test.invalid");
         when(segment.getMatrixParameters()).thenReturn(mmap);
+        when(mmap.keySet()).thenReturn(Collections.singleton("linus@test.invalid"));
 
         JSONObject resolved = service.resolve(segment);
         assertEquals(2, resolved.length());
@@ -157,8 +163,9 @@ public class MailMappingServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testResolveUnknownMail() throws OXException {
-        @SuppressWarnings("unchecked") MultivaluedMap<String, String> mmap = mock(MultivaluedMap.class);
+        MultivaluedMap<String, String> mmap = mock(MultivaluedMap.class);
 
         PathSegment segment = mock(PathSegment.class);
         when(segment.getPath()).thenReturn("charlie@test.invalid");
