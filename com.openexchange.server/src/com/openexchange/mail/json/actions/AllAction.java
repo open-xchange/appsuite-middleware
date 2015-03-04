@@ -70,12 +70,14 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
@@ -337,7 +339,20 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
                         MailSortField sortField = MailSortField.getField(sortCol);
                         OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
-                        MailMessage[] result = mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
+
+                        MailMessage[] result;
+                        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                        if (null != headers && 0 < headers.length) {
+                            if (messageStorage instanceof IMailMessageStorageExt) {
+                                IMailMessageStorageExt ext = (IMailMessageStorageExt) messageStorage;
+                                result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns), headers);
+                            } else {
+                                result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
+                                enrichWithHeaders(fa.getFullname(), result, headers, messageStorage);
+                            }
+                        } else {
+                            result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
+                        }
 
                         for (MailMessage mm : result) {
                             if (null != mm) {
@@ -349,7 +364,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         }
                     } else {
                         // Get iterator
-                        it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, filterApplied ? null : fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
+                        it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, headers, filterApplied ? null : fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
                         final int size = it.size();
                         for (int i = 0; i < size; i++) {
                             final MailMessage mm = it.next();
@@ -411,6 +426,36 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                 req.getParameter("unseen"),
                 req.getParameter("deleted"));
         return sha1Sum;
+    }
+
+    private void enrichWithHeaders(String fullName, MailMessage[] mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
+        int length = mails.length;
+        MailMessage[] headers;
+        {
+            String[] ids = new String[length];
+            for (int i = ids.length; i-- > 0;) {
+                MailMessage m = mails[i];
+                ids[i] = null == m ? null : m.getMailId();
+            }
+            headers = messageStorage.getMessages(fullName, ids, MailFields.toArray(MailField.HEADERS));
+        }
+
+        for (int i = length; i-- > 0;) {
+            MailMessage mailMessage = mails[i];
+            if (null != mailMessage) {
+                MailMessage header = headers[i];
+                if (null != header) {
+                    for (String headerName : headerNames) {
+                        String[] values = header.getHeader(headerName);
+                        if (null != values) {
+                            for (String value : values) {
+                                mailMessage.addHeader(headerName, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }
