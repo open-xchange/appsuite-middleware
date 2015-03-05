@@ -15,7 +15,7 @@ BuildRequires:  ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-halo
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -71,6 +71,18 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-1501
     # updated by SoftwareChange_Request-1710
     ox_add_property com.openexchange.subscribe.socialplugin.linkedin.autorunInterval 1d /opt/open-xchange/etc/linkedinsubscribe.properties
+
+    # SoftwareChange_Request-2410
+    PFILE=/opt/open-xchange/etc/linkedinoauth.properties
+    OLDNAMES=( com.openexchange.socialplugin.linkedin.apikey com.openexchange.socialplugin.linkedin.apisecret )
+    NEWNAMES=( com.openexchange.oauth.linkedin.apiKey com.openexchange.oauth.linkedin.apiSecret )
+    for I in $(seq 1 ${#OLDNAMES[@]}); do
+        VALUE=$(ox_read_property ${OLDNAMES[$I-1]} $PFILE)
+        if [ "" != "$VALUE" ]; then
+            ox_add_property ${NEWNAMES[$I-1]} "$VALUE" $PFILE
+            ox_remove_property ${OLDNAMES[$I-1]} $PFILE
+        fi
+    done
 fi
 
 %clean
