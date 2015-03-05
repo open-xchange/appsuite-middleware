@@ -50,6 +50,12 @@
 package com.openexchange.server.services;
 
 import java.util.concurrent.atomic.AtomicReference;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Reply;
+import com.openexchange.session.Session;
+import com.openexchange.session.inspector.Reason;
 import com.openexchange.session.inspector.SessionInspectorChain;
 
 /**
@@ -58,6 +64,29 @@ import com.openexchange.session.inspector.SessionInspectorChain;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionInspector {
+
+    private static final SessionInspectorChain NOOP_CHAIN = new SessionInspectorChain() {
+
+        @Override
+        public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
+            return Reply.CONTINUE;
+        }
+
+        @Override
+        public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+            return Reply.CONTINUE;
+        }
+
+        @Override
+        public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
+            return Reply.CONTINUE;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+    };
 
     private static final SessionInspector SINGLETON = new SessionInspector();
 
@@ -76,7 +105,7 @@ public class SessionInspector {
 
     private SessionInspector() {
         super();
-        reference = new AtomicReference<SessionInspectorChain>();
+        reference = new AtomicReference<SessionInspectorChain>(NOOP_CHAIN);
     }
 
     /**
@@ -95,7 +124,7 @@ public class SessionInspector {
      * @return <code>true</code> if given <code>SessionInspectorChain</code> instance could be successfully supplied; otherwise <code>false</code>
      */
     public boolean setService(final SessionInspectorChain service) {
-        return reference.compareAndSet(null, service);
+        return reference.compareAndSet(NOOP_CHAIN, service);
     }
 
     /**
@@ -105,7 +134,7 @@ public class SessionInspector {
      * @return <code>true</code> if given <code>SessionInspectorChain</code> instance could be successfully dropped; otherwise <code>false</code>
      */
     public boolean dropService(final SessionInspectorChain service) {
-        return reference.compareAndSet(service, null);
+        return reference.compareAndSet(service, NOOP_CHAIN);
     }
 
 }

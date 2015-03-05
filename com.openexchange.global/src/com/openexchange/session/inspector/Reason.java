@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,26 @@
  *
  */
 
-package com.openexchange.session.inspector.internal;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Reply;
-import com.openexchange.session.Session;
-import com.openexchange.session.inspector.Reason;
-import com.openexchange.session.inspector.SessionInspectorChain;
-import com.openexchange.session.inspector.SessionInspectorService;
+package com.openexchange.session.inspector;
 
 
 /**
- * {@link SessionInspectorChainImpl}
+ * {@link Reason} - The reason for a failed auto-login.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
  */
-public class SessionInspectorChainImpl implements SessionInspectorChain {
-
-    private final ServiceSet<SessionInspectorService> chain;
+public enum Reason {
 
     /**
-     * Initializes a new {@link SessionInspectorChainImpl}.
+     * The auto-login is disabled.
      */
-    public SessionInspectorChainImpl(ServiceSet<SessionInspectorService> chain) {
-        super();
-        this.chain = chain;
-    }
+    AUTO_LOGIN_DISABLED,
+    /**
+     * The auto-login attempt failed.
+     */
+    AUTO_LOGIN_FAILED,
 
-    @Override
-    public boolean isEmpty() {
-        return chain.isEmpty();
-    }
-
-    @Override
-    public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        for (SessionInspectorService inspector : chain) {
-            Reply r = inspector.onSessionHit(session, request, response);
-            if (r != Reply.NEUTRAL) {
-                return r;
-            }
-        }
-        return Reply.NEUTRAL;
-    }
-
-    @Override
-    public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        for (SessionInspectorService inspector : chain) {
-            Reply r = inspector.onSessionMiss(sessionId, request, response);
-            if (r != Reply.NEUTRAL) {
-                return r;
-            }
-        }
-        return Reply.NEUTRAL;
-    }
-
-    @Override
-    public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        for (SessionInspectorService inspector : chain) {
-            Reply r = inspector.onAutoLoginFailed(reason, request, response);
-            if (r != Reply.NEUTRAL) {
-                return r;
-            }
-        }
-        return Reply.NEUTRAL;
-    }
+    ;
 
 }

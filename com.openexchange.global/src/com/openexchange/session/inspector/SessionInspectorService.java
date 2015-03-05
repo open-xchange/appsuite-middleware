@@ -88,4 +88,16 @@ public interface SessionInspectorService {
      */
     Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
+    /**
+     * Called when auto-login failed.
+     *
+     * @param reason The reason for the failed auto-login
+     * @param request The associated HTTP request
+     * @param response The associated HTTP response
+     * @return The reply; either {@link Reply#NEUTRAL} to select next in chain, {@link Reply#CONTINUE} to leave chain and signal to
+     *         continue further processing or {@link Reply#STOP} to leave chain and signal to stop further processing
+     * @throws OXException If inspector raises an exception
+     */
+    Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException;
+
 }
