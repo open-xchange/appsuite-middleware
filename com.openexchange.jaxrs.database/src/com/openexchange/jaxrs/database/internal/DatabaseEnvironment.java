@@ -62,6 +62,7 @@ import com.openexchange.timer.TimerService;
  * {@link DatabaseEnvironment}. Singleton class for accessing the {@link TransactionKeeper and the {@link VersionChecker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.8.0
  */
 public final class DatabaseEnvironment {
 

@@ -53,6 +53,7 @@ package com.openexchange.jaxrs.database.internal;
  * {@link DatabaseAccessType}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.8.0
  */
 public enum DatabaseAccessType {
     READ, WRITE

@@ -50,6 +50,7 @@
 package com.openexchange.jaxrs.database;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -206,6 +207,21 @@ public class DatabaseRESTService extends JAXRSService {
     public void rollbackTransaction(@PathParam("txId") String txId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.rollbackTransaction(txId);
+    }
+
+    /**
+     * Initialize a new database schema with the specified name and the specified write pool identifier.
+     * 
+     * @param writePoolId The write pool identifier
+     * @param schema The schema name
+     * @throws OXException If the initialization of the new schema fails
+     */
+    @GET
+    @Path("/init/w/{writeId}/{schema}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void initSchema(@PathParam("writePoolId") int writePoolId, @PathParam("schema") String schema) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.initSchema(writePoolId, schema);
     }
 
 }

@@ -60,6 +60,7 @@ import java.util.List;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.8.0
  */
 public class DatabaseQuery {
 

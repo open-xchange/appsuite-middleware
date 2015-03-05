@@ -75,6 +75,8 @@ import com.openexchange.java.util.NativeBuilders.MapBuilder;
 import com.openexchange.jaxrs.database.DatabaseRESTErrorCodes;
 import com.openexchange.jaxrs.database.migrations.VersionChecker;
 import com.openexchange.jaxrs.database.osgi.Services;
+import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTable;
+import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTable;
 import com.openexchange.jaxrs.database.transactions.Transaction;
 import com.openexchange.jaxrs.database.transactions.TransactionKeeper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -201,6 +203,24 @@ public class DatabaseRESTPerformer {
     }
 
     /**
+     * Initialize a new database schema with the specified name and the specified write pool identifier.
+     * 
+     * @param writePoolId The write pool identifier
+     * @param schema The schema name
+     * @throws OXException If the initialization of the new schema fails
+     */
+    public void initSchema(int writePoolId, String schema) throws OXException {
+        DatabaseService db = dbService();
+        db.initMonitoringTables(writePoolId, schema);
+        db.initPartitions(writePoolId, schema, 0);
+
+        Connection con = db.get(writePoolId, schema);
+
+        new CreateServiceSchemaVersionTable().perform(con);
+        new CreateServiceSchemaLockTable().perform(con);
+    }
+
+    /**
      * Performs the execution of the DatabaseQuery objects
      * 
      * @return A JSONObject with the results.
@@ -299,6 +319,11 @@ public class DatabaseRESTPerformer {
         handleVersionNegotiation();
     }
 
+    /**
+     * Handles the SQL exception by rolling back the current transaction (if any) and restoring the post processor object
+     * Returns a response code of 400
+     * TODO: include the response body
+     */
     private void handleSQLException() {
         try {
             if (tx != null) {
@@ -475,7 +500,6 @@ public class DatabaseRESTPerformer {
     private static interface ConnectionPostProcessor {
 
         public void done(Connection con) throws SQLException, OXException;
-
     }
 
     private static interface BeforeHandler {
