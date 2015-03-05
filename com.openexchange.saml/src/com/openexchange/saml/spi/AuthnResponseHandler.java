@@ -124,6 +124,6 @@ public interface AuthnResponseHandler {
 
     boolean afterValidate(Response response, List<Assertion> assertions, OpenSAML openSAML) throws OXException;
 
-    Principal resolvePrincipal(Response response, List<Assertion> assertions, OpenSAML openSAML) throws OXException;
+    Principal resolvePrincipal(Response response, Assertion assertion, OpenSAML openSAML) throws OXException;
 
 }

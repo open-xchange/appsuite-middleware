@@ -2,7 +2,9 @@ package com.openexchange.saml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -39,6 +41,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDSAContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.joda.time.DateTime;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -128,6 +131,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.spi.AuthnResponseHandler;
+import com.openexchange.session.reservation.SimSessionReservationService;
 
 /*
  *
@@ -229,6 +233,8 @@ public class SAMLServiceProviderTest {
      */
     private KeyStore spKeyStore;
 
+    private File spKeyStoreFile;
+
     @Before
     public void setup() throws Exception {
         KeyPairGenerator dsaGenerator = KeyPairGenerator.getInstance("DSA");
@@ -266,13 +272,32 @@ public class SAMLServiceProviderTest {
         idpKeyStore.setKeyEntry(IDP_SIGNING_KEY_ALIAS, idpSigningKeyPair.getPrivate(), IDP_SIGNING_KEY_PASSWORD.toCharArray(), new Certificate[] { idpSigningCert });
         spKeyStore.setCertificateEntry(IDP_SIGNING_CERT_ALIAS, idpSigningCert);
 
+        idpKeyStoreFile = File.createTempFile("idpKeyStore", ".jks");
+        idpKeyStoreFile.deleteOnExit();
+        idpKeyStore.store(new FileOutputStream(idpKeyStoreFile), IDP_KEY_STORE_PASSWORD.toCharArray());
+
+        spKeyStoreFile = File.createTempFile("spKeyStore", ".jks");
+        spKeyStoreFile.deleteOnExit();
+        spKeyStore.store(new FileOutputStream(spKeyStoreFile), SP_KEY_STORE_PASSWORD.toCharArray());
+
         /*
          * Init service provider
          */
-        config = new TestConfig();
+        config = new TestConfig(spKeyStoreFile.getAbsolutePath());
         openSAML = new OpenSAML();
-        serviceProvider = new SAMLServiceProvider(config, openSAML, new TestResponseHandler());
+        serviceProvider = new SAMLServiceProvider(config, openSAML, new TestResponseHandler(), new SimSessionReservationService());
         serviceProvider.init();
+    }
+
+    @After
+    public void cleanUp() throws Exception {
+        if (idpKeyStoreFile != null) {
+            idpKeyStoreFile.delete();
+        }
+
+        if (spKeyStoreFile != null) {
+            spKeyStoreFile.delete();
+        }
     }
 
     private SAMLServiceProvider serviceProvider;
@@ -280,6 +305,13 @@ public class SAMLServiceProviderTest {
     private OpenSAML openSAML;
 
     private static final class TestConfig implements SAMLConfig {
+
+        private final String keyStorePath;
+
+        private TestConfig(String keyStorePath) {
+            super();
+            this.keyStorePath = keyStorePath;
+        }
 
         @Override
         public String getProviderName() {
@@ -308,12 +340,12 @@ public class SAMLServiceProviderTest {
 
         @Override
         public boolean signAuthnRequests() {
-            return true;
+            return false;
         }
 
         @Override
         public boolean supportSingleLogout() {
-            return true;
+            return false;
         }
 
         @Override
@@ -323,37 +355,37 @@ public class SAMLServiceProviderTest {
 
         @Override
         public String getKeyStorePath() {
-            return "/home/steffen/tmp/spassmitkeys/saml.jks";
+            return keyStorePath;
         }
 
         @Override
         public String getKeyStorePassword() {
-            return "secret";
+            return SP_KEY_STORE_PASSWORD;
         }
 
         @Override
         public String getSigningKeyAlias() {
-            return "saml-signing-key";
+            return SP_SIGNING_KEY_ALIAS;
         }
 
         @Override
         public String getSigningKeyPassword() {
-            return "secret1";
+            return SP_SIGNING_KEY_PASSWORD;
         }
 
         @Override
         public String getEncryptionKeyAlias() {
-            return "saml-encryption-key";
+            return SP_ENCRYPTION_KEY_ALIAS;
         }
 
         @Override
         public String getEncryptionKeyPassword() {
-            return "secret2";
+            return SP_ENCRYPTION_KEY_PASSWORD;
         }
 
         @Override
         public String getIDPCertificateAlias() {
-            return "testshib-certificate";
+            return IDP_SIGNING_CERT_ALIAS;
         }
 
         @Override
@@ -372,21 +404,21 @@ public class SAMLServiceProviderTest {
 
         @Override
         public boolean beforeDecode(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OpenSAML openSAML) throws OXException {
-            return false;
+            return true;
         }
 
         @Override
         public boolean beforeValidate(Response response, OpenSAML openSAML) throws OXException {
-            return false;
+            return true;
         }
 
         @Override
         public boolean afterValidate(Response response, List<Assertion> assertions, OpenSAML openSAML) throws OXException {
-            return false;
+            return true;
         }
 
         @Override
-        public Principal resolvePrincipal(Response response, List<Assertion> assertions, OpenSAML openSAML) throws OXException {
+        public Principal resolvePrincipal(Response response, Assertion assertion, OpenSAML openSAML) throws OXException {
             return new Principal(0, 0);
         }
 
@@ -477,6 +509,8 @@ public class SAMLServiceProviderTest {
         "    <EmailAddress>ndk@internet2.edu</EmailAddress>\n" +
         "  </ContactPerson>\n" +
         "</EntityDescriptor>";
+
+    private File idpKeyStoreFile;
 
     @Test
     public void testMetadata() throws Exception {
@@ -581,7 +615,6 @@ public class SAMLServiceProviderTest {
                 Assert.fail();
             }
         }
-
     }
 
     @Test
@@ -666,11 +699,13 @@ public class SAMLServiceProviderTest {
 
     @Test
     public void testHandlePOSTAuthnResponse() throws Exception {
+        String responseXML = buildResponse(true);
         SimHttpServletRequest samlResponseRequest = new SimHttpServletRequest();
         samlResponseRequest.setRequestURI(new URI(config.getAssertionConsumerServiceURL()).getPath());
         samlResponseRequest.setRequestURL(config.getAssertionConsumerServiceURL());
         samlResponseRequest.setMethod("POST");
-        samlResponseRequest.setParameter("SAMLResponse", SAML_RESPONSE);
+        samlResponseRequest.setParameter("SAMLResponse", Base64.encodeBytes(responseXML.getBytes("UTF-8"), Base64.DONT_BREAK_LINES));
+        samlResponseRequest.setParameter("RelayState", "example.com");
         serviceProvider.handleAuthnResponse(samlResponseRequest, new SimHttpServletResponse(), Binding.HTTP_POST);
     }
 
@@ -734,14 +769,14 @@ public class SAMLServiceProviderTest {
 
     private String buildResponse(boolean includeCert) throws Exception {
         Response response = openSAML.buildSAMLObject(Response.class);
-        response.setDestination("http://some.where.at.ox/acs");
+        response.setDestination(config.getAssertionConsumerServiceURL());
         response.setID("_" + UUIDs.getUnformattedString(UUID.randomUUID()));
         response.setInResponseTo("_" + UUIDs.getUnformattedString(UUID.randomUUID()));
         response.setIssueInstant(new DateTime());
         response.setVersion(SAMLVersion.VERSION_20);
 
         Issuer responseIssuer = openSAML.buildSAMLObject(Issuer.class);
-        responseIssuer.setValue("http://somewhere.at.ox/idp");
+        responseIssuer.setValue(config.getIdentityProviderEntityID());
         response.setIssuer(responseIssuer);
 
         Status status = openSAML.buildSAMLObject(Status.class);
@@ -755,7 +790,7 @@ public class SAMLServiceProviderTest {
         assertion.setIssueInstant(new DateTime());
 
         Issuer assertionIssuer = openSAML.buildSAMLObject(Issuer.class);
-        assertionIssuer.setValue("http://somewhere.at.ox/idp");
+        assertionIssuer.setValue(config.getIdentityProviderEntityID());
         assertion.setIssuer(assertionIssuer);
 
         Subject subject = openSAML.buildSAMLObject(Subject.class);
@@ -770,7 +805,7 @@ public class SAMLServiceProviderTest {
         subjectConfirmationData.setAddress("10.20.30.1");
         subjectConfirmationData.setInResponseTo("_" + UUIDs.getUnformattedString(UUID.randomUUID()));
         subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
-        subjectConfirmationData.setRecipient("http://some.where.at.ox/acs");
+        subjectConfirmationData.setRecipient(config.getAssertionConsumerServiceURL());
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
         subject.getSubjectConfirmations().add(subjectConfirmation);
         assertion.setSubject(subject);
@@ -780,7 +815,7 @@ public class SAMLServiceProviderTest {
         conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
         AudienceRestriction audienceRestriction = openSAML.buildSAMLObject(AudienceRestriction.class);
         Audience audience = openSAML.buildSAMLObject(Audience.class);
-        audience.setAudienceURI("http://some.where.at.ox/acs");
+        audience.setAudienceURI(config.getEntityID());
         audienceRestriction.getAudiences().add(audience);
         conditions.getAudienceRestrictions().add(audienceRestriction);
         assertion.setConditions(conditions);

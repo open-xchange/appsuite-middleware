@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -65,6 +66,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -79,7 +81,10 @@ import org.opensaml.common.binding.decoding.SAMLMessageDecoder;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.binding.decoding.HTTPPostDecoder;
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Audience;
+import org.opensaml.saml2.core.AudienceRestriction;
 import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.Conditions;
 import org.opensaml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDPolicy;
@@ -144,6 +149,7 @@ import com.openexchange.saml.spi.AuthnResponseHandler;
 import com.openexchange.saml.spi.AuthnResponseHandler.Principal;
 import com.openexchange.saml.spi.ServiceProviderCustomizer;
 import com.openexchange.saml.spi.ServiceProviderCustomizer.RequestContext;
+import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -167,9 +173,9 @@ public class SAMLServiceProvider {
 
     private final AuthnResponseHandler responseHandler;
 
-    private volatile ServiceProviderCustomizer customizer;
+    private final SessionReservationService sessionReservationService;
 
-//    private KeyStore keystore;
+    private volatile ServiceProviderCustomizer customizer;
 
     private Credential signingCredential;
 
@@ -179,14 +185,13 @@ public class SAMLServiceProvider {
 
     private boolean initialized;
 
-//    private KeyStoreCredentialResolver keyStoreCredentialResolver;
 
-
-    public SAMLServiceProvider(SAMLConfig config, OpenSAML openSAML, AuthnResponseHandler responseHandler) throws OXException {
+    public SAMLServiceProvider(SAMLConfig config, OpenSAML openSAML, AuthnResponseHandler responseHandler, SessionReservationService sessionReservationService) throws OXException {
         super();
         this.config = config;
         this.openSAML = openSAML;
         this.responseHandler = responseHandler;
+        this.sessionReservationService = sessionReservationService;
         initialized = false;
     }
 
@@ -280,12 +285,6 @@ public class SAMLServiceProvider {
         }
     }
 
-
-
-//    KeyStore getKeystore() {
-//        return keystore;
-//    }
-
     public String getMetadataXML() throws OXException {
         checkInitialized();
 
@@ -369,7 +368,7 @@ public class SAMLServiceProvider {
                 // sendFormResponse(authnRequestXML, httpResponse);
                 break;
             case HTTP_REDIRECT:
-                sendRedirect(authnRequestXML, httpResponse);
+                sendRedirect(authnRequestXML, httpRequest, httpResponse);
                 break;
             default:
                 throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(config.getRequestBinding());
@@ -379,7 +378,7 @@ public class SAMLServiceProvider {
         }
     }
 
-    private void sendRedirect(String authnRequestXML, HttpServletResponse httpResponse) throws OXException, IOException {
+    private void sendRedirect(String authnRequestXML, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException {
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         Deflater deflater = new Deflater(Deflater.DEFLATED, true);
         DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytesOut, deflater);
@@ -394,8 +393,8 @@ public class SAMLServiceProvider {
 
         String redirectLocation;
         try {
-            // TODO: Do we need a RelayState?
-            URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderURL()).setParameter("SAMLRequest", encoded);
+            // TODO: integrity protect RelayState
+            URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", httpRequest.getServerName());
             if (config.signAuthnRequests()) {
                 /*
                  * The <AuthnRequest> message MAY be signed, if authentication of the request issuer is required.
@@ -542,7 +541,7 @@ public class SAMLServiceProvider {
         return credential;
     }
 
-    public void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException {
+    public void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException {
         SAMLMessageDecoder decoder;
         if (binding == Binding.HTTP_POST) {
             decoder = new HTTPPostDecoder();
@@ -639,36 +638,76 @@ public class SAMLServiceProvider {
                      * and MAY be signed if the HTTP-Artifact binding is used.
                      * [profiles 06 - 4.1.3.5p18]
                      */
+                    List<Assertion> allAssertions = decryptAndCollectAssertions(response);
+                    List<Assertion> bearerAssertions = new LinkedList<Assertion>();
                     boolean enforceSignature = binding == Binding.HTTP_POST && !responseWasSigned;
-                    List<Assertion> assertions = new LinkedList<Assertion>();
-                    List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
-                    if (encryptedAssertions.size() > 0) {
-                        Decrypter decrypter = getDecrypter();
-                        for (EncryptedAssertion encryptedAssertion : encryptedAssertions) {
-                            Assertion assertion = decrypter.decrypt(encryptedAssertion);
-                            validateAssertion(response, assertion, enforceSignature);
-                            assertions.add(assertion);
+                    for (Assertion assertion : allAssertions) {
+                        validateAssertionSignatureAndIssuer(response, assertion, enforceSignature);
+                        if (isValidBearerAssertion(assertion)) {
+                            bearerAssertions.add(assertion);
                         }
                     }
 
-                    for (Assertion assertion : response.getAssertions()) {
-                        validateAssertion(response, assertion, enforceSignature);
-                        assertions.add(assertion);
+                    if (bearerAssertions.isEmpty()) {
+                        throw SAMLExceptionCode.INVALID_RESPONSE.create("no bearer assertion was contained");
                     }
 
+                    Assertion finalAssertion = null;
+                    for (Assertion assertion : bearerAssertions) {
+                        if (conditionsMet(assertion) && hasValidAuthnStatement(assertion)) {
+                            finalAssertion = assertion;
+                            break;
+                        }
+                    }
 
-
-                    // urn:oasis:names:tc:SAML:2.0:cm:bearer
+                    if (finalAssertion == null) {
+                        throw SAMLExceptionCode.INVALID_RESPONSE.create("no valid assertion was contained");
+                    }
 
                     /*
-                     * - at least one assertion MUST contain at least one authentication statement
-                     * [core06 - 3.4p47]
+                     * TODO:
+                     * If the identity provider supports the Single Logout profile, defined in Section 4.4, any authentication
+                     * statements MUST include a SessionIndex attribute to enable per-session logout requests by the
+                     * service provider.
+                     * [profiles 06 - 4.1.4.2p20]
                      */
 
                     /*
-                     * TODO: - resolve user and context - acquire token - redirect to token-login
+                     * TODO:
+                     * If an <AuthnStatement> used to establish a security context for the principal contains a
+                     * SessionNotOnOrAfter attribute, the security context SHOULD be discarded once this time is
+                     * reached, unless the service provider reestablishes the principal's identity by repeating the use of this
+                     * profile. Note that if multiple <AuthnStatement> elements are present, the SessionNotOnOrAfter
+                     * value closest to the present time SHOULD be honored.
                      */
-                    Principal principal = responseHandler.resolvePrincipal(response, assertions, openSAML);
+
+                    /*
+                     * TODO:
+                     * The service provider MUST ensure that bearer assertions are not replayed, by maintaining the set of used
+                     * ID values for the length of time for which the assertion would be considered valid based on the
+                     * NotOnOrAfter attribute in the <SubjectConfirmationData>.
+                     * [profiles 06 - 4.1.4.2p21]
+                     */
+
+                    Principal principal = responseHandler.resolvePrincipal(response, finalAssertion, openSAML);
+
+                    /*
+                     * TODO state:
+                     *  - session index for logout
+                     *  - SessionNotOnOrAfter
+                     */
+                    String sessionToken = sessionReservationService.reserveSessionFor(principal.getUserId(), principal.getContextId(), 60l, TimeUnit.SECONDS, null);
+                    String redirectHost = httpRequest.getParameter("RelayState"); // TODO: integrity check and fail on null
+                    // TODO redirect to relay state
+                    URI redirectLocation = new URIBuilder()
+                        .setScheme("https")
+                        .setHost(redirectHost)
+                        .setPath("/ajax/login")
+                        .setParameter("action", "supertoken")
+                        .setParameter("token", sessionToken)
+                        .build();
+
+                    httpResponse.sendRedirect(redirectLocation.toString());
                 }
             } catch (ValidationException e) {
                 xmlDebugLog("Response signature validation failed", response, e);
@@ -676,12 +715,169 @@ public class SAMLServiceProvider {
             } catch (DecryptionException e) {
                 xmlDebugLog("Assertion decryption failed", response, e);
                 throw SAMLExceptionCode.DECRYPTION_FAILED.create(e, e.getMessage());
+            } catch (URISyntaxException e) {
+                throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
             }
 
         }
     }
 
-    private void validateAssertion(Response response, Assertion assertion, boolean enforceSignature) throws OXException {
+    private boolean conditionsMet(Assertion assertion) {
+        /*
+         * Each bearer assertion(s) containing a bearer subject confirmation MUST contain an
+         * <AudienceRestriction> including the service provider's unique identifier as an <Audience>.
+         * Other conditions (and other <Audience> elements) MAY be included as requested by the service
+         * provider or at the discretion of the identity provider. (Of course, all such conditions MUST be
+         * understood by and accepted by the service provider in order for the assertion to be considered valid.)
+         * [profiles 06 - 4.1.4.2p20]
+         */
+        Conditions conditions = assertion.getConditions();
+        if (conditions == null) {
+            return false;
+        }
+
+        DateTime now = new DateTime();
+        DateTime notBefore = conditions.getNotBefore();
+        if (notBefore != null && now.isBefore(notBefore)) {
+            return false;
+        }
+
+        DateTime notOnOrAfter = conditions.getNotOnOrAfter();
+        if (notOnOrAfter != null && !now.isBefore(notOnOrAfter)) {
+            return false;
+        }
+
+
+        List<AudienceRestriction> audienceRestrictions = conditions.getAudienceRestrictions();
+        if (audienceRestrictions.isEmpty()) {
+            return false;
+        }
+
+        boolean audienceValid = false;
+        outer: for (AudienceRestriction audienceRestriction : audienceRestrictions) {
+            List<Audience> audiences = audienceRestriction.getAudiences();
+            for (Audience audience : audiences) {
+                if (config.getEntityID().equals(audience.getAudienceURI())) {
+                    audienceValid = true;
+                    break outer;
+                }
+            }
+        }
+
+        if (!audienceValid) {
+            return false;
+        }
+
+        /*
+         * TODO:
+         * OneTimeUse
+         * ProxyRestriction
+         * Both not relevant for us? Provide an extension point (maybe even for custom conditions)?
+         * Fail on unknown conditions?
+         */
+
+        return true;
+    }
+
+    private boolean hasValidAuthnStatement(Assertion assertion) {
+        /*
+         * The set of one or more bearer assertions MUST contain at least one <AuthnStatement> that
+         * reflects the authentication of the principal to the identity provider. Multiple <AuthnStatement>
+         * elements MAY be included, but the semantics of multiple statements is not defined by this profile.
+         * [profiles 06 - 4.1.4.2p20]
+         */
+        return !assertion.getAuthnStatements().isEmpty();
+    }
+
+    private boolean isValidBearerAssertion(Assertion assertion) {
+        /*
+         * Any assertion issued for consumption using this profile MUST contain a <Subject> element with at
+         * least one <SubjectConfirmation> element containing a Method of
+         * urn:oasis:names:tc:SAML:2.0:cm:bearer. Such an assertion is termed a bearer assertion.
+         * Bearer assertions MAY contain additional <SubjectConfirmation> elements.
+         * [profiles 06 - 4.1.4.2p20]
+         */
+        Subject subject = assertion.getSubject();
+        if (subject == null) {
+            return false;
+        }
+
+        List<SubjectConfirmation> bearerConfirmations = new LinkedList<SubjectConfirmation>();
+        for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
+            if ("urn:oasis:names:tc:SAML:2.0:cm:bearer".equals(confirmation.getMethod()) && confirmation.getSubjectConfirmationData() != null) {
+                bearerConfirmations.add(confirmation);
+            }
+        }
+
+        if (bearerConfirmations.isEmpty()) {
+            return false;
+        }
+
+        /*
+         * At lease one bearer <SubjectConfirmation> element MUST contain a
+         * <SubjectConfirmationData> element that itself MUST contain a Recipient attribute containing
+         * the service provider's assertion consumer service URL and a NotOnOrAfter attribute that limits the
+         * window during which the assertion can be [E52]confirmed by the relying party. It MAY also contain an
+         * Address attribute limiting the client address from which the assertion can be delivered. It MUST NOT
+         * contain a NotBefore attribute. If the containing message is in response to an <AuthnRequest>,
+         * then the InResponseTo attribute MUST match the request's ID.
+         * [profiles 06 - 4.1.4.2p20]
+         */
+        List<SubjectConfirmation> validConfirmations = new LinkedList<SubjectConfirmation>();
+        for (SubjectConfirmation confirmation : bearerConfirmations) {
+            SubjectConfirmationData confirmationData = confirmation.getSubjectConfirmationData();
+            String recipient = confirmationData.getRecipient();
+            if (recipient == null) {
+                continue;
+            }
+
+            if (!config.getAssertionConsumerServiceURL().equals(recipient)) {
+                continue;
+            }
+
+            DateTime notOnOrAfter = confirmationData.getNotOnOrAfter();
+            if (notOnOrAfter == null) {
+                continue;
+            }
+
+            if (!new DateTime().isBefore(notOnOrAfter)) {
+                continue;
+            }
+
+            String inResponseTo = confirmationData.getInResponseTo();
+            if (inResponseTo != null) {
+                // TODO validate
+            }
+
+            validConfirmations.add(confirmation);
+        }
+
+
+        if (validConfirmations.isEmpty()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private List<Assertion> decryptAndCollectAssertions(Response response) throws DecryptionException {
+        List<Assertion> assertions = new LinkedList<Assertion>();
+        List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
+        if (encryptedAssertions.size() > 0) {
+            Decrypter decrypter = getDecrypter();
+            for (EncryptedAssertion encryptedAssertion : encryptedAssertions) {
+                assertions.add(decrypter.decrypt(encryptedAssertion));
+            }
+        }
+
+        for (Assertion assertion : response.getAssertions()) {
+            assertions.add(assertion);
+        }
+
+        return assertions;
+    }
+
+    private void validateAssertionSignatureAndIssuer(Response response, Assertion assertion, boolean enforceSignature) throws OXException {
         if (enforceSignature && !assertion.isSigned()) {
             String msg = "assertion must be signed but was not";
             xmlDebugLog(msg, assertion);
@@ -703,81 +899,6 @@ public class SAMLServiceProvider {
         }
 
         validateAssertionIssuer(assertion);
-        validateAssertionSubject(assertion);
-    }
-
-    private void validateAssertionSubject(Assertion assertion) throws OXException {
-        /*
-         * Any assertion issued for consumption using this profile MUST contain a <Subject> element with at
-         * least one <SubjectConfirmation> element containing a Method of
-         * urn:oasis:names:tc:SAML:2.0:cm:bearer. Such an assertion is termed a bearer assertion.
-         * Bearer assertions MAY contain additional <SubjectConfirmation> elements.
-         * [profiles 06 - 4.1.4.2p20]
-         */
-        Subject subject = assertion.getSubject();
-        if (subject == null) {
-            xmlDebugLog("subject missing in assertion", assertion);
-            throw SAMLExceptionCode.INVALID_ASSERTION.create("issuer was missing");
-        }
-
-        SubjectConfirmation bearerConfirmation = null;
-        for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
-            if ("urn:oasis:names:tc:SAML:2.0:cm:bearer".equals(confirmation.getMethod()) && confirmation.getSubjectConfirmationData() != null) {
-                bearerConfirmation = confirmation;
-                break;
-            }
-        }
-
-        if (bearerConfirmation == null) {
-            xmlDebugLog("subject confirmation missing in assertion", assertion);
-            throw SAMLExceptionCode.INVALID_ASSERTION.create("subject confirmation was missing");
-        }
-
-        /*
-         * At lease one bearer <SubjectConfirmation> element MUST contain a
-         * <SubjectConfirmationData> element that itself MUST contain a Recipient attribute containing
-         * the service provider's assertion consumer service URL and a NotOnOrAfter attribute that limits the
-         * window during which the assertion can be [E52]confirmed by the relying party. It MAY also contain an
-         * Address attribute limiting the client address from which the assertion can be delivered. It MUST NOT
-         * contain a NotBefore attribute. If the containing message is in response to an <AuthnRequest>,
-         * then the InResponseTo attribute MUST match the request's ID.
-         * [profiles 06 - 4.1.4.2p20]
-         */
-        SubjectConfirmationData confirmationData = bearerConfirmation.getSubjectConfirmationData();
-        String recipient = confirmationData.getRecipient();
-        if (recipient == null) {
-            xmlDebugLog("recipient missing in subject confirmation", assertion);
-            throw SAMLExceptionCode.INVALID_ASSERTION.create("recipient missing in subject confirmation");
-        }
-
-        if (!config.getAssertionConsumerServiceURL().equals(recipient)) {
-            xmlDebugLog("invalid recipient in subject confirmation", assertion);
-            throw SAMLExceptionCode.INVALID_ASSERTION.create("invalid recipient in subject confirmation");
-        }
-
-        DateTime notOnOrAfter = confirmationData.getNotOnOrAfter();
-        if (notOnOrAfter == null) {
-            xmlDebugLog("NotOnOrAfter missing in subject confirmation", assertion);
-            throw SAMLExceptionCode.INVALID_ASSERTION.create("NotOnOrAfter missing in subject confirmation");
-        }
-
-        if (!new DateTime().isBefore(notOnOrAfter)) {
-            xmlDebugLog("subject confirmation is expired already", assertion);
-            throw SAMLExceptionCode.INVALID_ASSERTION.create("subject confirmation is expired already");
-        }
-
-        String inResponseTo = confirmationData.getInResponseTo();
-        if (inResponseTo != null) {
-            // TODO validate
-        }
-
-        /*
-         * The set of one or more bearer assertions MUST contain at least one <AuthnStatement> that
-         * reflects the authentication of the principal to the identity provider. Multiple <AuthnStatement>
-         * elements MAY be included, but the semantics of multiple statements is not defined by this profile.
-         * [profiles 06 - 4.1.4.2p20]
-         */
-
     }
 
     private void validateAssertionIssuer(Assertion assertion) throws OXException {

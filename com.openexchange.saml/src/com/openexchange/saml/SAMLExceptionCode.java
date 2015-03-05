@@ -86,6 +86,8 @@ public enum SAMLExceptionCode implements DisplayableOXExceptionCode {
     INVALID_RESPONSE("The validation of a response failed: %1$s", Category.CATEGORY_ERROR, 9),
 
     AUTHENTICATION_FAILED("The authentication failed. Message from IDP: %1$s", Category.CATEGORY_ERROR, 10),
+
+    INTERNAL_ERROR("An internal error occurred: %1$s", Category.CATEGORY_ERROR, 11),
     ;
 
     private final Category category;

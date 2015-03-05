@@ -16,6 +16,7 @@ Import-Package: com.google.common.io,
  com.openexchange.osgi,
  com.openexchange.osgi.util,
  com.openexchange.server,
+ com.openexchange.session.reservation,
  com.openexchange.tools.servlet,
  com.openexchange.tools.servlet.http,
  javax.crypto,
@@ -283,4 +284,4 @@ Export-Package: org.opensaml,
  org.opensaml.xml.signature.validator,
  org.opensaml.xml.util,
  org.opensaml.xml.validation
-Bundle-Activator: com.openexchange.saml.osgi.SamlActivator
+Bundle-Activator: com.openexchange.saml.osgi.SAMLActivator

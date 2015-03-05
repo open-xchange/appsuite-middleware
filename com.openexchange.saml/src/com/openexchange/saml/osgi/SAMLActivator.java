@@ -70,19 +70,20 @@ import com.openexchange.saml.SAMLServiceProvider;
 import com.openexchange.saml.Services;
 import com.openexchange.saml.spi.AuthnResponseHandler;
 import com.openexchange.saml.spi.ServiceProviderCustomizer;
+import com.openexchange.session.reservation.SessionReservationService;
 
 /**
  * {@link SAMLActivator} - The activator for <i>com.openexchange.saml</i> bundle.
  */
-public class SamlActivator extends HousekeepingActivator {
+public class SAMLActivator extends HousekeepingActivator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SamlActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SAMLActivator.class);
 
     private SAMLServiceProvider serviceProvider;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, DispatcherPrefixService.class, AuthnResponseHandler.class };
+        return new Class[] { ConfigurationService.class, DispatcherPrefixService.class, AuthnResponseHandler.class, SessionReservationService.class };
     }
 
     @Override
@@ -94,7 +95,7 @@ public class SamlActivator extends HousekeepingActivator {
         boolean enabled = configService.getBoolProperty("com.openexchange.saml.sp.enabled", false);
         if (enabled) {
             OpenSAML openSAML = initOpenSAML();
-            serviceProvider = new SAMLServiceProvider(DefaultConfig.init(configService), openSAML, getService(AuthnResponseHandler.class));
+            serviceProvider = new SAMLServiceProvider(DefaultConfig.init(configService), openSAML, getService(AuthnResponseHandler.class), getService(SessionReservationService.class));
             serviceProvider.init();
 
             trackService(HostnameService.class);

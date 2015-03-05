@@ -1,0 +1,159 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.session.reservation;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.session.Session;
+import com.openexchange.session.SimSession;
+
+/**
+ * {@link SimSessionReservationService}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
+ */
+public class SimSessionReservationService implements SessionReservationService {
+
+    private final ConcurrentMap<String, Reservation> reservations = new ConcurrentHashMap<String, Reservation>();
+
+    @Override
+    public String reserveSessionFor(int userId, int contextId, long timeout, TimeUnit unit, Map<String, String> optState) throws OXException {
+        String token = UUIDs.getUnformattedString(UUID.randomUUID());
+        ReservationImpl reservationImpl = new ReservationImpl(token, userId, contextId, unit.toMillis(timeout), System.currentTimeMillis(), optState);
+        reservations.put(token, reservationImpl);
+        return token;
+    }
+
+    @Override
+    public Reservation getReservation(String token) throws OXException {
+        return reservations.get(token);
+    }
+
+    @Override
+    public Session redeemReservation(ReservationInfo reservationInfo) throws OXException {
+        Reservation reservation = reservations.remove(reservationInfo.getToken());
+        if (reservation == null) {
+            return null;
+        }
+        return new SimSession(reservation.getUserId(), reservation.getContextId());
+    }
+
+    private static class ReservationImpl implements Reservation {
+
+        private final String token;
+
+        private final int userId;
+
+        private final int contextId;
+
+        private final long timeoutMillis;
+
+        private final long creationStamp;
+
+        private final Map<String, String> state;
+
+        /**
+         * Initializes a new {@link ReservationImpl}.
+         * @param token
+         * @param userId
+         * @param contextId
+         * @param timeoutMillis
+         * @param creationStamp
+         * @param state
+         */
+        public ReservationImpl(String token, int userId, int contextId, long timeoutMillis, long creationStamp, Map<String, String> state) {
+            super();
+            this.token = token;
+            this.userId = userId;
+            this.contextId = contextId;
+            this.timeoutMillis = timeoutMillis;
+            this.creationStamp = creationStamp;
+            this.state = state;
+        }
+
+        @Override
+        public String getToken() {
+            return token;
+        }
+
+        @Override
+        public int getUserId() {
+            return userId;
+        }
+
+        @Override
+        public int getContextId() {
+            return contextId;
+        }
+
+        @Override
+        public long getTimeoutMillis() {
+            return timeoutMillis;
+        }
+
+        @Override
+        public long getCreationStamp() {
+            return creationStamp;
+        }
+
+        @Override
+        public Map<String, String> getState() {
+            return state;
+        }
+
+    }
+
+}
