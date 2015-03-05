@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.mysql.jdbc,
  com.openexchange.caching,
  com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.i18n,

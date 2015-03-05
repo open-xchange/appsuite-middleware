@@ -399,13 +399,51 @@ public class QuotaFileStorageTest extends TestCase {
 
         @Override
         public Connection getForUpdateTask() throws OXException {
-            // TODO Auto-generated method stub
             return null;
         }
 
         @Override
         public void backForUpdateTask(Connection con) {
-            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public Connection getReadOnlyForGlobal(String group) throws OXException {
+            return null;
+        }
+
+        @Override
+        public Connection getReadOnlyForGlobal(int contextId) throws OXException {
+            return null;
+        }
+
+        @Override
+        public void backReadOnlyForGlobal(String group, Connection connection) {
+
+        }
+
+        @Override
+        public void backReadOnlyForGlobal(int contextId, Connection connection) {
+
+        }
+
+        @Override
+        public Connection getWritableForGlobal(String group) throws OXException {
+            return null;
+        }
+
+        @Override
+        public Connection getWritableForGlobal(int contextId) throws OXException {
+            return null;
+        }
+
+        @Override
+        public void backWritableForGlobal(String group, Connection connection) {
+
+        }
+
+        @Override
+        public void backWritableForGlobal(int contextId, Connection connection) {
 
         }
     }

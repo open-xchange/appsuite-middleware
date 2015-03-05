@@ -301,4 +301,44 @@ public class MockDBService implements DatabaseService {
     public void initPartitions(int writePoolId, String schema, int... partitions) throws OXException {
     }
 
+    @Override
+    public Connection getReadOnlyForGlobal(String group) throws OXException {
+        return null;
+    }
+
+    @Override
+    public Connection getReadOnlyForGlobal(int contextId) throws OXException {
+        return null;
+    }
+
+    @Override
+    public void backReadOnlyForGlobal(String group, Connection connection) {
+
+    }
+
+    @Override
+    public void backReadOnlyForGlobal(int contextId, Connection connection) {
+
+    }
+
+    @Override
+    public Connection getWritableForGlobal(String group) throws OXException {
+        return null;
+    }
+
+    @Override
+    public Connection getWritableForGlobal(int contextId) throws OXException {
+        return null;
+    }
+
+    @Override
+    public void backWritableForGlobal(String group, Connection connection) {
+
+    }
+
+    @Override
+    public void backWritableForGlobal(int contextId, Connection connection) {
+
+    }
+
 }

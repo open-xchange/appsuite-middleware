@@ -73,12 +73,14 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private final Pools pools;
     private final ConfigDatabaseServiceImpl configDatabaseService;
+    private final GlobalDatabaseServiceImpl globalDatabaseService;
     private final ReplicationMonitor monitor;
 
-    public DatabaseServiceImpl(Pools pools, ConfigDatabaseServiceImpl configDatabaseService, ReplicationMonitor monitor) {
+    public DatabaseServiceImpl(Pools pools, ConfigDatabaseServiceImpl configDatabaseService, GlobalDatabaseServiceImpl globalDatabaseService, ReplicationMonitor monitor) {
         super();
         this.pools = pools;
         this.configDatabaseService = configDatabaseService;
+        this.globalDatabaseService = globalDatabaseService;
         this.monitor = monitor;
     }
 
@@ -218,6 +220,48 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public void lock(Connection con) throws OXException {
         configDatabaseService.lock(con);
+    }
+
+    // Delegate global database service methods.
+
+    @Override
+    public Connection getReadOnlyForGlobal(String group) throws OXException {
+        return globalDatabaseService.getReadOnlyForGlobal(group);
+    }
+
+    @Override
+    public Connection getReadOnlyForGlobal(int contextId) throws OXException {
+        return globalDatabaseService.getReadOnlyForGlobal(contextId);
+    }
+
+    @Override
+    public void backReadOnlyForGlobal(String group, Connection connection) {
+        globalDatabaseService.backReadOnlyForGlobal(group, connection);
+    }
+
+    @Override
+    public void backReadOnlyForGlobal(int contextId, Connection connection) {
+        globalDatabaseService.backReadOnlyForGlobal(contextId, connection);
+    }
+
+    @Override
+    public Connection getWritableForGlobal(String group) throws OXException {
+        return globalDatabaseService.getWritableForGlobal(group);
+    }
+
+    @Override
+    public Connection getWritableForGlobal(int contextId) throws OXException {
+        return globalDatabaseService.getWritableForGlobal(contextId);
+    }
+
+    @Override
+    public void backWritableForGlobal(String group, Connection connection) {
+        globalDatabaseService.backWritableForGlobal(group, connection);
+    }
+
+    @Override
+    public void backWritableForGlobal(int contextId, Connection connection) {
+        globalDatabaseService.backWritableForGlobal(contextId, connection);
     }
 
     // Implemented database service methods.
