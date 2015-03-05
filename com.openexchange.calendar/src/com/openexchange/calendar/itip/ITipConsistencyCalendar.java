@@ -167,6 +167,9 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
         public void delete(final CalendarDataObject appointmentObject, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
             try {
                 final CalendarDataObject original = delegate.getObjectById(appointmentObject.getObjectID(), inFolder);
+                if (original.containsUntil() && original.containsOccurrence()) {
+                    original.removeUntil();
+                }
                 if (onlyOneParticipantRemaining(original)) {
                     cleanOccurrencesAndUnitl(original);
                     delegate.deleteAppointmentObject(appointmentObject, inFolder, clientLastModified, checkPermissions);
