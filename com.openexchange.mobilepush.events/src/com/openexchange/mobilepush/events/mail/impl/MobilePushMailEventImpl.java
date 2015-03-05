@@ -49,7 +49,6 @@
 
 package com.openexchange.mobilepush.events.mail.impl;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +116,6 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
-
         /**
          * Build publish message for push provider
          */
@@ -197,19 +195,17 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
             if (mms.length == 1) {
                 MailMessage mm = mms[0];
                 if (mm != null) {
-                    Date receivedDate = mm.getReceivedDate();
-
                     String subject = mm.getSubject();
                     InternetAddress[] ia = mm.getFrom();
+                    String personalFrom = ia[0].getPersonal();
                     String receivedFrom = ia[0].getAddress();
                     String mailId = mm.getMailId();
                     String folder = mm.getFolder();
 
                     props.put("mailId", mailId);
                     props.put("folder", folder);
-                    props.put("subject", subject == null ? "" : subject);
-                    props.put("received_from", receivedFrom == null ? "" : receivedFrom);
-                    props.put("received_date", receivedDate == null ? "" : receivedDate.toString());
+                    props.put("subject", subject == null ? "(no subject)" : subject);
+                    props.put("received_from", personalFrom == null ? receivedFrom : personalFrom);
                 }
             }
         }
@@ -289,7 +285,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     public void notifySubscribers(MobilePushEvent event) {
         if (event != null) {
             for (MobilePushPublisher publisher : publishers) {
-                LOG.debug("Publishing: {}", event);
+                LOG.debug("Publishing event {} to publisher {}", event, publisher.getClass().getName());
                 publisher.publish(event);
             }
         }

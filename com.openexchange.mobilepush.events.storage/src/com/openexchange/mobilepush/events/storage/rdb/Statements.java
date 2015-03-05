@@ -49,12 +49,18 @@
 
 package com.openexchange.mobilepush.events.storage.rdb;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  * {@link Statements}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class Statements {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Statements.class);
+
     public static final String TABLE_NAME = "mobileEventSubscriptions";
 
     public static final String CREATE_TABLE =
@@ -99,10 +105,10 @@ public class Statements {
      * Returns the following SQL statement based on parameter blockLoginPush.
      * <br>
      *  <code>true: </code><br>
-     *   <code>SELECT user, cid FROM mobileEventSubscriptions WHERE provider=? AND lastLoginPush &lt;= System.currentTimeMillis() GROUP BY cid, user;</code>
+     *   <code>"SELECT cid, user, token FROM mobileEventSubscriptions WHERE provider=? AND lastLoginPush &lt;= System.currentTimeMillis() GROUP BY cid, user;</code>
      *  <br><br>
      *  <code>false: </code><br>
-     *   <code>SELECT user, cid FROM mobileEventSubscriptions WHERE provider=? GROUP BY cid, user;</code>
+     *   <code>"SELECT cid, user, token FROM mobileEventSubscriptions WHERE provider=? GROUP BY cid, user;</code>
      *
      * @param blockLoginPush <code>true</code> if push notification should be blocked until b limit is exceeded.
      * @return string which represents the statement
@@ -160,5 +166,27 @@ public class Statements {
             stringBuilder.append(')');
         }
         return stringBuilder;
+    }
+
+    public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeQuery();
+        } else {
+            long start = System.currentTimeMillis();
+            ResultSet resultSet = stmt.executeQuery();
+            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
+            return resultSet;
+        }
+    }
+
+    public static int logExecuteUpdate(PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeUpdate();
+        } else {
+            long start = System.currentTimeMillis();
+            int rowCount = stmt.executeUpdate();
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
+            return rowCount;
+        }
     }
 }

@@ -49,8 +49,10 @@
 
 package com.openexchange.mobilepush.events.mail.impl;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.mobilepush.MobilePushProviders;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.storage.ContextUsers;
@@ -124,4 +126,23 @@ public class MobilePushMailEvent implements MobilePushEvent {
     public List<ContextUsers> getContextUsers() {
         return contextUsers;
     }
+
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        Iterator<Entry<String, String>> iter = messageData.entrySet().iterator();
+        while (iter.hasNext()) {
+            Entry<String, String> entry = iter.next();
+            sb.append(entry.getKey());
+            sb.append('=').append('"');
+            sb.append(entry.getValue());
+            sb.append('"');
+            if (iter.hasNext()) {
+                sb.append(',').append(' ');
+            }
+        }
+        return "MobilePushMailEvent [userId=" + userId + ", contextId=" + contextId + ", contextUsers=" + contextUsers + ", "
+            + "messageData=" + sb.toString() + "]";
+    }
+
 }
