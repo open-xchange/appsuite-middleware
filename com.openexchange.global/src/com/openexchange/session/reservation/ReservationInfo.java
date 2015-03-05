@@ -200,7 +200,7 @@ public class ReservationInfo {
     }
 
     /**
-     * Sets the clientIp
+     * Sets the client IP address
      *
      * @param clientIp The client IP address to set
      */
@@ -209,9 +209,9 @@ public class ReservationInfo {
     }
 
     /**
-     * Sets the authId
+     * Sets the auth identifier
      *
-     * @param authId The authId to set
+     * @param authId The auth identifier to set
      */
     public void setAuthId(String authId) {
         this.authId = authId;
@@ -227,18 +227,18 @@ public class ReservationInfo {
     }
 
     /**
-     * Sets the client
+     * Sets the client identifier
      *
-     * @param client The client to set
+     * @param client The client identifier to set
      */
     public void setClient(String client) {
         this.client = client;
     }
 
     /**
-     * Sets the isTransient
+     * Sets the transient flag
      *
-     * @param isTransient The isTransient to set
+     * @param isTransient The transient flag to set
      */
     public void setTransient(boolean isTransient) {
         this.isTransient = isTransient;
