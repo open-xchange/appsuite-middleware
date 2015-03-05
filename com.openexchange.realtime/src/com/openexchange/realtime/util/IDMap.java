@@ -65,8 +65,8 @@ import com.openexchange.realtime.packet.ID;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class IDMap<T> implements Map<ID, T> {
-    
-    private final Map<ID, T> delegate;
+
+    protected final Map<ID, T> delegate;
 
     /**
      * Initializes a new {@link IDMap}.
@@ -177,7 +177,7 @@ public class IDMap<T> implements Map<ID, T> {
     private boolean isEquivalent(ID id1, ID id2) {
         return id1.getUser().equals(id2.getUser()) && id1.getContext().equals(id2.getContext());
     }
-    
+
     @Override
     public String toString() {
         return delegate.toString();

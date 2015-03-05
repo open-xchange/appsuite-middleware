@@ -6,7 +6,9 @@ Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.realtime.hazelcast.serialization.osgi.HazelcastSerializationActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.hazelcast.core,
+Import-Package: com.hazelcast.config,
+ com.hazelcast.core,
+ com.hazelcast.nio,
  com.hazelcast.nio.serialization,
  com.hazelcast.query,
  com.openexchange.exception,

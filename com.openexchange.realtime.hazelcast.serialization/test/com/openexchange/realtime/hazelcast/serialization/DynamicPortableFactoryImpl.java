@@ -48,7 +48,7 @@
  */
 
 
-package com.openexchange.realtime.hazelcast.group.helper;
+package com.openexchange.realtime.hazelcast.serialization;
 
 import java.util.ArrayList;
 import java.util.Collection;
