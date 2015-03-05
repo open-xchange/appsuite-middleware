@@ -216,22 +216,12 @@ public final class LoginTools {
             LogProperties.putProperty(LogProperties.Name.LOGIN_VERSION, version);
         }
         // Return
-        return new LoginRequestImpl(
-            login,
-            password,
-            clientIP,
-            userAgent,
-            authId,
-            client,
-            version,
-            HashCalculator.getInstance().getHash(req, userAgent, client),
-            HTTP_JSON,
-            headers,
-            cookies,
-            Tools.considerSecure(req, forceHTTPS),
-            req.getServerName(),
-            req.getServerPort(),
-            httpSessionId);
+        LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(login).password(password).clientIP(clientIP);
+        b.userAgent(userAgent).authId(authId).client(client).version(version);
+        b.hash(HashCalculator.getInstance().getHash(req, userAgent, client));
+        b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
+        b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+        return b.build();
     }
 
     public static LoginRequestImpl parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient, boolean forceHTTPS, boolean disableTrimLogin, boolean requiredAuthId) throws OXException {

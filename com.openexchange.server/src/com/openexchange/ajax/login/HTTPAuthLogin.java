@@ -51,6 +51,7 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.login.LoginTools.parseClient;
 import static com.openexchange.ajax.login.LoginTools.parseUserAgent;
+import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.IOException;
 import java.util.Arrays;
@@ -75,7 +76,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -150,29 +150,25 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
             } else {
                 throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create("");
             }
-            final String client = LoginTools.parseClient(req, false, conf.getDefaultClient());
-            final String clientIP = LoginTools.parseClientIP(req);
-            final String userAgent = LoginTools.parseUserAgent(req);
-            final Map<String, List<String>> headers = copyHeaders(req);
-            final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
-            final String httpSessionId = req.getSession(true).getId();
-            final LoginRequest request = new LoginRequestImpl(
-                creds.getLogin(),
-                creds.getPassword(),
-                clientIP,
-                userAgent,
-                UUIDs.getUnformattedString(UUID.randomUUID()),
-                client,
-                version,
-                HashCalculator.getInstance().getHash(req, userAgent, client),
-                Interface.HTTP_JSON,
-                headers,
-                cookies,
-                Tools.considerSecure(req, conf.isCookieForceHTTPS()),
-                req.getServerName(),
-                req.getServerPort(),
-                httpSessionId);
-            final Map<String, Object> properties = new HashMap<String, Object>(1);
+
+            LoginRequest request;
+            {
+                String client = LoginTools.parseClient(req, false, conf.getDefaultClient());
+                String clientIP = LoginTools.parseClientIP(req);
+                String userAgent = LoginTools.parseUserAgent(req);
+                Map<String, List<String>> headers = copyHeaders(req);
+                com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+                String httpSessionId = req.getSession(true).getId();
+
+                LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(creds.getLogin()).password(creds.getPassword()).clientIP(clientIP);
+                b.userAgent(userAgent).authId(UUIDs.getUnformattedString(UUID.randomUUID())).client(client).version(version);
+                b.hash(HashCalculator.getInstance().getHash(req, userAgent, client));
+                b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
+                b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+                request = b.build();
+            }
+
+            Map<String, Object> properties = new HashMap<String, Object>(1);
             {
                 final String capabilities = req.getParameter("capabilities");
                 if (null != capabilities) {

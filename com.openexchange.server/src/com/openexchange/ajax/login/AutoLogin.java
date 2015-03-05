@@ -86,7 +86,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -290,7 +289,11 @@ public class AutoLogin extends AbstractLoginRequestHandler {
     }
 
     /**
-     * @return a boolean value indicated if an auto login should proceed afterwards
+     * Performs a login while providing the auto-login {@link LoginClosure closure}.
+     *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @return <code>true</code> if an auto login should proceed afterwards; otherwise <code>false</code>
      */
     private boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
         return loginOperation(req, resp, new LoginClosure() {
@@ -303,7 +306,14 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         }, conf);
     }
 
-    private LoginRequest parseAutoLoginRequest(final HttpServletRequest req) throws OXException {
+    /**
+     * Parses the given HTTP request into an appropriate {@link LoginRequest} instance.
+     *
+     * @param req The HTTP request to parse
+     * @return The resulting {@link LoginRequest} instance
+     * @throws OXException If parse operation fails
+     */
+    LoginRequest parseAutoLoginRequest(final HttpServletRequest req) throws OXException {
         final String authId = LoginTools.parseAuthId(req, false);
         final String client = LoginTools.parseClient(req, false, conf.getDefaultClient());
         final String clientIP = LoginTools.parseClientIP(req);
@@ -311,22 +321,13 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final String httpSessionId = req.getSession(true).getId();
-        return new LoginRequestImpl(
-            null,
-            null,
-            clientIP,
-            userAgent,
-            authId,
-            client,
-            null,
-            HashCalculator.getInstance().getHash(req, client),
-            HTTP_JSON,
-            headers,
-            cookies,
-            Tools.considerSecure(req, conf.isCookieForceHTTPS()),
-            req.getServerName(),
-            req.getServerPort(),
-            httpSessionId);
+
+        LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(null).password(null).clientIP(clientIP);
+        b.userAgent(userAgent).authId(authId).client(client).version(null);
+        b.hash(HashCalculator.getInstance().getHash(req, client));
+        b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
+        b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+        return b.build();
     }
 
 }
