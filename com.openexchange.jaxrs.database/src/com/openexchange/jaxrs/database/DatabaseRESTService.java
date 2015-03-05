@@ -75,6 +75,11 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @Path("/database/v1")
 public class DatabaseRESTService extends JAXRSService {
 
+    /*
+     * TODO:
+     * - Separate methods for consuming text/plain and application/json
+     */
+
     /**
      * Initializes a new {@link DatabaseRESTService}.
      */
@@ -167,4 +172,40 @@ public class DatabaseRESTService extends JAXRSService {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
     }
+
+    /**
+     * Executes the transaction with the specified transaction identifier
+     * 
+     * @param txId The transaction identifier
+     * @return
+     * @throws OXException
+     */
+    @PUT
+    @Path("/transaction/{transactionId}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public JSONObject queryTransaction(@PathParam("txId") String txId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        try {
+            return performer.executeTransaction(txId);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Rolls back the transaction with the specified transaction identifier
+     * 
+     * @param txId The transaction identifier
+     * @throws OXException
+     */
+    @PUT
+    @Path("/transaction/{transactionId}/rollback")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public void rollbackTransaction(@PathParam("txId") String txId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.rollbackTransaction(txId);
+    }
+
 }

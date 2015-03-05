@@ -139,28 +139,74 @@ public class DatabaseRESTPerformer {
     }
 
     /**
-     * Sets the transaction
-     *
-     * @param tx The t to set
+     * Executes the transaction with the specified transaction identifier
+     * 
+     * @param txId The transaction identifier
+     * @return A JSONObject with the results
+     * @throws OXException
+     * @throws JSONException
      */
-    public void setTransaction(Transaction tx) {
-        this.tx = tx;
+    public JSONObject executeTransaction(String txId) throws OXException, JSONException {
+        tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
+        if (tx == null) {
+            halt(404);
+        } else {
+            postProcessor = new TransactionCloser(tx);
+            connection = tx.getConnection();
+        }
+
+        return perform();
     }
 
     /**
-     * Sets the postProcessor
-     *
-     * @param postProcessor The postProcessor to set
+     * Rolls back the transaction with the specified transaction identifier
+     * 
+     * @param txId The transaction identifier
+     * @throws OXException
      */
-    public void setPostProcessor(ConnectionPostProcessor postProcessor) {
-        this.postProcessor = postProcessor;
+    public void rollbackTransaction(String txId) throws OXException {
+        tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
+        if (tx == null) {
+            halt(404);
+        } else {
+            postProcessor = new TransactionCloser(tx);
+            try {
+                DatabaseEnvironment.getInstance().getTransactionKeeper().rollback(txId);
+            } catch (SQLException e) {
+                throw DatabaseRESTErrorCodes.SQL_ERROR.create(e.getMessage());
+            }
+            unpackTransaction();
+        }
     }
 
-    private void prepare() throws OXException {
-        handleTransaction();
-        handleVersionNegotiation();
+    /**
+     * Commits the transaction with the specified transaction identifier
+     * 
+     * @param txId The transaction identifier
+     * @throws OXException
+     */
+    public void commitTransaction(String txId) throws OXException {
+        tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
+        if (tx == null) {
+            halt(404);
+        } else {
+            postProcessor = new TransactionCloser(tx);
+            try {
+                DatabaseEnvironment.getInstance().getTransactionKeeper().commit(txId);
+            } catch (SQLException e) {
+                throw DatabaseRESTErrorCodes.SQL_ERROR.create(e.getMessage());
+            }
+            unpackTransaction();
+        }
     }
 
+    /**
+     * Performs the execution of the DatabaseQuery objects
+     * 
+     * @return A JSONObject with the results.
+     * @throws OXException
+     * @throws JSONException
+     */
     public JSONObject perform() throws OXException, JSONException {
         prepare();
         try {
@@ -246,6 +292,11 @@ public class DatabaseRESTPerformer {
         cleanup();
 
         return response;
+    }
+
+    private void prepare() throws OXException {
+        handleTransaction();
+        handleVersionNegotiation();
     }
 
     private void handleSQLException() {
@@ -614,7 +665,6 @@ public class DatabaseRESTPerformer {
                 }
             }
         }
-
     }
 
     private static class MigrationMetadata {
