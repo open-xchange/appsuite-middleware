@@ -117,7 +117,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             stmt.setString(4, subscription.getProviderName());
             stmt.setInt(5, subscription.getUserId());
             stmt.setLong(6, subscription.getTimestamp());
-            return stmt.executeUpdate();
+            return Statements.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
@@ -149,7 +149,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             stmt.setInt(3, contextId);
             stmt.setString(4, serviceId);
             stmt.setString(5, token);
-            return stmt.executeUpdate();
+            return Statements.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
@@ -184,7 +184,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             for (UserToken userToken : userTokens) {
                 stmt.setInt(++index, userToken.getUserId());
             }
-            return stmt.executeUpdate();
+            return Statements.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
@@ -227,12 +227,11 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
 
             while (results.next()) {
                 contextId = results.getInt(1);
-
                 int userId = results.getInt(2);
                 String token = results.getString(3);
                 userIds.add(new UserToken(userId, token));
             }
-            if (false == userIds.isEmpty()) {
+            if (false == userIds.isEmpty() && contextId != -1) {
                 contextUser.add(new ContextUsers(contextId, userIds));
             }
         } finally {
@@ -260,7 +259,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             stmt.setString(2, serviceId);
             stmt.setString(3, provider.getProviderName());
             stmt.setString(4, token);
-            return stmt.executeUpdate();
+            return Statements.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
@@ -307,7 +306,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             stmt.setInt(1, contextId);
             stmt.setString(2, serviceId);
             stmt.setString(3, token);
-            return stmt.executeUpdate();
+            return Statements.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
@@ -335,7 +334,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             stmt.setInt(++index, userId);
             stmt.setString(++index, service);
             stmt.setString(++index, providerName);
-            ResultSet results = stmt.executeQuery();
+            ResultSet results = Statements.logExecuteQuery(stmt);
             while (results.next()) {
                 int cid = results.getInt(1);
                 String resService = results.getString(2);
@@ -383,7 +382,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
                 stmt.setInt(++index, userToken.getUserId());
                 stmt.setString(++index, provider.getProviderName());
 
-                ResultSet results = stmt.executeQuery();
+                ResultSet results = Statements.logExecuteQuery(stmt);
                 while (results.next()) {
                     tokens.add(results.getString(1));
                 }
