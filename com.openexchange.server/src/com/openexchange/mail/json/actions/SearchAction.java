@@ -146,7 +146,7 @@ public final class SearchAction extends AbstractMailAction {
                     /*
                      * Search mails
                      */
-                    final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                    final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
                     final int userId = session.getUserId();
                     final int contextId = session.getContextId();
                     int orderDir = OrderDirection.ASC.getOrder();
@@ -218,7 +218,7 @@ public final class SearchAction extends AbstractMailAction {
                 /*
                  * Pre-Select field writers
                  */
-                final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
                 final int userId = session.getUserId();
                 final int contextId = session.getContextId();
                 int orderDir = OrderDirection.ASC.getOrder();

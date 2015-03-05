@@ -80,6 +80,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
@@ -213,14 +214,13 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
     protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
         try {
-            /*
-             * Read in parameters
-             */
-            final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-            final String[] headers = req.optStringArray(Mail.PARAMETER_HEADERS);
-            final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
-            final String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
+            // Read parameters
+            String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
+            ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+            int[] columns = columnCollection.getFields();
+            String[] headers = columnCollection.getHeaders();
+            String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
+            String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
             if (sort != null && order == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ORDER);
             }
