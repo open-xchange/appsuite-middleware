@@ -210,6 +210,21 @@ public class DatabaseRESTService extends JAXRSService {
     }
 
     /**
+     * Commits the transaction with the specified transaction identifier
+     * 
+     * @param txId The transaction identifier
+     * @throws OXException
+     */
+    @PUT
+    @Path("/transaction/{transactionId}/commit")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public void commitTransaction(@PathParam("txId") String txId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.commitTransaction(txId);
+    }
+
+    /**
      * Initialize a new database schema with the specified name and the specified write pool identifier.
      * 
      * @param writePoolId The write pool identifier
