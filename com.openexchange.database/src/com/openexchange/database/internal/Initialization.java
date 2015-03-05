@@ -52,9 +52,13 @@ package com.openexchange.database.internal;
 import static com.openexchange.database.internal.Configuration.Property.CHECK_WRITE_CONS;
 import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
 import static com.openexchange.java.Autoboxing.I;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -96,10 +100,12 @@ public final class Initialization {
     private final Configuration configuration = new Configuration();
 
     private CacheService cacheService;
+    private ConfigViewFactory configViewFactory;
     private ReplicationMonitor monitor;
     private Pools pools;
     private ConfigDatabaseServiceImpl configDatabaseService;
     private DatabaseServiceImpl databaseService;
+    private GlobalDatabaseServiceImpl globalDatabaseService;
 
     private Initialization() {
         super();
@@ -134,6 +140,8 @@ public final class Initialization {
         if (null != cacheService) {
             configDatabaseService.setCacheService(cacheService);
         }
+        // Global database service
+        globalDatabaseService = new GlobalDatabaseServiceImpl(pools, monitor, parseGlobalDbConfigs(configurationService), configViewFactory);
         // Context pool life cycle.
         final ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(
             configuration,
@@ -148,7 +156,7 @@ public final class Initialization {
         } catch (OXException e) {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
-        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, monitor);
+        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, globalDatabaseService, monitor);
         return databaseService;
     }
 
@@ -156,6 +164,8 @@ public final class Initialization {
         databaseService = null;
         configDatabaseService.removeCacheService();
         configDatabaseService = null;
+        globalDatabaseService.setConfigViewFactory(null);
+        globalDatabaseService = null;
         pools.stop(timer);
         pools = null;
         configuration.clear();
@@ -175,6 +185,20 @@ public final class Initialization {
         }
     }
 
+    public void setConfigViewFactory(ConfigViewFactory service) {
+        this.configViewFactory = service;
+        if (null != globalDatabaseService) {
+            globalDatabaseService.setConfigViewFactory(service);
+        }
+    }
+
+    public void removeConfigViewFactory() {
+        this.configViewFactory = null;
+        if (null != globalDatabaseService) {
+            globalDatabaseService.setConfigViewFactory(null);
+        }
+    }
+
     public Management getManagement() {
         return management;
     }
@@ -182,4 +206,40 @@ public final class Initialization {
     public Timer getTimer() {
         return timer;
     }
+
+    private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(ConfigurationService configService) throws OXException {
+        return parseGlobalDbConfigs(configService.getYaml("globaldb.yml"));
+    }
+
+    private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(Object yaml) throws OXException {
+        if (null == yaml || false == Map.class.isInstance(yaml)) {
+            throw OXException.general("malformed config"); // TODO
+        }
+        Map<String, Object> map = (Map<String, Object>) yaml;
+        Map<String, GlobalDbConfig> configs = new HashMap<String, GlobalDbConfig>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (null == entry.getValue() || false == Map.class.isInstance(entry.getValue())) {
+                throw OXException.general("malformed config"); // TODO
+            }
+            Map<String, Object> values = (Map<String, Object>) entry.getValue();
+            int readPoolId = Integer.valueOf(String.valueOf(values.get("com.openexchange.database.global.readPoolId")));
+            int writePoolId = Integer.valueOf(String.valueOf(values.get("com.openexchange.database.global.writePoolId")));
+            String schema = String.valueOf(values.get("com.openexchange.database.global.schema"));
+            GlobalDbConfig dbConfig = new GlobalDbConfig(schema, readPoolId, writePoolId);
+            Object groups = values.get("groups");
+            if (null == groups || false == List.class.isInstance(groups)) {
+                throw OXException.general("malformed config"); // TODO
+            }
+            for (String group : (List<String>) groups) {
+                if (null != configs.put(group, dbConfig)) {
+                    throw OXException.general("more than one configuration for group"); // TODO
+                }
+            }
+        }
+        if (false == configs.containsKey(GlobalDbConfig.DEFAULT_GROUP)) {
+            throw OXException.general("no default configuration"); // TODO
+        }
+        return configs;
+    }
+
 }
