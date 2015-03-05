@@ -58,6 +58,7 @@ import java.util.List;
  * {@link ColumnCollection} - A column collection.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
  */
 public class ColumnCollection {
 

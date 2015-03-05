@@ -57,6 +57,7 @@ import gnu.trove.ConcurrentTIntObjectHashMap;
  * {@link Column} - A column parameter.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
  */
 public class Column {
 
