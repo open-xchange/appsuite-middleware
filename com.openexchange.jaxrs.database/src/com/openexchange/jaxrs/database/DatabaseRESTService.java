@@ -52,6 +52,7 @@ package com.openexchange.jaxrs.database;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
@@ -81,24 +82,87 @@ public class DatabaseRESTService extends JAXRSService {
         super(services);
     }
 
-    // TODO: Inject response to method parameters to modify the headers 
-    //       "@Context HttpServletResponse response"
     /**
      * Performs a query to the configdb.
      * 
-     * @return
-     * @throws OXException
+     * @return A JSONObject with the result set
+     * @throws OXException If an error occurs
      */
     @PUT
     @Path("/configdb/readOnly")
-    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public JSONObject queryConfigDB() throws OXException {
-        DatabaseRESTPerformer request = new DatabaseRESTPerformer(getAJAXRequestData());
-        request.returnConnectionWhenDone(DatabaseAccessType.READ);
-        request.setConnection(getService(DatabaseService.class).getReadOnly());
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.returnConnectionWhenDone(DatabaseAccessType.READ);
+        performer.setConnection(getService(DatabaseService.class).getReadOnly());
         try {
-            return request.perform();
+            return performer.perform();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Performs an update query to the configdb
+     * 
+     * @return A JSONObject with the outcome of the result (updated=1 or update=0)
+     * @throws OXException If an error occurs
+     */
+    @PUT
+    @Path("/configdb/writable")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public JSONObject updateConfigDB() throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.returnConnectionWhenDone(DatabaseAccessType.WRITE);
+        performer.setConnection(getService(DatabaseService.class).getWritable());
+        try {
+            return performer.perform();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Performs a query to an OX database with the specified context identifier
+     * 
+     * @param ctxId The context identifier
+     * @return A JSONObject with the result set
+     * @throws OXException If an error occurs
+     */
+    @PUT
+    @Path("/oxdb/{ctxId}/readOnly")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public JSONObject queryOXDB(@PathParam("ctxId") int ctxId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.returnConnectionWhenDone(DatabaseAccessType.READ, ctxId);
+        performer.setConnection(getService(DatabaseService.class).getReadOnly(ctxId));
+        try {
+            return performer.perform();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Issues updates and inserts to an OX database with the specified context identifier
+     * 
+     * @param ctxId The context identifier
+     * @return A JSONObject with the outcome of the result (updated=1 or update=0)
+     * @throws OXException If an error occurs
+     */
+    @PUT
+    @Path("/oxdb/{ctxId}/writable")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public JSONObject updateOXDB(@PathParam("ctxId") int ctxId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.returnConnectionWhenDone(DatabaseAccessType.WRITE, ctxId);
+        performer.setConnection(getService(DatabaseService.class).getWritable(ctxId));
+        try {
+            return performer.perform();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }

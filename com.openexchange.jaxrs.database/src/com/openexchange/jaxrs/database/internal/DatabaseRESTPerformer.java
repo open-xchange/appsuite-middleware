@@ -492,6 +492,12 @@ public class DatabaseRESTPerformer {
         };
     }
 
+    /**
+     * Returns the connection when the processing is finished
+     * 
+     * @param accessType The access type of the database connection
+     * @param ctxId The context identifiers
+     */
     public void returnConnectionWhenDone(final DatabaseAccessType accessType, final int ctxId) {
         this.accessType = accessType;
         this.ctxId = ctxId;
