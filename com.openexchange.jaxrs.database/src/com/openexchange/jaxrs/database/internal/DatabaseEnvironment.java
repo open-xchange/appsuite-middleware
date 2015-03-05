@@ -49,10 +49,14 @@
 
 package com.openexchange.jaxrs.database.internal;
 
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
 import com.openexchange.jaxrs.database.migrations.DBVersionChecker;
 import com.openexchange.jaxrs.database.migrations.VersionChecker;
+import com.openexchange.jaxrs.database.osgi.Services;
 import com.openexchange.jaxrs.database.transactions.InMemoryTransactionKeeper;
 import com.openexchange.jaxrs.database.transactions.TransactionKeeper;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link DatabaseEnvironment}. Singleton class for accessing the {@link TransactionKeeper and the {@link VersionChecker}
@@ -61,26 +65,39 @@ import com.openexchange.jaxrs.database.transactions.TransactionKeeper;
  */
 public final class DatabaseEnvironment {
 
-    private static final DatabaseEnvironment INSTANCE = new DatabaseEnvironment();
+    private static DatabaseEnvironment INSTANCE;
 
     /**
      * Get the instance of the environment
      * 
      * @return the instance of the environment;
+     * @throws OXException
      */
-    public static final DatabaseEnvironment getInstance() {
+    public static final DatabaseEnvironment getInstance() throws OXException {
+        if (INSTANCE == null) {
+            INSTANCE = new DatabaseEnvironment();
+        }
         return INSTANCE;
     }
 
-    private final TransactionKeeper transactionKeeper;
+    private final InMemoryTransactionKeeper transactionKeeper;
     private final VersionChecker versionChecker;
 
     /**
      * Initializes a new {@link DatabaseEnvironment}.
+     * 
+     * @throws OXException
      */
-    private DatabaseEnvironment() {
+    private DatabaseEnvironment() throws OXException {
         transactionKeeper = new InMemoryTransactionKeeper();
         versionChecker = new DBVersionChecker();
+
+        Services.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                transactionKeeper.tick(System.currentTimeMillis());
+            }
+        }, 2, 1, TimeUnit.MINUTES);
     }
 
     /**

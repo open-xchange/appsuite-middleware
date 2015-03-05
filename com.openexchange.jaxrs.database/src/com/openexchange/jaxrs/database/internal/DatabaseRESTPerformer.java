@@ -260,7 +260,7 @@ public class DatabaseRESTPerformer {
                 postProcessor = oldPostProcessor;
             }
             success = false;
-        } catch (SQLException e) {
+        } catch (SQLException | OXException e) {
             e.printStackTrace();
         }
         halt(400);
