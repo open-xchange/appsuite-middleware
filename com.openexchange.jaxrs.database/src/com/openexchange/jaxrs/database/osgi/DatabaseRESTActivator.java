@@ -77,6 +77,8 @@ public class DatabaseRESTActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        
         registerService(DatabaseRESTService.class, new DatabaseRESTService(this));
 
         registerService(CreateTableService.class, new CreateServiceSchemaVersionTable());
