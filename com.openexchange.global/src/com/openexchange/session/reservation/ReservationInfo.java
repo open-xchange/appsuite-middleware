@@ -144,6 +144,8 @@ public class ReservationInfo {
     }
 
     /**
+     * Gets the client identifier
+     *
      * @return the identifier of the client using the session.
      */
     public String getClient() {
