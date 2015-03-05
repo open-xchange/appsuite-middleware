@@ -87,6 +87,8 @@ import com.openexchange.caldav.query.FilterAnalyzerBuilder;
 import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.IncorrectString;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -94,6 +96,7 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -432,8 +435,24 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         if (false == this.folder.isDefault() && PrivateType.getInstance().equals(this.folder.getType())) {
             this.folder.setName(displayName);
             try {
-                factory.getFolderService().updateFolder(folder, this.folder.getLastModified(), factory.getSession(), null);
+                factory.getFolderService().updateFolder(folder, this.folder.getLastModifiedUTC(), factory.getSession(), null);
             } catch (OXException e) {
+                if ("FLD-0092".equals(e.getErrorCode())) {
+                    /*
+                     * 'Unsupported character "..." in field "Folder name".
+                     */
+                    ProblematicAttribute[] problematics = e.getProblematics();
+                    if (null != problematics && 0 < problematics.length && null != problematics[0] && IncorrectString.class.isInstance(problematics[0])) {
+                        IncorrectString incorrectString = ((IncorrectString) problematics[0]);
+                        if (FolderObject.FOLDER_NAME == incorrectString.getId()) {
+                            String correctedDisplayName = displayName.replace(incorrectString.getIncorrectString(), "");
+                            if (false == correctedDisplayName.equals(displayName)) {
+                                setDisplayName(correctedDisplayName);
+                                return;
+                            }
+                        }
+                    }
+                }
                 throw protocolException(e);
             }
         } else {

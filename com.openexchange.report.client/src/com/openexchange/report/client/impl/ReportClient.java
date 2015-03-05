@@ -746,11 +746,14 @@ public class ReportClient extends AbstractJMXTools {
             Long start = (Long) report.get("startTime");
             Long end = (Long) report.get("stopTime");
 
-            long elapsedTime = end - start;
+            long elapsedTime = end.longValue() - start.longValue();
+            if (elapsedTime < 0) {
+                elapsedTime = -elapsedTime;
+            }
 
             Integer totalContexts = (Integer) report.get("tasks");
 
-            long timePerContext = elapsedTime / totalContexts;
+            long timePerContext = elapsedTime / totalContexts.longValue();
 
             System.out.println("UUID: " + report.get("uuid"));
             System.out.println("Type: " + report.get("type"));

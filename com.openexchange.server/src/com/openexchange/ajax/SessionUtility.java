@@ -500,7 +500,6 @@ public final class SessionUtility {
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
-        LogProperties.putSessionProperties(session);
         /*
          * Get session secret
          */

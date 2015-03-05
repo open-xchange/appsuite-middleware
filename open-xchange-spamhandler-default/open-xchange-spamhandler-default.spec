@@ -56,10 +56,16 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Feb 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-23
 * Tue Feb 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Eighth candidate for 7.6.2 release
 * Mon Feb 23 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-02-25
+* Thu Feb 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-23
+* Thu Feb 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-23
 * Wed Feb 11 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.6.2 release
 * Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>

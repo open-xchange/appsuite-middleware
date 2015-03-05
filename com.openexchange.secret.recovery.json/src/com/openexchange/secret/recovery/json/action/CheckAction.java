@@ -49,6 +49,7 @@
 
 package com.openexchange.secret.recovery.json.action;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -57,6 +58,7 @@ import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CheckAction}
@@ -83,11 +85,15 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretInconsistencyDetector.class.getName());
         }
 
-        final String diagnosis = secretInconsistencyDetector.isSecretWorking(req.getSession());
-        final JSONObject object = new JSONObject(2);
+        // Check...
+        ServerSession session = req.getSession();
+        String diagnosis = secretInconsistencyDetector.isSecretWorking(session);
+
+        // Compose JSON response
+        JSONObject object = new JSONObject(2);
         object.put("secretWorks", diagnosis == null);
         if (diagnosis != null) {
-            LOG.info("Secrets in session {} seem to need migration: {}", req.getSession().getSessionID(), diagnosis);
+            LOG.info("Secrets in session {} (user={}, context={}) seem to need migration: {}", session.getSessionID(), I(session.getUserId()), I(session.getContextId()), diagnosis);
             object.put("secretWorks", false);
             object.put("diagnosis", diagnosis);
         }

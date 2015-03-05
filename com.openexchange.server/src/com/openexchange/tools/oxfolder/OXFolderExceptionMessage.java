@@ -119,4 +119,10 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     public static final String NO_FOLDER_NAME_MSG = "You must enter a folder name.";
     public final static String NO_RESERVED_FOLDER_MSG = "The folder name \"%1$s\" is reserved. Please choose another name.";
 
+    // Unsupported character "%1$s" in field "%2$s". Please remove that character.
+    public static final String INVALID_CHARACTER_MSG = "Unsupported character \"%1$s\" in field \"%2$s\". Please remove that character.";
+
+    // Unsupported character. Please correct your input.
+    public static final String INVALID_CHARACTER_SIMPLE_MSG = "Unsupported character. Please correct your input.";
+
 }

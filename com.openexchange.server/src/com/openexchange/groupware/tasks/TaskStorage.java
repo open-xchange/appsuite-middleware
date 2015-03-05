@@ -105,7 +105,9 @@ public abstract class TaskStorage {
      * @param type storage type of the task (one of ACTIVE, DELETED).
      * @throws OXException if inserting the task fails.
      */
-    public abstract void insertTask(Context ctx, Connection con, Task task, StorageType type) throws OXException;
+    public void insertTask(Context ctx, Connection con, Task task, StorageType type) throws OXException {
+        insertTask(ctx, con, task, type, null);
+    }
 
     /**
      * Stores a task object.

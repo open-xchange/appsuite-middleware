@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
@@ -302,17 +303,6 @@ public class RdbTaskStorage extends TaskStorage {
         return number;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type) throws OXException {
-        insertTask(ctx, con, task, type, null);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type, int[] columns) throws OXException {
         final StringBuilder insert = new StringBuilder();
@@ -344,6 +334,8 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.execute();
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, task, type);
+        } catch (IncorrectStringSQLException e) {
+            throw Tools.parseIncorrectString(e);
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
@@ -463,6 +455,8 @@ public class RdbTaskStorage extends TaskStorage {
             }
         } catch (final DataTruncation e) {
             throw parseTruncated(con, e, task, type);
+        } catch (IncorrectStringSQLException e) {
+            throw Tools.parseIncorrectString(e);
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
@@ -476,11 +470,11 @@ public class RdbTaskStorage extends TaskStorage {
      * @param exc DataTruncation exception.
      * @return a OXException.
      */
-    private OXException parseTruncated(final Connection con, final DataTruncation exc, final Task task, final StorageType type) {
+    private static OXException parseTruncated(final Connection con, final DataTruncation exc, final Task task, final StorageType type) {
         final String[] fields = DBUtils.parseTruncatedFields(exc);
         final StringBuilder sFields = new StringBuilder();
         final OXException.Truncated[] truncateds = new OXException.Truncated[fields.length];
-        final Mapper<?>[] mappers = SQL.findTruncated(fields);
+        final Mapper<?>[] mappers = SQL.mapColumns(fields);
         for (int i = 0; i < fields.length; i++) {
             sFields.append(fields[i]);
             sFields.append(", ");

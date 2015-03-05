@@ -74,14 +74,23 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
 		this.set(to, this.get(from));
 	}
 
-	/**
-	 * Default <code>truncate</code> implementation that never truncates,
-	 * override if applicable for the mapped property.
-	 */
-	@Override
-	public boolean truncate(O object, int length) throws OXException {
-		return false;
-	}
+    /**
+     * Default <code>truncate</code> implementation that never truncates,
+     * override if applicable for the mapped property.
+     */
+    @Override
+    public boolean truncate(O object, int length) throws OXException {
+        return false;
+    }
+
+    /**
+     * Default <code>replaceAll</code> implementation that never replaces,
+     * override if applicable for the mapped property.
+     */
+    @Override
+    public boolean replaceAll(O object, String regex, String replacement) throws OXException {
+        return false;
+    }
 
     /**
      * Default <code>compare</code> implementation, override if applicable for

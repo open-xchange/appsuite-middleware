@@ -58,6 +58,12 @@ open-xchange-osgi (7.6.2-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 17 Sep 2014 12:35:43 +0200
 
+open-xchange-osgi (7.6.1-21) stable; urgency=low
+
+  * Build for patch 2015-02-23
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Feb 2015 10:35:10 +0100
+
 open-xchange-osgi (7.6.1-20) stable; urgency=low
 
   * Build for patch 2015-02-25
@@ -183,6 +189,12 @@ open-xchange-osgi (7.6.1-0) unstable; urgency=medium
   * prepare for 7.6.1
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Jun 2014 11:39:16 +0200
+
+open-xchange-osgi (7.6.0-38) stable; urgency=low
+
+  * Build for patch 2015-02-23
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 12 Feb 2015 10:52:02 +0100
 
 open-xchange-osgi (7.6.0-37) stable; urgency=low
 
@@ -411,6 +423,12 @@ open-xchange-osgi (7.6.0-0) unstable; urgency=low
   * prepare for 7.6.0
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 12 Feb 2014 09:35:03 +0100
+
+open-xchange-osgi (7.4.2-43) stable; urgency=low
+
+  * Build for patch 2015-02-23
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 12 Feb 2015 10:41:54 +0100
 
 open-xchange-osgi (7.4.2-42) stable; urgency=low
 

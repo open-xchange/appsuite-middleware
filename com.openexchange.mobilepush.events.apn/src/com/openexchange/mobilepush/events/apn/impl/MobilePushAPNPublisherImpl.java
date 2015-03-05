@@ -69,8 +69,8 @@ import com.openexchange.mobilepush.events.apn.APNAccess;
 import com.openexchange.mobilepush.events.apn.osgi.Services;
 import com.openexchange.mobilepush.events.storage.ContextUsers;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
+import com.openexchange.mobilepush.events.storage.PushUtility;
 import com.openexchange.mobilepush.events.storage.Subscription;
-import com.openexchange.mobilepush.events.storage.UserToken;
 
 /**
  * {@link MobilePushAPNPublisherImpl}
@@ -78,11 +78,12 @@ import com.openexchange.mobilepush.events.storage.UserToken;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
-    // https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/CommunicatingWIthAPS.html
-    private final int STATUS_INVALID_TOKEN_SIZE = 5;
-    private final int STATUS_INVALID_TOKEN = 8;
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushAPNPublisherImpl.class);
+
+    // https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/CommunicatingWIthAPS.html
+    private static final int STATUS_INVALID_TOKEN_SIZE = 5;
+
+    private static final int STATUS_INVALID_TOKEN = 8;
 
     private static final String SERVICE_ID = "apn";
 
@@ -198,8 +199,8 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         if (null != devices && 0 < devices.size()) {
             for (Device device : devices) {
                 LOG.debug("Got feedback for device with token: {}, last registered: {}", device.getToken(), device.getLastRegister());
-                // int removed = removeSubscriptions(device.getDeviceId());
-                // LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
+                 int removed = removeSubscriptions(device);
+                 LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
             }
         } else {
             LOG.debug("No devices to unregister received from feedback service.");
@@ -255,7 +256,7 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         try {
             List<ContextUsers> contextUsers = event.getContextUsers();
             if (contextUsers != null && contextUsers.isEmpty()) {
-                int contextId = getContextIdForToken(contextUsers, token);
+                int contextId = PushUtility.getContextIdForToken(contextUsers, token);
                 return Services.getService(MobilePushStorageService.class, true).deleteSubscription(contextId, token, SERVICE_ID);
             } else {
                 return Services.getService(MobilePushStorageService.class, true).deleteSubscription(event.getContextId(), token, SERVICE_ID);
@@ -266,17 +267,17 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         return false;
     }
 
-    private static int getContextIdForToken(List<ContextUsers> contextUsers, String registrationId) {
-        if (contextUsers != null && contextUsers.isEmpty()) {
-            for (ContextUsers cu : contextUsers) {
-                for (UserToken ut : cu.getUserTokens()) {
-                    if (ut.getToken().equals(registrationId)) {
-                        return cu.getContextId();
-                    }
-                }
+    private int removeSubscriptions(Device device) {
+        if (null != device && null != device.getToken() && null != device.getLastRegister()) {
+            try {
+                return Services.getService(MobilePushStorageService.class, true).deleteSubscription(device.getToken(), SERVICE_ID);
+            } catch (OXException e) {
+                LOG.error("Error removing subscription", e);
             }
+        } else {
+            LOG.warn("Unsufficient device information to remove subscriptions for: {}", device);
         }
-        return -1;
+        return 0;
     }
 
     private boolean removeSubscriptions(MobilePushEvent event, Device device) {

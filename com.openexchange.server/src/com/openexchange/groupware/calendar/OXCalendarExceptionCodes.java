@@ -55,6 +55,7 @@ import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.tools.exceptions.SimpleIncorrectStringAttribute;
 
 /**
  * The calendar error code enumeration.
@@ -83,8 +84,10 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
         public OXException create(final Throwable cause, final Object... args) {
             if (IncorrectStringSQLException.class.isInstance(cause)) {
                 IncorrectStringSQLException isse = (IncorrectStringSQLException) cause;
-                System.out.println(isse.getColumn() + " " + isse.getRow());
-                return OXCalendarExceptionCodes.INVALID_CHARACTER.create(cause, CalendarField.getByDbField(isse.getColumn()).getName(), isse.getIncorrectString());
+                CalendarField field = CalendarField.getByDbField(isse.getColumn());
+                OXException e = OXCalendarExceptionCodes.INVALID_CHARACTER.create(cause, field.getLocalizable(), isse.getIncorrectString());
+                e.addProblematic(new SimpleIncorrectStringAttribute(field.getAppointmentObjectID(), isse.getIncorrectString()));
+                return e;
             }
             return OXExceptionFactory.getInstance().create(this, cause, args);
         }
@@ -517,7 +520,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
 
     private static final String FOLDER_TYPE_UNRESOLVEABLE_MSG = "Folder type unresolvable.";
 
-    public static final String CALENDAR_SQL_ERROR_MSG = "Unexpected SQL error.";
+    private static final String CALENDAR_SQL_ERROR_MSG = "Unexpected SQL error.";
 
     private static final String LAST_MODIFIED_IS_NULL_MSG = "clientLastModified IS NULL. Abort action.";
 

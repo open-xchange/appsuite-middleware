@@ -51,6 +51,8 @@ package com.openexchange.drive.impl.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.impl.internal.throttle.BucketInputStream;
 import com.openexchange.exception.OXException;
@@ -66,6 +68,7 @@ public class DriveFileHolder implements IFileHolder {
     private final InputStream stream;
     private final String contentType;
     private final String name;
+    private final List<Runnable> tasks;
 
     /**
      * Initializes a new {@link DriveFileHolder}.
@@ -87,6 +90,19 @@ public class DriveFileHolder implements IFileHolder {
             this.stream = new BucketInputStream(stream, session.getServerSession());
         } else {
             this.stream = stream;
+        }
+        tasks = new LinkedList<Runnable>();
+    }
+
+    @Override
+    public List<Runnable> getPostProcessingTasks() {
+        return tasks;
+    }
+
+    @Override
+    public void addPostProcessingTask(Runnable task) {
+        if (null != task) {
+            tasks.add(task);
         }
     }
 

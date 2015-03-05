@@ -52,6 +52,7 @@ package com.openexchange.ajax.fileholder;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
@@ -78,7 +79,7 @@ public interface IFileHolder extends Closeable {
     /** Provides random access to a resource */
     interface RandomAccess extends Readable {
 
-    /**
+        /**
          * Sets the pointer offset, measured from the beginning of associated resource, at which the next read.
          *
          * @param pos The offset position, measured in bytes
@@ -166,5 +167,19 @@ public interface IFileHolder extends Closeable {
      * @return The delivery or <code>null</code>
      */
     String getDelivery();
+
+    /**
+     * Gets the optional post-processing tasks.
+     *
+     * @return The tasks
+     */
+    List<Runnable> getPostProcessingTasks();
+
+    /**
+     * Adds the specified post-processing task.
+     *
+     * @param task The task to add
+     */
+    void addPostProcessingTask(Runnable task);
 
 }

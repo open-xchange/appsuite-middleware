@@ -279,6 +279,18 @@ public class DriveUtils {
     }
 
     /**
+     * Gets a value indicating whether the supplied exception indicates an unrecoverable failed save operation, e.g. due to an invalid
+     * path name not supported by the underlying storage backend.
+     *
+     * @param e The exception to check
+     * @return <code>true</code> if the exception indicates a failed saved exception, <code>false</code>, otherwise
+     */
+    public static boolean indicatesFailedSave(OXException e) {
+        return "IFO-0100".equals(e.getErrorCode()) || "IFO-2103".equals(e.getErrorCode()) ||
+            "FLD-0092".equals(e.getErrorCode()) || "FLD-0064".equals(e.getErrorCode());
+    }
+
+    /**
      * Gets a set of the normalized names of all supplied folders.
      *
      * @param folders The subfolders to get the names for

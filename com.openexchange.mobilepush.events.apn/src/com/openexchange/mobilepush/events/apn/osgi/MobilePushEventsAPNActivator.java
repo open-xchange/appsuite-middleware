@@ -59,6 +59,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mobilepush.events.MobilePushEventService;
@@ -66,6 +67,8 @@ import com.openexchange.mobilepush.events.apn.APNAccess;
 import com.openexchange.mobilepush.events.apn.impl.MobilePushAPNPublisherImpl;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
+import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link MobilePushEventsAPNActivator}
@@ -78,7 +81,7 @@ public class MobilePushEventsAPNActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, MobilePushStorageService.class, MobilePushEventService.class };
+        return new Class[] { ConfigurationService.class, MobilePushStorageService.class, MobilePushEventService.class, TimerService.class };
     }
 
     @Override
@@ -100,6 +103,29 @@ public class MobilePushEventsAPNActivator extends HousekeepingActivator {
                  * register publisher
                  */
                 getService(MobilePushEventService.class).registerPushPublisher(new MobilePushAPNPublisherImpl(access));
+
+                MobilePushAPNPublisherImpl publisher = new MobilePushAPNPublisherImpl(access);
+
+                String feedbackQueryInterval = configService.getProperty(
+                    "com.openxchange.mobilepush.events.apn.ios.feedbackQueryInterval", (String)null);
+                setupFeedbackQueries(publisher, feedbackQueryInterval);
+            }
+        }
+    }
+
+    private static void setupFeedbackQueries(final MobilePushAPNPublisherImpl publisher, String feedbackQueryInterval) throws OXException {
+        if (false == Strings.isEmpty(feedbackQueryInterval)) {
+            long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval);
+            if (60 * 1000 <= interval) {
+                Services.getService(TimerService.class).scheduleWithFixedDelay(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        publisher.queryFeedbackService();
+                    }
+                }, interval, interval);
+            } else {
+                LOG.warn("Ignoring too small value '{} for APN feedback query interval.", feedbackQueryInterval);
             }
         }
     }

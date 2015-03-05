@@ -58,6 +58,7 @@ import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreExceptionMessages;
 
 /**
  * The error code enumeration for folders.
@@ -559,13 +560,19 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     /**
      * Owner %1$s of folder %2$s has been restored to keep the folder admin permission
      */
-    CREATOR_STAYS_ADMIN("Owner %1$s of folder %2$s has been restored to keep the folder admin permission",
-        OXFolderExceptionMessage.CREATOR_STAYS_ADMIN_MSG, Category.CATEGORY_WARNING, 91),
+    CREATOR_STAYS_ADMIN("Owner %1$s of folder %2$s has been restored to keep the folder admin permission", OXFolderExceptionMessage.CREATOR_STAYS_ADMIN_MSG, Category.CATEGORY_WARNING, 91),
+    /**
+     * Unsupported character "%1$s" in field "%2$s".
+     */
+    INVALID_CHARACTER("Unsupported character \"%1$s\" in field \"%2$s\".", OXFolderExceptionMessage.INVALID_CHARACTER_MSG, CATEGORY_USER_INPUT, 92),
+    /**
+     * Unsupported character.
+     */
+    INVALID_CHARACTER_SIMPLE("Unsupported character", OXFolderExceptionMessage.INVALID_CHARACTER_SIMPLE_MSG, CATEGORY_USER_INPUT, 92 /* Yes, the same as INVALID_CHARACTER */),
     /**
      * The folder name \"%1$s\" is reserved. Please choose another name.
      */
-    NO_RESERVED_FOLDER("The folder name \"%1$s\" is reserved. Please choose another name.",
-        OXFolderExceptionMessage.NO_RESERVED_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 92),
+    NO_RESERVED_FOLDER("The folder name \"%1$s\" is reserved. Please choose another name.", OXFolderExceptionMessage.NO_RESERVED_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 93),
 
     ;
 

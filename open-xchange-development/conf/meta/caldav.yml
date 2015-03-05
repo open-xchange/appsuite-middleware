@@ -1,5 +1,0 @@
-com.openexchange.caldav.enabled:
-    preferencePath: modules/caldav/active
-
-com.openexchange.caldav.url:
-    preferencePath: modules/caldav/url

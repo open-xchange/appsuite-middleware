@@ -69,8 +69,35 @@ public final class AttributeNames implements LocalizableStrings {
     public static final String ACTUAL_DURATION = "Current duration";
 
     // Task attribute name
+    public static final String BILLING_INFORMATION = "Billing information";
+
+    // Task attribute name
+    public static final String CATEGORIES = "Categories";
+
+    // Task attribute name
+    public static final String COMPANIES = "Companies";
+
+    // Task attribute name
+    public static final String CURRENCY = "Currency";
+
+    // Task attribute name
+    public static final String DESCRIPTION = "Description";
+
+    // Task attribute name
+    public static final String FILENAME = "File name";
+
+    // Task attribute name
     public static final String TARGET_COSTS = "Estimated costs";
 
     // Task attribute name
     public static final String TARGET_DURATION = "Estimated duration";
+
+    // Task attribute name
+    public static final String TITLE = "Title";
+
+    // Task attribute name
+    public static final String TRIP_METER = "Trip meter";
+
+    // Task attribute name
+    public static final String UID = "UID";
 }

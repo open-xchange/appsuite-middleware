@@ -39,7 +39,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-sms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-filestore-s3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-distribution"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-cifs"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-oauth"/>
@@ -72,8 +71,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-mailnotify"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-malpoll"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-core"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-events"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-events"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-events-json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-report-client"/>

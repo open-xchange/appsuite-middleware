@@ -1,0 +1,74 @@
+--- src/net/fortuna/ical4j/model/TimeZoneRegistryImpl.java	2014-10-28 22:03:28.000000000 +0100
++++ src/net/fortuna/ical4j/model/TimeZoneRegistryImpl.java	2015-02-27 11:57:09.000000000 +0100
+@@ -142,39 +142,40 @@
+     public final TimeZone getTimeZone(final String id) {
+         TimeZone timezone = (TimeZone) timezones.get(id);
+         if (timezone == null) {
+-            timezone = (TimeZone) DEFAULT_TIMEZONES.get(id);
+-            if (timezone == null) {
+-                // if timezone not found with identifier, try loading an alias..
+-                final String alias = ALIASES.getProperty(id);
+-                if (alias != null) {
+-                    return getTimeZone(alias);
++            Map cachedTimezones;
++            synchronized (DEFAULT_TIMEZONES) {
++                cachedTimezones = (Map) DEFAULT_TIMEZONES.get(resourcePrefix);
++                if (null == cachedTimezones) {
++                    cachedTimezones = new ConcurrentHashMap();
++                    DEFAULT_TIMEZONES.put(resourcePrefix, cachedTimezones);
+                 }
+-                else {
+-                    synchronized (DEFAULT_TIMEZONES) {
+-                    	// check again as it may be loaded now..
+-                    	timezone = (TimeZone) DEFAULT_TIMEZONES.get(id);
+-                    	if (timezone == null) {
+-                            try {
+-                                final VTimeZone vTimeZone = loadVTimeZone(id);
+-                                if (vTimeZone != null) {
+-                                    // XXX: temporary kludge..
+-                                    // ((TzId) vTimeZone.getProperties().getProperty(Property.TZID)).setValue(id);
+-                                    timezone = new TimeZone(vTimeZone);
+-                                    DEFAULT_TIMEZONES.put(timezone.getID(), timezone);
+-                                }
+-                                else if (CompatibilityHints.isHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING)) {
+-                                    // strip global part of id and match on default tz..
+-                                    Matcher matcher = TZ_ID_SUFFIX.matcher(id);
+-                                    if (matcher.find()) {
+-                                        return getTimeZone(matcher.group());
+-                                    }
+-                                }
+-                            }
+-                            catch (Exception e) {
+-                                Log log = LogFactory.getLog(TimeZoneRegistryImpl.class);
+-                                log.warn("Error occurred loading VTimeZone", e);
++            }
++            synchronized (cachedTimezones) {
++                timezone = (TimeZone) cachedTimezones.get(id);
++                if (timezone == null) {
++                    // if timezone not found with identifier, try loading an alias..
++                    final String alias = ALIASES.getProperty(id);
++                    if (alias != null) {
++                        return getTimeZone(alias);
++                    }
++                    try {
++                        final VTimeZone vTimeZone = loadVTimeZone(id);
++                        if (vTimeZone != null) {
++                            // XXX: temporary kludge..
++                            // ((TzId) vTimeZone.getProperties().getProperty(Property.TZID)).setValue(id);
++                            timezone = new TimeZone(vTimeZone);
++                            cachedTimezones.put(timezone.getID(), timezone);
++                        }
++                        else if (CompatibilityHints.isHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING)) {
++                            // strip global part of id and match on default tz..
++                            Matcher matcher = TZ_ID_SUFFIX.matcher(id);
++                            if (matcher.find()) {
++                                return getTimeZone(matcher.group());
+                             }
+-                    	}
++                        }
++                    } catch (Exception e) {
++                        Log log = LogFactory.getLog(TimeZoneRegistryImpl.class);
++                        log.warn("Error occurred loading VTimeZone", e);
+                     }
+                 }
+             }

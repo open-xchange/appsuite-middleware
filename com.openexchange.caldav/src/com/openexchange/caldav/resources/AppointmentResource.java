@@ -74,6 +74,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -642,6 +643,20 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return hasTrimmed;
     }
 
+    @Override
+    protected boolean replaceIncorrectStrings(IncorrectString incorrectString, String replacement) {
+        boolean hasReplaced = false;
+        if (null != this.appointmentToSave) {
+            hasReplaced |= replaceIncorrectString(incorrectString, appointmentToSave, replacement);
+        }
+        if (null != this.exceptionsToSave && 0 < this.exceptionsToSave.size()) {
+            for (final CalendarDataObject calendarObject : exceptionsToSave) {
+                hasReplaced |= replaceIncorrectString(incorrectString, calendarObject, replacement);
+            }
+        }
+        return hasReplaced;
+    }
+
     /**
      * Tries to handle a {@link WebdavProtocolException} that occured during resource creation automatically.
      *
@@ -713,6 +728,19 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             final String stringValue = (String)value;
             if (stringValue.length() > truncated.getMaxSize()) {
                 calendarObject.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean replaceIncorrectString(IncorrectString incorrectString, CalendarDataObject calendarObject, String replacement) {
+        Object value = calendarObject.get(incorrectString.getId());
+        if (null != value && String.class.isInstance(value)) {
+            String stringValue = (String) value;
+            String replacedString = stringValue.replaceAll(incorrectString.getIncorrectString(), replacement);
+            if (false == stringValue.equals(replacedString)) {
+                calendarObject.set(incorrectString.getId(), replacedString);
                 return true;
             }
         }

@@ -120,7 +120,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
              * perform auto-login
              */
             String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), LoginTools.parseClient(req, false, conf.getDefaultClient()), LoginTools.parseShareInformation(req));
-            LoginResult loginResult = AutoLoginTools.tryAutologin(conf, req, hash);
+            LoginResult loginResult = AutoLoginTools.tryAutologin(conf, req, resp, hash);
             if (null == loginResult) {
                 /*
                  * auto-login failed

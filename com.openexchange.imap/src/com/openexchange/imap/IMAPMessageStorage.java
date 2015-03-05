@@ -3245,11 +3245,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         imapFolder.appendMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]));
                     }
                 } catch (final MessagingException e) {
-                    final Exception nextException = e.getNextException();
-                    if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
+                    OXException oxe = handleMessagingException(destFullName, e);
+                    if (MimeMailExceptionCode.PROCESSING_ERROR.equals(oxe)) {
                         throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
                     }
-                    throw e;
+                    throw oxe;
                 }
                 if (null != retval) {
                     /*

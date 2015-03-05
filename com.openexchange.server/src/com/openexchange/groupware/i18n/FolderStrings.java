@@ -121,4 +121,8 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String SYSTEM_USER_TEMPLATES_FOLDER_NAME = "Templates";
 
+    // -----------------------------------------------------------------------------------------------------
+
+    public static final String FIELD_FOLDER_NAME = "Folder name";
+
 }
