@@ -91,10 +91,10 @@ public interface SessionReservationService {
     /**
      * Redeems specified reservation and returns associated session
      *
-     * @param reservation The reservation
+     * @param reservationInfo The reservation information
      * @return The associated session or <code>null</code> if there is no such reservation or reservation is elapsed
      * @throws OXException If operation fails
      */
-    Session redeemReservation(ReservationInfo reservation) throws OXException;
+    Session redeemReservation(ReservationInfo reservationInfo) throws OXException;
 
 }

@@ -52,7 +52,7 @@ package com.openexchange.session.reservation;
 import com.openexchange.authentication.SessionEnhancement;
 
 /**
- * {@link ReservationInfo} - The reservation information.
+ * {@link ReservationInfo} - Provides the information used to redeem a reservation for a valid session instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
