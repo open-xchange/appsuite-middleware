@@ -1005,6 +1005,18 @@ if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
     fi
 fi
 
+# SoftwareChange_Request-2444
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# v7.6.2 update tasks start here
+
+# Deletes remnants for removed Facebook subscription
+!com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask
+EOF
+fi
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
