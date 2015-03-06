@@ -90,6 +90,10 @@ public interface SessionInspectorService {
 
     /**
      * Called when auto-login failed.
+     * <p>
+     * This call-back is invoked during login procedure, hence forcing a redirect needs to be initiated through throwing special
+     * error code {@link com.openexchange.authentication.LoginExceptionCodes#REDIRECT} (<code>"LGI-0016"</code>), which is only used
+     * as a workaround for a redirection, and is no real error.
      *
      * @param reason The reason for the failed auto-login
      * @param request The associated HTTP request
