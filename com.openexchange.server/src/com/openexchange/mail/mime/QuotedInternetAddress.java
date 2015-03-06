@@ -224,6 +224,9 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     private static InternetAddress[] parseSimple(String str, boolean strict) throws AddressException {
+        if (str.length() <= 0) {
+            return new InternetAddress[0];
+        }
         String[] addrs = Strings.splitByCommaNotInQuotes(str);
         List<InternetAddress> l = new ArrayList<InternetAddress>(addrs.length);
         for (String addr : addrs) {
