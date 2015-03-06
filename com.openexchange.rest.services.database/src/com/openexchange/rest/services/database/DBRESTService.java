@@ -110,6 +110,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     private BeforeHandler beforeHandler = null;
     private MonitoredMetadata monitoredMetadata;
 
+    /**
+     * @deprecated
+     */
     @PUT("/configdb/readOnly")
     public void queryConfigDB() throws OXException {
         returnConnectionWhenDone(AccessType.READ);
@@ -117,6 +120,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         perform();
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/configdb/writable")
     public void updateConfigDB() throws OXException {
         returnConnectionWhenDone(AccessType.WRITE);
@@ -124,6 +130,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         perform();
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/oxdb/:ctxId/readOnly")
     public void queryOXDB(int ctxId) throws OXException {
         returnConnectionWhenDone(AccessType.READ, ctxId);
@@ -132,6 +141,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         perform();
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/oxdb/:ctxId/writable")
     public void updateOXDB(int ctxId) throws OXException {
         returnConnectionWhenDone(AccessType.WRITE, ctxId);
@@ -166,6 +178,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         perform();
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/transaction/:transactionId")
     public void queryTransaction(String txId) throws OXException {
         tx = context.transactions.getTransaction(txId);
@@ -179,6 +194,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         perform();
     }
 
+    /**
+     * @deprecated
+     */
     @GET("/transaction/:transactionId/rollback")
     public void rollback(String txId) throws OXException {
         tx = context.transactions.getTransaction(txId);
@@ -195,6 +213,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         unpackTransaction();
     }
 
+    /**
+     * @deprecated
+     */
     @GET("/transaction/:transactionId/commit")
     public void commit(String txId) throws OXException {
         tx = context.transactions.getTransaction(txId);
@@ -302,6 +323,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
     }
 
+    /**
+     * @deprecated
+     */
     @GET("/init/w/:writeId/:schema")
     public void initSchema(int writePoolId, String schema) throws OXException {
         DatabaseService db = dbService();
