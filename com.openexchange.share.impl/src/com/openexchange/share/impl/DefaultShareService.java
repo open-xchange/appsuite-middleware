@@ -117,7 +117,6 @@ public class DefaultShareService implements ShareService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultShareService.class);
 
     private final ServiceLookup services;
-
     private final GuestCleaner guestCleaner;
 
     /**
@@ -204,14 +203,12 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public List<ShareInfo> getAllShares(Session session) throws OXException {
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), -1, StorageParameters.NO_PARAMETERS);
-        shares = removeExpired(session.getContextId(), shares);
-        return ShareTool.toShareInfos(services, session.getContextId(), shares);
+        return getAllShares(session, null);
     }
 
     @Override
     public List<ShareInfo> getAllShares(Session session, String module) throws OXException {
-        int moduleId = ShareModuleMapping.moduleMapping2int(module);
+        int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), moduleId, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         return ShareTool.toShareInfos(services, session.getContextId(), shares);
@@ -273,59 +270,16 @@ public class DefaultShareService implements ShareService {
                 sharesPerRecipient.put(recipient, sharesForGuest);
             }
             /*
-             * store shares
+             * store shares & trigger collection of e-mail addresses
              */
             shareStorage.storeShares(contextID, sharesToStore, connectionHelper.getParameters());
-
             connectionHelper.commit();
             LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(contextID));
             collectAddresses(session, recipients);
-
             return sharesPerRecipient;
         } finally {
             connectionHelper.finish();
         }
-    }
-
-    /**
-     * Recognizes the email addresses that should be collected and adds them to the ContactCollector.
-     *
-     * @param session - the {@link Session} of the user to collect the addresses for
-     * @param shareRecipients - List of {@link ShareRecipient}s to collect addresses for
-     * @throws OXException
-     */
-    private void collectAddresses(final Session session, final List<ShareRecipient> shareRecipients) throws OXException {
-        final ContactCollectorService ccs = services.getService(ContactCollectorService.class);
-        if (null != ccs) {
-            final Set<InternetAddress> addrs = getEmailAddresses(shareRecipients);
-            if (!addrs.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
-            }
-        }
-    }
-
-    /**
-     * Returns a <code>Set</code> of <code>InternetAddress</code>es that should be collected by the {@link ContactCollectorService}
-     *
-     * @param shareRecipients - a list of {@link ShareRecipient}s to get addresses from
-     * @return <code>Set</code> of <code>InternetAddress</code>es for further processing
-     * @throws OXException
-     */
-    private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients) throws OXException {
-        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-        for (ShareRecipient shareRecipient : shareRecipients) {
-            if (RecipientType.GUEST.equals(RecipientType.of(shareRecipient))) {
-                String emailAddress = ((GuestRecipient) shareRecipient).getEmailAddress();
-                if (emailAddress != null) {
-                    try {
-                        addrs.add(new InternetAddress(emailAddress));
-                    } catch (final AddressException addressException) {
-                        LOG.warn("Unable to add address to ContactCollector.", addressException);
-                    }
-                }
-            }
-        }
-        return addrs;
     }
 
     @Override
@@ -414,6 +368,23 @@ public class DefaultShareService implements ShareService {
     @Override
     public void deleteShares(Session session, List<String> tokens) throws OXException {
         removeShares(session, session.getContextId(), tokens);
+    }
+
+    @Override
+    public GuestInfo resolveGuest(String token) throws OXException {
+        ShareToken shareToken = new ShareToken(token);
+        int contextID = shareToken.getContextID();
+        User guestUser;
+        try {
+            guestUser = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+        } catch (OXException e) {
+            if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                LOG.debug("Guest user for share token {} not found, unable to resolve token.", shareToken, e);
+                return null;
+            }
+            throw e;
+        }
+        return new DefaultGuestInfo(services, guestUser, shareToken);
     }
 
     /**
@@ -887,22 +858,44 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * {@inheritDoc}
+     * Recognizes the email addresses that should be collected and adds them to the ContactCollector.
+     *
+     * @param session - the {@link Session} of the user to collect the addresses for
+     * @param shareRecipients - List of {@link ShareRecipient}s to collect addresses for
+     * @throws OXException
      */
-    @Override
-    public GuestInfo resolveGuest(String token) throws OXException {
-        ShareToken shareToken = new ShareToken(token);
-        int contextID = shareToken.getContextID();
-        User guestUser;
-        try {
-            guestUser = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
-        } catch (OXException e) {
-            if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
-                LOG.debug("Guest user for share token {} not found, unable to resolve token.", shareToken, e);
-                return null;
+    private void collectAddresses(final Session session, final List<ShareRecipient> shareRecipients) throws OXException {
+        final ContactCollectorService ccs = services.getService(ContactCollectorService.class);
+        if (null != ccs) {
+            final Set<InternetAddress> addrs = getEmailAddresses(shareRecipients);
+            if (!addrs.isEmpty()) {
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
             }
-            throw e;
         }
-        return new DefaultGuestInfo(services, guestUser, shareToken);
     }
+
+    /**
+     * Returns a <code>Set</code> of <code>InternetAddress</code>es that should be collected by the {@link ContactCollectorService}
+     *
+     * @param shareRecipients - a list of {@link ShareRecipient}s to get addresses from
+     * @return <code>Set</code> of <code>InternetAddress</code>es for further processing
+     * @throws OXException
+     */
+    private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients) throws OXException {
+        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+        for (ShareRecipient shareRecipient : shareRecipients) {
+            if (RecipientType.GUEST.equals(RecipientType.of(shareRecipient))) {
+                String emailAddress = ((GuestRecipient) shareRecipient).getEmailAddress();
+                if (emailAddress != null) {
+                    try {
+                        addrs.add(new InternetAddress(emailAddress));
+                    } catch (final AddressException addressException) {
+                        LOG.warn("Unable to add address to ContactCollector.", addressException);
+                    }
+                }
+            }
+        }
+        return addrs;
+    }
+
 }
