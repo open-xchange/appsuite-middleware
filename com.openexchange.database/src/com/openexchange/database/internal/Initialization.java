@@ -53,8 +53,6 @@ import static com.openexchange.database.internal.Configuration.Property.CHECK_WR
 import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.CacheService;
@@ -164,7 +162,6 @@ public final class Initialization {
         databaseService = null;
         configDatabaseService.removeCacheService();
         configDatabaseService = null;
-        globalDatabaseService.setConfigViewFactory(null);
         globalDatabaseService = null;
         pools.stop(timer);
         pools = null;
@@ -193,56 +190,28 @@ public final class Initialization {
         return timer;
     }
 
-    private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(ConfigurationService configService) {
-        Map<String, GlobalDbConfig> configs = new HashMap<String, GlobalDbConfig>();
-        try {
-            configs = parseGlobalDbConfigs(configService.getYaml("globaldb.yml"));
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+    /**
+     * Parses configuration settings for the global database from the configuration file <code>globaldb.yml</code>.
+     *
+     * @param configService A reference to the configuration service
+     * @return The global db configurations, mapped by their assigned group names, or an empty map if none are defined
+     */
+    private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(ConfigurationService configService) throws OXException {
+        String fileName = "globaldb.yml";
+        Map<String, GlobalDbConfig> configs = null;
+        Object yaml = configService.getYaml(fileName);
+        if (null != yaml && Map.class.isInstance(yaml)) {
+            Map<String, Object> map = (Map<String, Object>) yaml;
+            if (0 != map.size()) {
+                configs = GlobalDbConfig.parse(map);
+            }
         }
-        return configs;
-    }
-
-    private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(Object yaml) throws OXException {
-        if (null == yaml) {
-            return Collections.emptyMap(); // no global db configs defined
-        }
-        if (null == yaml || false == Map.class.isInstance(yaml)) {
-            throw OXException.general("malformed config"); // TODO
-        }
-        Map<String, Object> map = (Map<String, Object>) yaml;
-        Map<String, GlobalDbConfig> configs = new HashMap<String, GlobalDbConfig>();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            if (null == entry.getValue() || false == Map.class.isInstance(entry.getValue())) {
-                throw OXException.general("malformed config"); // TODO
-            }
-            Map<String, Object> values = (Map<String, Object>) entry.getValue();
-            final int readPoolId;
-            try {
-                readPoolId = Integer.parseInt(String.valueOf(values.get("com.openexchange.database.global.readPoolId")));
-            } catch (NumberFormatException e) {
-                throw OXException.general("failed to parse readPoolId " + values.get("com.openexchange.database.global.readPoolId")); // TODO
-            }
-            final int writePoolId;
-            try {
-                writePoolId = Integer.parseInt(String.valueOf(values.get("com.openexchange.database.global.writePoolId")));
-            } catch (NumberFormatException e) {
-                throw OXException.general("failed to parse readPoolId " + values.get("com.openexchange.database.global.writePoolId")); // TODO
-            }
-            String schema = String.valueOf(values.get("com.openexchange.database.global.schema"));
-            GlobalDbConfig dbConfig = new GlobalDbConfig(schema, readPoolId, writePoolId);
-            Object groups = values.get("groups");
-            if (null == groups || false == List.class.isInstance(groups)) {
-                throw OXException.general("malformed config"); // TODO
-            }
-            for (String group : (List<String>) groups) {
-                if (null != configs.put(group, dbConfig)) {
-                    throw OXException.general("more than one configuration for group"); // TODO
-                }
-            }
+        if (null == configs || 0 == configs.size()) {
+            LOG.warn("No global database settings configured at \"{}\", global database features are not available.", fileName);
+            return Collections.emptyMap();
         }
         if (false == configs.containsKey(GlobalDbConfig.DEFAULT_GROUP)) {
-            throw OXException.general("no default configuration"); // TODO
+            LOG.warn("No global database settings for group \"{}\" configured at \"{}\", no global fallback database available.", GlobalDbConfig.DEFAULT_GROUP, fileName);
         }
         return configs;
     }

@@ -52,12 +52,14 @@ package com.openexchange.database;
 import static com.openexchange.database.DBPoolingExceptionStrings.ACTIVE_STATEMENTS_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.ALREADY_INITIALIZED_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.INSERT_FAILED_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.INVALID_GLOBALDB_CONFIGURATION_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.MISSING_CONFIGURATION_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.NOT_INITIALIZED_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.NOT_RESOLVED_SERVER_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.NO_CONFIG_DB_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.NO_CONNECTION_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.NO_DRIVER_MSG;
+import static com.openexchange.database.DBPoolingExceptionStrings.NO_GLOBALDB_CONFIG_FOR_GROUP_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.NO_SERVER_NAME_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.NULL_CONNECTION_MSG;
 import static com.openexchange.database.DBPoolingExceptionStrings.PARAMETER_PROBLEM_MSG;
@@ -169,7 +171,17 @@ public enum DBPoolingExceptionCodes implements OXExceptionCode {
     /**
      * Inserting or updating database assignment for context %1$d and server %2$d failed!
      */
-    INSERT_FAILED(INSERT_FAILED_MSG, Category.CATEGORY_ERROR, 22);
+    INSERT_FAILED(INSERT_FAILED_MSG, Category.CATEGORY_ERROR, 22),
+    /**
+     * Invalid configuration for global databases: %1$s
+     */
+    INVALID_GLOBALDB_CONFIGURATION(INVALID_GLOBALDB_CONFIGURATION_MSG, Category.CATEGORY_CONFIGURATION, 23),
+    /**
+     * No global database for context group \"%1$s\" found.
+     */
+    NO_GLOBALDB_CONFIG_FOR_GROUP(NO_GLOBALDB_CONFIG_FOR_GROUP_MSG, Category.CATEGORY_CONFIGURATION, 24),
+
+    ;
 
     /**
      * Message of the exception.

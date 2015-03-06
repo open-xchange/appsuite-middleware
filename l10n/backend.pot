@@ -1443,6 +1443,16 @@ msgid ""
 "failed!"
 msgstr ""
 
+#. %1$s is replaced with more details about the invalid configuration
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:133
+msgid "Invalid configuration for global databases: %1$s"
+msgstr ""
+
+#. %1$s is replaced with the context group name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:136
+msgid "No global database for context group \"%1$s\" found."
+msgstr ""
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
