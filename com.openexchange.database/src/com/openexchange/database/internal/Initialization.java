@@ -52,6 +52,7 @@ package com.openexchange.database.internal;
 import static com.openexchange.database.internal.Configuration.Property.CHECK_WRITE_CONS;
 import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -210,6 +211,9 @@ public final class Initialization {
     }
 
     private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(Object yaml) throws OXException {
+        if (null == yaml) {
+            return Collections.emptyMap(); // no global db configs defined
+        }
         if (null == yaml || false == Map.class.isInstance(yaml)) {
             throw OXException.general("malformed config"); // TODO
         }
