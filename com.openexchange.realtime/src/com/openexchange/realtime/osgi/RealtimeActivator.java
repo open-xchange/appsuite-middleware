@@ -81,7 +81,6 @@ import com.openexchange.realtime.payload.converter.impl.DurationToJSONConverter;
 import com.openexchange.realtime.payload.converter.impl.JSONToDurationConverter;
 import com.openexchange.realtime.synthetic.DevNullChannel;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
-import com.openexchange.realtime.util.RealtimeReloadable;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -166,7 +165,7 @@ public class RealtimeActivator extends HousekeepingActivator {
 
         registerService(PayloadTreeConverter.class, converter);
 
-        registerService(Reloadable.class, RealtimeReloadable.getInstance());
+        registerService(Reloadable.class, realtimeConfig);
 
         registerService(Channel.class, new DevNullChannel());
         registerService(SimplePayloadConverter.class, new DurationToJSONConverter());

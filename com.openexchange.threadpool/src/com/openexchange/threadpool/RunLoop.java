@@ -84,6 +84,8 @@ public abstract class RunLoop<E> implements Runnable {
     /** The element we have just taken from the queue for handling */
     protected E currentElement;
 
+    private volatile boolean isRunning = false;
+
     public RunLoop(String name) {
         this.name = name;
     }
@@ -91,7 +93,8 @@ public abstract class RunLoop<E> implements Runnable {
     @Override
     public void run() {
         Thread.currentThread().setName(name);
-        while (true) {
+        isRunning=true;
+        while (isRunning) {
             /*
              * Get the current element from the queue. blocking, so this must be done outside the handleLock
              */
@@ -118,6 +121,7 @@ public abstract class RunLoop<E> implements Runnable {
                 }
             } catch (InterruptedException e) {
                 LOG.info("Returning from RunLoop due to interruption");
+                isRunning=false;
                 return;
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
@@ -128,6 +132,8 @@ public abstract class RunLoop<E> implements Runnable {
                 handleLock.unlock();
             }
         }
+        LOG.info("Leaving run loop");
+        Thread.currentThread().setName(name + "-stopped");
     }
 
     /**
@@ -162,6 +168,35 @@ public abstract class RunLoop<E> implements Runnable {
           }
     }
 
+    /**
+     * Check if the RunLoop is running
+     * @return true if the RunLoop is running, else false
+     */
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    /**
+     * Stop the {@link RunLoop} by ending the while loop and poisoning the internal {@link BlockingQueue}.
+     */
+    public void stop() {
+        isRunning = false;
+        unblock();
+    }
+
+    /**
+     * Get the name of this RunLoop
+     * @return the name of this RunLoop
+     */
+    public String getName() {
+        return name;
+    }
+
     protected abstract void handle(E element) throws OXException;
+
+    /**
+     * Unblock the potentially blocked internal {@link BlockingQueue} by inserting a NoOp element.
+     */
+    protected abstract void unblock();
 
 }

@@ -47,63 +47,32 @@
  *
  */
 
-package com.openexchange.realtime.util;
+package com.openexchange.realtime;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link RealtimeReloadable} - Collects reloadables for real-time bundle.
+ * {@link SimServiceLookup}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.2
  */
-public final class RealtimeReloadable implements Reloadable {
+public class SimServiceLookup implements ServiceLookup {
 
-    private static final RealtimeReloadable INSTANCE = new RealtimeReloadable();
-
-    /**
-     * Gets the instance.
-     *
-     * @return The instance
-     */
-    public static RealtimeReloadable getInstance() {
-        return INSTANCE;
-    }
-
-    // --------------------------------------------------------------------------------------------------- //
-
-    private final List<Reloadable> reloadables;
-
-    /**
-     * Initializes a new {@link RealtimeReloadable}.
-     */
-    private RealtimeReloadable() {
-        super();
-        reloadables = new CopyOnWriteArrayList<Reloadable>();
-    }
-
-    /**
-     * Adds given {@link Reloadable} instance.
-     *
-     * @param reloadable The instance to add
-     */
-    public void addReloadable(Reloadable reloadable) {
-        reloadables.add(reloadable);
-    }
+    private final DumbThreadPool dumbThreadPool = new DumbThreadPool();
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        for (final Reloadable reloadable : reloadables) {
-            reloadable.reloadConfiguration(configService);
+    public <S> S getService(Class<? extends S> clazz) {
+        if(clazz.isInstance(dumbThreadPool)) {
+            return (S)dumbThreadPool;
+        } else {
+            return null;
         }
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
+    public <S> S getOptionalService(Class<? extends S> clazz) {
         return null;
     }
 
