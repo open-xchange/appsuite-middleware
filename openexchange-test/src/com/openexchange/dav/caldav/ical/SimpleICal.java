@@ -72,18 +72,22 @@ public class SimpleICal {
 
 	private static final String CRLF = "\r\n";
 
-	public static Component parse(String iCal) throws IOException, SimpleICalException {
-	    BufferedReader reader = null;
-	    try {
-	        reader = new BufferedReader(new StringReader(ICalUtils.unfold(iCal)));
+    public static Component parse(String iCal) throws IOException, SimpleICalException {
+        return parse(iCal, "VCALENDAR");
+    }
+
+    public static Component parse(String iCal, String name) throws IOException, SimpleICalException {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new StringReader(ICalUtils.unfold(iCal)));
             String line = reader.readLine();
-            if (null == line || false == line.startsWith("BEGIN:VCALENDAR")) {
-                throw new SimpleICalException("VCALENDAR component expected");
+            if (null == line || false == line.startsWith("BEGIN:" + name)) {
+                throw new SimpleICalException(name + " component expected");
             }
-            return new Component("VCALENDAR", reader);
-	    } finally {
-	        reader.close();
-	    }
+            return new Component(name, reader);
+        } finally {
+            reader.close();
+        }
     }
 
     public static final class Component {
