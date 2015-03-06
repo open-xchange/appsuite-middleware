@@ -62,6 +62,83 @@ import com.openexchange.login.LoginRequest;
  */
 public class LoginRequestImpl implements LoginRequest {
 
+    /**
+     * The builder for a {@link LoginRequestImpl}.
+     */
+    public static final class Builder {
+
+        protected String login, password, clientIP, userAgent, authId, client, version, hash;
+        protected String clientToken;
+        protected Interface iface;
+        protected Map<String, List<String>> headers;
+        protected Cookie[] cookies;
+        protected boolean secure;
+        protected String serverName;
+        protected int serverPort;
+        protected String httpSessionID;
+        protected boolean tranzient;
+
+        public Builder() {
+            super();
+        }
+        public Builder login(String login) {
+            this.login = login; return this;
+        }
+        public Builder password(String password) {
+            this.password = password; return this;
+        }
+        public Builder clientIP(String clientIP) {
+            this.clientIP = clientIP; return this;
+        }
+        public Builder userAgent(String userAgent) {
+            this.userAgent = userAgent; return this;
+        }
+        public Builder authId(String authId) {
+            this.authId = authId; return this;
+        }
+        public Builder client(String client) {
+            this.client = client; return this;
+        }
+        public Builder version(String version) {
+            this.version = version; return this;
+        }
+        public Builder hash(String hash) {
+            this.hash = hash; return this;
+        }
+        public Builder clientToken(String clientToken) {
+            this.clientToken = clientToken; return this;
+        }
+        public Builder serverName(String serverName) {
+            this.serverName = serverName; return this;
+        }
+        public Builder serverPort(int serverPort) {
+            this.serverPort = serverPort; return this;
+        }
+        public Builder httpSessionID(String httpSessionID) {
+            this.httpSessionID = httpSessionID; return this;
+        }
+        public Builder iface(Interface iface) {
+            this.iface = iface; return this;
+        }
+        public Builder headers(Map<String, List<String>> headers) {
+            this.headers = headers; return this;
+        }
+        public Builder cookies(Cookie[] cookies) {
+            this.cookies = cookies; return this;
+        }
+        public Builder secure(boolean secure) {
+            this.secure = secure; return this;
+        }
+        public Builder tranzient(boolean tranzient) {
+            this.tranzient = tranzient; return this;
+        }
+        public LoginRequestImpl build() {
+            return new LoginRequestImpl(this);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
     private final String login, password, clientIP, userAgent, authId, client, version, hash;
     private String clientToken;
     private final Interface iface;
@@ -73,6 +150,49 @@ public class LoginRequestImpl implements LoginRequest {
     private final String httpSessionID;
     private boolean tranzient;
 
+    /**
+     * Initializes a new {@link LoginRequestImpl}.
+     *
+     * @param builder The builder instance
+     */
+    protected LoginRequestImpl(Builder builder) {
+        super();
+        this.login = builder.login;
+        this.password = builder.password;
+        this.clientIP = builder.clientIP;
+        this.userAgent = builder.userAgent;
+        this.authId = builder.authId;
+        this.client = builder.client;
+        this.version = builder.version;
+        this.hash = builder.hash;
+        this.iface = builder.iface;
+        this.headers = builder.headers;
+        this.cookies = builder.cookies;
+        this.secure = builder.secure;
+        this.serverName = builder.serverName;
+        this.serverPort = builder.serverPort;
+        this.httpSessionID = builder.httpSessionID;
+    }
+
+    /**
+     * Initializes a new {@link LoginRequestImpl}.
+     *
+     * @param login The login
+     * @param password The password
+     * @param clientIP The client IP address
+     * @param userAgent The associated User-Agent
+     * @param authId The authentication identifier
+     * @param client The client identifier
+     * @param version The version string
+     * @param hash The hash string
+     * @param iface The associated interface
+     * @param headers The headers
+     * @param cookies The cookies
+     * @param secure Whether associated request is considered to use a secure connection
+     * @param serverName The server name
+     * @param serverPort The server port
+     * @param httpSessionID The identifier of the associated HTTP session
+     */
     public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
         super();
         this.login = login;
@@ -137,6 +257,11 @@ public class LoginRequestImpl implements LoginRequest {
         return clientToken;
     }
 
+    /**
+     * Sets the client token.
+     *
+     * @param clientToken The client token
+     */
     public void setClientToken(String clientToken) {
         this.clientToken = clientToken;
     }
@@ -180,11 +305,11 @@ public class LoginRequestImpl implements LoginRequest {
     public boolean isTransient() {
         return tranzient;
     }
-    
+
     /**
-     * Sets if whether the session should be created in a transient way or not, i.e. the session should not be distributed to other nodes 
+     * Sets if whether the session should be created in a transient way or not, i.e. the session should not be distributed to other nodes
      * in the cluster or put into another persistent storage.
-     * 
+     *
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
      */
     public void setTransient(boolean tranzient) {

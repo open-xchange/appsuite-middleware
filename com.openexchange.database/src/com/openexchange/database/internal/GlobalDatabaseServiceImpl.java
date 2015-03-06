@@ -52,7 +52,6 @@ package com.openexchange.database.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.GlobalDatabaseService;
@@ -71,7 +70,7 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
     private final Pools pools;
     private final ReplicationMonitor monitor;
     private final Map<String, GlobalDbConfig> globalDbConfigs;
-    private final AtomicReference<ConfigViewFactory> configCascadeReference;
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link GlobalDatabaseServiceImpl}.
@@ -79,23 +78,14 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
      * @param pools A reference to the connection pool
      * @param monitor The replication monitor
      * @param globalDbConfigs The known global database configurations
-     * @param configViewFactory The config view factory, or <code>null</code> if not yet available
+     * @param configViewFactory The config view factory
      */
     public GlobalDatabaseServiceImpl(Pools pools, ReplicationMonitor monitor, Map<String, GlobalDbConfig> globalDbConfigs, ConfigViewFactory configViewFactory) {
         super();
         this.pools = pools;
         this.monitor = monitor;
         this.globalDbConfigs = globalDbConfigs;
-        this.configCascadeReference = new AtomicReference<ConfigViewFactory>(configViewFactory);
-    }
-
-    /**
-     * Sets the config view factory reference.
-     *
-     * @param configViewFactory The config view factory, or <code>null</code> to remove a previously set reference
-     */
-    public void setConfigViewFactory(ConfigViewFactory configViewFactory) {
-        configCascadeReference.set(configViewFactory);
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
@@ -138,26 +128,18 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
         back(connection);
     }
 
-
-    private ConfigViewFactory getConfigViewFactory() throws OXException {
-        ConfigViewFactory configViewFactory = configCascadeReference.get();
-        if (null == configViewFactory) {
-            throw OXException.general("no config cascade"); // TODO
-        }
-        return configViewFactory;
-    }
-
     private AssignmentImpl getAssignment(String group) throws OXException {
         String name = Strings.isEmpty(group) ? GlobalDbConfig.DEFAULT_GROUP : group;
         GlobalDbConfig dbConfig = globalDbConfigs.get(name);
         if (null == dbConfig) {
-            throw OXException.general("No db config for group " + group); //TODO
+            // TODO: fall back to "default" also in that case?
+            throw DBPoolingExceptionCodes.NO_GLOBALDB_CONFIG_FOR_GROUP.create(group);
         }
         return dbConfig.getAssignment();
     }
 
     private AssignmentImpl getAssignment(int contextId) throws OXException {
-        String group = getConfigViewFactory().getView(-1, contextId).opt("com.openexchange.context.group", String.class, null);
+        String group = configViewFactory.getView(-1, contextId).opt("com.openexchange.context.group", String.class, null);
         return getAssignment(group);
     }
 

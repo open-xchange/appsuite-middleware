@@ -49,11 +49,14 @@
 
 package com.openexchange.database.osgi;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.Initialization;
 import com.openexchange.exception.OXException;
@@ -63,11 +66,15 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
+public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseServiceRegisterer.class);
 
     private final BundleContext context;
+    private final Lock lock = new ReentrantLock();
+
+    private ConfigurationService configService;
+    private ConfigViewFactory configViewFactory;
 
     private ServiceRegistration<DatabaseService> serviceRegistration;
 
@@ -77,36 +84,47 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Confi
     }
 
     @Override
-    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
-        if (Initialization.getInstance().isStarted()) {
-            // No reconfiguration;
-            return null;
-        }
-        final ConfigurationService configuration = context.getService(reference);
+    public Object addingService(final ServiceReference<Object> reference) {
+        final Object obj = context.getService(reference);
+        final boolean needsRegistration;
+        lock.lock();
         try {
-            Initialization.setConfigurationService(configuration);
-            final DatabaseService service = Initialization.getInstance().start(configuration);
-            LOG.info("Publishing DatabaseService.");
-            serviceRegistration = context.registerService(DatabaseService.class, service, null);
-        } catch (final OXException e) {
-            LOG.error("Publishing the DatabaseService failed.", e);
+            if (obj instanceof ConfigurationService) {
+                configService = (ConfigurationService) obj;
+            }
+            if (obj instanceof ConfigViewFactory) {
+                configViewFactory = (ConfigViewFactory) obj;
+            }
+            needsRegistration = null != configService && null != configViewFactory;
+        } finally {
+            lock.unlock();
         }
-        return configuration;
+        if (needsRegistration && !Initialization.getInstance().isStarted()) {
+            try {
+                Initialization.setConfigurationService(configService);
+                final DatabaseService service = Initialization.getInstance().start(configService, configViewFactory);
+                LOG.info("Publishing DatabaseService.");
+                serviceRegistration = context.registerService(DatabaseService.class, service, null);
+            } catch (final OXException e) {
+                LOG.error("Publishing the DatabaseService failed.", e);
+            }
+        }
+        return obj;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
+    public void modifiedService(final ServiceReference<Object> reference, final Object service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
+    public void removedService(final ServiceReference<Object> reference, final Object service) {
         if (null != serviceRegistration) {
             LOG.info("Unpublishing DatabaseService.");
             serviceRegistration.unregister();
             Initialization.getInstance().stop();
             Initialization.setConfigurationService(null);
-            context.ungetService(reference);
         }
+        context.ungetService(reference);
     }
 }

@@ -36,8 +36,19 @@
 # different set of registered OAuth applications available for each context 
 # group.
 
-default:
-    groups: [default]
-    com.openexchange.database.global.readPoolId: 
-    com.openexchange.database.global.writePoolId: 
-    com.openexchange.database.global.schema: 
+# Section for the "default" global database, uncomment and define the 
+# connection settings for the default context-wide database here.
+# default:
+#
+#     groups: [default]
+#     id:  
+
+# Example for an additional configuration setting that directs all data from 
+# the context groups "de", "fr" and "nl" to this database schema. As outlined
+# above, contexts may be assigned to those groups via config cascade.
+#
+# central_europe:
+#     groups: [de, fr, nl]
+#     readPoolId: 453
+#     writePoolId: 455
+#     schema: ox_europe

@@ -49,6 +49,10 @@
 
 package com.openexchange.database.internal;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
@@ -61,6 +65,45 @@ public class GlobalDbConfig {
     /** The name used for the special "default" context group */
     static final String DEFAULT_GROUP = "default";
 
+    /**
+     * Parses configuration settings for the global database from the supplied YAML map.
+     *
+     * @param yaml The global database configurations in a YAML map
+     * @return The global db configurations, mapped by their assigned group names, or an empty map if none are defined
+     */
+    static Map<String, GlobalDbConfig> parse(Map<String, Object> yaml) throws OXException {
+        Map<String, GlobalDbConfig> configs = new HashMap<String, GlobalDbConfig>();
+        for (Map.Entry<String, Object> entry : yaml.entrySet()) {
+            if (null == entry.getValue() || false == Map.class.isInstance(entry.getValue())) {
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Malformed configuration at " + entry.getKey());
+            }
+            Map<String, Object> values = (Map<String, Object>) entry.getValue();
+            int readPoolId;
+            int writePoolId;
+            try {
+                readPoolId = Integer.valueOf(String.valueOf(values.get("readPoolId")));
+                writePoolId = Integer.valueOf(String.valueOf(values.get("writePoolId")));
+            } catch (NumberFormatException e) {
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create(e, "Pool IDs can't be parsed for " + entry.getKey());
+            }
+            String schema = String.valueOf(values.get("schema"));
+            if (null == schema) {
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Schema missing for " + entry.getKey());
+            }
+            GlobalDbConfig dbConfig = new GlobalDbConfig(schema, readPoolId, writePoolId);
+            Object groups = values.get("groups");
+            if (null == groups || false == List.class.isInstance(groups)) {
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Groups missing for " + entry.getKey());
+            }
+            for (String group : (List<String>) groups) {
+                if (null != configs.put(group, dbConfig)) {
+                    throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Group " + group + " is defined a second time at " + entry.getKey());
+                }
+            }
+        }
+        return configs;
+    }
+
     private final String schema;
     private final int readPoolId;
     private final int writePoolId;
@@ -72,7 +115,7 @@ public class GlobalDbConfig {
      * @param readPoolId The read pool identifier
      * @param writePoolId The write pool identifier
      */
-    public GlobalDbConfig(String schema, int readPoolId, int writePoolId) {
+    private GlobalDbConfig(String schema, int readPoolId, int writePoolId) {
         super();
         this.schema = schema;
         this.readPoolId = readPoolId;
