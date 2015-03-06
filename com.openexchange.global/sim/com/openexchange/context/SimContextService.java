@@ -110,6 +110,11 @@ public class SimContextService implements ContextService{
 
     }
 
+    @Override
+    public void invalidateContexts(int[] contextIDs) throws OXException {
+        // Nothing to do
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#invalidateLoginInfo(java.lang.String)
      */
