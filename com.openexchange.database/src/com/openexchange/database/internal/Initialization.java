@@ -101,7 +101,6 @@ public final class Initialization {
     private final Configuration configuration = new Configuration();
 
     private CacheService cacheService;
-    private ConfigViewFactory configViewFactory;
     private ReplicationMonitor monitor;
     private Pools pools;
     private ConfigDatabaseServiceImpl configDatabaseService;
@@ -120,7 +119,7 @@ public final class Initialization {
         return null != databaseService;
     }
 
-    public DatabaseService start(final ConfigurationService configurationService) throws OXException {
+    public DatabaseService start(final ConfigurationService configurationService, ConfigViewFactory configViewFactory) throws OXException {
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
@@ -186,18 +185,6 @@ public final class Initialization {
         }
     }
 
-    /**
-     * Sets the config view factory to use.
-     *
-     * @param service A reference to the config view factory service, or <code>null</code> to remove a previously set factory
-     */
-    public void setConfigViewFactory(ConfigViewFactory service) {
-        this.configViewFactory = service;
-        if (null != globalDatabaseService) {
-            globalDatabaseService.setConfigViewFactory(service);
-        }
-    }
-
     public Management getManagement() {
         return management;
     }
@@ -224,8 +211,18 @@ public final class Initialization {
                 throw OXException.general("malformed config"); // TODO
             }
             Map<String, Object> values = (Map<String, Object>) entry.getValue();
-            int readPoolId = Integer.valueOf(String.valueOf(values.get("com.openexchange.database.global.readPoolId")));
-            int writePoolId = Integer.valueOf(String.valueOf(values.get("com.openexchange.database.global.writePoolId")));
+            final int readPoolId;
+            try {
+                readPoolId = Integer.parseInt(String.valueOf(values.get("com.openexchange.database.global.readPoolId")));
+            } catch (NumberFormatException e) {
+                throw OXException.general("failed to parse readPoolId " + values.get("com.openexchange.database.global.readPoolId")); // TODO
+            }
+            final int writePoolId;
+            try {
+                writePoolId = Integer.parseInt(String.valueOf(values.get("com.openexchange.database.global.writePoolId")));
+            } catch (NumberFormatException e) {
+                throw OXException.general("failed to parse readPoolId " + values.get("com.openexchange.database.global.writePoolId")); // TODO
+            }
             String schema = String.valueOf(values.get("com.openexchange.database.global.schema"));
             GlobalDbConfig dbConfig = new GlobalDbConfig(schema, readPoolId, writePoolId);
             Object groups = values.get("groups");

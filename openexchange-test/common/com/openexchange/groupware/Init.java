@@ -686,8 +686,9 @@ public final class Init {
             final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
             final TimerService timerService = (TimerService) services.get(TimerService.class);
             final CacheService cacheService = (CacheService) services.get(CacheService.class);
+            ConfigViewFactory configViewFactory = (ConfigViewFactory) services.get(ConfigViewFactory.class);
             com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
-            final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
+            final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, configViewFactory);
             services.put(DatabaseService.class, dbService);
             com.openexchange.database.internal.Initialization.getInstance().setCacheService(cacheService);
             Database.setDatabaseService(dbService);

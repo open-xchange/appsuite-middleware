@@ -52,6 +52,8 @@ package com.openexchange.database.osgi;
 import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
@@ -83,13 +85,13 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) {
+    public void start(final BundleContext context) throws Exception {
         createTableRegistration = context.registerService(CreateTableService.class, new CreateReplicationTable(), null);
-        trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new DatabaseServiceRegisterer(context)));
+        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ConfigViewFactory.class.getName() + "))");
+        trackers.push(new ServiceTracker<Object, Object>(context, filter, new DatabaseServiceRegisterer(context)));
         trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceCustomizer(context)));
         trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
         trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new CacheServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<ConfigViewFactory, ConfigViewFactory>(context, ConfigViewFactory.class, new ConfigViewFactoryCustomizer(context)));
         for (final ServiceTracker<?, ?> tracker : trackers) {
             tracker.open();
         }
