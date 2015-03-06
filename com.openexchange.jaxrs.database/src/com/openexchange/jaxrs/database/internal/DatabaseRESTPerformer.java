@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.json.JSONArray;
@@ -214,10 +215,10 @@ public class DatabaseRESTPerformer {
         db.initMonitoringTables(writePoolId, schema);
         db.initPartitions(writePoolId, schema, 0);
 
-        Connection con = db.get(writePoolId, schema);
+        connection = db.get(writePoolId, schema);
 
-        new CreateServiceSchemaVersionTable().perform(con);
-        new CreateServiceSchemaLockTable().perform(con);
+        new CreateServiceSchemaVersionTable().perform(connection);
+        new CreateServiceSchemaLockTable().perform(connection);
     }
 
     /**
@@ -241,6 +242,114 @@ public class DatabaseRESTPerformer {
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Unlocks a schema/module combination for the specified context identifier.
+     * 
+     * @param ctxId The context identifier
+     * @param module The module
+     * @throws OXException If the operation fails
+     */
+    public void unlock(int ctxId, String module) throws OXException {
+        DatabaseService dbService = dbService();
+        connection = dbService.getForUpdateTask(ctxId);
+        try {
+            DatabaseEnvironment.getInstance().getVersionChecker().unlock(connection, module);
+        } finally {
+            if (connection != null) {
+                dbService.backForUpdateTask(ctxId, connection);
+            }
+        }
+    }
+
+    /**
+     * Unlocks a schema/module combination for the specified context identifier.
+     * 
+     * @param readPoolId The read pool identifier
+     * @param writePoolId The write pool identifier
+     * @param schema The schema name
+     * @param partitionId The partition identifier
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    public void unlockMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String module) throws OXException {
+        DatabaseService dbService = dbService();
+        Connection connection = dbService.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId);
+        try {
+            DatabaseEnvironment.getInstance().getVersionChecker().unlock(connection, module);
+        } finally {
+            if (connection != null) {
+                dbService.backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, connection);
+            }
+        }
+    }
+
+    /**
+     * Migrate from the specified version to the specified version
+     * 
+     * @param ctxId The context identifier
+     * @param fromVersion Version updating from
+     * @param toVersion Version updating to
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    public void migrate(int ctxId, String fromVersion, String toVersion, String module) throws OXException {
+        finishMigrationWhenDone(ctxId);
+        connection = dbService().getForUpdateTask(ctxId);
+        migrationMetadata = new MigrationMetadata(ctxId, fromVersion, toVersion, module);
+        skipVersionNegotiation = true;
+
+        boolean successfullyLocked = DatabaseEnvironment.getInstance().getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
+        if (!successfullyLocked) {
+            dbService().backForUpdateTask(ctxId, connection);
+            postProcessor = null;
+            halt(423); // LOCKED
+        }
+
+        beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
+
+        try {
+            perform();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
+
+    /**
+     * Migrate from the specified version to the specified version by using a monitored connection
+     * 
+     * @param readId The read identifier
+     * @param writeId The write identifier
+     * @param schema The name of the schema
+     * @param partitionId The partition identifier
+     * @param fromVersion Version updating from
+     * @param toVersion Version updating to
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    public void migrateMonitored(int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
+        finishMigrationWhenDone(readId, writeId, schema, partitionId);
+        connection = dbService().getWritableMonitoredForUpdateTask(readId, writeId, schema, partitionId);
+        migrationMetadata = new MigrationMetadata(fromVersion, toVersion, module);
+        monitoredMetadata = new MonitoredMetadata(readId, writeId, schema, partitionId);
+
+        skipVersionNegotiation = true;
+
+        boolean successfullyLocked = DatabaseEnvironment.getInstance().getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
+        if (!successfullyLocked) {
+            dbService().backForUpdateTask(ctxId, connection);
+            postProcessor = null;
+            halt(423); // LOCKED
+        }
+
+        beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
+
+        try {
+            perform();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
     }
 

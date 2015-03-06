@@ -95,9 +95,9 @@ public class DatabaseRESTService extends JAXRSService {
      * @throws OXException If an error occurs
      */
     @PUT
-    @Path("/configdb/readOnly")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/configdb/readOnly")
     public JSONObject queryConfigDB() throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnConnectionWhenDone(DatabaseAccessType.READ);
@@ -116,9 +116,9 @@ public class DatabaseRESTService extends JAXRSService {
      * @throws OXException If an error occurs
      */
     @PUT
-    @Path("/configdb/writable")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/configdb/writable")
     public JSONObject updateConfigDB() throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnConnectionWhenDone(DatabaseAccessType.WRITE);
@@ -138,9 +138,9 @@ public class DatabaseRESTService extends JAXRSService {
      * @throws OXException If an error occurs
      */
     @PUT
-    @Path("/oxdb/{ctxId}/readOnly")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/oxdb/{ctxId}/readOnly")
     public JSONObject queryOXDB(@PathParam("ctxId") int ctxId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnConnectionWhenDone(DatabaseAccessType.READ, ctxId);
@@ -160,9 +160,9 @@ public class DatabaseRESTService extends JAXRSService {
      * @throws OXException If an error occurs
      */
     @PUT
-    @Path("/oxdb/{ctxId}/writable")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/oxdb/{ctxId}/writable")
     public JSONObject updateOXDB(@PathParam("ctxId") int ctxId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnConnectionWhenDone(DatabaseAccessType.WRITE, ctxId);
@@ -182,9 +182,9 @@ public class DatabaseRESTService extends JAXRSService {
      * @throws OXException
      */
     @PUT
-    @Path("/transaction/{transactionId}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/transaction/{transactionId}")
     public JSONObject queryTransaction(@PathParam("txId") String txId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         try {
@@ -201,9 +201,9 @@ public class DatabaseRESTService extends JAXRSService {
      * @throws OXException
      */
     @PUT
-    @Path("/transaction/{transactionId}/rollback")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/transaction/{transactionId}/rollback")
     public void rollbackTransaction(@PathParam("txId") String txId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.rollbackTransaction(txId);
@@ -216,14 +216,97 @@ public class DatabaseRESTService extends JAXRSService {
      * @throws OXException
      */
     @PUT
-    @Path("/transaction/{transactionId}/commit")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/transaction/{transactionId}/commit")
     public void commitTransaction(@PathParam("txId") String txId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.commitTransaction(txId);
     }
 
+    /**
+     * Query a monitored connection
+     * 
+     * @param readId The read pool identifier
+     * @param writeId The write pool identifier
+     * @param schema The schema name
+     * @param partitionId The partition identifier
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/readOnly")
+    public void queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.returnMonitoredConnectionWhenDone(DatabaseAccessType.READ, readId, writeId, schema, partitionId);
+        performer.setConnection(getService(DatabaseService.class).getReadOnlyMonitored(readId, writeId, schema, partitionId));
+
+        try {
+            performer.perform();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Query a monitored connection
+     * 
+     * @param readId The read pool identifier
+     * @param writeId The write pool identifier
+     * @param schema The schema name
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/pool/r/{readId}/w/{writeId}/{schema}/readOnly")
+    public void queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
+        queryInMonitoredConnection(readId, writeId, schema, 0);
+    }
+    
+    /**
+     * Update a monitored connection
+     * 
+     * @param readId The read pool identifier
+     * @param writeId The write pool identifier
+     * @param schema The schema name
+     * @param partitionId The partition identifier
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/writable")
+    public void updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.returnMonitoredConnectionWhenDone(DatabaseAccessType.WRITE, readId, writeId, schema, partitionId);
+        performer.setConnection(getService(DatabaseService.class).getWritableMonitored(readId, writeId, schema, partitionId));
+
+        try {
+            performer.perform();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        }
+    }
+    
+    /**
+     * Update a monitored connection
+     * 
+     * @param readId The read pool identifier
+     * @param writeId The write pool identifier
+     * @param schema The schema name
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/pool/r/{readId}/w/{writeId}/{schema}/writable")
+    public void updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
+        updateInMonitoredConnection(readId, writeId, schema, 0);
+    }
+
+        
     /**
      * Initialize a new database schema with the specified name and the specified write pool identifier.
      * 
@@ -232,11 +315,11 @@ public class DatabaseRESTService extends JAXRSService {
      * @throws OXException If the initialization of the new schema fails
      */
     @GET
-    @Path("/init/w/{writeId}/{schema}")
     @Consumes(MediaType.TEXT_PLAIN)
-    public void initSchema(@PathParam("writePoolId") int writePoolId, @PathParam("schema") String schema) throws OXException {
+    @Path("/init/w/{writeId}/{schema}")
+    public void initSchema(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.initSchema(writePoolId, schema);
+        performer.initSchema(writeId, schema);
     }
 
     /**
@@ -247,11 +330,177 @@ public class DatabaseRESTService extends JAXRSService {
      * @throws OXException If the operation fails
      */
     @PUT
-    @Path("/pool/w/{writeId}/{schema}/partitions")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/pool/w/{writeId}/{schema}/partitions")
     public void insertPartitionIds(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.insertPartitionIds(writeId, schema);
     }
+
+    /**
+     * Unlocks a schema/module combination.
+     * 
+     * @param ctxId The context identifier
+     * @param module The module
+     * @throws OXException If the operation fails
+     */
+    @GET
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/unlock/for/{ctxId}/andModule/{module}")
+    public void unlock(@PathParam("ctxId") int ctxId, @PathParam("module") String module) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.unlock(ctxId, module);
+    }
+
+    /**
+     * Unlocks a schema/module combination for the specified context identifier.
+     * 
+     * @param readPoolId The read pool identifier
+     * @param writePoolId The write pool identifier
+     * @param schema The schema name
+     * @param partitionId The partition identifier
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    @GET
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/andModule/{module}")
+    public void unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module) throws OXException {
+        unlockMonitored(readId, writeId, schema, 0, module);
+    }
+
+    /**
+     * Unlocks a schema/module combination for the specified context identifier.
+     * 
+     * @param readPoolId The read pool identifier
+     * @param writePoolId The write pool identifier
+     * @param schema The schema name
+     * @param partitionId The partition identifier
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    @GET
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/andModule/{module}")
+    public void unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("module") String module) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.unlockMonitored(readId, writeId, schema, partitionId, module);
+    }
+
+    /**
+     * Perform an initial migration to the specified version
+     * 
+     * @param ctxId The context identifier
+     * @param toVersion Version updating to
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/migration/for/{ctxId}/to/{toVersion}/forModule/{module}")
+    public void initialiMigration(@PathParam("ctxId") int ctxId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+        migrate(ctxId, "", toVersion, module);
+    }
+
+    /**
+     * Migrate from the specified version to the specified version
+     * 
+     * @param ctxId The context identifier
+     * @param fromVersion Version updating from
+     * @param toVersion Version updating to
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/migration/for/{ctxId}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
+    public void migrate(@PathParam("ctxId") int ctxId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.migrate(ctxId, fromVersion, toVersion, module);
+    }
+
+    /**
+     * Migrate from the specified version to the specified version by using a monitored connection
+     * 
+     * @param readId The read identifier
+     * @param writeId The write identifier
+     * @param schema The name of the schema
+     * @param partitionId The partition identifier
+     * @param fromVersion Version updating from
+     * @param toVersion Version updating to
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
+    public void migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.migrateMonitored(readId, writeId, schema, partitionId, fromVersion, toVersion, module);
+    }
+
+    /**
+     * Migrate from the specified version to the specified version by using a monitored connection
+     * 
+     * @param readId The read identifier
+     * @param writeId The write identifier
+     * @param schema The name of the schema
+     * @param toVersion Version updating to
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/to/{toVersion}/forModule/{module}")
+    public void migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+        migrateMonitored(readId, writeId, schema, 0, "", toVersion, module);
+    }
+
+    /**
+     * Migrate from the specified version to the specified version by using a monitored connection
+     * 
+     * @param readId The read identifier
+     * @param writeId The write identifier
+     * @param schema The name of the schema
+     * @param partitionId The partition identifier
+     * @param toVersion Version updating to
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/to/{toVersion}/forModule/{module}")
+    public void migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+        migrateMonitored(readId, writeId, schema, partitionId, "", toVersion, module);
+    }
+
+    /**
+     * Migrate from the specified version to the specified version by using a monitored connection
+     * 
+     * @param readId The read identifier
+     * @param writeId The write identifier
+     * @param schema The name of the schema
+     * @param fromVersion Version updating from
+     * @param toVersion Version updating to
+     * @param module The module name
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
+    public void migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.migrateMonitored(readId, writeId, schema, 0, fromVersion, toVersion, module);
+    }
+
 }

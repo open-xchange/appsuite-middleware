@@ -152,16 +152,25 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         perform();
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/pool/r/:readId/w/:writeId/:schema/readOnly")
     public void queryInMonitoredConnection(int readId, int writeId, String schema) throws OXException {
         queryInMonitoredConnection(readId, writeId, schema, 0);
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/pool/r/:readId/w/:writeId/:schema/writable")
     public void updateInMonitoredConnection(int readId, int writeId, String schema) throws OXException {
         updateInMonitoredConnection(readId, writeId, schema, 0);
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/pool/r/:readId/w/:writeId/:schema/:partitionId/readOnly")
     public void queryInMonitoredConnection(int readId, int writeId, String schema, int partitionId) throws OXException {
         returnMonitoredConnectionWhenDone(AccessType.READ, readId, writeId, schema, partitionId);
@@ -232,11 +241,17 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         unpackTransaction();
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/migration/for/:ctxId/to/:toVersion/forModule/:module")
     public void initialMigration(int ctxId, String toVersion, String module) throws OXException {
         migrate(ctxId, "", toVersion, module);
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/migration/for/:ctxId/from/:fromVersion/to/:toVersion/forModule/:module")
     public void migrate(int ctxId, final String fromVersion, final String toVersion, final String module) throws OXException {
         finishMigrationWhenDone(ctxId);
@@ -255,21 +270,34 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
         perform();
     }
+
+    /**
+     * @deprecated
+     */
     @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/to/:toVersion/forModule/:module")
     public void migrateMonitored(int readPoolId, int writePoolId, String schema, String toVersion, String module) throws OXException {
         migrateMonitored(readPoolId, writePoolId, schema, 0, "", toVersion, module);
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/:partitionId/to/:toVersion/forModule/:module")
     public void migrateMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String toVersion, String module) throws OXException {
         migrateMonitored(readPoolId, writePoolId, schema, partitionId, "", toVersion, module);
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/from/:fromVersion/to/:toVersion/forModule/:module")
     public void migrateMonitored(int readPoolId, int writePoolId, String schema, String fromVersion, String toVersion, String module) throws OXException {
         migrateMonitored(readPoolId, writePoolId, schema, 0, fromVersion, toVersion, module);
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/:partitionId/from/:fromVersion/to/:toVersion/forModule/:module")
     public void migrateMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
         finishMigrationWhenDone(readPoolId, writePoolId, schema, partitionId);
@@ -292,6 +320,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
     }
 
+    /**
+     * @deprecated
+     */
     @GET("/unlock/for/:ctxId/andModule/:module")
     public void unlock(int ctxId, String module) throws OXException {
         DatabaseService dbs = services.getService(DatabaseService.class);
@@ -304,11 +335,18 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             }
         }
     }
+
+    /**
+     * @deprecated
+     */
     @GET("/unlock/pool/r/:readId/w/:writeId/:schema/andModule/:module")
     public void unlockMonitored(int readPoolId, int writePoolId, String schema, String module) throws OXException {
         unlockMonitored(readPoolId, writePoolId, schema, 0, module);
     }
 
+    /**
+     * @deprecated
+     */
     @GET("/unlock/pool/r/:readId/w/:writeId/:schema/:partitionId/andModule/:module")
     public void unlockMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String module) throws OXException {
         DatabaseService dbs = services.getService(DatabaseService.class);
@@ -338,12 +376,15 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         new CreateServiceSchemaLockTable().perform(con);
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/pool/w/:writeId/:schema/partitions")
     public void insertPartitionIds(int writeId, String schema) throws OXException {
         try {
             JSONArray arr = (JSONArray) request.getData();
             int[] partitionIds = new int[arr.length()];
-            for(int i = 0; i < partitionIds.length; i++) {
+            for (int i = 0; i < partitionIds.length; i++) {
                 partitionIds[i] = arr.getInt(i);
             }
 
@@ -355,10 +396,10 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
     @Override
     public void after() throws OXException {
-        for(ResultSet rs: resultSets) {
+        for (ResultSet rs : resultSets) {
             DBUtils.closeSQLStuff(rs);
         }
-        for(Statement stmt: statements) {
+        for (Statement stmt : statements) {
             DBUtils.closeSQLStuff(stmt);
         }
         if (postProcessor != null) {
@@ -393,7 +434,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         if (queries.size() > QUERY_LIMIT) {
             throw RESTDBErrorCodes.QUERY_LIMIT_EXCEEDED.create(QUERY_LIMIT, queries.size());
         }
-        for(Map.Entry<String, Query> question: queries.entrySet()) {
+        for (Map.Entry<String, Query> question : queries.entrySet()) {
             Query query = question.getValue();
             try {
                 PreparedStatement stmt = query.prepareFor(con);
@@ -409,13 +450,13 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                     int count = 0;
                     List<String> columns = new ArrayList<String>();
                     ResultSetMetaData metaData = rs.getMetaData();
-                    for(int i = 1, size = metaData.getColumnCount(); i <= size; i++) {
+                    for (int i = 1, size = metaData.getColumnCount(); i <= size; i++) {
                         columns.add(metaData.getColumnName(i));
                     }
 
-                    while(rs.next() && count < MAX_ROWS) {
+                    while (rs.next() && count < MAX_ROWS) {
                         Map<String, Object> row = new HashMap<String, Object>();
-                        for(String colName: columns) {
+                        for (String colName : columns) {
                             row.put(colName, rs.getObject(colName));
                         }
                         rows.add(row);
@@ -435,7 +476,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                         ResultSet rs = stmt.getGeneratedKeys();
                         this.resultSets.add(rs);
                         JSONArray keys = new JSONArray();
-                        while(rs.next()) {
+                        while (rs.next()) {
                             keys.put(rs.getObject(1));
                         }
                         res.put("generatedKeys", keys);
@@ -481,13 +522,13 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         try {
             Object data = request.getData();
             if (data instanceof String) {
-                queries.put("result", new Query((String)data, Collections.emptyList(), accessType == AccessType.READ, false));
+                queries.put("result", new Query((String) data, Collections.emptyList(), accessType == AccessType.READ, false));
             } else if (data instanceof JSONObject) {
                 JSONObject queryMap = (JSONObject) data;
-                for(String queryName: queryMap.keySet()) {
+                for (String queryName : queryMap.keySet()) {
                     Object queryObj = queryMap.get(queryName);
                     if (queryObj instanceof String) {
-                        queries.put(queryName, new Query((String)queryObj, Collections.emptyList(), accessType == AccessType.READ, false));
+                        queries.put(queryName, new Query((String) queryObj, Collections.emptyList(), accessType == AccessType.READ, false));
                     } else if (queryObj instanceof JSONObject) {
                         JSONObject querySpec = (JSONObject) queryObj;
                         String q = querySpec.getString("query");
@@ -513,7 +554,6 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         }
         return queries;
     }
-
 
     private void handleTransaction() throws OXException {
         unpackTransaction();
@@ -607,10 +647,11 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     }
 
     private static interface BeforeHandler {
+
         public void before() throws OXException, SQLException;
     }
 
-     private static enum AccessType {
+    private static enum AccessType {
         READ, WRITE
     }
 
@@ -626,12 +667,12 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 con.setAutoCommit(true);
                 DatabaseService db = dbService();
                 switch (accessType) {
-                case READ:
-                    db.backReadOnlyMonitored(readId, writeId, schema, partitionId, con);
-                    break;
-                case WRITE:
-                    db.backWritableMonitored(readId, writeId, schema, partitionId, con);
-                    break;
+                    case READ:
+                        db.backReadOnlyMonitored(readId, writeId, schema, partitionId, con);
+                        break;
+                    case WRITE:
+                        db.backWritableMonitored(readId, writeId, schema, partitionId, con);
+                        break;
                 }
             }
         };
@@ -649,12 +690,12 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 con.setAutoCommit(true);
                 DatabaseService db = services.getService(DatabaseService.class);
                 switch (accessType) {
-                case READ:
-                    db.backReadOnly(con);
-                    break;
-                case WRITE:
-                    db.backWritable(con);
-                    break;
+                    case READ:
+                        db.backReadOnly(con);
+                        break;
+                    case WRITE:
+                        db.backWritable(con);
+                        break;
                 }
             }
         };
@@ -672,12 +713,12 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 con.setAutoCommit(true);
                 DatabaseService db = services.getService(DatabaseService.class);
                 switch (accessType) {
-                case READ:
-                    db.backReadOnly(ctxId, con);
-                    break;
-                case WRITE:
-                    db.backWritable(ctxId, con);
-                    break;
+                    case READ:
+                        db.backReadOnly(ctxId, con);
+                        break;
+                    case WRITE:
+                        db.backWritable(ctxId, con);
+                        break;
                 }
             }
         };
@@ -718,8 +759,8 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         };
     }
 
-
     private class TransactionCloser implements ConnectionPostProcessor {
+
         private final Transaction tx;
 
         public TransactionCloser(Transaction tx) {
@@ -744,17 +785,17 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
             if (monitoredMetadata != null) {
                 switch (accessType) {
-                case READ:
-                    db.backReadOnlyMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
-                    break;
-                case WRITE:
-                    if (migrationMetadata != null) {
-                        db.backWritableMonitoredForUpdateTask(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
+                    case READ:
+                        db.backReadOnlyMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
+                        break;
+                    case WRITE:
+                        if (migrationMetadata != null) {
+                            db.backWritableMonitoredForUpdateTask(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
 
-                    } else {
-                        db.backWritableMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
-                    }
-                    break;
+                        } else {
+                            db.backWritableMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
+                        }
+                        break;
                 }
             } else if (migrationMetadata != null) {
                 services.getService(DatabaseService.class).backForUpdateTask(ctxId, con);
@@ -780,6 +821,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     }
 
     private static class Query {
+
         private final String query;
         private final List<Object> values;
         private boolean wantsResultSet = false;
@@ -801,7 +843,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             if (values == null) {
                 return stmt;
             }
-            for(int i = 0, size = values.size(); i < size; i++) {
+            for (int i = 0, size = values.size(); i < size; i++) {
                 stmt.setObject(i + 1, values.get(i));
             }
             return stmt;
@@ -813,6 +855,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     }
 
     private static class MigrationMetadata {
+
         public int ctxId;
         public String fromVersion, toVersion, module;
 
@@ -847,12 +890,13 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         }
 
         public String getID() {
-            return readId+":"+writeId+":"+schema;
+            return readId + ":" + writeId + ":" + schema;
         }
 
     }
 
     public static final class Environment {
+
         public TransactionKeeper transactions;
         public VersionChecker versions;
 
@@ -890,9 +934,5 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         }
 
     }
-
-
-
-
 
 }
