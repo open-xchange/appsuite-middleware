@@ -218,18 +218,17 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
         }
         // Sent to remote receivers
         IExecutorService executorService = hazelcastInstance.getExecutorService("default");
-        List<Future<Map<ID, OXException>>> futures = new ArrayList<Future<Map<ID, OXException>>>();
+        List<Future<IDMap<OXException>>> futures = new ArrayList<Future<IDMap<OXException>>>();
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
             LOG.debug("Sending to '{}' @ {}", stanza.getTo(), receiver);
             stanza.trace("Sending to '" + stanza.getTo() + "' @ " + receiver);
             ensureSequence(stanza, receiver);
-            Future<Map<ID, OXException>> task = executorService.submitToMember(new PortableStanzaDispatcher(stanza, ids), receiver);
+            Future<IDMap<OXException>> task = executorService.submitToMember(new PortableStanzaDispatcher(stanza, ids), receiver);
             futures.add(task);
         }
         // Await completion of send requests and extract their exceptions (if any)
-
-        for (Future<Map<ID, OXException>> future : futures) {
+        for (Future<IDMap<OXException>> future : futures) {
             try {
                 exceptions.putAll(future.get());
             } catch (InterruptedException e) {

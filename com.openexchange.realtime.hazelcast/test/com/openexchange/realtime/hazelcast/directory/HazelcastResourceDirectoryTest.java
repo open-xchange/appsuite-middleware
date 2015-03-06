@@ -85,7 +85,7 @@ import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.RoutingInfo;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
-import com.openexchange.realtime.hazelcast.group.helper.DynamicPortableFactoryImpl;
+import com.openexchange.realtime.hazelcast.serialization.DynamicPortableFactoryImpl;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableResourceFactory;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableRoutingInfoFactory;
