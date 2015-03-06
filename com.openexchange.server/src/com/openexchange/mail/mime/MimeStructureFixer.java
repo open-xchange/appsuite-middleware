@@ -178,18 +178,8 @@ public final class MimeStructureFixer {
                 }
             }
 
-            // Remember original Message-ID
-            String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
-
             // Process it
             MimeMessage processed = process0(mimeMessage, message.getContentType());
-            MimeMessageConverter.saveChanges(processed);
-            // Restore original Message-Id header
-            if (null == messageId) {
-                processed.removeHeader(MESSAGE_ID);
-            } else {
-                processed.setHeader(MESSAGE_ID, messageId);
-            }
 
             // Yield appropriate MailMessage instance
             MailMessage processedMessage = MimeMessageConverter.convertMessage(processed, false);
@@ -269,8 +259,7 @@ public final class MimeStructureFixer {
                         return mimeMessage;
                     }
                 }
-                // Remember original Message-ID
-                String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
+
                 // Start to check & fix multipart structure
                 MimeMessage mime;
                 if (mimeMessage instanceof com.sun.mail.util.ReadableMime) {
@@ -286,13 +275,7 @@ public final class MimeStructureFixer {
                     mime = mimeMessage;
                 }
                 MimeMessage retval = process0(mime, contentType);
-                MimeMessageConverter.saveChanges(retval);
-                // Restore original Message-Id header
-                if (null == messageId) {
-                    retval.removeHeader(MESSAGE_ID);
-                } else {
-                    retval.setHeader(MESSAGE_ID, messageId);
-                }
+
                 closeSink = false;
                 return retval;
             } catch (MessagingException e) {
@@ -309,8 +292,22 @@ public final class MimeStructureFixer {
 
     private MimeMessage process0(final MimeMessage mimeMessage, final ContentType contentType) throws OXException {
         try {
+            // Remember original Message-ID
+            String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
+
             // Start to check & fix multipart structure
             handlePart(multipartFor(mimeMessage, contentType));
+
+            // Save changes
+            MimeMessageConverter.saveChanges(mimeMessage);
+
+            // Restore original Message-Id header
+            if (null == messageId) {
+                mimeMessage.removeHeader(MESSAGE_ID);
+            } else {
+                mimeMessage.setHeader(MESSAGE_ID, messageId);
+            }
+
             return mimeMessage;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
