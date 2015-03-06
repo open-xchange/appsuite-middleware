@@ -57,6 +57,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.internal.CreateReplicationTable;
 import com.openexchange.database.internal.reloadable.GenericReloadable;
@@ -88,6 +89,7 @@ public class Activator implements BundleActivator {
         trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceCustomizer(context)));
         trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
         trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new CacheServiceCustomizer(context)));
+        trackers.push(new ServiceTracker<ConfigViewFactory, ConfigViewFactory>(context, ConfigViewFactory.class, new ConfigViewFactoryCustomizer(context)));
         for (final ServiceTracker<?, ?> tracker : trackers) {
             tracker.open();
         }
