@@ -193,8 +193,14 @@ public final class Initialization {
         return timer;
     }
 
-    private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(ConfigurationService configService) throws OXException {
-        return parseGlobalDbConfigs(configService.getYaml("globaldb.yml"));
+    private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(ConfigurationService configService) {
+        Map<String, GlobalDbConfig> configs = new HashMap<String, GlobalDbConfig>();
+        try {
+            configs = parseGlobalDbConfigs(configService.getYaml("globaldb.yml"));
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return configs;
     }
 
     private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(Object yaml) throws OXException {
