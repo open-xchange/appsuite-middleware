@@ -178,8 +178,18 @@ public final class MimeStructureFixer {
                 }
             }
 
+            // Remember original Message-ID
+            String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
+
             // Process it
             MimeMessage processed = process0(mimeMessage, message.getContentType());
+            MimeMessageConverter.saveChanges(processed);
+            // Restore original Message-Id header
+            if (null == messageId) {
+                processed.removeHeader(MESSAGE_ID);
+            } else {
+                processed.setHeader(MESSAGE_ID, messageId);
+            }
 
             // Yield appropriate MailMessage instance
             MailMessage processedMessage = MimeMessageConverter.convertMessage(processed, false);
