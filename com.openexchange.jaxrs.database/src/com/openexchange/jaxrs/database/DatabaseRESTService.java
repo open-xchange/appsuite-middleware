@@ -239,4 +239,19 @@ public class DatabaseRESTService extends JAXRSService {
         performer.initSchema(writePoolId, schema);
     }
 
+    /**
+     * Inserts the partition identifiers to the replication monitor table
+     * 
+     * @param writeId The write identifier referencing the master db server
+     * @param schema The name of the schema
+     * @throws OXException If the operation fails
+     */
+    @PUT
+    @Path("/pool/w/{writeId}/{schema}/partitions")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public void insertPartitionIds(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+        performer.insertPartitionIds(writeId, schema);
+    }
 }

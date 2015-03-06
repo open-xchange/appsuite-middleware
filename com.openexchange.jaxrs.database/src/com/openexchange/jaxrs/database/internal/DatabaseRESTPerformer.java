@@ -221,6 +221,30 @@ public class DatabaseRESTPerformer {
     }
 
     /**
+     * Inserts the partition identifiers to the replication monitor table
+     * 
+     * @param writeId The write identifier referencing the master db server
+     * @param schema The name of the schema
+     * @throws OXException If the operation fails
+     */
+    public void insertPartitionIds(int writeId, String schema) throws OXException {
+        Object data = ajaxData.getData();
+        if (data instanceof JSONArray) {
+            try {
+                JSONArray array = (JSONArray) data;
+                int[] partitionIds = new int[array.length()];
+                for (int i = 0; i < partitionIds.length; i++) {
+                    partitionIds[i] = array.getInt(i);
+                }
+
+                dbService().initPartitions(writeId, schema, partitionIds);
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Performs the execution of the DatabaseQuery objects
      * 
      * @return A JSONObject with the results.
