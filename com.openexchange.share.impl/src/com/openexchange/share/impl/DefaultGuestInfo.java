@@ -75,7 +75,7 @@ public class DefaultGuestInfo implements GuestInfo {
     /**
      * Initializes a new {@link DefaultGuestInfo}.
      *
-     * @param services A servie lookup reference
+     * @param services A service lookup reference
      * @param contextID The identifier of the context this guest user belongs to
      * @param guestUser The guest user
      */
@@ -86,7 +86,7 @@ public class DefaultGuestInfo implements GuestInfo {
     /**
      * Initializes a new {@link DefaultGuestInfo}.
      *
-     * @param services A servie lookup reference
+     * @param services A service lookup reference
      * @param guestUser The guest user
      * @param shareToken The share token
      */

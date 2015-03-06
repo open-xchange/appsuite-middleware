@@ -185,17 +185,15 @@ public final class Initialization {
         }
     }
 
+    /**
+     * Sets the config view factory to use.
+     *
+     * @param service A reference to the config view factory service, or <code>null</code> to remove a previously set factory
+     */
     public void setConfigViewFactory(ConfigViewFactory service) {
         this.configViewFactory = service;
         if (null != globalDatabaseService) {
             globalDatabaseService.setConfigViewFactory(service);
-        }
-    }
-
-    public void removeConfigViewFactory() {
-        this.configViewFactory = null;
-        if (null != globalDatabaseService) {
-            globalDatabaseService.setConfigViewFactory(null);
         }
     }
 

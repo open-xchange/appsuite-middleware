@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -99,6 +99,28 @@ if [ ${1:-0} -eq 2 ]; then
     if [ "$VALUE" = "false" ]; then
         ox_set_property com.openexchange.oauth.xing true $PFILE
     fi
+
+    # SoftwareChange_Request-2410
+    VALUE=$(ox_read_property com.openexchange.twitter.consumerKey /opt/open-xchange/etc/twitter.properties)
+    if [ "" != "$VALUE" ]; then
+        ox_add_property com.openexchange.oauth.twitter.apiKey "$VALUE" /opt/open-xchange/etc/twitteroauth.properties
+        ox_remove_property com.openexchange.twitter.consumerKey /opt/open-xchange/etc/twitter.properties
+    fi
+    VALUE=$(ox_read_property com.openexchange.twitter.consumerSecret /opt/open-xchange/etc/twitter.properties)
+    if [ "" != "$VALUE" ]; then
+        ox_add_property com.openexchange.oauth.twitter.apiSecret "$VALUE" /opt/open-xchange/etc/twitteroauth.properties
+        ox_remove_property com.openexchange.twitter.consumerSecret /opt/open-xchange/etc/twitter.properties
+    fi
+    PFILE=/opt/open-xchange/etc/facebookoauth.properties
+    OLDNAMES=( com.openexchange.facebook.apiKey com.openexchange.facebook.secretKey )
+    NEWNAMES=( com.openexchange.oauth.facebook.apiKey com.openexchange.oauth.facebook.apiSecret )
+    for I in $(seq 1 ${#OLDNAMES[@]}); do
+        VALUE=$(ox_read_property ${OLDNAMES[$I-1]} $PFILE)
+        if [ "" != "$VALUE" ]; then
+            ox_add_property ${NEWNAMES[$I-1]} "$VALUE" $PFILE
+            ox_remove_property ${OLDNAMES[$I-1]} $PFILE
+        fi
+    done
 fi
 
 %clean

@@ -59,7 +59,6 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.storage.StorageParameters;
 
-
 /**
  * {@link ConnectionHelper}
  *
@@ -184,12 +183,20 @@ public class ConnectionHelper {
      * @throws OXException
      */
     public void finish() {
-        if (ownsConnection) {
+        if (ownsConnection && null != connection) {
             if (false == committed) {
                 Databases.rollback(connection);
             }
             Databases.autocommit(connection);
-            services.getService(DatabaseService.class).backWritable(contextID, connection);
+            try {
+                if (connection.isReadOnly()) {
+                    services.getService(DatabaseService.class).backReadOnly(contextID, connection);
+                } else {
+                    services.getService(DatabaseService.class).backWritable(contextID, connection);
+                }
+            } catch (SQLException e) {
+                org.slf4j.LoggerFactory.getLogger(ConnectionHelper.class).warn("Error backing connection", e);
+            }
         }
     }
 
