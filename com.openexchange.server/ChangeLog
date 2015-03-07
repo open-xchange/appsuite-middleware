@@ -1,3 +1,7 @@
+* 2015-03-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37141: Do not discard subsequent inline test parts
+
 * 2015-03-04 - martin.herfurth@open-xchange.com
 
  - Fix for bug 36828: Delete of external recurring appointments caused problems under specific circumstances.
