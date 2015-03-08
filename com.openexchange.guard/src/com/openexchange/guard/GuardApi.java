@@ -86,6 +86,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.version.Version;
 
 
 /**
@@ -194,7 +195,7 @@ public class GuardApi {
             synchronized (this) {
                 tmp = httpClient;
                 if (null == tmp) {
-                    tmp = HttpClients.getHttpClient("OX Guard Http Client v" + com.openexchange.version.Version.getInstance().getVersionString());
+                    tmp = HttpClients.getHttpClient("OX Guard Http Client v" + Version.getInstance().getVersionString());
                     Credentials credentials = new UsernamePasswordCredentials(authLogin, authPassword);
                     tmp.getCredentialsProvider().setCredentials(new AuthScope(uri.getHost(), uri.getPort()), credentials);
                     httpClient = tmp;
