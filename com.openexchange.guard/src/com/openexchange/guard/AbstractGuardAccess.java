@@ -49,6 +49,8 @@
 
 package com.openexchange.guard;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -83,6 +85,27 @@ public abstract class AbstractGuardAccess {
      */
     protected static GuardApi getGuardApi() {
         return API_REF.get();
+    }
+
+    /**
+     * Gets a map for specified arguments.
+     *
+     * @param args The arguments
+     * @return The resulting map
+     */
+    protected static Map<String, String> mapFor(String... args) {
+        if (null == args) {
+            return null;
+        }
+        int length = args.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+        Map<String, String> map = new HashMap<String, String>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(args[i], args[i+1]);
+        }
+        return map;
     }
 
 }

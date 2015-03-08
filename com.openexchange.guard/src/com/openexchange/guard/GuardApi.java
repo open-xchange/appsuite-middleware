@@ -49,7 +49,6 @@
 
 package com.openexchange.guard;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -79,6 +78,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
@@ -293,11 +293,27 @@ public class GuardApi {
             return null;
         }
 
-        ByteArrayOutputStream bStream = Streams.newByteArrayOutputStream(1024);
-        OutputStreamWriter osw = new OutputStreamWriter(bStream, Charsets.UTF_8);
-        jValue.write(osw);
-        osw.flush();
-        return new InputStreamEntity(Streams.asInputStream(bStream), bStream.size(), ContentType.APPLICATION_JSON);
+        ThresholdFileHolder sink = null;
+        boolean error = true;
+        try {
+            sink = new ThresholdFileHolder();
+            OutputStreamWriter osw = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
+            jValue.write(osw);
+            osw.flush();
+            InputStreamEntity entity = new InputStreamEntity(sink.getStream(), sink.getLength(), ContentType.APPLICATION_JSON);
+            error = false;
+            return entity;
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            throw new IOException(null == cause ? e : cause);
+        } finally {
+            if (error && null != sink) {
+                Streams.close(sink);
+            }
+        }
     }
 
     /**
