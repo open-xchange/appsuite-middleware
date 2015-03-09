@@ -781,7 +781,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Propagate reloaded configuration among Reloadables
         for (Reloadable reloadable : reloadableServices.values()) {
             try {
-                Set<String> configFileNames = reloadable.getConfigFileNames().keySet();
+                Map<String, String[]> configFileNames = reloadable.getConfigFileNames();
                 if (null == configFileNames || configFileNames.isEmpty()) {
                     // Reloadable does not indicate the files of interest
 
@@ -790,7 +790,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                     // Reloadable does indicate the files of interest; thus check against changed ones
 
                     boolean doReload = false;
-                    for (Iterator<String> it = configFileNames.iterator(); !doReload && it.hasNext();) {
+                    for (Iterator<String> it = configFileNames.keySet().iterator(); !doReload && it.hasNext();) {
                         String fileName = it.next();
                         for (String changedFilePath : changes) {
                             if (changedFilePath.endsWith(fileName)) {

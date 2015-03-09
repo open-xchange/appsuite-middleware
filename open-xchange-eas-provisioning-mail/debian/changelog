@@ -4,6 +4,24 @@ open-xchange-eas-provisioning-mail (7.8.0-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:40:51 +0100
 
+open-xchange-eas-provisioning-mail (7.6.2-11) stable; urgency=medium
+
+  * Eleventh candidate for 7.6.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 06 Mar 2015 15:30:49 +0100
+
+open-xchange-eas-provisioning-mail (7.6.2-10) stable; urgency=medium
+
+  * Tenth candidate for 7.6.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 04 Mar 2015 13:13:55 +0100
+
+open-xchange-eas-provisioning-mail (7.6.2-9) stable; urgency=medium
+
+  * Nineth candidate for 7.6.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 03 Mar 2015 11:51:57 +0100
+
 open-xchange-eas-provisioning-mail (7.6.2-8) stable; urgency=low
 
   * Eighth candidate for 7.6.2 release

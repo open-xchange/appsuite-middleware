@@ -143,10 +143,10 @@ public interface ConfigDatabaseService {
     String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException;
 
     /**
-     * Invalidates all cached database pooling information for a context. This are especially the assignments to database servers.
-     * @param contextId unique identifier of the context.
+     * Invalidates all cached database pooling information for one or more contexts. This are especially the assignments to database servers.
+     * @param contextIds unique identifiers of the contexts.
      */
-    void invalidate(int contextId);
+    void invalidate(int... contextIds);
 
     /**
      * Writes a database assignment for a certain context.

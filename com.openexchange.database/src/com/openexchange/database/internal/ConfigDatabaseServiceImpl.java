@@ -202,8 +202,8 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
-    public void invalidate(final int contextId) {
-        contextAssignment.invalidateAssignment(contextId);
+    public void invalidate(final int... contextIds) {
+        contextAssignment.invalidateAssignment(contextIds);
     }
 
     @Override

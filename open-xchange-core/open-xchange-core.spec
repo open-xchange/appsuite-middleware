@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1133,6 +1133,15 @@ ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/op
 # SoftwareChange_Request-2270
 ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-2335
+PFILE=/opt/open-xchange/etc/ox-scriptconf.sh
+JOPTS=$(eval ox_read_property JAVA_XTRAOPTS $PFILE)
+JOPTS=${JOPTS//\"/}
+if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
+    JOPTS="$JOPTS -Dlogback.threadlocal.put.duplicate=false"
+    ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
+fi
+
 # SoftwareChange_Request-2342
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
@@ -1143,8 +1152,30 @@ if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatIn
 EOF
 fi
 
+# SoftwareChange_Request-2350
+ox_add_property com.openexchange.mail.signature.maxImageSize 1 /opt/open-xchange/etc/mail.properties
+ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchange/etc/mail.properties
+
 # SoftwareChange_Request-2353
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
+
+# SoftwareChange_Request-2442
+VALUE=$(ox_read_property html.style.background-position /opt/open-xchange/etc/whitelist.properties)
+if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
+    ox_set_property html.style.background-position "\",N,top,bottom,center,left,right,\"" /opt/open-xchange/etc/whitelist.properties
+fi
+
+# SoftwareChange_Request-2444
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# v7.6.2 update tasks start here
+
+# Deletes remnants for removed Facebook subscription
+!com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask
+EOF
+fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -1186,6 +1217,12 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Eleventh candidate for 7.6.2 release
+* Wed Mar 04 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Tenth candidate for 7.6.2 release
+* Tue Mar 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Nineth candidate for 7.6.2 release
 * Thu Feb 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-02-23
 * Tue Feb 24 2015 Marcus Klein <marcus.klein@open-xchange.com>

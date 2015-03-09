@@ -92,7 +92,7 @@ public final class GetUpdatesAction extends AbstractMailAction {
         super(services);
     }
 
-    private final transient MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriter(new MailListField[] { MailListField.ID })[0];
+    private final transient MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriters(new MailListField[] { MailListField.ID })[0];
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
@@ -124,7 +124,7 @@ public final class GetUpdatesAction extends AbstractMailAction {
 
                 if (!bIgnoreModified) {
                     final MailMessage[] modified = mailInterface.getUpdatedMessages(folderId, columns);
-                    final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                    final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
                     for (final MailMessage mail : modified) {
                         final JSONArray ja = new JSONArray();
                         if (mail != null) {

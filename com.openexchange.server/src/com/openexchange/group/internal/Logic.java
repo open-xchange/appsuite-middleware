@@ -192,11 +192,23 @@ public final class Logic {
             String displayName = group.getDisplayName();
 
             if (checki18nNames) {
-                for (String i18nName : GroupI18nNamesService.getInstance().getI18nNames()) {
-                    if (displayName.equals(i18nName)) {
-                        throw GroupExceptionCodes.RESERVED_DISPLAY_NAME.create(displayName);
+                int id = group.getIdentifier();
+                if (id > 0) {
+                    if (!storage.getGroup(id, ctx).getDisplayName().equals(displayName)) {
+                        for (String i18nName : GroupI18nNamesService.getInstance().getI18nNames()) {
+                            if (displayName.equals(i18nName)) {
+                                throw GroupExceptionCodes.RESERVED_DISPLAY_NAME.create(displayName);
+                            }
+                        }
+                    }
+                } else {
+                    for (String i18nName : GroupI18nNamesService.getInstance().getI18nNames()) {
+                        if (displayName.equals(i18nName)) {
+                            throw GroupExceptionCodes.RESERVED_DISPLAY_NAME.create(displayName);
+                        }
                     }
                 }
+
             }
 
             Group[] others = storage.searchGroups(displayName, true, ctx);

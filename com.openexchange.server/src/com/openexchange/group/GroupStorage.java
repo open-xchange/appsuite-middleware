@@ -72,6 +72,8 @@ public abstract class GroupStorage {
      */
     public static final int GUEST_GROUP_IDENTIFIER = Integer.MAX_VALUE;
 
+    public static final String GROUP_STANDARD_SIMPLE_NAME = "users";
+
     private static volatile GroupStorage instance;
 
     /**

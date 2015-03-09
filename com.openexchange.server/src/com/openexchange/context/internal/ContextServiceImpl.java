@@ -101,6 +101,11 @@ public final class ContextServiceImpl implements ContextService {
     }
 
     @Override
+    public void invalidateContexts(int[] contextIDs) throws OXException {
+        ContextStorage.getInstance().invalidateContexts(contextIDs);
+    }
+
+    @Override
     public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
         ContextStorage.getInstance().invalidateLoginInfo(loginContextInfo);
     }

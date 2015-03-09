@@ -74,6 +74,7 @@ import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.container.PushbackReadable;
 import com.openexchange.ajax.container.InputStreamReadable;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -1138,10 +1139,25 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         } else {
             // Write partial range.
-            input.seek(start);
+            input.seek(start);   // ----> OffsetOutOfRangeIOException
             long toRead = length;
 
-            while ((read = input.read(buffer, 0, buflen)) > 0) {
+            // Check first byte
+            @SuppressWarnings("resource")
+            PushbackReadable readMe = new PushbackReadable(input);
+            {
+                byte[] bs = new byte[1];
+                int first = readMe.read(bs);
+                if (first <= 0) {
+                    // Not enough bytes
+                    throw new OffsetOutOfRangeIOException(start, input.length());
+                }
+
+                // Unread first byte
+                readMe.unread(bs[0] & 0xff);
+            }
+
+            while ((read = readMe.read(buffer, 0, buflen)) > 0) {
                 if ((toRead -= read) > 0) {
                     output.write(buffer, 0, read);
                 } else {

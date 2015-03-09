@@ -71,7 +71,7 @@ import com.openexchange.realtime.packet.ID;
  */
 public class PortableIDToOXExceptionMapEntry implements CustomPortable {
 
-    public static final int CLASS_ID = 20;
+    public static final int CLASS_ID = 21;
 
     private static final String FIELD_ID = "id";
 

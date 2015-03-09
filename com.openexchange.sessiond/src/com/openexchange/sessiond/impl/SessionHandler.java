@@ -72,6 +72,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -84,6 +86,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.osgi.Services;
+import com.openexchange.sessiond.serialization.PortableContextSessionsCleaner;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
@@ -100,11 +103,6 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionHandler {
-
-    /**
-     * The parameter name for session storage's {@link Future add task}.
-     */
-    //private static final String PARAM_SST_FUTURE = StoredSession.PARAM_SST_FUTURE;
 
     public static final SessionCounter SESSION_COUNTER = new SessionCounter() {
 
@@ -244,6 +242,89 @@ public final class SessionHandler {
     }
 
     /**
+     * Globally removes sessions associated to the given contexts. 'Globally' means sessions on all cluster nodes
+     *
+     * @param contextIds - Set with context ids to be removed
+     * @throws OXException
+     */
+    public static void removeContextSessionsGlobal(final Set<Integer> contextIds) throws OXException {
+        SessionHandler.removeRemoteContextSessions(contextIds);
+
+        SessionHandler.removeContextSessions(contextIds);
+    }
+
+    /**
+     * Triggers removing sessions for given context ids on remote cluster nodes
+     *
+     * @param contextIds - Set with context ids to be removed
+     */
+    private static void removeRemoteContextSessions(final Set<Integer> contextIds) throws OXException {
+        HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
+
+        if (hazelcastInstance != null) {
+            LOG.debug("Trying to remove sessions for context ids {} from remote nodes", Strings.concat(", ", contextIds));
+
+            Member localMember = hazelcastInstance.getCluster().getLocalMember();
+            Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
+            if (!clusterMembers.remove(localMember)) {
+                LOG.warn("Couldn't remove local member from cluster members.");
+            }
+            if (!clusterMembers.isEmpty()) {
+                Map<Member, Future<Set<Integer>>> submitToMembers = hazelcastInstance.getExecutorService("default").submitToMembers(new PortableContextSessionsCleaner(contextIds), clusterMembers);
+                for (Member member : submitToMembers.keySet()) {
+                    Future<Set<Integer>> future = submitToMembers.get(member);
+                    int hzExecutionTimeout = getRemoteContextSessionsExecutionTimeout();
+
+                    try {
+                        Set<Integer> contextIdsSessionsHaveBeenRemovedFor = null;
+                        if (hzExecutionTimeout > 0) {
+                            contextIdsSessionsHaveBeenRemovedFor = future.get(hzExecutionTimeout, TimeUnit.SECONDS);
+                        } else {
+                            contextIdsSessionsHaveBeenRemovedFor = future.get();
+                        }
+                        if ((contextIdsSessionsHaveBeenRemovedFor != null) && (future.isDone())) {
+                            LOG.info("Removed sessions for context ids {} on remote node {}", Strings.concat(", ", contextIdsSessionsHaveBeenRemovedFor), member.getSocketAddress().toString());
+                        } else {
+                            LOG.warn("No sessions for context ids {} removed on node {}.", Strings.concat(", ", contextIds), member.getSocketAddress().toString());
+                        }
+                    } catch (TimeoutException e) {
+                        // Wait time elapsed; enforce cancelation
+                        future.cancel(true);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e);
+                    } catch (InterruptedException e) {
+                        future.cancel(true);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e);
+                    } catch (ExecutionException e) {
+                        future.cancel(true);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e.getCause());
+                    } catch (Exception e) {
+                        LOG.error("Failed to issue remote session removal for contexts {} on remote node {}.", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
+                        throw SessionExceptionCodes.REMOTE_SESSION_REMOVAL_FAILED.create(Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
+                    }
+                }
+            } else {
+                LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
+            }
+        } else {
+            LOG.warn("Cannot find HazelcastInstance for remote execution of session removing for context ids {}. Only local sessions will be removed.", Strings.concat(", ", contextIds));
+        }
+    }
+
+    /**
+     * Returns the timeout (in seconds) configured to wait for remote invalidation of context sessions. Default value 0 means "no timeout"
+     *
+     * @return timeout (in seconds) or 0 for no timeout
+     */
+    private static int getRemoteContextSessionsExecutionTimeout() {
+        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        if (configurationService == null) {
+            LOG.info("ConfigurationService not available. No execution timeout for remote processing of context sessions invalidation available. Fallback to no timeout.");
+            return 0;
+        }
+        return configurationService.getIntProperty("com.openexchange.remote.context.sessions.invalidation.timeout", 0);
+    }
+
+    /**
      * Removes all sessions associated with given context.
      *
      * @param contextId The context ID
@@ -268,35 +349,33 @@ public final class SessionHandler {
         /*
          * Continue...
          */
+        removeContextSessions(Collections.singleton(contextId));
+    }
+
+    /**
+     * Removes all sessions associated to the given contexts.
+     *
+     * @param contextId Set with contextIds to remove session for.
+     */
+    public static Set<Integer> removeContextSessions(final Set<Integer> contextIds) {
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
-            return;
+            return null;
         }
         /*
          * remove from session data
          */
-        sessionData.removeContextSessions(contextId);
-        /*
-         * remove from storage if available, too
-         */
-        final SessionStorageService storageService = Services.getService(SessionStorageService.class);
-        if (storageService != null) {
-            try {
-                Task<Void> c = new AbstractTask<Void>() {
+        List<SessionControl> removeContextSessions = sessionData.removeContextSessions(contextIds);
+        postContainerRemoval(removeContextSessions, true);
 
-                    @Override
-                    public Void call() throws Exception {
-                        storageService.removeContextSessions(contextId);
-                        return null;
-                    }
-                };
-                submitAndIgnoreRejection(c);
-            } catch (RuntimeException e) {
-                LOG.error("", e);
-            }
+        Set<Integer> processedContexts = new HashSet<Integer>(removeContextSessions.size());
+        for (SessionControl control : removeContextSessions) {
+            processedContexts.add(control.getSession().getContextId());
         }
-        LOG.info("{} removal of sessions: Context={}", (null != storageService ? "Remote" : "Local"), contextId);
+
+        LOG.info("Removed {} sessions for {} contexts", removeContextSessions.size(), processedContexts.size());
+        return processedContexts;
     }
 
     /**
@@ -576,7 +655,8 @@ public final class SessionHandler {
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
-     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly
+     *            replacing put
      */
     public static void storeSessionSync(SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
         storeSession(session, sessionStorageService, addIfAbsent, false);
@@ -587,7 +667,8 @@ public final class SessionHandler {
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
-     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly
+     *            replacing put
      */
     public static void storeSessionAsync(SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
         storeSession(session, sessionStorageService, addIfAbsent, true);
@@ -598,7 +679,8 @@ public final class SessionHandler {
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
-     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly
+     *            replacing put
      * @param async Whether to perform task asynchronously or not
      */
     public static void storeSession(SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final boolean async) {
@@ -1049,7 +1131,8 @@ public final class SessionHandler {
      * Gets the session associated with given session ID
      *
      * @param sessionId The session ID
-     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise <code>false</code>
+     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
+     *            <code>false</code>
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(String sessionId, final boolean considerSessionStorage) {
@@ -1061,7 +1144,8 @@ public final class SessionHandler {
      *
      * @param sessionId The session ID
      * @param considerLocalStorage <code>true</code> to consider local storage; otherwise <code>false</code>
-     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise <code>false</code>
+     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
+     *            <code>false</code>
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
@@ -1104,7 +1188,7 @@ public final class SessionHandler {
         if (null != sessionControl) {
             storeSession(sessionControl.getSession(), Services.getService(SessionStorageService.class), true);
         }
-        */
+         */
         return sessionControl;
     }
 
@@ -1240,12 +1324,24 @@ public final class SessionHandler {
         List<SessionControl> controls = sessionData.rotateShort();
         if (config.isAutoLogin()) {
             for (final SessionControl sessionControl : controls) {
-                LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", new Object() { @Override public String toString() { return sessionControl.getSession().getSessionID();}});
+                LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", new Object() {
+
+                    @Override
+                    public String toString() {
+                        return sessionControl.getSession().getSessionID();
+                    }
+                });
             }
             postSessionDataRemoval(controls);
         } else {
             for (final SessionControl sessionControl : controls) {
-                LOG.info("Session timed out. ID: {}", new Object() { @Override public String toString() { return sessionControl.getSession().getSessionID();}});
+                LOG.info("Session timed out. ID: {}", new Object() {
+
+                    @Override
+                    public String toString() {
+                        return sessionControl.getSession().getSessionID();
+                    }
+                });
             }
             postContainerRemoval(controls, true);
         }
@@ -1422,19 +1518,17 @@ public final class SessionHandler {
                     @Override
                     public Void call() {
                         try {
-                            for (SessionControl sessionControl : tSessionControls) {
+                            List<String> sessionsToRemove = new ArrayList<String>();
+                            for (final SessionControl sessionControl : tSessionControls) {
                                 SessionImpl session = sessionControl.getSession();
                                 if (useSessionStorage(session)) {
-                                    try {
-                                        sessionStorageService.removeSession(session.getSessionID());
-                                    } catch (OXException e) {
-                                        LOG.error("", e);
-                                    } catch (RuntimeException e) {
-                                        LOG.error("", e);
-                                    }
+                                    sessionsToRemove.add(session.getSessionID());
                                 }
                             }
-                        } catch (RuntimeException e) {
+                            sessionStorageService.removeSessions(sessionsToRemove);
+                        } catch (final RuntimeException e) {
+                            LOG.error("", e);
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
                         return null;
@@ -1617,7 +1711,9 @@ public final class SessionHandler {
     private static final class StoreSessionTask extends AbstractTask<Void> {
 
         private final SessionStorageService sessionStorageService;
+
         private final boolean addIfAbsent;
+
         private final SessionImpl session;
 
         protected StoreSessionTask(SessionImpl session, SessionStorageService sessionStorageService, boolean addIfAbsent) {
@@ -1640,8 +1736,8 @@ public final class SessionHandler {
                     LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                     postSessionStored(session);
                 }
-            } catch (Exception e) {
-                LOG.warn("Failed to put session {} with Auth-Id {} into session storage (user={}, context={})",session.getSessionID(),session.getAuthId(),Integer.valueOf(session.getUserId()),Integer.valueOf(session.getContextId()), e);
+            } catch (final Exception e) {
+                LOG.warn("Failed to put session {} with Auth-Id {} into session storage (user={}, context={})", session.getSessionID(), session.getAuthId(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
             }
             return null;
         }
@@ -1692,7 +1788,8 @@ public final class SessionHandler {
     }
 
     /**
-     * Submits given task to thread pool while ignoring a possible {@link RejectedExecutionException} in case thread pool refuses its execution.
+     * Submits given task to thread pool while ignoring a possible {@link RejectedExecutionException} in case thread pool refuses its
+     * execution.
      *
      * @param task The task to submit
      */
@@ -1756,8 +1853,11 @@ public final class SessionHandler {
     }
 
     private static final class UserKey {
+
         protected final int contextId;
+
         protected final int userId;
+
         private final int hash;
 
         protected UserKey(int userId, final int contextId) {
@@ -1794,5 +1894,4 @@ public final class SessionHandler {
             return true;
         }
     }
-
 }

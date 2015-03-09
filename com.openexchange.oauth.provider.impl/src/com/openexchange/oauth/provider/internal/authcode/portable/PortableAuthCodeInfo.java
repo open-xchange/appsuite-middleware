@@ -63,7 +63,7 @@ import com.openexchange.oauth.provider.Scopes;
 public class PortableAuthCodeInfo implements CustomPortable {
 
     /** The unique portable class ID of the {@link PortableAuthCodeInfo} */
-    public static final int CLASS_ID = 19;
+    public static final int CLASS_ID = 20;
 
     public static final String PARAMETER_CLIENT_ID = "clientId";
     private static final String PARAMETER_REDIRECT_URI = "redirectURI";

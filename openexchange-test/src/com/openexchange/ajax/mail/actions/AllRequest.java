@@ -133,10 +133,10 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
         }
         if (getAlias() != null) {
             if (getAlias().equals("all")) {
-                return new AllParser(isFailOnError(), AbstractMailAction.COLUMNS_ALL_ALIAS);
+                return new AllParser(isFailOnError(), AbstractMailAction.FIELDS_ALL_ALIAS);
             }
             if (getAlias().equals("list")) {
-                return new AllParser(isFailOnError(), AbstractMailAction.COLUMNS_LIST_ALIAS);
+                return new AllParser(isFailOnError(), AbstractMailAction.FIELDS_LIST_ALIAS);
             }
         }
         return null;

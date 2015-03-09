@@ -68,12 +68,16 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.Share;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.ConnectionHelper;
 import com.openexchange.share.impl.DefaultGuestInfo;
 import com.openexchange.share.impl.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -86,6 +90,7 @@ import com.openexchange.userconf.UserPermissionService;
 public class GuestCleanupTask extends AbstractTask<Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuestCleanupTask.class);
+    private static final boolean CHECK_FOR_STALE_TARGETS = false;
 
     protected final ServiceLookup services;
     protected final int contextID;
@@ -203,6 +208,14 @@ public class GuestCleanupTask extends AbstractTask<Void> {
             }
         } else {
             /*
+             * guest user still has shares, check for any stale references & adjust module permissions as needed
+             */
+            if (CHECK_FOR_STALE_TARGETS) {
+                if (checkForStaleTargets(contextID, guestID, connectionHelper)) {
+                    modules = shareStorage.getSharedModules(contextID, guestID, connectionHelper.getParameters());
+                }
+            }
+            /*
              * guest user still has shares, adjust permissions as needed
              */
             int requiredPermissionBits = ShareTool.getRequiredPermissionBits(guestUser, modules);
@@ -220,6 +233,42 @@ public class GuestCleanupTask extends AbstractTask<Void> {
              */
             GuestLastModifiedMarker.clearLastModified(services, context, guestUser);
         }
+    }
+
+    /**
+     * Checks and removes those shares that are no longer accessible by the guest user since they no longer exist or are no longer visible
+     * to the guest.
+     *
+     * @param contextID The context identifier
+     * @param guestID The guest identifier
+     * @param connectionHelper A (started) connection helper
+     * @return <code>true</code> if at least one stale share was removed, <code>false</code>, otherwise
+     */
+    private boolean checkForStaleTargets(int contextID, int guestID, ConnectionHelper connectionHelper) {
+        try {
+            ShareStorage shareStorage = services.getService(ShareStorage.class);
+            List<Share> shares = shareStorage.loadSharesForGuest(contextID, guestID, connectionHelper.getParameters());
+            if (null != shares && 0 < shares.size()) {
+                ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+                List<Share> sharesToRemove = new ArrayList<Share>();
+                for (Share share : shares) {
+                    ServerSession syntheticSession = ServerSessionAdapter.valueOf(guestID, contextID);
+                    if (false == moduleSupport.exists(share.getTarget(), syntheticSession)) {
+                        LOG.debug("Detected no longer existing share {}, marking for removal.", share);
+                        sharesToRemove.add(share);
+                    } else if (false == moduleSupport.isVisible(share.getTarget(), syntheticSession)) {
+                        LOG.debug("Share {} no longer visible for guest user, marking for removal.", share);
+                        sharesToRemove.add(share);
+                    }
+                }
+                if (0 < sharesToRemove.size()) {
+                    return 0 < shareStorage.deleteShares(contextID, sharesToRemove, connectionHelper.getParameters());
+                }
+            }
+        } catch (OXException e) {
+            LOG.warn("Unexpected error during check for stale targets for guest user {} in context {}", guestID, contextID, e);
+        }
+        return false;
     }
 
     /**

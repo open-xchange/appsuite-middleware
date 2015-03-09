@@ -148,6 +148,12 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
+* Fri Mar 06 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Eleventh candidate for 7.6.2 release
+* Wed Mar 04 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Tenth candidate for 7.6.2 release
+* Tue Mar 03 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Nineth candidate for 7.6.2 release
 * Thu Feb 26 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-02-23
 * Tue Feb 24 2015 Steffen Templin <marcus.klein@open-xchange.com>

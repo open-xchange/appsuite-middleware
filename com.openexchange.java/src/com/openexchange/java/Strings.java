@@ -266,6 +266,54 @@ public class Strings {
     }
 
     /**
+     * Splits given string by tokens/quoted-strings.
+     *
+     * @param str The string to split
+     * @return The tokens/quoted-strings
+     */
+    public static String[] splitByTokensOrQuotedStrings(String str) {
+        if (null == str) {
+            return null;
+        }
+        List<String> splitted = new LinkedList<String>();
+        int inQuotes = 0;
+        boolean escaped = false;
+        StringBuilder s = new StringBuilder(16);
+
+        int length = str.length();
+        for (int i = 0; i < length; i++) {
+            char c = str.charAt(i);
+            if (Strings.isWhitespace(c)) {
+                if (inQuotes > 0) {
+                    if (inQuotes == c && !escaped) {
+                        inQuotes = 0;
+                    }
+                    s.append(c);
+                    escaped = false;
+                } else {
+                    if (s.length() > 0) {
+                        splitted.add(s.toString().trim());
+                        s.setLength(0);
+                    }
+                }
+            } else if ('\\' == c) {
+                escaped = !escaped;
+                s.append(c);
+            } else {
+                if (('"' == c || '\'' == c) && !escaped) {
+                    inQuotes = inQuotes > 0 ? 0 : c;
+                }
+                s.append(c);
+                escaped = false;
+            }
+        }
+        if (s.length() > 0) {
+            splitted.add(s.toString().trim());
+        }
+        return splitted.toArray(new String[splitted.size()]);
+    }
+
+    /**
      * Splits given string by specifies delimiter.
      *
      * @param str The string to split
@@ -341,13 +389,28 @@ public class Strings {
      * Splits given string by dots.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByDots(final String s) {
         if (null == s) {
             return null;
         }
         return P_SPLIT_DOT.split(s, 0);
+    }
+
+    private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
+
+    /**
+     * Splits given string by ampersands <code>'&'</code>.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByAmps(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_AMP.split(s, 0);
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");

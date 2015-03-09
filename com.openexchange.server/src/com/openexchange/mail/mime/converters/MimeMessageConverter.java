@@ -96,7 +96,6 @@ import org.apache.james.mime4j.parser.ContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.container.TmpFileFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -397,16 +396,22 @@ public final class MimeMessageConverter {
             } else {
                 ManagedFileManagement fileManagement;
                 if (!stream2file || (null == (fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class)))) {
-                    final File tempFile = TmpFileFileHolder.newTempFile();
-                    boolean error = true;
+                    ThresholdFileHolder sink = null;
+                    boolean closeSink = true;
                     try {
-                        writeToFile(mail, tempFile);
-                        mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, mail.getReceivedDateDirect());
+                        sink = new ThresholdFileHolder();
+                        mail.writeTo(sink.asOutputStream());
+                        File tempFile = sink.getTempFile();
+                        if (null == tempFile) {
+                            mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                        } else {
+                            mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile);
+                        }
                         mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
-                        error = false;
+                        closeSink = false;
                     } finally {
-                        if (error) {
-                            tempFile.delete();
+                        if (closeSink && null != sink) {
+                            sink.close();
                         }
                     }
                 } else {

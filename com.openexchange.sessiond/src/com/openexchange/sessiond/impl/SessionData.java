@@ -49,11 +49,13 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -80,12 +82,17 @@ final class SessionData {
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionData.class);
 
     private final int maxSessions;
+
     private final long randomTokenTimeout;
+
     private final boolean autoLogin;
 
     private final LinkedList<SessionContainer> sessionList;
+
     private final Map<String, String> randoms;
+
     private final Lock rlock;
+
     private final Lock wlock;
 
     private final LinkedList<SessionMap> longTermList;
@@ -95,15 +102,18 @@ final class SessionData {
     private final UserRefCounter longTermUserGuardian = new UserRefCounter();
 
     private final Lock wlongTermLock;
+
     private final Lock rlongTermLock;
 
     /**
      * Map to remember if there is already a task that should move the session to the first container.
      */
     private final ConcurrentMap<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
+
     private final AtomicReference<ThreadPoolService> threadPoolService;
 
     private final AtomicReference<TimerService> timerService;
+
     protected Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
 
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
@@ -327,6 +337,50 @@ final class SessionData {
         } finally {
             wlongTermLock.unlock();
         }
+        return list;
+    }
+
+    /**
+     * Removes all sessions belonging to given contexts out of long- and short-term container.
+     *
+     * @param contextIds - Set with the context identifiers to remove sessions for
+     * @return List of {@link SessionControl} objects for each handled session
+     */
+    List<SessionControl> removeContextSessions(final Set<Integer> contextIds) {
+        // Removing sessions is a write operation.
+        final List<SessionControl> list = new ArrayList<SessionControl>();
+        wlock.lock();
+        try {
+            for (final SessionContainer container : sessionList) {
+                list.addAll(container.removeSessionsByContexts(contextIds));
+            }
+            for (final SessionControl control : list) {
+                unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID());
+            }
+        } finally {
+            wlock.unlock();
+        }
+
+        wlongTermLock.lock();
+        for (int contextId : contextIds) {
+            if (!hasLongTermSession(contextId)) {
+                continue;
+            }
+            for (final SessionMap longTerm : longTermList) {
+                final Iterator<SessionControl> iter = longTerm.values().iterator();
+                while (iter.hasNext()) {
+                    final SessionControl control = iter.next();
+                    final Session session = control.getSession();
+                    if (session.getContextId() == contextId) {
+                        longTerm.removeBySessionId(session.getSessionID());
+                        longTermUserGuardian.remove(session.getUserId(), contextId);
+                        list.add(control);
+                    }
+                }
+            }
+        }
+        wlongTermLock.unlock();
+
         return list;
     }
 
@@ -868,6 +922,7 @@ final class SessionData {
         if (null == threadPoolService) {
             final Move2FirstContainerTask tmp = task;
             new Thread(new Runnable() {
+
                 @Override
                 public void run() {
                     try {
@@ -892,7 +947,9 @@ final class SessionData {
     private class Move2FirstContainerTask extends AbstractTask<Void> {
 
         private final String sessionId;
+
         private final boolean longTerm;
+
         private boolean deactivated = false;
 
         Move2FirstContainerTask(final String sessionId, final boolean longTerm) {

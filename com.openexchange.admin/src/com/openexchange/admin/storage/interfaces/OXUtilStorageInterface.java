@@ -408,5 +408,12 @@ public abstract class OXUtilStorageInterface {
      */
     public abstract Server[] searchForServer(final String search_pattern) throws StorageException;
 
-
+    /**
+     * Get the write pool identifier for the specified cluster
+     *
+     * @param clusterId The cluster identifier
+     * @return The write pool identifier
+     * @throws StorageException
+     */
+    public abstract int getWritePoolIdForCluster(final int clusterId) throws StorageException;
 }

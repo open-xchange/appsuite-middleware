@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,32 @@
  *
  */
 
-package com.openexchange.subscribe.facebook.groupware;
+package com.openexchange.admin.osgi;
 
-import java.sql.Connection;
-import java.util.Map;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.subscribe.facebook.FacebookSubscribeService;
+import org.osgi.framework.BundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
 
 
 /**
- * {@link FacebookSubscriptionsOAuthAccountDeleteListener}
+ * {@link MainActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FacebookSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+public class MainActivator extends CompositeBundleActivator {
 
-    private final FacebookSubscribeService fbService;
-    private final ContextService contexts;
-
-    public FacebookSubscriptionsOAuthAccountDeleteListener(final FacebookSubscribeService fbService, final ContextService contexts) {
-        this.fbService = fbService;
-        this.contexts = contexts;
+    /**
+     * Initializes a new {@link MainActivator}.
+     */
+    public MainActivator() {
+        super();
     }
 
     @Override
-    public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
-        fbService.deleteAllUsingOAuthAccount(getContext(cid), id);
-    }
-
-    private Context getContext(final int cid) throws OXException {
-        return contexts.getContext(cid);
-    }
-
-    @Override
-    public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
-        // IGNORE
+    protected BundleActivator[] getActivators() {
+        return new BundleActivator[] {
+            new com.openexchange.admin.osgi.PluginHostingActivator(),
+            new com.openexchange.admin.schemamove.osgi.SchemaMoveActivator(),
+        };
     }
 
 }
