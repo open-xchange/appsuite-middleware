@@ -190,19 +190,17 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 StringAppender serializableNames = new StringAppender(':');
                 for (String parameterName : remoteParameterNames) {
                     Object value = parameters.get(parameterName);
-                    if (isSerializablePojo(value)) {
-                        String sValue = value.toString();
-                        names.append(parameterName);
-                        values.append(getSafeValue(sValue));
-                    } else if (value instanceof Serializable) {
-                        serializableNames.append(parameterName);
-                        byte[] bytes = SerializationUtils.serialize((Serializable) value);
-                        writer.writeByteArray(parameterName, bytes);
-                    } else {
-                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
-                        if (null == value) {
-                            logger.warn("Denied remote parameter for null value.");
+                    if (null != value) {
+                        if (isSerializablePojo(value)) {
+                            String sValue = value.toString();
+                            names.append(parameterName);
+                            values.append(getSafeValue(sValue));
+                        } else if (value instanceof Serializable) {
+                            serializableNames.append(parameterName);
+                            byte[] bytes = SerializationUtils.serialize((Serializable) value);
+                            writer.writeByteArray(parameterName, bytes);
                         } else {
+                            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
                             logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
                         }
                     }
