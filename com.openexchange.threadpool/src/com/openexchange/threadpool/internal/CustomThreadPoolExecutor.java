@@ -1656,8 +1656,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             task.beforeExecute(thread);
             // MDC map for executing thread
             {
-                final Map<String, Object> mdc = customFutureTask.getMdc();
+                Map<String, Object> mdc = customFutureTask.getMdc();
                 if (null != mdc) {
+                    mdc.remove(LogProperties.Name.TEMP_FILE.getName());
                     MDC.setContextMap(mdc);
                 }
             }

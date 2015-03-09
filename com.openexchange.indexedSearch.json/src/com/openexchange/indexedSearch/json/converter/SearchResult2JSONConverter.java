@@ -185,7 +185,7 @@ public class SearchResult2JSONConverter implements ResultConverter {
             return new JSONArray();
         }
 
-        MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(fields);
+        MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(fields);
         OXJSONWriter jsonWriter = new OXJSONWriter();
         jsonWriter.array();
         try {

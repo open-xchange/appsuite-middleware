@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,19 +47,53 @@
  *
  */
 
-package com.openexchange.subscribe.facebook;
+package com.openexchange.admin.schemamove.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.admin.schemamove.SchemaMoveService;
+import com.openexchange.admin.schemamove.internal.SchemaMoveImpl;
+import com.openexchange.admin.schemamove.internal.SchemaMoveRemoteImpl;
+import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**
- * {@link FormStrings}
+ * {@link SchemaMoveActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FormStrings implements LocalizableStrings {
+public class SchemaMoveActivator extends HousekeepingActivator {
 
-    public static final String ACCOUNT_LABEL = "Select an existing account";
+    /**
+     * Initializes a new {@link SchemaMoveActivator}.
+     */
+    public SchemaMoveActivator() {
+        super();
+    }
 
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{ ConfigurationService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        Logger logger = LoggerFactory.getLogger(SchemaMoveActivator.class);
+
+        SchemaMoveImpl schemaMoveImpl = new SchemaMoveImpl();
+        registerService(SchemaMoveService.class, schemaMoveImpl);
+
+        // Register RMI
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", SchemaMoveRemote.RMI_NAME);
+        registerService(Remote.class, new SchemaMoveRemoteImpl(this.context, schemaMoveImpl), serviceProperties);
+
+        logger.info("Successfully started bundle {}", context.getBundle().getSymbolicName());
+    }
 
 }

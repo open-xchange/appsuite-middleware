@@ -980,9 +980,6 @@ if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
     ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
 fi
 
-# SoftwareChange_Request-2270
-ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
-
 # SoftwareChange_Request-2342
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
@@ -993,8 +990,32 @@ if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatIn
 EOF
 fi
 
+# SoftwareChange_Request-2350
+ox_add_property com.openexchange.mail.signature.maxImageSize 1 /opt/open-xchange/etc/mail.properties
+ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchange/etc/mail.properties
+
 # SoftwareChange_Request-2353
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
+
+# SoftwareChange_Request-2442
+if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
+    VALUE=$(ox_read_property html.style.background-position /opt/open-xchange/etc/whitelist.properties)
+    if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
+        ox_set_property html.style.background-position "\",N,top,bottom,center,left,right,\"" /opt/open-xchange/etc/whitelist.properties
+    fi
+fi
+
+# SoftwareChange_Request-2444
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# v7.6.2 update tasks start here
+
+# Deletes remnants for removed Facebook subscription
+!com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask
+EOF
+fi
 
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"

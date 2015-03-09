@@ -383,7 +383,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         return appointment;
     }
 
-    protected static String generateICal(Date start, Date due, String uid, String summary, String location) {
+    protected static String generateICal(Date start, Date end, String uid, String summary, String location) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
         .append("BEGIN:VCALENDAR").append("\r\n")
@@ -413,8 +413,8 @@ public abstract class CalDAVTest extends WebDAVTest {
         if (null != uid) {
             stringBuilder.append("UID:").append(uid).append("\r\n");
         }
-        if (null != due) {
-            stringBuilder.append("DUE;TZID=Europe/Amsterdam:").append(format(due, "Europe/Amsterdam")).append("\r\n");
+        if (null != end) {
+            stringBuilder.append("DTEND;TZID=Europe/Amsterdam:").append(format(end, "Europe/Amsterdam")).append("\r\n");
         }
         stringBuilder.append("TRANSP:OPAQUE").append("\r\n");
         if (null != summary) {
@@ -436,7 +436,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         return stringBuilder.toString();
     }
 
-    protected static String generateVTodo(Date start, Date end, String uid, String summary, String location) {
+    protected static String generateVTodo(Date start, Date due, String uid, String summary, String location) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
             .append("BEGIN:VCALENDAR").append("\r\n")
@@ -466,8 +466,8 @@ public abstract class CalDAVTest extends WebDAVTest {
         if (null != uid) {
             stringBuilder.append("UID:").append(uid).append("\r\n");
         }
-        if (null != end) {
-            stringBuilder.append("DTEND;TZID=Europe/Amsterdam:").append(format(end, "Europe/Amsterdam")).append("\r\n");
+        if (null != due) {
+            stringBuilder.append("DUE;TZID=Europe/Amsterdam:").append(format(due, "Europe/Amsterdam")).append("\r\n");
         }
         stringBuilder.append("TRANSP:OPAQUE").append("\r\n");
         if (null != summary) {

@@ -490,7 +490,8 @@ public class DefaultDispatcher implements Dispatcher {
                         } else {
                             sb.append('&');
                         }
-                        sb.append(entry.getKey()).append('=').append(entry.getValue());
+                        String value = LogProperties.getSanitizedValue(entry.getKey(), entry.getValue());
+                        sb.append(entry.getKey()).append('=').append(value);
                     }
                     sb.append('"');
                     LogProperties.putProperty(LogProperties.Name.SERVLET_QUERY_STRING, sb.toString());

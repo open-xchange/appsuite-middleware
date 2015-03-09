@@ -352,6 +352,21 @@ public class CSSMatcherTest {
     }
 
     @Test
+    public void testDoCheckCss_bug37078() {
+        FilterJerichoHandler.loadWhitelist();
+
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("background-position: right -38px;"));
+        CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
+        String content = "background-position: right -38px;";
+        Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
+
+        cssBld = new StringBufferStringer(new StringBuffer("background:radial-gradient(at top, #3C73AA, #052D4B, #052D4B) repeat scroll 0% 0% transparent;"));
+        CSSMatcher.checkCSSElements(cssBld, FilterJerichoHandler.getStaticStyleMap(), true);
+        content = "background: radial-gradient(at top, #3C73AA, #052D4B, #052D4B) repeat scroll 0% 0% transparent;";
+        Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
+    }
+
+    @Test
     public void testCheckCss_threadpoolAvailableAndNotInternallyInvoked_createAdditionalThread() throws InterruptedException, ExecutionException, TimeoutException {
         PowerMockito.mockStatic(ThreadPools.class);
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);

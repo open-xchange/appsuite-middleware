@@ -52,6 +52,7 @@ package com.openexchange.admin.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.database.DatabaseService;
 
@@ -74,7 +75,11 @@ public class DatabaseServiceCustomizer implements ServiceTrackerCustomizer<Datab
     @Override
     public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
         DatabaseService service = context.getService(reference);
-        pool.setService(service);
+        if (service != null) {
+            pool.setService(service);
+            AdminServiceRegistry.getInstance().addService(DatabaseService.class, service);
+        }
+
         return service;
     }
 
@@ -86,6 +91,7 @@ public class DatabaseServiceCustomizer implements ServiceTrackerCustomizer<Datab
     @Override
     public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
         pool.removeService();
+        AdminServiceRegistry.getInstance().removeService(DatabaseService.class);
         context.ungetService(reference);
     }
 }

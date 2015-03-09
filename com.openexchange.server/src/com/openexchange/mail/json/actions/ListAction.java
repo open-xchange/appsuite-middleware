@@ -60,7 +60,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -69,10 +68,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ListAction}
@@ -99,12 +98,10 @@ public final class ListAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            final ServerSession session = req.getSession();
-            /*
-             * Read in parameters
-             */
-            final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-            final String[] headers = req.optStringArray(Mail.PARAMETER_HEADERS);
+            // Read in parameters
+            ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+            int[] columns = columnCollection.getFields();
+            String[] headers = columnCollection.getHeaders();
             /*
              * Get map
              */

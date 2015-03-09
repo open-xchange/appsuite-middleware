@@ -702,4 +702,54 @@ public final class LogProperties {
         return new Props();
     }
 
+    private static final Set<String> SANITIZE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("password")));
+    private static final String REPLACEMENT = "xxx";
+
+    /**
+     * Gets the sanitized (URL) parameter value.
+     *
+     * @param name The name
+     * @param value The value
+     * @return The sanitized value
+     */
+    public static String getSanitizedValue(String name, String value) {
+        return SANITIZE.contains(Strings.asciiLowerCase(name)) ? REPLACEMENT : value;
+    }
+
+    /**
+     * Gets the sanitized query-string
+     *
+     * @param queryString The query-string to sanitize
+     * @return The sanitized query-string
+     */
+    public static String getSanitizedQueryString(String queryString) {
+        if (Strings.isEmpty(queryString)) {
+            return queryString;
+        }
+        String[] pairs = Strings.splitByAmps(queryString);
+        StringBuilder sb = new StringBuilder(queryString.length());
+        boolean first = true;
+        for (String pair : pairs) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append('&');
+            }
+
+            int idx = pair.indexOf('=');
+            if (idx <= 0) {
+                sb.append(pair);
+            } else {
+                String key = pair.substring(0, idx);
+                sb.append(key);
+                if (SANITIZE.contains(Strings.asciiLowerCase(key))) {
+                    sb.append('=').append(REPLACEMENT);
+                } else {
+                    sb.append(pair.substring(idx));
+                }
+            }
+        }
+        return sb.toString();
+    }
+
 }

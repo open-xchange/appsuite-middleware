@@ -246,7 +246,7 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
-    public void invalidate(final int contextId) {
+    public void invalidate(final int... contextIds) {
         // Nothing to do
     }
 

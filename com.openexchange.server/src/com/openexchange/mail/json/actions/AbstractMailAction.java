@@ -75,6 +75,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.Column;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MimeMailException;
@@ -104,9 +105,13 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private final ServiceLookup services;
 
-    public static final @NonNull int[] COLUMNS_ALL_ALIAS = new int[] { 600, 601 };
+    public static final @NonNull int[] FIELDS_ALL_ALIAS = new int[] { 600, 601 };
 
-    public static final @NonNull int[] COLUMNS_LIST_ALIAS = new int[] { 600, 601, 614, 602, 611, 603, 612, 607, 652, 610, 608, 102 };
+    public static final @NonNull int[] FIELDS_LIST_ALIAS = new int[] { 600, 601, 614, 602, 611, 603, 612, 607, 652, 610, 608, 102 };
+
+    public static final @NonNull Column[] COLUMNS_ALL_ALIAS = new Column[] { Column.field(600), Column.field(601) };
+
+    public static final @NonNull Column[] COLUMNS_LIST_ALIAS = new Column[] { Column.field(600), Column.field(601), Column.field(614), Column.field(602), Column.field(611), Column.field(603), Column.field(612), Column.field(607), Column.field(652), Column.field(610), Column.field(608), Column.field(102) };
 
     /**
      * Initializes a new {@link AbstractMailAction}.

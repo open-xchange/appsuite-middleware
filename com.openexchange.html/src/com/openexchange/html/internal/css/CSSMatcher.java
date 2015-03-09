@@ -932,13 +932,15 @@ public final class CSSMatcher {
                         elemBuilder.append(elementValues);
                         hasValues = true;
                     } else {
-                        final String[] tokens = splitToTokens(elementValues);
-                        for (int j = 0; j < tokens.length; j++) {
-                            if (matches(tokens[j], allowedValuesSet)) {
-                                if (j > 0) {
+                        boolean first = true;
+                        for (String token : splitToTokens(elementValues)) {
+                            if (matches(token, allowedValuesSet)) {
+                                if (first) {
+                                    first = false;
+                                } else {
                                     elemBuilder.append(' ');
                                 }
-                                elemBuilder.append(tokens[j]);
+                                elemBuilder.append(token);
                                 hasValues = true;
                             } else {
                                 modified = true;
@@ -969,7 +971,7 @@ public final class CSSMatcher {
         return modified;
     }
 
-    private static String[] splitToTokens(final String elementValues) {
+    private static List<String> splitToTokens(final String elementValues) {
         List<String> l = new LinkedList<String>();
         int length = elementValues.length();
         StringBuilder token = new StringBuilder(16);
@@ -1010,7 +1012,7 @@ public final class CSSMatcher {
             l.add(token.toString());
             token.setLength(0);
         }
-        return l.toArray(new String[l.size()]);
+        return l;
     }
 
     /**

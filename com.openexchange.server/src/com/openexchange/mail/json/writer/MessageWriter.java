@@ -335,15 +335,16 @@ public final class MessageWriter {
             }
         }
 
-        private Object getHeaderValue(final MailMessage mail) {
+        private Object getHeaderValue(MailMessage mail) {
             final String[] headerValues = mail.getHeader(headerName);
             if (null == headerValues || 0 == headerValues.length) {
                 return null;
             }
-            if (1 == headerValues.length) {
+            int length = headerValues.length;
+            if (1 == length) {
                 return headerValues[0];
             }
-            final JSONArray ja = new JSONArray();
+            JSONArray ja = new JSONArray(length);
             for (String headerValue : headerValues) {
                 ja.put(headerValue);
             }
@@ -785,17 +786,24 @@ public final class MessageWriter {
      * @param fields The mail fields to write
      * @return Appropriate field writers as an array of {@link MailFieldWriter}
      */
-    public static MailFieldWriter[] getMailFieldWriter(final MailListField[] fields) {
-        final MailFieldWriter[] retval = new MailFieldWriter[fields.length];
+    public static MailFieldWriter[] getMailFieldWriters(MailListField[] fields) {
+        MailFieldWriter[] retval = new MailFieldWriter[fields.length];
         for (int i = 0; i < fields.length; i++) {
-            final MailFieldWriter mfw = WRITERS.get(fields[i]);
-            if (mfw == null) {
-                retval[i] = UNKNOWN;
-            } else {
-                retval[i] = mfw;
-            }
+            MailFieldWriter mfw = WRITERS.get(fields[i]);
+            retval[i] = (mfw == null) ? UNKNOWN : mfw;
         }
         return retval;
+    }
+
+    /**
+     * Generates the appropriate field writer for given mail field
+     *
+     * @param field The mail field to write
+     * @return Appropriate field writer
+     */
+    public static MailFieldWriter getMailFieldWriter(MailListField field) {
+        MailFieldWriter mfw = WRITERS.get(field);
+        return null == mfw ? UNKNOWN : mfw;
     }
 
     /**
@@ -804,15 +812,25 @@ public final class MessageWriter {
      * @param headers The header names
      * @return The writers for specified header names
      */
-    public static MailFieldWriter[] getHeaderFieldWriter(final String[] headers) {
+    public static MailFieldWriter[] getHeaderFieldWriters(String[] headers) {
         if (null == headers) {
             return new MailFieldWriter[0];
         }
-        final MailFieldWriter[] retval = new MailFieldWriter[headers.length];
+        MailFieldWriter[] retval = new MailFieldWriter[headers.length];
         for (int i = 0; i < headers.length; i++) {
             retval[i] = new HeaderFieldWriter(headers[i]);
         }
         return retval;
+    }
+
+    /**
+     * Gets the writer for specified header name.
+     *
+     * @param header The header name
+     * @return The writer for specified header name
+     */
+    public static MailFieldWriter getHeaderFieldWriter(String header) {
+        return null == header ? null : new HeaderFieldWriter(header);
     }
 
     /**

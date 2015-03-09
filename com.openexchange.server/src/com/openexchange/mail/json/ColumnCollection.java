@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,70 @@
  *
  */
 
-package com.openexchange.subscribe.facebook.osgi;
+package com.openexchange.mail.json;
 
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import com.openexchange.context.ContextService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.facebook.FacebookService;
-import com.openexchange.osgi.HousekeepingActivator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link ColumnCollection} - A column collection.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
+ */
+public class ColumnCollection {
 
-    public Activator() {
+    private final List<Column> columns;
+
+    /**
+     * Initializes a new {@link ColumnCollection}.
+     */
+    public ColumnCollection(List<Column> columns) {
         super();
+        this.columns = columns;
     }
 
-    @Override
-    public void startBundle() throws Exception {
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + OAuthServiceMetaData.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + FacebookService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + "))");
-        track(filter, new FacebookRegisterer(context));
-        openTrackers();
+    /**
+     * Gets the columns
+     *
+     * @return The columns
+     */
+    public List<Column> getColumns() {
+        return columns;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    /**
+     * Gets the contained fields
+     *
+     * @return The fields or <code>null</code>
+     */
+    public int[] getFields() {
+        TIntList l = new TIntArrayList(columns.size());
+        for (Column column : columns) {
+            int field = column.getField();
+            if (field > 0) {
+                l.add(field);
+            }
+        }
+        return l.isEmpty() ? null : l.toArray();
+    }
+
+    /**
+     * Gets the contained headers
+     *
+     * @return The headers or <code>null</code>
+     */
+    public String[] getHeaders() {
+        List<String> l = new ArrayList<String>(columns.size());
+        for (Column column : columns) {
+            String header = column.getHeader();
+            if (null != header) {
+                l.add(header);
+            }
+        }
+        return l.isEmpty() ? null : l.toArray(new String[l.size()]);
     }
 
 }

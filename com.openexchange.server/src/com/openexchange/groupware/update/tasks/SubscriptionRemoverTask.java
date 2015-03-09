@@ -76,9 +76,11 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     private final String subscriptionSourceId;
 
-    private static final String DELETE = "DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;";
-
-
+    /**
+     * Initializes a new {@link SubscriptionRemoverTask}.
+     *
+     * @param subscriptionSourceId The identifier
+     */
     public SubscriptionRemoverTask(final String subscriptionSourceId) {
         this.subscriptionSourceId = subscriptionSourceId;
     }
@@ -119,7 +121,7 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
                 return;
             }
 
-            stmt = con.prepareStatement(DELETE);
+            stmt = con.prepareStatement("DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;");
             stmt.setString(1, subscriptionSourceId);
             stmt.executeUpdate();
         } catch (final SQLException x) {

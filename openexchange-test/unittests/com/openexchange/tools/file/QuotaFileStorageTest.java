@@ -293,7 +293,7 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
-        public void invalidate(final int contextId) {
+        public void invalidate(final int... contextIds) {
             // Nothing to do.
         }
 

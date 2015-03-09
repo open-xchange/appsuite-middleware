@@ -71,6 +71,8 @@ public interface CustomPortable extends Portable {
      */
     public static final int PORTABLEREPORT_CLASS_ID = 9;
 
+    public static final int PORTABLE_CONTEXT_SESSIONS_CLEANER_CLASS_ID = 19;
+
     /**
      * Gets the ID of the dynamic portable factory.<p/>
      *
@@ -108,9 +110,10 @@ public interface CustomPortable extends Portable {
      * <li><code>  16</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupStatus</li>
      * <li><code>  17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
      * <li><code>  18</code>: com.openexchange.sessiond.portable.PortableTokenSessionControl</li>
-     * <li><code>  19</code>: com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo</li>
-     * <li><code>  20</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntry</li>
-     * <li><code>  21</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToRealtimeExceptionMap</li>
+     * <li><code>  19</code>: com.openexchange.sessiond.serialization.PortableContextSessionsCleaner</li>
+     * <li><code>  20</code>: com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo</li>
+     * <li><code>  21</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntry</li>
+     * <li><code>  22</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToRealtimeExceptionMap</li>
      * </ul>
      *
      * @return The class ID

@@ -503,7 +503,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private final transient static JSONArray EMPTY_JSON_ARR = new JSONArray();
 
-    private final transient MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriter(new MailListField[] { MailListField.ID })[0];
+    private final transient MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriters(new MailListField[] { MailListField.ID })[0];
 
     private final Response actionGetUpdates(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException {
         /*
@@ -539,7 +539,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                     if (!bIgnoreModified) {
                         final MailMessage[] modified = mailInterface.getUpdatedMessages(folderId, columns);
-                        final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                        final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
                         for (final MailMessage mail : modified) {
                             if (mail != null) {
                                 final JSONArray ja = new JSONArray();
@@ -758,7 +758,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Pre-Select field writers
                  */
-                final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
                 final int userId = session.getUserId();
                 final int contextId = session.getContextId();
                 int orderDir = OrderDirection.ASC.getOrder();
@@ -1682,7 +1682,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Pre-Select field writers
                  */
-                final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
                 it = mailInterface.getNewMessages(folderId, sortCol, orderDir, columns, limit == ParamContainer.NOT_FOUND ? -1 : limit);
                 final int size = it.size();
                 final int userId = session.getUserId();
@@ -2974,7 +2974,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Pre-Select field writers
                          */
-                        final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                        final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
                         final int userId = session.getUserId();
                         final int contextId = session.getContextId();
                         int orderDir = OrderDirection.ASC.getOrder();
@@ -3044,7 +3044,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Pre-Select field writers
                      */
-                    final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                    final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
                     final int userId = session.getUserId();
                     final int contextId = session.getContextId();
                     int orderDir = OrderDirection.ASC.getOrder();
@@ -3148,8 +3148,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Pre-Select field writers
              */
-            final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
-            final MailFieldWriter[] headerWriters = null == headers ? null : MessageWriter.getHeaderFieldWriter(headers);
+            final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
+            final MailFieldWriter[] headerWriters = null == headers ? null : MessageWriter.getHeaderFieldWriters(headers);
             /*
              * Get map
              */
