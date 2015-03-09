@@ -69,23 +69,49 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
 
-    private final boolean cookiesNeeded, locationNeeded;
+    private final boolean cookiesNeeded, locationNeeded, failOnNonRedirect;
     private String location;
     private int statusCode;
     private String reasonPhrase;
 
+    /**
+     * Initializes a new {@link AbstractRedirectParser}.
+     */
     protected AbstractRedirectParser() {
         this(true);
     }
 
+    /**
+     * Initializes a new {@link AbstractRedirectParser}.
+     *
+     * @param cookiesNeeded <code>true</code> if cookies should be parsed and checked from the response, <code>false</code>, otherwise
+     */
     protected AbstractRedirectParser(boolean cookiesNeeded) {
         this(cookiesNeeded, true);
     }
 
+    /**
+     * Initializes a new {@link AbstractRedirectParser}.
+     *
+     * @param cookiesNeeded <code>true</code> if cookies should be parsed and checked from the response, <code>false</code>, otherwise
+     * @param locationNeeded <code>true</code> to fail if the response contains no <code>Location</code> header, <code>false</code>, otherwise
+     */
     protected AbstractRedirectParser(boolean cookiesNeeded, boolean locationNeeded) {
+        this(cookiesNeeded, locationNeeded, true);
+    }
+
+    /**
+     * Initializes a new {@link AbstractRedirectParser}.
+     *
+     * @param cookiesNeeded <code>true</code> if cookies should be parsed and checked from the response, <code>false</code>, otherwise
+     * @param locationNeeded <code>true</code> to fail if the response contains no <code>Location</code> header, <code>false</code>, otherwise
+     * @param failOnNonRedirect <code>true</code> to fail if the response status code is anything else than <code>HTTP 302</code>, <code>false</code>, otherwise
+     */
+    protected AbstractRedirectParser(boolean cookiesNeeded, boolean locationNeeded, boolean failOnNonRedirect) {
         super(true);
         this.cookiesNeeded = cookiesNeeded;
         this.locationNeeded = locationNeeded;
+        this.failOnNonRedirect = failOnNonRedirect;
     }
 
     protected int getStatusCode() {
@@ -125,7 +151,9 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
     public String checkResponse(HttpResponse resp) throws ParseException, IOException {
         statusCode = resp.getStatusLine().getStatusCode();
         reasonPhrase = resp.getStatusLine().getReasonPhrase();
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
+        if (failOnNonRedirect) {
+            assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, statusCode);
+        }
         parseLocationHeader(resp);
         if (cookiesNeeded) {
             parseCookies(resp);

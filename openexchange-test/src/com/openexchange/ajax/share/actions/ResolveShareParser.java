@@ -50,12 +50,12 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import com.openexchange.ajax.framework.AbstractRedirectParser;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ResolveShareParser}
@@ -77,7 +77,7 @@ public class ResolveShareParser extends AbstractRedirectParser<ResolveShareRespo
      * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
      */
     public ResolveShareParser(boolean failOnNonRedirect) {
-        super(false, failOnNonRedirect);
+        super(false, failOnNonRedirect, failOnNonRedirect);
     }
 
     @Override
@@ -87,19 +87,21 @@ public class ResolveShareParser extends AbstractRedirectParser<ResolveShareRespo
 
     @Override
     protected ResolveShareResponse createResponse(String location) {
-        int fragIndex = location.indexOf('#');
-        if (-1 == fragIndex) {
-            return new ResolveShareResponse(getStatusCode(), location, Collections.<String, String>emptyMap());
-        }
-        String path = location.substring(0, fragIndex);
-        String[] params = location.substring(fragIndex + 1).split("&");
         Map<String, String> map = new HashMap<String, String>();
-        for (String param : params) {
-            int assignPos = param.indexOf('=');
-            if (-1 == assignPos) {
-                map.put(param, null);
-            } else {
-                map.put(param.substring(0, assignPos), param.substring(assignPos + 1));
+        String path = location;
+        if (false == Strings.isEmpty(location)) {
+            int fragIndex = location.indexOf('#');
+            if (-1 != fragIndex) {
+                path = location.substring(0, fragIndex);
+                String[] params = location.substring(fragIndex + 1).split("&");
+                for (String param : params) {
+                    int assignPos = param.indexOf('=');
+                    if (-1 == assignPos) {
+                        map.put(param, null);
+                    } else {
+                        map.put(param.substring(0, assignPos), param.substring(assignPos + 1));
+                    }
+                }
             }
         }
         return new ResolveShareResponse(getStatusCode(), path, map);
