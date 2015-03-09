@@ -47,15 +47,61 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.impl;
+
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.saml.SAMLWebSSOProvider;
+import com.openexchange.session.Reply;
+import com.openexchange.session.Session;
+import com.openexchange.session.inspector.Reason;
+import com.openexchange.session.inspector.SessionInspectorService;
 
 
 /**
- * {@link ResponseValidator}
+ * {@link SAMLSessionInspector}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ResponseValidator {
+public class SAMLSessionInspector implements SessionInspectorService {
+
+    private final SAMLWebSSOProvider provider;
+
+    public SAMLSessionInspector(SAMLWebSSOProvider provider) {
+        super();
+        this.provider = provider;
+    }
+
+    @Override
+    public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        return Reply.CONTINUE;
+    }
+
+    @Override
+    public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        try {
+            provider.respondWithAuthnRequest(request, response);
+        } catch (IOException e) {
+            // TODO
+            throw new OXException(e);
+        }
+
+        return Reply.STOP;
+    }
+
+    @Override
+    public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        try {
+            provider.respondWithAuthnRequest(request, response);
+        } catch (IOException e) {
+            // TODO
+            throw new OXException(e);
+        }
+
+        return Reply.STOP;
+    }
 
 }

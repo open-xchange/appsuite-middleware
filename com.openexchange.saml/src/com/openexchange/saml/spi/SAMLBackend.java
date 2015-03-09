@@ -60,23 +60,34 @@ import com.openexchange.saml.validation.chain.AssertionValidator;
 import com.openexchange.saml.validation.chain.ResponseValidator;
 import com.openexchange.saml.validation.chain.ValidatorChain;
 
+
 /**
- * {@link AuthnResponseHandler}
+ * A {@link SAMLBackend} must be implemented and registered as OSGi service to enable
+ * SAML-based SSO. It provides the necessary deployment-specific objects that are needed
+ * to create SP requests and process IDP responses.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface AuthnResponseHandler {
+public interface SAMLBackend {
 
     /**
-     * Resolves a principal based on the provided response and bearer assertion.
+     * Gets the credential provider used to sign/verify/decrypt XML objects.
      *
-     * @param response The SAML response
-     * @param assertion A valid bearer assertion whose subject shall be mapped to a principal
-     * @return The principal, which must denote an existing user
-     * @throws OXException If the principal cannot be resolved
+     * @return The credential provider
+     * @see KeySpecCredentialProvider
+     * @see KeyStoreCredentialProvider
      */
-    Principal resolvePrincipal(Response response, Assertion assertion) throws OXException;
+    CredentialProvider getCredentialProvider();
+
+    /**
+     * Gets an optional customizer that allows to modify authentication requests and
+     * the service providers metadata (&lt;SPSSODescriptor&gt;) before they are marshalled
+     * and returned to the requesting party.
+     *
+     * @return The customizer or <code>null</code> if customization is not necessary.
+     */
+    SAMLWebSSOCustomizer getWebSSOCustomizer();
 
     /**
      * Gets the validation strategy that will be used to validate authentication responses.
@@ -98,5 +109,15 @@ public interface AuthnResponseHandler {
      * @see AssertionValidator
      */
     ValidationStrategy getValidationStrategy(SAMLConfig config);
+
+    /**
+     * Resolves a principal based on the provided response and bearer assertion.
+     *
+     * @param response The SAML response
+     * @param assertion A valid bearer assertion whose subject shall be mapped to a principal
+     * @return The principal, which must denote an existing user
+     * @throws OXException If the principal cannot be resolved
+     */
+    Principal resolvePrincipal(Response response, Assertion assertion) throws OXException;
 
 }

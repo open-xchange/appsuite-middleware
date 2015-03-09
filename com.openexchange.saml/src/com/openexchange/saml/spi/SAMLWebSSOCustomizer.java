@@ -64,13 +64,13 @@ import com.openexchange.saml.SAMLConfig;
  * to customize the generated XML objects of the service provider side. This interface provides
  * a set of customization functions for this purpose.
  *
- * A concrete implementation must be registered as OSGi service under the {@link ServiceProviderCustomizer}
+ * A concrete implementation must be registered as OSGi service under the {@link SAMLWebSSOCustomizer}
  * interface. At most one instance is allowed to exist at runtime.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface ServiceProviderCustomizer {
+public interface SAMLWebSSOCustomizer {
 
     /**
      * A parameter class that encapsulates context data of

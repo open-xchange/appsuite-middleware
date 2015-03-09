@@ -107,4 +107,35 @@ public interface CredentialProvider {
      */
     Credential getDecryptionCredential();
 
+    /*
+     * Using certificates that are part of KeyInfo elements in the signed XML itself would require
+     * us to verify those in terms of if we trust them. In case we need to extract and use those certificates at a later point
+     * that is how it works:
+     *
+     *     List<KeyInfoProvider> keyInfoProviders = new ArrayList<KeyInfoProvider>(4);
+     *     keyInfoProviders.add(new InlineX509DataProvider());
+     *     keyInfoProviders.add(new KeyInfoReferenceProvider());
+     *     keyInfoProviders.add(new DEREncodedKeyValueProvider());
+     *     keyInfoProviders.add(new RSAKeyValueProvider());
+     *     keyInfoProviders.add(new DSAKeyValueProvider());
+     *     BasicProviderKeyInfoCredentialResolver keyInfoCredentialResolver = new BasicProviderKeyInfoCredentialResolver(keyInfoProviders);
+     *
+     *     ChainingCredentialResolver credentialResolver = new ChainingCredentialResolver();
+     *     credentialResolver.getResolverChain().add(keyInfoCredentialResolver);
+     *     if (idpCertificateCredential != null) {
+     *         credentialResolver.getResolverChain().add(new StaticCredentialResolver(idpCertificateCredential));
+     *     }
+     *
+     *     Credential credential;
+     *     try {
+     *         credential = credentialResolver.resolveSingle(new CriteriaSet(new KeyInfoCriteria(signature.getKeyInfo())));
+     *     } catch (SecurityException e) {
+     *         throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create(e, e.getMessage());
+     *     }
+     *
+     *     if (credential == null) {
+     *         throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create("Could not find a certificate for signature validation.");
+     *     }
+     */
+
 }

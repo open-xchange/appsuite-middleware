@@ -47,56 +47,64 @@
  *
  */
 
-package com.openexchange.saml.spi;
+package com.openexchange.saml.validation;
 
 import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Response;
-import com.openexchange.exception.OXException;
-import com.openexchange.saml.SAMLConfig;
-import com.openexchange.saml.validation.StrictValidationStrategy;
-import com.openexchange.saml.validation.ValidationStrategy;
-import com.openexchange.saml.validation.chain.AbstractChainBasedValidationStrategy;
-import com.openexchange.saml.validation.chain.AssertionValidator;
-import com.openexchange.saml.validation.chain.ResponseValidator;
-import com.openexchange.saml.validation.chain.ValidatorChain;
+
 
 /**
- * {@link AuthnResponseHandler}
+ * {@link DefaultValidationResult}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface AuthnResponseHandler {
+public class DefaultValidationResult implements ValidationResult {
+
+    private String errorDetail;
+
+    private ErrorReason reason;
+
+    private Assertion assertion;
+
 
     /**
-     * Resolves a principal based on the provided response and bearer assertion.
-     *
-     * @param response The SAML response
-     * @param assertion A valid bearer assertion whose subject shall be mapped to a principal
-     * @return The principal, which must denote an existing user
-     * @throws OXException If the principal cannot be resolved
+     * Initializes an unsuccessful validation result
+     * @param reason
+     * @param errorDetail
      */
-    Principal resolvePrincipal(Response response, Assertion assertion) throws OXException;
+    public DefaultValidationResult(ErrorReason reason, String errorDetail) {
+        super();
+        this.reason = reason;
+        this.errorDetail = errorDetail;
+    }
 
     /**
-     * Gets the validation strategy that will be used to validate authentication responses.
-     * Most likely you want return an instance of {@link StrictValidationStrategy} here.
-     *
-     * Unfortunately it might be that the actual IDPs responses are not conform to the SAML spec,
-     * as it is quite complex and hard to implement. In such cases you need to implement your own
-     * validation strategy. To avoid that malicious responses are accepted as valid you should not
-     * start with implementing your own validation mechanisms from scratch, but inherit from
-     * {@link AbstractChainBasedValidationStrategy}. You can then simply leave single validators
-     * out to work around the validation problems.
-     *
-     * @param config The SAML configuration
-     * @return The validation strategy
-     * @see StrictValidationStrategy
-     * @see AbstractChainBasedValidationStrategy
-     * @see ValidatorChain
-     * @see ResponseValidator
-     * @see AssertionValidator
+     * Initializes a successful validation result
+     * @param assertion
      */
-    ValidationStrategy getValidationStrategy(SAMLConfig config);
+    public DefaultValidationResult(Assertion assertion) {
+        super();
+        this.assertion = assertion;
+    }
+
+    @Override
+    public boolean success() {
+        return reason == null;
+    }
+
+    @Override
+    public ErrorReason getErrorReason() {
+        return reason;
+    }
+
+    @Override
+    public String getErrorDetail() {
+        return errorDetail;
+    }
+
+    @Override
+    public Assertion getBearerAssertion() {
+        return assertion;
+    }
 
 }

@@ -61,15 +61,19 @@ import com.openexchange.exception.OXException;
  */
 public class DefaultConfig implements SAMLConfig {
 
-    private static final String PROP_PROTOCOL_BINDING = "com.openexchange.saml.sp.protocolBinding";
+    private static final String PROP_REQUEST_BINDING = "com.openexchange.saml.requestBinding";
 
-    private static final String PROP_ACS_URL = "com.openexchange.saml.sp.acsURL";
+    private static final String PROP_RESPONSE_BINDING = "com.openexchange.saml.responseBinding";
 
-    private static final String PROP_ENTITY_ID = "com.openexchange.saml.sp.entityID";
+    private static final String PROP_ACS_URL = "com.openexchange.saml.acsURL";
 
-    private static final String PROP_PROVIDER_NAME = "com.openexchange.saml.sp.providerName";
+    private static final String PROP_ENTITY_ID = "com.openexchange.saml.entityID";
 
-    private static final String PROP_IDP_URL = "com.openexchange.saml.sp.idpURL";
+    private static final String PROP_PROVIDER_NAME = "com.openexchange.saml.providerName";
+
+    private static final String PROP_IDP_ENTITY_ID = "com.openexchange.saml.idpEntityID";
+
+    private static final String PROP_IDP_URL = "com.openexchange.saml.idpURL";
 
     private String providerName;
 
@@ -77,9 +81,14 @@ public class DefaultConfig implements SAMLConfig {
 
     private String acsURL;
 
-    private Binding binding;
+    private Binding requestBinding;
+
+    private Binding responseBinding;
 
     private String idpURL;
+
+    private String idpEntityID;
+
 
     private DefaultConfig() {
         super();
@@ -90,16 +99,27 @@ public class DefaultConfig implements SAMLConfig {
         config.setProviderName(checkProperty(configService, PROP_PROVIDER_NAME));
         config.setEntityID(checkProperty(configService, PROP_ENTITY_ID));
         config.setAcsURL(checkProperty(configService, PROP_ACS_URL));
+        config.setIdpEntityID(checkProperty(configService, PROP_IDP_ENTITY_ID));
         config.setIdpURL(checkProperty(configService, PROP_IDP_URL));
-        String bindingName = checkProperty(configService, PROP_PROTOCOL_BINDING);
-        if ("http-redirect".equals(bindingName)) {
-            config.setBinding(Binding.HTTP_REDIRECT);
-        } else if ("http-post".equals(bindingName)) {
-            config.setBinding(Binding.HTTP_POST);
-        } else {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(PROP_PROTOCOL_BINDING + " = " + bindingName);
-        }
+        config.setResponseBinding(checkBinding(configService, PROP_RESPONSE_BINDING));
+        config.setRequestBinding(checkBinding(configService, PROP_REQUEST_BINDING));
+
         return config;
+    }
+
+
+
+
+
+    private static Binding checkBinding(ConfigurationService configService, String property) throws OXException {
+        String bindingName = checkProperty(configService, property);
+        if ("http-redirect".equals(bindingName)) {
+            return Binding.HTTP_REDIRECT;
+        } else if ("http-post".equals(bindingName)) {
+            return Binding.HTTP_POST;
+        }
+
+        throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(property + " = " + bindingName);
     }
 
     private static String checkProperty(ConfigurationService configService, String name) throws OXException {
@@ -127,8 +147,18 @@ public class DefaultConfig implements SAMLConfig {
     }
 
     @Override
+    public Binding getRequestBinding() {
+        return requestBinding;
+    }
+
+    @Override
     public Binding getResponseBinding() {
-        return binding;
+        return responseBinding;
+    }
+
+    @Override
+    public String getIdentityProviderEntityID() {
+        return idpEntityID;
     }
 
     @Override
@@ -148,8 +178,16 @@ public class DefaultConfig implements SAMLConfig {
         this.acsURL = acsURL;
     }
 
-    private void setBinding(Binding binding) {
-        this.binding = binding;
+    private void setRequestBinding(Binding binding) {
+        this.requestBinding = binding;
+    }
+
+    private void setResponseBinding(Binding binding) {
+        this.responseBinding = binding;
+    }
+
+    private void setIdpEntityID(String idpEntityID) {
+        this.idpEntityID = idpEntityID;
     }
 
     private void setIdpURL(String idpURL) {
@@ -164,18 +202,6 @@ public class DefaultConfig implements SAMLConfig {
 
     @Override
     public String getSingleLogoutServiceURL() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getIdentityProviderEntityID() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Binding getRequestBinding() {
         // TODO Auto-generated method stub
         return null;
     }

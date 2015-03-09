@@ -47,13 +47,16 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.http;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.SAMLWebSSOProvider;
 
 
 /**
@@ -64,20 +67,23 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class AssertionConsumerService extends HttpServlet {
 
+    private static final long serialVersionUID = -8019507819002031614L;
+
+    private final SAMLWebSSOProvider provider;
+
+    public AssertionConsumerService(SAMLWebSSOProvider provider) {
+        super();
+        this.provider = provider;
+    }
+
     @Override
     protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        handle(httpRequest, httpResponse);
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        handle(httpRequest, httpResponse);
-    }
-
-    private void handle(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String base64Response = httpRequest.getParameter("SAMLResponse");
-        String relayState = httpRequest.getParameter("RelayState");
-
+        try {
+            provider.handleAuthnResponse(httpRequest, httpResponse, Binding.HTTP_POST);
+        } catch (OXException e) {
+            // TODO
+            httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
 }

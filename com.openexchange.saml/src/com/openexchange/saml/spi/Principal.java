@@ -49,54 +49,55 @@
 
 package com.openexchange.saml.spi;
 
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Response;
-import com.openexchange.exception.OXException;
-import com.openexchange.saml.SAMLConfig;
-import com.openexchange.saml.validation.StrictValidationStrategy;
-import com.openexchange.saml.validation.ValidationStrategy;
-import com.openexchange.saml.validation.chain.AbstractChainBasedValidationStrategy;
-import com.openexchange.saml.validation.chain.AssertionValidator;
-import com.openexchange.saml.validation.chain.ResponseValidator;
-import com.openexchange.saml.validation.chain.ValidatorChain;
+public class Principal {
 
-/**
- * {@link AuthnResponseHandler}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
- */
-public interface AuthnResponseHandler {
+    private final int contextId;
+
+    private final int userId;
 
     /**
-     * Resolves a principal based on the provided response and bearer assertion.
+     * Initializes a new {@link Principal}.
      *
-     * @param response The SAML response
-     * @param assertion A valid bearer assertion whose subject shall be mapped to a principal
-     * @return The principal, which must denote an existing user
-     * @throws OXException If the principal cannot be resolved
+     * @param contextId
+     * @param userId
      */
-    Principal resolvePrincipal(Response response, Assertion assertion) throws OXException;
+    public Principal(int contextId, int userId) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+    }
 
-    /**
-     * Gets the validation strategy that will be used to validate authentication responses.
-     * Most likely you want return an instance of {@link StrictValidationStrategy} here.
-     *
-     * Unfortunately it might be that the actual IDPs responses are not conform to the SAML spec,
-     * as it is quite complex and hard to implement. In such cases you need to implement your own
-     * validation strategy. To avoid that malicious responses are accepted as valid you should not
-     * start with implementing your own validation mechanisms from scratch, but inherit from
-     * {@link AbstractChainBasedValidationStrategy}. You can then simply leave single validators
-     * out to work around the validation problems.
-     *
-     * @param config The SAML configuration
-     * @return The validation strategy
-     * @see StrictValidationStrategy
-     * @see AbstractChainBasedValidationStrategy
-     * @see ValidatorChain
-     * @see ResponseValidator
-     * @see AssertionValidator
-     */
-    ValidationStrategy getValidationStrategy(SAMLConfig config);
+    public int getContextId() {
+        return contextId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Principal other = (Principal) obj;
+        if (contextId != other.contextId)
+            return false;
+        if (userId != other.userId)
+            return false;
+        return true;
+    }
 
 }

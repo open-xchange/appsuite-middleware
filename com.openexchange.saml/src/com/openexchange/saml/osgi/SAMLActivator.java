@@ -51,25 +51,31 @@ package com.openexchange.saml.osgi;
 
 import java.security.Provider;
 import java.security.Security;
+import javax.servlet.ServletException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.xml.ConfigurationException;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleServiceTrackerCustomizer;
 import com.openexchange.saml.DefaultConfig;
 import com.openexchange.saml.OpenSAML;
-import com.openexchange.saml.SAMLServiceProvider;
+import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.Services;
-import com.openexchange.saml.spi.AuthnResponseHandler;
-import com.openexchange.saml.spi.ServiceProviderCustomizer;
+import com.openexchange.saml.http.AssertionConsumerService;
+import com.openexchange.saml.impl.SAMLSessionInspector;
+import com.openexchange.saml.spi.SAMLBackend;
+import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.reservation.SessionReservationService;
 
 /**
@@ -79,11 +85,11 @@ public class SAMLActivator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(SAMLActivator.class);
 
-    private SAMLServiceProvider serviceProvider;
+    private SAMLWebSSOProvider serviceProvider;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, DispatcherPrefixService.class, AuthnResponseHandler.class, SessionReservationService.class };
+        return new Class[] { ConfigurationService.class, DispatcherPrefixService.class, SessionReservationService.class, HttpService.class };
     }
 
     @Override
@@ -91,32 +97,41 @@ public class SAMLActivator extends HousekeepingActivator {
         LOG.info("Starting bundle com.openexchange.saml...");
         Services.setServiceLookup(this);
 
-        ConfigurationService configService = getService(ConfigurationService.class);
-        boolean enabled = configService.getBoolProperty("com.openexchange.saml.sp.enabled", false);
+        final ConfigurationService configService = getService(ConfigurationService.class);
+        boolean enabled = configService.getBoolProperty("com.openexchange.saml.enabled", false);
         if (enabled) {
-            OpenSAML openSAML = initOpenSAML();
-            serviceProvider = new SAMLServiceProvider(DefaultConfig.init(configService), openSAML, getService(AuthnResponseHandler.class), getService(SessionReservationService.class));
-            serviceProvider.init();
+            final OpenSAML openSAML = initOpenSAML();
+
 
             trackService(HostnameService.class);
-            track(ServiceProviderCustomizer.class, new SimpleServiceTrackerCustomizer<ServiceProviderCustomizer>() {
+            track(SAMLBackend.class, new SimpleServiceTrackerCustomizer<SAMLBackend>() {
                 @Override
-                public ServiceProviderCustomizer addingService(ServiceReference<ServiceProviderCustomizer> reference) {
-                    ServiceProviderCustomizer customizer = context.getService(reference);
-                    if (customizer != null) {
-                        serviceProvider.setCustomizer(customizer);
+                public SAMLBackend addingService(ServiceReference<SAMLBackend> reference) {
+                    SAMLBackend backend = context.getService(reference);
+                    if (backend != null) {
+                        try {
+                            serviceProvider = new SAMLWebSSOProvider(DefaultConfig.init(configService), openSAML, backend, getService(SessionReservationService.class));
+                            context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null); // TODO unregister
+                            getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "saml/acs", new AssertionConsumerService(serviceProvider), null, null);
+                        } catch (OXException e) {
+                            LOG.error("SAML Web SSO Provider could not be started!", e);
+                        } catch (ServletException e) {
+                            LOG.error("SAML Web SSO Provider could not be started!", e);
+                        } catch (NamespaceException e) {
+                            LOG.error("SAML Web SSO Provider could not be started!", e);
+                        }
                     }
 
-                    return customizer;
+                    return backend;
                 }
 
                 @Override
-                public void removedService(ServiceReference<ServiceProviderCustomizer> reference, ServiceProviderCustomizer service) {
-                    serviceProvider.setCustomizer(null);
+                public void removedService(ServiceReference<SAMLBackend> reference, SAMLBackend service) {
+                    // TODO: shutdown
                 }
 
                 @Override
-                public void modifiedService(ServiceReference<ServiceProviderCustomizer> reference, ServiceProviderCustomizer service) {}
+                public void modifiedService(ServiceReference<SAMLBackend> reference, SAMLBackend service) {}
             });
 
             openTrackers();

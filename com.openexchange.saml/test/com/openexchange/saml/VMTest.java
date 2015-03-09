@@ -120,7 +120,7 @@ public class VMTest {
         samlResponseRequest.setMethod("POST");
         samlResponseRequest.setParameter("SAMLResponse", Base64.encodeBytes(RESPONSE.getBytes()));
         
-        SAMLServiceProvider serviceProvider = new SAMLServiceProvider(CONFIG, openSAML, new TestResponseHandler(), new SimSessionReservationService());
+        SAMLWebSSOProvider serviceProvider = new SAMLWebSSOProvider(CONFIG, openSAML, new TestResponseHandler(), new SimSessionReservationService());
         serviceProvider.setCredentialProvider(credentialProvider);
         serviceProvider.handleAuthnResponse(samlResponseRequest, new SimHttpServletResponse(), Binding.HTTP_POST);
     }

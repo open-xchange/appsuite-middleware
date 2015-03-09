@@ -275,7 +275,7 @@ public class SAMLServiceProviderTest {
          */
         config = new TestConfig();
         openSAML = new OpenSAML();
-        serviceProvider = new SAMLServiceProvider(config, openSAML, new TestResponseHandler(), new SimSessionReservationService());
+        serviceProvider = new SAMLWebSSOProvider(config, openSAML, new TestResponseHandler(), new SimSessionReservationService());
         serviceProvider.init();
     }
 
@@ -290,7 +290,7 @@ public class SAMLServiceProviderTest {
         }
     }
 
-    private SAMLServiceProvider serviceProvider;
+    private SAMLWebSSOProvider serviceProvider;
     private TestConfig config;
     private OpenSAML openSAML;
 
