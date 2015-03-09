@@ -71,8 +71,6 @@ public class DefaultConfig implements SAMLConfig {
 
     private static final String PROP_IDP_URL = "com.openexchange.saml.sp.idpURL";
 
-    private static final String PROP_SIGN_AUTHN_REQUEST = "com.openexchange.saml.sp.signAuthnRequest";
-
     private String providerName;
 
     private String entityID;
@@ -82,8 +80,6 @@ public class DefaultConfig implements SAMLConfig {
     private Binding binding;
 
     private String idpURL;
-
-    private boolean signAuthnRequest;
 
     private DefaultConfig() {
         super();
@@ -103,7 +99,6 @@ public class DefaultConfig implements SAMLConfig {
         } else {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(PROP_PROTOCOL_BINDING + " = " + bindingName);
         }
-        config.setSignAuthnRequest(configService.getBoolProperty(PROP_SIGN_AUTHN_REQUEST, false));
         return config;
     }
 
@@ -141,11 +136,6 @@ public class DefaultConfig implements SAMLConfig {
         return idpURL;
     }
 
-    @Override
-    public boolean signAuthnRequests() {
-        return signAuthnRequest;
-    }
-
     private void setProviderName(String providerName) {
         this.providerName = providerName;
     }
@@ -166,10 +156,6 @@ public class DefaultConfig implements SAMLConfig {
         this.idpURL = idpURL;
     }
 
-    private void setSignAuthnRequest(boolean signAuthnRequest) {
-        this.signAuthnRequest = signAuthnRequest;
-    }
-
     @Override
     public boolean supportSingleLogout() {
         // TODO Auto-generated method stub
@@ -178,48 +164,6 @@ public class DefaultConfig implements SAMLConfig {
 
     @Override
     public String getSingleLogoutServiceURL() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getKeyStorePath() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getKeyStorePassword() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getSigningKeyAlias() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getSigningKeyPassword() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getEncryptionKeyAlias() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getEncryptionKeyPassword() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getIDPCertificateAlias() {
         // TODO Auto-generated method stub
         return null;
     }

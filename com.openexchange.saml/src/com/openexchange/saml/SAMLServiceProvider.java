@@ -49,6 +49,7 @@
 
 package com.openexchange.saml;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -114,6 +115,8 @@ import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
 import org.opensaml.xml.encryption.SimpleKeyInfoReferenceEncryptedKeyResolver;
 import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.opensaml.xml.io.MarshallingException;
+import org.opensaml.xml.io.UnmarshallingException;
+import org.opensaml.xml.parse.XMLParserException;
 import org.opensaml.xml.security.Criteria;
 import org.opensaml.xml.security.CriteriaSet;
 import org.opensaml.xml.security.SecurityException;
@@ -138,6 +141,7 @@ import org.opensaml.xml.util.XMLHelper;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
@@ -147,6 +151,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.spi.AuthnResponseHandler;
 import com.openexchange.saml.spi.AuthnResponseHandler.Principal;
+import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.ServiceProviderCustomizer;
 import com.openexchange.saml.spi.ServiceProviderCustomizer.RequestContext;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -177,11 +182,7 @@ public class SAMLServiceProvider {
 
     private volatile ServiceProviderCustomizer customizer;
 
-    private Credential signingCredential;
-
-    private Credential encryptionCredential;
-
-    private Credential idpCertificateCredential;
+    private CredentialProvider credentialProvider;
 
     private boolean initialized;
 
@@ -196,93 +197,12 @@ public class SAMLServiceProvider {
     }
 
     public synchronized void init() throws OXException {
-        initCredentials();
         initialized = true;
     }
-
-    private void initCredentials() throws OXException {
-        String idpCertificateAlias = config.getIDPCertificateAlias();
-        String encryptionKeyAlias = config.getEncryptionKeyAlias();
-        boolean hasEncryptionKey = !Strings.isEmpty(encryptionKeyAlias);
-        boolean hasIDPCertificate = !Strings.isEmpty(idpCertificateAlias);
-        if (config.signAuthnRequests() || hasIDPCertificate || hasEncryptionKey) {
-            String keyStorePath = config.getKeyStorePath();
-            if (Strings.isEmpty(keyStorePath)) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("No keystore path was set");
-            }
-
-            KeyStore keystore = initKeyStore(keyStorePath, config.getKeyStorePassword());
-            String signingKeyAlias = config.getSigningKeyAlias();
-            String signingKeyPassword = config.getSigningKeyPassword();
-            String encryptionKeyPassword = config.getEncryptionKeyPassword();
-
-            Map<String, String> passwordMap = new HashMap<String, String>(4);
-            if (!Strings.isEmpty(signingKeyAlias) && !Strings.isEmpty(signingKeyPassword)) {
-                passwordMap.put(signingKeyAlias, signingKeyPassword);
-            }
-            if (hasEncryptionKey && !Strings.isEmpty(encryptionKeyPassword)) {
-                passwordMap.put(encryptionKeyAlias, encryptionKeyPassword);
-            }
-
-            KeyStoreCredentialResolver keyStoreCredentialResolver = new KeyStoreCredentialResolver(keystore, passwordMap);
-            if (config.signAuthnRequests()) {
-                signingCredential = resolveCredential(keyStoreCredentialResolver, signingKeyAlias);
-            }
-
-            if (hasIDPCertificate) {
-                idpCertificateCredential = resolveCredential(keyStoreCredentialResolver, idpCertificateAlias);
-            }
-
-            if (hasEncryptionKey) {
-                encryptionCredential = resolveCredential(keyStoreCredentialResolver, encryptionKeyAlias);
-            }
-        }
-    }
-
-    private static Credential resolveCredential(KeyStoreCredentialResolver resolver, String alias) throws OXException {
-        try {
-            Criteria criteria = new EntityIDCriteria(alias);
-            CriteriaSet criteriaSet = new CriteriaSet(criteria);
-            Credential credential = resolver.resolveSingle(criteriaSet);
-            if (credential == null) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("Found no key store entry for alias '" + alias + "'");
-            }
-
-            return credential;
-        } catch (SecurityException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-        }
-    }
-
-    private static KeyStore initKeyStore(String path, String password) throws OXException {
-        File keyStoreFile = new File(path);
-        if (!keyStoreFile.exists() || !keyStoreFile.isFile()) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("The keystore path " + path + " points to an invalid file");
-        }
-
-        if (!keyStoreFile.canRead()) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("The keystore file " + path + " is not readable");
-        }
-
-        FileInputStream inputStream = null;
-        try {
-            inputStream = new FileInputStream(keyStoreFile);
-            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keystore.load(inputStream, password == null ? null : password.toCharArray());
-            return keystore;
-        } catch (KeyStoreException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-        } catch (FileNotFoundException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-        } catch (CertificateException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-        } catch (IOException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Streams.close(inputStream);
-        }
+    
+    // TODO: make mandatory
+    public void setCredentialProvider(CredentialProvider credentialProvider) {
+        this.credentialProvider = credentialProvider;
     }
 
     public String getMetadataXML() throws OXException {
@@ -313,19 +233,19 @@ public class SAMLServiceProvider {
             X509KeyInfoGeneratorFactory keyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
             keyInfoGeneratorFactory.setEmitEntityCertificate(true);
             KeyInfoGenerator keyInfoGenerator = keyInfoGeneratorFactory.newInstance();
-            if (config.signAuthnRequests()) {
+            if (credentialProvider.hasSigningCredential()) {
                 KeyDescriptor signKeyDescriptor = openSAML.buildSAMLObject(KeyDescriptor.class);
                 signKeyDescriptor.setUse(UsageType.SIGNING);
-                KeyInfo keyInfo = keyInfoGenerator.generate(signingCredential);
+                KeyInfo keyInfo = keyInfoGenerator.generate(credentialProvider.getSigningCredential());
                 signKeyDescriptor.setKeyInfo(keyInfo);
                 spssoDescriptor.getKeyDescriptors().add(signKeyDescriptor);
                 spssoDescriptor.setAuthnRequestsSigned(Boolean.TRUE);
             }
 
-            if (encryptionCredential != null) {
+            if (credentialProvider.hasDecryptionCredential()) {
                 KeyDescriptor encryptionKeyDescriptor = openSAML.buildSAMLObject(KeyDescriptor.class);
                 encryptionKeyDescriptor.setUse(UsageType.ENCRYPTION);
-                encryptionKeyDescriptor.setKeyInfo(keyInfoGenerator.generate(encryptionCredential));
+                encryptionKeyDescriptor.setKeyInfo(keyInfoGenerator.generate(credentialProvider.getDecryptionCredential()));
                 spssoDescriptor.getKeyDescriptors().add(encryptionKeyDescriptor);
                 spssoDescriptor.setWantAssertionsSigned(Boolean.TRUE);
             }
@@ -395,11 +315,12 @@ public class SAMLServiceProvider {
         try {
             // TODO: integrity protect RelayState
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", httpRequest.getServerName());
-            if (config.signAuthnRequests()) {
+            if (credentialProvider.hasSigningCredential()) {
                 /*
                  * The <AuthnRequest> message MAY be signed, if authentication of the request issuer is required.
                  * [profiles 06 - 4.1.3.3p18]
                  */
+                Credential signingCredential = credentialProvider.getSigningCredential();
                 String sigAlg = openSAML.getGlobalSecurityConfiguration().getSignatureAlgorithmURI(signingCredential.getPrivateKey().getAlgorithm());
                 redirectLocationBuilder.setParameter("SigAlg", sigAlg);
                 byte[] rawSignature = SigningUtil.signWithURI(
@@ -495,7 +416,7 @@ public class SAMLServiceProvider {
         encryptedKeyResolver.getResolverChain().add(new SimpleKeyInfoReferenceEncryptedKeyResolver());
 
         // FIXME:
-        StaticKeyInfoCredentialResolver skicr = new StaticKeyInfoCredentialResolver(encryptionCredential);
+        StaticKeyInfoCredentialResolver skicr = new StaticKeyInfoCredentialResolver(credentialProvider.getDecryptionCredential());
         Decrypter decrypter = new Decrypter(null, skicr, new InlineEncryptedKeyResolver());
         decrypter.setRootInNewDocument(true);
         return decrypter;
@@ -533,19 +454,16 @@ public class SAMLServiceProvider {
          *     }
          */
 
-        Credential credential = idpCertificateCredential;
+        Credential credential = credentialProvider.getValidationCredential();
         if (credential == null) {
-            throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create("Could not find a certificate for signature validation.");
+            throw SAMLExceptionCode.SIGNATURE_VALIDATION_FAILED.create("Could not find a credential for signature validation.");
         }
 
         return credential;
     }
 
     public void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException {
-        SAMLMessageDecoder decoder;
-        if (binding == Binding.HTTP_POST) {
-            decoder = new HTTPPostDecoder();
-        } else {
+        if (binding != Binding.HTTP_POST) {
             /*
              * The HTTP Redirect binding MUST NOT be used, as the response will
              * typically exceed the URL length permitted by most user agents.
@@ -557,7 +475,7 @@ public class SAMLServiceProvider {
         }
 
         if (responseHandler.beforeDecode(httpRequest, httpResponse, openSAML)) {
-            Response response = decodeResponse(httpRequest, httpResponse, decoder);
+            Response response = decodeResponse(httpRequest, httpResponse);
             try {
                 if (responseHandler.beforeValidate(response, openSAML)) {
                     boolean responseWasSigned = false;
@@ -600,23 +518,23 @@ public class SAMLServiceProvider {
                      * Format attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity.
                      * [profiles 06 - 4.1.4.2p19]
                      */
-                    if (responseWasSigned || response.getEncryptedAssertions().size() > 0) {
-                        Issuer issuer = response.getIssuer();
-                        if (issuer == null) {
-                            xmlDebugLog("issuer missing in response", response);
-                            throw SAMLExceptionCode.INVALID_RESPONSE.create("issuer was missing");
-                        }
-
-                        if (issuer.getFormat() != null && !NameIDType.ENTITY.equals(issuer.getFormat())) {
-                            xmlDebugLog("invalid issuer format in assertion", response);
-                            throw SAMLExceptionCode.INVALID_RESPONSE.create("invalid issuer format");
-                        }
-
-                        if (!issuer.getValue().equals(config.getIdentityProviderEntityID())) {
-                            xmlDebugLog("invalid issuer value in assertion", response);
-                            throw SAMLExceptionCode.INVALID_RESPONSE.create("invalid issuer value");
-                        }
-                    }
+//                    if (responseWasSigned || response.getEncryptedAssertions().size() > 0) {
+//                        Issuer issuer = response.getIssuer();
+//                        if (issuer == null) {
+//                            xmlDebugLog("issuer missing in response", response);
+//                            throw SAMLExceptionCode.INVALID_RESPONSE.create("issuer was missing");
+//                        }
+//
+//                        if (issuer.getFormat() != null && !NameIDType.ENTITY.equals(issuer.getFormat())) {
+//                            xmlDebugLog("invalid issuer format in assertion", response);
+//                            throw SAMLExceptionCode.INVALID_RESPONSE.create("invalid issuer format");
+//                        }
+//
+//                        if (!issuer.getValue().equals(config.getIdentityProviderEntityID())) {
+//                            xmlDebugLog("invalid issuer value in assertion", response);
+//                            throw SAMLExceptionCode.INVALID_RESPONSE.create("invalid issuer value");
+//                        }
+//                    }
 
                     if (response.getAssertions().size() + response.getEncryptedAssertions().size() == 0) {
                         xmlDebugLog("no assertion contained in response", response);
@@ -945,19 +863,24 @@ public class SAMLServiceProvider {
         }, t);
     }
 
-    private static Response decodeResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, SAMLMessageDecoder decoder) throws OXException {
-        BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject> context = new BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject>();
-        context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
-        context.setInboundMessageTransport(new HttpServletRequestAdapter(httpRequest));
-        context.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
-        context.setPeerEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+    private Response decodeResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+        String b64Response = httpRequest.getParameter("SAMLResponse");
+        if (b64Response == null) {
+            throw SAMLExceptionCode.DECODING_ERROR.create("The 'SAMLResponse' parameter was not set");
+        }
 
         try {
-            decoder.decode(context);
-            return (Response) context.getInboundSAMLMessage();
-        } catch (MessageDecodingException e) {
+            byte[] responseBytes = Base64.decodeBase64(b64Response);
+            Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(responseBytes)).getDocumentElement();
+            XMLObject unmarshalledResponse = openSAML.getUnmarshallerFactory().getUnmarshaller(responseElement).unmarshall(responseElement);
+            if (!(unmarshalledResponse instanceof Response)) {
+                throw SAMLExceptionCode.DECODING_ERROR.create("XML was not a valid Response element");
+            }
+
+            return (Response) unmarshalledResponse;
+        } catch (XMLParserException e) {
             throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
-        } catch (SecurityException e) {
+        } catch (UnmarshallingException e) {
             throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
         }
     }

@@ -75,7 +75,7 @@ public class KeySpecCredentialProvider extends AbstractCredentialProvider {
         DSA
     }
 
-    protected KeySpecCredentialProvider(Credential idpPublicKeyCredential, Credential signingPrivateKeyCredential, Credential decryptionPrivateKeyCredential) {
+    private KeySpecCredentialProvider(Credential idpPublicKeyCredential, Credential signingPrivateKeyCredential, Credential decryptionPrivateKeyCredential) {
         super(idpPublicKeyCredential, signingPrivateKeyCredential, decryptionPrivateKeyCredential);
     }
 

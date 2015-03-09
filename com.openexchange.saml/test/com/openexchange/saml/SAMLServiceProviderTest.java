@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
@@ -120,10 +119,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
-import com.openexchange.saml.spi.AuthnResponseHandler;
 import com.openexchange.session.reservation.SimSessionReservationService;
 
 /*
@@ -276,7 +273,7 @@ public class SAMLServiceProviderTest {
         /*
          * Init service provider
          */
-        config = new TestConfig(spKeyStoreFile.getAbsolutePath());
+        config = new TestConfig();
         openSAML = new OpenSAML();
         serviceProvider = new SAMLServiceProvider(config, openSAML, new TestResponseHandler(), new SimSessionReservationService());
         serviceProvider.init();
@@ -299,11 +296,9 @@ public class SAMLServiceProviderTest {
 
     private static final class TestConfig implements SAMLConfig {
 
-        private final String keyStorePath;
 
-        private TestConfig(String keyStorePath) {
+        private TestConfig() {
             super();
-            this.keyStorePath = keyStorePath;
         }
 
         @Override
@@ -332,11 +327,6 @@ public class SAMLServiceProviderTest {
         }
 
         @Override
-        public boolean signAuthnRequests() {
-            return false;
-        }
-
-        @Override
         public boolean supportSingleLogout() {
             return false;
         }
@@ -344,41 +334,6 @@ public class SAMLServiceProviderTest {
         @Override
         public String getSingleLogoutServiceURL() {
             return "http://test.saml.open-xchange.com/ajax/saml/logout";
-        }
-
-        @Override
-        public String getKeyStorePath() {
-            return keyStorePath;
-        }
-
-        @Override
-        public String getKeyStorePassword() {
-            return SP_KEY_STORE_PASSWORD;
-        }
-
-        @Override
-        public String getSigningKeyAlias() {
-            return SP_SIGNING_KEY_ALIAS;
-        }
-
-        @Override
-        public String getSigningKeyPassword() {
-            return SP_SIGNING_KEY_PASSWORD;
-        }
-
-        @Override
-        public String getEncryptionKeyAlias() {
-            return SP_ENCRYPTION_KEY_ALIAS;
-        }
-
-        @Override
-        public String getEncryptionKeyPassword() {
-            return SP_ENCRYPTION_KEY_PASSWORD;
-        }
-
-        @Override
-        public String getIDPCertificateAlias() {
-            return IDP_SIGNING_CERT_ALIAS;
         }
 
         @Override
@@ -392,32 +347,6 @@ public class SAMLServiceProviderTest {
         }
 
     }
-
-    private static final class TestResponseHandler implements AuthnResponseHandler {
-
-        @Override
-        public boolean beforeDecode(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OpenSAML openSAML) throws OXException {
-            return true;
-        }
-
-        @Override
-        public boolean beforeValidate(Response response, OpenSAML openSAML) throws OXException {
-            return true;
-        }
-
-        @Override
-        public boolean afterValidate(Response response, List<Assertion> assertions, OpenSAML openSAML) throws OXException {
-            return true;
-        }
-
-        @Override
-        public Principal resolvePrincipal(Response response, Assertion assertion, OpenSAML openSAML) throws OXException {
-            return new Principal(0, 0);
-        }
-
-    }
-
-
 
     @BeforeClass
     public static void beforeClass() throws ConfigurationException {
@@ -473,10 +402,10 @@ public class SAMLServiceProviderTest {
             System.out.println(XMLHelper.prettyPrintXML(samlMessage.getDOM()));
             List<EncryptedAssertion> encryptedAssertions = samlMessage.getEncryptedAssertions();
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keystore.load(new FileInputStream(config.getKeyStorePath()), config.getKeyStorePassword() == null ? null : config.getKeyStorePassword().toCharArray());
+            keystore.load(new FileInputStream(spKeyStoreFile.getAbsolutePath()), SP_KEY_STORE_PASSWORD.toCharArray());
             BasicCredential decryptCredential = new BasicCredential();
             decryptCredential.setUsageType(UsageType.ENCRYPTION);
-            PrivateKeyEntry entry = (PrivateKeyEntry) keystore.getEntry(config.getEncryptionKeyAlias(), new PasswordProtection(config.getEncryptionKeyPassword().toCharArray()));
+            PrivateKeyEntry entry = (PrivateKeyEntry) keystore.getEntry(SP_ENCRYPTION_KEY_ALIAS, new PasswordProtection(SP_ENCRYPTION_KEY_ALIAS.toCharArray()));
             decryptCredential.setPrivateKey(entry.getPrivateKey());
             StaticKeyInfoCredentialResolver skicr = new StaticKeyInfoCredentialResolver(decryptCredential);
 

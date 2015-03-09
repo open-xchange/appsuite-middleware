@@ -81,25 +81,9 @@ public interface SAMLConfig {
 
     String getIdentityProviderURL();
 
-    boolean signAuthnRequests();
-
     boolean supportSingleLogout();
 
     String getSingleLogoutServiceURL();
-
-    String getKeyStorePath();
-
-    String getKeyStorePassword();
-
-    String getSigningKeyAlias();
-
-    String getSigningKeyPassword();
-
-    String getEncryptionKeyAlias();
-
-    String getEncryptionKeyPassword();
-
-    String getIDPCertificateAlias();
 
     String getIdentityProviderEntityID();
 
