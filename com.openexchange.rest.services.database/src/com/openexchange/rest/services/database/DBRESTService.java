@@ -179,6 +179,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         perform();
     }
 
+    /**
+     * @deprecated
+     */
     @PUT("/pool/r/:readId/w/:writeId/:schema/:partitionId/writable")
     public void updateInMonitoredConnection(int readId, int writeId, String schema, int partitionId) throws OXException {
         returnMonitoredConnectionWhenDone(AccessType.WRITE, readId, writeId, schema, partitionId);

@@ -56,6 +56,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.jaxrs.database.DatabaseRESTService;
+import com.openexchange.jaxrs.database.internal.DatabaseRESTServiceJsonImpl;
+import com.openexchange.jaxrs.database.internal.DatabaseRESTServiceTextImpl;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTable;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTableTask;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTable;
@@ -78,8 +80,9 @@ public class DatabaseRESTActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        
-        registerService(DatabaseRESTService.class, new DatabaseRESTService(this));
+
+        registerService(DatabaseRESTService.class, new DatabaseRESTServiceJsonImpl(this));
+        registerService(DatabaseRESTService.class, new DatabaseRESTServiceTextImpl(this));
 
         registerService(CreateTableService.class, new CreateServiceSchemaVersionTable());
         registerService(CreateTableService.class, new CreateServiceSchemaLockTable());

@@ -115,7 +115,10 @@ public class DBVersionChecker implements VersionChecker {
                 stmt.setString(1, module);
                 stmt.setString(2, newVersionId);
 
-                if (1 == stmt.executeUpdate()) {
+                int update = stmt.executeUpdate();
+                DBUtils.closeSQLStuff(stmt);
+                
+                if (update == 1) {
                     return null;
                 }
             }

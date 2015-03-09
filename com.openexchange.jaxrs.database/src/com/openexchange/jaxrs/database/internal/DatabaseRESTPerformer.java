@@ -295,7 +295,7 @@ public class DatabaseRESTPerformer {
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    public void migrate(int ctxId, String fromVersion, String toVersion, String module) throws OXException {
+    public JSONObject migrate(int ctxId, String fromVersion, String toVersion, String module) throws OXException {
         finishMigrationWhenDone(ctxId);
         connection = dbService().getForUpdateTask(ctxId);
         migrationMetadata = new MigrationMetadata(ctxId, fromVersion, toVersion, module);
@@ -311,7 +311,7 @@ public class DatabaseRESTPerformer {
         beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
 
         try {
-            perform();
+            return perform();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
@@ -329,7 +329,7 @@ public class DatabaseRESTPerformer {
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    public void migrateMonitored(int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
+    public JSONObject migrateMonitored(int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
         finishMigrationWhenDone(readId, writeId, schema, partitionId);
         connection = dbService().getWritableMonitoredForUpdateTask(readId, writeId, schema, partitionId);
         migrationMetadata = new MigrationMetadata(fromVersion, toVersion, module);
@@ -347,7 +347,7 @@ public class DatabaseRESTPerformer {
         beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
 
         try {
-            perform();
+            return perform();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
