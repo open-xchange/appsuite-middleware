@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.RoutingInfo;
-import com.openexchange.realtime.hazelcast.group.helper.DynamicPortableFactoryImpl;
+import com.openexchange.realtime.hazelcast.serialization.DynamicPortableFactoryImpl;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableResourceFactory;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableRoutingInfoFactory;
@@ -80,7 +80,7 @@ import com.openexchange.realtime.packet.PresenceState;
 
 /**
  * {@link PortableResourceTest}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
@@ -169,7 +169,7 @@ public class PortableResourceTest {
         resourceMap.put(portableMarensID, portableResource);
         PortableResource deserializedPortableResource = resourceMap.get(portableMarensID);
         assertEquals(portableResource, deserializedPortableResource);
-        
+
     }
 
     @Test

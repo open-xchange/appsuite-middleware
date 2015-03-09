@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,24 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
+package com.openexchange.realtime.management;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import com.openexchange.ajax.framework.AbstractRedirectParser;
-import com.openexchange.java.Strings;
+
 
 /**
- * {@link ResolveShareParser}
+ * {@link RunLoopManagerMBean}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.2
  */
-public class ResolveShareParser extends AbstractRedirectParser<ResolveShareResponse> {
+public interface RunLoopManagerMBean {
 
     /**
-     * Initializes a new {@link ResolveShareParser}.
-     */
-    public ResolveShareParser() {
-        this(true);
-    }
-
-    /**
-     * Initializes a new {@link ResolveShareParser}.
+     * Get the mapping of ComponentHandles to RunLoops.
      *
-     * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
+     * @return the map
      */
-    public ResolveShareParser(boolean failOnNonRedirect) {
-        super(false, failOnNonRedirect, failOnNonRedirect);
-    }
+    public Map<String, Map<String, String>> getComponentHandleMappings();
 
-    @Override
-    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-        return super.checkResponse(resp);
-    }
-
-    @Override
-    protected ResolveShareResponse createResponse(String location) {
-        Map<String, String> map = new HashMap<String, String>();
-        String path = location;
-        if (false == Strings.isEmpty(location)) {
-            int fragIndex = location.indexOf('#');
-            if (-1 != fragIndex) {
-                path = location.substring(0, fragIndex);
-                String[] params = location.substring(fragIndex + 1).split("&");
-                for (String param : params) {
-                    int assignPos = param.indexOf('=');
-                    if (-1 == assignPos) {
-                        map.put(param, null);
-                    } else {
-                        map.put(param.substring(0, assignPos), param.substring(assignPos + 1));
-                    }
-                }
-            }
-        }
-        return new ResolveShareResponse(getStatusCode(), path, map);
-    }
 }

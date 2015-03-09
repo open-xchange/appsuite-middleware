@@ -109,6 +109,8 @@ public interface CustomPortable extends Portable {
      * <li><code>  17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
      * <li><code>  18</code>: com.openexchange.sessiond.portable.PortableTokenSessionControl</li>
      * <li><code>  19</code>: com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo</li>
+     * <li><code>  20</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntry</li>
+     * <li><code>  21</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToRealtimeExceptionMap</li>
      * </ul>
      *
      * @return The class ID

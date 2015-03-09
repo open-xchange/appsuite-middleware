@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,65 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
+package com.openexchange.realtime.management;
 
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import com.openexchange.ajax.framework.AbstractRedirectParser;
-import com.openexchange.java.Strings;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.synthetic.RunLoopManager;
+import com.openexchange.realtime.synthetic.SyntheticChannelRunLoop;
+
 
 /**
- * {@link ResolveShareParser}
+ * {@link RunLoopManagerManagement}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.2
  */
-public class ResolveShareParser extends AbstractRedirectParser<ResolveShareResponse> {
+public class RunLoopManagerManagement extends ManagementObject<RunLoopManagerMBean> implements RunLoopManagerMBean {
 
-    /**
-     * Initializes a new {@link ResolveShareParser}.
-     */
-    public ResolveShareParser() {
-        this(true);
-    }
+    private ObjectName objectName;
+    private final RunLoopManager runLoopManager;
 
-    /**
-     * Initializes a new {@link ResolveShareParser}.
-     *
-     * @param failOnNonRedirect <code>true</code> to fail if request is not redirected, <code>false</code>, otherwise
-     */
-    public ResolveShareParser(boolean failOnNonRedirect) {
-        super(false, failOnNonRedirect, failOnNonRedirect);
+    public RunLoopManagerManagement(RunLoopManager runLoopManager) {
+        super(RunLoopManagerMBean.class);
+        this.runLoopManager = runLoopManager;
     }
 
     @Override
-    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-        return super.checkResponse(resp);
+    public Map<String, Map<String, String>> getComponentHandleMappings() {
+        HashMap<String, Map<String,String>> clusterMappings = new HashMap<String, Map<String, String>>();
+        Set<String> componentIds = runLoopManager.getManagedComponents();
+        for (String componentId : componentIds) {
+            Map<String, String> runLoopMap = new HashMap<String, String>();
+            List<Entry<ID,SyntheticChannelRunLoop>> handlesInCluster = runLoopManager.getHandlesInCluster(componentId);
+            for (Entry<ID, SyntheticChannelRunLoop> entry : handlesInCluster) {
+                runLoopMap.put(entry.getKey().toString(), entry.getValue().getName());
+            }
+            clusterMappings.put(componentId, runLoopMap);
+        }
+        return clusterMappings;
     }
 
     @Override
-    protected ResolveShareResponse createResponse(String location) {
-        Map<String, String> map = new HashMap<String, String>();
-        String path = location;
-        if (false == Strings.isEmpty(location)) {
-            int fragIndex = location.indexOf('#');
-            if (-1 != fragIndex) {
-                path = location.substring(0, fragIndex);
-                String[] params = location.substring(fragIndex + 1).split("&");
-                for (String param : params) {
-                    int assignPos = param.indexOf('=');
-                    if (-1 == assignPos) {
-                        map.put(param, null);
-                    } else {
-                        map.put(param.substring(0, assignPos), param.substring(assignPos + 1));
-                    }
-                }
+    public ObjectName getObjectName() {
+        if (objectName == null) {
+            String managerName = "RunLoopManger";
+            try {
+                objectName = new ObjectName("com.openexchange.realtime", "name", managerName);
+            } catch (MalformedObjectNameException e) {
+                // can't happen: valid domain and no missing parameters
+            } catch (NullPointerException e) {
+                // can't happen: valid domain and no missing parameters
             }
         }
-        return new ResolveShareResponse(getStatusCode(), path, map);
+        return objectName;
     }
+
 }

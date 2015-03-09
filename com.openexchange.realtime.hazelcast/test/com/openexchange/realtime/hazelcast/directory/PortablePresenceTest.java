@@ -58,7 +58,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
-import com.openexchange.realtime.hazelcast.group.helper.DynamicPortableFactoryImpl;
+import com.openexchange.realtime.hazelcast.serialization.DynamicPortableFactoryImpl;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableIDFactory;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortablePresence;
@@ -119,7 +119,7 @@ public class PortablePresenceTest {
     @Test
     public void testPortableRoundtrip() {
         IMap<PortableID, PortablePresence> presenceMap = hzInstance.getMap(PRESENCE_MAP);
-        
+
         PortableID portbleUser1 = new PortableID(user1);
         PortablePresence portablePresence1 = new PortablePresence(presence1);
         presenceMap.put(portbleUser1, portablePresence1);

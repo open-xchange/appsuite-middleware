@@ -1019,18 +1019,15 @@ public final class JsonMessageHandler implements MailMessageHandler {
                              */
                             if (null != contentType.getParameter("realfilename") && plainTextContentArg.length() > 0) {
                                 asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                                return true;
                             }
-                            return true;
                         } else if (DisplayMode.RAW.equals(displayMode)) {
                             /*
                              * Return plain-text content as-is
                              */
                             asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(plainTextContentArg));
+                            return true;
                         }
-                        /*
-                         * Discard
-                         */
-                        return true;
                     }
 
                     // A plain text message body has already been detected

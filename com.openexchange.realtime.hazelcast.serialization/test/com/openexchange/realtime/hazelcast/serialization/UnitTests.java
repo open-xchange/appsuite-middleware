@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,27 @@
  *
  */
 
-package com.openexchange.realtime.util;
+package com.openexchange.realtime.hazelcast.serialization;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapTest;
+
 
 /**
- * {@link RealtimeReloadable} - Collects reloadables for real-time bundle.
+ * {@link UnitTests}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.2
  */
-public final class RealtimeReloadable implements Reloadable {
-
-    private static final RealtimeReloadable INSTANCE = new RealtimeReloadable();
-
-    /**
-     * Gets the instance.
-     *
-     * @return The instance
-     */
-    public static RealtimeReloadable getInstance() {
-        return INSTANCE;
-    }
-
-    // --------------------------------------------------------------------------------------------------- //
-
-    private final List<Reloadable> reloadables;
-
-    /**
-     * Initializes a new {@link RealtimeReloadable}.
-     */
-    private RealtimeReloadable() {
-        super();
-        reloadables = new CopyOnWriteArrayList<Reloadable>();
-    }
-
-    /**
-     * Adds given {@link Reloadable} instance.
-     *
-     * @param reloadable The instance to add
-     */
-    public void addReloadable(Reloadable reloadable) {
-        reloadables.add(reloadable);
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        for (final Reloadable reloadable : reloadables) {
-            reloadable.reloadConfiguration(configService);
-        }
-    }
-
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
-    }
-
-}
+/**
+ * {@link UnitTests}
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
+@RunWith(Suite.class)
+@SuiteClasses({
+    PortableIDToOXExceptionMapTest.class
+})
+public class UnitTests {}

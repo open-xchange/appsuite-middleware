@@ -51,6 +51,8 @@ package com.openexchange.guard.interceptor;
 
 import java.util.List;
 import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -58,7 +60,9 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.exception.OXException;
 import com.openexchange.guard.AbstractGuardAccess;
+import com.openexchange.guard.GuardApi;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
@@ -104,7 +108,19 @@ public final class GuardProvisioningContextPlugin extends AbstractGuardAccess im
 
     @Override
     public void delete(final Context ctx, final Credentials auth) throws PluginException {
-        // Nothing to do
+        try {
+            GuardApi guardApi = getGuardApi();
+            if (null == guardApi) {
+                // Guard end point not available
+                return;
+            }
+            guardApi.doCallPut(mapFor("action", "context_delete"), new JSONObject(2).put("context_id", ctx.getId().intValue()), Void.class);
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            throw new PluginException(null == cause ? e : cause);
+        } catch (JSONException e) {
+            throw new PluginException(e);
+        }
     }
 
     @Override
