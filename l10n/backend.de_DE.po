@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-03-06 10:17+0100\n"
+"PO-Revision-Date: 2015-03-09 16:45+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1490,6 +1490,18 @@ msgid ""
 msgstr ""
 "Das Eintragen oder Aktualisieren der Datenbankzuordnung für den Kontext %1$d "
 "und den Server %2$d ist fehlgeschlagen."
+
+#. %1$s is replaced with more details about the invalid configuration
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:133
+msgid "Invalid configuration for global databases: %1$s"
+msgstr "Ungültige Konfiguration für globale Datenbanken: %1$s"
+
+#. %1$s is replaced with the context group name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:136
+msgid "No global database for context group \"%1$s\" found."
+msgstr ""
+"Es konnte keine globale Datenbank für die Kontextgruppe \"%1$s\" gefunden "
+"werden."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
@@ -4003,8 +4015,10 @@ msgstr "Der Account wurde nicht gefunden"
 
 #. Another process already revoked the secret for a client
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:66
+#, fuzzy
 msgid "Another process already revoked the secret of your client"
 msgstr ""
+"Das Secret Ihres Clients wurde bereits von einem anderen Prozess aufgehoben"
 
 #. '%1$s' is not a valid redirect URI.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:69
@@ -5204,7 +5218,6 @@ msgstr "Die Gruppe \"%1$s\" kann nicht geändert werden."
 
 #. The display name "%1$s" is reserved. Please choose another one.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:107
-#, fuzzy
 msgid "The display name \"%1$s\" is reserved. Please choose another one."
 msgstr ""
 "Der Anzeigename \"%1$s\" ist reserviert. Bitte wählen Sie einen anderen "
@@ -7353,9 +7366,8 @@ msgstr "Beschreibung"
 
 #. A document's version comment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
-#, fuzzy
 msgid "Version comment"
-msgstr "Hinweise zur Version"
+msgstr "Anmerkungen zur Version"
 
 #. *
 #. * Problem putting an object into the cache.
@@ -7693,7 +7705,6 @@ msgstr "Aktuelle Dauer"
 
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:72
-#, fuzzy
 msgid "Billing information"
 msgstr "Rechnungsinformation"
 
@@ -14376,9 +14387,6 @@ msgstr "Zulu"
 
 #~ msgid "Cannot load class \"%1$s\"."
 #~ msgstr "Klasse \"%1$s\" kann nicht geladen werden"
-
-#~ msgid "Invalid configuration: %1$s"
-#~ msgstr "Ungültige Konfiguration: %1$s"
 
 #~ msgid "Property %1$s is not an integer"
 #~ msgstr "Eigenschaft %1$s ist keine Ganzzahl"
