@@ -95,7 +95,7 @@ public class Bug36943Test extends CalDAVTest {
          */
         String uid = randomUID();
         Date start = TimeTools.D("next friday at 09:00");
-        Date end = TimeTools.D("next sunday at 10:00");
+        Date end = TimeTools.D("next friday at 10:00");
         String summary = "Pile of \uD83D\uDCA9 poo";
         String iCal = generateICal(start, end, uid, summary, "test");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
@@ -124,7 +124,7 @@ public class Bug36943Test extends CalDAVTest {
         String folderID = String.valueOf(getClient().getValues().getPrivateTaskFolder());
         String uid = randomUID();
         Date start = TimeTools.D("next friday at 09:00");
-        Date end = TimeTools.D("next sunday at 10:00");
+        Date end = TimeTools.D("next friday at 10:00");
         String summary = "Pile of \uD83D\uDCA9 poo";
         String iCal = generateVTodo(start, end, uid, summary, "test");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(folderID, uid, iCal));
