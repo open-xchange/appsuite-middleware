@@ -1,3 +1,7 @@
+* 2015-03-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37112: Ensure that the complete appointment data is loaded for change exceptions before applying outgoing patches
+
 * 2015-02-26 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 36969: Include session information (sessionId, contextId and userId) to all relevant servlets.Remove filter artifacts. Correctly assert the filter rule.
