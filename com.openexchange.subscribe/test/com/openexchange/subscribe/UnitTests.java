@@ -49,8 +49,9 @@
 
 package com.openexchange.subscribe;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategyTest;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategyTest;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImplTest;
@@ -60,22 +61,20 @@ import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImplTest;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    ContactFolderMultipleUpdaterStrategyTest.class,
+    ContactFolderUpdaterStrategyTest.class,
+    SubscriptionExecutionServiceImplTest.class,
+//    SubscriptionSQLStorageTest.class,
+    CompositeSubscriptionSourceDiscoveryServiceTest.class,
+    MicroformatAppointmentParserTest.class,
+    StrategyFolderUpdaterTest.class,
+    SubscriptionSourceCollectorTest.class
+})
 public final class UnitTests {
 
     public UnitTests() {
         super();
-    }
-
-    public static Test suite() {
-        final TestSuite pubSuite = new TestSuite();
-        pubSuite.addTestSuite(ContactFolderUpdaterStrategyTest.class);
-        pubSuite.addTestSuite(ContactFolderMultipleUpdaterStrategyTest.class);
-        pubSuite.addTestSuite(SubscriptionExecutionServiceImplTest.class);
-        // pubSuite.addTestSuite(SubscriptionSQLStorageTest.class);
-        pubSuite.addTestSuite(CompositeSubscriptionSourceDiscoveryServiceTest.class);
-        pubSuite.addTestSuite(MicroformatAppointmentParserTest.class);
-        pubSuite.addTestSuite(StrategyFolderUpdaterTest.class);
-        pubSuite.addTestSuite(SubscriptionSourceCollectorTest.class);
-        return pubSuite;
     }
 }

@@ -110,6 +110,9 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         if (eq(original.getEmail3(), candidate.getEmail3())) {
             score += 10;
         }
+        if (eq(original.getCellularTelephone1(), candidate.getCellularTelephone1())) {
+            score += 10;
+        }
         if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
             score += 5;
         }

@@ -65,14 +65,7 @@ public interface MobilePushEvent {
      *
      * @return a map containing the key/value pairs for the message
      */
-    Map<String, String> getMessageData();
-
-    /**
-     * Returns the collapse key to summarize new messages
-     *
-     * @return the collapse key
-     */
-    String getCollapseKey();
+    Map<String, Object> getMessageData();
 
     /**
      * The provider
