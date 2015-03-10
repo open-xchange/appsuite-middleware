@@ -58,7 +58,6 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MimeCleanUp;
 
 /**
@@ -165,9 +164,9 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
     @Override
     public void cleanUp() {
         final MimeMessage mimeMessage = getMimeMessage();
-        if (mimeMessage instanceof ManagedMimeMessage) {
+        if (mimeMessage instanceof MimeCleanUp) {
             try {
-                ((ManagedMimeMessage) mimeMessage).cleanUp();
+                ((MimeCleanUp) mimeMessage).cleanUp();
             } catch (final Exception e) {
                 LoggerFactory.getLogger(MimeMailMessage.class).warn("Couldn't clean-up MIME resource.", e);
             }
