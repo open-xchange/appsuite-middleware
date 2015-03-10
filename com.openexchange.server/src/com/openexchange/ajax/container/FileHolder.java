@@ -160,7 +160,7 @@ public class FileHolder implements IFileHolder {
 
     private File file;
     private byte[] bytes;
-    private RandomAccess raf;
+    private RandomAccessClosure rac;
     private final List<Runnable> tasks;
 
     /**
@@ -266,13 +266,13 @@ public class FileHolder implements IFileHolder {
     }
 
     /**
-     * Sets the random access.
+     * Sets the random access closure.
      *
-     * @param raf The random access to set
+     * @param rac The random access closure to set
      * @return This instance
      */
-    public FileHolder setRandomAccess(RandomAccess raf) {
-        this.raf = raf;
+    public FileHolder setRandomAccessClosure(RandomAccessClosure rac) {
+        this.rac = rac;
         return this;
     }
 
@@ -314,9 +314,13 @@ public class FileHolder implements IFileHolder {
     @Override
     public RandomAccess getRandomAccess() throws OXException {
         // Check random access
-        RandomAccess raf = this.raf;
+        RandomAccessClosure raf = this.rac;
         if (null != raf) {
-            return raf;
+            try {
+                return raf.newRandomAccess();
+            } catch (IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
         }
 
         // Check file
@@ -349,7 +353,7 @@ public class FileHolder implements IFileHolder {
         this.is = is;
         this.isClosure = null;
         file = null;
-        raf = null;
+        rac = null;
         length = -1L;
         if (is instanceof ByteArrayInputStream) {
             this.bytes = bytesFrom((ByteArrayInputStream) is);
