@@ -56,7 +56,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.json.JSONObject;
+import javax.ws.rs.core.Response;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -81,7 +81,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/configdb/readOnly")
-    public JSONObject queryConfigDB() throws OXException {
+    public Response queryConfigDB() throws OXException {
         return performQueryConfigDB();
     }
 
@@ -89,7 +89,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/configdb/writable")
-    public JSONObject updateConfigDB() throws OXException {
+    public Response updateConfigDB() throws OXException {
         return performUpdateConfigDB();
     }
 
@@ -97,7 +97,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/oxdb/{ctxId}/readOnly")
-    public JSONObject queryOXDB(@PathParam("ctxId") int ctxId) throws OXException {
+    public Response queryOXDB(@PathParam("ctxId") int ctxId) throws OXException {
         return performQueryOXDB(ctxId);
     }
 
@@ -105,7 +105,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/oxdb/{ctxId}/writable")
-    public JSONObject updateOXDB(@PathParam("ctxId") int ctxId) throws OXException {
+    public Response updateOXDB(@PathParam("ctxId") int ctxId) throws OXException {
         return performUpdateOXDB(ctxId);
     }
 
@@ -113,7 +113,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/transaction/{transactionId}")
-    public JSONObject queryTransaction(@PathParam("transactionId") String txId) throws OXException {
+    public Response queryTransaction(@PathParam("transactionId") String txId) throws OXException {
         return performQueryTransaction(txId);
     }
 
@@ -135,7 +135,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/readOnly")
-    public JSONObject queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException {
+    public Response queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException {
         return performQueryInMonitoredConnection(readId, writeId, schema, partitionId);
     }
 
@@ -143,7 +143,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/readOnly")
-    public JSONObject queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
+    public Response queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
         return performQueryInMonitoredConnection(readId, writeId, schema, 0);
     }
 
@@ -151,7 +151,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/writable")
-    public JSONObject updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException {
+    public Response updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException {
         return performUpdateInMonitoredConnection(readId, writeId, schema, partitionId);
     }
 
@@ -159,7 +159,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/writable")
-    public JSONObject updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
+    public Response updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
         return performUpdateInMonitoredConnection(readId, writeId, schema, 0);
     }
 
@@ -203,7 +203,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/{ctxId}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
-    public JSONObject migrate(@PathParam("ctxId") int ctxId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+    public Response migrate(@PathParam("ctxId") int ctxId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
         return performMigrate(ctxId, fromVersion, toVersion, module);
     }
 
@@ -211,7 +211,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/{ctxId}/to/{toVersion}/forModule/{module}")
-    public JSONObject initialiMigration(@PathParam("ctxId") int ctxId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+    public Response initialiMigration(@PathParam("ctxId") int ctxId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
         return performMigrate(ctxId, "", toVersion, module);
     }
 
@@ -219,7 +219,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
-    public JSONObject migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+    public Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
         return performMigrateMonitored(readId, writeId, schema, partitionId, fromVersion, toVersion, module);
     }
 
@@ -227,7 +227,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/to/{toVersion}/forModule/{module}")
-    public JSONObject migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+    public Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
         return performMigrateMonitored(readId, writeId, schema, 0, "", toVersion, module);
     }
 
@@ -235,7 +235,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/to/{toVersion}/forModule/{module}")
-    public JSONObject migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+    public Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
         return performMigrateMonitored(readId, writeId, schema, partitionId, "", toVersion, module);
     }
 
@@ -243,7 +243,7 @@ public class DatabaseRESTServiceJsonImpl extends AbstractDatabaseRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
-    public JSONObject migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
+    public Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException {
         return performMigrateMonitored(readId, writeId, schema, 0, fromVersion, toVersion, module);
     }
 }

@@ -55,7 +55,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.json.JSONObject;
+import javax.ws.rs.core.Response;
 import com.openexchange.exception.OXException;
 
 /**
@@ -74,13 +74,13 @@ public interface DatabaseRESTService {
     /**
      * Performs a query to the 'configdb'.
      * 
-     * @return A JSONObject with the result set
+     * @return A Response with the result set
      * @throws OXException If an error occurs
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/configdb/readOnly")
-    JSONObject queryConfigDB() throws OXException;
+    Response queryConfigDB() throws OXException;
 
     /**
      * Performs an update to the 'configdb'.
@@ -91,19 +91,19 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/configdb/writable")
-    JSONObject updateConfigDB() throws OXException;
+    Response updateConfigDB() throws OXException;
 
     /**
      * Performs a query to an OX database with the specified context identifier.
      * 
      * @param ctxId The context identifier
-     * @return A JSONObject with the result set
+     * @return A Response with the result set
      * @throws OXException If an error occurs
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/oxdb/{ctxId}/readOnly")
-    JSONObject queryOXDB(@PathParam("ctxId") int ctxId) throws OXException;
+    Response queryOXDB(@PathParam("ctxId") int ctxId) throws OXException;
 
     /**
      * Issues updates and inserts to an OX database with the specified context identifier. If multiple updates are
@@ -117,13 +117,13 @@ public interface DatabaseRESTService {
      * request.
      * 
      * @param ctxId The context identifier
-     * @return A JSONObject with the outcome of the result (updated=1 or update=0)
+     * @return A Response with the outcome of the result (updated=1 or update=0)
      * @throws OXException If an error occurs
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/oxdb/{ctxId}/writable")
-    JSONObject updateOXDB(@PathParam("ctxId") int ctxId) throws OXException;
+    Response updateOXDB(@PathParam("ctxId") int ctxId) throws OXException;
 
     /**
      * Uses the open transaction to execute further queries or updates.
@@ -135,7 +135,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/transaction/{transactionId}")
-    JSONObject queryTransaction(@PathParam("transactionId") String txId) throws OXException;
+    Response queryTransaction(@PathParam("transactionId") String txId) throws OXException;
 
     /**
      * Rolls back the transaction with the specified transaction identifier. Simply returns a 200 status code
@@ -175,7 +175,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/readOnly")
-    JSONObject queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException;
+    Response queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException;
 
     /**
      * Query a monitored connection
@@ -188,7 +188,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/readOnly")
-    JSONObject queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
+    Response queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
 
     /**
      * Update a monitored connection
@@ -202,7 +202,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/writable")
-    JSONObject updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException;
+    Response updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException;
 
     /**
      * Update a monitored connection
@@ -215,7 +215,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/writable")
-    JSONObject updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
+    Response updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
 
     /**
      * Initialize a new database schema with the specified name and the specified write pool identifier.
@@ -291,7 +291,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/{ctxId}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
-    JSONObject migrate(@PathParam("ctxId") int ctxId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    Response migrate(@PathParam("ctxId") int ctxId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
 
     /**
      * Perform an initial migration to the specified version
@@ -304,7 +304,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/{ctxId}/to/{toVersion}/forModule/{module}")
-    JSONObject initialiMigration(@PathParam("ctxId") int ctxId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    Response initialiMigration(@PathParam("ctxId") int ctxId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
@@ -321,7 +321,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
-    JSONObject migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
@@ -336,7 +336,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/to/{toVersion}/forModule/{module}")
-    JSONObject migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
@@ -352,7 +352,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/to/{toVersion}/forModule/{module}")
-    JSONObject migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
@@ -368,5 +368,5 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
-    JSONObject migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
 }

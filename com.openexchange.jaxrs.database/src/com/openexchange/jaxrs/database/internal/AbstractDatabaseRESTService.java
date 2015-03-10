@@ -49,6 +49,7 @@
 
 package com.openexchange.jaxrs.database.internal;
 
+import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.database.DatabaseService;
@@ -101,7 +102,7 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @return A JSONObject with the result set
      * @throws OXException If an error occurs
      */
-    protected JSONObject performQueryConfigDB() throws OXException {
+    protected Response performQueryConfigDB() throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnConnectionWhenDone(DatabaseAccessType.READ);
         performer.setConnection(getService(DatabaseService.class).getReadOnly());
@@ -138,7 +139,7 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @return A JSONObject with the outcome of the result (updated=1 or update=0)
      * @throws OXException If an error occurs
      */
-    protected JSONObject performUpdateConfigDB() throws OXException {
+    protected Response performUpdateConfigDB() throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnConnectionWhenDone(DatabaseAccessType.WRITE);
         performer.setConnection(getService(DatabaseService.class).getWritable());
@@ -156,7 +157,7 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @return
      * @throws OXException
      */
-    protected JSONObject performQueryOXDB(int ctxId) throws OXException {
+    protected Response performQueryOXDB(int ctxId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnConnectionWhenDone(DatabaseAccessType.READ, ctxId);
         performer.setConnection(getService(DatabaseService.class).getReadOnly(ctxId));
@@ -174,7 +175,7 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @return A JSONObject with the outcome of the result (updated=1 or update=0)
      * @throws OXException If an error occurs
      */
-    protected JSONObject performUpdateOXDB(int ctxId) throws OXException {
+    protected Response performUpdateOXDB(int ctxId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnConnectionWhenDone(DatabaseAccessType.WRITE, ctxId);
         performer.setConnection(getService(DatabaseService.class).getWritable(ctxId));
@@ -192,7 +193,7 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @return
      * @throws OXException
      */
-    protected JSONObject performQueryTransaction(String txId) throws OXException {
+    protected Response performQueryTransaction(String txId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         try {
             return performer.executeTransaction(txId);
@@ -232,7 +233,7 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param partitionId The partition identifier
      * @throws OXException If the operation fails
      */
-    protected JSONObject performQueryInMonitoredConnection(int readId, int writeId, String schema, int partitionId) throws OXException {
+    protected Response performQueryInMonitoredConnection(int readId, int writeId, String schema, int partitionId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnMonitoredConnectionWhenDone(DatabaseAccessType.READ, readId, writeId, schema, partitionId);
         performer.setConnection(getService(DatabaseService.class).getReadOnlyMonitored(readId, writeId, schema, partitionId));
@@ -253,7 +254,7 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param partitionId The partition identifier
      * @throws OXException If the operation fails
      */
-    protected JSONObject performUpdateInMonitoredConnection(int readId, int writeId, String schema, int partitionId) throws OXException {
+    protected Response performUpdateInMonitoredConnection(int readId, int writeId, String schema, int partitionId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         performer.returnMonitoredConnectionWhenDone(DatabaseAccessType.WRITE, readId, writeId, schema, partitionId);
         performer.setConnection(getService(DatabaseService.class).getWritableMonitored(readId, writeId, schema, partitionId));
@@ -325,7 +326,7 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    protected JSONObject performMigrate(int ctxId, String fromVersion, String toVersion, String module) throws OXException {
+    protected Response performMigrate(int ctxId, String fromVersion, String toVersion, String module) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         return performer.migrate(ctxId, fromVersion, toVersion, module);
     }
@@ -342,7 +343,7 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    protected JSONObject performMigrateMonitored(int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
+    protected Response performMigrateMonitored(int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
         return performer.migrateMonitored(readId, writeId, schema, partitionId, fromVersion, toVersion, module);
     }

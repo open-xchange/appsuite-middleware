@@ -50,6 +50,8 @@
 package com.openexchange.jaxrs.database.internal;
 
 import static com.openexchange.java.util.NativeBuilders.map;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,8 +65,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -149,7 +155,7 @@ public class DatabaseRESTPerformer {
      * @throws OXException
      * @throws JSONException
      */
-    public JSONObject executeTransaction(String txId) throws OXException, JSONException {
+    public Response executeTransaction(String txId) throws OXException, JSONException {
         tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
         if (tx == null) {
             halt(404);
@@ -295,7 +301,7 @@ public class DatabaseRESTPerformer {
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    public JSONObject migrate(int ctxId, String fromVersion, String toVersion, String module) throws OXException {
+    public Response migrate(int ctxId, String fromVersion, String toVersion, String module) throws OXException {
         finishMigrationWhenDone(ctxId);
         connection = dbService().getForUpdateTask(ctxId);
         migrationMetadata = new MigrationMetadata(ctxId, fromVersion, toVersion, module);
@@ -329,7 +335,7 @@ public class DatabaseRESTPerformer {
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    public JSONObject migrateMonitored(int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
+    public Response migrateMonitored(int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
         finishMigrationWhenDone(readId, writeId, schema, partitionId);
         connection = dbService().getWritableMonitoredForUpdateTask(readId, writeId, schema, partitionId);
         migrationMetadata = new MigrationMetadata(fromVersion, toVersion, module);
@@ -360,16 +366,16 @@ public class DatabaseRESTPerformer {
      * @throws OXException
      * @throws JSONException
      */
-    public JSONObject perform() throws OXException, JSONException {
+    public Response perform() throws OXException, JSONException {
         prepare();
         try {
             beforeQueries();
         } catch (SQLException x) {
-            handleSQLException();
+            handleSQLException(x, new JSONObject());
         }
         Map<String, DatabaseQuery> queries = getQueries();
         if (queries == null) {
-            return new JSONObject();
+            return Response.ok(new JSONObject(), MediaType.APPLICATION_JSON).build();
         }
         JSONObject results = new JSONObject();
         if (queries.size() > QUERY_LIMIT) {
@@ -431,8 +437,7 @@ public class DatabaseRESTPerformer {
                 JSONObject response = new JSONObject();
                 response.put("results", results);
                 response.put("error", x.getMessage());
-                handleSQLException();
-                return response; //return?
+                return handleSQLException(x, response);
             }
         }
 
@@ -444,7 +449,7 @@ public class DatabaseRESTPerformer {
 
         cleanup();
 
-        return response;
+        return Response.ok(response, MediaType.APPLICATION_JSON).build();
     }
 
     private void prepare() throws OXException {
@@ -457,7 +462,8 @@ public class DatabaseRESTPerformer {
      * Returns a response code of 400
      * TODO: include the response body
      */
-    private void handleSQLException() {
+    private Response handleSQLException(SQLException x, JSONObject response) {
+        String message = x.getMessage();
         try {
             if (tx != null) {
                 DatabaseEnvironment.getInstance().getTransactionKeeper().rollback(tx.getID());
@@ -472,7 +478,7 @@ public class DatabaseRESTPerformer {
         } catch (SQLException | OXException e) {
             e.printStackTrace();
         }
-        halt(400);
+        return halt(400, message, response);
     }
 
     /**
@@ -873,6 +879,7 @@ public class DatabaseRESTPerformer {
         public Environment(TransactionKeeper transactions, VersionChecker versions) {
             this.transactions = transactions;
             this.versions = versions;
+                
         }
 
     }
@@ -913,9 +920,9 @@ public class DatabaseRESTPerformer {
         throw new WebApplicationException(message, statusCode);
     }
 
-    private void halt(int statusCode, String message, JSONObject entity) {
-        Response r = Response.status(statusCode).entity(entity).type("application/json").build();
-        throw new WebApplicationException(message, r);
+    private Response halt(int statusCode, String message, JSONObject entity) {
+        //header("Transfer-Encoding", "chunked").header("Pragma", "no-cache").header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0").
+        return Response.status(statusCode).entity(entity).header("X-OX-ACHTUNG", "This is an internal API that may change without notice").type(MediaType.APPLICATION_JSON).build();
     }
 
     /**
