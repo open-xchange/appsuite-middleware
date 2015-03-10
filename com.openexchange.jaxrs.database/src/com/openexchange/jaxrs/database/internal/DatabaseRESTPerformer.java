@@ -430,10 +430,16 @@ public class DatabaseRESTPerformer {
                 success = true;
             } catch (SQLException x) {
                 success = false;
-                results.put(question.getKey(), map().put("error", x.getMessage()).put("query", query.getQuery()).build());
+                
+                JSONObject q = new JSONObject();
+                q.put("error", x.getMessage());
+                q.put("query", query.getQuery());
+                results.put(question.getKey(), q);
+                
                 JSONObject response = new JSONObject();
                 response.put("results", results);
                 response.put("error", x.getMessage());
+                
                 handleSQLException(response);
             }
         }
