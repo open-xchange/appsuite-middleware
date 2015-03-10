@@ -241,7 +241,11 @@ public class SessionReservationServiceImpl implements SessionReservationService 
     @Override
     public Reservation getReservation(String token) throws OXException {
         Reservation reservation = peekReservation(token);
-        if (null == reservation || ((System.currentTimeMillis() - reservation.getCreationStamp()) > reservation.getTimeoutMillis())) {
+        if (null == reservation) {
+            return null;
+        }
+        if ((System.currentTimeMillis() - reservation.getCreationStamp()) > reservation.getTimeoutMillis()) {
+            pollReservation(token);
             return null;
         }
 
