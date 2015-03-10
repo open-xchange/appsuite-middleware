@@ -51,7 +51,6 @@ package com.openexchange.jaxrs.database.internal;
 
 import javax.ws.rs.core.Response;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jaxrs.JAXRSService;
