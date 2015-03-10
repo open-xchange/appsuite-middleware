@@ -97,6 +97,19 @@ public interface IFileHolder extends Closeable {
         long length() throws IOException;
     }
 
+    /** Creates a new random access to read from */
+    interface RandomAccessClosure {
+
+        /**
+         * Creates a new random access to read from.
+         *
+         * @return The random access
+         * @throws OXException If random access cannot be returned
+         * @throws IOException If random access cannot be returned
+         */
+        RandomAccess newRandomAccess() throws OXException, IOException;
+    }
+
     /**
      * Signals if this file holder is repetitive; meaning {@link #getStream()} yields a new {@link InputStream}.
      *

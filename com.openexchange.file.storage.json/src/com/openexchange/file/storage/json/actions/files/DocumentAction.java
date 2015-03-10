@@ -74,6 +74,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -110,9 +111,8 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         final String version = request.getVersion();
 
         final Document document = (request.getCachedDocument() == null) ? fileAccess.getDocumentAndMetadata(id, version) : request.getCachedDocument();
-
         if (document != null) {
-            final FileHolder fileHolder = new FileHolder(new IFileHolder.InputStreamClosure() {
+            FileHolder fileHolder = new FileHolder(new IFileHolder.InputStreamClosure() {
 
                 @Override
                 public InputStream newStream() throws OXException, IOException {
@@ -133,9 +133,9 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             return result;
         }
 
-
-        final File fileMetadata = fileAccess.getFileMetadata(id, version);
-
+        // The regular way
+        File fileMetadata = fileAccess.getFileMetadata(id, version);
+        IFileHolder.RandomAccessClosure rac = null;
         IFileHolder.InputStreamClosure isClosure;
         {
             final ServerSession session = request.getSession();
@@ -174,10 +174,14 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                         return new BufferedInputStream(inputStream, 65536);
                     }
                 };
+                rac = new IDBasedFileAccessRandomAccessClosure(id, version, fileMetadata.getFileSize(), session);
             }
         }
 
-        final FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
+        FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
+        if (null != rac) {
+            fileHolder.setRandomAccessClosure(rac);
+        }
 
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         createAndSetETag(fileMetadata, request, result);
@@ -239,6 +243,129 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         result.setExpires(expires);
         if (eTag != null) {
             result.setHeader(ETAG, eTag);
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------
+
+    private static class IDBasedFileAccessRandomAccessClosure implements IFileHolder.RandomAccessClosure {
+
+        private final String id;
+        private final String version;
+        private final ServerSession session;
+        private final long length;
+
+        IDBasedFileAccessRandomAccessClosure(String id, String version, long length, ServerSession session) {
+            super();
+            this.id = id;
+            this.version = version;
+            this.length = length;
+            this.session = session;
+        }
+
+        @Override
+        public IFileHolder.RandomAccess newRandomAccess() throws OXException, IOException {
+            return new IDBasedFileAccessRandomAccess(id, version, length, session);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(32);
+            builder.append("IDBasedFileAccessRandomAccessClosure [");
+            if (id != null) {
+                builder.append("id=").append(id).append(", ");
+            }
+            if (version != null) {
+                builder.append("version=").append(version).append(", ");
+            }
+            builder.append("length=").append(length).append(']');
+            return builder.toString();
+        }
+    }
+
+    private static class IDBasedFileAccessRandomAccess implements IFileHolder.RandomAccess {
+
+        private final String id;
+        private final String version;
+        private final ServerSession session;
+        private final long length;
+        private long pos = 0;
+
+        IDBasedFileAccessRandomAccess(String id, String version, long length, ServerSession session) {
+            super();
+            this.id = id;
+            this.version = version;
+            this.length = length;
+            this.session = session;
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            return read(b, 0, b.length);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            long count = this.length;
+            if (pos >= count) {
+                return -1;
+            }
+
+            int length = len;
+            long avail = count - pos;
+            if (length > avail) {
+                length = (int) avail;
+            }
+            if (length <= 0) {
+                return 0;
+            }
+
+            InputStream partialIn = null;
+            try {
+                IDBasedFileAccess newFileAccess = Services.getFileAccessFactory().createAccess(session);
+                partialIn = newFileAccess.getDocument(id, version, pos, length);
+                int read = partialIn.read(b, off, length);
+                pos += length;
+                return read;
+            } catch (OXException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    throw (IOException) cause;
+                }
+                throw new IOException(null == cause ? e : cause);
+            } finally {
+                Streams.close(partialIn);
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            // Nothing
+        }
+
+        @Override
+        public void seek(long pos) throws IOException {
+            this.pos = pos;
+        }
+
+        @Override
+        public long length() throws IOException {
+            return length;
+        }
+
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(32);
+            builder.append("IDBasedFileAccessRandomAccess [");
+            if (id != null) {
+                builder.append("id=").append(id).append(", ");
+            }
+            if (version != null) {
+                builder.append("version=").append(version).append(", ");
+            }
+            builder.append("length=").append(length).append(", pos=").append(pos).append(']');
+            return builder.toString();
         }
     }
 
