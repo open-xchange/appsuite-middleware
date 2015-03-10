@@ -49,6 +49,8 @@
 
 package com.openexchange.session.reservation.impl.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -58,15 +60,20 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.session.reservation.impl.HazelcastInstanceNotActiveExceptionHandler;
+import com.openexchange.session.reservation.impl.ReservationLoginHandler;
 import com.openexchange.session.reservation.impl.Services;
 import com.openexchange.session.reservation.impl.SessionReservationServiceImpl;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -88,7 +95,7 @@ public class SessionReservationActivator extends HousekeepingActivator implement
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, SessiondService.class, ContextService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, SessiondService.class, ContextService.class, UserService.class, ConfigurationService.class };
     }
 
     @Override
@@ -150,6 +157,9 @@ public class SessionReservationActivator extends HousekeepingActivator implement
 
         // Register service instance
         registerService(SessionReservationService.class, serviceImpl);
+        Dictionary<String, String> props = new Hashtable<String, String>();
+        props.put(AJAXServlet.PARAMETER_ACTION, "redeemReservation");
+        registerService(LoginRequestHandler.class, new ReservationLoginHandler(serviceImpl, this), props);
     }
 
     @Override

@@ -83,8 +83,8 @@ import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.validation.DefaultValidationResult;
 import com.openexchange.saml.validation.ValidationResult;
-import com.openexchange.saml.validation.ValidationStrategy;
 import com.openexchange.saml.validation.ValidationResult.ErrorReason;
+import com.openexchange.saml.validation.ValidationStrategy;
 
 
 /**

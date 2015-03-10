@@ -111,13 +111,13 @@ public interface SAMLBackend {
     ValidationStrategy getValidationStrategy(SAMLConfig config);
 
     /**
-     * Resolves a principal based on the provided response and bearer assertion.
+     * Resolves an authentication response based on the determined bearer assertion.
      *
      * @param response The SAML response
      * @param assertion A valid bearer assertion whose subject shall be mapped to a principal
-     * @return The principal, which must denote an existing user
+     * @return The authentication information
      * @throws OXException If the principal cannot be resolved
      */
-    Principal resolvePrincipal(Response response, Assertion assertion) throws OXException;
+    AuthenticationInfo resolveResponse(Response response, Assertion assertion) throws OXException;
 
 }

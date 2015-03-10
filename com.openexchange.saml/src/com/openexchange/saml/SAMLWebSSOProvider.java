@@ -54,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
@@ -67,13 +68,11 @@ import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.Issuer;
-import org.opensaml.saml2.core.NameIDPolicy;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.KeyDescriptor;
-import org.opensaml.saml2.metadata.NameIDFormat;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.SingleLogoutService;
 import org.opensaml.xml.XMLObject;
@@ -92,19 +91,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.spi.AuthenticationInfo;
 import com.openexchange.saml.spi.CredentialProvider;
-import com.openexchange.saml.spi.Principal;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.spi.SAMLWebSSOCustomizer;
 import com.openexchange.saml.spi.SAMLWebSSOCustomizer.RequestContext;
 import com.openexchange.saml.validation.ValidationResult;
 import com.openexchange.saml.validation.ValidationStrategy;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  *
@@ -152,9 +155,9 @@ public class SAMLWebSSOProvider {
         }
 
         // TODO
-        NameIDFormat nameIDFormat = openSAML.buildSAMLObject(NameIDFormat.class);
-        nameIDFormat.setFormat(NameIDType.TRANSIENT);
-        spssoDescriptor.getNameIDFormats().add(nameIDFormat);
+//        NameIDFormat nameIDFormat = openSAML.buildSAMLObject(NameIDFormat.class);
+//        nameIDFormat.setFormat(NameIDType.TRANSIENT);
+//        spssoDescriptor.getNameIDFormats().add(nameIDFormat);
 
         try {
             X509KeyInfoGeneratorFactory keyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
@@ -214,15 +217,17 @@ public class SAMLWebSSOProvider {
          */
         try {
             String authnRequestXML = openSAML.marshall(authnRequest);
-            switch (config.getRequestBinding()) {
-            case HTTP_POST:
-                // sendFormResponse(authnRequestXML, httpResponse);
-                break;
-            case HTTP_REDIRECT:
-                sendRedirect(authnRequestXML, httpRequest, httpResponse);
-                break;
-            default:
-                throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(config.getRequestBinding());
+            Binding requestBinding = config.getRequestBinding();
+            LOG.debug("Responding with AuthnRequest via " + requestBinding.toString() + ":\n{}", authnRequestXML);
+            switch (requestBinding) {
+                case HTTP_POST:
+                    // sendFormResponse(authnRequestXML, httpResponse);
+                    break;
+                case HTTP_REDIRECT:
+                    sendRedirect(authnRequestXML, httpRequest, httpResponse);
+                    break;
+                default:
+                    throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(requestBinding);
             }
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
@@ -261,6 +266,7 @@ public class SAMLWebSSOProvider {
                     redirectLocationBuilder.build().getRawQuery().getBytes(Charsets.UTF_8));
                 String signature = Base64.encodeBase64String(rawSignature);
                 redirectLocationBuilder.setParameter("Signature", signature);
+                LOG.debug("AuthnRequest was signed with algorithm {}", sigAlg);
             }
 
             redirectLocation = redirectLocationBuilder.build().toString();
@@ -318,9 +324,9 @@ public class SAMLWebSSOProvider {
          *
          * [core06 - 3.4.1.1p51]
          */
-        NameIDPolicy nameIDPolicy = openSAML.buildSAMLObject(NameIDPolicy.class);
-        nameIDPolicy.setFormat(NameIDType.TRANSIENT);
-        authnRequest.setNameIDPolicy(nameIDPolicy);
+//        NameIDPolicy nameIDPolicy = openSAML.buildSAMLObject(NameIDPolicy.class);
+//        nameIDPolicy.setFormat(NameIDType.TRANSIENT);
+//        authnRequest.setNameIDPolicy(nameIDPolicy);
 
         return authnRequest;
     }
@@ -342,21 +348,30 @@ public class SAMLWebSSOProvider {
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config);
             ValidationResult validationResult = validationStrategy.validate(response, binding);
             if (validationResult.success()) {
-                Principal principal = backend.resolvePrincipal(response, validationResult.getBearerAssertion());
+                AuthenticationInfo authInfo = backend.resolveResponse(response, validationResult.getBearerAssertion());
+                LOG.debug("User {} in context {} is considered authenticated", authInfo.getUserId(), authInfo.getContextId());
 
                 /*
                  * TODO state:
                  *  - session index for logout
                  *  - SessionNotOnOrAfter
                  */
-                String sessionToken = sessionReservationService.reserveSessionFor(principal.getUserId(), principal.getContextId(), 60l, TimeUnit.SECONDS, null);
+                Map<String, String> properties = authInfo.getProperties();
+                String sessionToken = sessionReservationService.reserveSessionFor(authInfo.getUserId(), authInfo.getContextId(), 60l, TimeUnit.SECONDS, properties.isEmpty() ? null : properties);
                 String redirectHost = httpRequest.getParameter("RelayState"); // TODO: integrity check and fail on null
-                // TODO redirect to relay state
+
+                // TODO: remove static service access
+                ConfigurationService configService = Services.getService(ConfigurationService.class);
+                boolean secure = Tools.considerSecure(httpRequest, Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue())));
+
+                DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+                String prefix = prefixService.getPrefix();
+
                 URI redirectLocation = new URIBuilder()
-                    .setScheme("https")
+                    .setScheme(secure ? "https" : "http")
                     .setHost(redirectHost)
-                    .setPath("/ajax/login")
-                    .setParameter("action", "supertoken")
+                    .setPath(prefix + "login")
+                    .setParameter("action", "redeemReservation")
                     .setParameter("token", sessionToken)
                     .build();
 
@@ -367,7 +382,6 @@ public class SAMLWebSSOProvider {
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         }
-
     }
 
     private Response decodeResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
@@ -385,7 +399,7 @@ public class SAMLWebSSOProvider {
             }
 
             final Response response = (Response) unmarshalledResponse;
-            LOG.debug("Received SAMLResponse: {}", new Object() { @Override
+            LOG.debug("Received SAMLResponse:\n{}", new Object() { @Override
                 public String toString() {
                     return XMLHelper.prettyPrintXML(response.getDOM());
                 }

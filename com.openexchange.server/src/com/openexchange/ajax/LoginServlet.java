@@ -783,7 +783,7 @@ public class LoginServlet extends AJAXServlet {
         final com.openexchange.authentication.Cookie[] cookies = result.getCookies();
         if (null != cookies) {
             for (final com.openexchange.authentication.Cookie cookie : cookies) {
-                resp.addCookie(wrapCookie(cookie));
+                resp.addCookie(wrapCookie(cookie, result));
             }
         }
         final com.openexchange.authentication.Header[] headers = result.getHeaders();
@@ -794,8 +794,10 @@ public class LoginServlet extends AJAXServlet {
         }
     }
 
-    private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie) {
-        return new Cookie(cookie.getName(), cookie.getValue());
+    private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie, LoginResult result) {
+        Cookie servletCookie = new Cookie(cookie.getName(), cookie.getValue());
+        configureCookie(servletCookie, result.getRequest().isSecure(), result.getRequest().getServerName(), confReference.get());
+        return servletCookie;
     }
 
     /**
@@ -892,5 +894,5 @@ public class LoginServlet extends AJAXServlet {
         return null == serverName ? LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName;
     }
 
-    private static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
+    public static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
 }

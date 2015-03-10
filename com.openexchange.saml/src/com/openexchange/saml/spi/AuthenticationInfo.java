@@ -49,30 +49,74 @@
 
 package com.openexchange.saml.spi;
 
-public class Principal {
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.LoginInfo;
+
+/**
+ * Encapsulates the necessary information to authenticate a certain user. The IDs of the according
+ * user and his context must be provided. Additionally some properties can be defined. Those are later
+ * on passed into the {@link AuthenticationService} as part of the {@link LoginInfo} parameter.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
+ */
+public class AuthenticationInfo {
+
+    private final Map<String, String> properties = new HashMap<String, String>();
 
     private final int contextId;
 
     private final int userId;
 
     /**
-     * Initializes a new {@link Principal}.
+     * Initializes a new {@link AuthenticationInfo}.
      *
-     * @param contextId
-     * @param userId
+     * @param contextId The context ID
+     * @param userId The user ID
      */
-    public Principal(int contextId, int userId) {
+    public AuthenticationInfo(int contextId, int userId) {
         super();
         this.contextId = contextId;
         this.userId = userId;
     }
 
+    /**
+     * Gets the context ID
+     *
+     * @return The context ID
+     */
     public int getContextId() {
         return contextId;
     }
 
+    /**
+     * Gets the user ID
+     *
+     * @return The user ID
+     */
     public int getUserId() {
         return userId;
+    }
+
+    /**
+     * Gets the properties
+     *
+     * @return The properties, possibly empty but not <code>null</code>
+     */
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    /**
+     * Sets a property. Will be overriden if a property for the same name already exists.
+     *
+     * @param key The key
+     * @param value The value
+     */
+    public void setProperty(String key, String value) {
+        properties.put(key, value);
     }
 
     @Override
@@ -80,6 +124,7 @@ public class Principal {
         final int prime = 31;
         int result = 1;
         result = prime * result + contextId;
+        result = prime * result + ((properties == null) ? 0 : properties.hashCode());
         result = prime * result + userId;
         return result;
     }
@@ -92,12 +137,22 @@ public class Principal {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Principal other = (Principal) obj;
+        AuthenticationInfo other = (AuthenticationInfo) obj;
         if (contextId != other.contextId)
+            return false;
+        if (properties == null) {
+            if (other.properties != null)
+                return false;
+        } else if (!properties.equals(other.properties))
             return false;
         if (userId != other.userId)
             return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "AuthenticationInfo [contextId=" + contextId + ", userId=" + userId + ", properties=" + properties + "]";
     }
 
 }
