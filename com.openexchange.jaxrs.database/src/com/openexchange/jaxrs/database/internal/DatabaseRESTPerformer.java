@@ -430,16 +430,16 @@ public class DatabaseRESTPerformer {
                 success = true;
             } catch (SQLException x) {
                 success = false;
-                
+
                 JSONObject q = new JSONObject();
                 q.put("error", x.getMessage());
                 q.put("query", query.getQuery());
                 results.put(question.getKey(), q);
-                
+
                 JSONObject response = new JSONObject();
                 response.put("results", results);
                 response.put("error", x.getMessage());
-                
+
                 handleSQLException(response);
             }
         }
@@ -463,9 +463,10 @@ public class DatabaseRESTPerformer {
     /**
      * Handles the SQL exception by rolling back the current transaction (if any) and restoring the post processor object
      * Returns a response code of 400
-     * TODO: include the response body
+     * 
+     * @throws OXException
      */
-    private void handleSQLException(JSONObject response) {
+    private void handleSQLException(JSONObject response) throws OXException {
         try {
             if (tx != null) {
                 DatabaseEnvironment.getInstance().getTransactionKeeper().rollback(tx.getID());
@@ -480,6 +481,9 @@ public class DatabaseRESTPerformer {
         } catch (SQLException | OXException e) {
             e.printStackTrace();
         }
+
+        cleanup();
+
         halt(Status.BAD_REQUEST, response);
     }
 
