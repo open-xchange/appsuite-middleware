@@ -50,8 +50,6 @@
 package com.openexchange.jaxrs.database.internal;
 
 import static com.openexchange.java.util.NativeBuilders.map;
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,11 +63,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -158,7 +155,7 @@ public class DatabaseRESTPerformer {
     public Response executeTransaction(String txId) throws OXException, JSONException {
         tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
         if (tx == null) {
-            halt(404);
+            halt(Status.NOT_FOUND);
         } else {
             postProcessor = new TransactionCloser(tx);
             connection = tx.getConnection();
@@ -176,7 +173,7 @@ public class DatabaseRESTPerformer {
     public void rollbackTransaction(String txId) throws OXException {
         tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
         if (tx == null) {
-            halt(404);
+            halt(Status.NOT_FOUND);
         } else {
             postProcessor = new TransactionCloser(tx);
             try {
@@ -197,7 +194,7 @@ public class DatabaseRESTPerformer {
     public void commitTransaction(String txId) throws OXException {
         tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
         if (tx == null) {
-            halt(404);
+            halt(Status.NOT_FOUND);
         } else {
             postProcessor = new TransactionCloser(tx);
             try {
@@ -371,7 +368,7 @@ public class DatabaseRESTPerformer {
         try {
             beforeQueries();
         } catch (SQLException x) {
-            handleSQLException(x, new JSONObject());
+            handleSQLException(new JSONObject());
         }
         Map<String, DatabaseQuery> queries = getQueries();
         if (queries == null) {
@@ -437,7 +434,7 @@ public class DatabaseRESTPerformer {
                 JSONObject response = new JSONObject();
                 response.put("results", results);
                 response.put("error", x.getMessage());
-                return handleSQLException(x, response);
+                handleSQLException(response);
             }
         }
 
@@ -449,7 +446,7 @@ public class DatabaseRESTPerformer {
 
         cleanup();
 
-        return Response.ok(response, MediaType.APPLICATION_JSON).build();
+        return compileResponse(200, response);
     }
 
     private void prepare() throws OXException {
@@ -462,8 +459,7 @@ public class DatabaseRESTPerformer {
      * Returns a response code of 400
      * TODO: include the response body
      */
-    private Response handleSQLException(SQLException x, JSONObject response) {
-        String message = x.getMessage();
+    private void handleSQLException(JSONObject response) {
         try {
             if (tx != null) {
                 DatabaseEnvironment.getInstance().getTransactionKeeper().rollback(tx.getID());
@@ -478,7 +474,7 @@ public class DatabaseRESTPerformer {
         } catch (SQLException | OXException e) {
             e.printStackTrace();
         }
-        return halt(400, message, response);
+        halt(Status.BAD_REQUEST, response);
     }
 
     /**
@@ -589,7 +585,7 @@ public class DatabaseRESTPerformer {
         } else if (monitoredMetadata != null) {
             id = monitoredMetadata.getID();
         } else {
-            halt(403, "Can not modify the schema of the configdb");
+            halt(Status.FORBIDDEN, "Can not modify the schema of the configdb");
         }
         String conflictingVersion = DatabaseEnvironment.getInstance().getVersionChecker().isUpToDate(id, connection, module, version);
         if (conflictingVersion != null) {
@@ -597,7 +593,7 @@ public class DatabaseRESTPerformer {
                 postProcessor = oldPostProcessor;
             }
             ajaxData.setHeader("X-OX-DB-VERSION", conflictingVersion);
-            halt(409);
+            halt(Status.CONFLICT);
         }
     }
 
@@ -624,8 +620,7 @@ public class DatabaseRESTPerformer {
             try {
                 postProcessor.done(connection);
             } catch (SQLException e) {
-                //FIXME: Fill response body but don't send response yet
-                halt(500, e.getMessage());
+                halt(Status.INTERNAL_SERVER_ERROR, e.getMessage());
             }
         }
     }
@@ -879,7 +874,7 @@ public class DatabaseRESTPerformer {
         public Environment(TransactionKeeper transactions, VersionChecker versions) {
             this.transactions = transactions;
             this.versions = versions;
-                
+
         }
 
     }
@@ -912,19 +907,6 @@ public class DatabaseRESTPerformer {
 
     }
 
-    private void halt(int statusCode) {
-        throw new WebApplicationException(statusCode);
-    }
-
-    private void halt(int statusCode, String message) {
-        throw new WebApplicationException(message, statusCode);
-    }
-
-    private Response halt(int statusCode, String message, JSONObject entity) {
-        //header("Transfer-Encoding", "chunked").header("Pragma", "no-cache").header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0").
-        return Response.status(statusCode).entity(entity).header("X-OX-ACHTUNG", "This is an internal API that may change without notice").type(MediaType.APPLICATION_JSON).build();
-    }
-
     /**
      * Determines whether the request is considered to be part of a transaction
      * 
@@ -936,4 +918,96 @@ public class DatabaseRESTPerformer {
         return (data.isSet("keepOpen") && data.getParameter("keepOpen", boolean.class));
     }
 
+    // Error handling & Response
+
+    /**
+     * Throws a WebApplicationException with the specified status code
+     * 
+     * @param statusCode The status code for the error
+     */
+    private void halt(Status statusCode) {
+        halt(statusCode.getStatusCode());
+    }
+
+    /**
+     * Throws a WebApplicationException with the specified status code
+     * 
+     * @param statusCode The status code for the error
+     */
+    private void halt(int statusCode) {
+        ResponseBuilder builder = Response.status(statusCode);
+        addHeaders(builder);
+        Response r = builder.build();
+        throw new WebApplicationException(r);
+    }
+
+    /**
+     * Throws a WebApplicationException with the specified status code and the specified error message
+     * 
+     * @param statusCode The status code for the error
+     * @param message The error message
+     */
+    private void halt(Status statusCode, String message) {
+        halt(statusCode.getStatusCode(), message);
+    }
+
+    /**
+     * Throws a WebApplicationException with the specified status code and the specified error message
+     * 
+     * @param statusCode The status code for the error
+     * @param message The error message
+     */
+    private void halt(int statusCode, String message) {
+        ResponseBuilder builder = Response.status(statusCode).entity(message).type(MediaType.TEXT_PLAIN);
+        addHeaders(builder);
+        Response r = builder.build();
+        throw new WebApplicationException(r);
+    }
+
+    /**
+     * Throws a WebApplicationException with the specified status code and the specified JSONObject body
+     * 
+     * @param statusCode The status code for the error
+     * @param entity The error's bodys
+     */
+    private void halt(Status statusCode, JSONObject entity) {
+        halt(statusCode.getStatusCode(), entity);
+    }
+
+    /**
+     * Throws a WebApplicationException with the specified status code and the specified JSONObject body
+     * 
+     * @param statusCode The status code for the error
+     * @param entity The error's bodys
+     */
+    private void halt(int statusCode, JSONObject entity) {
+        ResponseBuilder builder = Response.status(statusCode).entity(entity).type(MediaType.APPLICATION_JSON);
+        addHeaders(builder);
+        Response r = builder.build();
+        throw new WebApplicationException(r);
+    }
+
+    /**
+     * Adds the 'Pragma', 'Cache-Control' and 'X-OX-ACHTUNG' headers
+     * 
+     * @param r The response builder
+     */
+    private void addHeaders(ResponseBuilder r) {
+        r.header("Pragma", "no-cache")
+            .header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")
+            .header("X-OX-ACHTUNG", "This is an internal API that may change without notice");
+    }
+
+    /**
+     * Compiles the response object for a successful/error-free response
+     * 
+     * @param statusCode The status code
+     * @param entity The body of the response
+     * @return The response object
+     */
+    private Response compileResponse(int statusCode, JSONObject entity) {
+        ResponseBuilder builder = Response.status(statusCode).entity(entity).type(MediaType.APPLICATION_JSON);
+        addHeaders(builder);
+        return builder.build();
+    }
 }
