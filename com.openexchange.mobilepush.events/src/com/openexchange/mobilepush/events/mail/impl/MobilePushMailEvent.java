@@ -70,16 +70,14 @@ public class MobilePushMailEvent implements MobilePushEvent {
 
     private List<ContextUsers> contextUsers;
 
-    private final Map<String, String> messageData;
-
-    private final static String COLLAPSE_KEY = "TRIGGER_NEW_MAIL";
+    private final Map<String, Object> messageData;
 
     private final static MobilePushProviders PROVIDER = MobilePushProviders.MAIL;
 
     /**
      * Initializes a new {@link MobilePushMailEvent}.
      */
-    public MobilePushMailEvent(int contextId, int userId, Map<String, String> messageData) {
+    public MobilePushMailEvent(int contextId, int userId, Map<String, Object> messageData) {
         super();
         this.userId = userId;
         this.contextId = contextId;
@@ -91,14 +89,14 @@ public class MobilePushMailEvent implements MobilePushEvent {
      *
      * A list of context / userIds for providing the event to several users
      */
-    public MobilePushMailEvent(List<ContextUsers> contextUsers, Map<String, String> messageData) {
+    public MobilePushMailEvent(List<ContextUsers> contextUsers, Map<String, Object> additionalData) {
         super();
         this.contextUsers = contextUsers;
-        this.messageData = messageData;
+        this.messageData = additionalData;
     }
 
     @Override
-    public Map<String, String> getMessageData() {
+    public Map<String, Object> getMessageData() {
         return messageData;
     }
 
@@ -110,11 +108,6 @@ public class MobilePushMailEvent implements MobilePushEvent {
     @Override
     public int getContextId() {
         return contextId;
-    }
-
-    @Override
-    public String getCollapseKey() {
-        return COLLAPSE_KEY;
     }
 
     @Override
@@ -130,9 +123,9 @@ public class MobilePushMailEvent implements MobilePushEvent {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        Iterator<Entry<String, String>> iter = messageData.entrySet().iterator();
+        Iterator<Entry<String, Object>> iter = messageData.entrySet().iterator();
         while (iter.hasNext()) {
-            Entry<String, String> entry = iter.next();
+            Entry<String, Object> entry = iter.next();
             sb.append(entry.getKey());
             sb.append('=').append('"');
             sb.append(entry.getValue());
@@ -144,5 +137,4 @@ public class MobilePushMailEvent implements MobilePushEvent {
         return "MobilePushMailEvent [userId=" + userId + ", contextId=" + contextId + ", contextUsers=" + contextUsers + ", "
             + "messageData=" + sb.toString() + "]";
     }
-
 }

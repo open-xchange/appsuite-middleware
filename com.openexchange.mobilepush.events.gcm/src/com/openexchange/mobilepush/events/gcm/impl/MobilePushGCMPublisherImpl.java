@@ -63,10 +63,10 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
+import com.openexchange.mobilepush.events.MailPushUtility;
 import com.openexchange.mobilepush.events.gcm.osgi.Services;
 import com.openexchange.mobilepush.events.storage.ContextUsers;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
-import com.openexchange.mobilepush.events.storage.PushUtility;
 import com.openexchange.mobilepush.events.storage.Subscription;
 
 /**
@@ -77,6 +77,8 @@ import com.openexchange.mobilepush.events.storage.Subscription;
 public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
 
     private static final int MULTICAST_LIMIT = 1000;
+
+    private static final int MAX_PAYLOAD_SIZE = 4096;
 
     private static final String SERVICE_ID = "gcm";
 
@@ -104,11 +106,6 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
             LOG.error("Could not get subscription {}", SERVICE_ID, e);
         }
         publishBySubscriptions(subscriptions, event);
-    }
-
-    public int length(Map<String, String> map) {
-
-        return 0;
     }
 
     private void publishByContextUsers(List<String> subscriptions, MobilePushEvent loginEvent) {
@@ -201,14 +198,21 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
         }
     }
 
-    private static Message getMessage(MobilePushEvent event) {
+    private Message getMessage(MobilePushEvent event) {
         Message.Builder message = new Message.Builder();
-        message.collapseKey(event.getCollapseKey());
+        message.collapseKey("NEW_MAIL");
 
-        Map<String, String> messageData = event.getMessageData();
-        for (Entry<String, String> entry : messageData.entrySet()) {
-            message.addData(entry.getKey(), entry.getValue());
+        Map<String, Object> messageData = event.getMessageData();
+        for (Entry<String, Object> entry : messageData.entrySet()) {
+            message.addData(entry.getKey(), (String) entry.getValue());
         }
+
+        int currentLength = MailPushUtility.getPayloadLength(message.toString());
+        if(currentLength > MAX_PAYLOAD_SIZE) {
+            int bytesToCut = currentLength - MAX_PAYLOAD_SIZE;
+            MailPushUtility.cutMessage(messageData, bytesToCut);
+        }
+
         return message.build();
     }
 
@@ -287,7 +291,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
         try {
             MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
             if (event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
-                int contextId = PushUtility.getContextIdForToken(event.getContextUsers(), oldRegistrationID);
+                int contextId = MailPushUtility.getContextIdForToken(event.getContextUsers(), oldRegistrationID);
                 if (contextId > -1 && true == mnss.updateToken(contextId, oldRegistrationID, SERVICE_ID, newRegistrationID)) {
                     LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
                 } else {
@@ -312,7 +316,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
              * Removes subscriptions for a set of context users, happens if the 'new login' request is fired
              */
             if (event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
-                int contextId = PushUtility.getContextIdForToken(event.getContextUsers(), registrationID);
+                int contextId = MailPushUtility.getContextIdForToken(event.getContextUsers(), registrationID);
                 if (contextId > -1 && true == mnss.deleteSubscription(contextId, registrationID, SERVICE_ID)) {
                     LOG.info("Successfully removed registration ID {}.", registrationID);
                 } else {

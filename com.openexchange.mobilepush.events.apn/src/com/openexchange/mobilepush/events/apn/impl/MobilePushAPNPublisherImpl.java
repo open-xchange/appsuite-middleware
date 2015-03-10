@@ -65,11 +65,11 @@ import javapns.notification.PushedNotifications;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
+import com.openexchange.mobilepush.events.MailPushUtility;
 import com.openexchange.mobilepush.events.apn.APNAccess;
 import com.openexchange.mobilepush.events.apn.osgi.Services;
 import com.openexchange.mobilepush.events.storage.ContextUsers;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
-import com.openexchange.mobilepush.events.storage.PushUtility;
 import com.openexchange.mobilepush.events.storage.Subscription;
 
 /**
@@ -78,6 +78,7 @@ import com.openexchange.mobilepush.events.storage.Subscription;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushAPNPublisherImpl.class);
 
     // https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/CommunicatingWIthAPS.html
@@ -87,7 +88,10 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
 
     private static final String SERVICE_ID = "apn";
 
+    private static final int MAX_PAYLOAD_SIZE = 256;
+
     private final APNAccess apnAccess;
+
     /**
      * Initializes a new {@link MobilePushAPNPublisherImpl}.
      */
@@ -199,8 +203,8 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         if (null != devices && 0 < devices.size()) {
             for (Device device : devices) {
                 LOG.debug("Got feedback for device with token: {}, last registered: {}", device.getToken(), device.getLastRegister());
-                 int removed = removeSubscriptions(device);
-                 LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
+                int removed = removeSubscriptions(device);
+                LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
             }
         } else {
             LOG.debug("No devices to unregister received from feedback service.");
@@ -230,16 +234,13 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
             try {
-                PushNotificationPayload payload = new PushNotificationPayload();
-                payload.addSound("beep.wav");
-                Map<String, String> messageData = event.getMessageData();
-                if (messageData.containsKey("subject") && messageData.containsKey("received_from")) {
-                    String subject = messageData.get("subject");
-                    String receivedFrom = messageData.get("received_from");
-                    StringBuffer sb = new StringBuffer(receivedFrom);
-                    sb.append("\n");
-                    sb.append(subject);
-                    payload.addAlert(sb.toString());
+                PushNotificationPayload payload = constructPayload(event);
+                //Check payload length
+                int payloadLength = MailPushUtility.getPayloadLength(payload.toString());
+                if (payloadLength > MAX_PAYLOAD_SIZE) {
+                    int bytesToCut = payloadLength - MAX_PAYLOAD_SIZE;
+                    MailPushUtility.cutMessage(event.getMessageData(), bytesToCut);
+                    payload = constructPayload(event);
                 }
                 payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
             } catch (JSONException e) {
@@ -252,11 +253,31 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         return payloads;
     }
 
+    private PushNotificationPayload constructPayload(MobilePushEvent event) throws JSONException {
+        PushNotificationPayload payload = new PushNotificationPayload();
+        payload.addSound("beep.wav");
+        Map<String, Object> messageData = event.getMessageData();
+
+        StringBuffer sb = new StringBuffer();
+
+        String sender = MailPushUtility.getSender(messageData);
+        String subject = MailPushUtility.getSubject(messageData);
+        String path = MailPushUtility.getPath(messageData);
+        int unread = MailPushUtility.getUnread(messageData);
+
+        sb.append(sender).append("\n");
+        sb.append(subject);
+        payload.addAlert(sb.toString());
+        payload.addBadge(unread);
+        payload.addCustomDictionary("path", path);
+        return payload;
+    }
+
     private boolean removeSubscription(MobilePushEvent event, String token) {
         try {
             List<ContextUsers> contextUsers = event.getContextUsers();
             if (contextUsers != null && contextUsers.isEmpty()) {
-                int contextId = PushUtility.getContextIdForToken(contextUsers, token);
+                int contextId = MailPushUtility.getContextIdForToken(contextUsers, token);
                 return Services.getService(MobilePushStorageService.class, true).deleteSubscription(contextId, token, SERVICE_ID);
             } else {
                 return Services.getService(MobilePushStorageService.class, true).deleteSubscription(event.getContextId(), token, SERVICE_ID);

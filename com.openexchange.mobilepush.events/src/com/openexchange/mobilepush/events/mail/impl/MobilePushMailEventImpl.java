@@ -66,6 +66,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mobilepush.events.MailPushUtility;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushEventService;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
@@ -81,6 +82,11 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobilePushMailEventImpl implements org.osgi.service.event.EventHandler, MobilePushEventService {
+
+    /**
+     * INBOX
+     */
+    private static final String INBOX = "INBOX";
 
     private final List<MobilePushPublisher> publishers;
 
@@ -104,10 +110,6 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
-//        if (isTriggeredByPushClient(session)) {
-//            LOG.debug("Ignoring event because it is triggered by the push device. Client Id: {}", session.getClient());
-//            return;
-//        }
         if (!isRemoteEvent(event)) {
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
@@ -121,17 +123,9 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
          */
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        Map<String, String> props = handleEvents(event, session);
+        Map<String, Object> props = handleEvents(event, session);
         notifySubscribers(new MobilePushMailEvent(contextId, userId, props));
     }
-
-//    /**
-//     * Checks if the event is triggered by the push device themself
-//     * TODO: Check if triggered by client
-//     */
-//    private boolean isTriggeredByPushClient(Session session) {
-
-//    }
 
     private boolean hasFolderProperty(Event event) {
         if (event != null && event.containsProperty(PushEventConstants.PROPERTY_FOLDER)) {
@@ -172,7 +166,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
      * @param session - The session
      * @param props - A map
      */
-    private Map<String, String> handleEvents(Event event, Session session) {
+    private Map<String, Object> handleEvents(Event event, Session session) {
         if (!event.containsProperty(PushEventConstants.PROPERTY_DELETED) ||
             (event.containsProperty(PushEventConstants.PROPERTY_DELETED) && !(boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED))) {
             return getNewMailProperties(event, session);
@@ -181,45 +175,13 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         }
     }
 
-    private Map<String, String> getNewMailProperties(Event event, Session session) {
-        Map<String, String> props = new HashMap<String, String>(9);
+    private Map<String, Object> getNewMailProperties(Event event, Session session) {
+        Map<String, Object> props = new HashMap<String, Object>(9);
         props.put("SYNC_EVENT", "NEW_MAIL");
         props.put("title", "OX Mail");
         props.put("message", "You've received a new mail");
         props.put("msgcnt", "1");
 
-        MailMessage[] mms = fetchMessageInformation(event, session);
-
-        if (mms != null) {
-            //TODO: currently catch only first message; ignore multiple messages
-            if (mms.length == 1) {
-                MailMessage mm = mms[0];
-                if (mm != null) {
-                    String subject = mm.getSubject();
-                    InternetAddress[] ia = mm.getFrom();
-                    String personalFrom = ia[0].getPersonal();
-                    String receivedFrom = ia[0].getAddress();
-                    String mailId = mm.getMailId();
-                    String folder = mm.getFolder();
-
-                    props.put("mailId", mailId);
-                    props.put("folder", folder);
-                    props.put("subject", subject == null ? "(no subject)" : subject);
-                    props.put("received_from", personalFrom == null ? receivedFrom : personalFrom);
-                }
-            }
-        }
-        return props;
-    }
-
-    /**
-     * Fetches the message information from event mail id properties. If there are no property ids returned <code>null</code> is returned
-     *
-     * @param event - The event
-     * @param session - The session
-     * @return an array of mail messages or <code>null</code> if property does not exist or mail id does not exist
-     */
-    private MailMessage[] fetchMessageInformation(Event event, Session session) {
         if (event != null && event.containsProperty("OX_EVENT") && event.containsProperty(PushEventConstants.PROPERTY_IDS)) {
             // check if its a new mail event
             String mailIds = (String) event.getProperty(PushEventConstants.PROPERTY_IDS);
@@ -229,10 +191,26 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                     MailService mailService = Services.getService(MailService.class, true);
                     mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
                     mailAccess.connect(false);
-                    IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-
-                    return messageStorage.getMessages("INBOX", getMailIds(mailIds),
-                        new MailField[] { MailField.ID, MailField.FOLDER_ID, MailField.SUBJECT, MailField.FROM, MailField.RECEIVED_DATE });
+                    MailMessage[] mms = fetchMessageInformation(mailAccess, mailIds, event, session);
+                    int unread = mailAccess.getUnreadMessagesCount(INBOX);
+                    if (mms != null) {
+                        //TODO: currently catch only first message; ignore multiple messages
+                        if (mms.length == 1) {
+                            MailMessage mm = mms[0];
+                            if (mm != null) {
+                                String subject = mm.getSubject();
+                                InternetAddress[] ia = mm.getFrom();
+                                String personalFrom = ia[0].getPersonal();
+                                String receivedFrom = ia[0].getAddress();
+                                String mailId = mm.getMailId();
+                                String folder = mm.getFolder();
+                                props.put(MailPushUtility.KEY_PATH, folder + "://" + mailId);
+                                props.put(MailPushUtility.KEY_SUBJECT, subject == null ? "(no subject)" : subject);
+                                props.put(MailPushUtility.KEY_SENDER, personalFrom == null ? receivedFrom : personalFrom);
+                                props.put(MailPushUtility.KEY_UNREAD, unread);
+                            }
+                        }
+                    }
                 } catch (OXException e) {
                     LOG.error("An unexpected mail exception occured", e);
                 } finally {
@@ -246,7 +224,21 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                 }
             }
         }
-        return null;
+        return props;
+    }
+
+    /**
+     * Fetches the message information from event mail id properties. If there are no property ids returned <code>null</code> is returned
+     *
+     * @param event - The event
+     * @param session - The session
+     * @return an array of mail messages or <code>null</code> if property does not exist or mail id does not exist
+     * @throws OXException
+     */
+    private MailMessage[] fetchMessageInformation(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, String mailIds, Event event, Session session) throws OXException {
+        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        return messageStorage.getMessages(INBOX, getMailIds(mailIds),
+            new MailField[] { MailField.ID, MailField.FOLDER_ID, MailField.SUBJECT, MailField.FROM });
     }
 
     private final static Pattern COMMA_SEPERATED_PATTERN = Pattern.compile("\\s*,\\s*");
@@ -258,8 +250,8 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         return null;
     }
 
-    private Map<String, String> getDeleteMailPayload(Event event) {
-        Map<String, String> props = new HashMap<String, String>(4);
+    private Map<String, Object> getDeleteMailPayload(Event event) {
+        Map<String, Object> props = new HashMap<String, Object>(4);
         props.put("SYNC_EVENT", "MAIL");
         props.put("title", "OX Mail");
         props.put("message", "refresh");
@@ -299,7 +291,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         long timeToWait = 1000 * 60 * 60 * 24 * 7;
         mnss.blockLoginPush(contextUsers, timeToWait);
 
-        Map<String, String> props = getLoginMessagePayload();
+        Map<String, Object> props = getLoginMessagePayload();
         MobilePushMailEvent loginEvent = new MobilePushMailEvent(contextUsers, props);
         for (MobilePushPublisher publisher : publishers) {
             LOG.debug("Publishing new login event: {}", contextUsers);
@@ -307,8 +299,8 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         }
     }
 
-    private Map<String, String> getLoginMessagePayload() {
-        Map<String, String> props = new HashMap<String, String>(4);
+    private Map<String, Object> getLoginMessagePayload() {
+        Map<String, Object> props = new HashMap<String, Object>(4);
         props.put("SYNC_EVENT", "LOGIN");
         props.put("title", "OX Mail");
         props.put("message", "You've received a new login");
