@@ -77,11 +77,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.NativeBuilders.MapBuilder;
 import com.openexchange.jaxrs.database.DatabaseRESTErrorCodes;
 import com.openexchange.jaxrs.database.migrations.VersionChecker;
-import com.openexchange.jaxrs.database.osgi.Services;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTable;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTable;
 import com.openexchange.jaxrs.database.transactions.Transaction;
 import com.openexchange.jaxrs.database.transactions.TransactionKeeper;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -120,15 +120,20 @@ public class DatabaseRESTPerformer {
 
     private RESTRequest request;
 
+    private ServiceLookup services;
+
     /**
      * 
      * Initializes a new {@link DatabaseRESTPerformer}.
      * 
+     * @param services TODO
      * @param transaction
+     * 
      * @throws OXException
      */
-    public DatabaseRESTPerformer(RESTRequest request) throws OXException {
+    public DatabaseRESTPerformer(RESTRequest request, ServiceLookup services) throws OXException {
         this.request = request;
+        this.services = services;
     }
 
     /**
@@ -552,7 +557,7 @@ public class DatabaseRESTPerformer {
                 postProcessor = oldPostProcessor;
             }
             success = false;
-        } catch (SQLException | OXException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -711,7 +716,7 @@ public class DatabaseRESTPerformer {
     // Utilities
 
     private DatabaseService dbService() throws OXException {
-        return Services.getService(DatabaseService.class);
+        return services.getService(DatabaseService.class);
     }
 
     private static interface ConnectionPostProcessor {

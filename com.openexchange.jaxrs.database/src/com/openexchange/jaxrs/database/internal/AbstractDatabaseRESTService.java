@@ -52,6 +52,7 @@ package com.openexchange.jaxrs.database.internal;
 import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -61,11 +62,14 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public abstract class AbstractDatabaseRESTService {
 
+    private ServiceLookup services;
+
     /**
      * Initializes a new {@link AbstractDatabaseRESTService}.
      */
-    protected AbstractDatabaseRESTService() {
+    protected AbstractDatabaseRESTService(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /**
@@ -97,7 +101,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If an error occurs
      */
     protected Response performQueryConfigDB(RESTRequest restRequest) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         try {
             return performer.performOnConfigDB(DatabaseAccessType.READ);
         } catch (JSONException e) {
@@ -133,7 +137,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If an error occurs
      */
     protected Response performUpdateConfigDB(RESTRequest restRequest) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         try {
             return performer.performOnConfigDB(DatabaseAccessType.WRITE);
         } catch (JSONException e) {
@@ -150,7 +154,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException
      */
     protected Response performQueryOXDB(RESTRequest restRequest, int ctxId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         try {
             return performer.performOnOXDB(ctxId, DatabaseAccessType.READ);
         } catch (JSONException e) {
@@ -167,7 +171,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If an error occurs
      */
     protected Response performUpdateOXDB(RESTRequest restRequest, int ctxId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         try {
             return performer.performOnOXDB(ctxId, DatabaseAccessType.WRITE);
         } catch (JSONException e) {
@@ -184,7 +188,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException
      */
     protected Response performQueryTransaction(RESTRequest restRequest, String txId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         try {
             return performer.executeTransaction(txId);
         } catch (JSONException e) {
@@ -200,7 +204,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException
      */
     protected Response performRollbackTransaction(RESTRequest restRequest, String txId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         return performer.rollbackTransaction(txId);
     }
 
@@ -212,7 +216,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException
      */
     protected Response performCommitTransaction(RESTRequest restRequest, String txId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         return performer.commitTransaction(txId);
     }
 
@@ -227,7 +231,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     protected Response performQueryInMonitoredConnection(RESTRequest restRequest, int readId, int writeId, String schema, int partitionId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
 
         try {
             return performer.performInMonitored(readId, writeId, schema, partitionId, DatabaseAccessType.READ);
@@ -247,7 +251,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     protected Response performUpdateInMonitoredConnection(RESTRequest restRequest, int readId, int writeId, String schema, int partitionId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
 
         try {
             return performer.performInMonitored(readId, writeId, schema, partitionId, DatabaseAccessType.WRITE);
@@ -265,7 +269,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If the initialization of the new schema fails
      */
     protected Response performInitSchema(RESTRequest restRequest, int writeId, String schema) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         return performer.initSchema(writeId, schema);
     }
 
@@ -278,7 +282,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     protected Response performInsertPartitionIds(RESTRequest restRequest, int writeId, String schema) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         return performer.insertPartitionIds(writeId, schema);
     }
 
@@ -291,7 +295,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     protected Response performUnlock(RESTRequest restRequest, int ctxId, String module) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         return performer.unlock(ctxId, module);
     }
 
@@ -307,7 +311,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     protected Response performUnlockMonitored(RESTRequest restRequest, int readId, int writeId, String schema, int partitionId, String module) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         return performer.unlockMonitored(readId, writeId, schema, partitionId, module);
     }
 
@@ -322,7 +326,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     protected Response performMigrate(RESTRequest restRequest, int ctxId, String fromVersion, String toVersion, String module) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         return performer.migrate(ctxId, fromVersion, toVersion, module);
     }
 
@@ -340,7 +344,7 @@ public abstract class AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     protected Response performMigrateMonitored(RESTRequest restRequest, int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest, services);
         return performer.migrateMonitored(readId, writeId, schema, partitionId, fromVersion, toVersion, module);
     }
 }

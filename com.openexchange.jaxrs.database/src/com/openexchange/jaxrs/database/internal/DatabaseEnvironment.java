@@ -49,14 +49,11 @@
 
 package com.openexchange.jaxrs.database.internal;
 
-import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.jaxrs.database.migrations.DBVersionChecker;
 import com.openexchange.jaxrs.database.migrations.VersionChecker;
-import com.openexchange.jaxrs.database.osgi.Services;
 import com.openexchange.jaxrs.database.transactions.InMemoryTransactionKeeper;
 import com.openexchange.jaxrs.database.transactions.TransactionKeeper;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link DatabaseEnvironment}. Singleton class for accessing the {@link TransactionKeeper and the {@link VersionChecker}
@@ -74,7 +71,7 @@ public final class DatabaseEnvironment {
      * @return the instance of the environment;
      * @throws OXException
      */
-    public static final DatabaseEnvironment getInstance() throws OXException {
+    public static final DatabaseEnvironment getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new DatabaseEnvironment();
         }
@@ -89,16 +86,9 @@ public final class DatabaseEnvironment {
      * 
      * @throws OXException
      */
-    private DatabaseEnvironment() throws OXException {
+    private DatabaseEnvironment() {
         transactionKeeper = new InMemoryTransactionKeeper();
         versionChecker = new DBVersionChecker();
-
-        Services.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                transactionKeeper.tick(System.currentTimeMillis());
-            }
-        }, 2, 1, TimeUnit.MINUTES);
     }
 
     /**
@@ -106,7 +96,7 @@ public final class DatabaseEnvironment {
      *
      * @return The transactionKeeper
      */
-    public TransactionKeeper getTransactionKeeper() {
+    public InMemoryTransactionKeeper getTransactionKeeper() {
         return transactionKeeper;
     }
 

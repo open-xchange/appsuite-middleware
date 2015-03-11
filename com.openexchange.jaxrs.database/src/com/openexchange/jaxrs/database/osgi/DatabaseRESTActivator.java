@@ -51,11 +51,13 @@ package com.openexchange.jaxrs.database.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.jaxrs.database.DatabaseRESTService;
+import com.openexchange.jaxrs.database.internal.DatabaseEnvironment;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTable;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTableTask;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTable;
@@ -77,9 +79,15 @@ public class DatabaseRESTActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
 
-        registerService(DatabaseRESTService.class, new DatabaseRESTService());
+        getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                DatabaseEnvironment.getInstance().getTransactionKeeper().tick(System.currentTimeMillis());
+            }
+        }, 2, 1, TimeUnit.MINUTES);
+        
+        registerService(DatabaseRESTService.class, new DatabaseRESTService(this));
 
         registerService(CreateTableService.class, new CreateServiceSchemaVersionTable());
         registerService(CreateTableService.class, new CreateServiceSchemaLockTable());
@@ -92,5 +100,4 @@ public class DatabaseRESTActivator extends HousekeepingActivator {
             }
         });
     }
-
 }
