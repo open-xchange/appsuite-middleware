@@ -175,11 +175,11 @@ public class DatabaseRESTPerformer {
         switch (accessType) {
             case READ:
                 returnConnectionWhenDone(DatabaseAccessType.READ, ctxId);
-                connection = dbService().getReadOnly();
+                connection = dbService().getReadOnly(ctxId);
                 break;
             case WRITE:
                 returnConnectionWhenDone(DatabaseAccessType.WRITE, ctxId);
-                connection = dbService().getWritable();
+                connection = dbService().getWritable(ctxId);
                 break;
         }
         return perform();
