@@ -75,6 +75,51 @@ public class KeySpecCredentialProvider extends AbstractCredentialProvider {
         DSA
     }
 
+    /**
+     * A simple container to hold a private key, a public or both and the according algorithm.
+     */
+    public static class SpecContainer {
+
+        private final KeySpec publicKeySpec;
+
+        private final KeySpec privateKeySpec;
+
+        private final Algorithm algorithm;
+
+        /**
+         * Initializes a new {@link SpecContainer}. The values to be passed in depend
+         * on the usage of the according keys:
+         * <ul>
+         *  <li><strong>Verify IDP signatures:</strong> The IDPs public key must be set.</li>
+         *  <li><strong>Sign request objects:</strong> The private key for signing is mandatory. If the public key is also provided, it will be part of the SPs metadata XML.</li>
+         *  <li><strong>Decrypt response objects:</strong> The private key for decryption is mandatory. If the public key is also provided, it will be part of the SPs metadata XML.</li>
+         * </ul>
+         *
+         * @param publicKeySpec The public key spec or <code>null</code>
+         * @param privateKeySpec The private key spec or <code>null</code>
+         * @param algorithm The algorithm
+         */
+        public SpecContainer(KeySpec publicKeySpec, KeySpec privateKeySpec, Algorithm algorithm) {
+            super();
+            this.publicKeySpec = publicKeySpec;
+            this.privateKeySpec = privateKeySpec;
+            this.algorithm = algorithm;
+        }
+
+        public KeySpec getPublicKeySpec() {
+            return publicKeySpec;
+        }
+
+        public KeySpec getPrivateKeySpec() {
+            return privateKeySpec;
+        }
+
+        public Algorithm getAlgorithm() {
+            return algorithm;
+        }
+
+    }
+
     private KeySpecCredentialProvider(Credential idpPublicKeyCredential, Credential signingPrivateKeyCredential, Credential decryptionPrivateKeyCredential) {
         super(idpPublicKeyCredential, signingPrivateKeyCredential, decryptionPrivateKeyCredential);
     }
@@ -82,39 +127,50 @@ public class KeySpecCredentialProvider extends AbstractCredentialProvider {
     /**
      * Initializes a new instance of {@link KeySpecCredentialProvider}.
      *
-     * @param idpPublicKeySpec The spec of the IDPs public key used for validating signatures or <code>null</code>
-     * @param idpPublicKeyAlgorithm The specs algorithm or <code>null</code>
-     * @param signingKeySpec The spec of the private key used for signing SP requests or <code>null</code>
-     * @param signingKeyAlgorithm The specs algorithm or <code>null</code>
-     * @param decryptionKeySpec The spec of the private key used to decrypt encrypted data or encryption keys or <code>null</code>
-     * @param decryptionKeyAlgorithm The specs algorithm or <code>null</code>
+     * @param idpPublicSpec The container holding the IDPs public key for signature verification.
+     * @param signingKeySpec The container holding the SPs private key and optionally the according public key to sign request objects.
+     *                       Can be <code>null</code> if request objects shall not be signed.
+     * @param decryptionKeySpec The container holding the SPs private key and optionally the according public key to decrypt encrypted
+     *                          response data or encryption keys. Can be <code>null</code> if request objects will not be encrypted.
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
      */
-    public static KeySpecCredentialProvider newInstance(KeySpec idpPublicKeySpec, Algorithm idpPublicKeyAlgorithm, KeySpec signingKeySpec, Algorithm signingKeyAlgorithm, KeySpec decryptionKeySpec, Algorithm decryptionKeyAlgorithm) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static KeySpecCredentialProvider newInstance(SpecContainer idpPublicSpec, SpecContainer signingKeySpec, SpecContainer decryptionKeySpec) throws NoSuchAlgorithmException, InvalidKeySpecException {
         BasicCredential idpPublicKeyCredential = null;
         BasicCredential signingPrivateKeyCredential = null;
         BasicCredential decryptionPrivateKeyCredential = null;
-        if (idpPublicKeySpec != null) {
-            KeyFactory keyFactory = KeyFactory.getInstance(idpPublicKeyAlgorithm.name());
-            PublicKey idpPublicKey = keyFactory.generatePublic(idpPublicKeySpec);
+        if (idpPublicSpec != null) {
+            KeyFactory keyFactory = KeyFactory.getInstance(idpPublicSpec.getAlgorithm().name());
+            PublicKey idpPublicKey = keyFactory.generatePublic(idpPublicSpec.getPublicKeySpec());
             idpPublicKeyCredential = new BasicCredential();
             idpPublicKeyCredential.setUsageType(UsageType.SIGNING);
             idpPublicKeyCredential.setPublicKey(idpPublicKey);
         }
 
         if (signingKeySpec != null) {
-            KeyFactory keyFactory = KeyFactory.getInstance(signingKeyAlgorithm.name());
-            PrivateKey signingKey = keyFactory.generatePrivate(signingKeySpec);
+            KeyFactory keyFactory = KeyFactory.getInstance(signingKeySpec.getAlgorithm().name());
+            PrivateKey signingKey = keyFactory.generatePrivate(signingKeySpec.getPrivateKeySpec());
+            PublicKey verificationKey = null;
+            if (signingKeySpec.getPublicKeySpec() != null) {
+                verificationKey = keyFactory.generatePublic(signingKeySpec.getPublicKeySpec());
+            }
             signingPrivateKeyCredential = new BasicCredential();
             signingPrivateKeyCredential.setUsageType(UsageType.SIGNING);
             signingPrivateKeyCredential.setPrivateKey(signingKey);
+            signingPrivateKeyCredential.setPublicKey(verificationKey);
         }
 
         if (decryptionKeySpec != null) {
-            KeyFactory keyFactory = KeyFactory.getInstance(decryptionKeyAlgorithm.name());
-            PrivateKey decryptionKey = keyFactory.generatePrivate(decryptionKeySpec);
+            KeyFactory keyFactory = KeyFactory.getInstance(decryptionKeySpec.getAlgorithm().name());
+            PrivateKey decryptionKey = keyFactory.generatePrivate(decryptionKeySpec.getPrivateKeySpec());
+            PublicKey encryptionKey = null;
+            if (decryptionKeySpec.getPublicKeySpec() != null) {
+                keyFactory.generatePublic(decryptionKeySpec.getPublicKeySpec());
+            }
             decryptionPrivateKeyCredential = new BasicCredential();
             decryptionPrivateKeyCredential.setUsageType(UsageType.ENCRYPTION);
             decryptionPrivateKeyCredential.setPrivateKey(decryptionKey);
+            decryptionPrivateKeyCredential.setPublicKey(encryptionKey);
         }
 
         return new KeySpecCredentialProvider(idpPublicKeyCredential, signingPrivateKeyCredential, decryptionPrivateKeyCredential);
