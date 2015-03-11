@@ -64,6 +64,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jaxrs.database.internal.AbstractDatabaseRESTService;
+import com.openexchange.jaxrs.database.internal.DatabaseEnvironment;
 import com.openexchange.jaxrs.database.internal.RESTRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -80,8 +81,8 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * 
      * @param services
      */
-    public DatabaseRESTService(ServiceLookup services) {
-        super(services);
+    public DatabaseRESTService(ServiceLookup services, DatabaseEnvironment environment) {
+        super(services, environment);
     }
 
     /**

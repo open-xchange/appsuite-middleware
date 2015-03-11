@@ -121,19 +121,21 @@ public class DatabaseRESTPerformer {
     private RESTRequest request;
 
     private ServiceLookup services;
+    private DatabaseEnvironment environment;
 
     /**
      * 
      * Initializes a new {@link DatabaseRESTPerformer}.
-     * 
      * @param services TODO
+     * @param environment TODO
      * @param transaction
      * 
      * @throws OXException
      */
-    public DatabaseRESTPerformer(RESTRequest request, ServiceLookup services) throws OXException {
+    public DatabaseRESTPerformer(RESTRequest request, ServiceLookup services, DatabaseEnvironment environment) throws OXException {
         this.request = request;
         this.services = services;
+        this.environment = environment;
     }
 
     /**
@@ -225,7 +227,7 @@ public class DatabaseRESTPerformer {
      * @throws JSONException
      */
     public Response executeTransaction(String txId) throws OXException, JSONException {
-        tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
+        tx = environment.getTransactionKeeper().getTransaction(txId);
         if (tx == null) {
             halt(Status.NOT_FOUND);
         } else {
@@ -243,13 +245,13 @@ public class DatabaseRESTPerformer {
      * @throws OXException
      */
     public Response rollbackTransaction(String txId) throws OXException {
-        tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
+        tx = environment.getTransactionKeeper().getTransaction(txId);
         if (tx == null) {
             halt(Status.NOT_FOUND);
         } else {
             postProcessor = new TransactionCloser(tx);
             try {
-                DatabaseEnvironment.getInstance().getTransactionKeeper().rollback(txId);
+                environment.getTransactionKeeper().rollback(txId);
             } catch (SQLException e) {
                 throw DatabaseRESTErrorCodes.SQL_ERROR.create(e.getMessage());
             }
@@ -265,13 +267,13 @@ public class DatabaseRESTPerformer {
      * @throws OXException
      */
     public Response commitTransaction(String txId) throws OXException {
-        tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
+        tx = environment.getTransactionKeeper().getTransaction(txId);
         if (tx == null) {
             halt(Status.NOT_FOUND);
         } else {
             postProcessor = new TransactionCloser(tx);
             try {
-                DatabaseEnvironment.getInstance().getTransactionKeeper().commit(txId);
+                environment.getTransactionKeeper().commit(txId);
             } catch (SQLException e) {
                 throw DatabaseRESTErrorCodes.SQL_ERROR.create(e.getMessage());
             }
@@ -336,7 +338,7 @@ public class DatabaseRESTPerformer {
         DatabaseService dbService = dbService();
         connection = dbService.getForUpdateTask(ctxId);
         try {
-            DatabaseEnvironment.getInstance().getVersionChecker().unlock(connection, module);
+            environment.getVersionChecker().unlock(connection, module);
         } finally {
             if (connection != null) {
                 dbService.backForUpdateTask(ctxId, connection);
@@ -359,7 +361,7 @@ public class DatabaseRESTPerformer {
         DatabaseService dbService = dbService();
         Connection connection = dbService.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId);
         try {
-            DatabaseEnvironment.getInstance().getVersionChecker().unlock(connection, module);
+            environment.getVersionChecker().unlock(connection, module);
         } finally {
             if (connection != null) {
                 dbService.backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, connection);
@@ -383,7 +385,7 @@ public class DatabaseRESTPerformer {
         migrationMetadata = new MigrationMetadata(ctxId, fromVersion, toVersion, module);
         skipVersionNegotiation = true;
 
-        boolean successfullyLocked = DatabaseEnvironment.getInstance().getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
+        boolean successfullyLocked = environment.getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
         if (!successfullyLocked) {
             dbService().backForUpdateTask(ctxId, connection);
             postProcessor = null;
@@ -419,7 +421,7 @@ public class DatabaseRESTPerformer {
 
         skipVersionNegotiation = true;
 
-        boolean successfullyLocked = DatabaseEnvironment.getInstance().getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
+        boolean successfullyLocked = environment.getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
         if (!successfullyLocked) {
             dbService().backForUpdateTask(ctxId, connection);
             postProcessor = null;
@@ -548,7 +550,7 @@ public class DatabaseRESTPerformer {
     private void handleSQLException(JSONObject response) throws OXException {
         try {
             if (tx != null) {
-                DatabaseEnvironment.getInstance().getTransactionKeeper().rollback(tx.getID());
+                environment.getTransactionKeeper().rollback(tx.getID());
                 tx = null;
             } else {
                 connection.rollback();
@@ -620,7 +622,7 @@ public class DatabaseRESTPerformer {
             postProcessor = null;
             if (tx == null) {
                 try {
-                    tx = DatabaseEnvironment.getInstance().getTransactionKeeper().newTransaction(connection);
+                    tx = environment.getTransactionKeeper().newTransaction(connection);
                     tx.put("ctxId", ctxId);
                     tx.put("accessType", accessType);
                     if (migrationMetadata != null) {
@@ -676,7 +678,7 @@ public class DatabaseRESTPerformer {
         } else {
             halt(Status.FORBIDDEN, "Can not modify the schema of the configdb");
         }
-        String conflictingVersion = DatabaseEnvironment.getInstance().getVersionChecker().isUpToDate(id, connection, module, version);
+        String conflictingVersion = environment.getVersionChecker().isUpToDate(id, connection, module, version);
         if (conflictingVersion != null) {
             if (oldPostProcessor != null) {
                 postProcessor = oldPostProcessor;
@@ -830,7 +832,7 @@ public class DatabaseRESTPerformer {
                     con.commit();
                 }
                 con.setAutoCommit(true);
-                DatabaseEnvironment.getInstance().getVersionChecker().unlock(con, migrationMetadata.module);
+                environment.getVersionChecker().unlock(con, migrationMetadata.module);
                 dbService().backForUpdateTask(ctxId, con);
             }
         };
@@ -847,7 +849,7 @@ public class DatabaseRESTPerformer {
                     con.commit();
                 }
                 con.setAutoCommit(true);
-                DatabaseEnvironment.getInstance().getVersionChecker().unlock(con, migrationMetadata.module);
+                environment.getVersionChecker().unlock(con, migrationMetadata.module);
                 dbService().backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
             }
         };
@@ -864,7 +866,7 @@ public class DatabaseRESTPerformer {
         @Override
         public void done(Connection con) throws SQLException, OXException {
             if (success) {
-                DatabaseEnvironment.getInstance().getTransactionKeeper().commit(tx.getID());
+                environment.getTransactionKeeper().commit(tx.getID());
             }
             DatabaseService db = dbService();
             Integer ctxId = (Integer) tx.getParameter("ctxId");
@@ -874,7 +876,7 @@ public class DatabaseRESTPerformer {
                     con.commit();
                 }
                 con.setAutoCommit(true);
-                DatabaseEnvironment.getInstance().getVersionChecker().unlock(con, migrationMetadata.module);
+                environment.getVersionChecker().unlock(con, migrationMetadata.module);
             }
 
             if (monitoredMetadata != null) {
@@ -982,12 +984,13 @@ public class DatabaseRESTPerformer {
 
         @Override
         public void before() throws OXException, SQLException {
-            String conflictingVersion = DatabaseEnvironment.getInstance().getVersionChecker().updateVersion(connection, module, fromVersion, toVersion);
+            String conflictingVersion = environment.getVersionChecker().updateVersion(connection, module, fromVersion, toVersion);
             if (conflictingVersion != null) {
                 if (oldPostProcessor != null) {
                     postProcessor = oldPostProcessor;
                 }
                 success = false;
+                cleanup();
                 halt(Status.CONFLICT, "X-OX-DB-VERSION", conflictingVersion);
             }
         }

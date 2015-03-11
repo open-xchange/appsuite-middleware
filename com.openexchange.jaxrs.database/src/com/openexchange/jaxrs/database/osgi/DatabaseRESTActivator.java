@@ -58,10 +58,12 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.jaxrs.database.DatabaseRESTService;
 import com.openexchange.jaxrs.database.internal.DatabaseEnvironment;
+import com.openexchange.jaxrs.database.migrations.DBVersionChecker;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTable;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaLockTableTask;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTable;
 import com.openexchange.jaxrs.database.sql.CreateServiceSchemaVersionTableTask;
+import com.openexchange.jaxrs.database.transactions.InMemoryTransactionKeeper;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
@@ -79,15 +81,18 @@ public class DatabaseRESTActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final InMemoryTransactionKeeper txKeeper = new InMemoryTransactionKeeper();
+        final DBVersionChecker versionChecker = new DBVersionChecker();
 
         getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
+
             @Override
             public void run() {
-                DatabaseEnvironment.getInstance().getTransactionKeeper().tick(System.currentTimeMillis());
+                txKeeper.tick(System.currentTimeMillis());
             }
         }, 2, 1, TimeUnit.MINUTES);
-        
-        registerService(DatabaseRESTService.class, new DatabaseRESTService(this));
+
+        registerService(DatabaseRESTService.class, new DatabaseRESTService(this, new DatabaseEnvironment(txKeeper, versionChecker)));
 
         registerService(CreateTableService.class, new CreateServiceSchemaVersionTable());
         registerService(CreateTableService.class, new CreateServiceSchemaLockTable());

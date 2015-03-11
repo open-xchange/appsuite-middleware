@@ -50,7 +50,6 @@
 package com.openexchange.jaxrs.database.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.jaxrs.database.migrations.DBVersionChecker;
 import com.openexchange.jaxrs.database.migrations.VersionChecker;
 import com.openexchange.jaxrs.database.transactions.InMemoryTransactionKeeper;
 import com.openexchange.jaxrs.database.transactions.TransactionKeeper;
@@ -61,22 +60,7 @@ import com.openexchange.jaxrs.database.transactions.TransactionKeeper;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.8.0
  */
-public final class DatabaseEnvironment {
-
-    private static DatabaseEnvironment INSTANCE;
-
-    /**
-     * Get the instance of the environment
-     * 
-     * @return the instance of the environment;
-     * @throws OXException
-     */
-    public static final DatabaseEnvironment getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new DatabaseEnvironment();
-        }
-        return INSTANCE;
-    }
+public class DatabaseEnvironment {
 
     private final InMemoryTransactionKeeper transactionKeeper;
     private final VersionChecker versionChecker;
@@ -86,9 +70,9 @@ public final class DatabaseEnvironment {
      * 
      * @throws OXException
      */
-    private DatabaseEnvironment() {
-        transactionKeeper = new InMemoryTransactionKeeper();
-        versionChecker = new DBVersionChecker();
+    public DatabaseEnvironment(InMemoryTransactionKeeper transactionKeeper, VersionChecker versionChecker) {
+        this.transactionKeeper = transactionKeeper;
+        this.versionChecker = versionChecker;
     }
 
     /**

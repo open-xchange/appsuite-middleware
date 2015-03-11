@@ -80,9 +80,10 @@ import com.openexchange.database.DatabaseMocking.QueryStubBuilder;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jaxrs.database.DatabaseRESTService;
+import com.openexchange.jaxrs.database.internal.DatabaseEnvironment;
 import com.openexchange.jaxrs.database.migrations.VersionChecker;
+import com.openexchange.jaxrs.database.transactions.InMemoryTransactionKeeper;
 import com.openexchange.jaxrs.database.transactions.Transaction;
-import com.openexchange.jaxrs.database.transactions.TransactionKeeper;
 import com.openexchange.server.MockingServiceLookup;
 
 /**
@@ -94,8 +95,9 @@ import com.openexchange.server.MockingServiceLookup;
 public class DBRESTServiceTest {
 
     private DatabaseService dbs;
-    private TransactionKeeper txs;
+    private InMemoryTransactionKeeper txs;
     private VersionChecker versionChecker;
+    private DatabaseEnvironment environment;
 
     private Connection con;
 
@@ -120,10 +122,12 @@ public class DBRESTServiceTest {
         con = connection();
 
         versionChecker = mock(VersionChecker.class);
-        txs = mock(TransactionKeeper.class);
+        txs = mock(InMemoryTransactionKeeper.class);
         dbs = services.mock(DatabaseService.class);
-
-        service = new DatabaseRESTService(services);
+        
+        environment = mock(DatabaseEnvironment.class);
+        
+        service = new DatabaseRESTService(services, new DatabaseEnvironment(txs, versionChecker));
 
         mmap = mock(MultivaluedMap.class);
 
