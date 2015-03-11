@@ -120,15 +120,15 @@ public class DatabaseRESTServiceTextImpl extends AbstractDatabaseRESTService {
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/transaction/{transactionId}/rollback")
-    public void rollbackTransaction(@PathParam("transactionId") String txId) throws OXException {
-        performRollbackTransaction(txId);
+    public Response rollbackTransaction(@PathParam("transactionId") String txId) throws OXException {
+        return performRollbackTransaction(txId);
     }
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/transaction/{transactionId}/commit")
-    public void commitTransaction(@PathParam("transactionId") String txId) throws OXException {
-        performCommitTransaction(txId);
+    public Response commitTransaction(@PathParam("transactionId") String txId) throws OXException {
+        return performCommitTransaction(txId);
     }
 
     @PUT
@@ -166,36 +166,36 @@ public class DatabaseRESTServiceTextImpl extends AbstractDatabaseRESTService {
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/init/w/{writeId}/{schema}")
-    public void initSchema(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
-        performInitSchema(writeId, schema);
+    public Response initSchema(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
+        return performInitSchema(writeId, schema);
     }
 
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/pool/w/{writeId}/{schema}/partitions")
-    public void insertPartitionIds(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
-        performInsertPartitionIds(writeId, schema);
+    public Response insertPartitionIds(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException {
+        return performInsertPartitionIds(writeId, schema);
     }
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/unlock/for/{ctxId}/andModule/{module}")
-    public void unlock(@PathParam("ctxId") int ctxId, @PathParam("module") String module) throws OXException {
-        performUnlock(ctxId, module);
+    public Response unlock(@PathParam("ctxId") int ctxId, @PathParam("module") String module) throws OXException {
+        return performUnlock(ctxId, module);
     }
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/andModule/{module}")
-    public void unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("module") String module) throws OXException {
-        performUnlockMonitored(readId, writeId, schema, partitionId, module);
+    public Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("module") String module) throws OXException {
+        return performUnlockMonitored(readId, writeId, schema, partitionId, module);
     }
     
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/andModule/{module}")
-    public void unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module) throws OXException {
-        performUnlockMonitored(readId, writeId, schema, 0, module);
+    public Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module) throws OXException {
+        return performUnlockMonitored(readId, writeId, schema, 0, module);
     }
     
     @PUT

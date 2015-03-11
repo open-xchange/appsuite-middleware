@@ -148,7 +148,7 @@ public interface DatabaseRESTService {
      */
     @GET
     @Path("/transaction/{transactionId}/rollback")
-    void rollbackTransaction(@PathParam("transactionId") String txId) throws OXException;
+    Response rollbackTransaction(@PathParam("transactionId") String txId) throws OXException;
 
     /**
      * Commits the transaction with the specified transaction identifier. Simply returns a 200 status code
@@ -161,7 +161,7 @@ public interface DatabaseRESTService {
      */
     @GET
     @Path("/transaction/{transactionId}/commit")
-    void commitTransaction(@PathParam("transactionId") String txId) throws OXException;
+    Response commitTransaction(@PathParam("transactionId") String txId) throws OXException;
 
     /**
      * Query a monitored connection
@@ -226,7 +226,7 @@ public interface DatabaseRESTService {
      */
     @GET
     @Path("/init/w/{writeId}/{schema}")
-    void initSchema(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
+    Response initSchema(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
 
     /**
      * Inserts the partition identifiers to the replication monitor table
@@ -238,7 +238,7 @@ public interface DatabaseRESTService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/w/{writeId}/{schema}/partitions")
-    void insertPartitionIds(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
+    Response insertPartitionIds(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
 
     /**
      * Unlocks a schema/module combination.
@@ -249,7 +249,7 @@ public interface DatabaseRESTService {
      */
     @GET
     @Path("/unlock/for/{ctxId}/andModule/{module}")
-    void unlock(@PathParam("ctxId") int ctxId, @PathParam("module") String module) throws OXException;
+    Response unlock(@PathParam("ctxId") int ctxId, @PathParam("module") String module) throws OXException;
 
     /**
      * Unlocks a schema/module combination for the specified context identifier.
@@ -263,7 +263,7 @@ public interface DatabaseRESTService {
      */
     @GET
     @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/andModule/{module}")
-    void unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("module") String module) throws OXException;
+    Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("module") String module) throws OXException;
 
     /**
      * Unlocks a schema/module combination for the specified context identifier.
@@ -277,7 +277,7 @@ public interface DatabaseRESTService {
      */
     @GET
     @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/andModule/{module}")
-    void unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module) throws OXException;
+    Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module) throws OXException;
 
     /**
      * Migrate from the specified version to the specified version

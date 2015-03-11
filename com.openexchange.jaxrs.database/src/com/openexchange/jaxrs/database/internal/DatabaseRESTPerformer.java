@@ -170,7 +170,7 @@ public class DatabaseRESTPerformer {
      * @param txId The transaction identifier
      * @throws OXException
      */
-    public void rollbackTransaction(String txId) throws OXException {
+    public Response rollbackTransaction(String txId) throws OXException {
         tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
         if (tx == null) {
             halt(Status.NOT_FOUND);
@@ -183,6 +183,7 @@ public class DatabaseRESTPerformer {
             }
             unpackTransaction();
         }
+        return compileResponse(Status.OK);
     }
 
     /**
@@ -191,7 +192,7 @@ public class DatabaseRESTPerformer {
      * @param txId The transaction identifier
      * @throws OXException
      */
-    public void commitTransaction(String txId) throws OXException {
+    public Response commitTransaction(String txId) throws OXException {
         tx = DatabaseEnvironment.getInstance().getTransactionKeeper().getTransaction(txId);
         if (tx == null) {
             halt(Status.NOT_FOUND);
@@ -204,6 +205,7 @@ public class DatabaseRESTPerformer {
             }
             unpackTransaction();
         }
+        return compileResponse(Status.OK);
     }
 
     /**
@@ -213,7 +215,7 @@ public class DatabaseRESTPerformer {
      * @param schema The schema name
      * @throws OXException If the initialization of the new schema fails
      */
-    public void initSchema(int writePoolId, String schema) throws OXException {
+    public Response initSchema(int writePoolId, String schema) throws OXException {
         DatabaseService db = dbService();
         db.initMonitoringTables(writePoolId, schema);
         db.initPartitions(writePoolId, schema, 0);
@@ -222,6 +224,8 @@ public class DatabaseRESTPerformer {
 
         new CreateServiceSchemaVersionTable().perform(connection);
         new CreateServiceSchemaLockTable().perform(connection);
+        
+        return compileResponse(Status.OK);
     }
 
     /**
@@ -231,7 +235,7 @@ public class DatabaseRESTPerformer {
      * @param schema The name of the schema
      * @throws OXException If the operation fails
      */
-    public void insertPartitionIds(int writeId, String schema) throws OXException {
+    public Response insertPartitionIds(int writeId, String schema) throws OXException {
         Object data = ajaxData.getData();
         if (data instanceof JSONArray) {
             try {
@@ -246,6 +250,7 @@ public class DatabaseRESTPerformer {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
             }
         }
+        return compileResponse(Status.OK);
     }
 
     /**
@@ -255,7 +260,7 @@ public class DatabaseRESTPerformer {
      * @param module The module
      * @throws OXException If the operation fails
      */
-    public void unlock(int ctxId, String module) throws OXException {
+    public Response unlock(int ctxId, String module) throws OXException {
         DatabaseService dbService = dbService();
         connection = dbService.getForUpdateTask(ctxId);
         try {
@@ -265,6 +270,7 @@ public class DatabaseRESTPerformer {
                 dbService.backForUpdateTask(ctxId, connection);
             }
         }
+        return compileResponse(Status.OK);
     }
 
     /**
@@ -277,7 +283,7 @@ public class DatabaseRESTPerformer {
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    public void unlockMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String module) throws OXException {
+    public Response unlockMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String module) throws OXException {
         DatabaseService dbService = dbService();
         Connection connection = dbService.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId);
         try {
@@ -287,6 +293,7 @@ public class DatabaseRESTPerformer {
                 dbService.backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, connection);
             }
         }
+        return compileResponse(Status.OK);
     }
 
     /**
@@ -1017,6 +1024,18 @@ public class DatabaseRESTPerformer {
      */
     private Response compileResponse(int statusCode, JSONObject entity) {
         ResponseBuilder builder = Response.status(statusCode).entity(entity).type(MediaType.APPLICATION_JSON);
+        addHeaders(builder);
+        return builder.build();
+    }
+
+    /**
+     * Compiles the response object for a successful/error-free response
+     * 
+     * @param statusCode The status code
+     * @return The response object
+     */
+    private Response compileResponse(Status statusCode) {
+        ResponseBuilder builder = Response.status(statusCode);
         addHeaders(builder);
         return builder.build();
     }

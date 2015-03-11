@@ -207,9 +207,9 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param txId The transaction identifier
      * @throws OXException
      */
-    protected void performRollbackTransaction(String txId) throws OXException {
+    protected Response performRollbackTransaction(String txId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.rollbackTransaction(txId);
+        return performer.rollbackTransaction(txId);
     }
 
     /**
@@ -218,9 +218,9 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param txId The transaction identifier
      * @throws OXException
      */
-    protected void performCommitTransaction(String txId) throws OXException {
+    protected Response performCommitTransaction(String txId) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.commitTransaction(txId);
+        return performer.commitTransaction(txId);
     }
 
     /**
@@ -272,9 +272,9 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param schema The schema name
      * @throws OXException If the initialization of the new schema fails
      */
-    protected void performInitSchema(int writeId, String schema) throws OXException {
+    protected Response performInitSchema(int writeId, String schema) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.initSchema(writeId, schema);
+        return performer.initSchema(writeId, schema);
     }
 
     /**
@@ -284,9 +284,9 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param schema The name of the schema
      * @throws OXException If the operation fails
      */
-    protected void performInsertPartitionIds(int writeId, String schema) throws OXException {
+    protected Response performInsertPartitionIds(int writeId, String schema) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.insertPartitionIds(writeId, schema);
+        return performer.insertPartitionIds(writeId, schema);
     }
 
     /**
@@ -296,9 +296,9 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param module The module
      * @throws OXException If the operation fails
      */
-    protected void performUnlock(int ctxId, String module) throws OXException {
+    protected Response performUnlock(int ctxId, String module) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.unlock(ctxId, module);
+        return performer.unlock(ctxId, module);
     }
 
     /**
@@ -311,9 +311,9 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    protected void performUnlockMonitored(int readId, int writeId, String schema, int partitionId, String module) throws OXException {
+    protected Response performUnlockMonitored(int readId, int writeId, String schema, int partitionId, String module) throws OXException {
         DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.unlockMonitored(readId, writeId, schema, partitionId, module);
+        return performer.unlockMonitored(readId, writeId, schema, partitionId, module);
     }
 
     /**
