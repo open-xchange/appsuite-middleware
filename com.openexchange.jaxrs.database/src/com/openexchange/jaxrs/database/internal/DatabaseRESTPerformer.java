@@ -71,7 +71,6 @@ import javax.ws.rs.core.Response.Status;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -113,14 +112,13 @@ public class DatabaseRESTPerformer {
 
     private boolean skipVersionNegotiation;
     private boolean success = false;
-    private final boolean transaction;
 
     private MigrationMetadata migrationMetadata;
     private MonitoredMetadata monitoredMetadata;
 
     private BeforeHandler beforeHandler;
 
-    private AJAXRequestData ajaxData;
+    private RESTRequest request;
 
     /**
      * 
@@ -129,10 +127,8 @@ public class DatabaseRESTPerformer {
      * @param transaction
      * @throws OXException
      */
-    public DatabaseRESTPerformer(AJAXRequestData data) throws OXException {
-        this.ajaxData = data;
-        transaction = isTransaction(data);
-
+    public DatabaseRESTPerformer(RESTRequest request) throws OXException {
+        this.request = request;
     }
 
     /**
@@ -142,6 +138,77 @@ public class DatabaseRESTPerformer {
      */
     public void setConnection(Connection connection) {
         this.connection = connection;
+    }
+
+    /**
+     * Perform an update or a query on the 'configdb'
+     * 
+     * @param accessType The access type
+     * @return The response of the query/update
+     * @throws OXException
+     * @throws JSONException
+     */
+    public Response performOnConfigDB(DatabaseAccessType accessType) throws OXException, JSONException {
+        switch (accessType) {
+            case READ:
+                returnConnectionWhenDone(DatabaseAccessType.READ);
+                connection = dbService().getReadOnly();
+                break;
+            case WRITE:
+                returnConnectionWhenDone(DatabaseAccessType.WRITE);
+                connection = dbService().getWritable();
+                break;
+        }
+        return perform();
+    }
+
+    /**
+     * Perform an update or a query on the 'configdb'
+     * 
+     * @param ctxId The context identifier
+     * @param accessType The access type
+     * @return The response of the query/update
+     * @throws OXException
+     * @throws JSONException
+     */
+    public Response performOnOXDB(int ctxId, DatabaseAccessType accessType) throws OXException, JSONException {
+        switch (accessType) {
+            case READ:
+                returnConnectionWhenDone(DatabaseAccessType.READ, ctxId);
+                connection = dbService().getReadOnly();
+                break;
+            case WRITE:
+                returnConnectionWhenDone(DatabaseAccessType.WRITE, ctxId);
+                connection = dbService().getWritable();
+                break;
+        }
+        return perform();
+    }
+
+    /**
+     * Perform an update or a query in a monitored db.
+     * 
+     * @param readId The read pool identifier
+     * @param writeId The write pool identifier
+     * @param schema The schema name
+     * @param partitionId The partition identifier
+     * @param accessType The access type
+     * @return The response of the query/update
+     * @throws OXException If the operation fails
+     * @throws JSONException
+     */
+    public Response performInMonitored(int readId, int writeId, String schema, int partitionId, DatabaseAccessType accessType) throws OXException, JSONException {
+        switch (accessType) {
+            case READ:
+                returnMonitoredConnectionWhenDone(DatabaseAccessType.READ, readId, writeId, schema, partitionId);
+                connection = dbService().getReadOnlyMonitored(readId, writeId, schema, partitionId);
+                break;
+            case WRITE:
+                returnMonitoredConnectionWhenDone(DatabaseAccessType.WRITE, readId, writeId, schema, partitionId);
+                connection = dbService().getWritableMonitored(readId, writeId, schema, partitionId);
+                break;
+        }
+        return perform();
     }
 
     /**
@@ -224,7 +291,7 @@ public class DatabaseRESTPerformer {
 
         new CreateServiceSchemaVersionTable().perform(connection);
         new CreateServiceSchemaLockTable().perform(connection);
-        
+
         return compileResponse(Status.OK);
     }
 
@@ -236,7 +303,7 @@ public class DatabaseRESTPerformer {
      * @throws OXException If the operation fails
      */
     public Response insertPartitionIds(int writeId, String schema) throws OXException {
-        Object data = ajaxData.getData();
+        Object data = request.getBody();
         if (data instanceof JSONArray) {
             try {
                 JSONArray array = (JSONArray) data;
@@ -505,7 +572,7 @@ public class DatabaseRESTPerformer {
     @SuppressWarnings("unchecked")
     private Map<String, DatabaseQuery> getQueries() throws OXException {
         Map<String, DatabaseQuery> queries = new HashMap<String, DatabaseQuery>();
-        Object data = ajaxData.getData();
+        Object data = request.getBody();
         try {
             if (data instanceof String) {
                 queries.put("result", new DatabaseQuery((String) data, Collections.emptyList(), accessType == DatabaseAccessType.READ, false));
@@ -543,7 +610,7 @@ public class DatabaseRESTPerformer {
 
     private void handleTransaction() throws OXException {
         unpackTransaction();
-        if (transaction) {
+        if (isTransaction()) {
             oldPostProcessor = postProcessor;
             postProcessor = null;
             if (tx == null) {
@@ -591,8 +658,8 @@ public class DatabaseRESTPerformer {
         if (skipVersionNegotiation) {
             return;
         }
-        String module = ajaxData.getHeader("x-ox-db-module");
-        String version = ajaxData.getHeader("x-ox-db-version");
+        String module = request.getHeader("x-ox-db-module");
+        String version = request.getHeader("x-ox-db-version");
         if (version == null && module == null) {
             return;
         }
@@ -609,8 +676,7 @@ public class DatabaseRESTPerformer {
             if (oldPostProcessor != null) {
                 postProcessor = oldPostProcessor;
             }
-            ajaxData.setHeader("X-OX-DB-VERSION", conflictingVersion);
-            halt(Status.CONFLICT);
+            halt(Status.CONFLICT, "X-OX-DB-VERSION", conflictingVersion);
         }
     }
 
@@ -667,7 +733,7 @@ public class DatabaseRESTPerformer {
      * @param schema The schema name
      * @param partitionId The partition identifier
      */
-    public void returnMonitoredConnectionWhenDone(final DatabaseAccessType accessType, final int readId, final int writeId, final String schema, final int partitionId) {
+    private void returnMonitoredConnectionWhenDone(final DatabaseAccessType accessType, final int readId, final int writeId, final String schema, final int partitionId) {
         this.accessType = accessType;
         this.monitoredMetadata = new MonitoredMetadata(readId, writeId, schema, partitionId);
 
@@ -695,7 +761,7 @@ public class DatabaseRESTPerformer {
      * 
      * @param accessType The access type of the database connection
      */
-    public void returnConnectionWhenDone(final DatabaseAccessType accessType) {
+    private void returnConnectionWhenDone(final DatabaseAccessType accessType) {
         this.accessType = accessType;
         this.ctxId = null;
 
@@ -724,7 +790,7 @@ public class DatabaseRESTPerformer {
      * @param accessType The access type of the database connection
      * @param ctxId The context identifiers
      */
-    public void returnConnectionWhenDone(final DatabaseAccessType accessType, final int ctxId) {
+    private void returnConnectionWhenDone(final DatabaseAccessType accessType, final int ctxId) {
         this.accessType = accessType;
         this.ctxId = ctxId;
 
@@ -747,7 +813,7 @@ public class DatabaseRESTPerformer {
         };
     }
 
-    public void finishMigrationWhenDone(final int ctxId) {
+    private void finishMigrationWhenDone(final int ctxId) {
         this.ctxId = ctxId;
         this.accessType = DatabaseAccessType.WRITE;
 
@@ -765,7 +831,7 @@ public class DatabaseRESTPerformer {
         };
     }
 
-    public void finishMigrationWhenDone(final int readPoolId, final int writePoolId, final String schema, final int partitionId) {
+    private void finishMigrationWhenDone(final int readPoolId, final int writePoolId, final String schema, final int partitionId) {
         this.accessType = DatabaseAccessType.WRITE;
 
         this.postProcessor = new ConnectionPostProcessor() {
@@ -917,8 +983,7 @@ public class DatabaseRESTPerformer {
                     postProcessor = oldPostProcessor;
                 }
                 success = false;
-                ajaxData.setHeader("X-OX-DB-VERSION", conflictingVersion);
-                halt(409);
+                halt(Status.CONFLICT, "X-OX-DB-VERSION", conflictingVersion);
             }
         }
 
@@ -931,11 +996,25 @@ public class DatabaseRESTPerformer {
      * @return true if the request is part of a transaction; false otherwise
      * @throws OXException
      */
-    private boolean isTransaction(AJAXRequestData data) throws OXException {
-        return (data.isSet("keepOpen") && data.getParameter("keepOpen", boolean.class));
+    private boolean isTransaction() throws OXException {
+        return (request.isParameterSet("keepOpen") && request.getParameter("keepOpen", boolean.class));
     }
 
     // Error handling & Response
+
+    /**
+     * Throws a WebApplicationException with the specified status code and the specified header name and value
+     * 
+     * @param statusCode The status code for the error
+     * @param hName Header name
+     * @param hValue Header value
+     */
+    private void halt(Status statusCode, String hName, String hValue) {
+        ResponseBuilder builder = Response.status(statusCode).header(hName, hValue);
+        addHeaders(builder);
+        Response r = builder.build();
+        throw new WebApplicationException(r);
+    }
 
     /**
      * Throws a WebApplicationException with the specified status code

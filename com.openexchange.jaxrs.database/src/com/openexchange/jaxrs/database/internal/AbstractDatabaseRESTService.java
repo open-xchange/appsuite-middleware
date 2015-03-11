@@ -51,11 +51,7 @@ package com.openexchange.jaxrs.database.internal;
 
 import javax.ws.rs.core.Response;
 import org.json.JSONException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.jaxrs.JAXRSService;
-import com.openexchange.jaxrs.database.DatabaseRESTService;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -63,15 +59,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractDatabaseRESTService extends JAXRSService implements DatabaseRESTService {
+public abstract class AbstractDatabaseRESTService {
 
     /**
      * Initializes a new {@link AbstractDatabaseRESTService}.
-     * 
-     * @param services
      */
-    protected AbstractDatabaseRESTService(ServiceLookup services) {
-        super(services);
+    protected AbstractDatabaseRESTService() {
+        super();
     }
 
     /**
@@ -98,15 +92,14 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * }
      * </pre>
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @return A JSONObject with the result set
      * @throws OXException If an error occurs
      */
-    protected Response performQueryConfigDB() throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.returnConnectionWhenDone(DatabaseAccessType.READ);
-        performer.setConnection(getService(DatabaseService.class).getReadOnly());
+    protected Response performQueryConfigDB(RESTRequest restRequest) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         try {
-            return performer.perform();
+            return performer.performOnConfigDB(DatabaseAccessType.READ);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
@@ -135,15 +128,14 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * }
      * </pre>
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @return A JSONObject with the outcome of the result (updated=1 or update=0)
      * @throws OXException If an error occurs
      */
-    protected Response performUpdateConfigDB() throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.returnConnectionWhenDone(DatabaseAccessType.WRITE);
-        performer.setConnection(getService(DatabaseService.class).getWritable());
+    protected Response performUpdateConfigDB(RESTRequest restRequest) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         try {
-            return performer.perform();
+            return performer.performOnConfigDB(DatabaseAccessType.WRITE);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
@@ -152,16 +144,15 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
     /**
      * Performs a query to an OX database with the specified context identifier.
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param ctxId
      * @return
      * @throws OXException
      */
-    protected Response performQueryOXDB(int ctxId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.returnConnectionWhenDone(DatabaseAccessType.READ, ctxId);
-        performer.setConnection(getService(DatabaseService.class).getReadOnly(ctxId));
+    protected Response performQueryOXDB(RESTRequest restRequest, int ctxId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         try {
-            return performer.perform();
+            return performer.performOnOXDB(ctxId, DatabaseAccessType.READ);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
@@ -170,16 +161,15 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
     /**
      * Issues updates and inserts to an OX database with the specified context identifier
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param ctxId The context identifier
      * @return A JSONObject with the outcome of the result (updated=1 or update=0)
      * @throws OXException If an error occurs
      */
-    protected Response performUpdateOXDB(int ctxId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.returnConnectionWhenDone(DatabaseAccessType.WRITE, ctxId);
-        performer.setConnection(getService(DatabaseService.class).getWritable(ctxId));
+    protected Response performUpdateOXDB(RESTRequest restRequest, int ctxId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         try {
-            return performer.perform();
+            return performer.performOnOXDB(ctxId, DatabaseAccessType.WRITE);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
@@ -188,12 +178,13 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
     /**
      * Executes the transaction with the specified transaction identifier
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param txId The transaction identifier
      * @return
      * @throws OXException
      */
-    protected Response performQueryTransaction(String txId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+    protected Response performQueryTransaction(RESTRequest restRequest, String txId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         try {
             return performer.executeTransaction(txId);
         } catch (JSONException e) {
@@ -204,41 +195,42 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
     /**
      * Rolls back the transaction with the specified transaction identifier
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param txId The transaction identifier
      * @throws OXException
      */
-    protected Response performRollbackTransaction(String txId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+    protected Response performRollbackTransaction(RESTRequest restRequest, String txId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         return performer.rollbackTransaction(txId);
     }
 
     /**
      * Commits the transaction with the specified transaction identifier
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param txId The transaction identifier
      * @throws OXException
      */
-    protected Response performCommitTransaction(String txId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+    protected Response performCommitTransaction(RESTRequest restRequest, String txId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         return performer.commitTransaction(txId);
     }
 
     /**
      * Query a monitored connection
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param readId The read pool identifier
      * @param writeId The write pool identifier
      * @param schema The schema name
      * @param partitionId The partition identifier
      * @throws OXException If the operation fails
      */
-    protected Response performQueryInMonitoredConnection(int readId, int writeId, String schema, int partitionId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.returnMonitoredConnectionWhenDone(DatabaseAccessType.READ, readId, writeId, schema, partitionId);
-        performer.setConnection(getService(DatabaseService.class).getReadOnlyMonitored(readId, writeId, schema, partitionId));
+    protected Response performQueryInMonitoredConnection(RESTRequest restRequest, int readId, int writeId, String schema, int partitionId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
 
         try {
-            return performer.perform();
+            return performer.performInMonitored(readId, writeId, schema, partitionId, DatabaseAccessType.READ);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
@@ -247,19 +239,18 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
     /**
      * Update a monitored connection
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param readId The read pool identifier
      * @param writeId The write pool identifier
      * @param schema The schema name
      * @param partitionId The partition identifier
      * @throws OXException If the operation fails
      */
-    protected Response performUpdateInMonitoredConnection(int readId, int writeId, String schema, int partitionId) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
-        performer.returnMonitoredConnectionWhenDone(DatabaseAccessType.WRITE, readId, writeId, schema, partitionId);
-        performer.setConnection(getService(DatabaseService.class).getWritableMonitored(readId, writeId, schema, partitionId));
+    protected Response performUpdateInMonitoredConnection(RESTRequest restRequest, int readId, int writeId, String schema, int partitionId) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
 
         try {
-            return performer.perform();
+            return performer.performInMonitored(readId, writeId, schema, partitionId, DatabaseAccessType.WRITE);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
@@ -268,42 +259,46 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
     /**
      * Initialize a new database schema with the specified name and the specified write pool identifier.
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param writePoolId The write pool identifier
      * @param schema The schema name
      * @throws OXException If the initialization of the new schema fails
      */
-    protected Response performInitSchema(int writeId, String schema) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+    protected Response performInitSchema(RESTRequest restRequest, int writeId, String schema) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         return performer.initSchema(writeId, schema);
     }
 
     /**
      * Inserts the partition identifiers to the replication monitor table
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param writeId The write identifier referencing the master db server
      * @param schema The name of the schema
      * @throws OXException If the operation fails
      */
-    protected Response performInsertPartitionIds(int writeId, String schema) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+    protected Response performInsertPartitionIds(RESTRequest restRequest, int writeId, String schema) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         return performer.insertPartitionIds(writeId, schema);
     }
 
     /**
      * Unlocks a schema/module combination.
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param ctxId The context identifier
      * @param module The module
      * @throws OXException If the operation fails
      */
-    protected Response performUnlock(int ctxId, String module) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+    protected Response performUnlock(RESTRequest restRequest, int ctxId, String module) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         return performer.unlock(ctxId, module);
     }
 
     /**
      * Unlocks a schema/module combination for the specified context identifier.
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param readPoolId The read pool identifier
      * @param writePoolId The write pool identifier
      * @param schema The schema name
@@ -311,28 +306,30 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    protected Response performUnlockMonitored(int readId, int writeId, String schema, int partitionId, String module) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+    protected Response performUnlockMonitored(RESTRequest restRequest, int readId, int writeId, String schema, int partitionId, String module) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         return performer.unlockMonitored(readId, writeId, schema, partitionId, module);
     }
 
     /**
      * Migrate from the specified version to the specified version
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param ctxId The context identifier
      * @param fromVersion Version updating from
      * @param toVersion Version updating to
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    protected Response performMigrate(int ctxId, String fromVersion, String toVersion, String module) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+    protected Response performMigrate(RESTRequest restRequest, int ctxId, String fromVersion, String toVersion, String module) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         return performer.migrate(ctxId, fromVersion, toVersion, module);
     }
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
      * 
+     * @param restRequest The REST request object containing the request's headers, URL parameters and body
      * @param readId The read identifier
      * @param writeId The write identifier
      * @param schema The name of the schema
@@ -342,8 +339,8 @@ abstract class AbstractDatabaseRESTService extends JAXRSService implements Datab
      * @param module The module name
      * @throws OXException If the operation fails
      */
-    protected Response performMigrateMonitored(int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
-        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(getAJAXRequestData());
+    protected Response performMigrateMonitored(RESTRequest restRequest, int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
+        DatabaseRESTPerformer performer = new DatabaseRESTPerformer(restRequest);
         return performer.migrateMonitored(readId, writeId, schema, partitionId, fromVersion, toVersion, module);
     }
 }

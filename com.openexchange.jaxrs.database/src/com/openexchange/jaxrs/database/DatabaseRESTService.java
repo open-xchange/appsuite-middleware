@@ -49,27 +49,38 @@
 
 package com.openexchange.jaxrs.database;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jaxrs.database.internal.AbstractDatabaseRESTService;
+import com.openexchange.jaxrs.database.internal.RESTRequest;
 
 /**
- * {@link DatabaseRESTService}. Defines the REST API for the Database Service.
- * 
- * The implemented methods MUST also be annotated accordingly. The annotation '@Consumes' must also be specified
- * on the implementation level.
- * 
- * Path: /database/v1
+ * {@link DatabaseRESTService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @Path("/database/v1")
-public interface DatabaseRESTService {
+public class DatabaseRESTService extends AbstractDatabaseRESTService {
+
+    /**
+     * Initializes a new {@link DatabaseRESTService}.
+     * 
+     * @param services
+     */
+    public DatabaseRESTService() {
+        super();
+    }
 
     /**
      * Performs a query to the 'configdb'.
@@ -78,9 +89,26 @@ public interface DatabaseRESTService {
      * @throws OXException If an error occurs
      */
     @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/configdb/readOnly")
-    Response queryConfigDB() throws OXException;
+    public Response queryConfigDB(@Context HttpHeaders headers, @Context UriInfo uriInfo, String body) throws OXException {
+        return performQueryConfigDB(new RESTRequest(headers, uriInfo.getQueryParameters(), body));
+    }
+
+    /**
+     * Performs a query to the 'configdb'.
+     * 
+     * @return A Response with the result set
+     * @throws OXException If an error occurs
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/configdb/readOnly")
+    public Response queryConfigDB(@Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performQueryConfigDB(new RESTRequest(headers, uriInfo.getQueryParameters(), body));
+    }
 
     /**
      * Performs an update to the 'configdb'.
@@ -89,9 +117,20 @@ public interface DatabaseRESTService {
      * @throws OXException
      */
     @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/configdb/writable")
-    Response updateConfigDB() throws OXException;
+    public Response updateConfigDB(@Context HttpHeaders headers, @Context UriInfo uriInfo, String body) throws OXException {
+        return performUpdateConfigDB(new RESTRequest(headers, uriInfo.getQueryParameters(), body));
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/configdb/writable")
+    public Response updateConfigDB(@Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performUpdateConfigDB(new RESTRequest(headers, uriInfo.getQueryParameters(), body));
+    }
 
     /**
      * Performs a query to an OX database with the specified context identifier.
@@ -101,9 +140,27 @@ public interface DatabaseRESTService {
      * @throws OXException If an error occurs
      */
     @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/oxdb/{ctxId}/readOnly")
-    Response queryOXDB(@PathParam("ctxId") int ctxId) throws OXException;
+    public Response queryOXDB(@PathParam("ctxId") int ctxId, @Context HttpHeaders headers, @Context UriInfo uriInfo, String body) throws OXException {
+        return performQueryOXDB(new RESTRequest(headers, uriInfo.getQueryParameters(), body), ctxId);
+    }
+
+    /**
+     * Performs a query to an OX database with the specified context identifier.
+     * 
+     * @param ctxId The context identifier
+     * @return A Response with the result set
+     * @throws OXException If an error occurs
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/oxdb/{ctxId}/readOnly")
+    public Response queryOXDB(@PathParam("ctxId") int ctxId, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performQueryOXDB(new RESTRequest(headers, uriInfo.getQueryParameters(), body), ctxId);
+    }
 
     /**
      * Issues updates and inserts to an OX database with the specified context identifier. If multiple updates are
@@ -121,9 +178,35 @@ public interface DatabaseRESTService {
      * @throws OXException If an error occurs
      */
     @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/oxdb/{ctxId}/writable")
-    Response updateOXDB(@PathParam("ctxId") int ctxId) throws OXException;
+    public Response updateOXDB(@PathParam("ctxId") int ctxId, @Context HttpHeaders headers, @Context UriInfo uriInfo, String body) throws OXException {
+        return performUpdateOXDB(new RESTRequest(headers, uriInfo.getQueryParameters(), body), ctxId);
+    }
+
+    /**
+     * Issues updates and inserts to an OX database with the specified context identifier. If multiple updates are
+     * sent in a request to a writable database, they are considered to be part of one transaction. A transaction
+     * is automatically committed after all requests have been sent. If an error occurs, the transaction is rolled
+     * back and all changes are undone.
+     * 
+     * The transaction can be kept open at the end of an request to get a transaction that spans multiple requests.
+     * This is useful, if, for example, a value is to be retrieved, do a computation on it, and then write it back.
+     * A transaction will be kept open, if the URL parameter "keepOpen" with the parameter to "true" is set in the
+     * request.
+     * 
+     * @param ctxId The context identifier
+     * @return A Response with the outcome of the result (updated=1 or update=0)
+     * @throws OXException If an error occurs
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/oxdb/{ctxId}/writable")
+    public Response updateOXDB(@PathParam("ctxId") int ctxId, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performUpdateOXDB(new RESTRequest(headers, uriInfo.getQueryParameters(), body), ctxId);
+    }
 
     /**
      * Uses the open transaction to execute further queries or updates.
@@ -133,9 +216,12 @@ public interface DatabaseRESTService {
      * @throws OXException If an error occurs
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/transaction/{transactionId}")
-    Response queryTransaction(@PathParam("transactionId") String txId) throws OXException;
+    public Response queryTransaction(@PathParam("transactionId") String txId, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performQueryTransaction(new RESTRequest(headers, uriInfo.getQueryParameters(), body), txId);
+    }
 
     /**
      * Rolls back the transaction with the specified transaction identifier. Simply returns a 200 status code
@@ -147,8 +233,12 @@ public interface DatabaseRESTService {
      * @throws OXException If an error occurs
      */
     @GET
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/transaction/{transactionId}/rollback")
-    Response rollbackTransaction(@PathParam("transactionId") String txId) throws OXException;
+    public Response rollbackTransaction(@PathParam("transactionId") String txId, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performRollbackTransaction(new RESTRequest(headers, uriInfo.getQueryParameters(), body), txId);
+
+    }
 
     /**
      * Commits the transaction with the specified transaction identifier. Simply returns a 200 status code
@@ -160,8 +250,11 @@ public interface DatabaseRESTService {
      * @throws OXException If an error occurs
      */
     @GET
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/transaction/{transactionId}/commit")
-    Response commitTransaction(@PathParam("transactionId") String txId) throws OXException;
+    public Response commitTransaction(@PathParam("transactionId") String txId, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performCommitTransaction(new RESTRequest(headers, uriInfo.getQueryParameters(), body), txId);
+    }
 
     /**
      * Query a monitored connection
@@ -173,9 +266,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/readOnly")
-    Response queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException;
+    public Response queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performQueryInMonitoredConnection(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, partitionId);
+    }
 
     /**
      * Query a monitored connection
@@ -186,9 +282,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/readOnly")
-    Response queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
+    public Response queryInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performQueryInMonitoredConnection(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, 0);
+    }
 
     /**
      * Update a monitored connection
@@ -200,9 +299,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/writable")
-    Response updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId) throws OXException;
+    public Response updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performUpdateInMonitoredConnection(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, partitionId);
+    }
 
     /**
      * Update a monitored connection
@@ -213,9 +315,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/r/{readId}/w/{writeId}/{schema}/writable")
-    Response updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
+    public Response updateInMonitoredConnection(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performUpdateInMonitoredConnection(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, 0);
+    }
 
     /**
      * Initialize a new database schema with the specified name and the specified write pool identifier.
@@ -225,8 +330,11 @@ public interface DatabaseRESTService {
      * @throws OXException If the initialization of the new schema fails
      */
     @GET
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/init/w/{writeId}/{schema}")
-    Response initSchema(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
+    public Response initSchema(@PathParam("writeId") int writeId, @PathParam("schema") String schema, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performInitSchema(new RESTRequest(headers, uriInfo.getQueryParameters(), body), writeId, schema);
+    }
 
     /**
      * Inserts the partition identifiers to the replication monitor table
@@ -236,9 +344,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pool/w/{writeId}/{schema}/partitions")
-    Response insertPartitionIds(@PathParam("writeId") int writeId, @PathParam("schema") String schema) throws OXException;
+    public Response insertPartitionIds(@PathParam("writeId") int writeId, @PathParam("schema") String schema, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performInsertPartitionIds(new RESTRequest(headers, uriInfo.getQueryParameters(), body), writeId, schema);
+    }
 
     /**
      * Unlocks a schema/module combination.
@@ -248,8 +359,11 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @GET
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/unlock/for/{ctxId}/andModule/{module}")
-    Response unlock(@PathParam("ctxId") int ctxId, @PathParam("module") String module) throws OXException;
+    public Response unlock(@PathParam("ctxId") int ctxId, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performUnlock(new RESTRequest(headers, uriInfo.getQueryParameters(), body), ctxId, module);
+    }
 
     /**
      * Unlocks a schema/module combination for the specified context identifier.
@@ -262,8 +376,11 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @GET
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/andModule/{module}")
-    Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("module") String module) throws OXException;
+    public Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performUnlockMonitored(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, partitionId, module);
+    }
 
     /**
      * Unlocks a schema/module combination for the specified context identifier.
@@ -276,8 +393,11 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @GET
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/andModule/{module}")
-    Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module) throws OXException;
+    public Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performUnlockMonitored(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, 0, module);
+    }
 
     /**
      * Migrate from the specified version to the specified version
@@ -289,9 +409,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/{ctxId}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
-    Response migrate(@PathParam("ctxId") int ctxId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    public Response migrate(@PathParam("ctxId") int ctxId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performMigrate(new RESTRequest(headers, uriInfo.getQueryParameters(), body), ctxId, fromVersion, toVersion, module);
+    }
 
     /**
      * Perform an initial migration to the specified version
@@ -302,9 +425,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/{ctxId}/to/{toVersion}/forModule/{module}")
-    Response initialiMigration(@PathParam("ctxId") int ctxId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    public Response initialiMigration(@PathParam("ctxId") int ctxId, @PathParam("toVersion") String toVersion, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performMigrate(new RESTRequest(headers, uriInfo.getQueryParameters(), body), ctxId, "", toVersion, module);
+    }
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
@@ -319,9 +445,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
-    Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    public Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performMigrateMonitored(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, partitionId, fromVersion, toVersion, module);
+    }
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
@@ -334,9 +463,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/to/{toVersion}/forModule/{module}")
-    Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    public Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("toVersion") String toVersion, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performMigrateMonitored(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, 0, "", toVersion, module);
+    }
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
@@ -350,9 +482,12 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/to/{toVersion}/forModule/{module}")
-    Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    public Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("toVersion") String toVersion, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performMigrateMonitored(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, partitionId, "", toVersion, module);
+    }
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
@@ -366,7 +501,10 @@ public interface DatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/migration/for/pool/r/{readId}/w/{writeId}/{schema}/from/{fromVersion}/to/{toVersion}/forModule/{module}")
-    Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module) throws OXException;
+    public Response migrateMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("fromVersion") String fromVersion, @PathParam("toVersion") String toVersion, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
+        return performMigrateMonitored(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, 0, fromVersion, toVersion, module);
+    }
 }
