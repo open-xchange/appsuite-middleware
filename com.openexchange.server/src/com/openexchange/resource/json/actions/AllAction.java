@@ -98,6 +98,7 @@ public final class AllAction extends AbstractResourceAction {
                 if (lastModified < resource.getLastModified().getTime()) {
                     lastModified = resource.getLastModified().getTime();
                 }
+                list.add(resource);
             }
             timestamp = new Date(lastModified);
         } else {
