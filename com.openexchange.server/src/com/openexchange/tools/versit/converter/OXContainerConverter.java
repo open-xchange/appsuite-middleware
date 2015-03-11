@@ -1239,13 +1239,17 @@ public class OXContainerConverter {
                     ContactField.TELEPHONE_OTHER)) {
                 continue;
             }
+
             boolean home = containsValue(PARAM_HOME, typeParameter);
             boolean business = containsValue(PARAM_WORK, typeParameter);
             boolean other = containsValue(PARAM_OTHER, typeParameter);
+
             /*
              * voice
+             *
+             * (Fix for bug 37172: Assume voice if parameter is missing and tag types 'home', 'work' or 'other' are set)
              */
-            if (containsValue("voice", typeParameter)) {
+            if (containsValue("voice", typeParameter) || parameterValueCount(typeParameter) == 1) {
                 if (business && setProperty(target, value, preferred, ContactField.TELEPHONE_BUSINESS1,
                     ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_OTHER)) {
                     continue;
@@ -1263,6 +1267,7 @@ public class OXContainerConverter {
                     continue;
                 }
             }
+
             /*
              * fax
              */
@@ -1331,6 +1336,13 @@ public class OXContainerConverter {
             }
         }
         return false;
+    }
+
+    private static int parameterValueCount(Parameter parameter) {
+        if (null != parameter) {
+            return parameter.getValueCount();
+        }
+        return 0;
     }
 
     private static boolean IntegerProperty(final CommonObject containerObj, final VersitObject object, final String VersitName, final int fieldNumber) throws ConverterException {
