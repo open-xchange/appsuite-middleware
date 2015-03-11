@@ -59,7 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.Credentials;
 import com.openexchange.exception.OXException;
-import com.openexchange.jaxrs.JAXRSService;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -71,7 +71,9 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since 7.8.0
  */
 @Path("/adminproc/v1")
-public class AdminAuthRESTService extends JAXRSService {
+public class AdminAuthRESTService {
+
+    private ServiceLookup services;
 
     /**
      * Initializes a new {@link AdminAuthRESTService}.
@@ -79,15 +81,16 @@ public class AdminAuthRESTService extends JAXRSService {
      * @param services
      */
     public AdminAuthRESTService(ServiceLookup services) {
-        super(services);
+        super();
+        this.services = services;
     }
 
     /**
      * <pre>
      * PUT /rest/adminproc/v1/adminAuth
      * { "login" : String,
-     *   "password": String,
-     *   "contenxt: int (optional)
+     * "password": String,
+     * "contenxt: int (optional)
      * }
      * </pre>
      */
@@ -95,41 +98,38 @@ public class AdminAuthRESTService extends JAXRSService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/adminAuth")
-    public JSONObject doAdminAuth() throws OXException {
-        Object data = getAJAXRequestData().getData();
-        JSONObject jRequest;
-        if (data instanceof String) {
-            try {
-                jRequest = new JSONObject((String) data);
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            }
-        } else if (data instanceof JSONObject) {
-            jRequest = (JSONObject) data;
-        } else {
+    public JSONObject doAdminAuth(String body) throws OXException {
+        if (Strings.isEmpty(body)) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
-        if (false == jRequest.hasAndNotNull("login")) {
-            throw AjaxExceptionCodes.MISSING_FIELD.create("login");
-        }
-
-        if (false == jRequest.hasAndNotNull("password")) {
-            throw AjaxExceptionCodes.MISSING_FIELD.create("password");
-        }
-        Authenticator authenticator = getService(Authenticator.class);
+        JSONObject jRequest;
         try {
-            int contextId = jRequest.optInt("context", 0);
-            if (contextId <= 0) {
-                authenticator.doAuthentication(new Credentials(jRequest.getString("login"), jRequest.getString("password")));
-            } else {
-                authenticator.doAuthentication(new Credentials(jRequest.getString("login"), jRequest.getString("password")), contextId);
+            jRequest = new JSONObject(body);
+
+            if (false == jRequest.hasAndNotNull("login")) {
+                throw AjaxExceptionCodes.MISSING_FIELD.create("login");
             }
-            return new JSONObject(2).put("result", true);
+
+            if (false == jRequest.hasAndNotNull("password")) {
+                throw AjaxExceptionCodes.MISSING_FIELD.create("password");
+            }
+            Authenticator authenticator = services.getService(Authenticator.class);
+            try {
+                int contextId = jRequest.optInt("context", 0);
+                if (contextId <= 0) {
+                    authenticator.doAuthentication(new Credentials(jRequest.getString("login"), jRequest.getString("password")));
+                } else {
+                    authenticator.doAuthentication(new Credentials(jRequest.getString("login"), jRequest.getString("password")), contextId);
+                }
+                return new JSONObject(2).put("result", true);
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            } catch (OXException e) {
+                return new JSONObject(2).putSafe("result", Boolean.FALSE);
+            }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (OXException e) {
-            return new JSONObject(2).putSafe("result", Boolean.FALSE);
         }
     }
 }
