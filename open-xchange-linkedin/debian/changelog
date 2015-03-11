@@ -1,3 +1,9 @@
+open-xchange-linkedin (7.6.2-5) stable; urgency=medium
+
+  * Twelfth candidate for 7.6.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 11 Mar 2015 16:40:42 +0100
+
 open-xchange-linkedin (7.6.2-4) stable; urgency=medium
 
   * Eleventh candidate for 7.6.2 release
