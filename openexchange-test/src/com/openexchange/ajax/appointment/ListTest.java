@@ -173,7 +173,7 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
         appointmentObj.setOrganizer("someone else");
-        appointmentObj.setUid("1234567890abcdef");
+        appointmentObj.setUid("1234567890abcdef" + System.currentTimeMillis());
         appointmentObj.setSequence(0);
 
         final int userParticipantId = ContactTest.searchContact(

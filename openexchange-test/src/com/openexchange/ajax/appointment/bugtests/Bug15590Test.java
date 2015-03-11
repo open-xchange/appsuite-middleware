@@ -52,7 +52,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         secondUserValues = secondClient.getValues();
 
         // Create Folder and share it to 2. User
-        testFolder = Create.createPrivateFolder("bug15590folder", FolderObject.CALENDAR, client.getValues().getUserId());
+        testFolder = Create.createPrivateFolder("bug15590folder" + System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getUserId());
         testFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
 
         com.openexchange.ajax.folder.actions.InsertRequest insFolder = new com.openexchange.ajax.folder.actions.InsertRequest(
