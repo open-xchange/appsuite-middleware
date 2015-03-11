@@ -89,6 +89,7 @@ public class ConfigRESTServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testRetrieveProperty() throws OXException, JSONException {
 
         ComposedConfigProperty<String> prop = mock(ComposedConfigProperty.class);
@@ -105,6 +106,7 @@ public class ConfigRESTServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void retrieveUnknownProperty() throws OXException {
         ComposedConfigProperty<String> prop = mock(ComposedConfigProperty.class);
         when(prop.isDefined()).thenReturn(false);
@@ -119,6 +121,7 @@ public class ConfigRESTServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testRetrieveAllPropertiesWithACertainPrefix() throws OXException, JSONException {
         ComposedConfigProperty<String> prop1 = mock(ComposedConfigProperty.class);
         when(prop1.get()).thenReturn("v1");
