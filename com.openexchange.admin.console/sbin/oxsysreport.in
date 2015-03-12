@@ -143,7 +143,9 @@ collect_httpd_configs() {
             local _httpd_config_copy=$(normalize_path ${TMP}/${LOGDIR}/${dir})
             echo "Collecting httpd configuration into ${_httpd_config_copy}"
             mkdir -p $(dirname ${_httpd_config_copy})
-            cp -aL ${dir} ${_httpd_config_copy}
+            cp -a ${dir} ${_httpd_config_copy}
+            # Drop dangling links
+            find ${_httpd_config_copy} -type l -xtype l | xargs rm
             # Drop all files without name schema '.conf' or which are stored outside
             # <name>-enabled or <name>-available directories
             find ${_httpd_config_copy} -type f | \
