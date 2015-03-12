@@ -85,13 +85,13 @@ public class OXExceptionMapper implements ExceptionMapper<OXException> {
     @Override
     public Response toResponse(OXException e) {
         if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
-            LOG.debug(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             return Response.status(new CustomStatus(Status.BAD_REQUEST.getStatusCode(), e.getMessage())).build();
         } else if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
-            LOG.debug(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             return Response.status(new CustomStatus(Status.BAD_REQUEST.getStatusCode(), e.getMessage())).build();
         } else if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
-            LOG.debug(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             Object[] logArgs = e.getLogArgs();
             Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
             int sc = ((Integer) logArgs[0]).intValue();
@@ -99,7 +99,7 @@ public class OXExceptionMapper implements ExceptionMapper<OXException> {
         } else if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
             LOG.error(e.getMessage(), e);
         } else {
-            LOG.debug(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
 
         return Response.status(new CustomStatus(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage())).build();
