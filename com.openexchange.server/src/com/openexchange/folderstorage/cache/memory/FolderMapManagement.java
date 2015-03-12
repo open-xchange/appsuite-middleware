@@ -348,7 +348,7 @@ public final class FolderMapManagement {
 
     private static void fireInvalidateCacheEvent(List<String> folderIds, String treeId, int optUser, int contextId) {
         CacheEventService cacheEventService = CacheServiceRegistry.getServiceRegistry().getOptionalService(CacheEventService.class);
-        if (null != cacheEventService) {
+        if (null != cacheEventService && cacheEventService.getConfiguration().remoteInvalidationForPersonalFolders()) {
             CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
             if (null == cacheService) {
                 return;
