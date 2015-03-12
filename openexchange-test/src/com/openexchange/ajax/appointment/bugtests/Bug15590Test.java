@@ -2,6 +2,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -116,8 +117,10 @@ public class Bug15590Test extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         // Delete testAppointment
         if (movedAppointment != null) {
+            movedAppointment.setLastModified(new Date(Long.MAX_VALUE));
             secondClient.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(movedAppointment));
         } else if (testAppointment != null) {
+            testAppointment.setLastModified(new Date(Long.MAX_VALUE));
             final com.openexchange.ajax.appointment.action.DeleteRequest delApp = new com.openexchange.ajax.appointment.action.DeleteRequest(
                 testAppointment.getObjectID(), testFolder.getObjectID(), testAppointment.getLastModified());
             secondClient.execute(delApp);
