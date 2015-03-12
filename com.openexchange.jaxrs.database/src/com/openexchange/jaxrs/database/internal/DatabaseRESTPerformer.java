@@ -126,6 +126,7 @@ public class DatabaseRESTPerformer {
     /**
      * 
      * Initializes a new {@link DatabaseRESTPerformer}.
+     * 
      * @param services TODO
      * @param environment TODO
      * @param transaction
@@ -156,17 +157,21 @@ public class DatabaseRESTPerformer {
      * @throws JSONException
      */
     public Response performOnConfigDB(DatabaseAccessType accessType) throws OXException, JSONException {
-        switch (accessType) {
-            case READ:
-                returnConnectionWhenDone(DatabaseAccessType.READ);
-                connection = dbService().getReadOnly();
-                break;
-            case WRITE:
-                returnConnectionWhenDone(DatabaseAccessType.WRITE);
-                connection = dbService().getWritable();
-                break;
+        try {
+            switch (accessType) {
+                case READ:
+                    returnConnectionWhenDone(DatabaseAccessType.READ);
+                    connection = dbService().getReadOnly();
+                    break;
+                case WRITE:
+                    returnConnectionWhenDone(DatabaseAccessType.WRITE);
+                    connection = dbService().getWritable();
+                    break;
+            }
+            return perform();
+        } finally {
+            cleanup();
         }
-        return perform();
     }
 
     /**
@@ -179,17 +184,21 @@ public class DatabaseRESTPerformer {
      * @throws JSONException
      */
     public Response performOnOXDB(int ctxId, DatabaseAccessType accessType) throws OXException, JSONException {
-        switch (accessType) {
-            case READ:
-                returnConnectionWhenDone(DatabaseAccessType.READ, ctxId);
-                connection = dbService().getReadOnly(ctxId);
-                break;
-            case WRITE:
-                returnConnectionWhenDone(DatabaseAccessType.WRITE, ctxId);
-                connection = dbService().getWritable(ctxId);
-                break;
+        try {
+            switch (accessType) {
+                case READ:
+                    returnConnectionWhenDone(DatabaseAccessType.READ, ctxId);
+                    connection = dbService().getReadOnly(ctxId);
+                    break;
+                case WRITE:
+                    returnConnectionWhenDone(DatabaseAccessType.WRITE, ctxId);
+                    connection = dbService().getWritable(ctxId);
+                    break;
+            }
+            return perform();
+        } finally {
+            cleanup();
         }
-        return perform();
     }
 
     /**
@@ -205,17 +214,21 @@ public class DatabaseRESTPerformer {
      * @throws JSONException
      */
     public Response performInMonitored(int readId, int writeId, String schema, int partitionId, DatabaseAccessType accessType) throws OXException, JSONException {
-        switch (accessType) {
-            case READ:
-                returnMonitoredConnectionWhenDone(DatabaseAccessType.READ, readId, writeId, schema, partitionId);
-                connection = dbService().getReadOnlyMonitored(readId, writeId, schema, partitionId);
-                break;
-            case WRITE:
-                returnMonitoredConnectionWhenDone(DatabaseAccessType.WRITE, readId, writeId, schema, partitionId);
-                connection = dbService().getWritableMonitored(readId, writeId, schema, partitionId);
-                break;
+        try {
+            switch (accessType) {
+                case READ:
+                    returnMonitoredConnectionWhenDone(DatabaseAccessType.READ, readId, writeId, schema, partitionId);
+                    connection = dbService().getReadOnlyMonitored(readId, writeId, schema, partitionId);
+                    break;
+                case WRITE:
+                    returnMonitoredConnectionWhenDone(DatabaseAccessType.WRITE, readId, writeId, schema, partitionId);
+                    connection = dbService().getWritableMonitored(readId, writeId, schema, partitionId);
+                    break;
+            }
+            return perform();
+        } finally {
+            cleanup();
         }
-        return perform();
     }
 
     /**
@@ -227,15 +240,19 @@ public class DatabaseRESTPerformer {
      * @throws JSONException
      */
     public Response executeTransaction(String txId) throws OXException, JSONException {
-        tx = environment.getTransactionKeeper().getTransaction(txId);
-        if (tx == null) {
-            halt(Status.NOT_FOUND);
-        } else {
-            postProcessor = new TransactionCloser(tx);
-            connection = tx.getConnection();
-        }
+        try {
+            tx = environment.getTransactionKeeper().getTransaction(txId);
+            if (tx == null) {
+                halt(Status.NOT_FOUND);
+            } else {
+                postProcessor = new TransactionCloser(tx);
+                connection = tx.getConnection();
+            }
 
-        return perform();
+            return perform();
+        } finally {
+            cleanup();
+        }
     }
 
     /**
@@ -245,19 +262,23 @@ public class DatabaseRESTPerformer {
      * @throws OXException
      */
     public Response rollbackTransaction(String txId) throws OXException {
-        tx = environment.getTransactionKeeper().getTransaction(txId);
-        if (tx == null) {
-            halt(Status.NOT_FOUND);
-        } else {
-            postProcessor = new TransactionCloser(tx);
-            try {
-                environment.getTransactionKeeper().rollback(txId);
-            } catch (SQLException e) {
-                throw DatabaseRESTErrorCodes.SQL_ERROR.create(e.getMessage());
+        try {
+            tx = environment.getTransactionKeeper().getTransaction(txId);
+            if (tx == null) {
+                halt(Status.NOT_FOUND);
+            } else {
+                postProcessor = new TransactionCloser(tx);
+                try {
+                    environment.getTransactionKeeper().rollback(txId);
+                } catch (SQLException e) {
+                    throw DatabaseRESTErrorCodes.SQL_ERROR.create(e.getMessage());
+                }
+                unpackTransaction();
             }
-            unpackTransaction();
+            return compileResponse(Status.OK);
+        } finally {
+            cleanup();
         }
-        return compileResponse(Status.OK);
     }
 
     /**
@@ -267,19 +288,23 @@ public class DatabaseRESTPerformer {
      * @throws OXException
      */
     public Response commitTransaction(String txId) throws OXException {
-        tx = environment.getTransactionKeeper().getTransaction(txId);
-        if (tx == null) {
-            halt(Status.NOT_FOUND);
-        } else {
-            postProcessor = new TransactionCloser(tx);
-            try {
-                environment.getTransactionKeeper().commit(txId);
-            } catch (SQLException e) {
-                throw DatabaseRESTErrorCodes.SQL_ERROR.create(e.getMessage());
+        try {
+            tx = environment.getTransactionKeeper().getTransaction(txId);
+            if (tx == null) {
+                halt(Status.NOT_FOUND);
+            } else {
+                postProcessor = new TransactionCloser(tx);
+                try {
+                    environment.getTransactionKeeper().commit(txId);
+                } catch (SQLException e) {
+                    throw DatabaseRESTErrorCodes.SQL_ERROR.create(e.getMessage());
+                }
+                unpackTransaction();
             }
-            unpackTransaction();
+            return compileResponse(Status.OK);
+        } finally {
+            cleanup();
         }
-        return compileResponse(Status.OK);
     }
 
     /**
@@ -290,16 +315,20 @@ public class DatabaseRESTPerformer {
      * @throws OXException If the initialization of the new schema fails
      */
     public Response initSchema(int writePoolId, String schema) throws OXException {
-        DatabaseService db = dbService();
-        db.initMonitoringTables(writePoolId, schema);
-        db.initPartitions(writePoolId, schema, 0);
+        try {
+            DatabaseService db = dbService();
+            db.initMonitoringTables(writePoolId, schema);
+            db.initPartitions(writePoolId, schema, 0);
 
-        connection = db.get(writePoolId, schema);
+            connection = db.get(writePoolId, schema);
 
-        new CreateServiceSchemaVersionTable().perform(connection);
-        new CreateServiceSchemaLockTable().perform(connection);
+            new CreateServiceSchemaVersionTable().perform(connection);
+            new CreateServiceSchemaLockTable().perform(connection);
 
-        return compileResponse(Status.OK);
+            return compileResponse(Status.OK);
+        } finally {
+            cleanup();
+        }
     }
 
     /**
@@ -310,21 +339,25 @@ public class DatabaseRESTPerformer {
      * @throws OXException If the operation fails
      */
     public Response insertPartitionIds(int writeId, String schema) throws OXException {
-        Object data = request.getBody();
-        if (data instanceof JSONArray) {
-            try {
-                JSONArray array = (JSONArray) data;
-                int[] partitionIds = new int[array.length()];
-                for (int i = 0; i < partitionIds.length; i++) {
-                    partitionIds[i] = array.getInt(i);
-                }
+        try {
+            Object data = request.getBody();
+            if (data instanceof JSONArray) {
+                try {
+                    JSONArray array = (JSONArray) data;
+                    int[] partitionIds = new int[array.length()];
+                    for (int i = 0; i < partitionIds.length; i++) {
+                        partitionIds[i] = array.getInt(i);
+                    }
 
-                dbService().initPartitions(writeId, schema, partitionIds);
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+                    dbService().initPartitions(writeId, schema, partitionIds);
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+                }
             }
+            return compileResponse(Status.OK);
+        } finally {
+            cleanup();
         }
-        return compileResponse(Status.OK);
     }
 
     /**
@@ -335,16 +368,20 @@ public class DatabaseRESTPerformer {
      * @throws OXException If the operation fails
      */
     public Response unlock(int ctxId, String module) throws OXException {
-        DatabaseService dbService = dbService();
-        connection = dbService.getForUpdateTask(ctxId);
         try {
-            environment.getVersionChecker().unlock(connection, module);
-        } finally {
-            if (connection != null) {
-                dbService.backForUpdateTask(ctxId, connection);
+            DatabaseService dbService = dbService();
+            connection = dbService.getForUpdateTask(ctxId);
+            try {
+                environment.getVersionChecker().unlock(connection, module);
+            } finally {
+                if (connection != null) {
+                    dbService.backForUpdateTask(ctxId, connection);
+                }
             }
+            return compileResponse(Status.OK);
+        } finally {
+            cleanup();
         }
-        return compileResponse(Status.OK);
     }
 
     /**
@@ -358,16 +395,20 @@ public class DatabaseRESTPerformer {
      * @throws OXException If the operation fails
      */
     public Response unlockMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String module) throws OXException {
-        DatabaseService dbService = dbService();
-        Connection connection = dbService.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId);
         try {
-            environment.getVersionChecker().unlock(connection, module);
-        } finally {
-            if (connection != null) {
-                dbService.backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, connection);
+            DatabaseService dbService = dbService();
+            Connection connection = dbService.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId);
+            try {
+                environment.getVersionChecker().unlock(connection, module);
+            } finally {
+                if (connection != null) {
+                    dbService.backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, connection);
+                }
             }
+            return compileResponse(Status.OK);
+        } finally {
+            cleanup();
         }
-        return compileResponse(Status.OK);
     }
 
     /**
@@ -380,24 +421,26 @@ public class DatabaseRESTPerformer {
      * @throws OXException If the operation fails
      */
     public Response migrate(int ctxId, String fromVersion, String toVersion, String module) throws OXException {
-        finishMigrationWhenDone(ctxId);
-        connection = dbService().getForUpdateTask(ctxId);
-        migrationMetadata = new MigrationMetadata(ctxId, fromVersion, toVersion, module);
-        skipVersionNegotiation = true;
-
-        boolean successfullyLocked = environment.getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
-        if (!successfullyLocked) {
-            dbService().backForUpdateTask(ctxId, connection);
-            postProcessor = null;
-            halt(423); // LOCKED
-        }
-
-        beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
-
         try {
+            finishMigrationWhenDone(ctxId);
+            connection = dbService().getForUpdateTask(ctxId);
+            migrationMetadata = new MigrationMetadata(ctxId, fromVersion, toVersion, module);
+            skipVersionNegotiation = true;
+
+            boolean successfullyLocked = environment.getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
+            if (!successfullyLocked) {
+                dbService().backForUpdateTask(ctxId, connection);
+                postProcessor = null;
+                halt(423); // LOCKED
+            }
+
+            beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
+
             return perform();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        } finally {
+            cleanup();
         }
     }
 
@@ -414,26 +457,28 @@ public class DatabaseRESTPerformer {
      * @throws OXException If the operation fails
      */
     public Response migrateMonitored(int readId, int writeId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
-        finishMigrationWhenDone(readId, writeId, schema, partitionId);
-        connection = dbService().getWritableMonitoredForUpdateTask(readId, writeId, schema, partitionId);
-        migrationMetadata = new MigrationMetadata(fromVersion, toVersion, module);
-        monitoredMetadata = new MonitoredMetadata(readId, writeId, schema, partitionId);
-
-        skipVersionNegotiation = true;
-
-        boolean successfullyLocked = environment.getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
-        if (!successfullyLocked) {
-            dbService().backForUpdateTask(ctxId, connection);
-            postProcessor = null;
-            halt(423); // LOCKED
-        }
-
-        beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
-
         try {
+            finishMigrationWhenDone(readId, writeId, schema, partitionId);
+            connection = dbService().getWritableMonitoredForUpdateTask(readId, writeId, schema, partitionId);
+            migrationMetadata = new MigrationMetadata(fromVersion, toVersion, module);
+            monitoredMetadata = new MonitoredMetadata(readId, writeId, schema, partitionId);
+
+            skipVersionNegotiation = true;
+
+            boolean successfullyLocked = environment.getVersionChecker().lock(connection, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
+            if (!successfullyLocked) {
+                dbService().backForUpdateTask(ctxId, connection);
+                postProcessor = null;
+                halt(423); // LOCKED
+            }
+
+            beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
+
             return perform();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        } finally {
+            cleanup();
         }
     }
 
@@ -444,7 +489,7 @@ public class DatabaseRESTPerformer {
      * @throws OXException
      * @throws JSONException
      */
-    public Response perform() throws OXException, JSONException {
+    private Response perform() throws OXException, JSONException {
         prepare();
         try {
             beforeQueries();
@@ -531,8 +576,6 @@ public class DatabaseRESTPerformer {
             response.put("tx", tx.getID());
         }
 
-        cleanup();
-
         return compileResponse(200, response);
     }
 
@@ -562,8 +605,6 @@ public class DatabaseRESTPerformer {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        cleanup();
 
         halt(Status.BAD_REQUEST, response);
     }
@@ -990,7 +1031,6 @@ public class DatabaseRESTPerformer {
                     postProcessor = oldPostProcessor;
                 }
                 success = false;
-                cleanup();
                 halt(Status.CONFLICT, "X-OX-DB-VERSION", conflictingVersion);
             }
         }
