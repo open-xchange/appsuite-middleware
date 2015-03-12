@@ -49,6 +49,13 @@
 
 package com.openexchange.saml;
 
+import static com.openexchange.saml.SAMLProperties.ACS_URL;
+import static com.openexchange.saml.SAMLProperties.ENTITY_ID;
+import static com.openexchange.saml.SAMLProperties.IDP_ENTITY_ID;
+import static com.openexchange.saml.SAMLProperties.IDP_URL;
+import static com.openexchange.saml.SAMLProperties.PROVIDER_NAME;
+import static com.openexchange.saml.SAMLProperties.REQUEST_BINDING;
+import static com.openexchange.saml.SAMLProperties.RESPONSE_BINDING;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -60,20 +67,6 @@ import com.openexchange.exception.OXException;
  * @since v7.6.1
  */
 public class DefaultConfig implements SAMLConfig {
-
-    private static final String PROP_REQUEST_BINDING = "com.openexchange.saml.requestBinding";
-
-    private static final String PROP_RESPONSE_BINDING = "com.openexchange.saml.responseBinding";
-
-    private static final String PROP_ACS_URL = "com.openexchange.saml.acsURL";
-
-    private static final String PROP_ENTITY_ID = "com.openexchange.saml.entityID";
-
-    private static final String PROP_PROVIDER_NAME = "com.openexchange.saml.providerName";
-
-    private static final String PROP_IDP_ENTITY_ID = "com.openexchange.saml.idpEntityID";
-
-    private static final String PROP_IDP_URL = "com.openexchange.saml.idpURL";
 
     private String providerName;
 
@@ -96,20 +89,16 @@ public class DefaultConfig implements SAMLConfig {
 
     public static DefaultConfig init(ConfigurationService configService) throws OXException {
         DefaultConfig config = new DefaultConfig();
-        config.setProviderName(checkProperty(configService, PROP_PROVIDER_NAME));
-        config.setEntityID(checkProperty(configService, PROP_ENTITY_ID));
-        config.setAcsURL(checkProperty(configService, PROP_ACS_URL));
-        config.setIdpEntityID(checkProperty(configService, PROP_IDP_ENTITY_ID));
-        config.setIdpURL(checkProperty(configService, PROP_IDP_URL));
-        config.setResponseBinding(checkBinding(configService, PROP_RESPONSE_BINDING));
-        config.setRequestBinding(checkBinding(configService, PROP_REQUEST_BINDING));
+        config.setProviderName(checkProperty(configService, PROVIDER_NAME));
+        config.setEntityID(checkProperty(configService, ENTITY_ID));
+        config.setAcsURL(checkProperty(configService, ACS_URL));
+        config.setIdpEntityID(checkProperty(configService, IDP_ENTITY_ID));
+        config.setIdpURL(checkProperty(configService, IDP_URL));
+        config.setResponseBinding(checkBinding(configService, RESPONSE_BINDING));
+        config.setRequestBinding(checkBinding(configService, REQUEST_BINDING));
 
         return config;
     }
-
-
-
-
 
     private static Binding checkBinding(ConfigurationService configService, String property) throws OXException {
         String bindingName = checkProperty(configService, property);

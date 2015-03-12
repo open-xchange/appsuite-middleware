@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.SubjectConfirmationData;
 
 
 /**
@@ -67,6 +68,7 @@ public class ValidatorChain {
 
     private final List<AssertionValidator> assertionValidators = new LinkedList<AssertionValidator>();
 
+    private final List<SubjectConfirmationDataValidator> confirmationDataValidators = new LinkedList<SubjectConfirmationDataValidator>();
 
     public void add(ResponseValidator responseValidator) {
         responseValidators.add(responseValidator);
@@ -74,6 +76,10 @@ public class ValidatorChain {
 
     public void add(AssertionValidator assertionValidator) {
         assertionValidators.add(assertionValidator);
+    }
+
+    public void add(SubjectConfirmationDataValidator confirmationDataValidator) {
+        confirmationDataValidators.add(confirmationDataValidator);
     }
 
     public ValidationError validateResponse(Response response) {
@@ -92,8 +98,19 @@ public class ValidatorChain {
             for (AssertionValidator assertionValidator : assertionValidators) {
                 ValidationError error = assertionValidator.validate(response, assertion);
                 if (error != null) {
-                    return new ValidationError(error.getReason(), error.getMessage());
+                    return error;
                 }
+            }
+        }
+
+        return null;
+    }
+
+    public ValidationError validateSubjectConfirmationData(SubjectConfirmationData confirmationData) {
+        for (SubjectConfirmationDataValidator confirmationDataValidator : confirmationDataValidators) {
+            ValidationError error = confirmationDataValidator.validate(confirmationData);
+            if (error != null) {
+                return error;
             }
         }
 

@@ -130,6 +130,17 @@ public interface SAMLWebSSOCustomizer {
     AuthnRequest customizeAuthnRequest(AuthnRequest authnRequest, RequestContext requestContext) throws OXException;
 
     /**
+     * Allows to customize the decoding of the authentication response. The result of this method is expected to be the full XML
+     * representation of the &lt;Response&gt; element. The implementation of this method is optional, you may return <code>null</code>
+     * if the response shall be decoded in the normal (spec-conform) way.
+     *
+     * @param httpRequest The servlet request of the HTTP POST that (normally) contains the base64 encoded response XML as a form field
+     * @return The decoded XML or <code>null</code> if the response shall be decoded in the normal way by the core implementation.
+     * @throws OXException If thrown the further processing will be aborted
+     */
+    String decodeResponse(HttpServletRequest httpRequest) throws OXException;
+
+    /**
      * Customizes the SPSSODescriptor of the metadata XML. This method is called right after the descriptor
      * has been constructed based on general assumptions and the properties in <code>saml.properties</code>.
      *

@@ -47,29 +47,32 @@
  *
  */
 
-package com.openexchange.saml.osgi;
+package com.openexchange.saml;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 
 /**
- * {@link SAMLActivator} - The activator for <i>com.openexchange.saml</i> bundle.
+ * {@link SAMLProperties}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public class SAMLActivator implements BundleActivator {
+public class SAMLProperties {
 
-    private SAMLFeature samlFeature;
+    public static final String ENABLED = "com.openexchange.saml.enabled";
 
-    @Override
-    public void start(BundleContext context) throws Exception {
-      samlFeature = new SAMLFeature(context);
-      samlFeature.open();
-    }
+    public static final String REQUEST_BINDING = "com.openexchange.saml.requestBinding";
 
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        if (samlFeature != null) {
-            samlFeature.close();
-        }
-    }
+    public static final String RESPONSE_BINDING = "com.openexchange.saml.responseBinding";
+
+    public static final String ACS_URL = "com.openexchange.saml.acsURL";
+
+    public static final String ENTITY_ID = "com.openexchange.saml.entityID";
+
+    public static final String PROVIDER_NAME = "com.openexchange.saml.providerName";
+
+    public static final String IDP_ENTITY_ID = "com.openexchange.saml.idpEntityID";
+
+    public static final String IDP_URL = "com.openexchange.saml.idpURL";
+
 
 }

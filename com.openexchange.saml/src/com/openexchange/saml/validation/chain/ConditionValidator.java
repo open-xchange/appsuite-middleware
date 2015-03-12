@@ -47,29 +47,19 @@
  *
  */
 
-package com.openexchange.saml.osgi;
+package com.openexchange.saml.validation.chain;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.opensaml.saml2.core.Conditions;
+
 
 /**
- * {@link SAMLActivator} - The activator for <i>com.openexchange.saml</i> bundle.
+ * {@link ConditionValidator}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public class SAMLActivator implements BundleActivator {
+public interface ConditionValidator {
 
-    private SAMLFeature samlFeature;
-
-    @Override
-    public void start(BundleContext context) throws Exception {
-      samlFeature = new SAMLFeature(context);
-      samlFeature.open();
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        if (samlFeature != null) {
-            samlFeature.close();
-        }
-    }
+    ValidationError validate(Conditions conditions);
 
 }

@@ -106,6 +106,7 @@ import com.openexchange.saml.spi.SAMLWebSSOCustomizer;
 import com.openexchange.saml.spi.SAMLWebSSOCustomizer.RequestContext;
 import com.openexchange.saml.validation.ValidationResult;
 import com.openexchange.saml.validation.ValidationStrategy;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -127,13 +128,16 @@ public class SAMLWebSSOProvider {
 
     private final SessionReservationService sessionReservationService;
 
+    private final ServiceLookup services;
 
-    public SAMLWebSSOProvider(SAMLConfig config, OpenSAML openSAML, SAMLBackend backend, SessionReservationService sessionReservationService) throws OXException {
+
+    public SAMLWebSSOProvider(SAMLConfig config, OpenSAML openSAML, ServiceLookup services) {
         super();
         this.config = config;
-        this.backend = backend;
         this.openSAML = openSAML;
-        this.sessionReservationService = sessionReservationService;
+        this.backend = services.getService(SAMLBackend.class);
+        this.sessionReservationService = services.getService(SessionReservationService.class);
+        this.services = services;
     }
 
     public String getMetadataXML() throws OXException {
@@ -343,7 +347,7 @@ public class SAMLWebSSOProvider {
             throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(binding.name());
         }
 
-        Response response = decodeResponse(httpRequest, httpResponse);
+        Response response = decodeResponse(httpRequest);
         try {
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config);
             ValidationResult validationResult = validationStrategy.validate(response, binding);
@@ -361,10 +365,10 @@ public class SAMLWebSSOProvider {
                 String redirectHost = httpRequest.getParameter("RelayState"); // TODO: integrity check and fail on null
 
                 // TODO: remove static service access
-                ConfigurationService configService = Services.getService(ConfigurationService.class);
+                ConfigurationService configService = services.getService(ConfigurationService.class);
                 boolean secure = Tools.considerSecure(httpRequest, Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue())));
 
-                DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+                DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
                 String prefix = prefixService.getPrefix();
 
                 URI redirectLocation = new URIBuilder()
@@ -384,15 +388,19 @@ public class SAMLWebSSOProvider {
         }
     }
 
-    private Response decodeResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
-        String b64Response = httpRequest.getParameter("SAMLResponse");
-        if (b64Response == null) {
-            throw SAMLExceptionCode.DECODING_ERROR.create("The 'SAMLResponse' parameter was not set");
+    private Response decodeResponse(HttpServletRequest httpRequest) throws OXException {
+        String responseXML = customDecode(httpRequest);
+        if (responseXML == null) {
+            String b64Response = httpRequest.getParameter("SAMLResponse");
+            if (b64Response == null) {
+                throw SAMLExceptionCode.DECODING_ERROR.create("The 'SAMLResponse' parameter was not set");
+            }
+
+            responseXML = new String(Base64.decodeBase64(b64Response));
         }
 
         try {
-            byte[] responseBytes = Base64.decodeBase64(b64Response);
-            Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(responseBytes)).getDocumentElement();
+            Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(responseXML.getBytes())).getDocumentElement();
             XMLObject unmarshalledResponse = openSAML.getUnmarshallerFactory().getUnmarshaller(responseElement).unmarshall(responseElement);
             if (!(unmarshalledResponse instanceof Response)) {
                 throw SAMLExceptionCode.DECODING_ERROR.create("XML was not a valid Response element");
@@ -410,6 +418,15 @@ public class SAMLWebSSOProvider {
         } catch (UnmarshallingException e) {
             throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private String customDecode(HttpServletRequest httpRequest) throws OXException {
+        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        if (customizer != null) {
+            return customizer.decodeResponse(httpRequest);
+        }
+
+        return null;
     }
 
     private static String getBindingURI(Binding binding) {

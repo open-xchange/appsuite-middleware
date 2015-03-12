@@ -47,29 +47,37 @@
  *
  */
 
-package com.openexchange.saml.osgi;
+package com.openexchange.saml.spi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import javax.servlet.http.HttpServletRequest;
+import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.metadata.SPSSODescriptor;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link SAMLActivator} - The activator for <i>com.openexchange.saml</i> bundle.
+ * A convenient class that allows implementors of {@link SAMLWebSSOCustomizer} to only
+ * implement the methods that are really needed. All methods of the interface are pre-
+ * implemented with default implementations, i.e. no customization takes place.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public class SAMLActivator implements BundleActivator {
-
-    private SAMLFeature samlFeature;
+public abstract class AbstractWebSSOCustomizer implements SAMLWebSSOCustomizer {
 
     @Override
-    public void start(BundleContext context) throws Exception {
-      samlFeature = new SAMLFeature(context);
-      samlFeature.open();
+    public AuthnRequest customizeAuthnRequest(AuthnRequest authnRequest, RequestContext requestContext) throws OXException {
+        return authnRequest;
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        if (samlFeature != null) {
-            samlFeature.close();
-        }
+    public String decodeResponse(HttpServletRequest httpRequest) throws OXException {
+        return null;
+    }
+
+    @Override
+    public SPSSODescriptor customizeSPSSODescriptor(SPSSODescriptor descriptor) throws OXException {
+        return descriptor;
     }
 
 }

@@ -62,8 +62,8 @@ import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.saml.validation.ValidationStrategy;
 import com.openexchange.saml.validation.ValidationResult.ErrorReason;
+import com.openexchange.saml.validation.ValidationStrategy;
 
 
 /**
@@ -158,7 +158,7 @@ public class ResponseValidators {
             if (actual.equals(expected)) {
                 LOG.debug("Response contains a valid 'Destination' attribute");
             } else {
-                return new ValidationError(ErrorReason.INVALID_ATTRIBUTE, "'Destination' attribute of response contains an unexpected value");
+                return new ValidationError(ErrorReason.INVALID_ATTRIBUTE, "'Destination' attribute of response contains an unexpected value: " + actual);
             }
 
             return null;

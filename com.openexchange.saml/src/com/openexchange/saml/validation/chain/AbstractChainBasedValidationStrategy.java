@@ -61,7 +61,6 @@ import org.opensaml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.Subject;
 import org.opensaml.saml2.core.SubjectConfirmation;
-import org.opensaml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
 import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
@@ -115,8 +114,8 @@ public abstract class AbstractChainBasedValidationStrategy implements Validation
 
     @Override
     public ValidationResult validate(Response response, Binding binding) {
-        ValidatorChain validatiorChain = getValidatorChain(response, binding);
-        ValidationError error = validatiorChain.validateResponse(response);
+        ValidatorChain validatorChain = getValidatorChain(response, binding);
+        ValidationError error = validatorChain.validateResponse(response);
         if (error != null) {
             return new DefaultValidationResult(error.getReason(), error.getMessage());
         }
@@ -132,23 +131,27 @@ public abstract class AbstractChainBasedValidationStrategy implements Validation
             return new DefaultValidationResult(ErrorReason.DECRYPTION_FAILED, e.getMessage());
         }
 
-
-        error = validatiorChain.validateAssertions(response, allAssertions);
+        error = validatorChain.validateAssertions(response, allAssertions);
         if (error != null) {
             return new DefaultValidationResult(error.getReason(), error.getMessage());
         }
 
-
+        LinkedList<ValidationError> collectedErrors = new LinkedList<ValidationError>();
         List<Assertion> bearerAssertions = new LinkedList<Assertion>();
         for (Assertion assertion : allAssertions) {
-            if (isValidBearerAssertion(assertion)) {
+            if (isValidBearerAssertion(assertion, validatorChain, collectedErrors)) {
                 LOG.debug("Assertion '{}' is a valid bearer assertion", assertion.getID());
                 bearerAssertions.add(assertion);
             }
         }
 
         if (bearerAssertions.isEmpty()) {
-            return new DefaultValidationResult(ErrorReason.NO_VALID_ASSERTION_CONTAINED, "No contained assertion can be considered a valid bearer assertion");
+            if (collectedErrors.isEmpty()) {
+                return new DefaultValidationResult(ErrorReason.NO_VALID_ASSERTION_CONTAINED, "No contained assertion can be considered a valid bearer assertion");
+            } else {
+                ValidationError lastError = collectedErrors.getLast();
+                return new DefaultValidationResult(lastError.getReason(), lastError.getMessage());
+            }
         }
 
         Assertion bearerAssertion = null;
@@ -193,7 +196,13 @@ public abstract class AbstractChainBasedValidationStrategy implements Validation
 
     protected abstract ValidatorChain getValidatorChain(Response response, Binding binding);
 
-    private boolean conditionsMet(Assertion assertion) {
+    /**
+     * Checks whether all conditions of a given assertion are met.
+     *
+     * @param assertion The assertion to check
+     * @return <code>true</code> if all conditions are met
+     */
+    protected boolean conditionsMet(Assertion assertion) {
         /*
          * Each bearer assertion(s) containing a bearer subject confirmation MUST contain an
          * <AudienceRestriction> including the service provider's unique identifier as an <Audience>.
@@ -218,7 +227,6 @@ public abstract class AbstractChainBasedValidationStrategy implements Validation
             return false;
         }
 
-
         List<AudienceRestriction> audienceRestrictions = conditions.getAudienceRestrictions();
         if (audienceRestrictions.isEmpty()) {
             return false;
@@ -239,18 +247,17 @@ public abstract class AbstractChainBasedValidationStrategy implements Validation
             return false;
         }
 
-        /*
-         * TODO:
-         * OneTimeUse
-         * ProxyRestriction
-         * Both not relevant for us? Provide an extension point (maybe even for custom conditions)?
-         * Fail on unknown conditions?
-         */
-
         return true;
     }
 
-    private boolean hasValidAuthnStatement(Assertion assertion) {
+    /**
+     * Checks whether the given assertion contains a valid AuthnStatement element. Per default
+     * it is only checked if at least one AuthnStatement element is contained.
+     *
+     * @param assertion The assertion to check
+     * @return <code>true</code> if a valid AuthnStatement is contained
+     */
+    protected boolean hasValidAuthnStatement(Assertion assertion) {
         /*
          * The set of one or more bearer assertions MUST contain at least one <AuthnStatement> that
          * reflects the authentication of the principal to the identity provider. Multiple <AuthnStatement>
@@ -258,6 +265,56 @@ public abstract class AbstractChainBasedValidationStrategy implements Validation
          * [profiles 06 - 4.1.4.2p20]
          */
         return !assertion.getAuthnStatements().isEmpty();
+    }
+
+    /**
+     * Checks if a given assertion is a valid bearer assertion and therefore a candidate to proof the authentication of a user.
+     * All validation errors that occur while iterating over the contained SubjectConfirmation elements are collected.
+     *
+     * @param assertion The assertion to validate
+     * @param validatorChain The validator chain
+     * @param collectedErrors The collection to add validation errors to
+     * @return <code>true</code> if the assertion is a valid bearer assertion
+     */
+    protected boolean isValidBearerAssertion(Assertion assertion, ValidatorChain validatorChain, List<ValidationError> collectedErrors) {
+        /*
+         * Any assertion issued for consumption using this profile MUST contain a <Subject> element with at
+         * least one <SubjectConfirmation> element containing a Method of
+         * urn:oasis:names:tc:SAML:2.0:cm:bearer. Such an assertion is termed a bearer assertion.
+         * Bearer assertions MAY contain additional <SubjectConfirmation> elements.
+         * [profiles 06 - 4.1.4.2p20]
+         */
+        Subject subject = assertion.getSubject();
+        if (subject == null) {
+            return false;
+        }
+
+        List<SubjectConfirmation> bearerConfirmations = new LinkedList<SubjectConfirmation>();
+        for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
+            if ("urn:oasis:names:tc:SAML:2.0:cm:bearer".equals(confirmation.getMethod()) && confirmation.getSubjectConfirmationData() != null) {
+                bearerConfirmations.add(confirmation);
+            }
+        }
+
+        if (bearerConfirmations.isEmpty()) {
+            return false;
+        }
+
+        List<SubjectConfirmation> validConfirmations = new LinkedList<SubjectConfirmation>();
+        for (SubjectConfirmation confirmation : bearerConfirmations) {
+            ValidationError error = validatorChain.validateSubjectConfirmationData(confirmation.getSubjectConfirmationData());
+            if (error == null) {
+                validConfirmations.add(confirmation);
+            } else {
+                collectedErrors.add(error);
+            }
+        }
+
+        if (validConfirmations.isEmpty()) {
+            return false;
+        }
+
+        return true;
     }
 
     private List<Assertion> decryptAndCollectAssertions(Response response) throws DecryptionException {
@@ -302,77 +359,6 @@ public abstract class AbstractChainBasedValidationStrategy implements Validation
         Decrypter decrypter = new Decrypter(null, skicr, new InlineEncryptedKeyResolver());
         decrypter.setRootInNewDocument(true);
         return decrypter;
-    }
-
-    private boolean isValidBearerAssertion(Assertion assertion) {
-        /*
-         * Any assertion issued for consumption using this profile MUST contain a <Subject> element with at
-         * least one <SubjectConfirmation> element containing a Method of
-         * urn:oasis:names:tc:SAML:2.0:cm:bearer. Such an assertion is termed a bearer assertion.
-         * Bearer assertions MAY contain additional <SubjectConfirmation> elements.
-         * [profiles 06 - 4.1.4.2p20]
-         */
-        Subject subject = assertion.getSubject();
-        if (subject == null) {
-            return false;
-        }
-
-        List<SubjectConfirmation> bearerConfirmations = new LinkedList<SubjectConfirmation>();
-        for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
-            if ("urn:oasis:names:tc:SAML:2.0:cm:bearer".equals(confirmation.getMethod()) && confirmation.getSubjectConfirmationData() != null) {
-                bearerConfirmations.add(confirmation);
-            }
-        }
-
-        if (bearerConfirmations.isEmpty()) {
-            return false;
-        }
-
-        /*
-         * At lease one bearer <SubjectConfirmation> element MUST contain a
-         * <SubjectConfirmationData> element that itself MUST contain a Recipient attribute containing
-         * the service provider's assertion consumer service URL and a NotOnOrAfter attribute that limits the
-         * window during which the assertion can be [E52]confirmed by the relying party. It MAY also contain an
-         * Address attribute limiting the client address from which the assertion can be delivered. It MUST NOT
-         * contain a NotBefore attribute. If the containing message is in response to an <AuthnRequest>,
-         * then the InResponseTo attribute MUST match the request's ID.
-         * [profiles 06 - 4.1.4.2p20]
-         */
-        List<SubjectConfirmation> validConfirmations = new LinkedList<SubjectConfirmation>();
-        for (SubjectConfirmation confirmation : bearerConfirmations) {
-            SubjectConfirmationData confirmationData = confirmation.getSubjectConfirmationData();
-            String recipient = confirmationData.getRecipient();
-            if (recipient == null) {
-                continue;
-            }
-
-            if (!config.getAssertionConsumerServiceURL().equals(recipient)) {
-                continue;
-            }
-
-            DateTime notOnOrAfter = confirmationData.getNotOnOrAfter();
-            if (notOnOrAfter == null) {
-                continue;
-            }
-
-            if (!new DateTime().isBefore(notOnOrAfter)) {
-                continue;
-            }
-
-            String inResponseTo = confirmationData.getInResponseTo();
-            if (inResponseTo != null) {
-                // TODO validate
-            }
-
-            validConfirmations.add(confirmation);
-        }
-
-
-        if (validConfirmations.isEmpty()) {
-            return false;
-        }
-
-        return true;
     }
 
 }

@@ -47,66 +47,15 @@
  *
  */
 
-package com.openexchange.saml;
-
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.saml.validation.chain;
 
 
 /**
- * {@link Services}
+ * {@link ConditionValidators}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class Services {
-
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    private Services() {
-        super();
-    }
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if not available or not tracked
-     * @throws IllegalStateException If no service lookup was set
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.saml\" not started?");
-        }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws OXException If the service is unavailable
-     * @throws IllegalStateException If no service lookup was set
-     */
-    public static <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
-        S service = getService(clazz);
-        if (service == null) {
-            throw ServiceExceptionCode.serviceUnavailable(clazz);
-        }
-        return service;
-    }
+public class ConditionValidators {
 
 }
