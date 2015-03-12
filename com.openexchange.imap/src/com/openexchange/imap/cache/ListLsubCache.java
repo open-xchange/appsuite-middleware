@@ -939,9 +939,11 @@ public final class ListLsubCache {
 
     private static void fireInvalidateCacheEvent(int userId, int contextId) {
         CacheEventService cacheEventService = Services.optService(CacheEventService.class);
-        if (null != cacheEventService) {
+        if (null != cacheEventService && cacheEventService.getConfiguration().remoteInvalidationForPersonalFolders()) {
             CacheEvent event = newCacheEventFor(userId, contextId);
-            cacheEventService.notify(INSTANCE, event, false);
+            if (null != event) {
+                cacheEventService.notify(INSTANCE, event, false);
+            }
         }
     }
 
@@ -952,13 +954,9 @@ public final class ListLsubCache {
      * @param contextId The context identifier
      * @return The cache event
      */
-    public static CacheEvent newCacheEventFor(int userId, int contextId) {
+    private static CacheEvent newCacheEventFor(int userId, int contextId) {
         CacheService service = Services.optService(CacheService.class);
-        if (null == service) {
-            return null;
-        }
-
-        return CacheEvent.INVALIDATE(REGION, Integer.toString(contextId), service.newCacheKey(contextId, userId));
+        return null == service ? null : CacheEvent.INVALIDATE(REGION, Integer.toString(contextId), service.newCacheKey(contextId, userId));
     }
 
 }

@@ -64,6 +64,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEventConfiguration;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.internal.JCSCacheService;
@@ -864,7 +865,14 @@ public final class Init {
 
     public static void startAndInjectCache() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(CacheService.class)) {
-            CacheEventService cacheEventService = new CacheEventServiceImpl();
+            CacheEventConfiguration config = new CacheEventConfiguration() {
+
+                @Override
+                public boolean remoteInvalidationForPersonalFolders() {
+                    return false;
+                }
+            };
+            CacheEventService cacheEventService = new CacheEventServiceImpl(config);
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();
