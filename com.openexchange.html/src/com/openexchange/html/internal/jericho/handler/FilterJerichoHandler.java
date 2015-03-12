@@ -67,7 +67,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,6 +86,7 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AsciiReader;
+import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -101,7 +101,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private static final CellPadding CELLPADDING_EMPTY = new CellPadding(null);
 
-    private static class CellPadding {
+    protected static class CellPadding {
+
         final String cellPadding;
 
         CellPadding(String cellPadding) {
@@ -234,7 +235,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private boolean imageURLFound;
     private boolean replaceUrls = true;
     private String cssPrefix;
-    private final Queue<CellPadding> tablePaddings;
+    private final LinkedList<CellPadding> tablePaddings;
 
     private final boolean changed = false;
 
@@ -616,6 +617,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
         return (HTMLElementName.SCRIPT == check || check.startsWith("w:") || check.startsWith("o:"));
     }
 
+    private static final Pattern PATTERN_STYLE_VALUE = Pattern.compile("([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}\\p{L}&&[^;]]+);?", Pattern.CASE_INSENSITIVE);
+
     /**
      * Adds tag occurring in white list to HTML result.
      *
@@ -660,24 +663,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
             }
         } else if (HTMLElementName.TABLE == tagName) {
-            // Has attribute "bgcolor"
-            String bgcolor = attrMap.get("bgcolor");
-            if (null != bgcolor) {
-                prependToStyle("background-color: " + bgcolor + ';', attrMap);
-            }
-
-            // Has attribute "cellpadding"?
-            String cellpadding = attrMap.get("cellpadding");
-            if (null == cellpadding) {
-                tablePaddings.offer(CELLPADDING_EMPTY);
-            } else {
-                if ("0".equals(attrMap.get("cellspacing"))) {
-                    prependToStyle("border-collapse: collapse;", attrMap);
-                }
-
-                // Table has cell padding -> Remember it for all child elements
-                tablePaddings.offer(new CellPadding(cellpadding));
-            }
+            addTableTag(attrMap);
         } else if (HTMLElementName.TD == tagName || HTMLElementName.TH == tagName) {
             CellPadding cellPadding = tablePaddings.peek();
             if (CELLPADDING_EMPTY != cellPadding && null != cellPadding) {
@@ -785,6 +771,62 @@ public final class FilterJerichoHandler implements JerichoHandler {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
+    }
+
+    /**
+     * Prepares the environment and output based on the given table tag.
+     *
+     * @param attrMap
+     */
+    private void addTableTag(Map<String, String> attrMap) {
+        // Has attribute "bgcolor"
+        String bgcolor = attrMap.get("bgcolor");
+        if (null != bgcolor) {
+            prependToStyle("background-color: " + bgcolor + ';', attrMap);
+        }
+
+        handleTableCellpaddingAttribute(attrMap);
+    }
+
+    /**
+     * Handles 'cellpadding' attribute for the given table start tag to be able to add its value to nested tags.<br>
+     * <br>
+     * If 'cellpadding' attribute is available, add given 'cellpadding' (-value) to table stack. If 'cellpadding' attribute is not available have a look if 'padding' is nested in 'style' attribute of the table. I so add 'padding' to nested tags.
+     *
+     * @param attrMap - map containing attributes of the 'table' tag
+     */
+    protected void handleTableCellpaddingAttribute(Map<String, String> attrMap) {
+        if (attrMap == null) {
+            return;
+        }
+
+        // Has attribute "cellpadding"?
+        String cellpadding = attrMap.get("cellpadding");
+        if (null == cellpadding) {
+            String style = attrMap.get("style");
+            if (null == style || style.indexOf("padding") < 0) {
+                tablePaddings.addFirst(CELLPADDING_EMPTY);
+            } else {
+                boolean found = false;
+                final Matcher m = PATTERN_STYLE_VALUE.matcher(InterruptibleCharSequence.valueOf(style));
+                while (!found && m.find()) {
+                    final String elementName = m.group(1);
+                    if ((null != elementName) && (elementName.equalsIgnoreCase("padding"))) {
+                        final String elementValue = m.group(2);
+
+                        tablePaddings.addFirst(new CellPadding(elementValue));
+                        found = true;
+                    }
+                }
+            }
+        } else {
+            if ("0".equals(attrMap.get("cellspacing"))) {
+                prependToStyle("border-collapse: collapse;", attrMap);
+            }
+
+            // Table has cell padding -> Remember it for all child elements
+            tablePaddings.addFirst(new CellPadding(cellpadding));
+        }
     }
 
     private void prependToStyle(String stylePrefix, Map<String, String> attrMap) {
