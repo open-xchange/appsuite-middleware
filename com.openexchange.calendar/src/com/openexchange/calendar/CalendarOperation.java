@@ -1745,8 +1745,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 return CalendarCollectionService.RECURRING_CREATE_EXCEPTION;
             }
             cdao.setRecurrenceID(edao.getObjectID());
-            if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
+            if (!cdao.containsStartDate()) {
                 cdao.setStartDate(edao.getStartDate());
+            }
+            if (!cdao.containsEndDate()) {
                 if (cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
                     calculateEndDateForNoType(cdao, edao);
                 } else {
