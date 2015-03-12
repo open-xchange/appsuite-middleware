@@ -73,6 +73,9 @@ CREATE_HEAP_DUMP_VALUES="true false"
 SKIP_COMPRESSION=false
 SKIP_COMPRESSION_LONG=skip-compression
 SKIP_COMPRESSION_VALUES="true false"
+SKIP_RUN_COMMANDS=false
+SKIP_RUN_COMMANDS_LONG=skip-system-tools
+SKIP_RUN_COMMANDS_VALUES="true false"
 EXCLUDE_OLDER_LOGS_THAN=disabled
 EXCLUDE_OLDER_LOGS_THAN_LONG=exclude-old-logs
 EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days"
@@ -82,7 +85,7 @@ EXCLUDE_SECRETS_VALUES="true false"
 KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log"
 PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf;java -version;listconfigdiff'
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
-LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
+LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$SKIP_RUN_COMMANDS_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
 OX_LOG_DIR=/var/log/open-xchange
@@ -126,6 +129,7 @@ collect_command_output() {
    IFS=";"
    for i in ${PROCS}; do
        IFS=${OIFS}
+       echo "  ${i}"
        ${i} > "/${TMP}/${LOGDIR}/commands/${i}" 2>&1
        IFS=";"
    done
@@ -143,7 +147,9 @@ collect_httpd_configs() {
             local _httpd_config_copy=$(normalize_path ${TMP}/${LOGDIR}/${dir})
             echo "Collecting httpd configuration into ${_httpd_config_copy}"
             mkdir -p $(dirname ${_httpd_config_copy})
-            cp -aL ${dir} ${_httpd_config_copy}
+            cp -a ${dir} ${_httpd_config_copy}
+            # Drop dangling links
+            find ${_httpd_config_copy} -type l -xtype l | xargs rm
             # Drop all files without name schema '.conf' or which are stored outside
             # <name>-enabled or <name>-available directories
             find ${_httpd_config_copy} -type f | \
@@ -668,9 +674,17 @@ for argument in ${@}; do
         ;;
         --${SKIP_COMPRESSION_LONG})
             SKIP_COMPRESSION=$(check_argument ${1} ${2})
+            # disable also commands when compression is an issue
+            if [ 'true' == "${SKIP_COMPRESSION}" ]; then
+                SKIP_RUN_COMMANDS=true
+            fi
             shift 2
             unset LOGARC_SUFFIX
             unset LOGS_SUFFIX
+        ;;
+        --${SKIP_RUN_COMMANDS_LONG})
+            SKIP_RUN_COMMANDS=$(check_argument ${1} ${2})
+            shift 2
         ;;
         --${EXCLUDE_OLDER_LOGS_THAN_LONG})
             if [ '0' -le "${2}" ] 2> /dev/null ; then
@@ -770,7 +784,9 @@ fi
 distribution_check
 echo "Creating temporary log directory: $(normalize_path ${TMP}/${LOGDIR})"
 mkdir -p ${TMP}/${LOGDIR}/commands/
-collect_command_output
+if [ 'false' == "${SKIP_RUN_COMMANDS}" ]; then
+    collect_command_output
+fi
 collect_httpd_configs
 collect_ox_configs
 collect_other_configs
