@@ -460,7 +460,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(DistributedFileManagement.class, new DistributedFilesListener());
 
         // CapabilityService
-        track(CapabilityService.class, new CapabilityRegistrationListener());
+        track(CapabilityService.class, new CapabilityRegistrationListener(context));
 
         // Authenticator
         track(Authenticator.class, new RegistryCustomizer<Authenticator>(context, Authenticator.class));

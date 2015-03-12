@@ -1,3 +1,7 @@
+* 2015-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37200: Do only advertise "edit_group"/"edit_resource" capability if both - backend service and permission bit are available
+
 * 2015-03-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 37141: Do not discard subsequent inline test parts
