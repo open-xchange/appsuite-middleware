@@ -1,3 +1,7 @@
+* 2015-03-12 - martin.schneider@open-xchange.com
+
+ - Fix for bug 36881: consider 'padding' within style tag and correct 'table' tag stack handling
+
 * 2015-03-11 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 37172: Assume voice in VCard import if parameter is missing and tag types 'home', 'work' or 'other' are set
