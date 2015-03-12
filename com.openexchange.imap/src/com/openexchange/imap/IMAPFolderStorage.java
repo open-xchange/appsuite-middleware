@@ -79,8 +79,6 @@ import javax.mail.Quota;
 import javax.mail.Quota.Resource;
 import javax.mail.StoreClosedException;
 import javax.mail.search.FlagTerm;
-import com.openexchange.caching.events.CacheEvent;
-import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -3015,30 +3013,25 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return (examined == newACLs.size());
     }
 
-    private void dropListLsubCachesForOther(final ACL[] acls) {
+    private void dropListLsubCachesForOther(ACL[] acls) {
         if (null == acls || 0 == acls.length) {
             return;
         }
-        final CacheEventService cacheEventService = Services.optService(CacheEventService.class);
-        final UserStorage us = UserStorage.getInstance();
-        for (final ACL acl : acls) {
+
+        UserStorage us = UserStorage.getInstance();
+        for (ACL acl : acls) {
             if (null != acl) {
-                final String entityName = acl.getName();
+                String entityName = acl.getName();
                 if (!imapConfig.getLogin().equals(entityName)) {
                     try {
-                        final User[] users = us.searchUserByMailLogin(entityName, ctx);
-                        for (final User user : users) {
-                            final int userId = user.getId();
+                        User[] users = us.searchUserByMailLogin(entityName, ctx);
+                        for (User user : users) {
+                            int userId = user.getId();
                             if (userId != session.getUserId()) {
                                 ListLsubCache.dropFor(userId, ctx.getContextId());
-                                if (null != cacheEventService) {
-                                    final CacheEvent event = newCacheEventFor(userId);
-                                    LOG.debug("fireInvalidate: {}", event);
-                                    cacheEventService.notify(this, event, false);
-                                }
                             }
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.debug("Could not resolve users for entity name {}", entityName, e);
                     }
                 }
@@ -3046,29 +3039,24 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private void dropListLsubCachesForOther(final Collection<String> entityNames) {
+    private void dropListLsubCachesForOther(Collection<String> entityNames) {
         if (null == entityNames || entityNames.isEmpty()) {
             return;
         }
-        final CacheEventService cacheEventService = Services.optService(CacheEventService.class);
-        final UserStorage us = UserStorage.getInstance();
-        for (final String entityName : entityNames) {
+
+        UserStorage us = UserStorage.getInstance();
+        for (String entityName : entityNames) {
             if (null != entityName) {
                 if (!imapConfig.getLogin().equals(entityName)) {
                     try {
-                        final User[] users = us.searchUserByMailLogin(entityName, ctx);
-                        for (final User user : users) {
-                            final int userId = user.getId();
+                        User[] users = us.searchUserByMailLogin(entityName, ctx);
+                        for (User user : users) {
+                            int userId = user.getId();
                             if (userId != session.getUserId()) {
                                 ListLsubCache.dropFor(userId, ctx.getContextId());
-                                if (null != cacheEventService) {
-                                    final CacheEvent event = newCacheEventFor(userId);
-                                    LOG.debug("fireInvalidate: {}", event);
-                                    cacheEventService.notify(this, event, false);
-                                }
                             }
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.debug("Could not resolve users for entity name {}", entityName, e);
                     }
                 }
@@ -3085,10 +3073,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 entityNames.add(acl.getName());
             }
         }
-    }
-
-    private CacheEvent newCacheEventFor(final int userId) {
-        return ListLsubCache.newCacheEventFor(userId, ctx.getContextId());
     }
 
     private static String stripPOSTRight(final String rights) {

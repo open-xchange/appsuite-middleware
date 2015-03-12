@@ -78,6 +78,8 @@ import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
+import com.openexchange.mail.api.permittance.Permittance;
+import com.openexchange.mail.api.permittance.Permitter;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
@@ -365,14 +367,36 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         // Check login attempt
         checkLogin(session, accountId);
 
-        // Occupy free slot
+        // Return instance
+        Permitter permitter = Permittance.acquireFor(accountId, session);
+        if (null == permitter) {
+            // Non-restricted
+            return doGetInstance(session, accountId);
+        }
+
+        // Acquire permit, then return instance
+        permitter.acquire();
+        try {
+            return doGetInstance(session, accountId);
+        } finally {
+            boolean lastOne = permitter.release();
+            if (lastOne) {
+                Permittance.release(permitter);
+            }
+        }
+    }
+
+    private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> doGetInstance(Session session, int accountId) throws OXException {
         Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
         if (null == tmp || toBool(tmp)) {
-            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
+            // Look-up cached, already connected instance
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
             }
         }
+
+        // Initialize a new one
         MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
         return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
     }
