@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.caching.events
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.management,
  com.openexchange.osgi,
