@@ -169,6 +169,8 @@ public class DatabaseRESTPerformer {
                     break;
             }
             return perform();
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -196,6 +198,8 @@ public class DatabaseRESTPerformer {
                     break;
             }
             return perform();
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -226,6 +230,8 @@ public class DatabaseRESTPerformer {
                     break;
             }
             return perform();
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -250,6 +256,8 @@ public class DatabaseRESTPerformer {
             }
 
             return perform();
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -276,6 +284,8 @@ public class DatabaseRESTPerformer {
                 unpackTransaction();
             }
             return compileResponse(Status.OK);
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -302,6 +312,8 @@ public class DatabaseRESTPerformer {
                 unpackTransaction();
             }
             return compileResponse(Status.OK);
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -326,6 +338,8 @@ public class DatabaseRESTPerformer {
             new CreateServiceSchemaLockTable().perform(connection);
 
             return compileResponse(Status.OK);
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -355,6 +369,8 @@ public class DatabaseRESTPerformer {
                 }
             }
             return compileResponse(Status.OK);
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -379,6 +395,8 @@ public class DatabaseRESTPerformer {
                 }
             }
             return compileResponse(Status.OK);
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -406,6 +424,8 @@ public class DatabaseRESTPerformer {
                 }
             }
             return compileResponse(Status.OK);
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -439,6 +459,8 @@ public class DatabaseRESTPerformer {
             return perform();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        } catch (OXException e) {
+            throw e;
         } finally {
             cleanup();
         }
@@ -603,7 +625,7 @@ public class DatabaseRESTPerformer {
             }
             success = false;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw DatabaseRESTErrorCodes.SQL_ERROR.create(e.getMessage());
         }
 
         halt(Status.BAD_REQUEST, response);
