@@ -255,11 +255,11 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * @throws OXException If an error occurs
      */
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/transaction/{transactionId}/rollback")
-    public Response rollbackTransaction(@PathParam("transactionId") String txId, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
-        return performRollbackTransaction(new RESTRequest(headers, uriInfo.getQueryParameters(), body), txId);
-
+    public Response rollbackTransaction(@PathParam("transactionId") String txId, @Context HttpHeaders headers, @Context UriInfo uriInfo) throws OXException {
+        return performRollbackTransaction(new RESTRequest(headers, uriInfo.getQueryParameters()), txId);
     }
 
     /**
@@ -272,10 +272,9 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * @throws OXException If an error occurs
      */
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/transaction/{transactionId}/commit")
-    public Response commitTransaction(@PathParam("transactionId") String txId, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
-        return performCommitTransaction(new RESTRequest(headers, uriInfo.getQueryParameters(), body), txId);
+    public Response commitTransaction(@PathParam("transactionId") String txId, @Context HttpHeaders headers, @Context UriInfo uriInfo) throws OXException {
+        return performCommitTransaction(new RESTRequest(headers, uriInfo.getQueryParameters()), txId);
     }
 
     /**
@@ -384,10 +383,9 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * @throws OXException If the initialization of the new schema fails
      */
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/init/w/{writeId}/{schema}")
-    public Response initSchema(@PathParam("writeId") int writeId, @PathParam("schema") String schema, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
-        return performInitSchema(new RESTRequest(headers, uriInfo.getQueryParameters(), body), writeId, schema);
+    public Response initSchema(@PathParam("writeId") int writeId, @PathParam("schema") String schema, @Context HttpHeaders headers, @Context UriInfo uriInfo) throws OXException {
+        return performInitSchema(new RESTRequest(headers, uriInfo.getQueryParameters()), writeId, schema);
     }
 
     /**
@@ -413,10 +411,9 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/unlock/for/{ctxId}/andModule/{module}")
-    public Response unlock(@PathParam("ctxId") int ctxId, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
-        return performUnlock(new RESTRequest(headers, uriInfo.getQueryParameters(), body), ctxId, module);
+    public Response unlock(@PathParam("ctxId") int ctxId, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo) throws OXException {
+        return performUnlock(new RESTRequest(headers, uriInfo.getQueryParameters()), ctxId, module);
     }
 
     /**
@@ -430,10 +427,9 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/{partitionId}/andModule/{module}")
-    public Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
-        return performUnlockMonitored(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, partitionId, module);
+    public Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("partitionId") int partitionId, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo) throws OXException {
+        return performUnlockMonitored(new RESTRequest(headers, uriInfo.getQueryParameters()), readId, writeId, schema, partitionId, module);
     }
 
     /**
@@ -447,10 +443,9 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      */
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/unlock/pool/r/{readId}/w/{writeId}/{schema}/andModule/{module}")
-    public Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
-        return performUnlockMonitored(new RESTRequest(headers, uriInfo.getQueryParameters(), body), readId, writeId, schema, 0, module);
+    public Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo) throws OXException {
+        return performUnlockMonitored(new RESTRequest(headers, uriInfo.getQueryParameters()), readId, writeId, schema, 0, module);
     }
     
     /**

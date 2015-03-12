@@ -19,8 +19,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(RESTConfigurationService.class, new RESTConfigurationService(this));
-        registerService(RESTHtmlService.class, new RESTHtmlService(getService(HtmlService.class)));
+        //registerService(RESTConfigurationService.class, new RESTConfigurationService(this));
+        //registerService(RESTHtmlService.class, new RESTHtmlService(getService(HtmlService.class)));
 
         /*
          * Example stuff

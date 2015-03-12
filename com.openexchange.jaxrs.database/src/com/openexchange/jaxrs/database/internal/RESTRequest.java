@@ -79,6 +79,16 @@ public class RESTRequest {
     }
 
     /**
+     * Initializes a new {@link RESTRequest}.
+     * 
+     * @param headers The request's headers
+     * @param params The request's parameters
+     */
+    public RESTRequest(HttpHeaders headers, MultivaluedMap<String, String> params) {
+        this(headers, params, null);
+    }
+
+    /**
      * Gets the body
      *
      * @return The body
@@ -116,6 +126,14 @@ public class RESTRequest {
         return params.getFirst(key);
     }
 
+    /**
+     * Get the specified parameter from the URL parameters map and parse it as the specified type.
+     * 
+     * @param key The parameter's name
+     * @param clazz The type
+     * @return The parsed parameter's value
+     * @throws OXException
+     */
     @SuppressWarnings("unchecked")
     public <T> T getParameter(String key, Class<T> clazz) throws OXException {
         String value = params.getFirst(key);

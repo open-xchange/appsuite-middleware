@@ -127,9 +127,9 @@ public class DatabaseRESTPerformer {
      * 
      * Initializes a new {@link DatabaseRESTPerformer}.
      * 
-     * @param services TODO
-     * @param environment TODO
-     * @param transaction
+     * @param request The RESTRequest
+     * @param services The ServiceLookup instance
+     * @param environment The DatabaseEnvironment instance containing the TransactionKeeper and the VersionChecker
      * 
      * @throws OXException
      */

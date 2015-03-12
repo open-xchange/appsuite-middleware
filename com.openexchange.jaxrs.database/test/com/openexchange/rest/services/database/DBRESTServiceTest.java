@@ -556,7 +556,7 @@ public class DBRESTServiceTest {
         Transaction tx = new Transaction(con, txs);
         when(txs.getTransaction(tx.getID())).thenReturn(tx);
 
-        service.rollbackTransaction(tx.getID(), httpHeaders, uriInfo, new JSONObject());
+        service.rollbackTransaction(tx.getID(), httpHeaders, uriInfo);
 
         verify(txs).rollback(tx.getID());
     }
@@ -567,7 +567,7 @@ public class DBRESTServiceTest {
         Transaction tx = new Transaction(con, txs);
         when(txs.getTransaction(tx.getID())).thenReturn(tx);
 
-        service.commitTransaction(tx.getID(), httpHeaders, uriInfo, new JSONObject());
+        service.commitTransaction(tx.getID(), httpHeaders, uriInfo);
 
         verify(txs).commit(tx.getID());
     }
@@ -583,14 +583,14 @@ public class DBRESTServiceTest {
         }
 
         try {
-            service.commitTransaction("unknownTransaction", httpHeaders, uriInfo, new JSONObject());
+            service.commitTransaction("unknownTransaction", httpHeaders, uriInfo);
             fail("Not halted");
         } catch (WebApplicationException e) {
             assertEquals(404, e.getResponse().getStatus());
         }
 
         try {
-            service.rollbackTransaction("unknownTransaction", httpHeaders, uriInfo, new JSONObject());
+            service.rollbackTransaction("unknownTransaction", httpHeaders, uriInfo);
             fail("Not halted");
         } catch (WebApplicationException e) {
             assertEquals(404, e.getResponse().getStatus());
@@ -875,7 +875,7 @@ public class DBRESTServiceTest {
     public void forcedUnlock() throws OXException {
         when(dbs.getForUpdateTask(ctxId)).thenReturn(con);
 
-        service.unlock(ctxId, "com.openexchange.myModule", httpHeaders, uriInfo, new JSONObject());
+        service.unlock(ctxId, "com.openexchange.myModule", httpHeaders, uriInfo);
 
         verify(versionChecker).unlock(con, "com.openexchange.myModule");
         verify(dbs).backForUpdateTask(ctxId, con);
@@ -885,7 +885,7 @@ public class DBRESTServiceTest {
     public void forceUnlockMonitoredSchema() throws OXException {
         when(dbs.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
 
-        service.unlockMonitored(readPoolId, writePoolId, schema, partitionId, "com.openexchange.myModule", httpHeaders, uriInfo, new JSONObject());
+        service.unlockMonitored(readPoolId, writePoolId, schema, partitionId, "com.openexchange.myModule", httpHeaders, uriInfo);
 
         verify(versionChecker).unlock(con, "com.openexchange.myModule");
         verify(dbs).backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
