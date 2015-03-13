@@ -115,6 +115,16 @@ public interface ManagedFileManagement {
     ManagedFile createManagedFile(File temporaryFile) throws OXException;
 
     /**
+     * Creates a new managed file from specified temporary file.
+     *
+     * @param temporaryFile A temporary file (previously obtained from {@link #newTempFile()}
+     * @param ttl The custom time-to-live or <code>-1</code> to use default one
+     * @return A new managed file
+     * @throws OXException If a new managed file cannot be created from specified temporary file
+     */
+    ManagedFile createManagedFile(File temporaryFile, int ttl) throws OXException;
+
+    /**
      * Creates a new managed file from specified input stream.
      * <p>
      * Size attribute is already set in returned managed file.
@@ -239,6 +249,14 @@ public interface ManagedFileManagement {
      * @throws OXException If no such managed file exists or cannot be returned
      */
     ManagedFile getByID(String id) throws OXException;
+
+    /**
+     * Gets an existing managed file by its unique ID and updates its last-accessed time stamp if found.
+     *
+     * @param id The managed file's unique ID
+     * @return The managed file associated with specified unique ID or <code>null</code>
+     */
+    ManagedFile optByID(String id) throws OXException;
 
     /**
      * Checks for an existing managed file of which unique ID matches given unique ID. If such a managed file is found, its last-accessed
