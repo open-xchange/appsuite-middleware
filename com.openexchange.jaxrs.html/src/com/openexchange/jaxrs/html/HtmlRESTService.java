@@ -58,6 +58,9 @@ public class HtmlRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public JSONObject getSanitizedHtmlJSON(JSONObject data) throws OXException {
+        if (data == null || data.isEmpty()) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
         try {
             final String sanitized = htmlService.sanitize(data.getString("content"), null, true, new boolean[1], null);
             return new JSONObject(2).put("content", sanitized);
@@ -95,6 +98,9 @@ public class HtmlRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public JSONObject getSanitizedHtmlWithoutExternalImages(JSONObject data) throws OXException {
+        if (data == null || data.isEmpty()) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
         try {
             final String sanitized = htmlService.sanitize(data.getString("content"), null, false, new boolean[1], null);
             return new JSONObject(2).put("content", sanitized);
