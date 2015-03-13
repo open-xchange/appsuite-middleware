@@ -1123,6 +1123,9 @@ fi
 # SoftwareChange_Request-2379
 ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-2456
+ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
