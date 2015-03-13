@@ -197,10 +197,10 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
         List<ContextUsers> contextUser = new LinkedList<ContextUsers>();
         if (false == allContextIDs.isEmpty()) {
             for (Iterator<Integer> iter = allContextIDs.iterator(); iter.hasNext();) {
-                int ctx = iter.next().intValue();
-                Connection connection = databaseService.getReadOnly(ctx);
+                int contextId = iter.next().intValue();
+                Connection connection = databaseService.getReadOnly(contextId);
                 try {
-                    selectAllSubscription(connection, provider, ctx, contextUser, isLoginPush);
+                    selectAllSubscription(connection, provider, contextId, contextUser, isLoginPush);
                 } catch (SQLException e) {
                     if ("42S02".equals(e.getSQLState())) {
                         // "Table 'mobileEventSubscriptions' doesn't exist" => no update task for tables in this schema yet, so ignore
@@ -208,7 +208,15 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
                         throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                     }
                 } finally {
-                    databaseService.backReadOnly(ctx, connection);
+                    databaseService.backReadOnly(contextId, connection);
+                }
+
+                /*
+                 * Remember processed contexts
+                 */
+                int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId);
+                for (int cid : contextsInSameSchema) {
+                    allContextIDs.remove(Integer.valueOf(cid));
                 }
             }
         }
@@ -294,6 +302,13 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
                 throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 databaseService.backWritable(contextId, connection);
+            }
+            /*
+             * Remember processed contexts
+             */
+            int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId);
+            for (int cid : contextsInSameSchema) {
+                allContextIDs.remove(Integer.valueOf(cid));
             }
         }
         return removed;
