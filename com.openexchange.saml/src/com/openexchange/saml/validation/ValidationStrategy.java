@@ -54,12 +54,7 @@ import com.openexchange.saml.SAMLConfig.Binding;
 
 
 /**
- * A strategy that is used to validate authentication responses.
- *
- * Several validation steps in validation classes are commented with excerpts from the SAML 2.0 specification.
- * Those excerpts are always annotated with their origin. E.g. [core 06 - 1.1p7] means "Cited from core specification,
- * working draft 06, section 1.1 on page 7". The "errata composite" documents from https://wiki.oasis-open.org/security/FrontPage
- * have been used as implementation reference.
+ * Interface for the strategy that is used to validate SAML authentication responses.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -67,12 +62,14 @@ import com.openexchange.saml.SAMLConfig.Binding;
 public interface ValidationStrategy {
 
     /**
-     * Validates the given response in accordance to the binding via which it was received.
+     * Validates an authentication response and extracts the bearer assertion that denotes the authentication
+     * of a certain subject.
      *
      * @param response The response
      * @param binding The binding
-     * @return The validation result
+     * @return The extracted bearer assertion
+     * @throws ValidationException If the response validation failed
      */
-    ValidationResult validate(Response response, Binding binding);
+    ValidationResult validate(Response response, Binding binding) throws ValidationException;
 
 }

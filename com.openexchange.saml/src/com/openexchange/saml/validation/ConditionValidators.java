@@ -47,40 +47,15 @@
  *
  */
 
-package com.openexchange.saml.validation.chain;
-
-import com.openexchange.saml.validation.ValidationResult.ErrorReason;
+package com.openexchange.saml.validation;
 
 
 /**
- * Indicates validation errors of {@link ResponseValidator}s and {@link AssertionValidator}s.
+ * {@link ConditionValidators}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ValidationError {
-
-    private final ErrorReason reason;
-
-    private final String message;
-
-    /**
-     * Initializes a new {@link ValidationError}.
-     * @param reason
-     * @param message
-     */
-    public ValidationError(ErrorReason reason, String message) {
-        super();
-        this.reason = reason;
-        this.message = message;
-    }
-
-    public ErrorReason getReason() {
-        return reason;
-    }
-
-    public String getMessage() {
-        return message;
-    }
+public class ConditionValidators {
 
 }

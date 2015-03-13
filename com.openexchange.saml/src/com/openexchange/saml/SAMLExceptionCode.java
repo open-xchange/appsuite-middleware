@@ -62,6 +62,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
+// TODO cleanup
 public enum SAMLExceptionCode implements DisplayableOXExceptionCode {
 
     /**
@@ -91,6 +92,8 @@ public enum SAMLExceptionCode implements DisplayableOXExceptionCode {
     INTERNAL_ERROR("An internal error occurred: %1$s", Category.CATEGORY_ERROR, 11),
 
     VALIDATION_FAILED("SAML response validation failed: %1$s (%2$s)", Category.CATEGORY_ERROR, 12),
+
+    INVALID_REQUEST("A SAML request was considered invalid. Reason: %1$s", Category.CATEGORY_ERROR, 13),
     ;
 
     private final Category category;

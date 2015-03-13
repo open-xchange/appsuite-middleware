@@ -47,15 +47,17 @@
  *
  */
 
-package com.openexchange.saml.validation.chain;
+package com.openexchange.saml.state;
 
 
 /**
- * {@link ConditionValidators}
+ * {@link AuthnResponseInfo}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ConditionValidators {
+public interface AuthnResponseInfo {
+
+    String getResponseID();
 
 }

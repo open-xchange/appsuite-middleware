@@ -55,8 +55,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.SAMLConfig.Binding;
-import com.openexchange.saml.SAMLWebSSOProvider;
 
 
 /**
@@ -69,9 +69,9 @@ public class AssertionConsumerService extends HttpServlet {
 
     private static final long serialVersionUID = -8019507819002031614L;
 
-    private final SAMLWebSSOProvider provider;
+    private final WebSSOProvider provider;
 
-    public AssertionConsumerService(SAMLWebSSOProvider provider) {
+    public AssertionConsumerService(WebSSOProvider provider) {
         super();
         this.provider = provider;
     }

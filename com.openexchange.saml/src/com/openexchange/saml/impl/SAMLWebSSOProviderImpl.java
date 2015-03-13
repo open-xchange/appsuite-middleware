@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -66,6 +66,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.joda.time.DateTime;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDType;
@@ -95,15 +96,24 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.saml.OpenSAML;
+import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.SAMLExceptionCode;
+import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.spi.AuthenticationInfo;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.spi.SAMLWebSSOCustomizer;
 import com.openexchange.saml.spi.SAMLWebSSOCustomizer.RequestContext;
+import com.openexchange.saml.state.AuthnRequestInfo;
+import com.openexchange.saml.state.DefaultAuthnRequestInfo;
+import com.openexchange.saml.state.StateManagement;
+import com.openexchange.saml.validation.ValidationException;
 import com.openexchange.saml.validation.ValidationResult;
 import com.openexchange.saml.validation.ValidationStrategy;
 import com.openexchange.server.ServiceLookup;
@@ -111,14 +121,12 @@ import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- *
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SAMLWebSSOProvider {
+public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SAMLWebSSOProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SAMLWebSSOProviderImpl.class);
 
     private final SAMLConfig config;
 
@@ -126,20 +134,131 @@ public class SAMLWebSSOProvider {
 
     private final SAMLBackend backend;
 
+    private final StateManagement stateManagement;
+
     private final SessionReservationService sessionReservationService;
 
     private final ServiceLookup services;
 
 
-    public SAMLWebSSOProvider(SAMLConfig config, OpenSAML openSAML, ServiceLookup services) {
+    public SAMLWebSSOProviderImpl(SAMLConfig config, OpenSAML openSAML, StateManagement stateManagement, ServiceLookup services) {
         super();
         this.config = config;
         this.openSAML = openSAML;
+        this.stateManagement = stateManagement;
         this.backend = services.getService(SAMLBackend.class);
         this.sessionReservationService = services.getService(SessionReservationService.class);
         this.services = services;
     }
 
+    @Override
+    public void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException {
+        AuthnRequest authnRequest = customizeAuthnRequest(prepareAuthnRequest(), httpRequest, httpResponse);
+        String relayState = getFrontendDomain(httpRequest);
+        DefaultAuthnRequestInfo requestInfo = new DefaultAuthnRequestInfo();
+        requestInfo.setRequestId(authnRequest.getID());
+        requestInfo.setRelayState(relayState);
+        stateManagement.addAuthnRequest(requestInfo, 5, TimeUnit.MINUTES);
+        try {
+            String authnRequestXML = openSAML.marshall(authnRequest);
+            Binding requestBinding = config.getRequestBinding();
+            LOG.debug("Responding with AuthnRequest via " + requestBinding.toString() + ":\n{}", authnRequestXML);
+            switch (requestBinding) {
+                case HTTP_POST:
+                    // sendFormResponse(authnRequestXML, httpResponse);
+                    break;
+                case HTTP_REDIRECT:
+                    sendRedirect(authnRequestXML, relayState, httpRequest, httpResponse);
+                    break;
+                default:
+                    throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(requestBinding);
+            }
+        } catch (MarshallingException e) {
+            throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException {
+        if (binding != Binding.HTTP_POST) {
+            /*
+             * The HTTP Redirect binding MUST NOT be used, as the response will
+             * typically exceed the URL length permitted by most user agents.
+             * [profiles 06 - 4.1.2p17]
+             *
+             * We don't support artifact binding yet. If you need it, feel free to implement it ;-)
+             */
+            throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(binding.name());
+        }
+
+        Response response = decodeResponse(httpRequest);
+        try {
+            /*
+             * TODO:
+             * If the identity provider supports the Single Logout profile, defined in Section 4.4, any authentication
+             * statements MUST include a SessionIndex attribute to enable per-session logout requests by the
+             * service provider.
+             * [profiles 06 - 4.1.4.2p20]
+             */
+
+            /*
+             * TODO:
+             * If an <AuthnStatement> used to establish a security context for the principal contains a
+             * SessionNotOnOrAfter attribute, the security context SHOULD be discarded once this time is
+             * reached, unless the service provider reestablishes the principal's identity by repeating the use of this
+             * profile. Note that if multiple <AuthnStatement> elements are present, the SessionNotOnOrAfter
+             * value closest to the present time SHOULD be honored.
+             */
+
+            ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
+            ValidationResult validationResult = validationStrategy.validate(response, binding);
+            AuthnRequestInfo requestInfo = validationResult.getRequestInfo();
+            if (requestInfo != null) {
+                stateManagement.removeAuthnRequestInfo(requestInfo.getRequestID());
+            }
+
+            Assertion bearerAssertion = validationResult.getBearerAssertion();
+            AuthenticationInfo authInfo = backend.resolveResponse(response, bearerAssertion);
+            LOG.debug("User {} in context {} is considered authenticated", authInfo.getUserId(), authInfo.getContextId());
+
+            String relayState = httpRequest.getParameter("RelayState");
+            if (relayState == null) {
+                throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was not set");
+            }
+
+            String redirectHost = relayState; // TODO: integrity check and fail on null
+
+            /*
+             * TODO state:
+             *  - session index for logout
+             *  - SessionNotOnOrAfter
+             */
+            Map<String, String> properties = authInfo.getProperties();
+            String sessionToken = sessionReservationService.reserveSessionFor(authInfo.getUserId(), authInfo.getContextId(), 60l, TimeUnit.SECONDS, properties.isEmpty() ? null : properties);
+
+            ConfigurationService configService = services.getService(ConfigurationService.class);
+            boolean secure = Tools.considerSecure(httpRequest, Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue())));
+
+            DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
+            String prefix = prefixService.getPrefix();
+
+            URI redirectLocation = new URIBuilder()
+                .setScheme(secure ? "https" : "http")
+                .setHost(redirectHost)
+                .setPath(prefix + "login")
+                .setParameter("action", "redeemReservation")
+                .setParameter("token", sessionToken)
+                .build();
+
+            httpResponse.sendRedirect(redirectLocation.toString());
+        } catch (URISyntaxException e) {
+            throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
+        } catch (ValidationException e) {
+            throw SAMLExceptionCode.VALIDATION_FAILED.create(e.getReason().getMessage(), e.getMessage());
+        }
+    }
+
+    @Override
     public String getMetadataXML() throws OXException {
         SPSSODescriptor spssoDescriptor = openSAML.buildSAMLObject(SPSSODescriptor.class);
         spssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
@@ -157,11 +276,6 @@ public class SAMLWebSSOProvider {
             slService.setLocation(config.getSingleLogoutServiceURL());
             spssoDescriptor.getSingleLogoutServices().add(slService);
         }
-
-        // TODO
-//        NameIDFormat nameIDFormat = openSAML.buildSAMLObject(NameIDFormat.class);
-//        nameIDFormat.setFormat(NameIDType.TRANSIENT);
-//        spssoDescriptor.getNameIDFormats().add(nameIDFormat);
 
         try {
             X509KeyInfoGeneratorFactory keyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
@@ -204,41 +318,7 @@ public class SAMLWebSSOProvider {
         }
     }
 
-    private SPSSODescriptor customizeDescriptor(SPSSODescriptor spssoDescriptor) throws OXException {
-        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
-        if (customizer != null) {
-            return customizer.customizeSPSSODescriptor(spssoDescriptor);
-        }
-
-        return spssoDescriptor;
-    }
-
-    public void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException {
-        AuthnRequest authnRequest = customizeAuthnRequest(prepareAuthnRequest(), httpRequest, httpResponse);
-
-        /*
-         * We don't use the encoders of OpenSAML here for <several reasons>.
-         */
-        try {
-            String authnRequestXML = openSAML.marshall(authnRequest);
-            Binding requestBinding = config.getRequestBinding();
-            LOG.debug("Responding with AuthnRequest via " + requestBinding.toString() + ":\n{}", authnRequestXML);
-            switch (requestBinding) {
-                case HTTP_POST:
-                    // sendFormResponse(authnRequestXML, httpResponse);
-                    break;
-                case HTTP_REDIRECT:
-                    sendRedirect(authnRequestXML, httpRequest, httpResponse);
-                    break;
-                default:
-                    throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(requestBinding);
-            }
-        } catch (MarshallingException e) {
-            throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
-        }
-    }
-
-    private void sendRedirect(String authnRequestXML, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException {
+    private void sendRedirect(String authnRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException {
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         Deflater deflater = new Deflater(Deflater.DEFLATED, true);
         DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytesOut, deflater);
@@ -255,7 +335,7 @@ public class SAMLWebSSOProvider {
         try {
             // TODO: integrity protect RelayState
             CredentialProvider credentialProvider = backend.getCredentialProvider();
-            URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", httpRequest.getServerName());
+            URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
             if (credentialProvider.hasSigningCredential()) {
                 /*
                  * The <AuthnRequest> message MAY be signed, if authentication of the request issuer is required.
@@ -280,6 +360,20 @@ public class SAMLWebSSOProvider {
         } catch (SecurityException e) {
             throw SAMLExceptionCode.ENCODING_ERROR.create(e, "Could not compute authentication request signature");
         }
+    }
+
+    private String getFrontendDomain(HttpServletRequest httpRequest) {
+        HostnameService hostnameService = services.getOptionalService(HostnameService.class);
+        if (hostnameService == null) {
+            return httpRequest.getServerName();
+        }
+
+        String hostname = hostnameService.getHostname(-1, -1);
+        if (hostname == null) {
+            return httpRequest.getServerName();
+        }
+
+        return hostname;
     }
 
     private AuthnRequest customizeAuthnRequest(AuthnRequest authnRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
@@ -320,72 +414,16 @@ public class SAMLWebSSOProvider {
         authnRequest.setForceAuthn(Boolean.FALSE);
         authnRequest.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
         authnRequest.setIssueInstant(new DateTime());
-
-        /*
-         * The use of the AllowCreate attribute MUST NOT be used and SHOULD be ignored in conjunction with
-         * requests for or assertions issued with name identifiers with a Format of
-         * urn:oasis:names:tc:SAML:2.0:nameid-format:transient (they preclude any such state in and of themselves).
-         *
-         * [core06 - 3.4.1.1p51]
-         */
-//        NameIDPolicy nameIDPolicy = openSAML.buildSAMLObject(NameIDPolicy.class);
-//        nameIDPolicy.setFormat(NameIDType.TRANSIENT);
-//        authnRequest.setNameIDPolicy(nameIDPolicy);
-
         return authnRequest;
     }
 
-    public void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException {
-        if (binding != Binding.HTTP_POST) {
-            /*
-             * The HTTP Redirect binding MUST NOT be used, as the response will
-             * typically exceed the URL length permitted by most user agents.
-             * [profiles 06 - 4.1.2p17]
-             *
-             * We don't support artifact binding yet. If you need it, feel free to implement it ;-)
-             */
-            throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(binding.name());
+    private SPSSODescriptor customizeDescriptor(SPSSODescriptor spssoDescriptor) throws OXException {
+        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        if (customizer != null) {
+            return customizer.customizeSPSSODescriptor(spssoDescriptor);
         }
 
-        Response response = decodeResponse(httpRequest);
-        try {
-            ValidationStrategy validationStrategy = backend.getValidationStrategy(config);
-            ValidationResult validationResult = validationStrategy.validate(response, binding);
-            if (validationResult.success()) {
-                AuthenticationInfo authInfo = backend.resolveResponse(response, validationResult.getBearerAssertion());
-                LOG.debug("User {} in context {} is considered authenticated", authInfo.getUserId(), authInfo.getContextId());
-
-                /*
-                 * TODO state:
-                 *  - session index for logout
-                 *  - SessionNotOnOrAfter
-                 */
-                Map<String, String> properties = authInfo.getProperties();
-                String sessionToken = sessionReservationService.reserveSessionFor(authInfo.getUserId(), authInfo.getContextId(), 60l, TimeUnit.SECONDS, properties.isEmpty() ? null : properties);
-                String redirectHost = httpRequest.getParameter("RelayState"); // TODO: integrity check and fail on null
-
-                // TODO: remove static service access
-                ConfigurationService configService = services.getService(ConfigurationService.class);
-                boolean secure = Tools.considerSecure(httpRequest, Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue())));
-
-                DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-                String prefix = prefixService.getPrefix();
-
-                URI redirectLocation = new URIBuilder()
-                    .setScheme(secure ? "https" : "http")
-                    .setHost(redirectHost)
-                    .setPath(prefix + "login")
-                    .setParameter("action", "redeemReservation")
-                    .setParameter("token", sessionToken)
-                    .build();
-
-                httpResponse.sendRedirect(redirectLocation.toString());
-            } else {
-                throw SAMLExceptionCode.VALIDATION_FAILED.create(validationResult.getErrorReason().getMessage(), validationResult.getErrorDetail());
-            }
-        } catch (URISyntaxException e) {
-            throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
-        }
+        return spssoDescriptor;
     }
 
     private Response decodeResponse(HttpServletRequest httpRequest) throws OXException {
@@ -393,7 +431,7 @@ public class SAMLWebSSOProvider {
         if (responseXML == null) {
             String b64Response = httpRequest.getParameter("SAMLResponse");
             if (b64Response == null) {
-                throw SAMLExceptionCode.DECODING_ERROR.create("The 'SAMLResponse' parameter was not set");
+                throw SAMLExceptionCode.INVALID_REQUEST.create("The 'SAMLResponse' parameter was not set");
             }
 
             responseXML = new String(Base64.decodeBase64(b64Response));

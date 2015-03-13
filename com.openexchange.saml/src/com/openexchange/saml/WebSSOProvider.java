@@ -47,54 +47,44 @@
  *
  */
 
-package com.openexchange.saml.spi;
+package com.openexchange.saml;
 
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Response;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.SAMLConfig;
-import com.openexchange.saml.validation.AssertionValidator;
-import com.openexchange.saml.validation.ResponseValidator;
-import com.openexchange.saml.validation.StrictValidationStrategy;
-import com.openexchange.saml.validation.ValidationStrategy;
+import com.openexchange.saml.SAMLConfig.Binding;
 
 /**
- * {@link AuthnResponseHandler}
+ * {@link WebSSOProvider}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface AuthnResponseHandler {
+public interface WebSSOProvider {
 
     /**
-     * Resolves a principal based on the provided response and bearer assertion.
+     * Response with an authentication request based on the configured binding.
      *
-     * @param response The SAML response
-     * @param assertion A valid bearer assertion whose subject shall be mapped to a principal
-     * @return The principal, which must denote an existing user
-     * @throws OXException If the principal cannot be resolved
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
      */
-    AuthenticationInfo resolvePrincipal(Response response, Assertion assertion) throws OXException;
+    void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException;
 
     /**
-     * Gets the validation strategy that will be used to validate authentication responses.
-     * Most likely you want return an instance of {@link StrictValidationStrategy} here.
+     * Handles an authentication response
      *
-     * Unfortunately it might be that the actual IDPs responses are not conform to the SAML spec,
-     * as it is quite complex and hard to implement. In such cases you need to implement your own
-     * validation strategy. To avoid that malicious responses are accepted as valid you should not
-     * start with implementing your own validation mechanisms from scratch, but inherit from
-     * {@link AbstractChainBasedValidationStrategy}. You can then simply leave single validators
-     * out to work around the validation problems.
-     *
-     * @param config The SAML configuration
-     * @return The validation strategy
-     * @see StrictValidationStrategy
-     * @see AbstractChainBasedValidationStrategy
-     * @see ValidatorChain
-     * @see ResponseValidator
-     * @see AssertionValidator
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @param binding The binding used to call the assertion consumer service
      */
-    ValidationStrategy getValidationStrategy(SAMLConfig config);
+    void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException;
+
+    /**
+     * Generates the service providers metadata XML.
+     *
+     * @return The XML as string
+     */
+    String getMetadataXML() throws OXException;
 
 }

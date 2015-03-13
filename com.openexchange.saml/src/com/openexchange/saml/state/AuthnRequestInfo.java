@@ -47,74 +47,19 @@
  *
  */
 
-package com.openexchange.saml.validation.chain;
-
-import java.util.LinkedList;
-import java.util.List;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.saml2.core.SubjectConfirmationData;
+package com.openexchange.saml.state;
 
 
 /**
- * {@link ValidatorChain}
+ * {@link AuthnRequestInfo}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ValidatorChain {
+public interface AuthnRequestInfo {
 
-    private final List<ResponseValidator> responseValidators = new LinkedList<ResponseValidator>();
+    String getRequestID();
 
-    private final List<AssertionValidator> assertionValidators = new LinkedList<AssertionValidator>();
-
-    private final List<SubjectConfirmationDataValidator> confirmationDataValidators = new LinkedList<SubjectConfirmationDataValidator>();
-
-    public void add(ResponseValidator responseValidator) {
-        responseValidators.add(responseValidator);
-    }
-
-    public void add(AssertionValidator assertionValidator) {
-        assertionValidators.add(assertionValidator);
-    }
-
-    public void add(SubjectConfirmationDataValidator confirmationDataValidator) {
-        confirmationDataValidators.add(confirmationDataValidator);
-    }
-
-    public ValidationError validateResponse(Response response) {
-        for (ResponseValidator responseValidator : responseValidators) {
-            ValidationError error = responseValidator.validate(response);
-            if (error != null) {
-                return error;
-            }
-        }
-
-        return null;
-    }
-
-    public ValidationError validateAssertions(Response response, List<Assertion> assertions) {
-        for (Assertion assertion : assertions) {
-            for (AssertionValidator assertionValidator : assertionValidators) {
-                ValidationError error = assertionValidator.validate(response, assertion);
-                if (error != null) {
-                    return error;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public ValidationError validateSubjectConfirmationData(SubjectConfirmationData confirmationData) {
-        for (SubjectConfirmationDataValidator confirmationDataValidator : confirmationDataValidators) {
-            ValidationError error = confirmationDataValidator.validate(confirmationData);
-            if (error != null) {
-                return error;
-            }
-        }
-
-        return null;
-    }
+    String getRelayState();
 
 }

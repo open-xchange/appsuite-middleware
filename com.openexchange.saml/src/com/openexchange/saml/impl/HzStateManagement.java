@@ -49,59 +49,86 @@
 
 package com.openexchange.saml.impl;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.WebSSOProvider;
-import com.openexchange.session.Reply;
-import com.openexchange.session.Session;
-import com.openexchange.session.inspector.Reason;
-import com.openexchange.session.inspector.SessionInspectorService;
+import com.openexchange.saml.state.AuthnRequestInfo;
+import com.openexchange.saml.state.AuthnResponseInfo;
+import com.openexchange.saml.state.DefaultAuthnRequestInfo;
+import com.openexchange.saml.state.StateManagement;
 
 
 /**
- * {@link SAMLSessionInspector}
+ * {@link HzStateManagement}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SAMLSessionInspector implements SessionInspectorService {
+public class HzStateManagement implements StateManagement {
 
-    private final WebSSOProvider provider;
+    private final HazelcastInstance hazelcast;
 
-    public SAMLSessionInspector(WebSSOProvider provider) {
+    /**
+     * Initializes a new {@link HzStateManagement}.
+     * @param hazelcast
+     */
+    public HzStateManagement(HazelcastInstance hazelcast) {
         super();
-        this.provider = provider;
+        this.hazelcast = hazelcast;
     }
 
     @Override
-    public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return Reply.CONTINUE;
-    }
-
-    @Override
-    public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        try {
-            provider.respondWithAuthnRequest(request, response);
-        } catch (IOException e) {
-            // TODO
-            throw new OXException(e);
+    public void addAuthnRequest(AuthnRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException {
+        Map<String, String> infoMap = new HashMap<String, String>(2);
+        String relayState = requestInfo.getRelayState();
+        if (relayState != null) {
+            infoMap.put("relayState", relayState);
         }
 
-        return Reply.STOP;
+        getRequestInfoMap().put(requestInfo.getRequestID(), infoMap, ttl, timeUnit);
     }
 
     @Override
-    public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        try {
-            provider.respondWithAuthnRequest(request, response);
-        } catch (IOException e) {
-            // TODO
-            throw new OXException(e);
+    public AuthnRequestInfo getAuthnRequest(String id) throws OXException {
+        Map<String, String> infoMap = getRequestInfoMap().get(id);
+        if (infoMap == null) {
+            return null;
         }
 
-        return Reply.STOP;
+        DefaultAuthnRequestInfo requestInfo = new DefaultAuthnRequestInfo();
+        requestInfo.setRequestId(id);
+        requestInfo.setRelayState(infoMap.get("relayState"));
+        return requestInfo;
+    }
+
+    @Override
+    public void addAuthnResponse(AuthnResponseInfo responseInfo, long ttl, TimeUnit timeUnit) throws OXException {
+        Object value = new Object();
+        getResponseInfoMap().put(responseInfo.getResponseID(), value, ttl, timeUnit);
+    }
+
+    @Override
+    public boolean hasAuthnResponse(String id) throws OXException {
+        Object value = getResponseInfoMap().get(id);
+        return value != null;
+    }
+
+    private IMap<String, Map<String, String>> getRequestInfoMap() {
+        IMap<String, Map<String, String>> hzMap = hazelcast.getMap("com.openexchange.saml.impl.HzStateManagement.RequestInfos");
+        return hzMap;
+    }
+
+    private IMap<String, Object> getResponseInfoMap() {
+        IMap<String, Object> hzMap = hazelcast.getMap("com.openexchange.saml.impl.HzStateManagement.ResponseInfos");
+        return hzMap;
+    }
+
+    @Override
+    public void removeAuthnRequestInfo(String requestID) throws OXException {
+        getRequestInfoMap().remove(requestID);
     }
 
 }

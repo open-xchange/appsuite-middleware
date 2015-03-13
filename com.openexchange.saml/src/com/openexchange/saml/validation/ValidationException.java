@@ -47,15 +47,33 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.validation;
 
 
 /**
- * {@link SAMLStateManagement}
+ * This exception is thrown by {@link ValidationStrategy} in case the validation of a response failed.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SAMLStateManagement {
+public class ValidationException extends Exception {
+
+    private static final long serialVersionUID = -2030486914619353014L;
+
+    private final ValidationFailedReason reason;
+
+    public ValidationException(ValidationFailedReason reason, String detailMessage) {
+        super(detailMessage);
+        this.reason = reason;
+    }
+
+    public ValidationException(ValidationFailedReason reason, String detailMessage, Throwable cause) {
+        super(detailMessage, cause);
+        this.reason = reason;
+    }
+
+    public ValidationFailedReason getReason() {
+        return reason;
+    }
 
 }

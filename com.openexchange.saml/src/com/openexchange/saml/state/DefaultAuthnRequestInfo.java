@@ -47,28 +47,75 @@
  *
  */
 
-package com.openexchange.saml.validation.chain;
-
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Response;
+package com.openexchange.saml.state;
 
 
 /**
- * An interface for validators meant to be used with a {@link ValidatorChain}.
+ * {@link DefaultAuthnRequestInfo}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface AssertionValidator {
+public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
 
-    /**
-     * Validates a certain requirement.
-     *
-     * @param response The assertions response
-     * @param assertion The assertion
-     * @return A {@link ValidationError} with an according reason and message if the validation fails.
-     * If the validation is successful, <code>null</code> is returned.
-     */
-    ValidationError validate(Response response, Assertion assertion);
+    private String requestId;
+
+    private String relayState;
+
+    @Override
+    public String getRequestID() {
+        return requestId;
+    }
+
+    @Override
+    public String getRelayState() {
+        return relayState;
+    }
+
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+
+    public void setRelayState(String relayState) {
+        this.relayState = relayState;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((relayState == null) ? 0 : relayState.hashCode());
+        result = prime * result + ((requestId == null) ? 0 : requestId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DefaultAuthnRequestInfo other = (DefaultAuthnRequestInfo) obj;
+        if (relayState == null) {
+            if (other.relayState != null)
+                return false;
+        } else if (!relayState.equals(other.relayState))
+            return false;
+        if (requestId == null) {
+            if (other.requestId != null)
+                return false;
+        } else if (!requestId.equals(other.requestId))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultAuthnRequestInfo [requestId=" + requestId + ", relayState=" + relayState + "]";
+    }
 
 }

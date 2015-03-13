@@ -49,88 +49,287 @@
 
 package com.openexchange.saml.validation;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import org.joda.time.DateTime;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Audience;
+import org.opensaml.saml2.core.AudienceRestriction;
+import org.opensaml.saml2.core.Conditions;
+import org.opensaml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml2.core.SubjectConfirmationData;
+import org.opensaml.saml2.encryption.Decrypter;
+import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
+import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
+import org.opensaml.xml.encryption.DecryptionException;
+import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
+import org.opensaml.xml.encryption.SimpleKeyInfoReferenceEncryptedKeyResolver;
+import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
+import org.opensaml.xml.security.keyinfo.KeyInfoProvider;
+import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
+import org.opensaml.xml.security.keyinfo.provider.DEREncodedKeyValueProvider;
+import org.opensaml.xml.security.keyinfo.provider.DSAKeyValueProvider;
+import org.opensaml.xml.security.keyinfo.provider.InlineX509DataProvider;
+import org.opensaml.xml.security.keyinfo.provider.KeyInfoReferenceProvider;
+import org.opensaml.xml.security.keyinfo.provider.RSAKeyValueProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.spi.CredentialProvider;
-import com.openexchange.saml.validation.chain.AbstractChainBasedValidationStrategy;
-import com.openexchange.saml.validation.chain.AssertionValidators.AssertionIssuerValidator;
-import com.openexchange.saml.validation.chain.AssertionValidators.AssertionSignatureValidator;
-import com.openexchange.saml.validation.chain.ResponseValidators.ResponseDestinationValidator;
-import com.openexchange.saml.validation.chain.ResponseValidators.ResponseIssuerValidator;
-import com.openexchange.saml.validation.chain.ResponseValidators.ResponseSignatureValidator;
-import com.openexchange.saml.validation.chain.ResponseValidators.ResponseStatusCodeValidator;
-import com.openexchange.saml.validation.chain.SubjectConfirmationDataValidators.InResponseToValidator;
-import com.openexchange.saml.validation.chain.SubjectConfirmationDataValidators.NotOnOrAfterValidator;
-import com.openexchange.saml.validation.chain.SubjectConfirmationDataValidators.RecipientValidator;
-import com.openexchange.saml.validation.chain.ValidatorChain;
+import com.openexchange.saml.state.AuthnRequestInfo;
+import com.openexchange.saml.state.StateManagement;
+import com.openexchange.saml.validation.AssertionValidators.AssertionIssuerValidator;
+import com.openexchange.saml.validation.AssertionValidators.AssertionSignatureValidator;
+import com.openexchange.saml.validation.ResponseValidators.ResponseDestinationValidator;
+import com.openexchange.saml.validation.ResponseValidators.ResponseIssuerValidator;
+import com.openexchange.saml.validation.ResponseValidators.ResponseSignatureValidator;
+import com.openexchange.saml.validation.ResponseValidators.ResponseStatusCodeValidator;
 
 
 /**
- * {@link StrictValidationStrategy}
+ * <p>
+ *   A validation strategy that tries to strictly obey the SAML 2.0 sepc. It is meant as reference implementation for validating
+ *   authentication responses. The validation is divided into three subsequent steps while the result of each predecessor method
+ *   is passed as an argument to the successor method. Every method can abort further validation by returning an error that
+ *   describes why the validation failed. The first method basically validates the response object and its contained assertions.
+ *   Encrypted assertions are decrypted here. The second one looks for the first basically valid bearer assertion. In the last step
+ *   that bearer assertion is checked further in terms of fulfilled conditions etc.
+ * </p>
+ * <p>
+ *   The JavaDoc of every method states the validation steps that are necessary to obey the SAML 2.0 specification. Nevertheless,
+ *   the IDP of a concrete deployment may not obey the spec in such a strict way and validation will fail even if the received assertions
+ *   must be accepted. In these cases you need to implement your own validation strategy. Best practice is to base your implementation
+ *   on this one and only remove/relax the single validation steps to let the valdiation pass.
+ * </p>
+ * <p>
+ *   Several validation steps are commented with excerpts from the SAML 2.0 specification. Those excerpts are always annotated with their
+ *   origin. E.g. [core 06 - 1.1p7] means "Cited from core specification, working draft 06, section 1.1 on page 7". The "errata composite"
+ *   documents from https://wiki.oasis-open.org/security/FrontPage have been used as implementation reference.
+ * </p>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class StrictValidationStrategy extends AbstractChainBasedValidationStrategy {
+public class StrictValidationStrategy implements ValidationStrategy {
+
+    private static final Logger LOG = LoggerFactory.getLogger(StrictValidationStrategy.class);
+
+    protected final SAMLConfig config;
+
+    protected final CredentialProvider credentialProvider;
+
+    protected final StateManagement stateManagement;
+
 
     /**
      * Initializes a new {@link StrictValidationStrategy}.
      * @param config
      * @param credentialProvider
+     * @param stateManagement
      */
-    public StrictValidationStrategy(SAMLConfig config, CredentialProvider credentialProvider) {
-        super(config, credentialProvider);
+    public StrictValidationStrategy(SAMLConfig config, CredentialProvider credentialProvider, StateManagement stateManagement) {
+        super();
+        this.config = config;
+        this.credentialProvider = credentialProvider;
+        this.stateManagement = stateManagement;
     }
 
     @Override
-    protected ValidatorChain getValidatorChain(Response response, Binding binding) {
-        ValidatorChain chain = new ValidatorChain();
+    public ValidationResult validate(Response response, Binding binding) throws ValidationException {
+        List<Assertion> responseValidationResult = validateResponse(binding, response);
+        Assertion bearerAssertion = chooseAssertion(binding, response, responseValidationResult);
+        AuthnRequestInfo authnRequestInfo = validateBearerAssertion(binding, response, bearerAssertion);
+        return new ValidationResult(bearerAssertion, authnRequestInfo);
+    }
 
+    /**
+     * <p>
+     *   Checks if the given response is basically valid and returns all contained assertions after they have possibly been decrypted.
+     *   If the response was invalid or at least one assertion could not be decrypted, the result object denotes an according error.
+     * </p>
+     *
+     * <p>Validation steps:</p>
+     * <ul>
+     *  <li>If the response element is signed, its signature is valid.</li>
+     *  <li>If the response element contains a InResponseTo attribute, its value must match the ID of the according authentication request.</li>
+     *  <li>The response element contains a destination attribute containing the ACS URL.</li>
+     *  <li>If the response element contains an issuer element, its value must be equal to the IDPs entity ID.</li>
+     *  <li>The response element contains a status element with a status code equal to <code>urn:oasis:names:tc:SAML:2.0:status:Success</code>.</li>
+     *  <li>The response element contains one or more assertion elements which may or may not be encrypted.</li>
+     *  <li>
+     *    Every contained assertion must be basically valid in terms of:
+     *    <ul>
+     *      <li>
+     *        If the assertion is signed, its signature must be valid. Whether a signature is required depends on the binding.
+     *        If the response was signed, unsigned assertions inherit the response signature.
+     *      </li>
+     *      <li>The assertion element contains an issuer element with a value equal to the IDPs entity ID.</li>
+     *    </ul>
+     *  </li>
+     * </ul>
+     *
+     * @param binding The binding via which the response was received
+     * @param response The response
+     * @return The list of (possibly decrypted) assertions
+     * @throws ValidationException
+     */
+    protected List<Assertion> validateResponse(Binding binding, Response response) throws ValidationException {
+        List<ResponseValidator> responseValidators = getResponseValidators(binding, response);
+        ValidationError error = validateResponse(response, responseValidators);
+        if (error != null) {
+            throw new ValidationException(error.getReason(), error.getMessage());
+        }
+
+        try {
+            List<Assertion> allAssertions = decryptAndCollectAssertions(response);
+            if (allAssertions.size() == 0) {
+                throw new ValidationException(ValidationFailedReason.MISSING_ELEMENT, "Response contains neither an 'Assertion' nor an 'EncryptedAssertion' element");
+            }
+
+            List<AssertionValidator> assertionValidators = getAssertionValidators(binding, response);
+            error = validateAssertions(response, allAssertions, assertionValidators);
+            if (error != null) {
+                throw new ValidationException(error.getReason(), error.getMessage());
+            }
+
+            return allAssertions;
+        } catch (DecryptionException e) {
+            LOG.debug("", e);
+            throw new ValidationException(ValidationFailedReason.DECRYPTION_FAILED, e.getMessage());
+        }
+
+    }
+
+    /**
+     * <p>
+     *   Takes the assertions that are returned from {@link #validate(Response, Binding)}, performs basic validation and
+     *   chooses the bearer assertion that asserts a users authentication. The chosen assertion is further validated
+     *   in the next step then. If none of the passed assertions is a valid bearer assertion, the result object must
+     *   return an according error.
+     * </p>
+     *
+     * <p>Steps to choose an assertion:</p>
+     * <ul>
+     *   <li>
+     *     The assertion contains a subject element with at least one subject confirmation whose method is equal to
+     *     <code>urn:oasis:names:tc:SAML:2.0:cm:bearer</code>. The subject confirmation contains a subject confirmation data element with
+     *     a recipient attribute containing the ACS URL.
+     *   </li>
+     *   <li>
+     *     The assertion contains an audience restriction element, which in turn contains an audience element whose value is equal to the
+     *     SPs entity ID.
+     *   </li>
+     *   <li>The assertion contains at least one authentication statement.</li>
+     * </ul>
+     *
+     * @param binding The binding via which the response was received
+     * @param response The response
+     * @param assertions The (possibly decrypted) and basically validated assertions
+     * @return The validation result containing the chosen bearer assertion or an error
+     * @throws ValidationException
+     */
+    protected Assertion chooseAssertion(Binding binding, Response response, List<Assertion> assertions) throws ValidationException {
         /*
-         * If response is signed, we need to verify the signature
+         * We'll select the first contained assertion that
+         *  - is a bearer assertion
+         *  - has an audience restriction that contains us as the target audience
+         *  - has an authentication statement
          */
-        chain.add(new ResponseSignatureValidator(credentialProvider.getValidationCredential()));
+        for (Assertion assertion : assertions) {
+            /*
+             * Any assertion issued for consumption using this profile MUST contain a <Subject> element with at
+             * least one <SubjectConfirmation> element containing a Method of
+             * urn:oasis:names:tc:SAML:2.0:cm:bearer. Such an assertion is termed a bearer assertion.
+             * Bearer assertions MAY contain additional <SubjectConfirmation> elements.
+             * [profiles 06 - 4.1.4.2p20]
+             */
+            Subject subject = assertion.getSubject();
+            if (subject == null) {
+                continue;
+            }
 
-        /*
-         * If the message is signed, the Destination XML attribute in the root SAML element of the protocol
-         * message MUST contain the URL to which the sender has instructed the user agent to deliver the
-         * message. The recipient MUST then verify that the value matches the location at which the message has
-         * been received.
-         * [bindings 05 - 3.5.5.2p24]
-         */
-        boolean allowNullDestination = !(binding == Binding.HTTP_POST && response.isSigned());
-        chain.add(new ResponseDestinationValidator(config.getAssertionConsumerServiceURL(), allowNullDestination));
+            /*
+             * At lease one bearer <SubjectConfirmation> element MUST contain a
+             * <SubjectConfirmationData> element that itself MUST contain a Recipient attribute containing
+             * the service provider's assertion consumer service URL [...].
+             * [profiles 06 - 4.1.4.2p20]
+             */
+            boolean isBearerAssertion = findBearerConfirmation(subject) != null;
+            if (isBearerAssertion) {
+                /*
+                 * Each bearer assertion(s) containing a bearer subject confirmation MUST contain an
+                 * <AudienceRestriction> including the service provider's unique identifier as an <Audience>.
+                 * Other conditions (and other <Audience> elements) MAY be included as requested by the service
+                 * provider or at the discretion of the identity provider. (Of course, all such conditions MUST be
+                 * understood by and accepted by the service provider in order for the assertion to be considered valid.)
+                 * [profiles 06 - 4.1.4.2p20]
+                 */
+                Conditions conditions = assertion.getConditions();
+                if (conditions == null) {
+                    continue;
+                }
 
-        /*
-         * The status code of the response must be 'urn:oasis:names:tc:SAML:2.0:status:Success'
-         */
-        chain.add(new ResponseStatusCodeValidator());
+                List<AudienceRestriction> audienceRestrictions = conditions.getAudienceRestrictions();
+                if (audienceRestrictions.isEmpty()) {
+                    continue;
+                }
 
-        /*
-         * If the <Response> message is signed or
-         * if an enclosed assertion is encrypted, then the <Issuer> element MUST be present. Otherwise it
-         * MAY be omitted. If present it MUST contain the unique identifier of the issuing identity provider; the
-         * Format attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity.
-         * [profiles 06 - 4.1.4.2p19]
-         */
-        boolean allowNullIssuer = !(response.isSigned() || response.getEncryptedAssertions().size() > 0);
-        chain.add(new ResponseIssuerValidator(config.getIdentityProviderEntityID(), allowNullIssuer));
+                boolean audienceValid = false;
+                outer: for (AudienceRestriction audienceRestriction : audienceRestrictions) {
+                    List<Audience> audiences = audienceRestriction.getAudiences();
+                    for (Audience audience : audiences) {
+                        if (config.getEntityID().equals(audience.getAudienceURI())) {
+                            audienceValid = true;
+                            break outer;
+                        }
+                    }
+                }
 
-        /*
-         * The <Assertion> element(s) in the <Response> MUST be signed, if the HTTP POST binding is used,
-         * and MAY be signed if the HTTP-Artifact binding is used.
-         * [profiles 06 - 4.1.3.5p18]
-         */
-        boolean enforceSignature = (binding == Binding.HTTP_POST);
-        chain.add(new AssertionSignatureValidator(credentialProvider.getValidationCredential(), enforceSignature));
+                if (audienceValid) {
+                    /*
+                     * The set of one or more bearer assertions MUST contain at least one <AuthnStatement> that
+                     * reflects the authentication of the principal to the identity provider. Multiple <AuthnStatement>
+                     * elements MAY be included, but the semantics of multiple statements is not defined by this profile.
+                     * [profiles 06 - 4.1.4.2p20]
+                     */
+                    if (assertion.getAuthnStatements().size() > 0) {
+                        LOG.debug("Assertion '{}' is a valid bearer assertion", assertion.getID());
+                        return assertion;
+                    }
+                }
+            }
+        }
 
-        /*
-         * Check the assertions issuers
-         */
-        chain.add(new AssertionIssuerValidator(config.getIdentityProviderEntityID()));
+        throw new ValidationException(ValidationFailedReason.NO_VALID_ASSERTION_CONTAINED, "No contained bearer assertion meets the required conditions");
+    }
 
+    /**
+     * <p>
+     *   Takes the chosen bearer assertion and performs some final validation steps. If the assertion is valid, the result object denotes success. Otherwise
+     *   it contains an according error.
+     * </p>
+     *
+     * <p>Validation steps:</p>
+     * <ul>
+     *   <li>The subject confirmation must contain an InResponseTo attribute. The value must match the ID of the according authentication request.</li>
+     *   <li>The subject confirmation must contain an NotOnOrAfter attribute, which must be fulfilled.</li>
+     *   <li>If the assertion contains more conditions than the audience restriction (e.g. NotBefore, NotOnOrAfter), all conditions must be understood and met.</li>
+     *   <li>The ID of the response must not have been approved before, i.e. a replay check has to be performed.</li>
+     * </ul>
+     *
+     * @param binding The binding via which the response was received
+     * @param response The response
+     * @param assertion The chosen bearer assertion
+     * @return The {@link AuthnRequestInfo} according to the response based on possibly set InResponseTo attributes or <code>null</code> if InResponseTo is not set
+     * @throws ValidationException
+     */
+    protected AuthnRequestInfo validateBearerAssertion(Binding binding, Response response, Assertion bearerAssertion) throws ValidationException {
         /*
          * At lease one bearer <SubjectConfirmation> element MUST contain a
          * <SubjectConfirmationData> element that itself MUST contain a Recipient attribute containing
@@ -141,11 +340,255 @@ public class StrictValidationStrategy extends AbstractChainBasedValidationStrate
          * then the InResponseTo attribute MUST match the request's ID.
          * [profiles 06 - 4.1.4.2p20]
          */
-        chain.add(new RecipientValidator(config.getAssertionConsumerServiceURL()));
-        chain.add(new NotOnOrAfterValidator(new DateTime()));
-        chain.add(new InResponseToValidator(null)); // FIXME
+        DateTime now = new DateTime();
+        SubjectConfirmationData confirmationData = findBearerConfirmation(bearerAssertion.getSubject()).getSubjectConfirmationData();
+        DateTime scNotOnOrAfter = confirmationData.getNotOnOrAfter();
+        if (scNotOnOrAfter == null) {
+            throw new ValidationException(ValidationFailedReason.MISSING_ATTRIBUTE, "SubjectConfirmationData contains no 'NotOnOrAfter' attribute");
+        }
 
-        return chain;
+        if (now.isEqual(scNotOnOrAfter) || now.isAfter(scNotOnOrAfter)) {
+            throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "Assertion is not valid anymore due to 'NotOnOrAfter' attribute in SubjectConfirmationData: " + scNotOnOrAfter);
+        }
+
+        String inResponseTo = confirmationData.getInResponseTo();
+        if (inResponseTo == null) {
+            throw new ValidationException(ValidationFailedReason.MISSING_ATTRIBUTE, "SubjectConfirmationData contains no 'InResponseTo' attribute");
+        }
+
+        /*
+         * Check conditions
+         */
+        Conditions conditions = bearerAssertion.getConditions();
+        DateTime notBefore = conditions.getNotBefore();
+        if (notBefore != null && now.isBefore(notBefore)) {
+            throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "Assertion is not valid anymore due to 'NotBefore' attribute in Conditions: " + notBefore);
+        }
+
+        DateTime notOnOrAfter = conditions.getNotOnOrAfter();
+        if (notOnOrAfter != null && !now.isBefore(notOnOrAfter)) {
+            throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "Assertion is not valid anymore due to 'NotOnOrAfter' attribute in Conditions: " + notOnOrAfter);
+        }
+
+        /*
+         * The service provider MUST ensure that bearer assertions are not replayed, by maintaining the set of used
+         * ID values for the length of time for which the assertion would be considered valid based on the
+         * NotOnOrAfter attribute in the <SubjectConfirmationData>.
+         * [profiles 06 - 4.1.4.2p21]
+         */
+        checkForReplayAttack(response);
+
+        return getAccordingRequestInfo(response, confirmationData);
+    }
+
+    /**
+     * Override this method to change the basic validation steps for the response objects.
+     *
+     * @param binding The binding via which the response was received
+     * @param response The response
+     * @return The list of {@link ResponseValidator}s used to the response
+     */
+    protected List<ResponseValidator> getResponseValidators(Binding binding, Response response) {
+        List<ResponseValidator> responseValidators = new LinkedList<ResponseValidator>();
+
+        /*
+         * If response is signed, we need to verify the signature
+         */
+        responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredential()));
+
+        /*
+         * If the message is signed, the Destination XML attribute in the root SAML element of the protocol
+         * message MUST contain the URL to which the sender has instructed the user agent to deliver the
+         * message. The recipient MUST then verify that the value matches the location at which the message has
+         * been received.
+         * [bindings 05 - 3.5.5.2p24]
+         */
+        boolean allowNullDestination = !(binding == Binding.HTTP_POST && response.isSigned());
+        responseValidators.add(new ResponseDestinationValidator(config.getAssertionConsumerServiceURL(), allowNullDestination));
+
+        /*
+         * The status code of the response must be 'urn:oasis:names:tc:SAML:2.0:status:Success'
+         */
+        responseValidators.add(new ResponseStatusCodeValidator());
+
+        /*
+         * If the <Response> message is signed or
+         * if an enclosed assertion is encrypted, then the <Issuer> element MUST be present. Otherwise it
+         * MAY be omitted. If present it MUST contain the unique identifier of the issuing identity provider; the
+         * Format attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity.
+         * [profiles 06 - 4.1.4.2p19]
+         */
+        boolean allowNullIssuer = !(response.isSigned() || response.getEncryptedAssertions().size() > 0);
+        responseValidators.add(new ResponseIssuerValidator(config.getIdentityProviderEntityID(), allowNullIssuer));
+
+        return responseValidators;
+    }
+
+    /**
+     * Override this method to change the basic validation steps for the assertion objects.
+     *
+     * @param binding The binding via which the response was received
+     * @param response The response
+     * @return The list of {@link AssertionValidator}s used to validate every single assertion
+     */
+    protected List<AssertionValidator> getAssertionValidators(Binding binding, Response response) {
+        List<AssertionValidator> assertionValidators = new LinkedList<AssertionValidator>();
+
+        /*
+         * The <Assertion> element(s) in the <Response> MUST be signed, if the HTTP POST binding is used,
+         * and MAY be signed if the HTTP-Artifact binding is used.
+         * [profiles 06 - 4.1.3.5p18]
+         */
+        boolean enforceSignature = (binding == Binding.HTTP_POST);
+        assertionValidators.add(new AssertionSignatureValidator(credentialProvider.getValidationCredential(), enforceSignature));
+
+        /*
+         * Check the assertions issuers
+         */
+        assertionValidators.add(new AssertionIssuerValidator(config.getIdentityProviderEntityID()));
+        return assertionValidators;
+    }
+
+    /**
+     * Gets the request info according to the passed response. The request is determined by the <code>InResponseTo</code> attributes
+     * of the response or the subject confirmation data. If the attribute is not set in any of both, <code>null</code> is returned.
+     * A validation exception is thrown if:
+     * <ul>
+     *  <li>The attribute is set in both but differs</li>
+     *  <li>No authentication info can be found for the given value</li>
+     * </ul>
+     *
+     * @param The response
+     * @param confirmationData The subject confirmation data of the chosen bearer assertion
+     */
+    protected AuthnRequestInfo getAccordingRequestInfo(Response response, SubjectConfirmationData confirmationData) throws ValidationException {
+        String rInResponseTo = response.getInResponseTo();
+        String scdInResponseTo = confirmationData.getInResponseTo();
+        if (rInResponseTo == null && scdInResponseTo == null) {
+            return null;
+        }
+
+        String inResponseTo;
+        if (rInResponseTo == null) {
+            inResponseTo = scdInResponseTo;
+        } else {
+            if (scdInResponseTo != null) {
+                if (!rInResponseTo.equals(scdInResponseTo)) {
+                    throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "'InResponseTo' attributes of Response and SubjectConfirmationData do not match: " + rInResponseTo + " vs." + scdInResponseTo);
+                }
+            }
+
+            inResponseTo = rInResponseTo;
+        }
+
+        try {
+            AuthnRequestInfo authnRequest = stateManagement.getAuthnRequest(inResponseTo);
+            if (authnRequest == null) {
+                throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "SubjectConfirmationData contains invalid 'InResponseTo' attribute: " + inResponseTo);
+            }
+
+            return authnRequest;
+        } catch (OXException e) {
+            LOG.error("", e);
+            throw new ValidationException(ValidationFailedReason.INTERNAL_ERROR, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Checks if the given response has been replayed and throws a validation exception if so.
+     *
+     * @param response The response
+     * @throws ValidationException
+     */
+    protected void checkForReplayAttack(Response response) throws ValidationException {
+        try {
+            if (stateManagement.hasAuthnResponse(response.getID())) {
+                throw new ValidationException(ValidationFailedReason.RESPONSE_REPLAY, response.getID());
+            }
+        } catch (OXException e) {
+            LOG.error("", e);
+            throw new ValidationException(ValidationFailedReason.INTERNAL_ERROR, e.getMessage(), e);
+        }
+    }
+
+    protected SubjectConfirmation findBearerConfirmation(Subject subject) {
+        for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
+            SubjectConfirmationData subjectConfirmationData = confirmation.getSubjectConfirmationData();
+            if ("urn:oasis:names:tc:SAML:2.0:cm:bearer".equals(confirmation.getMethod()) && subjectConfirmationData != null) {
+                if (config.getAssertionConsumerServiceURL().equals(subjectConfirmationData.getRecipient())) {
+                    return confirmation;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected Decrypter getDecrypter() {
+        /*
+         * TODO:
+         * Currently this decrypter is only able to decrypt assertions
+         * that come along with their symmetric encrytion keys which are
+         * in turn encrypted with the public key of 'encryptionCredential'
+         */
+        List<KeyInfoProvider> keyInfoProviders = new ArrayList<KeyInfoProvider>(4);
+        keyInfoProviders.add(new InlineX509DataProvider());
+        keyInfoProviders.add(new KeyInfoReferenceProvider());
+        keyInfoProviders.add(new DEREncodedKeyValueProvider());
+        keyInfoProviders.add(new RSAKeyValueProvider());
+        keyInfoProviders.add(new DSAKeyValueProvider());
+
+        ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
+        encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
+        encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
+        encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
+        encryptedKeyResolver.getResolverChain().add(new SimpleKeyInfoReferenceEncryptedKeyResolver());
+
+        StaticKeyInfoCredentialResolver skicr = new StaticKeyInfoCredentialResolver(credentialProvider.getDecryptionCredential());
+        Decrypter decrypter = new Decrypter(null, skicr, encryptedKeyResolver);
+        decrypter.setRootInNewDocument(true);
+        return decrypter;
+    }
+
+    private static ValidationError validateResponse(Response response, List<ResponseValidator> responseValidators) {
+        for (ResponseValidator responseValidator : responseValidators) {
+            ValidationError error = responseValidator.validate(response);
+            if (error != null) {
+                return error;
+            }
+        }
+
+        return null;
+    }
+
+    private static ValidationError validateAssertions(Response response, List<Assertion> assertions,List<AssertionValidator> assertionValidators) {
+        for (Assertion assertion : assertions) {
+            for (AssertionValidator assertionValidator : assertionValidators) {
+                ValidationError error = assertionValidator.validate(response, assertion);
+                if (error != null) {
+                    return error;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private List<Assertion> decryptAndCollectAssertions(Response response) throws DecryptionException {
+        List<Assertion> assertions = new LinkedList<Assertion>();
+        List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
+        if (encryptedAssertions.size() > 0) {
+            Decrypter decrypter = getDecrypter();
+            for (EncryptedAssertion encryptedAssertion : encryptedAssertions) {
+                assertions.add(decrypter.decrypt(encryptedAssertion));
+            }
+        }
+
+        for (Assertion assertion : response.getAssertions()) {
+            assertions.add(assertion);
+        }
+
+        return assertions;
     }
 
 }

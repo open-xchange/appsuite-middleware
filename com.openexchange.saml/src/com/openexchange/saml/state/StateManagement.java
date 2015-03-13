@@ -47,64 +47,29 @@
  *
  */
 
-package com.openexchange.saml.validation;
+package com.openexchange.saml.state;
 
-import org.opensaml.saml2.core.Assertion;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link DefaultValidationResult}
+ * The state management is used to assign authentication responses to previously generated requests
+ * and to cache responses to check for replay attacks.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class DefaultValidationResult implements ValidationResult {
+public interface StateManagement {
 
-    private String errorDetail;
+    void addAuthnRequest(AuthnRequestInfo requestInfo, long timeout, TimeUnit timeUnit) throws OXException;
 
-    private ErrorReason reason;
+    AuthnRequestInfo getAuthnRequest(String id) throws OXException;
 
-    private Assertion assertion;
+    void addAuthnResponse(AuthnResponseInfo responseInfo, long timeout, TimeUnit timeUnit) throws OXException;
 
+    boolean hasAuthnResponse(String id) throws OXException;
 
-    /**
-     * Initializes an unsuccessful validation result
-     * @param reason
-     * @param errorDetail
-     */
-    public DefaultValidationResult(ErrorReason reason, String errorDetail) {
-        super();
-        this.reason = reason;
-        this.errorDetail = errorDetail;
-    }
-
-    /**
-     * Initializes a successful validation result
-     * @param assertion
-     */
-    public DefaultValidationResult(Assertion assertion) {
-        super();
-        this.assertion = assertion;
-    }
-
-    @Override
-    public boolean success() {
-        return reason == null;
-    }
-
-    @Override
-    public ErrorReason getErrorReason() {
-        return reason;
-    }
-
-    @Override
-    public String getErrorDetail() {
-        return errorDetail;
-    }
-
-    @Override
-    public Assertion getBearerAssertion() {
-        return assertion;
-    }
+    void removeAuthnRequestInfo(String requestID) throws OXException;
 
 }

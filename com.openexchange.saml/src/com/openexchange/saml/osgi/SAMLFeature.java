@@ -63,6 +63,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -70,9 +71,11 @@ import com.openexchange.osgi.DependentServiceStarter;
 import com.openexchange.saml.DefaultConfig;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLProperties;
-import com.openexchange.saml.SAMLWebSSOProvider;
+import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.http.AssertionConsumerService;
+import com.openexchange.saml.impl.HzStateManagement;
 import com.openexchange.saml.impl.SAMLSessionInspector;
+import com.openexchange.saml.impl.SAMLWebSSOProviderImpl;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.inspector.SessionInspectorService;
@@ -93,7 +96,8 @@ public class SAMLFeature extends DependentServiceStarter {
         ConfigurationService.class,
         DispatcherPrefixService.class,
         SessionReservationService.class,
-        SAMLBackend.class
+        SAMLBackend.class,
+        HazelcastInstance.class
     };
 
     private final static Class<?>[] OPTIONAL_SERVICES = new Class[] {
@@ -116,7 +120,9 @@ public class SAMLFeature extends DependentServiceStarter {
             LOG.info("Starting SAML 2.0 support...");
             OpenSAML openSAML = initOpenSAML();
             DefaultConfig config = DefaultConfig.init(configService);
-            SAMLWebSSOProvider serviceProvider = new SAMLWebSSOProvider(config, openSAML, services);
+
+            HzStateManagement hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
+            WebSSOProvider serviceProvider = new SAMLWebSSOProviderImpl(config, openSAML, hzStateManagement, services);
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
             String acsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/acs";
             servlets.push(acsServletPath);

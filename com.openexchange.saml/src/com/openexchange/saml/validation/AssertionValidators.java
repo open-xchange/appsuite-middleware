@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.saml.validation.chain;
+package com.openexchange.saml.validation;
 
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Issuer;
@@ -60,7 +60,6 @@ import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.saml.validation.ValidationResult.ErrorReason;
 
 
 /**
@@ -106,7 +105,7 @@ public class AssertionValidators {
                     signatureValidator.validate(signature);
                 } catch (ValidationException e) {
                     LOG.debug("", e);
-                    return new ValidationError(ErrorReason.INVALID_ASSERTION_SIGNATURE, e.getMessage());
+                    return new ValidationError(ValidationFailedReason.INVALID_ASSERTION_SIGNATURE, e.getMessage());
                 }
 
                 LOG.debug("Assertion '{}' contains a valid signature", assertionID);
@@ -122,7 +121,7 @@ public class AssertionValidators {
                  * [core 06 - 5.3p70/71]
                  */
                 if (!response.isSigned() && enforceSignature) {
-                    return new ValidationError(ErrorReason.INVALID_ASSERTION_SIGNATURE, "Assertion '" + assertionID + "' is not signed");
+                    return new ValidationError(ValidationFailedReason.INVALID_ASSERTION_SIGNATURE, "Assertion '" + assertionID + "' is not signed");
                 }
             }
 
@@ -150,16 +149,16 @@ public class AssertionValidators {
             String assertionID = assertion.getID();
             Issuer issuer = assertion.getIssuer();
             if (issuer == null) {
-                return new ValidationError(ErrorReason.MISSING_ELEMENT, "'Issuer' is missing in assertion '" + assertionID + "'");
+                return new ValidationError(ValidationFailedReason.MISSING_ELEMENT, "'Issuer' is missing in assertion '" + assertionID + "'");
             } else {
                 String issuerFormat = issuer.getFormat();
                 if (issuerFormat != null && !NameIDType.ENTITY.equals(issuerFormat)) {
-                    return new ValidationError(ErrorReason.INVALID_ELEMENT, "'Issuer' of assertion '" + assertionID + "' has unexpected format: " + issuerFormat);
+                    return new ValidationError(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' of assertion '" + assertionID + "' has unexpected format: " + issuerFormat);
                 }
 
                 String issuerValue = issuer.getValue();
                 if (!issuerValue.equals(expected)) {
-                    return new ValidationError(ErrorReason.INVALID_ELEMENT, "'Issuer' of assertion '" + assertionID + "' has unexpected value: " + issuerValue);
+                    return new ValidationError(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' of assertion '" + assertionID + "' has unexpected value: " + issuerValue);
                 }
 
                 LOG.debug("Assertion '{}' contains a valid 'Issuer' element: {}", assertionID, issuerValue);

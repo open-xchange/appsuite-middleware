@@ -53,12 +53,11 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Response;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.state.StateManagement;
+import com.openexchange.saml.validation.AssertionValidator;
+import com.openexchange.saml.validation.ResponseValidator;
 import com.openexchange.saml.validation.StrictValidationStrategy;
 import com.openexchange.saml.validation.ValidationStrategy;
-import com.openexchange.saml.validation.chain.AbstractChainBasedValidationStrategy;
-import com.openexchange.saml.validation.chain.AssertionValidator;
-import com.openexchange.saml.validation.chain.ResponseValidator;
-import com.openexchange.saml.validation.chain.ValidatorChain;
 
 
 /**
@@ -101,6 +100,7 @@ public interface SAMLBackend {
      * out to work around the validation problems.
      *
      * @param config The SAML configuration
+     * @param stateManagement The SAML state management
      * @return The validation strategy
      * @see StrictValidationStrategy
      * @see AbstractChainBasedValidationStrategy
@@ -108,7 +108,7 @@ public interface SAMLBackend {
      * @see ResponseValidator
      * @see AssertionValidator
      */
-    ValidationStrategy getValidationStrategy(SAMLConfig config);
+    ValidationStrategy getValidationStrategy(SAMLConfig config, StateManagement stateManagement);
 
     /**
      * Resolves an authentication response based on the determined bearer assertion.

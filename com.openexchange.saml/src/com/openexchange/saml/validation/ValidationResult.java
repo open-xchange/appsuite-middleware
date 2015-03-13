@@ -50,93 +50,60 @@
 package com.openexchange.saml.validation;
 
 import org.opensaml.saml2.core.Assertion;
+import com.openexchange.saml.state.AuthnRequestInfo;
 
 
 /**
- * Encapsulates the result of a response validation. If the validation was successful, the
- * detected bearer assertion can be obtained. If the validation failed, details about what
- * led to the failure are provided.
+ * The result object of a response validation via {@link ValidationStrategy}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface ValidationResult {
+public class ValidationResult {
 
-    public enum ErrorReason {
-        /**
-         * The response is digitally signed but its signature cannot be verified.
-         */
-        INVALID_RESPONSE_SIGNATURE("The response is digitally signed but its signature cannot be verified."),
-        /**
-         * The assertion is digitally signed but its signature cannot be verified.
-         */
-        INVALID_ASSERTION_SIGNATURE("The assertion is digitally signed but its signature cannot be verified."),
-        /**
-         * A required XML element is missing.
-         */
-        MISSING_ELEMENT("A required XML element is missing."),
-        /**
-         * A required XML attribute is missing.
-         */
-        MISSING_ATTRIBUTE("A required XML attribute is missing."),
-        /**
-         * A provided XML element contains an invalid value.
-         */
-        INVALID_ELEMENT("A provided XML element contains an invalid value."),
-        /**
-         * A provided XML attribute contains an invalid value.
-         */
-        INVALID_ATTRIBUTE("A provided XML attribute contains an invalid value."),
-        /**
-         * An encrypted XML element cannot be decrypted.
-         */
-        DECRYPTION_FAILED("An encrypted XML element cannot be decrypted."),
-        /**
-         * The response contains a status code different from 'urn:oasis:names:tc:SAML:2.0:status:Success'.
-         */
-        RESPONSE_NOT_SUCCESSFUL("The response contains a status code different from 'urn:oasis:names:tc:SAML:2.0:status:Success'."),
-        /**
-         * The response contained one or more &lt;Assertion&gt; elements, but none is valid.
-         */
-        NO_VALID_ASSERTION_CONTAINED("The response contained one or more <Assertion> elements, but none is valid.");
+    private final Assertion bearerAssertion;
 
-        private final String message;
+    private final AuthnRequestInfo requestInfo;
 
-        private ErrorReason(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
+    /**
+     * Initializes a new {@link ValidationResult}.
+     * @param bearerAssertion
+     * @param requestInfo
+     */
+    public ValidationResult(Assertion bearerAssertion, AuthnRequestInfo requestInfo) {
+        super();
+        this.bearerAssertion = bearerAssertion;
+        this.requestInfo = requestInfo;
     }
 
     /**
-     * Checks whether the according response is considered valid.
-     *
-     * @return <code>true</code> if the response is valid, otherwise <code>false</code>
+     * Initializes a new {@link ValidationResult}.
+     * @param bearerAssertion
+     * @param requestInfo
      */
-    boolean success();
+    public ValidationResult(Assertion bearerAssertion) {
+        super();
+        this.bearerAssertion = bearerAssertion;
+        this.requestInfo = null;
+    }
 
     /**
-     * Gets the reason why the response is considered invalid.
+     * Gets the bearer assertion determined during validation of the authentication response.
      *
-     * @return The reason or <code>null</code> if the response is valid
+     * @return The bearer assertion
      */
-    ErrorReason getErrorReason();
+    public Assertion getBearerAssertion() {
+        return bearerAssertion;
+    }
 
     /**
-     * Gets a detailed error message that further describes the error reason.
+     * Gets the {@link AuthnRequestInfo} of the authentication request according to the validated response.
      *
-     * @return The detail message or <code>null</code> if the response is valid
+     * @return The authentication info or <code>null</code> if no InResponseTo were contained.
      */
-    String getErrorDetail();
+    public AuthnRequestInfo getRequestInfo() {
+        return requestInfo;
+    }
 
-    /**
-     * Gets the bearer assertion which caused the according response to be considered valid.
-     *
-     * @return The assertion. If the response is invalid, <code>null</code> is returned.
-     */
-    Assertion getBearerAssertion();
 
 }

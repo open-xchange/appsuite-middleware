@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.saml.validation.chain;
+package com.openexchange.saml.validation;
 
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDType;
@@ -62,8 +62,6 @@ import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.saml.validation.ValidationResult.ErrorReason;
-import com.openexchange.saml.validation.ValidationStrategy;
 
 
 /**
@@ -109,7 +107,7 @@ public class ResponseValidators {
                     LOG.debug("Response is signed and the signature is valid");
                 } catch (ValidationException e) {
                     LOG.debug("", e);
-                    return new ValidationError(ErrorReason.INVALID_RESPONSE_SIGNATURE, e.getMessage());
+                    return new ValidationError(ValidationFailedReason.INVALID_RESPONSE_SIGNATURE, e.getMessage());
                 }
             }
 
@@ -144,7 +142,7 @@ public class ResponseValidators {
                     return null;
                 }
 
-                return new ValidationError(ErrorReason.MISSING_ATTRIBUTE, "'Destination' is not set in response");
+                return new ValidationError(ValidationFailedReason.MISSING_ATTRIBUTE, "'Destination' is not set in response");
             }
 
             /*
@@ -158,7 +156,7 @@ public class ResponseValidators {
             if (actual.equals(expected)) {
                 LOG.debug("Response contains a valid 'Destination' attribute");
             } else {
-                return new ValidationError(ErrorReason.INVALID_ATTRIBUTE, "'Destination' attribute of response contains an unexpected value: " + actual);
+                return new ValidationError(ValidationFailedReason.INVALID_ATTRIBUTE, "'Destination' attribute of response contains an unexpected value: " + actual);
             }
 
             return null;
@@ -179,7 +177,7 @@ public class ResponseValidators {
         public ValidationError validate(Response response) {
             Status status = response.getStatus();
             if (status == null) {
-                return new ValidationError(ErrorReason.MISSING_ELEMENT, "'Status' is missing in response");
+                return new ValidationError(ValidationFailedReason.MISSING_ELEMENT, "'Status' is missing in response");
             }
 
             String statusCodeValue = status.getStatusCode().getValue();
@@ -192,7 +190,7 @@ public class ResponseValidators {
                     statusMessage = message.getMessage();
                 }
 
-                return new ValidationError(ErrorReason.RESPONSE_NOT_SUCCESSFUL, "Status code: " + statusCodeValue + ", message: " + statusMessage);
+                return new ValidationError(ValidationFailedReason.RESPONSE_NOT_SUCCESSFUL, "Status code: " + statusCodeValue + ", message: " + statusMessage);
             }
 
             return null;
@@ -226,17 +224,17 @@ public class ResponseValidators {
                 if (allowNull) {
                     return null;
                 }
-                return new ValidationError(ErrorReason.MISSING_ELEMENT, "'Issuer' is missing in response");
+                return new ValidationError(ValidationFailedReason.MISSING_ELEMENT, "'Issuer' is missing in response");
             }
 
             String issuerFormat = issuer.getFormat();
             if (issuerFormat != null && !NameIDType.ENTITY.equals(issuerFormat)) {
-                return new ValidationError(ErrorReason.INVALID_ELEMENT, "'Issuer' has unexpected format: " + issuerFormat);
+                return new ValidationError(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' has unexpected format: " + issuerFormat);
             }
 
             String issuerValue = issuer.getValue();
             if (!issuerValue.equals(expected)) {
-                return new ValidationError(ErrorReason.INVALID_ELEMENT, "'Issuer' has unexpected value: " + issuerValue);
+                return new ValidationError(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' has unexpected value: " + issuerValue);
             }
 
             LOG.debug("Response contains a valid 'Issuer' element: {}", issuerValue);

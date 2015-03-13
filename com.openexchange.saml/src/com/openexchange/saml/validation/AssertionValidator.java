@@ -47,19 +47,28 @@
  *
  */
 
-package com.openexchange.saml.validation.chain;
+package com.openexchange.saml.validation;
 
-import org.opensaml.saml2.core.Conditions;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Response;
 
 
 /**
- * {@link ConditionValidator}
+ * An interface for validators meant to be used with a {@link ValidatorChain}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface ConditionValidator {
+public interface AssertionValidator {
 
-    ValidationError validate(Conditions conditions);
+    /**
+     * Validates a certain requirement.
+     *
+     * @param response The assertions response
+     * @param assertion The assertion
+     * @return A {@link ValidationError} with an according reason and message if the validation fails.
+     * If the validation is successful, <code>null</code> is returned.
+     */
+    ValidationError validate(Response response, Assertion assertion);
 
 }

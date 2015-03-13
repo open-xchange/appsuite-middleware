@@ -47,19 +47,67 @@
  *
  */
 
-package com.openexchange.saml.validation.chain;
-
-import org.opensaml.saml2.core.SubjectConfirmationData;
-
+package com.openexchange.saml.validation;
 
 /**
- * {@link SubjectConfirmationDataValidator}
+ * Denotes the reason why a response validation failed.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface SubjectConfirmationDataValidator {
+public enum ValidationFailedReason {
+    /**
+     * The response is digitally signed but its signature cannot be verified.
+     */
+    INVALID_RESPONSE_SIGNATURE("The response is digitally signed but its signature cannot be verified."),
+    /**
+     * The assertion is digitally signed but its signature cannot be verified.
+     */
+    INVALID_ASSERTION_SIGNATURE("The assertion is digitally signed but its signature cannot be verified."),
+    /**
+     * A required XML element is missing.
+     */
+    MISSING_ELEMENT("A required XML element is missing."),
+    /**
+     * A required XML attribute is missing.
+     */
+    MISSING_ATTRIBUTE("A required XML attribute is missing."),
+    /**
+     * A provided XML element contains an invalid value.
+     */
+    INVALID_ELEMENT("A provided XML element contains an invalid value."),
+    /**
+     * A provided XML attribute contains an invalid value.
+     */
+    INVALID_ATTRIBUTE("A provided XML attribute contains an invalid value."),
+    /**
+     * An encrypted XML element cannot be decrypted.
+     */
+    DECRYPTION_FAILED("An encrypted XML element cannot be decrypted."),
+    /**
+     * The response contains a status code different from 'urn:oasis:names:tc:SAML:2.0:status:Success'.
+     */
+    RESPONSE_NOT_SUCCESSFUL("The response contains a status code different from 'urn:oasis:names:tc:SAML:2.0:status:Success'."),
+    /**
+     * The response contained one or more &lt;Assertion&gt; elements, but none is valid.
+     */
+    NO_VALID_ASSERTION_CONTAINED("The response contained one or more <Assertion> elements, but none is valid."),
+    /**
+     * An internal error occurred.
+     */
+    INTERNAL_ERROR("An internal error occurred."),
+    /**
+     * The response is a replay!
+     */
+    RESPONSE_REPLAY("The response is a replay!");
 
-    ValidationError validate(SubjectConfirmationData confirmationData);
+    private final String message;
 
+    private ValidationFailedReason(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }
