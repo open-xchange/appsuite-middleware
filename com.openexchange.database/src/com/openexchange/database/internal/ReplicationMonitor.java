@@ -73,8 +73,10 @@ public class ReplicationMonitor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReplicationMonitor.class);
 
-    private final FetchAndSchema TIMEOUT = new TimeoutFetchAndSchema(this);
-    private final FetchAndSchema NOTIMEOUT = new NotimeoutFetchAndSchema(this);
+    private final FetchAndSchema TIMEOUT = new TimeoutFetchAndSchema(this, true);
+    private final FetchAndSchema NOTIMEOUT = new NotimeoutFetchAndSchema(this, true);
+    private final FetchAndSchema TIMEOUT_NOSCHEMA = new TimeoutFetchAndSchema(this, false);
+    private final FetchAndSchema NOTIMEOUT_NOSCHEMA = new NotimeoutFetchAndSchema(this, false);
 
     private final AtomicLong masterConnectionsFetched = new AtomicLong();
     private final AtomicLong slaveConnectionsFetched = new AtomicLong();
@@ -93,6 +95,16 @@ public class ReplicationMonitor {
 
     Connection checkFallback(Pools pools, AssignmentImpl assign, boolean noTimeout, boolean write) throws OXException {
         return checkFallback(pools, assign, noTimeout ? NOTIMEOUT : TIMEOUT, write);
+    }
+
+    Connection checkFallback(Pools pools, AssignmentImpl assign, boolean noTimeout, boolean write, boolean noSchema) throws OXException {
+        FetchAndSchema fetchAndSchema;
+        if (noTimeout) {
+            fetchAndSchema = noSchema ? NOTIMEOUT_NOSCHEMA : NOTIMEOUT;
+        } else {
+            fetchAndSchema = noSchema ? TIMEOUT_NOSCHEMA : TIMEOUT;
+        }
+        return checkFallback(pools, assign, fetchAndSchema, write);
     }
 
     private Connection checkFallback(Pools pools, AssignmentImpl assign, FetchAndSchema fetch, boolean write) throws OXException {

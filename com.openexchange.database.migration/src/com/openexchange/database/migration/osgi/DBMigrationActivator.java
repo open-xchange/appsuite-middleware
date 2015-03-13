@@ -51,23 +51,14 @@ package com.openexchange.database.migration.osgi;
 
 import liquibase.servicelocator.CustomResolverServiceLocator;
 import liquibase.servicelocator.ServiceLocator;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
 import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.database.migration.internal.DBMigrationMonitor;
-import com.openexchange.database.migration.internal.Services;
-import com.openexchange.database.migration.osgi.tracker.ManagementServiceTracker;
+import com.openexchange.database.migration.mbean.MBeanRegisterer;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.startup.SignalStartedService;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * Activator for the main migration bundle
@@ -77,14 +68,12 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class DBMigrationActivator extends HousekeepingActivator {
 
-    volatile ServiceTracker<ManagementService, ManagementService> managementServiceTracker;
-
     /**
      * {@inheritDoc}
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ThreadPoolService.class };
+        return EMPTY_CLASSES;
     }
 
     /**
@@ -92,36 +81,23 @@ public class DBMigrationActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class);
+        org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class).info("Starting bundle: {}", context.getBundle().getSymbolicName());
 
-        final BundleContext context = this.context;
-        logger.info("Starting bundle: {}", context.getBundle().getSymbolicName());
-
-        Services.setServiceLookup(this);
         // Important: Enable liquibase to load required classes (e.g. liquibase.logging.Logger implementation) from this bundle
         ServiceLocator.setInstance(new CustomResolverServiceLocator(new BundlePackageScanClassResolver(this.context.getBundle())));
-
-        context.registerService(DBMigrationMonitorService.class, DBMigrationMonitor.getInstance(), null);
-
-        final DatabaseService databaseService = getService(DatabaseService.class);
-        final ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
-        threadPoolService.submit(new AbstractTask<Void>() {
-
-            @Override
-            public Void call() throws Exception {
-                DBMigrationExecutorServiceImpl dbMigrationExecutorService = new DBMigrationExecutorServiceImpl(databaseService);
-                ServiceTracker<ManagementService, ManagementService> managementServiceTracker = new ServiceTracker<ManagementService, ManagementService>(
-                    context,
-                    ManagementService.class,
-                    new ManagementServiceTracker(context, dbMigrationExecutorService, databaseService));
-                DBMigrationActivator.this.managementServiceTracker = managementServiceTracker;
-                managementServiceTracker.open();
-
-                dbMigrationExecutorService.runConfigDBCoreMigrations();
-                context.registerService(DBMigrationExecutorService.class, dbMigrationExecutorService, null);
-                return null;
-            }
-        });
+        /*
+         * instantiate & register services
+         */
+        DBMigrationExecutorServiceImpl executorService = new DBMigrationExecutorServiceImpl();
+        MBeanRegisterer registerer = new MBeanRegisterer(context, executorService);
+        executorService.setRegisterer(registerer);
+        registerService(DBMigrationMonitorService.class, DBMigrationMonitor.getInstance());
+        registerService(DBMigrationExecutorService.class, executorService);
+        /*
+         * register utility mbean for migrations once the management service appears
+         */
+        track(ManagementService.class, registerer);
+        openTrackers();
     }
 
     /**
@@ -129,16 +105,7 @@ public class DBMigrationActivator extends HousekeepingActivator {
      */
     @Override
     protected void stopBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class);
-        logger.info("Stopping bundle: {}", this.context.getBundle().getSymbolicName());
-
-        ServiceTracker<ManagementService, ManagementService> managementServiceTracker = this.managementServiceTracker;
-        if (managementServiceTracker != null) {
-            managementServiceTracker.close();
-            this.managementServiceTracker = null;
-        }
-
-        Services.setServiceLookup(null);
+        org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class).info("Stopping bundle: {}", this.context.getBundle().getSymbolicName());
         ServiceLocator.reset();
         super.stopBundle();
     }

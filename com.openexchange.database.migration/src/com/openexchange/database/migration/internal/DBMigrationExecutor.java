@@ -50,6 +50,7 @@
 package com.openexchange.database.migration.internal;
 
 import static com.openexchange.database.migration.internal.LiquibaseHelper.LIQUIBASE_NO_DEFINED_CONTEXT;
+import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -57,36 +58,32 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
-import liquibase.resource.ResourceAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ConfigDBMigrationExecutor}
+ * {@link DBMigrationExecutor}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ConfigDBMigrationExecutor implements Runnable {
+public class DBMigrationExecutor implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConfigDBMigrationExecutor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DBMigrationExecutor.class);
 
-    private final DatabaseService databaseService;
     private final Queue<ScheduledExecution> scheduledExecutions;
     private final Lock lock = new ReentrantLock();
     private Thread thread;
 
     /**
-     * Initializes a new {@link ConfigDBMigrationExecutor}.
-     *
-     * @param databaseService The database service
+     * Initializes a new {@link DBMigrationExecutor}.
      */
-    public ConfigDBMigrationExecutor(DatabaseService databaseService) {
+    public DBMigrationExecutor() {
         super();
-        this.databaseService = databaseService;
         scheduledExecutions = new LinkedList<ScheduledExecution>();
     }
 
@@ -109,8 +106,11 @@ public class ConfigDBMigrationExecutor implements Runnable {
             Exception exception = null;
             Liquibase liquibase = null;
             String fileLocation = scheduledExecution.getFileLocation();
+            DBMigrationConnectionProvider connectionProvider = scheduledExecution.getConnectionProvider();
+            Connection connection = null;
             try {
-                liquibase = LiquibaseHelper.prepareLiquibase(databaseService, fileLocation, scheduledExecution.getResourceAccessor());
+                connection = connectionProvider.get();
+                liquibase = LiquibaseHelper.prepareLiquibase(connection, fileLocation, scheduledExecution.getResourceAccessor());
                 DBMigrationMonitor.getInstance().addFile(fileLocation);
                 if (scheduledExecution.isRollback()) {
                     Object target = scheduledExecution.getRollbackTarget();
@@ -149,28 +149,39 @@ public class ConfigDBMigrationExecutor implements Runnable {
             } finally {
                 scheduledExecution.setDone(exception);
                 try {
-                    LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
+                    LiquibaseHelper.cleanUpLiquibase(liquibase);
                 } catch (Exception e) {
                     LOG.error("", e);
+                }
+                if (null != connection) {
+                    connectionProvider.back(connection);
                 }
                 DBMigrationMonitor.getInstance().removeFile(fileLocation);
             }
         }
     }
 
-    public ScheduledExecution scheduleMigration(String fileLocation, ResourceAccessor resourceAccessor) {
-        ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, resourceAccessor);
-        schedule(scheduledExecution);
-        return scheduledExecution;
+    /**
+     * Schedules a database migration.
+     *
+     * @param migration The database migration
+     * @return The scheduled migration
+     */
+    public ScheduledExecution scheduleMigration(DBMigration migration) {
+        return schedule(new ScheduledExecution(migration));
     }
 
-    public ScheduledExecution scheduleRollback(String fileLocation, ResourceAccessor resourceAccessor, Object rollbackTarget) {
-        ScheduledExecution scheduledExecution = new ScheduledExecution(fileLocation, resourceAccessor, rollbackTarget);
-        schedule(scheduledExecution);
-        return scheduledExecution;
+    /**
+     * Schedules a database migration rollback.
+     *
+     * @param migration The database migration
+     * @param rollbackTarget The rollback target
+     */
+    public ScheduledExecution scheduleRollback(DBMigration migration, Object rollbackTarget) {
+        return schedule(new ScheduledExecution(migration, rollbackTarget));
     }
 
-    private void schedule(ScheduledExecution scheduledExecution) {
+    private ScheduledExecution schedule(ScheduledExecution scheduledExecution) {
         lock.lock();
         try {
             scheduledExecutions.add(scheduledExecution);
@@ -181,6 +192,7 @@ public class ConfigDBMigrationExecutor implements Runnable {
         } finally {
             lock.unlock();
         }
+        return scheduledExecution;
     }
 
 }

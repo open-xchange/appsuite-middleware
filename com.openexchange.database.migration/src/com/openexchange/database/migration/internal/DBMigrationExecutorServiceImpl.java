@@ -53,23 +53,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.resource.ResourceAccessor;
-import org.apache.commons.lang.Validate;
-import org.osgi.framework.FrameworkUtil;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationState;
-import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
+import com.openexchange.database.migration.mbean.MBeanRegisterer;
 import com.openexchange.exception.OXException;
 
 /**
@@ -81,63 +78,53 @@ import com.openexchange.exception.OXException;
  */
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
 
-    private static final String CONFIGDB_CHANGE_LOG = "/liquibase/configdbChangeLog.xml";
-
-    private final ConfigDBMigrationExecutor executor;
-    private final DatabaseService databaseService;
-    private final BundleResourceAccessor localResourceAccessor = new BundleResourceAccessor(FrameworkUtil.getBundle(getClass()));
-
+    private final DBMigrationExecutor executor;
+    private MBeanRegisterer registerer;
 
     /**
      * Initializes a new {@link DBMigrationExecutorServiceImpl}.
-     *
-     * @param databaseService - {@link DatabaseService} to be able to execute migration files
      */
-    public DBMigrationExecutorServiceImpl(DatabaseService databaseService) {
+    public DBMigrationExecutorServiceImpl() {
         super();
-
-        Validate.notNull(databaseService, "DatabaseService mustn't be null!");
-
-        this.databaseService = databaseService;
-        executor = new ConfigDBMigrationExecutor(databaseService);
+        executor = new DBMigrationExecutor();
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DBMigrationState scheduleConfigDBMigration(String fileLocation, ResourceAccessor accessor) {
-    	return executor.scheduleMigration(fileLocation, accessor);
-    }
-
-    /**
-     * {@inheritDoc}
+     * Sets the MBean registerer instance to use.
      *
-     * @throws OXException
+     * @param registerer The MBean registerer
      */
-    @Override
-    public DBMigrationState scheduleConfigDBRollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor) {
-        return executor.scheduleRollback(fileLocation, accessor, numberOfChangeSets);
+    public void setRegisterer(MBeanRegisterer registerer) {
+        this.registerer = registerer;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws OXException
-     */
     @Override
-    public DBMigrationState scheduleConfigDBRollback(String fileLocation, String changeSetTag, ResourceAccessor accessor) {
-    	return executor.scheduleRollback(fileLocation, accessor, changeSetTag);
+    public DBMigrationState scheduleDBMigration(DBMigration migration) {
+        return executor.scheduleMigration(migration);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public List<ChangeSet> listUnrunConfigDBChangeSets(String fileLocation, ResourceAccessor accessor) throws OXException {
+    public boolean registerMBean(DBMigration migration) {
+        return null != registerer && registerer.register(migration);
+    }
+
+    @Override
+    public DBMigrationState scheduleDBRollback(DBMigration migration, int numberOfChangeSets) {
+        return executor.scheduleRollback(migration, numberOfChangeSets);
+    }
+
+    @Override
+    public DBMigrationState scheduleDBRollback(DBMigration migration, String changeSet) {
+        return executor.scheduleRollback(migration, changeSet);
+    }
+
+    @Override
+    public List<ChangeSet> listUnrunDBChangeSets(DBMigration migration) throws OXException {
+        Connection connection = null;
         Liquibase liquibase = null;
         try {
-        	liquibase = LiquibaseHelper.prepareLiquibase(databaseService, fileLocation, accessor);
+            connection = migration.getConnectionProvider().get();
+        	liquibase = LiquibaseHelper.prepareLiquibase(connection, migration.getFileLocation(), migration.getAccessor());
         	return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));
         } catch (Exception exception) {
             if (exception instanceof OXException) {
@@ -154,36 +141,45 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
                 throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
             }
         } finally {
-        	LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
+        	LiquibaseHelper.cleanUpLiquibase(liquibase);
+        	if (null != connection) {
+        	    migration.getConnectionProvider().back(connection);
+        	}
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean migrationsRunning() {
         return !DBMigrationMonitor.getInstance().getScheduledFiles().isEmpty();
     }
 
-    public String getConfigDBStatus() throws OXException {
+    @Override
+    public String getDBStatus(DBMigration migration) throws OXException {
+        Connection connection = null;
         Liquibase liquibase = null;
         try {
-            liquibase = LiquibaseHelper.prepareLiquibase(databaseService, CONFIGDB_CHANGE_LOG, localResourceAccessor);
+            connection = migration.getConnectionProvider().get();
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration.getFileLocation(), migration.getAccessor());
             StringWriter sw = new StringWriter();
             liquibase.reportStatus(true, LIQUIBASE_NO_DEFINED_CONTEXT, sw);
             return sw.toString();
         } catch (LiquibaseException e) {
             throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(e);
         } finally {
-            LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
+            LiquibaseHelper.cleanUpLiquibase(liquibase);
+            if (null != connection) {
+                migration.getConnectionProvider().back(connection);
+            }
         }
     }
 
-    public String listConfigDBLocks() throws OXException {
+    @Override
+    public String listDBLocks(DBMigration migration) throws OXException {
+        Connection connection = null;
         Liquibase liquibase = null;
         try {
-            liquibase = LiquibaseHelper.prepareLiquibase(databaseService, CONFIGDB_CHANGE_LOG, localResourceAccessor);
+            connection = migration.getConnectionProvider().get();
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration.getFileLocation(), migration.getAccessor());
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(os);
             liquibase.reportLocks(ps);
@@ -193,20 +189,11 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         } catch (UnsupportedEncodingException e) {
             throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(e);
         } finally {
-            LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
+            LiquibaseHelper.cleanUpLiquibase(liquibase);
+            if (null != connection) {
+                migration.getConnectionProvider().back(connection);
+            }
         }
-    }
-
-
-    public void runConfigDBCoreMigrations() throws InterruptedException, ExecutionException {
-        ScheduledExecution scheduledExecution = executor.scheduleMigration(CONFIGDB_CHANGE_LOG, localResourceAccessor);
-        scheduledExecution.awaitCompletion();
-    }
-
-
-    public void rollbackConfigDBCoreMigrations(String changeSetTag) throws ExecutionException, InterruptedException {
-        ScheduledExecution scheduledExecution = executor.scheduleRollback(CONFIGDB_CHANGE_LOG, localResourceAccessor, changeSetTag);
-        scheduledExecution.awaitCompletion();
     }
 
 }

@@ -47,73 +47,80 @@
  *
  */
 
-package com.openexchange.database.internal;
+package com.openexchange.database.migration;
 
-import com.openexchange.exception.OXException;
+import liquibase.resource.ResourceAccessor;
 
 /**
- * {@link GlobalDbConfig}
+ * {@link DBMigration}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class GlobalDbConfig {
+public class DBMigration {
 
-    /** The name used for the special "default" context group */
-    static final String DEFAULT_GROUP = "default";
-
+    private final DBMigrationConnectionProvider connectionProvider;
+    private final String fileLocation;
+    private final ResourceAccessor accessor;
     private final String schema;
-    private final int readPoolId;
-    private final int writePoolId;
 
     /**
-     * Initializes a new {@link GlobalDbConfig}.
+     * Initializes a new {@link DBMigration}.
      *
-     * @param schema The schema name
-     * @param readPoolId The read pool identifier
-     * @param writePoolId The write pool identifier
+     * @param connectionProvider The connection provider used to acquire and release database connections
+     * @param fileLocation Location of the changelog file (e.g. "/liquibase/configdbChangeLog.xml")
+     * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
+     * @param schema The database schema name the migration operates on
      */
-    GlobalDbConfig(String schema, int readPoolId, int writePoolId) {
+    public DBMigration(DBMigrationConnectionProvider connectionProvider, String fileLocation, ResourceAccessor accessor, String schema) {
         super();
+        this.connectionProvider = connectionProvider;
+        this.fileLocation = fileLocation;
+        this.accessor = accessor;
         this.schema = schema;
-        this.readPoolId = readPoolId;
-        this.writePoolId = writePoolId;
     }
 
     /**
-     * Gets an appropriate read-/write-pool assignment for this global database config.
+     * Gets the connection provider.
      *
-     * @return The assignment
+     * @return The connectionProvider
      */
-    public AssignmentImpl getAssignment() throws OXException {
-        return getAssignment(Server.getServerId());
+    public DBMigrationConnectionProvider getConnectionProvider() {
+        return connectionProvider;
     }
 
     /**
-     * Gets an appropriate read-/write-pool assignment for this global database config.
+     * Gets the file location.
      *
-     * @param serverID The server identifier to use
-     * @return The assignment
+     * @return The file location
      */
-    public AssignmentImpl getAssignment(int serverID) throws OXException {
-        return new AssignmentImpl(0, serverID, readPoolId, writePoolId, schema);
+    public String getFileLocation() {
+        return fileLocation;
     }
 
     /**
-     * Gets the schema name.
+     * Gets the database schema name.
      *
      * @return The schema name
      */
-    public String getSchema() {
+    public String getSchemaName() {
         return schema;
+    }
+
+    /**
+     * Gets the resource accessor.
+     *
+     * @return The accessor
+     */
+    public ResourceAccessor getAccessor() {
+        return accessor;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + readPoolId;
+        result = prime * result + ((fileLocation == null) ? 0 : fileLocation.hashCode());
         result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-        result = prime * result + writePoolId;
         return result;
     }
 
@@ -125,11 +132,15 @@ public class GlobalDbConfig {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof GlobalDbConfig)) {
+        if (!(obj instanceof DBMigration)) {
             return false;
         }
-        GlobalDbConfig other = (GlobalDbConfig) obj;
-        if (readPoolId != other.readPoolId) {
+        DBMigration other = (DBMigration) obj;
+        if (fileLocation == null) {
+            if (other.fileLocation != null) {
+                return false;
+            }
+        } else if (!fileLocation.equals(other.fileLocation)) {
             return false;
         }
         if (schema == null) {
@@ -139,15 +150,12 @@ public class GlobalDbConfig {
         } else if (!schema.equals(other.schema)) {
             return false;
         }
-        if (writePoolId != other.writePoolId) {
-            return false;
-        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "GlobalDbConfig [schema=" + schema + ", readPoolId=" + readPoolId + ", writePoolId=" + writePoolId + "]";
+        return "DBMigration [fileLocation=" + fileLocation + ", schema=" + schema + "]";
     }
 
 }

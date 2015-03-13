@@ -59,20 +59,16 @@ import javax.management.MBeanException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.1
  */
-public interface ConfigDBMigrationMBean {
+public interface DBMigrationMBean {
 
-    public static final String DOMAIN = "com.openexchange.database.migration";
-
-    public static final String KEY = "name";
-
-    public static final String VALUE = "Database migration";
+    static final String DOMAIN = "com.openexchange.database.migration";
 
     /**
      * Force running the core configdb changelog
      *
      * @throws MBeanException
      */
-    public void forceMigration() throws MBeanException;
+    void forceMigration() throws MBeanException;
 
     /**
      * Rollback to the given tag of a changeset of the core changelog
@@ -80,14 +76,14 @@ public interface ConfigDBMigrationMBean {
      * @param changeSetTag
      * @throws MBeanException
      */
-    public void rollbackMigration(String changeSetTag) throws MBeanException;
+    void rollbackMigration(String changeSetTag) throws MBeanException;
 
     /**
      * Releases all configdb migration locks. Use this in case no lock can be acquired by liquibase.
      *
      * @throws MBeanException
      */
-    public void releaseLocks() throws MBeanException;
+    void releaseLocks() throws MBeanException;
 
     /**
      * Gets a human-readable migration status string for the configdb.
@@ -95,7 +91,7 @@ public interface ConfigDBMigrationMBean {
      * @return The status
      * @throws MBeanException
      */
-    public String getMigrationStatus() throws MBeanException;
+    String getMigrationStatus() throws MBeanException;
 
     /**
      * Gets a human-readable lock status string for the configdb.
@@ -103,5 +99,6 @@ public interface ConfigDBMigrationMBean {
      * @return The status
      * @throws MBeanException
      */
-    public String getLockStatus() throws MBeanException;
+    String getLockStatus() throws MBeanException;
+
 }

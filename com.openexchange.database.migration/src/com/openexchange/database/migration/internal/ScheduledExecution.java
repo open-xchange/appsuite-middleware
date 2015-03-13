@@ -54,6 +54,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import liquibase.resource.ResourceAccessor;
+import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationState;
 
 
@@ -66,47 +68,49 @@ import com.openexchange.database.migration.DBMigrationState;
 public class ScheduledExecution implements DBMigrationState {
 
     private final Lock lock = new ReentrantLock();
-
     private final Condition wasExecuted = lock.newCondition();
-
-    private final String fileLocation;
-
-    private final ResourceAccessor resourceAccessor;
-
     private final Object rollbackTarget;
+    private final DBMigration migration;
 
     private ExecutionException exception = null;
-
     private boolean done = false;
 
     /**
      * Initializes a new {@link ScheduledExecution}.
-     * @param fileLocation
-     * @param resourceAccessor
+     *
+     * @param migration The database migration
      */
-    public ScheduledExecution(String fileLocation, ResourceAccessor resourceAccessor) {
-        this(fileLocation, resourceAccessor, null);
+    public ScheduledExecution(DBMigration migration) {
+        this(migration, null);
     }
 
     /**
      * Initializes a new {@link ScheduledExecution}.
-     * @param fileLocation
-     * @param resourceAccessor
-     * @param rollbackTarget
+     *
+     * @param migration The database migration
+     * @param rollbackTarget The rollback target
      */
-    public ScheduledExecution(String fileLocation, ResourceAccessor resourceAccessor, Object rollbackTarget) {
+    public ScheduledExecution(DBMigration migration, Object rollbackTarget) {
         super();
-        this.fileLocation = fileLocation;
-        this.resourceAccessor = resourceAccessor;
+        this.migration = migration;
         this.rollbackTarget = rollbackTarget;
     }
 
+    /**
+     * Gets the database connection provider.
+     *
+     * @return The database connection provider
+     */
+    DBMigrationConnectionProvider getConnectionProvider() {
+        return migration.getConnectionProvider();
+    }
+
     String getFileLocation() {
-        return fileLocation;
+        return migration.getFileLocation();
     }
 
     ResourceAccessor getResourceAccessor() {
-        return resourceAccessor;
+        return migration.getAccessor();
     }
 
     boolean isRollback() {
@@ -157,11 +161,16 @@ public class ScheduledExecution implements DBMigrationState {
     }
 
     @Override
+    public DBMigration getMigration() {
+        return migration;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((fileLocation == null) ? 0 : fileLocation.hashCode());
-        result = prime * result + ((resourceAccessor == null) ? 0 : resourceAccessor.hashCode());
+        result = prime * result + ((getFileLocation() == null) ? 0 : getFileLocation().hashCode());
+        result = prime * result + ((getResourceAccessor() == null) ? 0 : getResourceAccessor().hashCode());
         result = prime * result + ((rollbackTarget == null) ? 0 : rollbackTarget.hashCode());
         result = prime * result + ((wasExecuted == null) ? 0 : wasExecuted.hashCode());
         return result;
@@ -169,39 +178,50 @@ public class ScheduledExecution implements DBMigrationState {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ScheduledExecution other = (ScheduledExecution) obj;
-        if (fileLocation == null) {
-            if (other.fileLocation != null)
+        if (getFileLocation() == null) {
+            if (other.getFileLocation() != null) {
                 return false;
-        } else if (!fileLocation.equals(other.fileLocation))
+            }
+        } else if (!getFileLocation().equals(other.getFileLocation())) {
             return false;
-        if (resourceAccessor == null) {
-            if (other.resourceAccessor != null)
+        }
+        if (getResourceAccessor() == null) {
+            if (other.getResourceAccessor() != null) {
                 return false;
-        } else if (!resourceAccessor.equals(other.resourceAccessor))
+            }
+        } else if (!getResourceAccessor().equals(other.getResourceAccessor())) {
             return false;
+        }
         if (rollbackTarget == null) {
-            if (other.rollbackTarget != null)
+            if (other.rollbackTarget != null) {
                 return false;
-        } else if (!rollbackTarget.equals(other.rollbackTarget))
+            }
+        } else if (!rollbackTarget.equals(other.rollbackTarget)) {
             return false;
+        }
         if (wasExecuted == null) {
-            if (other.wasExecuted != null)
+            if (other.wasExecuted != null) {
                 return false;
-        } else if (!wasExecuted.equals(other.wasExecuted))
+            }
+        } else if (!wasExecuted.equals(other.wasExecuted)) {
             return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "ScheduledExecution [fileLocation=" + fileLocation + ", resourceAccessor=" + resourceAccessor + ", rollbackTarget=" + rollbackTarget + ", done=" + done + "]";
+        return "ScheduledExecution [fileLocation=" + getFileLocation() + ", resourceAccessor=" + getResourceAccessor() + ", rollbackTarget=" + rollbackTarget + ", done=" + done + "]";
     }
 
 }

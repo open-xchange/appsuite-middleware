@@ -65,10 +65,18 @@ final class TimeoutFetchAndSchema implements FetchAndSchema {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TimeoutFetchAndSchema.class);
     private final ReplicationMonitor monitor;
+    private final boolean setSchema;
 
-    TimeoutFetchAndSchema(ReplicationMonitor monitor) {
+    /**
+     * Initializes a new {@link TimeoutFetchAndSchema}.
+     *
+     * @param monitor The replication monitor
+     * @param setSchema <code>true</code> to set the schema name when getting the connection, <code>false</code>, otherwise
+     */
+    TimeoutFetchAndSchema(ReplicationMonitor monitor, boolean setSchema) {
         super();
         this.monitor = monitor;
+        this.setSchema = setSchema;
     }
 
     @Override
@@ -95,19 +103,21 @@ final class TimeoutFetchAndSchema implements FetchAndSchema {
                 pool = pools.getPool(poolId);
             }
         } while (null == retval);
-        try {
-            final String schema = assign.getSchema();
-            if (null != schema && !retval.getCatalog().equals(schema)) {
-                retval.setCatalog(schema);
-            }
-        } catch (SQLException e) {
+        if (setSchema) {
             try {
-                pool.back(retval);
-            } catch (PoolingException e1) {
-                DBUtils.close(retval);
-                LOG.error(e1.getMessage(), e1);
+                final String schema = assign.getSchema();
+                if (null != schema && !retval.getCatalog().equals(schema)) {
+                    retval.setCatalog(schema);
+                }
+            } catch (SQLException e) {
+                try {
+                    pool.back(retval);
+                } catch (PoolingException e1) {
+                    DBUtils.close(retval);
+                    LOG.error(e1.getMessage(), e1);
+                }
+                throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
             }
-            throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
         return ConnectionReturnerFactory.createConnection(pools, monitor, assign, retval, false, write, usedAsRead);
     }

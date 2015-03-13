@@ -14,8 +14,6 @@ import liquibase.resource.ResourceAccessor;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
@@ -28,32 +26,27 @@ public class LiquibaseHelper {
 
     /**
      * Prepares a new liquibase instance for the given file location. The instance is initialized with a writable non-timeout connection to
-     * the config database.
+     * the underlying database.
      *
-     * @param databaseService The database service for obtaining the connection
+     * @param connection The database connection to use
      * @param fileLocation The file location
      * @param accessor Needed to access the given file
      * @return The initialized liquibase instance
-     * @throws LiquibaseException
-     * @throws OXException
      */
-    public static Liquibase prepareLiquibase(DatabaseService databaseService, String fileLocation, ResourceAccessor accessor) throws LiquibaseException, OXException {
-        Connection connection = databaseService.getForUpdateTask();
+    public static Liquibase prepareLiquibase(Connection connection, String fileLocation, ResourceAccessor accessor) throws LiquibaseException, OXException {
         MySQLDatabase database = new MySQLDatabase();
         database.setConnection(new JdbcConnection(connection));
-        Liquibase liquibase = new Liquibase(fileLocation, LiquibaseHelper.prepareResourceAccessor(accessor), database);
-        return liquibase;
+        return new Liquibase(fileLocation, LiquibaseHelper.prepareResourceAccessor(accessor), database);
     }
 
     /**
-     * All liquibase locks are released and the underlying connection is closed (resp. returned to the connection pool via the given
-     * {@link DatabaseService}.
+     * All liquibase locks are released and the underlying connection is closed.
      *
-     * @param databaseService The database service for returning the connection
      * @param liquibase The liquibase instance. If <code>null</code>, calling this method has no effect.
+     * @return The underlying database connection, or <code>null</code> if not available
      * @throws OXException If an error occurs while releasing the locks
      */
-    public static void cleanUpLiquibase(DatabaseService databaseService, Liquibase liquibase) throws OXException {
+    public static Connection cleanUpLiquibase(Liquibase liquibase) throws OXException {
         if (liquibase != null) {
             try {
                 liquibase.forceReleaseLocks();
@@ -65,9 +58,7 @@ public class LiquibaseHelper {
                     DatabaseConnection connectionWrapper = database.getConnection();
                     if (connectionWrapper != null) {
                         try {
-                            Connection connection = ((JdbcConnection) connectionWrapper).getUnderlyingConnection();
-                            Databases.autocommit(connection);
-                            databaseService.backForUpdateTask(connection);
+                            return  ((JdbcConnection) connectionWrapper).getUnderlyingConnection();
                         } catch (ClassCastException e) {
                             LOG.warn("An unexpected connection instance was passed, it will be closed manually.", e);
                             try {
@@ -80,11 +71,12 @@ public class LiquibaseHelper {
                 }
             }
         }
+        return null;
     }
 
     /**
      * Prepares a {@link CompositeResourceAccessor} containing the given {@link ResourceAccessor} and one for this bundle.
-     * 
+     *
      * @param provided The {@link ResourceAccessor} provided by service users
      * @return A {@link CompositeResourceAccessor}
      */

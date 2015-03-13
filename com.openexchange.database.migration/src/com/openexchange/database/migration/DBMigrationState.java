@@ -64,7 +64,7 @@ public interface DBMigrationState {
      *
      * @return <code>true</code> if the task is done.
      */
-    public boolean isDone();
+    boolean isDone();
 
     /**
      * Awaits the completion of this migration. If the current thread is interrupted while its blocked, {@link InterruptedException} is
@@ -74,6 +74,13 @@ public interface DBMigrationState {
      *             {@link ExecutionException#getCause()}. The according exception has already been logged, you don't need to do that again.
      * @throws InterruptedException If the current thread is interrupted while waiting for completion.
      */
-    public void awaitCompletion() throws ExecutionException, InterruptedException;
+    void awaitCompletion() throws ExecutionException, InterruptedException;
+
+    /**
+     * Gets the underlying database migration.
+     *
+     * @return The database migration
+     */
+    DBMigration getMigration();
 
 }

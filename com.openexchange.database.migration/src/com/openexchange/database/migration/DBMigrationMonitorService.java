@@ -65,4 +65,5 @@ public interface DBMigrationMonitorService {
      * @return Collection<String> - collection with the files the changesets have to be executed
      */
     Collection<String> getScheduledFiles();
+
 }

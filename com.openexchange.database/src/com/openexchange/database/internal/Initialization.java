@@ -52,7 +52,6 @@ package com.openexchange.database.internal;
 import static com.openexchange.database.internal.Configuration.Property.CHECK_WRITE_CONS;
 import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.CacheService;
@@ -60,6 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -117,7 +117,15 @@ public final class Initialization {
         return null != databaseService;
     }
 
-    public DatabaseService start(final ConfigurationService configurationService, ConfigViewFactory configViewFactory) throws OXException {
+    /**
+     * Initializes the database service.
+     *
+     * @param configurationService A reference to the configuration service
+     * @param configViewFactory The config view factory
+     * @param migrationService The database migration service
+     * @return The database service
+     */
+    public DatabaseService start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService) throws OXException {
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
@@ -138,15 +146,9 @@ public final class Initialization {
         if (null != cacheService) {
             configDatabaseService.setCacheService(cacheService);
         }
-        // Global database service
-        globalDatabaseService = new GlobalDatabaseServiceImpl(pools, monitor, parseGlobalDbConfigs(configurationService), configViewFactory);
+        configDatabaseService.scheduleMigrations(migrationService);
         // Context pool life cycle.
-        final ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(
-            configuration,
-            management,
-            timer,
-            configDatabaseService);
-        pools.addLifeCycle(contextDBLifeCycle);
+        pools.addLifeCycle(new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService));
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
         try {
@@ -154,6 +156,10 @@ public final class Initialization {
         } catch (OXException e) {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
+        // Global database service
+        Map<String, GlobalDbConfig> globalDbConfigs = GlobalDbInit.init(configurationService, configDatabaseService, pools, monitor);
+        globalDatabaseService = new GlobalDatabaseServiceImpl(pools, monitor, globalDbConfigs, configViewFactory);
+        globalDatabaseService.scheduleMigrations(migrationService);
         databaseService = new DatabaseServiceImpl(pools, configDatabaseService, globalDatabaseService, monitor);
         return databaseService;
     }
@@ -188,32 +194,6 @@ public final class Initialization {
 
     public Timer getTimer() {
         return timer;
-    }
-
-    /**
-     * Parses configuration settings for the global database from the configuration file <code>globaldb.yml</code>.
-     *
-     * @param configService A reference to the configuration service
-     * @return The global db configurations, mapped by their assigned group names, or an empty map if none are defined
-     */
-    private static Map<String, GlobalDbConfig> parseGlobalDbConfigs(ConfigurationService configService) throws OXException {
-        String fileName = "globaldb.yml";
-        Map<String, GlobalDbConfig> configs = null;
-        Object yaml = configService.getYaml(fileName);
-        if (null != yaml && Map.class.isInstance(yaml)) {
-            Map<String, Object> map = (Map<String, Object>) yaml;
-            if (0 != map.size()) {
-                configs = GlobalDbConfig.parse(map);
-            }
-        }
-        if (null == configs || 0 == configs.size()) {
-            LOG.warn("No global database settings configured at \"{}\", global database features are not available.", fileName);
-            return Collections.emptyMap();
-        }
-        if (false == configs.containsKey(GlobalDbConfig.DEFAULT_GROUP)) {
-            LOG.warn("No global database settings for group \"{}\" configured at \"{}\", no global fallback database available.", GlobalDbConfig.DEFAULT_GROUP, fileName);
-        }
-        return configs;
     }
 
 }
