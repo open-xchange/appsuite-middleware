@@ -57,8 +57,8 @@ import java.util.List;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class ContextUsers {
-    private int contextId;
-    private List<UserToken> userTokens;
+    private final int contextId;
+    private final List<UserToken> userTokens;
 
     public ContextUsers(int contextId, List<UserToken> userTokens) {
         this.contextId = contextId;
@@ -71,5 +71,19 @@ public class ContextUsers {
 
     public List<UserToken> getUserTokens() {
         return userTokens;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer("ContextUsers [");
+        sb.append("contextId=");
+        sb.append(contextId);
+        sb.append(", userTokens=");
+        sb.append("[ ");
+        for(UserToken ut : userTokens) {
+            sb.append(ut.toString());
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }
