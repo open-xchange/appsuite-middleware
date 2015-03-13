@@ -90,7 +90,7 @@ public final class BetaFeatures implements PreferencesItemService {
         return new AbstractUserFuncs() {
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                final Set<String> set = user.getAttributes().get(NAME);
+                Set<String> set = user.getAttributes().get(NAME);
                 if (null == set || set.isEmpty()) {
                     // Return global configuration setting for beta features
                     setting.setSingleValue(B(getBooleanProperty(PROP_BETA, true)));
@@ -113,7 +113,15 @@ public final class BetaFeatures implements PreferencesItemService {
                 if (!("true".equalsIgnoreCase(value)) && !("false".equalsIgnoreCase(value))) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(value, NAME);
                 }
-                UserStorage.getInstance().setAttribute(NAME, value, user.getId(), ctx);
+
+                // Only update if different
+                Set<String> set = user.getAttributes().get(NAME);
+                if (null == set || set.isEmpty()) {
+                    UserStorage.getInstance().setAttribute(NAME, value, user.getId(), ctx);
+                } else if (Boolean.parseBoolean(set.iterator().next()) != Boolean.parseBoolean(value)) {
+                    UserStorage.getInstance().setAttribute(NAME, value, user.getId(), ctx);
+                }
+
             }
         };
     }

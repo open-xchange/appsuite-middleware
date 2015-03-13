@@ -85,12 +85,12 @@ public class CachingUserStorage extends UserStorage {
     /**
      * Proxy attribute for the object implementing the persistent methods.
      */
-    private final UserStorage delegate;
+    private final RdbUserStorage delegate;
 
     /**
      * Default constructor.
      */
-    public CachingUserStorage(final UserStorage delegate) {
+    public CachingUserStorage(RdbUserStorage delegate) {
         super();
         this.delegate = delegate;
     }
@@ -132,20 +132,21 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public User getUser(final int uid, final Context context) throws OXException {
+    public User getUser(int uid, Context context) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getUser(uid, context);
         }
 
         Cache cache = cacheService.getCache(REGION_NAME);
-        Object object = cache.get(cacheService.newCacheKey(context.getContextId(), uid));
+        CacheKey key = cacheService.newCacheKey(context.getContextId(), uid);
+        Object object = cache.get(key);
         if (object instanceof User) {
             return (User) object;
         }
 
         User user = delegate.getUser(uid, context);
-        cache.put(cacheService.newCacheKey(context.getContextId(), uid), user, false);
+        cache.put(key, user, false);
         return user;
     }
 
@@ -314,8 +315,30 @@ public class CachingUserStorage extends UserStorage {
 
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
-        delegate.setAttribute(name, value, userId, context);
-        invalidateUserCache(context, userId);
+        if (null == name) {
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
+        }
+
+        if (name.startsWith("client:")) {
+            // Special handling for last-login time stamp
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (cacheService == null) {
+                // Huh...?
+                delegate.setAttribute(name, value, userId, context);
+            } else {
+                // Set attribute and obtain updated user
+                User updatedUser = delegate.setAttributeAndReturnUser(name, value, userId, context, true);
+
+                // Put into cache
+                Cache cache = cacheService.getCache(REGION_NAME);
+                CacheKey key = cacheService.newCacheKey(context.getContextId(), userId);
+                cache.put(key, updatedUser, false);
+            }
+        } else {
+            // Regular way
+            delegate.setAttribute(name, value, userId, context);
+            invalidateUserCache(context, userId);
+        }
     }
 
     @Override
