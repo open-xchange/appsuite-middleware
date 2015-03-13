@@ -59,7 +59,6 @@ import org.json.JSONObject;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.Credentials;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -98,38 +97,35 @@ public class AdminAuthRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/adminAuth")
-    public JSONObject doAdminAuth(String body) throws OXException {
-        if (Strings.isEmpty(body)) {
+    public JSONObject doAdminAuth(JSONObject body) throws OXException {
+        if (body == null || body.isEmpty()) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
-        JSONObject jRequest;
+        if (false == body.hasAndNotNull("login")) {
+            throw AjaxExceptionCodes.MISSING_FIELD.create("login");
+        }
+
+        if (false == body.hasAndNotNull("password")) {
+            throw AjaxExceptionCodes.MISSING_FIELD.create("password");
+        }
+        Authenticator authenticator = services.getService(Authenticator.class);
         try {
-            jRequest = new JSONObject(body);
-
-            if (false == jRequest.hasAndNotNull("login")) {
-                throw AjaxExceptionCodes.MISSING_FIELD.create("login");
+            int contextId = body.optInt("context", 0);
+            if (contextId <= 0) {
+                authenticator.doAuthentication(createCredentials(body.getString("login"), body.getString("password")));
+            } else {
+                authenticator.doAuthentication(createCredentials(body.getString("login"), body.getString("password")), contextId);
             }
-
-            if (false == jRequest.hasAndNotNull("password")) {
-                throw AjaxExceptionCodes.MISSING_FIELD.create("password");
-            }
-            Authenticator authenticator = services.getService(Authenticator.class);
-            try {
-                int contextId = jRequest.optInt("context", 0);
-                if (contextId <= 0) {
-                    authenticator.doAuthentication(new Credentials(jRequest.getString("login"), jRequest.getString("password")));
-                } else {
-                    authenticator.doAuthentication(new Credentials(jRequest.getString("login"), jRequest.getString("password")), contextId);
-                }
-                return new JSONObject(2).put("result", true);
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            } catch (OXException e) {
-                return new JSONObject(2).putSafe("result", Boolean.FALSE);
-            }
+            return new JSONObject(2).put("result", true);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (OXException e) {
+            return new JSONObject(2).putSafe("result", Boolean.FALSE);
         }
+    }
+    
+    Credentials createCredentials(String login, String password) {
+        return new Credentials(login, password);
     }
 }
