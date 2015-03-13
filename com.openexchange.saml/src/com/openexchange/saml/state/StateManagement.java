@@ -64,12 +64,13 @@ public interface StateManagement {
 
     void addAuthnRequest(AuthnRequestInfo requestInfo, long timeout, TimeUnit timeUnit) throws OXException;
 
-    AuthnRequestInfo getAuthnRequest(String id) throws OXException;
-
-    void addAuthnResponse(AuthnResponseInfo responseInfo, long timeout, TimeUnit timeUnit) throws OXException;
-
-    boolean hasAuthnResponse(String id) throws OXException;
+    AuthnRequestInfo getAuthnRequest(String requestID) throws OXException;
 
     void removeAuthnRequestInfo(String requestID) throws OXException;
+
+    void addAuthnResponse(String responseID, long timeout, TimeUnit timeUnit) throws OXException;
+
+    boolean hasAuthnResponse(String responseID) throws OXException;
+
 
 }

@@ -51,10 +51,11 @@ package com.openexchange.saml;
 
 
 /**
- * {@link SAMLConfig}
+ * Contains configuration settings of the SAML feature.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
+ * @see DefaultConfig
  */
 public interface SAMLConfig {
 
@@ -63,28 +64,68 @@ public interface SAMLConfig {
         HTTP_POST;
     }
 
+    /**
+     * Gets the human-readable name of the service provider.
+     *
+     * @return The provider name. Never <code>null</code>.
+     */
     String getProviderName();
 
+    /**
+     * Gets the entity ID of the service provider.
+     *
+     * @return The entity ID. Never <code>null</code>.
+     */
     String getEntityID();
 
+    /**
+     * Gets the URL of the assertion consumer service (ACS).
+     *
+     * @return The ACS URL. Never <code>null</code>.
+     */
     String getAssertionConsumerServiceURL();
 
     /**
-     * spec: redirect, post or artifact
+     * Gets the binding used to send out authentication requests.
+     *
+     * @return The binding. Never <code>null</code>.
      */
     Binding getRequestBinding();
 
     /**
-     * spec: post or artifact
+     * Gets the binding via which authentication responses are to be received.
+     *
+     * @return The binding. Never <code>null</code>.
      */
     Binding getResponseBinding();
 
+    /**
+     * Gets the entity ID of the identity provider.
+     *
+     * @return The ID. Never <code>null</code>.
+     */
+    String getIdentityProviderEntityID();
+
+    /**
+     * Gets the URL of the identity provider (IDP).
+     *
+     * @return The URL. Never <code>null</code>.
+     */
     String getIdentityProviderURL();
 
+    /**
+     * Whether the single logout profile is supported. Note: currently only IDP-initiated
+     * single logout is implemented.
+     *
+     * @return <code>true</code> if the profile is supported, otherwise false.
+     */
     boolean supportSingleLogout();
 
+    /**
+     * The URL of the single logout service.
+     *
+     * @return The URL or <code>null</code>, if the profile is not supported.
+     */
     String getSingleLogoutServiceURL();
-
-    String getIdentityProviderEntityID();
 
 }

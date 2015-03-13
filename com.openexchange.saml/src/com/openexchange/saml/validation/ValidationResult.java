@@ -105,5 +105,4 @@ public class ValidationResult {
         return requestInfo;
     }
 
-
 }

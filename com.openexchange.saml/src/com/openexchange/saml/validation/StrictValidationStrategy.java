@@ -82,6 +82,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.spi.CredentialProvider;
+import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 import com.openexchange.saml.validation.AssertionValidators.AssertionIssuerValidator;
@@ -94,7 +95,7 @@ import com.openexchange.saml.validation.ResponseValidators.ResponseStatusCodeVal
 
 /**
  * <p>
- *   A validation strategy that tries to strictly obey the SAML 2.0 sepc. It is meant as reference implementation for validating
+ *   A validation strategy that tries to strictly obey the SAML 2.0 spec. It is meant as reference implementation for validating
  *   authentication responses. The validation is divided into three subsequent steps while the result of each predecessor method
  *   is passed as an argument to the successor method. Every method can abort further validation by returning an error that
  *   describes why the validation failed. The first method basically validates the response object and its contained assertions.
@@ -102,10 +103,10 @@ import com.openexchange.saml.validation.ResponseValidators.ResponseStatusCodeVal
  *   that bearer assertion is checked further in terms of fulfilled conditions etc.
  * </p>
  * <p>
- *   The JavaDoc of every method states the validation steps that are necessary to obey the SAML 2.0 specification. Nevertheless,
+ *   The JavaDoc of every method denotes the validation steps that are necessary to obey the SAML 2.0 specification. Nevertheless,
  *   the IDP of a concrete deployment may not obey the spec in such a strict way and validation will fail even if the received assertions
  *   must be accepted. In these cases you need to implement your own validation strategy. Best practice is to base your implementation
- *   on this one and only remove/relax the single validation steps to let the valdiation pass.
+ *   on this one and only remove/relax the single validation steps to let the validation pass.
  * </p>
  * <p>
  *   Several validation steps are commented with excerpts from the SAML 2.0 specification. Those excerpts are always annotated with their
@@ -129,9 +130,9 @@ public class StrictValidationStrategy implements ValidationStrategy {
 
     /**
      * Initializes a new {@link StrictValidationStrategy}.
-     * @param config
-     * @param credentialProvider
-     * @param stateManagement
+     * @param config The SAML configuration
+     * @param credentialProvider The credential provider as in {@link SAMLBackend#getCredentialProvider()}
+     * @param stateManagement The state management
      */
     public StrictValidationStrategy(SAMLConfig config, CredentialProvider credentialProvider, StateManagement stateManagement) {
         super();
@@ -143,7 +144,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
     @Override
     public ValidationResult validate(Response response, Binding binding) throws ValidationException {
         List<Assertion> responseValidationResult = validateResponse(binding, response);
-        Assertion bearerAssertion = chooseAssertion(binding, response, responseValidationResult);
+        Assertion bearerAssertion = determineAssertion(binding, response, responseValidationResult);
         AuthnRequestInfo authnRequestInfo = validateBearerAssertion(binding, response, bearerAssertion);
         return new ValidationResult(bearerAssertion, authnRequestInfo);
     }
@@ -151,7 +152,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
     /**
      * <p>
      *   Checks if the given response is basically valid and returns all contained assertions after they have possibly been decrypted.
-     *   If the response was invalid or at least one assertion could not be decrypted, the result object denotes an according error.
+     *   If the response was invalid or at least one assertion could not be decrypted, a validation exception is thrown.
      * </p>
      *
      * <p>Validation steps:</p>
@@ -176,8 +177,8 @@ public class StrictValidationStrategy implements ValidationStrategy {
      *
      * @param binding The binding via which the response was received
      * @param response The response
-     * @return The list of (possibly decrypted) assertions
-     * @throws ValidationException
+     * @return All assertions contained in the response
+     * @throws ValidationException If validation fails
      */
     protected List<Assertion> validateResponse(Binding binding, Response response) throws ValidationException {
         List<ResponseValidator> responseValidators = getResponseValidators(binding, response);
@@ -208,18 +209,17 @@ public class StrictValidationStrategy implements ValidationStrategy {
 
     /**
      * <p>
-     *   Takes the assertions that are returned from {@link #validate(Response, Binding)}, performs basic validation and
-     *   chooses the bearer assertion that asserts a users authentication. The chosen assertion is further validated
-     *   in the next step then. If none of the passed assertions is a valid bearer assertion, the result object must
-     *   return an according error.
+     *   Takes the assertions that are returned from {@link #validate(Response, Binding)}, and determines the bearer assertion that
+     *   asserts a certain users authentication. If none of the passed assertions is a valid bearer assertion, a validation exception is
+     *   thrown.
      * </p>
      *
-     * <p>Steps to choose an assertion:</p>
+     * <p>Steps to determine an assertion:</p>
      * <ul>
      *   <li>
      *     The assertion contains a subject element with at least one subject confirmation whose method is equal to
      *     <code>urn:oasis:names:tc:SAML:2.0:cm:bearer</code>. The subject confirmation contains a subject confirmation data element with
-     *     a recipient attribute containing the ACS URL.
+     *     a recipient attribute equal to the ACS URL.
      *   </li>
      *   <li>
      *     The assertion contains an audience restriction element, which in turn contains an audience element whose value is equal to the
@@ -230,11 +230,11 @@ public class StrictValidationStrategy implements ValidationStrategy {
      *
      * @param binding The binding via which the response was received
      * @param response The response
-     * @param assertions The (possibly decrypted) and basically validated assertions
-     * @return The validation result containing the chosen bearer assertion or an error
-     * @throws ValidationException
+     * @param assertions The assertions, formerly returned from {@link #validateResponse(Binding, Response)}
+     * @return The determined bearer assertion
+     * @throws ValidationException If no bearer assertion could be determined
      */
-    protected Assertion chooseAssertion(Binding binding, Response response, List<Assertion> assertions) throws ValidationException {
+    protected Assertion determineAssertion(Binding binding, Response response, List<Assertion> assertions) throws ValidationException {
         /*
          * We'll select the first contained assertion that
          *  - is a bearer assertion
@@ -311,8 +311,8 @@ public class StrictValidationStrategy implements ValidationStrategy {
 
     /**
      * <p>
-     *   Takes the chosen bearer assertion and performs some final validation steps. If the assertion is valid, the result object denotes success. Otherwise
-     *   it contains an according error.
+     *   Takes the determined bearer assertion and performs some final validation steps. If a {@link AuthnRequestInfo} belonging to the response could be determined
+     *   via {@link StateManagement}, it is returned. If any validation step fails, a validation exception is thrown.
      * </p>
      *
      * <p>Validation steps:</p>
@@ -325,9 +325,9 @@ public class StrictValidationStrategy implements ValidationStrategy {
      *
      * @param binding The binding via which the response was received
      * @param response The response
-     * @param assertion The chosen bearer assertion
+     * @param assertion The bearer assertion
      * @return The {@link AuthnRequestInfo} according to the response based on possibly set InResponseTo attributes or <code>null</code> if InResponseTo is not set
-     * @throws ValidationException
+     * @throws ValidationException If any validation step fails
      */
     protected AuthnRequestInfo validateBearerAssertion(Binding binding, Response response, Assertion bearerAssertion) throws ValidationException {
         /*
@@ -526,7 +526,6 @@ public class StrictValidationStrategy implements ValidationStrategy {
 
     protected Decrypter getDecrypter() {
         /*
-         * TODO:
          * Currently this decrypter is only able to decrypt assertions
          * that come along with their symmetric encrytion keys which are
          * in turn encrypted with the public key of 'encryptionCredential'
@@ -544,8 +543,8 @@ public class StrictValidationStrategy implements ValidationStrategy {
         encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
         encryptedKeyResolver.getResolverChain().add(new SimpleKeyInfoReferenceEncryptedKeyResolver());
 
-        StaticKeyInfoCredentialResolver skicr = new StaticKeyInfoCredentialResolver(credentialProvider.getDecryptionCredential());
-        Decrypter decrypter = new Decrypter(null, skicr, encryptedKeyResolver);
+        StaticKeyInfoCredentialResolver kekCredentialResolver = new StaticKeyInfoCredentialResolver(credentialProvider.getDecryptionCredential());
+        Decrypter decrypter = new Decrypter(null, kekCredentialResolver, encryptedKeyResolver);
         decrypter.setRootInNewDocument(true);
         return decrypter;
     }

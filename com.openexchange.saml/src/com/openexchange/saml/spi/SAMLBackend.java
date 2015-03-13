@@ -89,6 +89,16 @@ public interface SAMLBackend {
     SAMLWebSSOCustomizer getWebSSOCustomizer();
 
     /**
+     * An exception handler that resolves exceptions thrown by e.g. {@link SAMLWebSSOCustomizer}.
+     * You can simply return an instance of {@link DefaultExceptionHandler} here, but probably you
+     * want to customize a few things (like HTML error pages). Its considered best practice to inherit
+     * from {@link DefaultExceptionHandler} and return your custom version.
+     *
+     * @return The exception handler
+     */
+    ExceptionHandler getExceptionHandler();
+
+    /**
      * Gets the validation strategy that will be used to validate authentication responses.
      * Most likely you want return an instance of {@link StrictValidationStrategy} here.
      *

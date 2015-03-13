@@ -55,8 +55,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.spi.ExceptionHandler;
+import com.openexchange.saml.WebSSOProvider;
 
 
 /**
@@ -71,9 +72,12 @@ public class AssertionConsumerService extends HttpServlet {
 
     private final WebSSOProvider provider;
 
-    public AssertionConsumerService(WebSSOProvider provider) {
+    private final ExceptionHandler exceptionHandler;
+
+    public AssertionConsumerService(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
         super();
         this.provider = provider;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -81,8 +85,7 @@ public class AssertionConsumerService extends HttpServlet {
         try {
             provider.handleAuthnResponse(httpRequest, httpResponse, Binding.HTTP_POST);
         } catch (OXException e) {
-            // TODO
-            httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            exceptionHandler.handleAuthnResponseFailed(httpRequest, httpResponse, e);
         }
     }
 

@@ -51,6 +51,7 @@ package com.openexchange.saml.validation;
 
 import org.opensaml.saml2.core.Response;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.state.AuthnRequestInfo;
 
 
 /**
@@ -67,8 +68,9 @@ public interface ValidationStrategy {
      *
      * @param response The response
      * @param binding The binding
-     * @return The extracted bearer assertion
-     * @throws ValidationException If the response validation failed
+     * @return The validation result containing the determined bearer assertion and optionally an according
+     *         {@link AuthnRequestInfo} denoting the AuthnRequest that initiated the authentication flow.
+     * @throws ValidationException If the response validation fails
      */
     ValidationResult validate(Response response, Binding binding) throws ValidationException;
 

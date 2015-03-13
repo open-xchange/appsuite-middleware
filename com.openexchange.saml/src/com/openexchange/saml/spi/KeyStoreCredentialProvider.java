@@ -97,7 +97,7 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
      */
     public static KeyStoreCredentialProvider newInstance(String keyStorePath, char[] keyStorePassword, String idpCertAlias, String signingKeyAlias, char[] signingKeyPassword, String decryptionKeyAlias, char[] decryptionKeyPassword) throws OXException {
         if (Strings.isEmpty(keyStorePath)) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("a keystore path must be set");
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("a keystore path must be set");
         }
 
         BasicCredential idpCertificateCredential = null;
@@ -109,7 +109,7 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
             if (!Strings.isEmpty(idpCertAlias)) {
                 Certificate certificate = keyStore.getCertificate(idpCertAlias);
                 if (certificate == null) {
-                    throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("key store contains no certificate for alias '" + idpCertAlias + "'");
+                    throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store contains no certificate for alias '" + idpCertAlias + "'");
                 }
 
                 idpCertificateCredential = new BasicCredential();
@@ -120,11 +120,11 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
             signingCredential = credentialFromKeyPair(keyStore, signingKeyAlias, signingKeyPassword, UsageType.SIGNING);
             encryptionCredential = credentialFromKeyPair(keyStore, decryptionKeyAlias, decryptionKeyPassword, UsageType.ENCRYPTION);
         } catch (KeyStoreException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
         } catch (NoSuchAlgorithmException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
         } catch (UnrecoverableEntryException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
         }
 
         return new KeyStoreCredentialProvider(idpCertificateCredential, signingCredential, encryptionCredential);
@@ -139,7 +139,7 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
 
             Entry keyStoreEntry = keyStore.getEntry(alias, pp);
             if (keyStoreEntry == null) {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("key store contains no entry key for alias '" + alias + "'");
+                throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store contains no entry key for alias '" + alias + "'");
             }
 
             if (keyStoreEntry instanceof KeyStore.PrivateKeyEntry) {
@@ -150,7 +150,7 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
                 credential.setPrivateKey(pke.getPrivateKey());
                 return credential;
             } else {
-                throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("key store entry for alias '" + alias + "' is not a private key");
+                throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store entry for alias '" + alias + "' is not a private key");
             }
         }
 
@@ -160,11 +160,11 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
     private static KeyStore initKeyStore(String path, char[] password) throws OXException, KeyStoreException {
         File keyStoreFile = new File(path);
         if (!keyStoreFile.exists() || !keyStoreFile.isFile()) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("The keystore path " + path + " points to an invalid file");
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("The keystore path " + path + " points to an invalid file");
         }
 
         if (!keyStoreFile.canRead()) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create("The keystore file " + path + " is not readable");
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("The keystore file " + path + " is not readable");
         }
 
         FileInputStream inputStream = null;
@@ -174,13 +174,13 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
             keystore.load(inputStream, password == null ? null : password);
             return keystore;
         } catch (FileNotFoundException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
         } catch (NoSuchAlgorithmException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
         } catch (CertificateException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
         } catch (IOException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
         } finally {
             Streams.close(inputStream);
         }

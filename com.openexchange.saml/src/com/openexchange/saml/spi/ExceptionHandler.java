@@ -49,52 +49,29 @@
 
 package com.openexchange.saml.spi;
 
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Response;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.SAMLConfig;
-import com.openexchange.saml.validation.AssertionValidator;
-import com.openexchange.saml.validation.ResponseValidator;
-import com.openexchange.saml.validation.StrictValidationStrategy;
-import com.openexchange.saml.validation.ValidationStrategy;
+import com.openexchange.saml.WebSSOProvider;
+
 
 /**
- * {@link AuthnResponseHandler}
+ * An extension point to define how exceptions thrown during SAML authentication flows shall be handled.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface AuthnResponseHandler {
+public interface ExceptionHandler {
 
     /**
-     * Resolves a principal based on the provided response and bearer assertion.
+     * This method is called when {@link WebSSOProvider#handleAuthnResponse(HttpServletRequest, HttpServletResponse, com.openexchange.saml.SAMLConfig.Binding)}
+     * failed with an exception. An exception handler is responsible for answering the HTTP request then. Normally the request is a redirect, triggered by the
+     * IDP and the result is directly visible to the user.
      *
-     * @param response The SAML response
-     * @param assertion A valid bearer assertion whose subject shall be mapped to a principal
-     * @return The principal, which must denote an existing user
-     * @throws OXException If the principal cannot be resolved
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @param exception The thrown exception
      */
-    AuthenticationInfo resolvePrincipal(Response response, Assertion assertion) throws OXException;
-
-    /**
-     * Gets the validation strategy that will be used to validate authentication responses.
-     * Most likely you want return an instance of {@link StrictValidationStrategy} here.
-     *
-     * Unfortunately it might be that the actual IDPs responses are not conform to the SAML spec,
-     * as it is quite complex and hard to implement. In such cases you need to implement your own
-     * validation strategy. To avoid that malicious responses are accepted as valid you should not
-     * start with implementing your own validation mechanisms from scratch, but inherit from
-     * {@link AbstractChainBasedValidationStrategy}. You can then simply leave single validators
-     * out to work around the validation problems.
-     *
-     * @param config The SAML configuration
-     * @return The validation strategy
-     * @see StrictValidationStrategy
-     * @see AbstractChainBasedValidationStrategy
-     * @see ValidatorChain
-     * @see ResponseValidator
-     * @see AssertionValidator
-     */
-    ValidationStrategy getValidationStrategy(SAMLConfig config);
+    void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception);
 
 }

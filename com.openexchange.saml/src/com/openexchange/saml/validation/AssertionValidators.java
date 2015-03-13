@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * {@link AssertionValidators}
+ * Container for common assertion validators.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

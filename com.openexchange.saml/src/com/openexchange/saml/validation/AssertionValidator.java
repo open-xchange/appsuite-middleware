@@ -54,7 +54,8 @@ import org.opensaml.saml2.core.Response;
 
 
 /**
- * An interface for validators meant to be used with a {@link ValidatorChain}.
+ * An interface for assertion validators. Allows to build fine grained validation steps
+ * and chain them together.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -62,7 +63,7 @@ import org.opensaml.saml2.core.Response;
 public interface AssertionValidator {
 
     /**
-     * Validates a certain requirement.
+     * Validates a certain part of an assertion.
      *
      * @param response The assertions response
      * @param assertion The assertion

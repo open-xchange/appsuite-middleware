@@ -51,7 +51,7 @@ package com.openexchange.saml.state;
 
 
 /**
- * {@link DefaultAuthnRequestInfo}
+ * Default implementation of {@link AuthnRequestInfo}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

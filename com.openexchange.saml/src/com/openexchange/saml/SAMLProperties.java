@@ -51,27 +51,53 @@ package com.openexchange.saml;
 
 
 /**
- * {@link SAMLProperties}
+ * Constants that denote the keys of <code>saml.properties</code>.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
 public class SAMLProperties {
 
+    /**
+     * Toggle to enable/disable the feature as a whole
+     */
     public static final String ENABLED = "com.openexchange.saml.enabled";
 
+    /**
+     * The binding used to send out authentication requests.
+     */
     public static final String REQUEST_BINDING = "com.openexchange.saml.requestBinding";
 
+    /**
+     * The binding via which authentication responses are to be received. This value is also used
+     * as value for the <code>ProtocolBinding</code> attribute in AuthnRequest objects and contained
+     * in the generated metadata XML of the service provider.
+     */
     public static final String RESPONSE_BINDING = "com.openexchange.saml.responseBinding";
 
+    /**
+     * The URL of the assertion consumer service.
+     */
     public static final String ACS_URL = "com.openexchange.saml.acsURL";
 
+    /**
+     * The unique entity ID of the service provider.
+     */
     public static final String ENTITY_ID = "com.openexchange.saml.entityID";
 
+    /**
+     * The human-readable name of the service provider.
+     */
     public static final String PROVIDER_NAME = "com.openexchange.saml.providerName";
 
+    /**
+     * The unique entity ID of the identity provider.
+     */
     public static final String IDP_ENTITY_ID = "com.openexchange.saml.idpEntityID";
 
+    /**
+     * The URL of the identity provider where authentication requests are redirected to.
+     */
     public static final String IDP_URL = "com.openexchange.saml.idpURL";
 
 

@@ -52,7 +52,8 @@ package com.openexchange.saml.validation;
 import org.opensaml.saml2.core.Response;
 
 /**
- * An interface for response validators that are meant to use within a {@link ValidatorChain}.
+ * An interface for response validators. Allows to build fine grained validation steps
+ * and chain them together.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -60,7 +61,7 @@ import org.opensaml.saml2.core.Response;
 public interface ResponseValidator {
 
     /**
-     * Validates a certain requirement.
+     * Validates a certain part of a response.
      *
      * @param response The response
      * @return A {@link ValidationError} with an according reason and message if the validation fails.

@@ -61,7 +61,8 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link DefaultConfig}
+ * Default implementation of {@link SAMLConfig} based on {@link ConfigurationService} and
+ * <code>saml.properties</code>.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

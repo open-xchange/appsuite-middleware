@@ -109,8 +109,8 @@ public interface CredentialProvider {
 
     /*
      * Using certificates that are part of KeyInfo elements in the signed XML itself would require
-     * us to verify those in terms of if we trust them. In case we need to extract and use those certificates at a later point
-     * that is how it works:
+     * us to verify if we trust them. In case we need to extract and use those certificates at a later
+     * point, that is how it works:
      *
      *     List<KeyInfoProvider> keyInfoProviders = new ArrayList<KeyInfoProvider>(4);
      *     keyInfoProviders.add(new InlineX509DataProvider());

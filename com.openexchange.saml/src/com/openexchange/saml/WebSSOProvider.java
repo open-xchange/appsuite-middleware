@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
 
 /**
- * {@link WebSSOProvider}
+ * The interface for SAML 2.0 Web SSO support.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -64,15 +64,15 @@ import com.openexchange.saml.SAMLConfig.Binding;
 public interface WebSSOProvider {
 
     /**
-     * Response with an authentication request based on the configured binding.
+     * Responds with an authentication request based on the configured binding.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
      */
-    void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException;
+    void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException;
 
     /**
-     * Handles an authentication response
+     * Handles an authentication response.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response

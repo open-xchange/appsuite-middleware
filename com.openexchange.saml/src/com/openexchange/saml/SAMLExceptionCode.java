@@ -55,45 +55,45 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
-
 /**
  * {@link SAMLExceptionCode}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-// TODO cleanup
 public enum SAMLExceptionCode implements DisplayableOXExceptionCode {
-
     /**
-     * An error regarding the SAML keystore occurred: %1$s
+     * An error regarding the SAML credential provider occurred: %1$s
      */
-    KEYSTORE_PROBLEM("An error regarding the SAML keystore occurred: %1$s", Category.CATEGORY_CONFIGURATION, 1),
-
+    CREDENTIAL_PROBLEM("An error regarding the SAML credential provider occurred: %1$s", Category.CATEGORY_CONFIGURATION, 1),
+    /**
+     * An error occurred while trying to marshall a SAML object to XML: %1$s
+     */
     MARSHALLING_PROBLEM("An error occurred while trying to marshall a SAML object to XML: %1$s", Category.CATEGORY_ERROR, 2),
-
+    /**
+     * An error occurred while trying to encode a SAML message for transport: %1$s
+     */
     ENCODING_ERROR("An error occurred while trying to encode a SAML message for transport: %1$s", Category.CATEGORY_ERROR, 3),
-
+    /**
+     * An error occurred while decoding a SAML message: %1$s
+     */
     DECODING_ERROR("An error occurred while decoding a SAML message: %1$s", Category.CATEGORY_ERROR, 4),
-
-//    DECRYPTION_FAILED("Could not decrypt a SAML message: %1$s", Category.CATEGORY_ERROR, 5),
-
-//    SIGNATURE_VALIDATION_FAILED("Could not validate signature of a SAML element: %1$s", Category.CATEGORY_ERROR, 6),
-
-    UNSUPPORTED_BINDING("The binding '%1$s' is not supported for this operation", Category.CATEGORY_ERROR, 7),
-
-//    INVALID_ASSERTION("The validation of an assertion failed: %1$s", Category.CATEGORY_ERROR, 8),
-
-//    INVALID_RESPONSE("The validation of a response failed: %1$s", Category.CATEGORY_ERROR, 9),
-
-//    AUTHENTICATION_FAILED("The authentication failed. Message from IDP: %1$s", Category.CATEGORY_ERROR, 10),
-
-
-    INTERNAL_ERROR("An internal error occurred: %1$s", Category.CATEGORY_ERROR, 11),
-
-    VALIDATION_FAILED("SAML response validation failed: %1$s (%2$s)", Category.CATEGORY_ERROR, 12),
-
-    INVALID_REQUEST("A SAML request was considered invalid. Reason: %1$s", Category.CATEGORY_ERROR, 13),
+    /**
+     * The binding '%1$s' is not supported for this operation
+     */
+    UNSUPPORTED_BINDING("The binding '%1$s' is not supported for this operation", Category.CATEGORY_ERROR, 5),
+    /**
+     * SAML response validation failed: %1$s (%2$s)
+     */
+    VALIDATION_FAILED("SAML response validation failed: %1$s (%2$s)", Category.CATEGORY_ERROR, 6),
+    /**
+     * A SAML request was considered invalid. Reason: %1$s
+     */
+    INVALID_REQUEST("A SAML request was considered invalid. Reason: %1$s", Category.CATEGORY_ERROR, 7),
+    /**
+     * An internal error occurred: %1$s
+     */
+    INTERNAL_ERROR("An internal error occurred: %1$s", Category.CATEGORY_ERROR, 8),
     ;
 
     private final Category category;

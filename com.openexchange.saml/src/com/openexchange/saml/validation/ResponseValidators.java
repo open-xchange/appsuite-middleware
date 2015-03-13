@@ -65,8 +65,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Provides a bunch of helper methods that can be used to validate SAML authentication responses.
- * A {@link ValidationStrategy} might use some or all of these methods to avoid code duplication.
+ * A container for common response validators.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

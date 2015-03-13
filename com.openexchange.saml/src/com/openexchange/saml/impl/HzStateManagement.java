@@ -56,7 +56,6 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.state.AuthnRequestInfo;
-import com.openexchange.saml.state.AuthnResponseInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 
@@ -105,14 +104,14 @@ public class HzStateManagement implements StateManagement {
     }
 
     @Override
-    public void addAuthnResponse(AuthnResponseInfo responseInfo, long ttl, TimeUnit timeUnit) throws OXException {
+    public void addAuthnResponse(String responseID, long ttl, TimeUnit timeUnit) throws OXException {
         Object value = new Object();
-        getResponseInfoMap().put(responseInfo.getResponseID(), value, ttl, timeUnit);
+        getResponseInfoMap().put(responseID, value, ttl, timeUnit);
     }
 
     @Override
-    public boolean hasAuthnResponse(String id) throws OXException {
-        Object value = getResponseInfoMap().get(id);
+    public boolean hasAuthnResponse(String responseID) throws OXException {
+        Object value = getResponseInfoMap().get(responseID);
         return value != null;
     }
 

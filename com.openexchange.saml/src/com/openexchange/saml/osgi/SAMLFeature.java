@@ -126,7 +126,8 @@ public class SAMLFeature extends DependentServiceStarter {
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
             String acsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/acs";
             servlets.push(acsServletPath);
-            services.getService(HttpService.class).registerServlet(acsServletPath, new AssertionConsumerService(serviceProvider), null, null);
+            SAMLBackend samlBackend = services.getService(SAMLBackend.class);
+            services.getService(HttpService.class).registerServlet(acsServletPath, new AssertionConsumerService(serviceProvider, samlBackend.getExceptionHandler()), null, null);
         } else {
             LOG.info("SAML 2.0 support is disabled by configuration. Skipping initialization...");
         }

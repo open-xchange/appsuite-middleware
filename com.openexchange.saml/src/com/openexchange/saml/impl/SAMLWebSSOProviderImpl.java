@@ -152,7 +152,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     @Override
-    public void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException {
+    public void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         AuthnRequest authnRequest = customizeAuthnRequest(prepareAuthnRequest(), httpRequest, httpResponse);
         String relayState = getFrontendDomain(httpRequest);
         DefaultAuthnRequestInfo requestInfo = new DefaultAuthnRequestInfo();
@@ -303,7 +303,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
                 spssoDescriptor.setWantAssertionsSigned(Boolean.FALSE);
             }
         } catch (SecurityException e) {
-            throw SAMLExceptionCode.KEYSTORE_PROBLEM.create(e, e.getMessage());
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
         }
 
         spssoDescriptor = customizeDescriptor(spssoDescriptor);
@@ -318,7 +318,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
     }
 
-    private void sendRedirect(String authnRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException {
+    private void sendRedirect(String authnRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         Deflater deflater = new Deflater(Deflater.DEFLATED, true);
         DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytesOut, deflater);
