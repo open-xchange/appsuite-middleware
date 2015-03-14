@@ -122,7 +122,7 @@ public final class Initialization {
      *
      * @param configurationService A reference to the configuration service
      * @param configViewFactory The config view factory
-     * @param migrationService The database migration service
+     * @param migrationService The database migration service, or <code>null</code> if not available
      * @return The database service
      */
     public DatabaseService start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService) throws OXException {
@@ -146,7 +146,6 @@ public final class Initialization {
         if (null != cacheService) {
             configDatabaseService.setCacheService(cacheService);
         }
-        configDatabaseService.scheduleMigrations(migrationService);
         // Context pool life cycle.
         pools.addLifeCycle(new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService));
         Server.setConfigDatabaseService(configDatabaseService);
@@ -159,7 +158,11 @@ public final class Initialization {
         // Global database service
         Map<String, GlobalDbConfig> globalDbConfigs = GlobalDbInit.init(configurationService, configDatabaseService, pools, monitor);
         globalDatabaseService = new GlobalDatabaseServiceImpl(pools, monitor, globalDbConfigs, configViewFactory);
-        globalDatabaseService.scheduleMigrations(migrationService);
+        // Schedule pending migrations
+        if (null != migrationService) {
+            configDatabaseService.scheduleMigrations(migrationService);
+            globalDatabaseService.scheduleMigrations(migrationService);
+        }
         databaseService = new DatabaseServiceImpl(pools, configDatabaseService, globalDatabaseService, monitor);
         return databaseService;
     }
