@@ -4920,7 +4920,6 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @param foldertype any of PRIVATE, PUBLIC or SHARED.
      */
     private void deleteSingleAppointment(final int cid, int oid, int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified) throws SQLException, OXException {
-        IDGenerator.getId(cid, Types.APPOINTMENT, writecon);
         deleteSingleAppointment(
             cid,
             oid,
@@ -4962,6 +4961,7 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @throws OXException
      */
     private void deleteSingleAppointment(final int cid, int oid, int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified, boolean backup) throws SQLException, OXException {
+        IDGenerator.getId(cid, Types.APPOINTMENT, writecon);
         int folderOwner = new OXFolderAccess(ctx).getFolderOwner(fid);
         if ((foldertype == FolderObject.PRIVATE || (foldertype == FolderObject.SHARED && owner != folderOwner)) && uid != owner) {
             if (foldertype == FolderObject.SHARED) {
