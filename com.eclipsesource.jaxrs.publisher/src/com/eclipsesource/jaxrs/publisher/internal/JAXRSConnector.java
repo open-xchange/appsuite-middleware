@@ -12,14 +12,13 @@
 package com.eclipsesource.jaxrs.publisher.internal;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
-
 import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 import com.eclipsesource.jaxrs.publisher.internal.ServiceContainer.ServiceHolder;
 
@@ -38,8 +37,8 @@ public class JAXRSConnector {
   private final List<ServiceHolder> resourceCache;
   private ServletConfiguration servletConfiguration;
   private String rootPath;
-  private boolean isWadlDisabled;
   private long publishDelay;
+  private Dictionary jerseyServerProperties;
 
   JAXRSConnector( BundleContext bundleContext ) {
     this.bundleContext = bundleContext;
@@ -50,15 +49,15 @@ public class JAXRSConnector {
     this.publishDelay = Configuration.DEFAULT_PUBLISH_DELAY;
   }
   
-  void updateConfiguration( String rootPath, boolean isWadlDisabled, long publishDelay ) {
+  void updateConfiguration( String rootPath, long publishDelay, Dictionary jerseyServerProperties ) {
     synchronized( lock ) {
-      doUpdateConfiguration( rootPath, isWadlDisabled, publishDelay );
+      doUpdateConfiguration( rootPath, publishDelay, jerseyServerProperties );
     }
   }
 
-  private void doUpdateConfiguration( String rootPath, boolean isWadlDisabled, long publishDelay ) {
+  private void doUpdateConfiguration( String rootPath, long publishDelay, Dictionary jerseyServerProperties ) {
     this.rootPath = rootPath;
-    this.isWadlDisabled = isWadlDisabled;
+    this.jerseyServerProperties = jerseyServerProperties;
     this.publishDelay = publishDelay;
     doUpdateHttpServices();
   }
@@ -98,7 +97,7 @@ public class JAXRSConnector {
     ServiceHolder serviceHolder = httpServices.add( reference );
     HttpService service = ( HttpService )serviceHolder.getService();
     contextMap.put( service, 
-                    createJerseyContext( service, rootPath, isWadlDisabled, publishDelay, servletConfiguration ) );
+                    createJerseyContext( service, rootPath, jerseyServerProperties, publishDelay, servletConfiguration ) );
     clearCache();
     return service;
   }
@@ -210,10 +209,10 @@ public class JAXRSConnector {
   // For testing purpose
   JerseyContext createJerseyContext( HttpService service,
                                      String rootPath,
-                                     boolean disableWadl,
+                                     Dictionary jerseyServerProperties,
                                      long publishDelay,
                                      ServletConfiguration servletConfiguration )
   {
-    return new JerseyContext( service, rootPath, disableWadl, publishDelay, servletConfiguration );
+    return new JerseyContext( service, rootPath, jerseyServerProperties, publishDelay, servletConfiguration );
   }
 }

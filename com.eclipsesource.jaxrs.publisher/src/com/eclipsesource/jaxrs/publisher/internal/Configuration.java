@@ -39,7 +39,7 @@ public class Configuration implements ManagedService {
       ensureRootIsPresent( root );
       String rootPath = ( String )root;
       ensureRootIsValid( rootPath );
-      connector.updateConfiguration( rootPath, isWadlDisabled( properties ), getPublishDelay( properties ) );
+      connector.updateConfiguration( rootPath, getPublishDelay( properties ), properties );
     }
   }
   
@@ -53,14 +53,6 @@ public class Configuration implements ManagedService {
     if( root == null || !( root instanceof String ) ) {
       throw new ConfigurationException( PROPERTY_ROOT, "Property is not set or invalid." );
     }
-  }
-
-  private boolean isWadlDisabled( Dictionary properties ){
-    Object wadl = properties.get( PROPERTY_WADL_DISABLE );
-    if( wadl == null ){
-      return false;
-    }
-    return ( ( Boolean)wadl ).booleanValue();
   }
 
   private long getPublishDelay( Dictionary properties ) {

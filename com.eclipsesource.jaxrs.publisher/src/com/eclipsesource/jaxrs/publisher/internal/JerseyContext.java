@@ -15,16 +15,14 @@ package com.eclipsesource.jaxrs.publisher.internal;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.ws.rs.core.Application;
-
 import org.glassfish.jersey.server.ServerProperties;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-
 import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 
 
@@ -38,22 +36,25 @@ public class JerseyContext {
   private final ServletConfiguration servletConfigurationService;
   private final ResourcePublisher resourcePublisher;
   private boolean isApplicationRegistered;
+  private final Dictionary jerseyServerProperties;
   
-  public JerseyContext( HttpService httpService, String rootPath, boolean isWadlDisabled, long publishDelay ) {
-    this( httpService, rootPath, isWadlDisabled, publishDelay, null ); 
+  public JerseyContext( HttpService httpService, String rootPath, Dictionary jerseyServerProperties, long publishDelay ) {
+    this( httpService, rootPath, jerseyServerProperties, publishDelay, null ); 
   }
 
   public JerseyContext( HttpService httpService,
                         String rootPath,
-                        boolean isWadlDisabled,
+                        Dictionary jerseyServerProperties,
                         long publishDelay,
                         ServletConfiguration servletConfigurationService )
   {
     this.httpService = httpService;
+    this.jerseyServerProperties = jerseyServerProperties;
     this.rootPath = rootPath == null ? "/services" : rootPath;
     this.application = new RootApplication();
+    applyJerseyConfiguration();
     disableAutoDiscovery();
-    disableWadl( isWadlDisabled );
+    disableWadl();
     this.servletContainerBridge = new ServletContainerBridge( application );
     this.servletConfigurationService = servletConfigurationService;
     this.resourcePublisher = new ResourcePublisher( servletContainerBridge, publishDelay );
@@ -64,7 +65,6 @@ public class JerseyContext {
     this.application.addProperty(ServerProperties.METAINF_SERVICES_LOOKUP_DISABLE, false );
     // disable auto discovery on server, as it's handled via OSGI
     this.application.addProperty(ServerProperties.FEATURE_AUTO_DISCOVERY_DISABLE, true );
-    this.application.addProperty(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, true); //patch proposal
   }
 
   /**
@@ -72,10 +72,36 @@ public class JerseyContext {
    * default to each resource and an auto-generated /application.wadl resource is deployed too. In
    * case you want to disable that you can set this property to true.
    * 
-   * @param disableWadl <code>true</code> to disable WADL feature 
+   * @deprecated The 'disableWadl' property can be directly injected to Jersey's configuration 
+   *    via the 'jerseyProperties' dictionary, hence this could be marked as deprecated and can be removed.
    */
-  private void disableWadl( boolean disableWadl ) {
+  private void disableWadl() {
+    final boolean disableWadl;
+    {
+        Object o = jerseyServerProperties.get(ServerProperties.WADL_FEATURE_DISABLE);
+        if (o == null) {
+            disableWadl = false;
+        } else {
+            disableWadl = Boolean.parseBoolean((String) o);
+        }
+    }
     this.application.addProperty( ServerProperties.WADL_FEATURE_DISABLE, disableWadl );
+  }
+  
+  /**
+   * Apply the jersey configuration. The Server configuration properties that are supported can be 
+   * found in {@link org.glassfish.jersey.server.ServerProperties}
+   */
+  private void applyJerseyConfiguration() {
+      Enumeration enumeration = jerseyServerProperties.keys();
+      while(enumeration.hasMoreElements()) {
+        String key = (String) enumeration.nextElement();
+        
+        if (key.startsWith("jersey.config") || key.startsWith("javax.ws.rs")) {
+          Object value = jerseyServerProperties.get(key);
+          this.application.addProperty(key, value);
+        }
+      }
   }
 
   public void addResource( Object resource ) {
