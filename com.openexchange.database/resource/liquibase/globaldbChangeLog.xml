@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="urn:liquibase"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
+    logicalFilePath="globaldbChangeLog">
+
+    <!-- ******************************************************* -->
+    <!-- ************** Release 7.8.0 starts here ************** -->
+    <!-- ******************************************************* -->
+
+    <changeSet id="7.8.0:replicationMonitor:create" author="tobias.friedrich@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="replicationMonitor" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'replicationMonitor' for master/slave replication.
+        </comment>
+        <sql>
+            CREATE TABLE replicationMonitor (
+                cid int(10) unsigned NOT NULL,
+                transaction bigint(20) NOT NULL,
+                PRIMARY KEY (cid)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="replicationMonitor" />
+        </rollback>
+    </changeSet>
+
+    <changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
+        <tagDatabase tag="7.8.0-milestone" />
+    </changeSet>
+
+</databaseChangeLog>

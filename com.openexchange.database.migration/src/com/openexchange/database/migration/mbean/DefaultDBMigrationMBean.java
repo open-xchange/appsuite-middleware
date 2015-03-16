@@ -53,71 +53,62 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
-
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
-
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
+import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
 
 /**
- * Implementation of {@link ConfigDBMigrationMBean} to manage everything around
- * config database migration based on liquibase.
+ * Abstract implementation of {@link DBMigrationMBean} to manage everything around a migration based on liquibase.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.1
  */
-public class ConfigDBMigrationMBeanImpl extends StandardMBean implements ConfigDBMigrationMBean {
+public class DefaultDBMigrationMBean extends StandardMBean implements DBMigrationMBean {
 
-    private final DBMigrationExecutorServiceImpl dbMigrationExecutorService;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDBMigrationMBean.class);
 
-    private final DatabaseService databaseService;
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigDBMigrationMBeanImpl.class);
+    private final DBMigrationExecutorService dbMigrationExecutorService;
+    private final DBMigration migration;
 
     /**
-     * Initializes a new {@link ConfigDBMigrationMBeanImpl}.
+     * Initializes a new {@link DefaultDBMigrationMBean}.
      *
-     * @param mbeanInterface
+     * @param dbMigrationExecutorService A reference to the DB migration service
+     * @param migration The DB migration
      * @throws NotCompliantMBeanException
      */
-    public ConfigDBMigrationMBeanImpl(Class<? extends ConfigDBMigrationMBean> mbeanInterface, DBMigrationExecutorServiceImpl dbMigrationExecutorService, DatabaseService databaseService) throws NotCompliantMBeanException {
-        super(mbeanInterface);
+    public DefaultDBMigrationMBean(DBMigrationExecutorService dbMigrationExecutorService, DBMigration migration) throws NotCompliantMBeanException {
+        super(DBMigrationMBean.class);
         Validate.notNull(dbMigrationExecutorService, "DBMigrationExecuterService must not be null!");
-        Validate.notNull(databaseService, "DatabaseService must not be null!");
-
+        Validate.notNull(migration, "DBMigration must not be null!");
         this.dbMigrationExecutorService = dbMigrationExecutorService;
-        this.databaseService = databaseService;
+        this.migration = migration;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void forceMigration() throws MBeanException {
         try {
-            dbMigrationExecutorService.runConfigDBCoreMigrations();
+            dbMigrationExecutorService.scheduleDBMigration(migration).awaitCompletion();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new MBeanException(e, e.getMessage());
         } catch (ExecutionException e) {
             throw new MBeanException(e, e.getMessage());
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void rollbackMigration(String changeSetTag) throws MBeanException {
         try {
-            dbMigrationExecutorService.rollbackConfigDBCoreMigrations(changeSetTag);
+            dbMigrationExecutorService.scheduleDBRollback(migration, changeSetTag).awaitCompletion();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new MBeanException(e, e.getMessage());
         } catch (ExecutionException e) {
             throw new MBeanException(e, e.getMessage());
@@ -129,49 +120,43 @@ public class ConfigDBMigrationMBeanImpl extends StandardMBean implements ConfigD
      */
     @Override
     public void releaseLocks() throws MBeanException {
-        Connection writable = null;
+        Connection connection = null;
         PreparedStatement stmt = null;
         try {
-            writable = databaseService.getForUpdateTask();
-            stmt = writable.prepareStatement("UPDATE DATABASECHANGELOGLOCK SET LOCKED=0, LOCKGRANTED=null, LOCKEDBY=null where ID=1;");
+            connection = migration.getConnectionProvider().get();
+            stmt = connection.prepareStatement("UPDATE DATABASECHANGELOGLOCK SET LOCKED=0, LOCKGRANTED=null, LOCKEDBY=null where ID=1;");
             stmt.execute();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Not able to release the lock for table DATABASECHANGELOGLOCK", e);
-            final String message = e.getMessage();
+            String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
         } finally {
             if (null != stmt) {
                 try {
                     stmt.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LOG.error("", e);
                 }
             }
-            if (writable != null) {
-                databaseService.backForUpdateTask(writable);
+            if (connection != null) {
+                migration.getConnectionProvider().back(connection);
             }
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getMigrationStatus() throws MBeanException {
         try {
-            return dbMigrationExecutorService.getConfigDBStatus();
+            return dbMigrationExecutorService.getDBStatus(migration);
         } catch (OXException e) {
             throw new MBeanException(e, e.getMessage());
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getLockStatus() throws MBeanException {
         try {
-            return dbMigrationExecutorService.listConfigDBLocks();
+            return dbMigrationExecutorService.listDBLocks(migration);
         } catch (OXException e) {
             throw new MBeanException(e, e.getMessage());
         }

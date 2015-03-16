@@ -68,53 +68,62 @@ import com.openexchange.exception.OXException;
 public interface DBMigrationExecutorService {
 
     /**
-     * Schedules a configdb migration based on the given file location and {@link ResourceAccessor}.
+     * Registers a database migration for management via an utility MBean.
+     *
+     * @param migration The migration to register for monitoring
+     * @return <code>true</code> if the migration was added, <code>false</code>, otherwise
+     */
+    boolean registerMBean(DBMigration migration);
+
+    /**
+     * Schedules a database migration based on the given file location and {@link ResourceAccessor}.
      * The migration file must be resolvable by its location via the accessor.
      *
      * You probably want to use a XML file contained in your bundle-jar. {@link BundleResourceAccessor}
      * is the right choice then. The files location must then be specified absolute, starting at the
      * bundles root directory.
      *
-     * @param fileLocation Location of the changelog file (e.g. "/liquibase/configdbChangeLog.xml")
-     * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
+     * @param migration The database migration
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public DBMigrationState scheduleConfigDBMigration(String fileLocation, ResourceAccessor accessor);
+    DBMigrationState scheduleDBMigration(DBMigration migration);
 
     /**
-     * Schedules a rollback of the configdb for the given number of change sets
+     * Schedules a rollback of the database for the given number of change sets
      *
-     * @param fileLocation Location of the changelog file (e.g. "/liquibase/configdbChangeLog.xml")
+     * @param migration The database migration
      * @param numberOfChangeSets Number of change sets to roll back
-     * @param accessor The {@link ResourceAccessor}s to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public DBMigrationState scheduleConfigDBRollback(String fileLocation, int numberOfChangeSets, ResourceAccessor accessor);
+    DBMigrationState scheduleDBRollback(DBMigration migration, int numberOfChangeSets);
 
     /**
-     * Schedules a rollback of the configdb to a given tag. This will roll back all change sets of the
+     * Schedules a rollback of the database to a given tag. This will roll back all change sets of the
      * given changelog, that were executed after the given tag was applied.
      *
-     * @param fileLocation Location of the changelog file (e.g. "/liquibase/configdbChangeLog.xml")
+     * @param migration The database migration
      * @param changeSetTag The tag to roll back to
-     * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
      * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
      */
-    public DBMigrationState scheduleConfigDBRollback(String fileLocation, String changeSetTag, ResourceAccessor accessor);
+    DBMigrationState scheduleDBRollback(DBMigration migration, String changeSet);
 
     /**
-     * Returns a list of the currently not executed change sets of the given changelog for the configdb.
+     * Returns a list of the currently not executed change sets of the given changelog for the database.
      *
-     * @param fileLocation Location of the changelog file (e.g. "/liquibase/configdbChangeLog.xml")
-     * @param accessor The {@link ResourceAccessor} to read in the changelog file identified by <code>fileLocation</code>
+     * @param migration The database migration
      * @return List<ChangeSet> with the currently not executed liquibase change sets
      */
-    public List<ChangeSet> listUnrunConfigDBChangeSets(String fileLocation, ResourceAccessor accessor) throws OXException;
+    List<ChangeSet> listUnrunDBChangeSets(DBMigration migration) throws OXException;
 
     /**
      * Gets if any database migrations are currently running.
      *
      * @return true, if migrations are running; otherwise false
      */
-    public boolean migrationsRunning();
+    boolean migrationsRunning();
+
+    String getDBStatus(DBMigration migration) throws OXException;
+
+    String listDBLocks(DBMigration migration) throws OXException;
+
 }

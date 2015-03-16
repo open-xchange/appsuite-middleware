@@ -51,10 +51,21 @@ package com.openexchange.database.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import org.osgi.framework.FrameworkUtil;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.GlobalDatabaseService;
+import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationConnectionProvider;
+import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.DBMigrationState;
+import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -66,6 +77,7 @@ import com.openexchange.java.Strings;
 public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalDatabaseServiceImpl.class);
+    private static final String GLOBALDB_CHANGE_LOG = "/liquibase/globaldbChangeLog.xml";
 
     private final Pools pools;
     private final ReplicationMonitor monitor;
@@ -86,6 +98,58 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
         this.monitor = monitor;
         this.globalDbConfigs = globalDbConfigs;
         this.configViewFactory = configViewFactory;
+    }
+
+    /**
+     * Schedules pending migrations for all known global databases.
+     *
+     * @param migrationService The database migration service
+     * @return The scheduled migrations
+     */
+    public List<DBMigrationState> scheduleMigrations(DBMigrationExecutorService migrationService) throws OXException {
+        if (null == globalDbConfigs || 0 == globalDbConfigs.size()) {
+            return Collections.emptyList();
+        }
+        /*
+         * use appropriate connection provider per global database & a local resource accessor for the changeset file
+         */
+        BundleResourceAccessor localResourceAccessor = new BundleResourceAccessor(FrameworkUtil.getBundle(GlobalDbInit.class));
+        Set<GlobalDbConfig> dbConfigs = new HashSet<GlobalDbConfig>(globalDbConfigs.values());
+        List<DBMigrationState> migrationStates = new ArrayList<DBMigrationState>(dbConfigs.size());
+        for (GlobalDbConfig dbConfig : dbConfigs) {
+            /*
+             * use a special assignment override that pretends a connection to the config database to prevent accessing a not yet existing
+             * replication monitor
+             */
+            final AssignmentImpl assignment = new AssignmentImpl(dbConfig.getAssignment()) {
+
+                private static final long serialVersionUID = -6801059791528227771L;
+
+                @Override
+                public boolean isToConfigDB() {
+                    return true;
+                }
+            };
+            DBMigrationConnectionProvider connectionProvider = new DBMigrationConnectionProvider() {
+
+                @Override
+                public Connection get() throws OXException {
+                    return GlobalDatabaseServiceImpl.this.get(assignment, true, true);
+                }
+
+                @Override
+                public void back(Connection connection) {
+                    GlobalDatabaseServiceImpl.this.back(connection);
+                }
+            };
+            /*
+             * register utility MBean and schedule migration
+             */
+            DBMigration migration = new DBMigration(connectionProvider, GLOBALDB_CHANGE_LOG, localResourceAccessor, assignment.getSchema());
+            migrationService.registerMBean(migration);
+            migrationStates.add(migrationService.scheduleDBMigration(migration));
+        }
+        return migrationStates;
     }
 
     @Override

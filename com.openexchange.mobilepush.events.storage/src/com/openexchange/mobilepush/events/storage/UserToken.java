@@ -56,8 +56,8 @@ package com.openexchange.mobilepush.events.storage;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class UserToken {
-    private int userId;
-    private String token;
+    private final int userId;
+    private final String token;
 
     public UserToken(int userId, String token) {
         this.userId = userId;
@@ -72,5 +72,8 @@ public class UserToken {
         return token;
     }
 
-
+    @Override
+    public String toString() {
+        return "UserToken [userId=" + userId + ", token=" + token + "]";
+    }
 }

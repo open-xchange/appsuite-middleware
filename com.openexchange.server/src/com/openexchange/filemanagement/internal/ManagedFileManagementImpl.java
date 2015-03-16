@@ -251,7 +251,12 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public ManagedFile createManagedFile(final File temporaryFile) throws OXException {
-        final ManagedFileImpl mf = new ManagedFileImpl(this, UUID.randomUUID().toString(), temporaryFile);
+        return createManagedFile(temporaryFile, -1);
+    }
+
+    @Override
+    public ManagedFile createManagedFile(final File temporaryFile, int ttl) throws OXException {
+        final ManagedFileImpl mf = new ManagedFileImpl(this, UUID.randomUUID().toString(), temporaryFile, ttl);
         mf.setSize(temporaryFile.length());
         files.put(mf.getID(), mf);
         return mf;
@@ -318,10 +323,10 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     tmpFile.deleteOnExit();
                     OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
                     try {
-                        byte[] buf = new byte[8192];
-                        int len = -1;
-                        while ((len = inputStream.read(buf, 0, buf.length)) > 0) {
-                            out.write(buf, 0, len);
+                        int blen = 65536;
+                        byte[] buf = new byte[blen];
+                        for (int read; (read = inputStream.read(buf, 0, blen)) > 0;) {
+                            out.write(buf, 0, read);
                         }
                         out.flush();
                     } finally {
@@ -424,11 +429,20 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public ManagedFile getByID(final String id) throws OXException {
+        ManagedFile mf = optByID(id);
+        if (null == mf) {
+            throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
+        }
+        return mf;
+    }
+
+    @Override
+    public ManagedFile optByID(String id) {
         ManagedFile mf = files.get(id);
         if (null != mf) {
             // Locally available
             if (mf.isDeleted()) {
-                throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
+                return null;
             }
             mf.touch();
             return mf;
@@ -437,7 +451,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         // Do remote look-up
         mf = getByIDDistributed(id);
         if (null == mf || mf.isDeleted()) {
-            throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
+            return null;
         }
         mf.touch();
         return mf;

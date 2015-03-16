@@ -57,7 +57,7 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.database.migration.mbean.ConfigDBMigrationMBean;
+import com.openexchange.database.migration.mbean.DBMigrationMBean;
 
 /**
  * Command line tool to control config database migrations.
@@ -146,7 +146,7 @@ public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected Void invoke(Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        ConfigDBMigrationMBean migrationMBean = getMBean(mbsc, ConfigDBMigrationMBean.class, ConfigDBMigrationMBean.DOMAIN);
+        DBMigrationMBean migrationMBean = getMBean(mbsc, DBMigrationMBean.class, DBMigrationMBean.DOMAIN);
 
         if (cmd.hasOption(OPT_RUN_SHORT)) {
             migrationMBean.forceMigration();

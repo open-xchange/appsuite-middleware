@@ -51,10 +51,16 @@ package com.openexchange.database.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import org.osgi.framework.FrameworkUtil;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationConnectionProvider;
+import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.DBMigrationState;
+import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
 import com.openexchange.exception.OXException;
 
 /**
@@ -65,6 +71,7 @@ import com.openexchange.exception.OXException;
 public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigDatabaseServiceImpl.class);
+    private static final String CONFIGDB_CHANGE_LOG = "/liquibase/configdbChangeLog.xml";
 
     // ------------------------------------------------------------------------------------------------ //
 
@@ -79,6 +86,39 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         contextAssignment = new ContextDatabaseAssignmentImpl(this);
         this.pools = pools;
         this.monitor = monitor;
+    }
+
+    /**
+     * Schedules pending migrations for the config database.
+     *
+     * @param migrationService The database migration service
+     * @return The scheduled migration
+     */
+    public DBMigrationState scheduleMigrations(DBMigrationExecutorService migrationService) throws OXException {
+        /*
+         * use appropriate connection provider fro config database & a local resource accessor for the changeset file
+         */
+        BundleResourceAccessor localResourceAccessor = new BundleResourceAccessor(FrameworkUtil.getBundle(ConfigDatabaseServiceImpl.class));
+        AssignmentImpl assignment = assignmentService.getConfigDBAssignment();
+        DBMigrationConnectionProvider connectionProvider = new DBMigrationConnectionProvider() {
+
+            @Override
+            public Connection get() throws OXException {
+                return ConfigDatabaseServiceImpl.this.getForUpdateTask();
+            }
+
+            @Override
+            public void back(Connection connection) {
+                ConfigDatabaseServiceImpl.back(connection);
+            }
+        };
+        /*
+         * register utility MBean and schedule migration
+         */
+        String schema = null != assignment.getSchema() ? assignment.getSchema() : "configdb";
+        DBMigration migration = new DBMigration(connectionProvider, CONFIGDB_CHANGE_LOG, localResourceAccessor, schema);
+        migrationService.registerMBean(migration);
+        return migrationService.scheduleDBMigration(migration);
     }
 
     private Connection get(final boolean write) throws OXException {

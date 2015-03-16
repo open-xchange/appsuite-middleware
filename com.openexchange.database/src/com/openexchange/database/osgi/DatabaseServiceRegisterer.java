@@ -59,6 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.Initialization;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -75,6 +76,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
 
     private ConfigurationService configService;
     private ConfigViewFactory configViewFactory;
+    private DBMigrationExecutorService migrationService;
 
     private ServiceRegistration<DatabaseService> serviceRegistration;
 
@@ -95,14 +97,17 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
             if (obj instanceof ConfigViewFactory) {
                 configViewFactory = (ConfigViewFactory) obj;
             }
-            needsRegistration = null != configService && null != configViewFactory;
+            if (obj instanceof DBMigrationExecutorService) {
+                migrationService = (DBMigrationExecutorService) obj;
+            }
+            needsRegistration = null != configService && null != configViewFactory && null != migrationService;
         } finally {
             lock.unlock();
         }
         if (needsRegistration && !Initialization.getInstance().isStarted()) {
             try {
                 Initialization.setConfigurationService(configService);
-                final DatabaseService service = Initialization.getInstance().start(configService, configViewFactory);
+                final DatabaseService service = Initialization.getInstance().start(configService, configViewFactory, migrationService);
                 LOG.info("Publishing DatabaseService.");
                 serviceRegistration = context.registerService(DatabaseService.class, service, null);
             } catch (final OXException e) {

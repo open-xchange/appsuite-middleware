@@ -57,17 +57,25 @@ import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolingException;
 
 /**
- * Fetches a connection without timeouts and selects the wanted schema.
+ * Fetches a connection without timeouts and optionally selects the wanted schema.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 final class NotimeoutFetchAndSchema implements FetchAndSchema {
 
     private final ReplicationMonitor monitor;
+    private final boolean setSchema;
 
-    NotimeoutFetchAndSchema(ReplicationMonitor monitor) {
+    /**
+     * Initializes a new {@link NotimeoutFetchAndSchema}.
+     *
+     * @param monitor The replication monitor
+     * @param setSchema <code>true</code> to set the schema name when getting the connection, <code>false</code>, otherwise
+     */
+    NotimeoutFetchAndSchema(ReplicationMonitor monitor, boolean setSchema) {
         super();
         this.monitor = monitor;
+        this.setSchema = setSchema;
     }
 
     @Override
@@ -80,14 +88,16 @@ final class NotimeoutFetchAndSchema implements FetchAndSchema {
         }
         final ConnectionPool pool = pools.getPool(poolId);
         final Connection retval = pool.getWithoutTimeout();
-        try {
-            final String schema = assign.getSchema();
-            if (null != schema && !retval.getCatalog().equals(schema)) {
-                retval.setCatalog(schema);
+        if (setSchema) {
+            try {
+                final String schema = assign.getSchema();
+                if (null != schema && !retval.getCatalog().equals(schema)) {
+                    retval.setCatalog(schema);
+                }
+            } catch (SQLException e) {
+                pool.backWithoutTimeout(retval);
+                throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
             }
-        } catch (SQLException e) {
-            pool.backWithoutTimeout(retval);
-            throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
         return ConnectionReturnerFactory.createConnection(pools, monitor, assign, retval, true, write, usedAsRead);
     }

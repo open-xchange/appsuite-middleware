@@ -7,7 +7,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.database.migration.osgi.DBMigrationActivator
 Bundle-ClassPath: .
 Import-Package: com.openexchange.config,
- com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.management,
  com.openexchange.osgi,
@@ -80,6 +79,5 @@ Import-Package: com.openexchange.config,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.database.migration,
- com.openexchange.database.migration.mbean,
  com.openexchange.database.migration.resource.accessor
 Bundle-Vendor: Open-Xchange Inc.

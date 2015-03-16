@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,30 @@
  *
  */
 
-package com.openexchange.database.migration.internal;
+package com.openexchange.database.migration;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.sql.Connection;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link DBMigrationConnectionProvider}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class Services {
-
-    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+public interface DBMigrationConnectionProvider {
 
     /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
-    }
-
-    /**
-     * Sets the {@link ServiceLookup} reference.
+     * Gets a database connection to perform the migration on.
      *
-     * @param serviceLookup The service lookup or <code>null</code>
+     * @return The connection
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        SERVICES.set(serviceLookup);
-    }
+    Connection get() throws OXException;
 
     /**
-     * Gets the {@link ServiceLookup} reference.
+     * Returns the database connection.
      *
-     * @return The reference
+     * @param connection The connection to return
      */
-    public static ServiceLookup getServices() {
-        return SERVICES.get();
-    }
+    void back(Connection connection);
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = SERVICES.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
-        }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * Gets the optional service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = SERVICES.get();
-        if (null == serviceLookup) {
-            return null;
-        }
-        return serviceLookup.getOptionalService(clazz);
-    }
 }
