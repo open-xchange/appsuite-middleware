@@ -1,3 +1,7 @@
+* 2015-03-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37213: Also consider remote sessions when trying to re-establish a terminated IMAP-IDLE listener
+
 * 2015-03-12 - martin.schneider@open-xchange.com
 
  - Fix for bug 36881: consider 'padding' within style tag and correct 'table' tag stack handling

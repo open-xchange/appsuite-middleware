@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import java.util.Collection;
 import com.openexchange.session.Session;
 
 /**
@@ -83,5 +84,15 @@ public interface SessiondServiceExtended extends SessiondService {
      * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
      */
     Session getSession(String sessionId, boolean considerSessionStorage);
+
+    /**
+     * Gets the sessions associated with specified user in given context.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param considerSessionStorage <code>true</code> to also consider session storage; otherwise <code>false</code>
+     * @return The <b>local-only</b> sessions associated with specified user in given context
+     */
+    Collection<Session> getSessions(int userId, int contextId, boolean considerSessionStorage);
 
 }

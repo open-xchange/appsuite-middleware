@@ -416,16 +416,17 @@ public final class SessionHandler {
      *
      * @param userId The user ID
      * @param contextId The context ID
+     * @param considerSessionStorage <code>true</code> to also consider session storage; otherwise <code>false</code>
      * @return The wrapper objects for sessions
      */
-    public static SessionControl[] getUserSessions(final int userId, final int contextId) {
+    public static List<SessionControl> getUserSessions(final int userId, final int contextId, boolean considerSessionStorage) {
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
-            return new SessionControl[0];
+            return new LinkedList<SessionControl>();
         }
-        SessionControl[] retval = sessionData.getUserSessions(userId, contextId);
-        if (retval == null) {
+        List<SessionControl> retval = sessionData.getUserSessions(userId, contextId);
+        if (considerSessionStorage) {
             final SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
@@ -453,9 +454,8 @@ public final class SessionHandler {
                         }
                     };
                     Session[] sessions = getFrom(c, new Session[0]);
-                    retval = new SessionControl[sessions.length];
                     for (int i = 0; i < sessions.length; i++) {
-                        retval[i] = sessionToSessionControl(sessions[i]);
+                        retval.add(sessionToSessionControl(sessions[i]));
                     }
                 } catch (RuntimeException e) {
                     LOG.error("", e);
@@ -775,7 +775,7 @@ public final class SessionHandler {
         int maxSessPerClient = config.getMaxSessionsPerClient();
         if (maxSessPerClient > 0) {
             SessionData sessionData = SESSION_DATA_REF.get();
-            SessionControl[] userSessions = null == sessionData ? new SessionControl[0] : sessionData.getUserSessions(userId, contextId);
+            List<SessionControl> userSessions = null == sessionData ? new LinkedList<SessionControl>() : sessionData.getUserSessions(userId, contextId);
             int cnt = 1; // We have at least one
             for (SessionControl sessionControl : userSessions) {
                 if (client.equals(sessionControl.getSession().getClient()) && ++cnt > maxSessPerClient) {
@@ -889,8 +889,8 @@ public final class SessionHandler {
         /*
          * Invalidate all other user sessions known by local session containers
          */
-        SessionControl[] userSessionControls = sessionData.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
-        if (null != userSessionControls && 0 < userSessionControls.length) {
+        List<SessionControl> userSessionControls = sessionData.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
+        if (null != userSessionControls) {
             for (SessionControl userSessionControl : userSessionControls) {
                 String otherSessionID = userSessionControl.getSession().getSessionID();
                 if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
