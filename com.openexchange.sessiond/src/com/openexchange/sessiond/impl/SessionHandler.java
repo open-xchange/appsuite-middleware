@@ -386,33 +386,6 @@ public final class SessionHandler {
     }
 
     /**
-     * Removes all sessions associated to the given contexts.
-     *
-     * @param contextId Set with contextIds to remove session for.
-     */
-    public static Set<Integer> removeContextSessions(final Set<Integer> contextIds) {
-
-        final SessionData sessionData = sessionDataRef.get();
-        if (null == sessionData) {
-            LOG.warn("\tSessionData instance is null.");
-            return null;
-        }
-        /*
-         * remove from session data
-         */
-        List<SessionControl> removeContextSessions = sessionData.removeContextSessions(contextIds);
-        postContainerRemoval(removeContextSessions, true);
-
-        Set<Integer> processedContexts = new HashSet<Integer>(removeContextSessions.size());
-        for (SessionControl control : removeContextSessions) {
-            processedContexts.add(Integer.valueOf(control.getSession().getContextId()));
-        }
-
-        LOG.info("Removed {} sessions for {} contexts", Integer.valueOf(removeContextSessions.size()), Integer.valueOf(processedContexts.size()));
-        return processedContexts;
-    }
-
-    /**
      * Checks for any active session for specified context.
      *
      * @param contextId The context identifier
