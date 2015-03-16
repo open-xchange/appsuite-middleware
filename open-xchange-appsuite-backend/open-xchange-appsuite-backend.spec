@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -84,6 +84,8 @@ ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates prin
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Fri Mar 13 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Twelfth candidate for 7.6.2 release
 * Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Eleventh candidate for 7.6.2 release
 * Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>

@@ -7,6 +7,10 @@
  - Fix for bug 37213: Also consider remote sessions when trying to re-establish a terminated IMAP-IDLE listener
  - Fix for bug 37063: Added null guard
 
+* 2015-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37200: Do only advertise "edit_group"/"edit_resource" capability if both - backend service and permission bit are available
+
 * 2015-03-12 - martin.schneider@open-xchange.com
 
  - Fix for bug 36881: consider 'padding' within style tag and correct 'table' tag stack handling

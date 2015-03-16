@@ -504,6 +504,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         for (String cap : declaredCapabilities.keySet()) {
             if (check(cap, serverSession, capabilities)) {
                 capabilities.add(getCapability(cap));
+            } else {
+                capabilities.remove(cap);
             }
         }
 

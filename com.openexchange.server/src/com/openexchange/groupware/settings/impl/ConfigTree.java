@@ -102,7 +102,8 @@ public final class ConfigTree {
      */
     public Setting optSettingByPath(final String path) {
         final String[] pathParts = SPLIT.split(path, 0);
-        return new ValueSetting(optSettingByPath(tree, pathParts));
+        Setting setting = optSettingByPath(tree, pathParts);
+        return null == setting ? null : new ValueSetting(setting);
     }
 
     /**
