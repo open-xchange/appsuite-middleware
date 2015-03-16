@@ -52,15 +52,20 @@ package com.openexchange.jaxrs.osgi;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.glassfish.jersey.server.ServerProperties;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.jaxrs.jersey.JSONReaderWriter;
 import com.openexchange.jaxrs.jersey.OXExceptionMapper;
@@ -87,6 +92,22 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
+        ServletConfiguration sc = new ServletConfiguration() {
+            
+            @Override
+            public Dictionary<String, String> getInitParams(HttpService httpService, String rootPath) {
+                Dictionary<String, String> dict = new Hashtable<String, String>();
+                dict.put("jersey.config.server.response.setStatusOverSendError", "true");
+                return dict;
+            }
+            
+            @Override
+            public HttpContext getHttpContext(HttpService httpService, String rootPath) {
+                return httpService.createDefaultHttpContext();
+            }
+        };
+        context.registerService(ServletConfiguration.class, sc, null);
+        
         cmTracker = new ServiceTracker<ConfigurationAdmin, ConfigurationAdmin>(context, ConfigurationAdmin.class, null) {
             @Override
             public ConfigurationAdmin addingService(ServiceReference<ConfigurationAdmin> reference) {
@@ -99,6 +120,7 @@ public class Activator implements BundleActivator {
                             properties = new Hashtable<String, Object>(1);
                         }
                         properties.put("root", "/rest");
+                        properties.put(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, true);
                         configuration.update(properties);
                     } catch (IOException e) {
                         LOG.error("Could not set root path for jersey servlet. REST API will not be available!", e);
