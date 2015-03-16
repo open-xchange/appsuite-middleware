@@ -68,6 +68,8 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %changelog
 * Fri Mar 06 2015 Carsten Hoeger <choeger@open-xchange.com>
 Eleventh candidate for 7.6.2 release
+* Fri Mar 06 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-03-16
 * Wed Mar 04 2015 Carsten Hoeger <choeger@open-xchange.com>
 Tenth candidate for 7.6.2 release
 * Tue Mar 03 2015 Carsten Hoeger <choeger@open-xchange.com>
