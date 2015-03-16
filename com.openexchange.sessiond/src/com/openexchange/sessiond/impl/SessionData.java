@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -337,6 +338,50 @@ final class SessionData {
         } finally {
             wlongTermLock.unlock();
         }
+        return list;
+    }
+
+    /**
+     * Removes all sessions belonging to given contexts out of long- and short-term container.
+     *
+     * @param contextIds - Set with the context identifiers to remove sessions for
+     * @return List of {@link SessionControl} objects for each handled session
+     */
+    List<SessionControl> removeContextSessions(final Set<Integer> contextIds) {
+        // Removing sessions is a write operation.
+        final List<SessionControl> list = new ArrayList<SessionControl>();
+        wlock.lock();
+        try {
+            for (final SessionContainer container : sessionList) {
+                list.addAll(container.removeSessionsByContexts(contextIds));
+            }
+            for (final SessionControl control : list) {
+                unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID());
+            }
+        } finally {
+            wlock.unlock();
+        }
+
+        wlongTermLock.lock();
+        for (int contextId : contextIds) {
+            if (!hasLongTermSession(contextId)) {
+                continue;
+            }
+            for (final SessionMap longTerm : longTermList) {
+                final Iterator<SessionControl> iter = longTerm.values().iterator();
+                while (iter.hasNext()) {
+                    final SessionControl control = iter.next();
+                    final Session session = control.getSession();
+                    if (session.getContextId() == contextId) {
+                        longTerm.removeBySessionId(session.getSessionID());
+                        longTermUserGuardian.remove(session.getUserId(), contextId);
+                        list.add(control);
+                    }
+                }
+            }
+        }
+        wlongTermLock.unlock();
+
         return list;
     }
 

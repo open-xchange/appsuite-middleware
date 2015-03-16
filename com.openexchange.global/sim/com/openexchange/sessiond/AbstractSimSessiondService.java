@@ -132,6 +132,11 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
+    public void removeUserSessionsGlobal(int userId, int contextId) throws OXException {
+        // Nope
+    }
+
+    @Override
     public Collection<Session> getSessions(final int userId, final int contextId) {
         return null;
     }

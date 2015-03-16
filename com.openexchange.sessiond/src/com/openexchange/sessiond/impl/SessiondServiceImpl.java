@@ -137,6 +137,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public void removeUserSessionsGlobal(int userId, int contextId) throws OXException {
+        SessionHandler.removeUserSessionsGlobal(userId, contextId);
+    }
+
+    @Override
     public int getUserSessions(final int userId, final int contextId) {
         return SessionHandler.SESSION_COUNTER.getNumberOfSessions(userId, contextId);
     }

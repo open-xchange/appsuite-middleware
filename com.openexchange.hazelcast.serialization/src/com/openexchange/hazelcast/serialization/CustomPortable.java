@@ -72,6 +72,11 @@ public interface CustomPortable extends Portable {
     public static final int PORTABLEREPORT_CLASS_ID = 9;
 
     /**
+     * Unique id for PortableUserSessionsCleaner
+     */
+    public static final int PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID = 20;
+
+    /**
      * Gets the ID of the dynamic portable factory.<p/>
      *
      * Make sure to supply {@link CustomPortable#FACTORY_ID} here.
@@ -109,6 +114,8 @@ public interface CustomPortable extends Portable {
      * <li><code>  17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
      *
      * <li><code>  19</code>: com.openexchange.session.reservation.impl.portable.PortableReservation</li>
+     * <li><code>  20</code>: com.openexchange.sessiond.serialization.PortableUserSessionsCleaner, used via
+     * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID}</li>
      * </ul>
      *
      * @return The class ID

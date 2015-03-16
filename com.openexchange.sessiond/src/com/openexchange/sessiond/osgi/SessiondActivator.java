@@ -62,10 +62,12 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -82,6 +84,7 @@ import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
+import com.openexchange.sessiond.serialization.PortableUserSessionsCleanerFactory;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -94,6 +97,43 @@ import com.openexchange.timer.TimerService;
 public final class SessiondActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondActivator.class);
+
+    private static class HazelcastInstanceTracker implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> {
+
+        final BundleContext context;
+
+        final SessiondActivator activator;
+
+        public HazelcastInstanceTracker(BundleContext context, SessiondActivator activator) {
+            super();
+            this.context = context;
+            this.activator = activator;
+        }
+
+        @Override
+        public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
+            HazelcastInstance hzInstance = context.getService(reference);
+            try {
+                activator.addService(HazelcastInstance.class, hzInstance);
+                return hzInstance;
+            } catch (RuntimeException e) {
+                LOG.warn("Couldn't initialize distributed token-session map.", e);
+            }
+            context.ungetService(reference);
+            return null;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
+            // Ignore
+        }
+
+        @Override
+        public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
+            activator.removeService(HazelcastInstance.class);
+            context.ungetService(reference);
+        }
+    }
 
     private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
@@ -145,6 +185,9 @@ public final class SessiondActivator extends HousekeepingActivator {
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
 
+            registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
+
+            track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
             track(ManagementService.class, new ManagementRegisterer(context));
             track(ThreadPoolService.class, new ThreadPoolTracker(context));
             track(TimerService.class, new TimerServiceTracker(context));

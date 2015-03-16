@@ -73,6 +73,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -84,6 +86,7 @@ import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.serialization.PortableUserSessionsCleaner;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -240,8 +243,90 @@ public final class SessionHandler {
                 LOG.error("", e);
             }
         }
-        LOG.info("{} removal of user sessions: User={}, Context={}", (null != storageService ? "Remote" : "Local"), userId, contextId);
+        LOG.info("{} removal of user sessions: User={}, Context={}", (null != storageService ? "Remote" : "Local"), Integer.valueOf(userId), Integer.valueOf(contextId));
         return merge(retval, retval2);
+    }
+
+    /**
+     * Globally removes sessions associated to the given contexts. 'Globally' means sessions on all cluster nodes
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @throws OXException If operation fails
+     */
+    public static void removeUserSessionsGlobal(int userId, int contextId) throws OXException {
+        SessionHandler.removeRemoteUserSessions(userId, contextId);
+        SessionHandler.removeUserSessions(userId, contextId);
+    }
+
+    /**
+     * Triggers removing sessions for given context ids on remote cluster nodes
+     *
+     * @param contextIds - Set with context ids to be removed
+     */
+    private static void removeRemoteUserSessions(int userId, int contextId) throws OXException {
+        HazelcastInstance hazelcastInstance = SessiondServiceRegistry.getServiceRegistry().getService(HazelcastInstance.class);
+        if (hazelcastInstance != null) {
+            LOG.debug("Trying to remove sessions for user {} in context {} from remote nodes", userId, contextId);
+
+            Member localMember = hazelcastInstance.getCluster().getLocalMember();
+            Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
+            if (!clusterMembers.remove(localMember)) {
+                LOG.warn("Couldn't remove local member from cluster members.");
+            }
+            if (!clusterMembers.isEmpty()) {
+                int hzExecutionTimeout = getRemoteUserSessionsExecutionTimeout();
+                Map<Member, Future<Integer>> submitToMembers = hazelcastInstance.getExecutorService("default").submitToMembers(new PortableUserSessionsCleaner(userId, contextId), clusterMembers);
+                for (Member member : submitToMembers.keySet()) {
+                    Future<Integer> future = submitToMembers.get(member);
+                    try {
+                        Integer numOfRemovedSessions = null;
+                        if (hzExecutionTimeout > 0) {
+                            numOfRemovedSessions = future.get(hzExecutionTimeout, TimeUnit.SECONDS);
+                        } else {
+                            numOfRemovedSessions = future.get();
+                        }
+                        if ((numOfRemovedSessions != null) && (future.isDone())) {
+                            LOG.info("Removed {} sessions for user {} in context {} on remote node {}", numOfRemovedSessions, userId, contextId, member.getSocketAddress().toString());
+                        } else {
+                            LOG.warn("No sessions removed for user {} in context {} on remote node {}.", userId, contextId, member.getSocketAddress().toString());
+                        }
+                    } catch (TimeoutException e) {
+                        // Wait time elapsed; enforce cancelation
+                        future.cancel(true);
+                        LOG.error("Removing sessions for user {} in context {} on remote node {} took to longer than {} seconds and was aborted!", userId, contextId, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e);
+                    } catch (InterruptedException e) {
+                        future.cancel(true);
+                        LOG.error("Removing sessions for user {} in context {} on remote node {} took to longer than {} seconds and was aborted!", userId, contextId, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e);
+                    } catch (ExecutionException e) {
+                        future.cancel(true);
+                        LOG.error("Removing sessions for user {} in context {} on remote node {} took to longer than {} seconds and was aborted!", userId, contextId, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e.getCause());
+                    } catch (Exception e) {
+                        LOG.error("Failed to issue remote session removal for user {} in context {} on remote node {}.", userId, contextId, member.getSocketAddress().toString(), e.getCause());
+                        throw SessionExceptionCodes.REMOTE_SESSION_REMOVAL_FAILED.create(userId, contextId, member.getSocketAddress().toString(), e.getCause());
+                    }
+                }
+            } else {
+                LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
+            }
+        } else {
+            LOG.warn("Cannot find HazelcastInstance for remote execution of session removing for user {} in context {}. Only local sessions will be removed.", userId, contextId);
+        }
+    }
+
+    /**
+     * Returns the timeout (in seconds) configured to wait for remote invalidation of user sessions. Default value 0 means "no timeout"
+     *
+     * @return timeout (in seconds) or 0 for no timeout
+     */
+    private static int getRemoteUserSessionsExecutionTimeout() {
+        int defaultValue = 0;
+        ConfigurationService configurationService = getServiceRegistry().getService(ConfigurationService.class);
+        if (configurationService == null) {
+            LOG.info("ConfigurationService not available. No execution timeout for remote processing of user sessions invalidation available. Fallback to no timeout.");
+            return defaultValue;
+        }
+        return configurationService.getIntProperty("com.openexchange.remote.user.sessions.invalidation.timeout", defaultValue);
     }
 
     /**
@@ -260,7 +345,7 @@ public final class SessionHandler {
                     cs.loadContext(contextId);
                 } catch (final OXException e) {
                     if (2 == e.getCode() && "CTX".equals(e.getPrefix())) { // See com.openexchange.groupware.contexts.impl.ContextExceptionCodes.NOT_FOUND
-                        LOG.info("No such context {}", contextId);
+                        LOG.info("No such context {}", Integer.valueOf(contextId));
                         return;
                     }
                 }
@@ -297,7 +382,34 @@ public final class SessionHandler {
                 LOG.error("", e);
             }
         }
-        LOG.info("{} removal of sessions: Context={}", (null != storageService ? "Remote" : "Local"), contextId);
+        LOG.info("{} removal of sessions: Context={}", (null != storageService ? "Remote" : "Local"), Integer.valueOf(contextId));
+    }
+
+    /**
+     * Removes all sessions associated to the given contexts.
+     *
+     * @param contextId Set with contextIds to remove session for.
+     */
+    public static Set<Integer> removeContextSessions(final Set<Integer> contextIds) {
+
+        final SessionData sessionData = sessionDataRef.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return null;
+        }
+        /*
+         * remove from session data
+         */
+        List<SessionControl> removeContextSessions = sessionData.removeContextSessions(contextIds);
+        postContainerRemoval(removeContextSessions, true);
+
+        Set<Integer> processedContexts = new HashSet<Integer>(removeContextSessions.size());
+        for (SessionControl control : removeContextSessions) {
+            processedContexts.add(Integer.valueOf(control.getSession().getContextId()));
+        }
+
+        LOG.info("Removed {} sessions for {} contexts", Integer.valueOf(removeContextSessions.size()), Integer.valueOf(processedContexts.size()));
+        return processedContexts;
     }
 
     /**
@@ -751,7 +863,7 @@ public final class SessionHandler {
         }
         final SessionControl sessionControl = sessionData.clearSession(sessionid);
         if (null == sessionControl) {
-            LOG.debug("Cannot find session for given identifier to remove session <{}{}", sessionid, '>');
+            LOG.debug("Cannot find session for given identifier to remove session <{}>", sessionid);
             return false;
         }
         postSessionRemoval(sessionControl.getSession());
@@ -1408,7 +1520,7 @@ public final class SessionHandler {
         }
     }
 
-    private static void postContainerRemoval(final List<SessionControl> sessionControls, final boolean removeFromSessionStorage) {
+    private static void postContainerRemoval(List<SessionControl> sessionControls, boolean removeFromSessionStorage) {
         if (removeFromSessionStorage) {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
@@ -1731,7 +1843,7 @@ public final class SessionHandler {
      * @param session The session to check
      * @return <code>true</code> if session should be put to storage, <code>false</code>, otherwise
      */
-    private static boolean useSessionStorage(SessionImpl session) {
+    static boolean useSessionStorage(SessionImpl session) {
         return null != session && false == session.isTransient() && false == isUsmEas(session.getClient());
     }
 
