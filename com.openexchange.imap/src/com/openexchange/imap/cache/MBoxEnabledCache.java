@@ -134,7 +134,7 @@ public final class MBoxEnabledCache {
                 f = ft;
                 Boolean mbox;
                 try {
-                    mbox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession());
+                    mbox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession(), imapConfig.getIMAPProperties().isIgnoreSubscription());
                 } catch (final MessagingException e) {
                     throw MimeMailException.handleMessagingException(e, imapConfig, imapConfig.getSession());
                 }

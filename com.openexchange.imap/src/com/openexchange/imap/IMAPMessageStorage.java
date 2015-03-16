@@ -1299,6 +1299,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    private static final FetchProfile FETCH_PROFILE_GET = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(FetchProfile.Item.ENVELOPE);
+            add(FetchProfile.Item.FLAGS);
+            add(FetchProfile.Item.CONTENT_INFO);
+            add(IMAPFolder.FetchProfileItem.HEADERS);
+        }
+    };
+
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
         if (msgUID < 0) {
@@ -1325,8 +1336,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (null == msg) {
                     return null;
                 }
-                // Force to pre-load envelope data through touching "Message-ID" header
-                msg.getMessageID();
+                // Force to pre-load envelope data
+                imapFolder.fetch(new Message[] { msg }, FETCH_PROFILE_GET);
                 long duration = System.currentTimeMillis() - start;
 
                 if (duration > 1000L) {
@@ -2737,7 +2748,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
                 {
-                    final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session);
+                    final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session, this.ignoreSubscriptions);
                     if (!STR_INBOX.equals(destFullName) && !listEntry.exists()) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, destFullName);
                     }
@@ -4220,7 +4231,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
-        return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session);
+        return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session, this.ignoreSubscriptions);
     }
 
     private static boolean isSubfolderOf(final String fullName, final String possibleParent, final char separator) {
