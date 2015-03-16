@@ -8,7 +8,6 @@ import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeLogParameters;
@@ -24,7 +23,13 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.ExecutedAfterChangeSetFilter;
 import liquibase.changelog.filter.NotRanChangeSetFilter;
 import liquibase.changelog.filter.ShouldRunChangeSetFilter;
-import liquibase.changelog.visitor.*;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.ChangeLogSyncVisitor;
+import liquibase.changelog.visitor.DBDocVisitor;
+import liquibase.changelog.visitor.ExpectedChangesVisitor;
+import liquibase.changelog.visitor.ListVisitor;
+import liquibase.changelog.visitor.RollbackVisitor;
+import liquibase.changelog.visitor.UpdateVisitor;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -62,12 +67,12 @@ public class Liquibase {
     public static final String ENABLE_CHANGELOG_PROP_ESCAPING = "liquibase.enableEscaping";
 
     private String changeLogFile;
-    private ResourceAccessor resourceAccessor;
+    private final ResourceAccessor resourceAccessor;
 
     protected Database database;
-    private Logger log;
+    private final Logger log;
 
-    private ChangeLogParameters changeLogParameters;
+    private final ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
     private boolean ignoreClasspathPrefix = true;
 
@@ -85,7 +90,7 @@ public class Liquibase {
 
         changeLogParameters = new ChangeLogParameters(database);
         setDatabase(database);
-        
+
     }
 
     public ChangeLogParameters getChangeLogParameters() {
@@ -98,8 +103,9 @@ public class Liquibase {
 
     private void setDatabase(Database database) throws DatabaseException {
         this.database=database;
-        if(database!=null) //Some tests use a null database
+        if(database!=null) {
             setDatabasePropertiesAsChangelogParameters(database);
+        }
     }
 
     /**
@@ -134,7 +140,8 @@ public class Liquibase {
             changeLog.validate(database, contexts);
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, changeLog);
 
-            changeLogIterator.run(new UpdateVisitor(database), database);
+//          changeLogIterator.run(new UpdateVisitor(database), database);
+            changeLogIterator.run(createUpdateVisitor(), database);
         } finally {
             try {
                 database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
@@ -205,7 +212,8 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToApply));
 
-            logIterator.run(new UpdateVisitor(database), database);
+//            logIterator.run(new UpdateVisitor(database), database);
+            logIterator.run(createUpdateVisitor(), database);
         } finally {
             lockService.releaseLock();
         }
@@ -245,7 +253,7 @@ public class Liquibase {
         }
         executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
-        
+
         if (database instanceof OracleDatabase) {
         	executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
         }
@@ -551,7 +559,7 @@ public class Liquibase {
 
     /**
      * Drops all database objects owned by the current user.
-     */                                      
+     */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
         try {
             getLockService().waitForLock();
@@ -750,7 +758,7 @@ public class Liquibase {
         }
 
     }
-    
+
     /**
      * Sets checksums to null so they will be repopulated next run
      */
@@ -802,7 +810,7 @@ public class Liquibase {
     	// call without context
     	generateDocumentation(outputDirectory, null);
     }
-    
+
     public void generateDocumentation(String outputDirectory, String contexts) throws LiquibaseException {
         contexts = StringUtils.trimToNull(contexts);
         log.info("Generating Database Documentation");
@@ -870,7 +878,7 @@ public class Liquibase {
      * @param database Database which propeties are put in the changelog
      * @throws DatabaseException
      */
-    private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
+    private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {
             setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
             setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
             setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());

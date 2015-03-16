@@ -337,6 +337,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         for(Statement stmt: statements) {
             DBUtils.closeSQLStuff(stmt);
         }
+        ConnectionPostProcessor postProcessor = this.postProcessor;
         if (postProcessor != null) {
             try {
                 postProcessor.done(con);
@@ -598,16 +599,18 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
             @Override
             public void done(Connection con) throws SQLException, OXException {
-                con.commit();
-                con.setAutoCommit(true);
-                DatabaseService db = dbService();
-                switch (accessType) {
-                case READ:
-                    db.backReadOnlyMonitored(readId, writeId, schema, partitionId, con);
-                    break;
-                case WRITE:
-                    db.backWritableMonitored(readId, writeId, schema, partitionId, con);
-                    break;
+                if (null != con) {
+                    con.commit();
+                    con.setAutoCommit(true);
+                    DatabaseService db = dbService();
+                    switch (accessType) {
+                        case READ:
+                            db.backReadOnlyMonitored(readId, writeId, schema, partitionId, con);
+                            break;
+                        case WRITE:
+                            db.backWritableMonitored(readId, writeId, schema, partitionId, con);
+                            break;
+                    }
                 }
             }
         };
@@ -621,16 +624,18 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
             @Override
             public void done(Connection con) throws SQLException {
-                con.commit();
-                con.setAutoCommit(true);
-                DatabaseService db = services.getService(DatabaseService.class);
-                switch (accessType) {
-                case READ:
-                    db.backReadOnly(con);
-                    break;
-                case WRITE:
-                    db.backWritable(con);
-                    break;
+                if (null != con) {
+                    con.commit();
+                    con.setAutoCommit(true);
+                    DatabaseService db = services.getService(DatabaseService.class);
+                    switch (accessType) {
+                    case READ:
+                        db.backReadOnly(con);
+                        break;
+                    case WRITE:
+                        db.backWritable(con);
+                        break;
+                    }
                 }
             }
         };
@@ -644,35 +649,39 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
             @Override
             public void done(Connection con) throws SQLException {
-                con.commit();
-                con.setAutoCommit(true);
-                DatabaseService db = services.getService(DatabaseService.class);
-                switch (accessType) {
-                case READ:
-                    db.backReadOnly(ctxId, con);
-                    break;
-                case WRITE:
-                    db.backWritable(ctxId, con);
-                    break;
+                if (null != con) {
+                    con.commit();
+                    con.setAutoCommit(true);
+                    DatabaseService db = services.getService(DatabaseService.class);
+                    switch (accessType) {
+                    case READ:
+                        db.backReadOnly(ctxId, con);
+                        break;
+                    case WRITE:
+                        db.backWritable(ctxId, con);
+                        break;
+                    }
                 }
             }
         };
     }
 
     private void finishMigrationWhenDone(final int ctxId) {
-        this.ctxId = ctxId;
+        this.ctxId = Integer.valueOf(ctxId);
         this.accessType = AccessType.WRITE;
 
         this.postProcessor = new ConnectionPostProcessor() {
 
             @Override
             public void done(Connection con) throws SQLException, OXException {
-                if (success) {
-                    con.commit();
+                if (null != con) {
+                    if (success) {
+                        con.commit();
+                    }
+                    con.setAutoCommit(true);
+                    context.versions.unlock(con, migrationMetadata.module);
+                    services.getService(DatabaseService.class).backForUpdateTask(ctxId, con);
                 }
-                con.setAutoCommit(true);
-                context.versions.unlock(con, migrationMetadata.module);
-                services.getService(DatabaseService.class).backForUpdateTask(ctxId, con);
             }
         };
     }
@@ -684,12 +693,14 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
             @Override
             public void done(Connection con) throws SQLException, OXException {
-                if (success) {
-                    con.commit();
+                if (null != con) {
+                    if (success) {
+                        con.commit();
+                    }
+                    con.setAutoCommit(true);
+                    context.versions.unlock(con, migrationMetadata.module);
+                    services.getService(DatabaseService.class).backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
                 }
-                con.setAutoCommit(true);
-                context.versions.unlock(con, migrationMetadata.module);
-                services.getService(DatabaseService.class).backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
             }
         };
     }
