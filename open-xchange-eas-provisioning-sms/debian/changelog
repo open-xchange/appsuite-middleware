@@ -1,3 +1,9 @@
+open-xchange-eas-provisioning-sms (7.6.1-23) stable; urgency=medium
+
+  * Build for patch 2015-03-18
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 16 Mar 2015 09:55:48 +0100
+
 open-xchange-eas-provisioning-sms (7.6.1-22) stable; urgency=medium
 
   * Build for patch 2015-03-16
