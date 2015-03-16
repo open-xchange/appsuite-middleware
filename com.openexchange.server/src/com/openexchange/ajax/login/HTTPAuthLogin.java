@@ -76,6 +76,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -91,7 +92,7 @@ import com.openexchange.tools.servlet.http.Tools;
  * {@link HTTPAuthLogin}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @since 7.6.2
+ * @since 7.6.1
  */
 public final class HTTPAuthLogin implements LoginRequestHandler {
 
