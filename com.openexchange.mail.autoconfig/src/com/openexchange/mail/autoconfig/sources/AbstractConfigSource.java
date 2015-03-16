@@ -149,7 +149,7 @@ public abstract class AbstractConfigSource implements ConfigSource {
             String username = autoconfig.getUsername();
             if (null != username) {
                 if (username.equalsIgnoreCase(EMAILADDRESS)) {
-                    autoconfig.setUsername(emailLocalPart + "@" + emailDomain);
+                    autoconfig.setUsername(new StringBuilder(24).append(emailLocalPart).append("@").append(emailDomain).toString());
                 } else if (username.equalsIgnoreCase(MAILLOCALPART)) {
                     autoconfig.setUsername(emailLocalPart);
                 }
