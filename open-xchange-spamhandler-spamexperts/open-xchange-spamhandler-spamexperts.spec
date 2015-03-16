@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:	@OXVERSION@
-%define        ox_release 0
+%define        ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL_2.0
@@ -71,8 +71,12 @@ ox_add_property com.openexchange.custom.spamexperts.trainhamfolder "Not Spam" /o
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Fri Mar 13 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Twelfth candidate for 7.6.2 release
 * Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Eleventh candidate for 7.6.2 release
+* Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-03-16
 * Wed Mar 04 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Tenth candidate for 7.6.2 release
 * Tue Mar 03 2015 Marcus Klein <marcus.klein@open-xchange.com>

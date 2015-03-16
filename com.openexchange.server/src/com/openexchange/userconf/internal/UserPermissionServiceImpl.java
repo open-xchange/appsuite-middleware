@@ -68,6 +68,13 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class UserPermissionServiceImpl implements UserPermissionService {
 
+    /**
+     * Initializes a new {@link UserPermissionServiceImpl}.
+     */
+    public UserPermissionServiceImpl() {
+        super();
+    }
+
     @Override
     public UserPermissionBits getUserPermissionBits(int userId, int contextId) throws OXException {
         return UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, contextId);

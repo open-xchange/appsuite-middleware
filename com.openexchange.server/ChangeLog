@@ -1,6 +1,16 @@
+* 2015-03-16 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 36100: Use IDGenerator to block concurrent deleting threads to prevent MySQL deadlocks #2
+
 * 2015-03-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 37213: Also consider remote sessions when trying to re-establish a terminated IMAP-IDLE listener
+ - Fix for bug 37063: Added null guard
+ - Fix for bug 37186: Added null guard
+
+* 2015-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37200: Do only advertise "edit_group"/"edit_resource" capability if both - backend service and permission bit are available
 
 * 2015-03-12 - martin.schneider@open-xchange.com
 

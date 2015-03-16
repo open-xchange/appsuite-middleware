@@ -198,6 +198,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected IMAPFolder imapFolder;
     protected final Set<IMAPFolder> otherFolders;
     protected int holdsMessages = -1;
+    protected final boolean ignoreSubscriptions;
 
     /**
      * Initializes a new {@link IMAPFolderWorker}.
@@ -217,6 +218,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         imapConfig = imapAccess.getIMAPConfig();
         aclExtension = imapConfig.getACLExtension();
         otherFolders = new HashSet<IMAPFolder>(4);
+        ignoreSubscriptions = imapConfig.getIMAPProperties().isIgnoreSubscription();
     }
 
     private void openFolder(final int desiredMode, final IMAPFolder imapFolder) throws MessagingException {
@@ -355,7 +357,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      */
     protected boolean holdsMessages() throws OXException, MessagingException {
         if (holdsMessages == -1) {
-            holdsMessages = ListLsubCache.getCachedLISTEntry(imapFolder.getFullName(), accountId, imapFolder, session).canOpen() ? 1 : 0;
+            holdsMessages = ListLsubCache.getCachedLISTEntry(imapFolder.getFullName(), accountId, imapFolder, session, this.ignoreSubscriptions).canOpen() ? 1 : 0;
         }
         return holdsMessages > 0;
     }
@@ -465,14 +467,15 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 throw IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, imapConfig, session, Integer.valueOf(desiredMode));
             }
             boolean openIt = true;
-            ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, retval, session);
+            boolean ignoreSubscription = this.ignoreSubscriptions;
+            ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, retval, session, ignoreSubscription);
             if (!isDefaultFolder && !STR_INBOX.equals(fullName) && (!listEntry.exists())) {
                 // Try to open the folder although not LISTed to check existence
                 if (!tryOpen(retval, desiredMode)) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
                 openIt = false;
-                listEntry = ListLsubCache.addSingleByFolder(accountId, retval, session);
+                listEntry = ListLsubCache.addSingleByFolder(accountId, retval, session, ignoreSubscription);
             }
             boolean selectable = listEntry.canOpen();
             if (!selectable) { // NoSelect

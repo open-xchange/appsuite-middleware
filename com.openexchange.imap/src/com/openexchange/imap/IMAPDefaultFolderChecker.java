@@ -129,6 +129,7 @@ public class IMAPDefaultFolderChecker {
     protected final IMAPAccess imapAccess;
     protected final IMAPConfig imapConfig;
     protected final boolean hasMetadata;
+    protected final boolean ignoreSubscription;
 
     /**
      * Initializes a new {@link IMAPDefaultFolderChecker}.
@@ -148,6 +149,7 @@ public class IMAPDefaultFolderChecker {
         this.imapAccess = imapAccess;
         imapConfig = imapAccess.getIMAPConfig();
         this.hasMetadata = hasMetadata;
+        ignoreSubscription = imapConfig.getIMAPProperties().isIgnoreSubscription();
     }
 
     /**
@@ -273,7 +275,7 @@ public class IMAPDefaultFolderChecker {
                         IMAPFolder inboxFolder;
                         {
                             IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(INBOX);
-                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session);
+                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session, ignoreSubscription);
                             if (entry.exists()) {
                                 inboxFolder = tmp;
                             } else {
@@ -286,9 +288,9 @@ public class IMAPDefaultFolderChecker {
                                 } catch (MessagingException e) {
                                     IMAPCommandsCollection.createFolder(tmp, sep, Folder.HOLDS_MESSAGES);
                                 }
-                                ListLsubCache.addSingle(INBOX, accountId, tmp, session);
+                                ListLsubCache.addSingle(INBOX, accountId, tmp, session, ignoreSubscription);
                                 inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-                                entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
+                                entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session, ignoreSubscription);
                             }
                             inboxListEntry = entry;
                         }
@@ -297,8 +299,8 @@ public class IMAPDefaultFolderChecker {
                              * Subscribe INBOX folder
                              */
                             inboxFolder.setSubscribed(true);
-                            ListLsubCache.addSingle(INBOX, accountId, inboxFolder, session);
-                            inboxListEntry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
+                            ListLsubCache.addSingle(INBOX, accountId, inboxFolder, session, ignoreSubscription);
+                            inboxListEntry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session, ignoreSubscription);
                         }
                         char sep = inboxFolder.getSeparator();
                         /*
@@ -413,19 +415,19 @@ public class IMAPDefaultFolderChecker {
             IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
 
             // Entries with "\Drafts" marker
-            Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session);
+            Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session, ignoreSubscription);
             handleMarkedEntries(entries, StorageUtility.INDEX_DRAFTS, names, fullNames, checkedIndexes, cache, modified);
 
             // Entries with "\Junk" marker
-            entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session);
+            entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session, ignoreSubscription);
             handleMarkedEntries(entries, StorageUtility.INDEX_SPAM, names, fullNames, checkedIndexes, cache, modified);
 
             // Entries with "\Send" marker
-            entries = ListLsubCache.getSentEntry(accountId, imapFolder, session);
+            entries = ListLsubCache.getSentEntry(accountId, imapFolder, session, ignoreSubscription);
             handleMarkedEntries(entries, StorageUtility.INDEX_SENT, names, fullNames, checkedIndexes, cache, modified);
 
             // Entries with "\Trash" marker
-            entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session);
+            entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session, ignoreSubscription);
             handleMarkedEntries(entries, StorageUtility.INDEX_TRASH, names, fullNames, checkedIndexes, cache, modified);
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
@@ -612,7 +614,7 @@ public class IMAPDefaultFolderChecker {
         int prefixLen = prefix.length();
         String desiredFullName = prefixLen == 0 ? qualifiedName : new StringBuilder(prefix).append(qualifiedName).toString();
         {
-            ListLsubEntry entry = modified.get() ? ListLsubCache.getActualLISTEntry(desiredFullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(desiredFullName, accountId, imapStore, session);
+            ListLsubEntry entry = modified.get() ? ListLsubCache.getActualLISTEntry(desiredFullName, accountId, imapStore, session, ignoreSubscription) : ListLsubCache.getCachedLISTEntry(desiredFullName, accountId, imapStore, session, ignoreSubscription);
             if (null != entry && entry.exists()) {
                 // The easy one -- already existing; just check subscription status
                 if (1 == subscribe) {

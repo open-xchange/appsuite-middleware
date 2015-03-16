@@ -128,9 +128,10 @@ final class ListLsubCollection implements Serializable {
      * @param user The user namespaces
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
+     * @param ignoreSubscriptions Whether to ignore subscriptions
      * @throws MessagingException If a messaging error occurs
      */
-    protected ListLsubCollection(final IMAPFolder imapFolder, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
+    protected ListLsubCollection(IMAPFolder imapFolder, String[] shared, String[] user, boolean doStatus, boolean doGetAcl, boolean ignoreSubscriptions) throws MessagingException {
         super();
         listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
@@ -141,7 +142,7 @@ final class ListLsubCollection implements Serializable {
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
-        init(false, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
+        init(false, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
     }
 
     /**
@@ -152,9 +153,10 @@ final class ListLsubCollection implements Serializable {
      * @param user The user namespaces
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
+     * @param ignoreSubscriptions Whether to ignore subscriptions
      * @throws OXException If initialization fails
      */
-    protected ListLsubCollection(final IMAPStore imapStore, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    protected ListLsubCollection(IMAPStore imapStore, String[] shared, String[] user, boolean doStatus, boolean doGetAcl, boolean ignoreSubscriptions) throws OXException {
         super();
         listMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
         lsubMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
@@ -165,7 +167,7 @@ final class ListLsubCollection implements Serializable {
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
-        init(false, imapStore, doStatus, doGetAcl);
+        init(false, imapStore, doStatus, doGetAcl, ignoreSubscriptions);
     }
 
     private void checkDeprecated() {
@@ -282,9 +284,9 @@ final class ListLsubCollection implements Serializable {
      * @param doGetAcl Whether ACL command shall be performed
      * @throws OXException If re-initialization fails
      */
-    public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws OXException {
         clear();
-        init(true, imapStore, doStatus, doGetAcl);
+        init(true, imapStore, doStatus, doGetAcl, ignoreSubscriptions);
     }
 
     /**
@@ -295,14 +297,14 @@ final class ListLsubCollection implements Serializable {
      * @param doGetAcl Whether ACL command shall be performed
      * @throws MessagingException If a messaging error occurs
      */
-    public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
+    public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws MessagingException {
         clear();
-        init(true, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
+        init(true, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
     }
 
-    private void init(final boolean clearMaps, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    private void init(final boolean clearMaps, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws OXException {
         try {
-            init(clearMaps, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl, imapStore);
+            init(clearMaps, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl, ignoreSubscriptions, imapStore);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
@@ -354,9 +356,11 @@ final class ListLsubCollection implements Serializable {
         });
     }
 
-    private void init(final boolean clearMaps, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, final IMAPStore imapStore) throws MessagingException {
+    private void init(boolean clearMaps, IMAPFolder imapFolder, boolean doStatus, boolean doGetAcl, boolean ignoreSubscriptions, IMAPStore imapStore) throws MessagingException {
         if (clearMaps) {
             listMap.clear();
+            lsubMap.clear();
+        } else if (ignoreSubscriptions) {
             lsubMap.clear();
         }
         final boolean debug = LOG.isDebugEnabled();
@@ -373,18 +377,20 @@ final class ListLsubCollection implements Serializable {
             }
 
         });
-        /*
-         * Perform LSUB "" "*"
-         */
-        imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        if (!ignoreSubscriptions) {
+            /*
+             * Perform LSUB "" "*"
+             */
+            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-            @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                doListLsubCommand(protocol, true);
-                return null;
-            }
+                @Override
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    doListLsubCommand(protocol, true);
+                    return null;
+                }
 
-        });
+            });
+        }
         /*
          * Perform LIST "" "*"
          */
@@ -397,6 +403,9 @@ final class ListLsubCollection implements Serializable {
             }
 
         });
+        if (ignoreSubscriptions) {
+            lsubMap.putAll(listMap);
+        }
         if (imapStore.getCapabilities().containsKey("SPECIAL-USE")) {
             /*
              * Perform LIST (SPECIAL-USE) "" "*"
@@ -434,10 +443,12 @@ final class ListLsubCollection implements Serializable {
                 LOG.debug(sb.toString());
             }
         }
-        /*
-         * Consistency check
-         */
-        checkConsistency(imapStore);
+        if (!ignoreSubscriptions) {
+            /*
+             * Consistency check
+             */
+            checkConsistency(imapStore);
+        }
         /*
          * Status if enabled
          */
@@ -686,9 +697,9 @@ final class ListLsubCollection implements Serializable {
      * @param doGetAcl Whether ACL command shall be performed
      * @throws OXException If update fails
      */
-    public void update(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    public void update(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws OXException {
         try {
-            update(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
+            update(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl, ignoreSubscriptions);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
@@ -703,15 +714,15 @@ final class ListLsubCollection implements Serializable {
      * @param doGetAcl Whether ACL command shall be performed
      * @throws MessagingException If a messaging error occurs
      */
-    public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
+    public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws MessagingException {
         if (deprecated.get() || ROOT_FULL_NAME.equals(fullName)) {
-            init(true, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
+            init(true, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
             return;
         }
         /*
          * Do a full re-build anyway...
          */
-        init(true, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
+        init(true, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
     }
 
     /**

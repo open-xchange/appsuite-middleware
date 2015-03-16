@@ -174,7 +174,7 @@ public final class IMAPFolderConverter {
                 new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(),
                 session.getUserId(),
                 imapFolder.getFullName(),
-                ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session));
+                ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()));
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -248,7 +248,7 @@ public final class IMAPFolderConverter {
                 mailFolder.setRootFolder(false);
                 // Get appropriate entries
                 final int accountId = imapConfig.getAccountId();
-                final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(imapFullName, accountId, imapFolder, session);
+                final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(imapFullName, accountId, imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription());
                 /*
                  * Check existence
                  */
@@ -372,7 +372,7 @@ public final class IMAPFolderConverter {
                      * Check reliably for subscribed subfolders through LSUB command since folder attributes need not to to be present as
                      * per RFC 3501
                      */
-                    mailFolder.setSubscribedSubfolders(ListLsubCache.hasAnySubscribedSubfolder(imapFullName, accountId, imapFolder, session));
+                    mailFolder.setSubscribedSubfolders(ListLsubCache.hasAnySubscribedSubfolder(imapFullName, accountId, imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()));
                 }
                 /*
                  * Set full name, name, and parent full name
@@ -558,7 +558,7 @@ public final class IMAPFolderConverter {
              * This is the tricky case: Allow subfolder creation for a common imap folder but deny it for imap server's
              * namespace folders
              */
-            if (checkForNamespaceFolder(imapFullName, imapAccess.getIMAPStore(), session, accountId)) {
+            if (checkForNamespaceFolder(imapFullName, imapAccess.getIMAPStore(), session, accountId, imapConfig.getIMAPProperties().isIgnoreSubscription())) {
                 ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
             } else {
                 ownPermission.setAllPermission(
@@ -601,9 +601,10 @@ public final class IMAPFolderConverter {
             mailFolder.setExists(true);
             mailFolder.setShared(false);
             mailFolder.setPublic(true);
-            mailFolder.setSeparator(ListLsubCache.getSeparator(imapConfig.getAccountId(), rootFolder, session));
+            boolean ignoreSubscription = imapConfig.getIMAPProperties().isIgnoreSubscription();
+            mailFolder.setSeparator(ListLsubCache.getSeparator(imapConfig.getAccountId(), rootFolder, session, ignoreSubscription));
             final String imapFullname = "";
-            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(imapFullname, imapConfig.getAccountId(), rootFolder, session);
+            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(imapFullname, imapConfig.getAccountId(), rootFolder, session, ignoreSubscription);
             final Set<String> attrs = listEntry.getAttributes();
             if (null != attrs && !attrs.isEmpty()) {
                 if (attrs.contains(ATTRIBUTE_NON_EXISTENT)) {
@@ -775,7 +776,7 @@ public final class IMAPFolderConverter {
         return (e.isPrefix("ACL") && (Entity2ACLExceptionCode.RESOLVE_USER_FAILED.getNumber() == code)) || (e.isPrefix("USR") && (LdapExceptionCode.USER_NOT_FOUND.getNumber() == code));
     }
 
-    private static boolean checkForNamespaceFolder(final String fullName, final IMAPStore imapStore, final Session session, final int accountId) throws MessagingException, OXException {
+    private static boolean checkForNamespaceFolder(final String fullName, final IMAPStore imapStore, final Session session, final int accountId, boolean ignoreLsub) throws MessagingException, OXException {
         /*
          * Check for namespace folder
          */
@@ -795,7 +796,7 @@ public final class IMAPFolderConverter {
                     if (userFolders[i].startsWith(fullName)) {
                         return true;
                     }
-                    final List<ListLsubEntry> children = ListLsubCache.getCachedLISTEntry(userFolders[i], accountId, imapStore, session).getChildren();
+                    final List<ListLsubEntry> children = ListLsubCache.getCachedLISTEntry(userFolders[i], accountId, imapStore, session, ignoreLsub).getChildren();
                     for (final ListLsubEntry entry : children) {
                         if (entry.getFullName().startsWith(fullName)) {
                             return true;

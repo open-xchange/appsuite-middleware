@@ -1594,6 +1594,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         }
 
         if (!con.controlledExternally) {
+            params.putParameter(getFolderType(), PARAM_CONNECTION, null);
             if (con.isWritable()) {
                 try {
                     DBUtils.rollback(con.connection);

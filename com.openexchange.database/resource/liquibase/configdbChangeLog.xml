@@ -54,6 +54,7 @@
     </changeSet>
 
     <changeSet id="7.6.2:context_server2db_pool:addpoolandschemaindex" author="thorben.betten@open-xchange.com">
+        <validCheckSum>7:8ecb4a685838eb81a07d77c4835f6bce</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists tableName="context_server2db_pool"  columnNames="write_db_pool_id,db_schema"/>

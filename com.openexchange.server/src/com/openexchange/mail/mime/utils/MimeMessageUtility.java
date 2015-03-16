@@ -111,6 +111,7 @@ import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -132,11 +133,13 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -2410,6 +2413,49 @@ public final class MimeMessageUtility {
                 return CharsetDetector.getFallback();
             }
             return CharsetDetector.detectCharset(rawIn);
+        }
+    }
+
+    /**
+     * Creates a new MIME message from given message
+     *
+     * @param msg The message to copy from
+     * @return The new MIME message
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static MimeMessage mimeMessageFrom(Message msg) throws MessagingException, IOException {
+        ThresholdFileHolder sink = null;
+        boolean closeSink = true;
+        try {
+            sink = new ThresholdFileHolder();
+            msg.writeTo(sink.asOutputStream());
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+            } else {
+                FileBackedMimeMessage fbm = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, msg.getReceivedDate());
+                tmp = fbm;
+            }
+            closeSink = false;
+            return tmp;
+        } catch (OXException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw new IOException(e);
+        } catch (com.sun.mail.util.MessageRemovedIOException e) {
+            throw new MessageRemovedException(e.getMessage());
+        } catch (IOException e) {
+            if (e.getCause() instanceof MessageRemovedException) {
+                throw (MessageRemovedException) e.getCause();
+            }
+            throw e;
+        } finally {
+            if (closeSink && null != sink) {
+                sink.close();
+            }
         }
     }
 

@@ -499,9 +499,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Obtain IMAP folder
              */
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullname);
-            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullname, accountId, imapFolder, session);
-            final boolean exists = "INBOX".equals(fullname) || (listEntry.exists());
             final IMAPConfig imapConfig = getIMAPConfig();
+            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullname, accountId, imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription());
+            final boolean exists = "INBOX".equals(fullname) || (listEntry.exists());
             if (!exists) {
                 throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
             }
@@ -645,7 +645,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("", e);
                 }
             }
-            final boolean certainPassword = ("dovecot.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
+            boolean certainPassword = false; //("dovecot.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
             if (certainPassword) {
                 tmpPass = "secret";
             }

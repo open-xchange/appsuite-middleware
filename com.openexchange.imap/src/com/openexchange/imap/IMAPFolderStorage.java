@@ -194,6 +194,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private final Session session;
     private final Context ctx;
     private final IMAPConfig imapConfig;
+    private final boolean ignoreSubscriptions;
 
     private Character separator;
     private IMAPDefaultFolderChecker checker;
@@ -214,6 +215,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         this.session = session;
         ctx = session instanceof ServerSession ? ((ServerSession) session).getContext() : ContextStorage.getStorageContext(session.getContextId());
         imapConfig = imapAccess.getIMAPConfig();
+        ignoreSubscriptions = imapConfig.getIMAPProperties().isIgnoreSubscription();
     }
 
     /**
@@ -390,7 +392,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     public MailFolderInfo getFolderInfo(final String fullName) throws OXException {
         try {
             final String fn = (DEFAULT_FOLDER_ID.equals(fullName) ? "" : fullName);
-            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fn, accountId, imapStore, session);
+            boolean ignoreSubscription = this.ignoreSubscriptions;
+            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fn, accountId, imapStore, session, ignoreSubscription);
             if (entry.exists()) {
                 return toFolderInfo(entry);
             }
@@ -427,7 +430,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
 
-            ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, f, session);
+            ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, f, session, ignoreSubscription);
             return null == listEntry ? IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId) : toFolderInfo(listEntry);
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
@@ -445,7 +448,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     public List<MailFolderInfo> getFolderInfos(final String optParentFullName, final boolean subscribedOnly) throws OXException {
         try {
             final String pfn = null == optParentFullName ? null : (DEFAULT_FOLDER_ID.equals(optParentFullName) ? "" : optParentFullName);
-            final List<ListLsubEntry> allEntries = ListLsubCache.getAllEntries(pfn, accountId, subscribedOnly, imapStore, session);
+            final List<ListLsubEntry> allEntries = ListLsubCache.getAllEntries(pfn, accountId, subscribedOnly, imapStore, session, this.ignoreSubscriptions);
 
             // User's locale
             final Locale locale = (session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getInstance().getUser(session.getUserId(), session.getContextId())).getLocale();
@@ -585,7 +588,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session);
+            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions);
             {
                 if (!doesExist(entry)) {
                     final IMAPFolder f = checkForNamespaceFolder(fullName);
@@ -617,7 +620,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session);
+            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions);
             {
                 if (!doesExist(entry)) {
                     final IMAPFolder f = checkForNamespaceFolder(fullName);
@@ -649,7 +652,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session);
+            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions);
             {
                 if (!doesExist(entry)) {
                     final IMAPFolder f = checkForNamespaceFolder(fullName);
@@ -681,7 +684,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session);
+            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions);
             {
                 if (!doesExist(entry)) {
                     final IMAPFolder f = checkForNamespaceFolder(fullName);
@@ -712,7 +715,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (DEFAULT_FOLDER_ID.equals(fullName) || STR_INBOX.equals(fullName)) {
                 return true;
             }
-            if (ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session).exists()) {
+            if (ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions).exists()) {
                 return true;
             }
             if (checkForNamespaceFolder(fullName) != null) {
@@ -939,7 +942,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         mailFolder.setShared(true);
         mailFolder.setSubfolders(listEntry.hasChildren());
         mailFolder.setSubscribed(listEntry.isSubscribed());
-        mailFolder.setSubscribedSubfolders(ListLsubCache.hasAnySubscribedSubfolder(fn, accountId, parent, session));
+        mailFolder.setSubscribedSubfolders(ListLsubCache.hasAnySubscribedSubfolder(fn, accountId, parent, session, this.ignoreSubscriptions));
         mailFolder.setParentFullname(null);
         mailFolder.setDefaultFolder(false);
         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
@@ -1378,11 +1381,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         Folder parent = createMe.getParent();
                         if (null != parent) {
                             final String parentFullName = parent.getFullName();
-                            ListLsubCache.addSingle(parentFullName, accountId, createMe, session);
+                            boolean ignoreSubscription = this.ignoreSubscriptions;
+                            ListLsubCache.addSingle(parentFullName, accountId, createMe, session, ignoreSubscription);
                             if ("".equals(parentFullName)) {
-                                ListLsubCache.addSingle(MailFolder.DEFAULT_FOLDER_ID, accountId, createMe, session);
+                                ListLsubCache.addSingle(MailFolder.DEFAULT_FOLDER_ID, accountId, createMe, session, ignoreSubscription);
                             }
-                            ListLsubCache.addSingle(createMe.getFullName(), accountId, createMe, session);
+                            ListLsubCache.addSingle(createMe.getFullName(), accountId, createMe, session, ignoreSubscription);
                         } else {
                             ListLsubCache.clearCache(accountId, session);
                         }
@@ -2452,7 +2456,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     /*
                      * Look-up special GMail folder: [GMail], [Google Mail], ...
                      */
-                    final ListLsubEntry rootEntry = ListLsubCache.getCachedLISTEntry("", accountId, imapStore, session);
+                    final ListLsubEntry rootEntry = ListLsubCache.getCachedLISTEntry("", accountId, imapStore, session, this.ignoreSubscriptions);
                     final List<ListLsubEntry> children = rootEntry.getChildren();
                     final String prefix = "[G";
                     for (final ListLsubEntry child : children) {
@@ -3313,7 +3317,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
-        return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session);
+        return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session, this.ignoreSubscriptions);
     }
 
     private ListLsubEntry getLSUBEntry(final IMAPFolder imapFolder) throws OXException, MessagingException {
@@ -3321,7 +3325,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private ListLsubEntry getLSUBEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
-        return ListLsubCache.getCachedLSUBEntry(fullName, accountId, imapFolder, session);
+        return ListLsubCache.getCachedLSUBEntry(fullName, accountId, imapFolder, session, this.ignoreSubscriptions);
     }
 
     /**

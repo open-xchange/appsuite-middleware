@@ -62,7 +62,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.procedure.TLongObjectProcedure;
 import gnu.trove.set.hash.TIntHashSet;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -142,8 +141,6 @@ import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.UnsynchronizedByteArrayInputStream;
-import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -402,7 +399,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
         } catch (final MessagingException e) {
             final Exception next = e.getNextException();
-            if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+            if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                 throw handleMessagingException(fullName, e);
             }
             throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -451,7 +448,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static String extractPlainText(final String content, final String optMimeType) throws OXException {
         final TextXtractService textXtractService = Services.getService(TextXtractService.class);
-        return textXtractService.extractFrom(new UnsynchronizedByteArrayInputStream(content.getBytes(Charsets.UTF_8)), optMimeType);
+        return textXtractService.extractFrom(Streams.newByteArrayInputStream(content.getBytes(Charsets.UTF_8)), optMimeType);
     }
 
     @Override
@@ -840,7 +837,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, "INBOX", READ_ONLY);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(imapFolder.getFullName(), e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, "INBOX");
@@ -969,7 +966,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(imapFolder.getFullName(), e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -998,10 +995,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             Part p = examinePart(msg, contentId);
             if (null == p) {
                 // Retry...
-                ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
-                msg.writeTo(out);
-                final MimeMessage tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
-                out = null;
+                MimeMessage tmp = MimeMessageUtility.mimeMessageFrom(msg);
                 p = examinePart(tmp, contentId);
                 if (null == p) {
                     throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(msgUID), fullName);
@@ -1146,7 +1140,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -1243,7 +1237,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -1299,6 +1293,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    private static final FetchProfile FETCH_PROFILE_GET = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(FetchProfile.Item.ENVELOPE);
+            add(FetchProfile.Item.FLAGS);
+            add(FetchProfile.Item.CONTENT_INFO);
+            add(IMAPFolder.FetchProfileItem.HEADERS);
+        }
+    };
+
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
         if (msgUID < 0) {
@@ -1310,7 +1315,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -1325,8 +1330,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (null == msg) {
                     return null;
                 }
-                // Force to pre-load envelope data through touching "Message-ID" header
-                msg.getMessageID();
+                // Force to pre-load envelope data
+                imapFolder.fetch(new Message[] { msg }, FETCH_PROFILE_GET);
                 long duration = System.currentTimeMillis() - start;
 
                 if (duration > 1000L) {
@@ -2499,7 +2504,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -2708,7 +2713,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, sourceFullName, move ? READ_WRITE : READ_ONLY);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(sourceFullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, sourceFullName);
@@ -2737,7 +2742,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
                 {
-                    final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session);
+                    final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session, this.ignoreSubscriptions);
                     if (!STR_INBOX.equals(destFullName) && !listEntry.exists()) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, destFullName);
                     }
@@ -2965,7 +2970,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, destFullName, READ_WRITE);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(destFullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, destFullName);
@@ -3140,7 +3145,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, destFullName, READ_WRITE);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(destFullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, destFullName);
@@ -3366,7 +3371,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -3497,7 +3502,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -3634,7 +3639,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -3697,7 +3702,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -3764,7 +3769,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -4029,7 +4034,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
                     } catch (final MessagingException e) {
                         final Exception next = e.getNextException();
-                        if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                        if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                             throw handleMessagingException(fullName, e);
                         }
                         throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -4062,7 +4067,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
                 } catch (final MessagingException e) {
                     final Exception next = e.getNextException();
-                    if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                         throw handleMessagingException(fullName, e);
                     }
                     throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
@@ -4220,7 +4225,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
-        return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session);
+        return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session, this.ignoreSubscriptions);
     }
 
     private static boolean isSubfolderOf(final String fullName, final String possibleParent, final char separator) {
@@ -4322,7 +4327,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
-                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
                     throw handleMessagingException(imapFolder.getFullName(), e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, "INBOX");
