@@ -50,8 +50,8 @@
 package com.openexchange.mail.mime;
 
 import javax.mail.internet.InternetAddress;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import junit.framework.TestCase;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 
 /**
  * {@link QuotedInternetAddressTest}
