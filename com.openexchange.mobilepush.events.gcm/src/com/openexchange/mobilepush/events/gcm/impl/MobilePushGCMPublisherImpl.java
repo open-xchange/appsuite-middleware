@@ -204,7 +204,9 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
 
         Map<String, Object> messageData = event.getMessageData();
         for (Entry<String, Object> entry : messageData.entrySet()) {
-            message.addData(entry.getKey(), (String) entry.getValue());
+            //Cast to string cause google only allows strings..
+            String value = String.valueOf(entry.getValue());
+            message.addData(entry.getKey(), value);
         }
 
         int currentLength = MailPushUtility.getPayloadLength(message.toString());
