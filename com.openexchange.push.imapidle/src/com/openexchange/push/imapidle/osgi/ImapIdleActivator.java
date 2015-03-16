@@ -76,6 +76,7 @@ import com.openexchange.push.imapidle.ImapIdlePushManagerService;
 import com.openexchange.push.imapidle.locking.HzImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -227,11 +228,12 @@ public class ImapIdleActivator extends HousekeepingActivator {
         if (ImapIdleClusterLock.Type.HAZELCAST.equals(configuration.getClusterLock().getType())) {
             // Start tracking for Hazelcast
             track(HazelcastConfigurationService.class, new HzConfigTracker(context, configuration, this));
-            openTrackers();
         } else {
             // Register PushManagerService instance
             registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, this));
         }
+        trackService(SessionStorageService.class);
+        openTrackers();
 
         registerService(MailAccountDeleteListener.class, new ImapIdleMailAccountDeleteListener());
         registerService(DeleteListener.class, new ImapIdleDeleteListener());
