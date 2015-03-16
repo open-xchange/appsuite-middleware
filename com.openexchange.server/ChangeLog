@@ -1,3 +1,7 @@
+* 2015-03-16 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 36100: Use IDGenerator to block concurrent deleting threads to prevent MySQL deadlocks #2
+
 * 2015-03-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 37213: Also consider remote sessions when trying to re-establish a terminated IMAP-IDLE listener
