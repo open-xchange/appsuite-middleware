@@ -162,6 +162,8 @@ public final class ListAction extends AbstractUserAction {
                 if (null != contactLastModified && ((null == lastModified) || (contactLastModified.after(lastModified)))) {
                     lastModified = contactLastModified;
                 }
+            } else {
+                userContacts.add(new UserContact(user));
             }
         }
         /*

@@ -74,11 +74,9 @@ public final class ResourceRequestActivator extends AJAXModuleActivator {
         super();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { ResourceService.class, UserService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { ResourceService.class, UserService.class };
     }
 
     @Override

@@ -49,12 +49,14 @@
 
 package com.openexchange.sessiond.impl;
 
-import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.util.Set;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessiondMBean;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
@@ -99,7 +101,7 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
 
     @Override
     public void clearSessionStorage() throws MBeanException {
-        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        SessionStorageService storageService = Services.getService(SessionStorageService.class);
         try {
             storageService.cleanUp();
         } catch (OXException e) {
@@ -107,4 +109,17 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void clearContextSessionsGlobal(Set<Integer> contextIds) throws MBeanException {
+        final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+
+        try {
+            sessiondService.removeContextSessionsGlobal(contextIds);
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
+    }
 }

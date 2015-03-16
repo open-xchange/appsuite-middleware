@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.command;
 
+import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import java.io.IOException;
@@ -124,6 +125,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     private int index;
     private final MailMessage[] retval;
     private boolean determineAttachmentByHeader;
+    private boolean checkICal;
+    private boolean checkVCard;
+    private boolean treatEmbeddedAsAttachment;
     private final String fullname;
     private final Set<FetchItemHandler> lastHandlers;
     private final TLongIntHashMap uid2index;
@@ -151,7 +155,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         command = getFetchCommand(isRev1, fp, false);
         uid = false;
         length = seqNums.length;
-        seqNum2index = new TIntIntHashMap(length);
+        seqNum2index = new TIntIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
         uid2index = null;
         for (int i = 0; i < length; i++) {
             seqNum2index.put(seqNums[i], i);
@@ -184,7 +188,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
         length = uids.length;
-        uid2index = new TLongIntHashMap(length);
+        uid2index = new TLongIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
         seqNum2index = null;
         for (int i = 0; i < length; i++) {
             uid2index.put(uids[i], i);
@@ -215,8 +219,41 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      *            only; otherwise <code>false</code>
      * @return This FETCH IMAP command with value applied
      */
-    public MailMessageFetchIMAPCommand setDetermineAttachmentByHeader(final boolean determineAttachmentByHeader) {
+    public MailMessageFetchIMAPCommand setDetermineAttachmentByHeader(boolean determineAttachmentByHeader) {
         this.determineAttachmentByHeader = determineAttachmentByHeader;
+        return this;
+    }
+
+    /**
+     * Sets the checkICal
+     *
+     * @param checkICal The checkICal to set
+     * @return This FETCH IMAP command with value applied
+     */
+    public MailMessageFetchIMAPCommand setCheckICal(boolean checkICal) {
+        this.checkICal = checkICal;
+        return this;
+    }
+
+    /**
+     * Sets the checkVCard
+     *
+     * @param checkVCard The checkVCard to set
+     * @return This FETCH IMAP command with value applied
+     */
+    public MailMessageFetchIMAPCommand setCheckVCard(boolean checkVCard) {
+        this.checkVCard = checkVCard;
+        return this;
+    }
+
+    /**
+     * Sets the treatEmbeddedAsAttachment
+     *
+     * @param treatEmbeddedAsAttachment The treatEmbeddedAsAttachment to set
+     * @return This FETCH IMAP command with value applied
+     */
+    public MailMessageFetchIMAPCommand setTreatEmbeddedAsAttachment(boolean treatEmbeddedAsAttachment) {
+        this.treatEmbeddedAsAttachment = treatEmbeddedAsAttachment;
         return this;
     }
 
@@ -346,18 +383,20 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         final FetchResponse fetchResponse = (FetchResponse) currentReponse;
         final int seqNum = fetchResponse.getNumber();
-        final int pos;
+        int pos;
         if (null == seqNum2index) {
-            final UID uidItem = getItemOf(UID.class, fetchResponse);
-            if (null != uidItem && uid2index.containsKey(uidItem.uid)) {
+            UID uidItem = getItemOf(UID.class, fetchResponse);
+            if (null != uidItem) {
                 pos = uid2index.remove(uidItem.uid);
+                if (pos < 0) {
+                    pos = index;
+                }
             } else {
                 pos = index;
             }
         } else {
-            if (seqNum2index.containsKey(seqNum)) {
-                pos = seqNum2index.remove(seqNum);
-            } else {
+            pos = seqNum2index.remove(seqNum);
+            if (pos < 0) {
                 pos = index;
             }
         }
@@ -365,7 +404,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         boolean error = false;
         MailMessage mail;
         try {
-            mail = handleFetchRespone(fetchResponse, fullname, separator, lastHandlers, determineAttachmentByHeader);
+            mail = handleFetchRespone(fetchResponse, fullname, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
         } catch (final MessagingException e) {
             /*
              * Discard corrupt message
@@ -401,7 +440,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @throws OXException If an OX error occurs
      */
     public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, null, false);
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, null, false, false, false, false);
     }
 
     /**
@@ -416,14 +455,14 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @throws OXException If an OX error occurs
      */
     public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(mail, fetchResponse, fullName, separator, null, false);
+        return handleFetchRespone(mail, fetchResponse, fullName, separator, null, false, false, false, false);
     }
 
-    private static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader);
+    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
     }
 
-    private static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
+    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
         final IDMailMessage m;
         if (null == mail) {
             m = new IDMailMessage(null, fullName);
@@ -442,7 +481,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             final Item item = fetchResponse.getItem(j);
             FetchItemHandler itemHandler = map.get(item.getClass());
             if (null == itemHandler) {
-                itemHandler = getItemHandlerByItem(item);
+                itemHandler = getItemHandlerByItem(item, checkICal, checkVCard, treatEmbeddedAsAttachment);
                 if (null == itemHandler) {
                     LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
                 } else {
@@ -467,8 +506,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         return m;
     }
 
-    private static FetchItemHandler getItemHandlerByItem(final Item item) {
-        if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
+    private static FetchItemHandler getItemHandlerByItem(Item item, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) {
+        if (item instanceof BODYSTRUCTURE) {
+            return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard, treatEmbeddedAsAttachment);
+        } else if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
         } else if (item instanceof UID) {
             return UID_ITEM_HANDLER;
@@ -480,8 +521,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return ENVELOPE_ITEM_HANDLER;
         } else if (item instanceof RFC822SIZE) {
             return SIZE_ITEM_HANDLER;
-        } else if (item instanceof BODYSTRUCTURE) {
-            return BODYSTRUCTURE_ITEM_HANDLER;
         } else if (item instanceof X_REAL_UID) {
             return X_REAL_UID_ITEM_HANDLER;
         } else if (item instanceof com.sun.mail.imap.protocol.X_MAILBOX) {
@@ -913,22 +952,35 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
     };
 
-    private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class BODYSTRUCTUREFetchItemHandler implements FetchItemHandler {
+
+        private final boolean checkICal;
+        private final boolean checkVCard;
+        private final boolean treatEmbeddedAsAttachment;
+
+        BODYSTRUCTUREFetchItemHandler(boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) {
+            super();
+            this.checkICal = checkICal;
+            this.checkVCard = checkVCard;
+            this.treatEmbeddedAsAttachment = treatEmbeddedAsAttachment;
+        }
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws OXException {
-            final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-            final ContentType contentType = new ContentType().setPrimaryType(bs.type).setSubType(bs.subtype);
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) throws OXException {
+            BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
+            ContentType contentType = new ContentType().setPrimaryType(bs.type).setSubType(bs.subtype);
             {
-                final ParameterList cParams = bs.cParams;
+                ParameterList cParams = bs.cParams;
                 if (cParams != null) {
-                    for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
-                        final String name = names.nextElement().toString();
-                        final String value = cParams.get(name);
+                    for (Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
+                        String name = names.nextElement().toString();
+                        String value = cParams.get(name);
                         if (!isEmpty(value)) {
                             try {
-                                contentType.setParameterErrorAware(name, value);
-                            } catch (final OXException e) {
+                                contentType.setParameterErrorAware(name, MimeMessageUtility.decodeEnvelopeHeader(value));
+                            } catch (OXException e) {
                                 final long uid = msg.getUid();
                                 final String folder = msg.getFolder();
                                 LOG.debug("Ignoring invalid parameter in Content-Type header contained in message {} of folder {}.", uid <= 0 ? "<unknown>" : Long.toString(uid), null == folder ? "<unknown>" : folder);
@@ -939,7 +991,75 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
             msg.setContentType(contentType);
             msg.addHeader("Content-Type", contentType.toString(true));
-            msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
+
+
+            boolean hasAttachment = bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs));
+            if (hasAttachment) {
+                msg.setHasAttachment(hasAttachment);
+
+                if (checkICal && hasICal(bs)) {
+                    msg.addHeader("X-ICAL", "true");
+                }
+
+                if (checkVCard && hasVCard(bs)) {
+                    msg.addHeader("X-VCARD", "true");
+                }
+            } else if (treatEmbeddedAsAttachment) {
+                hasAttachment = hasEmbedded(bs);
+            }
+        }
+
+        private boolean hasICal(BODYSTRUCTURE bs) {
+            String baseContentType = bs.type + "/" + bs.subtype;
+            if (baseContentType.indexOf("calendar") >= 0 || baseContentType.indexOf("ics") >= 0) {
+                return true;
+            }
+
+            BODYSTRUCTURE[] subs = bs.bodies;
+            if (null != subs) {
+                for (BODYSTRUCTURE sub : subs) {
+                    if (hasICal(sub)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private boolean hasVCard(BODYSTRUCTURE bs) {
+            String baseContentType = bs.type + "/" + bs.subtype;
+            if (baseContentType.indexOf("card") >= 0 || baseContentType.indexOf("vcf") >= 0) {
+                return true;
+            }
+
+            BODYSTRUCTURE[] subs = bs.bodies;
+            if (null != subs) {
+                for (BODYSTRUCTURE sub : subs) {
+                    if (hasVCard(sub)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private boolean hasEmbedded(BODYSTRUCTURE bs) {
+            if ("image".equals(bs.type) && !Strings.isEmpty(bs.id)) {
+                return true;
+            }
+
+            BODYSTRUCTURE[] subs = bs.bodies;
+            if (null != subs) {
+                for (BODYSTRUCTURE sub : subs) {
+                    if (hasEmbedded(sub)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         @Override
@@ -968,7 +1088,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 }
             }
         }
-    };
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
 
     private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
 
@@ -1024,7 +1146,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
         MAP.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
         MAP.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
-        MAP.put(BODYSTRUCTURE.class, BODYSTRUCTURE_ITEM_HANDLER);
         MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
     }
 

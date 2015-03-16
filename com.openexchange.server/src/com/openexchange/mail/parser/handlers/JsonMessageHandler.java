@@ -49,11 +49,13 @@
 
 package com.openexchange.mail.parser.handlers;
 
+import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -73,6 +75,7 @@ import javax.mail.internet.MimeMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -102,8 +105,10 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
@@ -182,6 +187,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     } // End of class PlainTextContent
 
     private static final class MultipartInfo {
+
         final String mpId;
         final ContentType contentType;
 
@@ -226,6 +232,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private String altId;
     private boolean textAppended;
     private boolean textWasEmpty;
+    private boolean html;
     private final boolean[] modified;
     private PlainTextContent plainText;
     private String tokenFolder;
@@ -237,6 +244,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private boolean includePlainText;
     private boolean exactLength;
     private final int maxContentSize;
+    private boolean doDeepParseForNestedMessage = true;
 
 
     /**
@@ -301,10 +309,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JsonMessageHandler} for internal usage
      */
-    private JsonMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis, final int maxContentSize) throws OXException {
+    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize) throws OXException {
         super();
         this.multiparts = new LinkedList<MultipartInfo>();
-        this.embedded = embedded;
+        this.embedded = DisplayMode.DOCUMENT.equals(displayMode) ? false : embedded;
         this.attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.ttlMillis = ttlMillis;
         this.token = token;
@@ -336,9 +344,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (unreadMessages >= 0) {
                     jsonObject.put(UNREAD, unreadMessages);
                 }
-                jsonObject.put(
-                    HAS_ATTACHMENTS,
-                    mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
+                jsonObject.put(HAS_ATTACHMENTS, mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
                 jsonObject.put(CONTENT_TYPE, mail.getContentType().getBaseType());
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
@@ -673,7 +679,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
-        final boolean considerAsInline = isInline || part.containsHeader("Content-Id");
+        // Check for inline image
+        boolean considerAsInline = isInline || (!part.getContentDisposition().isAttachment() && part.containsHeader("Content-Id"));
+
+        // Handle it...
         if (considerAsInline && (DisplayMode.MODIFYABLE.getMode() < displayMode.getMode())) {
             final MultipartInfo mpInfo = multiparts.peek();
             if (null != mpInfo && textAppended && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
@@ -745,24 +754,25 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
+    public boolean handleInlineHtml(final ContentProvider contentProvider, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
+        String htmlContent = contentProvider.getContent();
         if (textAppended) {
             /*
              * A text part has already been detected as message's body
              */
             if (isAlternative) {
-                if (DisplayMode.DISPLAY.equals(displayMode)) {
+                if (DisplayMode.DISPLAY.isIncluded(displayMode)) {
                     /*
                      * Check if previously appended text part was empty
                      */
                     if (textWasEmpty) {
                         if (usm.isDisplayHtmlInlineContent()) {
-                            final JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                            JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
                             if (includePlainText) {
                                 try {
-                                    final String plainText = html2text(htmlContent);
+                                    String plainText = html2text(htmlContent);
                                     jsonObject.put("plain_text", plainText);
-                                } catch (final JSONException e) {
+                                } catch (JSONException e) {
                                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                                 }
                             }
@@ -770,7 +780,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             try {
                                 asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
                                 getAttachmentsArr().remove(0);
-                            } catch (final JSONException e) {
+                            } catch (JSONException e) {
                                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                             }
                         }
@@ -779,24 +789,24 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      * Check if nested in same multipart
                      */
                     try {
-                        final MultipartInfo mpInfo = multiparts.peek();
-                        final JSONArray attachments = getAttachmentsArr();
-                        final int length = attachments.length();
+                        MultipartInfo mpInfo = multiparts.peek();
+                        JSONArray attachments = getAttachmentsArr();
+                        int length = attachments.length();
                         for (int i = length; i-- > 0;) {
-                            final JSONObject jAttachment = attachments.getJSONObject(i);
+                            JSONObject jAttachment = attachments.getJSONObject(i);
                             // Is HTML and in same multipart
                             if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && null != mpInfo && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null)) && mpInfo.isSubType("mixed")) {
                                 String content = jAttachment.optString(CONTENT, "null");
                                 if (!"null".equals(content)) {
                                     // Append to first one
-                                    final HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded, maxContentSize);
+                                    HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded, maxContentSize);
                                     content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
                                     jAttachment.put(CONTENT, content);
                                     return true;
                                 }
                             }
                         }
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                     }
                     /*
@@ -804,7 +814,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     if (attachHTMLAlternativePart) {
                         try {
-                            final JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                            JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
                             attachment.put(VIRTUAL, true);
                         } catch (final JSONException e) {
                             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -823,24 +833,24 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
             } else {
                 try {
-                    final MultipartInfo mpInfo = multiparts.peek();
-                    final JSONArray attachments = getAttachmentsArr();
-                    final int length = attachments.length();
+                    MultipartInfo mpInfo = multiparts.peek();
+                    JSONArray attachments = getAttachmentsArr();
+                    int length = attachments.length();
                     for (int i = length; i-- > 0;) {
-                        final JSONObject jAttachment = attachments.getJSONObject(i);
+                        JSONObject jAttachment = attachments.getJSONObject(i);
                         // Is HTML and in same multipart
                         if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && null != mpInfo && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null)) && mpInfo.isSubType("mixed")) {
                             String content = jAttachment.optString(CONTENT, "null");
                             if (!"null".equals(content)) {
                                 // Append to first one
-                                final HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded, maxContentSize);
+                                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded, maxContentSize);
                                 content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
                                 jAttachment.put(CONTENT, content);
                                 return true;
                             }
                         }
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
                 /*
@@ -857,27 +867,27 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     /*
                      * Check if HTML is empty or has an empty body section
                      */
-                    if ((com.openexchange.java.Strings.isEmpty(htmlContent) || (htmlContent.length() < 1024 && hasNoImage(htmlContent) && com.openexchange.java.Strings.isEmpty(html2text(htmlContent)))) && plainText != null) {
+                    if ((com.openexchange.java.Strings.isEmpty(htmlContent) || (htmlContent.length() < 1024 && hasNoImage(htmlContent) && isEmpty(html2text(htmlContent)))) && plainText != null) {
                         /*
                          * No text present
                          */
                         asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
                     } else {
-                        final JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                        JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
                         if (includePlainText) {
                             try {
                                 /*
                                  * Try to convert the given HTML to regular text
                                  */
-                                final String plainText = html2text(htmlContent);
+                                String plainText = html2text(htmlContent);
                                 jsonObject.put("plain_text", plainText);
-                            } catch (final JSONException e) {
+                            } catch (JSONException e) {
                                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                             }
                         }
                     }
                 } else {
-                    asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                    asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.isIncluded(displayMode));
                 }
             } else if (DisplayMode.RAW.equals(displayMode)) {
                 /*
@@ -886,21 +896,21 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(htmlContent));
             } else {
                 try {
-                    final JSONObject jsonObject = new JSONObject(6);
+                    JSONObject jsonObject = new JSONObject(6);
                     jsonObject.put(ID, id);
                     jsonObject.put(CONTENT_TYPE, contentType.getBaseType());
                     jsonObject.put(SIZE, htmlContent.length());
                     jsonObject.put(DISPOSITION, Part.INLINE);
                     jsonObject.put(CONTENT, htmlContent);
                     getAttachmentsArr().put(jsonObject);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
+            html = true;
             textAppended = true;
         }
         return true;
-
     }
 
     private static final Enriched2HtmlConverter ENRCONV = new Enriched2HtmlConverter();
@@ -927,7 +937,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             if (contentType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || contentType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT) || contentType.startsWith(MimeTypes.MIME_TEXT_RTF)) {
                 if (textAppended) {
-                    if (DisplayMode.DISPLAY.equals(displayMode)) {
+                    if (DisplayMode.DISPLAY.isIncluded(displayMode)) {
                         /*
                          * Add alternative part as attachment
                          */
@@ -963,7 +973,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 contentType.getBaseType(),
                                 getHtmlDisplayVersion(contentType, plainTextContentArg),
                                 fileName,
-                                DisplayMode.DISPLAY.equals(displayMode));
+                                DisplayMode.DISPLAY.isIncluded(displayMode));
                     }
                     if (includePlainText && !textObject.has("plain_text")) {
                         textObject.put("plain_text", plainTextContentArg);
@@ -985,6 +995,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                     getAttachmentsArr().put(jsonObject);
                 }
+                html = false;
                 textAppended = true;
                 return true;
             }
@@ -1000,9 +1011,26 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                     textWasEmpty = (null == content.getContent() || 0 == content.getContent().length());
                 } else {
-                    /*
-                     * A plain text message body has already been detected
-                     */
+                    if (usm.isDisplayHtmlInlineContent()) {
+                        // Assume HTML content has been appended before
+                        if (DisplayMode.DISPLAY.isIncluded(displayMode)) {
+                            /*
+                             * Add alternative part as attachment
+                             */
+                            if (null != contentType.getParameter("realfilename") && plainTextContentArg.length() > 0) {
+                                asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                                return true;
+                            }
+                        } else if (DisplayMode.RAW.equals(displayMode)) {
+                            /*
+                             * Return plain-text content as-is
+                             */
+                            asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(plainTextContentArg));
+                            return true;
+                        }
+                    }
+
+                    // A plain text message body has already been detected
                     final HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
                     final MultipartInfo mpInfo = multiparts.peek();
                     if (null != mpInfo && (DisplayMode.RAW.getMode() < displayMode.getMode()) && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
@@ -1042,6 +1070,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     textObject.put("plain_text", plainTextContentArg);
                 }
                 textAppended = true;
+                html = false;
                 textWasEmpty = (null == sanitizeResult.getContent() || 0 == sanitizeResult.getContent().length());
             }
             return true;
@@ -1178,50 +1207,69 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+        if (null != altId && altId.equals(id)) {
+            // Leaving multipart/alternative part
+            altId = null;
+            isAlternative = false;
+        }
         multiparts.pop();
         return true;
     }
 
     @Override
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
+        ThresholdFileHolder backup = null;
         try {
-            final Object content = mailPart.getContent();
-            final MailMessage nestedMail;
-            if (content instanceof MailMessage) {
-                nestedMail = (MailMessage) content;
-            } else if (content instanceof MimeMessage) {
-                nestedMail = MimeMessageConverter.convertMessage((MimeMessage) content, false);
-            }else if (content instanceof InputStream) {
-                try {
-                    nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
-                } catch (final MessagingException e) {
-                    throw MimeMailException.handleMessagingException(e);
+            JSONObject nestedObject;
+            if (doDeepParseForNestedMessage) {
+                MailMessage nestedMail;
+                {
+                    Object content = mailPart.getContent();
+                    if (content instanceof MailMessage) {
+                        nestedMail = (MailMessage) content;
+                    } else if (content instanceof MimeMessage) {
+                        nestedMail = MimeMessageConverter.convertMessage((MimeMessage) content, false);
+                    } else if (content instanceof InputStream) {
+                        try {
+                            backup = new ThresholdFileHolder();
+                            backup.write((InputStream) content);
+                            FileBackedMimeMessage mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), backup.getSharedStream());
+                            nestedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
+                        } catch (IOException e) {
+                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                        } catch (MessagingException e) {
+                            throw MimeMailException.handleMessagingException(e);
+                        }
+                    } else if (content instanceof String) {
+                        try {
+                            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8")));
+                            nestedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
+                        } catch (UnsupportedEncodingException e) {
+                            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
+                        } catch (MessagingException e) {
+                            throw MimeMailException.handleMessagingException(e);
+                        }
+                    } else {
+                        StringBuilder sb = new StringBuilder(128);
+                        sb.append("Ignoring nested message.").append("Cannot handle part's content which should be a RFC822 message according to its content type: ");
+                        sb.append((null == content ? "null" : content.getClass().getSimpleName()));
+                        LOG.error(sb.toString());
+                        return true;
+                    }
                 }
-            } else if (content instanceof String) {
-                try {
-                    nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8"))));
-                } catch (UnsupportedEncodingException e) {
-                    throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-                } catch (final MessagingException e) {
-                    throw MimeMailException.handleMessagingException(e);
-                }
+                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis, maxContentSize);
+                msgHandler.setTimeZone(timeZone);
+                msgHandler.includePlainText = includePlainText;
+                msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
+                msgHandler.tokenFolder = tokenFolder;
+                msgHandler.tokenMailId = tokenMailId;
+                msgHandler.exactLength = exactLength;
+                msgHandler.doDeepParseForNestedMessage = false;
+                new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
+                nestedObject = msgHandler.getJSONObject();
             } else {
-                final StringBuilder sb = new StringBuilder(128);
-                sb.append("Ignoring nested message.").append(
-                    "Cannot handle part's content which should be a RFC822 message according to its content type: ");
-                sb.append((null == content ? "null" : content.getClass().getSimpleName()));
-                LOG.error(sb.toString());
-                return true;
+                nestedObject = new JSONObject(3);
             }
-            final JsonMessageHandler msgHandler =
-                new JsonMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis, maxContentSize).setTimeZone(timeZone);
-            msgHandler.includePlainText = includePlainText;
-            msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
-            msgHandler.tokenFolder = tokenFolder;
-            msgHandler.tokenMailId = tokenMailId;
-            msgHandler.exactLength = exactLength;
-            new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
-            final JSONObject nestedObject = msgHandler.getJSONObject();
             /*
              * Sequence ID
              */
@@ -1239,6 +1287,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != backup) {
+                backup.close();
+            }
         }
     }
 

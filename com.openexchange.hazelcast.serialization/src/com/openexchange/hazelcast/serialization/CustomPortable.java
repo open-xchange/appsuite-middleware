@@ -71,6 +71,8 @@ public interface CustomPortable extends Portable {
      */
     public static final int PORTABLEREPORT_CLASS_ID = 9;
 
+    public static final int PORTABLE_CONTEXT_SESSIONS_CLEANER_CLASS_ID = 19;
+
     /**
      * Gets the ID of the dynamic portable factory.<p/>
      *
@@ -89,7 +91,7 @@ public interface CustomPortable extends Portable {
      * <p/>
      * The following list gives an overview about the <b>already used</b> class IDs (add your IDs here):
      * <ul>
-     * <li><code>  1</code>: com.openexchange.sessionstorage.hazelcast.portable.PortableSession</li>
+     * <li><code>  1</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSession</li>
      * <li><code>  2</code>: com.openexchange.drive.events.ms.PortableDriveEvent</li>
      * <li><code>  3</code>: com.openexchange.ms.internal.portable.PortableMessage</li>
      * <li><code>  4</code>: com.openexchange.caching.events.ms.internal.PortableCacheEvent</li>
@@ -106,7 +108,9 @@ public interface CustomPortable extends Portable {
      * <li><code>  14</code>: com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcher</li>
      * <li><code>  15</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcher</li>
      * <li><code>  16</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupStatus</li>
-     * <li><code> 17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
+     * <li><code>  17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
+     * <li><code>  18</code>: com.openexchange.sessiond.portable.PortableTokenSessionControl</li>
+     * <li><code>  19</code>: com.openexchange.sessiond.serialization.PortableContextSessionsCleaner</li>
      * </ul>
      *
      * @return The class ID

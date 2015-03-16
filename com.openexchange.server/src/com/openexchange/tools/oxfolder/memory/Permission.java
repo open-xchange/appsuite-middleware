@@ -49,8 +49,6 @@
 
 package com.openexchange.tools.oxfolder.memory;
 
-import com.openexchange.server.impl.OCLPermission;
-
 
 /**
  * {@link Permission}
@@ -59,34 +57,27 @@ import com.openexchange.server.impl.OCLPermission;
  */
 final class Permission {
 
-    int fuid;
+    final int fuid;
+    final int entity;
+    final boolean admin;
+    final boolean readFolder;
+    final int module;
+    final int type;
+    final int creator;
+    final long lastModified;
+    final int parent;
 
-    int entity;
-
-    boolean admin;
-
-    boolean readFolder;
-
-    int module;
-
-    int type;
-
-    int creator;
-
-    long lastModified;
-
-    int parent;
-
-    /**
-     * Initializes a new {@link Permission}.
-     */
-    Permission() {
+    Permission(int fuid, int entity, boolean admin, boolean readFolder, int module, int type, int creator, long lastModified, int parent) {
         super();
-    }
-
-    Permission setFolderPermission(final int fp) {
-        readFolder = fp >= OCLPermission.READ_FOLDER;
-        return this;
+        this.fuid = fuid;
+        this.entity = entity;
+        this.admin = admin;
+        this.readFolder = readFolder;
+        this.module = module;
+        this.type = type;
+        this.creator = creator;
+        this.lastModified = lastModified;
+        this.parent = parent;
     }
 
 }

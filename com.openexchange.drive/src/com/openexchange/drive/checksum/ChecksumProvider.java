@@ -67,6 +67,7 @@ import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -148,7 +149,7 @@ public class ChecksumProvider {
         }
         int userID = session.getServerSession().getUserId();
         List<DirectoryChecksum> checksums;
-        if (false == session.getStorage().supportsFolderSequenceNumbers()) {
+        if (false == session.getStorage().supports(FileStorageCapability.SEQUENCE_NUMBERS)) {
             if (null != trace) {
                 trace.append(" No folder sequence numbers supported.\n");
             }

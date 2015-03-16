@@ -148,6 +148,9 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static final String OPT_MEMORYPOOL_STATS_LONG = "memorypool";
 
+    private static final char OPT_NIO_BUFFER_STATS_SHORT = 'n';
+    private static final String OPT_NIO_BUFFER_STATS_LONG = "niobufferstats";
+
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
     private CLIOption runtimestats = null;
@@ -175,6 +178,7 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption miscstats = null;
     private CLIOption overviewstats = null;
     private CLIOption memorypoolstats = null;
+    private CLIOption niobufferstats = null;
 
     /**
      * Option for garbage collection statistics
@@ -255,7 +259,8 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showGrizzlyData(mbc));
             System.out.print(showGcData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.usm.session", "name", "com.openexchange.usm.session.impl.USMSessionInformation"));
-            System.out.println(showEventAdminData(mbc));
+            System.out.print(showEventAdminData(mbc));
+            System.out.println(showNioBufferData(mbc));
             count++;
         }
         if (null != parser.getOptionValue(this.showoperation) && 0 == count) {
@@ -319,6 +324,10 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showGeneralMonitor(mbc));
             System.out.print(showPooling(mbc));
             System.out.print(getStats(mbc, "java.lang:type=OperatingSystem"));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.niobufferstats) && 0 == count) {
+            System.out.print(showNioBufferData(mbc));
             count++;
         }
         if (0 == count) {
@@ -570,6 +579,14 @@ public class StatisticTools extends AbstractJMXTools {
         this.miscstats = setLongOpt(parser, OPT_MISC_STATS_LONG, "shows stats for general and threading", false, false);
         this.overviewstats = setLongOpt(parser, OPT_OVERVIEW_STATS_LONG, "shows stats for pooling and OperatingSystem", false, false);
         this.memorypoolstats = setLongOpt(parser, OPT_MEMORYPOOL_STATS_LONG, "shows stats for memory pool usage of the Java runtime", false, false);
+        this.niobufferstats = setShortLongOpt(
+            parser,
+            OPT_NIO_BUFFER_STATS_SHORT,
+            OPT_NIO_BUFFER_STATS_LONG,
+            "shows the NIO buffer stats",
+            false,
+            NeededQuadState.notneeded);
+
 
     }
 
@@ -877,6 +894,25 @@ public class StatisticTools extends AbstractJMXTools {
             }
         }
         return uptimeHours;
+    }
+
+
+    /**
+     * Show NIO buffer stats
+     * @param mbeanServerConnection
+     * @return
+     * @throws InstanceNotFoundException
+     * @throws AttributeNotFoundException
+     * @throws IntrospectionException
+     * @throws MalformedObjectNameException
+     * @throws MBeanException
+     * @throws ReflectionException
+     * @throws IOException
+     */
+    static String showNioBufferData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+        return getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=direct")
+        .append(getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=mapped"))
+        .toString();
     }
 
     private static String extractTextInBrackets(final String value, final int startIdx) {

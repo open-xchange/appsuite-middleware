@@ -513,9 +513,28 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Invalid argument(s) supplied
      */
     ILLEGAL_ARGUMENT("Invalid argument(s) supplied.", CATEGORY_ERROR, 93),
+    /**
+     * The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s.
+     */
+    MAX_DRIVE_ATTACHMENTS_EXCEEDED("The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s.", MailExceptionStrings.MAX_DRIVE_ATTACHMENTS_EXCEEDED_MSG, CATEGORY_USER_INPUT, 94),
+    /**
+     * The client request is not permitted. Details: %1$s
+     */
+    REQUEST_NOT_PERMITTED("The client request is not permitted. Details: %1$s", MailExceptionStrings.REQUEST_NOT_PERMITTED_MSG, CATEGORY_PERMISSION_DENIED, 95)
+
+
     ;
 
     private static String PREFIX = "MSG";
+
+    /**
+     * Gets the <code>"MSG"</code> prefix for mail-related exceptions
+     *
+     * @return The <code>"MSG"</code> prefix
+     */
+    public static String prefix() {
+        return PREFIX;
+    }
 
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.

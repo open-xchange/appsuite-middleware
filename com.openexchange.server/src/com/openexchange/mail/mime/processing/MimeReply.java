@@ -77,7 +77,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -319,75 +318,7 @@ public final class MimeReply {
              * Set "From"
              */
             if (setFrom) {
-                final Set<InternetAddress> fromCandidates = new HashSet<InternetAddress>(8);
-                if (accountId == MailAccount.DEFAULT_ID) {
-                    addUserAliases(fromCandidates, session, ctx);
-                } else {
-                    // Check for Unified Mail account
-                    ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
-                    UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
-                    if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
-                        int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
-                        if (realAccountId == MailAccount.DEFAULT_ID) {
-                            addUserAliases(fromCandidates, session, ctx);
-                        } else {
-                            final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
-                            if (null == mass) {
-                                addUserAliases(fromCandidates, session, ctx);
-                            } else {
-                                fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
-                            }
-                        }
-                    } else {
-                        final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
-                        if (null == mass) {
-                            addUserAliases(fromCandidates, session, ctx);
-                        } else {
-                            fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
-                        }
-                    }
-                }
-                /*
-                 * Check if present anywhere
-                 */
-                InternetAddress from = null;
-                {
-                    String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
-                    InternetAddress[] toAddrs = null;
-                    if (hdrVal != null) {
-                        toAddrs = parseAddressList(hdrVal, true);
-                        for (final InternetAddress addr : toAddrs) {
-                            if (fromCandidates.contains(addr)) {
-                                from = addr;
-                                break;
-                            }
-                        }
-                    }
-                    if (null == from) {
-                        hdrVal = origMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
-                        if (hdrVal != null) {
-                            toAddrs = parseAddressList(unfold(hdrVal), true);
-                            for (final InternetAddress addr : toAddrs) {
-                                if (fromCandidates.contains(addr)) {
-                                    from = addr;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (null == from) {
-                        hdrVal = origMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
-                        if (hdrVal != null) {
-                            toAddrs = parseAddressList(unfold(hdrVal), true);
-                            for (final InternetAddress addr : toAddrs) {
-                                if (fromCandidates.contains(addr)) {
-                                    from = addr;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
+                InternetAddress from = MimeProcessingUtility.determinePossibleFrom(false, origMsg, accountId, session, ctx);
                 /*
                  * Set if a "From" candidate applies
                  */
@@ -432,7 +363,7 @@ public final class MimeReply {
                         /*
                          * Message holds header 'Reply-To'
                          */
-                        tmpSet.addAll(Arrays.asList(QuotedInternetAddress.parseHeader(unfold(replyTo[0]), false)));
+                        tmpSet.addAll(Arrays.asList(MimeMessageConverter.getAddressHeader(unfold(replyTo[0]))));
                         fromAdded = false;
                     }
                 }
@@ -461,7 +392,7 @@ public final class MimeReply {
                     ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
                     UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
                     if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
-                        int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
+                        int realAccountId = MimeProcessingUtility.resolveFrom2Account(session, origMsg.getFrom());
                         if (realAccountId == MailAccount.DEFAULT_ID) {
                             addUserAddresses(filter, mailSession, session, ctx);
                         } else {
@@ -713,22 +644,7 @@ public final class MimeReply {
         /*
          * Add user's aliases to filter
          */
-        addUserAliases(filter, session, ctx);
-    }
-
-    private static void addUserAliases(final Set<InternetAddress> set, final Session session, final Context ctx) throws OXException {
-        /*
-         * Add user's aliases to set
-         */
-        final String[] userAddrs = UserStorage.getInstance().getUser(session.getUserId(), ctx).getAliases();
-        if (userAddrs != null && userAddrs.length > 0) {
-            final StringBuilder addrBuilder = new StringBuilder();
-            addrBuilder.append(userAddrs[0]);
-            for (int i = 1; i < userAddrs.length; i++) {
-                addrBuilder.append(',').append(userAddrs[i]);
-            }
-            set.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
-        }
+        MimeProcessingUtility.addUserAliases(filter, session, ctx);
     }
 
     private static void appendInlineContent(final MailMessage originalMail, final CompositeMailMessage replyMail, final List<String> cids) throws OXException {
@@ -1220,52 +1136,6 @@ public final class MimeReply {
 
     private static boolean hasContent(final String html) {
         return PATTERN_CONTENT.matcher(html).find();
-    }
-
-    /**
-     * Resolves specified "from" address to associated account identifier
-     *
-     * @param session The session
-     * @param from The from addresses
-     * @return The account identifier
-     * @throws OXException If address cannot be resolved
-     */
-    private static int resolveFrom2Account(final Session session, final InternetAddress[] from) throws OXException {
-        if (null == from || from.length == 0) {
-            return MailAccount.DEFAULT_ID;
-        }
-        return resolveFrom2Account(session, from[0]);
-    }
-
-    /**
-     * Resolves specified "from" address to associated account identifier
-     *
-     * @param session The session
-     * @param from The from address
-     * @return The account identifier
-     * @throws OXException If address cannot be resolved
-     */
-    private static int resolveFrom2Account(final Session session, final InternetAddress from) throws OXException {
-        /*
-         * Resolve "From" to proper mail account to select right transport server
-         */
-        int accountId;
-        if (null == from) {
-            accountId = MailAccount.DEFAULT_ID;
-        } else {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService( MailAccountStorageService.class);
-            final int user = session.getUserId();
-            final int cid = session.getContextId();
-            accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
-            if (accountId != -1) {
-                // Retry with IDN representation
-                accountId = storageService.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
-            }
-        }
-        if (accountId == -1) {
-            accountId = MailAccount.DEFAULT_ID;
-        }
-        return accountId;
     }
 
 }

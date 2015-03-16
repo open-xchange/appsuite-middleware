@@ -67,7 +67,6 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
 import com.openexchange.file.storage.AccountAware;
-import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -176,30 +175,30 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
-        FolderID folderID = new FolderID(folderId);
-        FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
-        FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
-        FolderID newParentID = new FolderID(newParentId);
-        String newID;
-        Event deleteEvent = new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folderID, path));
-        if (folderID.getAccountId().equals(newParentID.getAccountId()) && folderID.getService().equals(newParentID.getService())) {
-            newID = folderAccess.moveFolder(folderID.getFolderId(), newParentID.getFolderId(), newName);
-        } else {
-            FileStorageFolder sourceFolder = folderAccess.getFolder(folderID.getFolderId());
-            DefaultFileStorageFolder toCreate = new DefaultFileStorageFolder();
-            toCreate.setName(null != newName ? newName : sourceFolder.getName());
-            toCreate.setParentId(newParentID.getFolderId());
-            toCreate.setSubscribed(sourceFolder.isSubscribed());
-            toCreate.setPermissions(sourceFolder.getPermissions());
-            FileStorageFolderAccess targetFolderAccess = getFolderAccess(newParentID);
-            path = targetFolderAccess.getPath2DefaultFolder(newParentID.getFolderId());
-            newID = targetFolderAccess.createFolder(toCreate);
-            folderAccess.deleteFolder(folderID.getFolderId());
+        FolderID sourceFolderID = new FolderID(folderId);
+        FolderID targetParentFolderID = new FolderID(newParentId);
+        if (sourceFolderID.getAccountId().equals(targetParentFolderID.getAccountId()) && sourceFolderID.getService().equals(targetParentFolderID.getService())) {
+            /*
+             * move within same storage
+             */
+            FileStorageFolderAccess folderAccess = getFolderAccess(sourceFolderID);
+            FileStorageFolder[] sourcePath = folderAccess.getPath2DefaultFolder(sourceFolderID.getFolderId());
+            String newID = folderAccess.moveFolder(sourceFolderID.getFolderId(), targetParentFolderID.getFolderId(), newName);
+            FolderID newFolderID = new FolderID(sourceFolderID.getService(), sourceFolderID.getAccountId(), newID);
+            FileStorageFolder[] newPath = folderAccess.getPath2DefaultFolder(newID);
+            fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(sourceFolderID, sourcePath)));
+            fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(newFolderID, newPath)));
+
+            // TODO: events for nested files & folders ?
+
+            return newFolderID.toUniqueID();
         }
-        FolderID newFolderID = new FolderID(newParentID.getService(), newParentID.getAccountId(), newID);
-        fire(deleteEvent);
-        fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(newFolderID, path)));
-        return newFolderID.toUniqueID();
+        /*
+         * move across storages not yet supported...
+         */
+        FileStorageFolder sourceFolder = getFolderAccess(sourceFolderID).getFolder(sourceFolderID.getFolderId());
+        FileStorageFolder targetFolder = getFolderAccess(targetParentFolderID).getFolder(targetParentFolderID.getFolderId());
+        throw FileStorageExceptionCodes.FOLDER_MOVE_NOT_SUPPORTED.create(sourceFolder.getName(), targetFolder.getName());
     }
 
     @Override
@@ -277,9 +276,17 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
     protected FileStorageFolderAccess getFolderAccess(String serviceId, String accountId) throws OXException {
         FileStorageAccountAccess accountAccess = connectedAccounts.get().get(serviceId + '/' + accountId);
         if (null == accountAccess) {
-            FileStorageService fileStorage = getFileStorageService(serviceId);
-            accountAccess = fileStorage.getAccountAccess(accountId, session);
-            connect(accountAccess);
+            try {
+                FileStorageService fileStorage = getFileStorageService(serviceId);
+                accountAccess = fileStorage.getAccountAccess(accountId, session);
+                connect(accountAccess);
+            } catch (OXException e) {
+                // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
+                if (e.equalsCode(4, "OAUTH") || OXExceptions.containsCommunicationError(e)) {
+                    throw FileStorageExceptionCodes.ACCOUNT_NOT_ACCESSIBLE.create(e, accountId, serviceId, session.getUserId(), session.getContextId());
+                }
+                throw e;
+            }
         }
         return accountAccess.getFolderAccess();
     }

@@ -64,8 +64,8 @@ import com.openexchange.ajax.framework.AbstractRedirectParser;
  */
 public class FormLoginParser extends AbstractRedirectParser<FormLoginResponse> {
 
-    FormLoginParser(boolean cookiesNeeded, boolean failOnNonRedirect) {
-        super(cookiesNeeded, failOnNonRedirect);
+    FormLoginParser(boolean cookiesNeeded) {
+        super(cookiesNeeded);
     }
 
     @Override

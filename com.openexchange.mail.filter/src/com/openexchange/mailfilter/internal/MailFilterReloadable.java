@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
+import com.openexchange.mailfilter.osgi.MailFilterActivator;
 
 /**
  * {@link MailFilterReloadable}
@@ -83,7 +83,7 @@ public class MailFilterReloadable implements Reloadable {
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         try {
-            Activator.checkConfigfile();
+            MailFilterActivator.checkConfigfile();
         } catch (Exception e) {
             LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
         }

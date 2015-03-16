@@ -99,6 +99,11 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     }
 
     @Override
+    public boolean checkForDuplicate() {
+        return true;
+    }
+
+    @Override
     public void modifyIncoming(final Subscription subscription) throws OXException {
         checkUrl((String) subscription.getConfiguration().get("url"));
     }
@@ -254,7 +259,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     /**
      * Checks given URL string for syntactical correctness.
-     * 
+     *
      * @param sUrl The URL string
      * @throws OXException If URL string is invalid
      */

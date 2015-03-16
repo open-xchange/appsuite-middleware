@@ -92,10 +92,11 @@ public final class MessageTimelineManagement {
     /**
      * Drops the entries for session-associated user.
      *
-     * @param session The user session
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public void dropFor(final Session session) {
-        maps.remove(Key.valueOf(session));
+    public void dropFor(int userId, int contextId) {
+        maps.remove(Key.valueOf(userId, contextId));
     }
 
     /**

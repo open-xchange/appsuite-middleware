@@ -2,6 +2,7 @@
 package com.openexchange.admin.soap.context.soap;
 
 import javax.xml.ws.WebFault;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 
 
 /**
@@ -39,5 +40,13 @@ public class ContextExistsException_Exception extends java.lang.Exception {
 
     public com.openexchange.admin.soap.context.soap.ContextExistsException getFaultInfo() {
         return this.contextExistsException;
+    }
+
+
+    public static ContextExistsException_Exception faultFor(ContextExistsException e) {
+        com.openexchange.admin.soap.context.soap.ContextExistsException faultDetail = new com.openexchange.admin.soap.context.soap.ContextExistsException();
+        com.openexchange.admin.soap.context.exceptions.ContextExistsException value = new com.openexchange.admin.soap.context.exceptions.ContextExistsException();
+        faultDetail.setContextExistsException(value);
+        return new ContextExistsException_Exception(e.getMessage(), faultDetail, e);
     }
 }

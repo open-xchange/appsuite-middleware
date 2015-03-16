@@ -81,6 +81,7 @@ public class WhitelistedSchemes {
         }
         Set<String> schemes = new LinkedHashSet<String>(Arrays.asList(schemas));
         schemes.add("cid");
+        schemes.add("data");
         instance = new WhitelistedSchemes(schemes);
     }
 

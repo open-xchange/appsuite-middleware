@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
  * Checks the value set for com.openexchange.mail.usersetting.UserSettingMail.uploadQuota and
  * com.openexchange.mail.usersetting.UserSettingMail.uploadQuotaPerFile (based on DB entries) and set the value that will be used for mail
  * attachments file size. In some cases a fallback to server.properties file is used.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailUploadQuotaChecker extends UploadQuotaChecker {
@@ -86,8 +86,9 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
         Validate.notNull(settings, "UserSettingMail cannot be null!");
 
-        if (settings.getUploadQuota() >= 0) {
-            uploadQuota = settings.getUploadQuota();
+        long quota = settings.getUploadQuota();
+        if (quota >= 0) {
+            uploadQuota = quota;
         } else {
             LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
             int globalQuota;
@@ -100,7 +101,8 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
             uploadQuota = globalQuota;
         }
 
-        uploadQuotaPerFile = settings.getUploadQuotaPerFile() > 0 ? settings.getUploadQuotaPerFile() : -1;
+        long quotaPerFile = settings.getUploadQuotaPerFile();
+        uploadQuotaPerFile = quotaPerFile > 0 ? quotaPerFile : -1;
     }
 
     /**

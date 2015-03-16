@@ -84,6 +84,15 @@ public class SessionControl {
      * Initializes a new {@link SessionControl}
      *
      * @param session The stored session
+     */
+    public SessionControl(final SessionImpl session) {
+        this(session, -1L); // Default idle time
+    }
+
+    /**
+     * Initializes a new {@link SessionControl}
+     *
+     * @param session The stored session
      * @param idleTime The session's allowed idle time or <code>-1</code> to use default setting
      */
     public SessionControl(final SessionImpl session, final long idleTime) {
@@ -105,15 +114,6 @@ public class SessionControl {
             return lastAccessed.get() < (System.currentTimeMillis() - defaultIdleTime);
         }
         return lastAccessed.get() < (System.currentTimeMillis() - idleTime);
-    }
-
-    /**
-     * Initializes a new {@link SessionControl}
-     *
-     * @param session The stored session
-     */
-    public SessionControl(final SessionImpl session) {
-        this(session, -1L); // Default idle time
     }
 
     /**

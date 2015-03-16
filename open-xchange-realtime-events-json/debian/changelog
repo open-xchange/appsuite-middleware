@@ -1,3 +1,81 @@
+open-xchange-realtime-events-json (7.6.2-12) stable; urgency=medium
+
+  * Twelfth candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 13 Mar 2015 17:14:31 +0100
+
+open-xchange-realtime-events-json (7.6.2-11) stable; urgency=medium
+
+  * Eleventh candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 06 Mar 2015 15:31:22 +0100
+
+open-xchange-realtime-events-json (7.6.2-10) stable; urgency=medium
+
+  * Tenth candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Wed, 04 Mar 2015 13:14:22 +0100
+
+open-xchange-realtime-events-json (7.6.2-9) stable; urgency=medium
+
+  * Nineth candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 03 Mar 2015 11:52:27 +0100
+
+open-xchange-realtime-events-json (7.6.2-8) stable; urgency=low
+
+  * Eighth candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 24 Feb 2015 16:15:40 +0100
+
+open-xchange-realtime-events-json (7.6.2-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Wed, 11 Feb 2015 15:43:16 +0100
+
+open-xchange-realtime-events-json (7.6.2-6) stable; urgency=low
+
+  * Sixth candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 30 Jan 2015 16:13:47 +0100
+
+open-xchange-realtime-events-json (7.6.2-5) stable; urgency=low
+
+  * Fifth candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Wed, 28 Jan 2015 12:29:14 +0100
+
+open-xchange-realtime-events-json (7.6.2-4) stable; urgency=low
+
+  * Fourth candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 12 Dec 2014 13:11:02 +0100
+
+open-xchange-realtime-events-json (7.6.2-3) stable; urgency=medium
+
+  * Third candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 05 Dec 2014 13:59:42 +0100
+
+open-xchange-realtime-events-json (7.6.2-2) stable; urgency=low
+
+  * Second candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 21 Nov 2014 10:39:16 +0100
+
+open-xchange-realtime-events-json (7.6.2-1) stable; urgency=medium
+
+  * First candidate for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 31 Oct 2014 13:33:45 +0100
+
+open-xchange-realtime-events-json (7.6.2-0) unstable; urgency=medium
+
+  * prepare for 7.6.2 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Wed, 17 Sep 2014 12:36:32 +0200
+
 open-xchange-realtime-events-json (7.6.0-25) stable; urgency=medium
 
   * Build for patch 2015-03-16
@@ -56,13 +134,13 @@ open-xchange-realtime-events-json (7.6.0-16) stable; urgency=medium
 
   * Build for patch 2014-12-15
 
- -- Marc Arens <marc.arens@open-xchange.com>  Mon, 08 Dec 2014 15:14:55 +0000
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 08 Dec 2014 16:14:55 +0100
 
 open-xchange-realtime-events-json (7.6.0-15) stable; urgency=medium
 
   * Build for patch 2014-12-03
 
- -- Marc Arens <marc.arens@open-xchange.com>  Tue, 02 Dec 2014 16:09:52 +0000
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 02 Dec 2014 17:09:52 +0100
 
 open-xchange-realtime-events-json (7.6.0-14) stable; urgency=low
 
@@ -74,7 +152,7 @@ open-xchange-realtime-events-json (7.6.0-13) stable; urgency=medium
 
   * Build for patch 2014-12-01
 
- -- Marc Arens <marc.arens@open-xchange.com>  Mon, 24 Nov 2014 09:00:53 +0000
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 24 Nov 2014 10:00:53 +0100
 
 open-xchange-realtime-events-json (7.6.0-12) stable; urgency=low
 

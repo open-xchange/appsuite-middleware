@@ -543,6 +543,18 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     	loadEnvelope();
     	return envelope.inReplyTo;
     }
+
+    /**
+     * Gets the IMAP message's BODYSTRUCTURE element
+     *
+     * @return The BODYSTRUCTURE element
+     * @exception	MessagingException for failures
+     */
+    public synchronized BODYSTRUCTURE getBodystructure() throws MessagingException {
+    checkExpunged();
+    loadBODYSTRUCTURE();
+    return bs;
+    }
  
     /**
      * Get the Content-Type.

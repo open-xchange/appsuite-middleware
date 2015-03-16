@@ -77,8 +77,6 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     private static final long serialVersionUID = 6666321725945931657L;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxAccess.class);
-
     /**
      * Full name of INBOX.
      */

@@ -214,4 +214,9 @@ public final class MessageHeaders {
 
     public static final HeaderName X_OX_NOTIFICATION = HeaderName.valueOf(HDR_X_OX_NOTIFICATION);
 
+    /** "X-Part-Id" */
+    public static final String HDR_X_PART_ID = "X-Part-Id".intern();
+
+    public static final HeaderName X_PART_ID = HeaderName.valueOf(HDR_X_PART_ID);
+
 }

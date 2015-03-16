@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.File;
@@ -76,6 +77,7 @@ import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.login.AutoLogin;
 import com.openexchange.ajax.login.FormLogin;
 import com.openexchange.ajax.login.HTTPAuthLogin;
+import com.openexchange.ajax.login.HasAutoLogin;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.Login;
 import com.openexchange.ajax.login.LoginConfiguration;
@@ -117,6 +119,7 @@ import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
  * Servlet doing the login and logout stuff.
@@ -128,6 +131,11 @@ public class LoginServlet extends AJAXServlet {
     private static final long serialVersionUID = 7680745138705836499L;
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginServlet.class);
+
+    /**
+     * The path appendix for login servlet.
+     */
+    public static final String SERVLET_PATH_APPENDIX = "login";
 
     /** The log properties for login-related information. */
     protected static final Set<LogProperties.Name> LOG_PROPERTIES;
@@ -636,6 +644,7 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf, rampUpServices));
         handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
+        handlerMap.put("hasAutologin", new HasAutoLogin(conf));
         handlerMap.put("/httpAuth", new HTTPAuthLogin(conf));
     }
 
@@ -655,28 +664,19 @@ public class LoginServlet extends AJAXServlet {
             if (null != subPath && subPath.startsWith("/httpAuth")) {
                 handlerMap.get("/httpAuth").handleRequest(req, resp);
             } else if (null != action) {
-                // Check if autologin is enabled
-                if (action.equalsIgnoreCase("hasAutologin")) {
-                    // The magic spell to disable caching
-                    Tools.disableCaching(resp);
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                    resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
-                    try {
-                        final JSONObject jo = new JSONObject(2);
-                        jo.put(ACTION_AUTOLOGIN, confReference.get().isSessiondAutoLogin());
-                        jo.write(resp.getWriter());
-                    } catch (final JSONException e) {
-                        LOG.error(LoginServlet.RESPONSE_ERROR, e);
-                        LoginServlet.sendError(resp);
-                    }
-                } else {
-                    // Regular login handling
-                    doJSONAuth(req, resp, action);
-                }
+                // Regular login handling
+                doJSONAuth(req, resp, action);
             } else {
                 logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
                 return;
             }
+        } catch (RateLimitedException e) {
+            resp.setContentType("text/plain; charset=UTF-8");
+            int retryAfter = e.getRetryAfter();
+            if (retryAfter > 0) {
+                resp.setHeader(RETRY_AFTER, Integer.toString(retryAfter));
+            }
+            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } finally {
             LogProperties.removeProperties(LOG_PROPERTIES);
         }
@@ -740,11 +740,7 @@ public class LoginServlet extends AJAXServlet {
 
     public static void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
         LOG.debug("", e);
-        Tools.disableCaching(resp);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        final Response response = new Response();
-        response.setException(e);
-        Send.sendResponse(response, resp);
+        Send.sendResponse(new Response().setException(e), resp);
     }
 
     @Override

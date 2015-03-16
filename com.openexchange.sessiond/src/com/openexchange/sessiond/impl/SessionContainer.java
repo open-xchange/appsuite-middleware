@@ -52,9 +52,11 @@ package com.openexchange.sessiond.impl;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.procedure.TObjectProcedure;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -82,6 +84,15 @@ final class SessionContainer {
         super();
         sessionMap = new SessionMap();
         userSessions = new ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<Map<String, Object>>>(32);
+    }
+
+    /**
+     * Drops expired sessions from this session map
+     *
+     * @param idleTime The idle time
+     */
+    protected List<SessionControl> dropExpired(long idleTime) {
+        return sessionMap.dropExpired(idleTime);
     }
 
     /**
@@ -198,7 +209,7 @@ final class SessionContainer {
         }
         final Map<String, Object> sessionIds = map.get(userId);
         if (sessionIds == null) {
-        	return null;
+            return null;
         }
         for (final String sessionId : sessionIds.keySet()) {
             return sessionMap.getBySessionId(sessionId);
@@ -433,6 +444,21 @@ final class SessionContainer {
             }
         });
         return l.toArray(new SessionControl[l.size()]);
+    }
+
+    /**
+     * Removes the sessions bound to the given contextIds.
+     *
+     * @param contextId Set of context ids
+     * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
+     */
+    protected List<SessionControl> removeSessionsByContexts(final Set<Integer> contextIds) {
+        List<SessionControl> removedSessionsByContexts = new ArrayList<SessionControl>();
+        for (int contextId : contextIds) {
+            SessionControl[] removeSessionsByContext = this.removeSessionsByContext(contextId);
+            removedSessionsByContexts.addAll(Arrays.asList(removeSessionsByContext));
+        }
+        return removedSessionsByContexts;
     }
 
     /**

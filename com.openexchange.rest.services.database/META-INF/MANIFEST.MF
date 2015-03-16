@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Database REST Service
 Bundle-SymbolicName: com.openexchange.rest.services.database
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.rest.services.database.osgi.DatabaseRESTActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.session;
 
+import static com.openexchange.java.Autoboxing.I;
+import static javax.servlet.http.HttpServletResponse.SC_FOUND;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.params.ClientPNames;
@@ -112,7 +116,8 @@ public class Bug34928Test extends AbstractAJAXSession {
          * perform second HTTP Auth login (without providing authorization headers)
          */
         client.getSession().setId(null);
-        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false));
+        assertThat("Second authentication with cookies failed. Session " + firstSessionID, I(httpAuthResponse.getStatusCode()), equalTo(I(SC_FOUND)));
         String secondSessionID = extractSessionID(httpAuthResponse);
         assertNotNull("No session ID", secondSessionID);
         assertEquals("Different session IDs", firstSessionID, secondSessionID);
@@ -134,7 +139,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         BasicClientCookie cookie = findCookie(LoginServlet.SECRET_PREFIX);
         String correctSecret = cookie.getValue();
         cookie.setValue("wrongsecret");
-        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false));
         assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
@@ -155,7 +160,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         BasicClientCookie cookie = findCookie(LoginServlet.SESSION_PREFIX);
         String correctSession = cookie.getValue();
         cookie.setValue("wrongsecret");
-        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false));
         assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
@@ -173,7 +178,7 @@ public class Bug34928Test extends AbstractAJAXSession {
          * perform second HTTP Auth login
          */
         client.getSession().setId(null);
-        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest());
+        HttpAuthResponse httpAuthResponse = client.execute(new EmptyHttpAuthRequest(false));
         assertEquals("Wrong response code", HttpServletResponse.SC_UNAUTHORIZED, httpAuthResponse.getStatusCode());
         /*
          * re-enable first session for logout in tearDown
@@ -202,7 +207,7 @@ public class Bug34928Test extends AbstractAJAXSession {
         return null;
     }
 
-    private String extractSessionID(HttpAuthResponse httpAuthResponse) {
+    private static String extractSessionID(HttpAuthResponse httpAuthResponse) {
         String location = httpAuthResponse.getLocation();
         assertNotNull("Location is missing in response", location);
         int sessionStart = location.indexOf("session=");

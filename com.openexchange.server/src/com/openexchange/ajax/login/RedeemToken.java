@@ -118,7 +118,8 @@ public class RedeemToken implements LoginRequestHandler {
         Session session;
         try {
             String authId = LoginTools.parseAuthId(req, true);
-            session = service.redeemToken(token, appSecret, client, authId, hash);
+            String clientIp = LoginTools.parseClientIP(req);
+            session = service.redeemToken(token, appSecret, client, authId, hash, clientIp);
         } catch (OXException e) {
             LoginServlet.logAndSendException(resp, e);
             return;

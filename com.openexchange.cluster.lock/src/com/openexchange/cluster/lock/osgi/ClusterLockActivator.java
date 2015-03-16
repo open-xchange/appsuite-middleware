@@ -62,6 +62,7 @@ import com.openexchange.cluster.lock.internal.ClusterLockServiceImpl;
 import com.openexchange.cluster.lock.internal.Unregisterer;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link ClusterLockActivator}
@@ -81,12 +82,14 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final Logger LOG = LoggerFactory.getLogger(ClusterLockActivator.class);
+
+        Services.setServiceLookup(this);
 
         final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
         final boolean enabled = hzConfigService.isEnabled();
@@ -136,6 +139,7 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
             tracker.close();
             this.tracker = null;
         }
+        Services.setServiceLookup(null);
     }
 
     @Override

@@ -54,6 +54,7 @@ import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -99,6 +100,10 @@ public interface UserService {
 
     /**
      * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
      * @param name Name of the attribute.
      * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
      * @param userId Identifier of the user that attribute should be set.
@@ -232,8 +237,8 @@ public interface UserService {
      *
      * @param email The email address of the user.
      * @param context The context.
+     * @param considerAliases Whether to consider alias E-Mail addresses when searching for an appropriate user
      * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
-     * @return considerAliases
      * @throws OXException If an error occurs.
      * @see #getContext(int)
      */

@@ -68,6 +68,7 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         ContextService contexts = getService(ContextService.class);
         ConfigurationService configuration = getService(ConfigurationService.class);
         UserPermissionService userConfigs = getService(UserPermissionService.class);
@@ -77,7 +78,6 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
             Hashtable<String, Object> properties = new Hashtable<String,Object>();
             properties.put("scope", "context");
-
             registerService(ConfigProviderService.class, provider, properties);
         }
 
@@ -88,13 +88,14 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
             Hashtable<String, Object> properties = new Hashtable<String,Object>();
             properties.put("scope", "contextSets");
-
             registerService(ConfigProviderService.class, provider, properties);
         }
-
-
-
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
+    }
 
 }

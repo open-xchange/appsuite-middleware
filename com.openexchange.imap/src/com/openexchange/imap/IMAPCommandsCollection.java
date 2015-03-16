@@ -67,6 +67,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1477,6 +1478,13 @@ public final class IMAPCommandsCollection {
         }
     }
 
+    /**
+     * Sets the given SPECIAL-USE flags for specified IMAP folder
+     *
+     * @param imapFolder The IMAP folder
+     * @param specialUses The SPECIAL-USE flags to apply; e.g. <code>"\Draft"</code>, <code>"\Sent"</code>, <code>"\Junk"</code>, or <code>"\Trash"</code>
+     * @throws MessagingException If operation fails
+     */
     public static void setSpecialUses(final IMAPFolder imapFolder, final Collection<String> specialUses) throws MessagingException {
         if (null == specialUses || specialUses.isEmpty()) {
             return;
@@ -1486,22 +1494,18 @@ public final class IMAPCommandsCollection {
         imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                final String fullName = imapFolder.getFullName();
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                String fullName = imapFolder.getFullName();
+
                 // Encode the mbox as per RFC2060
-                final String mbox;
-                if ((type & Folder.HOLDS_MESSAGES) == 0) {
-                    // Only holds folders
-                    mbox = prepareStringArgument(fullName + sep);
-                } else {
-                    mbox = prepareStringArgument(fullName);
-                }
-                // Create command
-                final String command;
+                String mbox = (type & Folder.HOLDS_MESSAGES) == 0 ? prepareStringArgument(fullName + sep) : prepareStringArgument(fullName);
+
+                // Craft IMAP command
+                String command;
                 {
-                    final StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox);
+                    StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox);
                     cmdBuilder.append("(");
-                    for (final String specialUse : specialUses) {
+                    for (String specialUse : specialUses) {
                         cmdBuilder.append("/private/specialuse ");
                         if (null == specialUse) {
                             cmdBuilder.append("NIL");
@@ -1516,15 +1520,16 @@ public final class IMAPCommandsCollection {
                     cmdBuilder.append(")");
                     command = cmdBuilder.toString();
                 }
+
                 // Issue command
-                final Response[] r = performCommand(protocol, command);
-                final Response response = r[r.length - 1];
+                Response[] r = performCommand(protocol, command);
+                Response response = r[r.length - 1];
                 if (response.isOK()) {
                     for (int i = 0, len = r.length - 1; i < len; i++) {
                         if (!(r[i] instanceof IMAPResponse)) {
                             continue;
                         }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals("METADATA")) {
                             r[i] = null;
                         }
@@ -1868,8 +1873,60 @@ public final class IMAPCommandsCollection {
      * @return An array of <code>int</code> representing sorted messages' sequence numbers
      * @throws MessagingException
      */
-    public static int[] getServerSortList(final IMAPFolder folder, final String sortCrit, final int[] toSort) throws MessagingException {
-        return getServerSortList(folder, sortCrit, null == toSort ? RANGE_ALL : IMAPNumArgSplitter.getSeqNumArg(toSort, false, false, -1));
+    public static int[] getServerSortList(IMAPFolder folder, String sortCrit, int[] toSort) throws MessagingException {
+        if (null == toSort) {
+            return getServerSortList(folder, sortCrit, RANGE_ALL);
+        }
+
+        // Need to build message range argument
+        String[] numArgs = IMAPNumArgSplitter.getSeqNumArg(toSort, false, true, -1);
+        if (1 == numArgs.length) {
+            return getServerSortList(folder, sortCrit, numArgs);
+        }
+
+        // The messages to sort do not fit into a single command -- Sort them all
+        int[] allSorted = getServerSortList(folder, sortCrit, RANGE_ALL);
+
+        class SeqNumOrdinal implements Comparable<SeqNumOrdinal> {
+            final int seqNum;
+            final int ordinal;
+
+            SeqNumOrdinal(int seqNum, int ordinal) {
+                super();
+                this.seqNum = seqNum;
+                this.ordinal = ordinal;
+            }
+
+            @Override
+            public int compareTo(SeqNumOrdinal o) {
+                int thisOrdinal = ordinal;
+                int otherOrdinal = o.ordinal;
+                return thisOrdinal < otherOrdinal ? -1 : (thisOrdinal == otherOrdinal ? 0 : 1);
+            }
+        }
+
+        int length = toSort.length;
+        List<SeqNumOrdinal> list = new ArrayList<SeqNumOrdinal>(length);
+        for (int i = 0; i < length; i++) {
+            int seqNum = toSort[i];
+            list.add(new SeqNumOrdinal(seqNum, getIndexFor(seqNum, allSorted)));
+        }
+        Collections.sort(list);
+
+        int[] sorted = new int[length];
+        for (int i = 0; i < length; i++) {
+            sorted[i] = list.get(i).seqNum;
+        }
+        return sorted;
+    }
+
+    private static int getIndexFor(int seqNum, int[] seqNums) {
+        for (int i = 0; i < seqNums.length; i++) {
+            if (seqNum == seqNums[i]) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -1910,7 +1967,7 @@ public final class IMAPCommandsCollection {
         /*
          * Call the IMAPFolder.doCommand() method with inner class definition of ProtocolCommand
          */
-        final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(IMAPProtocol p) throws ProtocolException {
@@ -1923,10 +1980,9 @@ public final class IMAPCommandsCollection {
                         if (!(r[i] instanceof IMAPResponse)) {
                             continue;
                         }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        IMAPResponse ir = (IMAPResponse) r[i];
                         if (ir.keyEquals(COMMAND_SORT)) {
-                            String num;
-                            while ((num = ir.readAtomString()) != null) {
+                            for (String num; (num = ir.readAtomString()) != null && num.length() > 0;) {
                                 try {
                                     sia.add(Integer.parseInt(num));
                                 } catch (NumberFormatException e) {
@@ -3058,7 +3114,7 @@ public final class IMAPCommandsCollection {
             }
 
             private boolean isApplicationSmil(final BODYSTRUCTURE bodystructure) {
-                return bodystructure.isMulti() && "related".equals(toLowerCase(bodystructure.subtype)) && "application/smil".equals(toLowerCase(bodystructure.cParams.get("type")));
+                return bodystructure.isMulti() && "related".equals(toLowerCase(bodystructure.subtype)) && "application/smil".equals(toLowerCase(MimeMessageUtility.decodeEnvelopeHeader(bodystructure.cParams.get("type"))));
             }
 
         }));

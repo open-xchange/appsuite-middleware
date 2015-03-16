@@ -59,7 +59,7 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * Tests if the object count on the folder works successfully for contact folders.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public final class ContactObjectCountTest extends AbstractObjectCountTest {
@@ -95,7 +95,7 @@ public final class ContactObjectCountTest extends AbstractObjectCountTest {
         ContactTestManager ctm1 = new ContactTestManager(client1);
         ContactTestManager ctm2 = new ContactTestManager(client2);
         try {
-            FolderObject created = createSharedFolder(client1, FolderObject.CONTACT, client2.getValues().getUserId());
+            FolderObject created = createSharedFolder(client1, FolderObject.CONTACT, client2.getValues().getUserId(), ftm);
             Folder folder = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
 
@@ -116,14 +116,14 @@ public final class ContactObjectCountTest extends AbstractObjectCountTest {
             ftm.cleanUp();
         }
     }
-    
+
     @Test
     public void testCountInPublicFolder() throws Exception {
         FolderTestManager ftm = new FolderTestManager(client1);
         ContactTestManager ctm1 = new ContactTestManager(client1);
         ContactTestManager ctm2 = new ContactTestManager(client2);
         try {
-            FolderObject created = createPublicFolder(client1, FolderObject.CONTACT, client2.getValues().getUserId());
+            FolderObject created = createPublicFolder(client1, FolderObject.CONTACT, client2.getValues().getUserId(), ftm);
             Folder folder = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
 

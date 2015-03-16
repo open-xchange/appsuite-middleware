@@ -115,33 +115,43 @@ postFix() {
     # SoftwareChange_Request-1831
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
-    
+
 	if grep -E "projects" $pfile > /dev/null; then
 	   ptmp=${pfile}.$$
-	   
+
 	   sed -e 's;projects *,;;g' -e 's;, *projects;;g' $pfile > $ptmp
-	
+
 	   if [ -s $ptmp ]; then
 	      cp $ptmp $pfile
 	   fi
 	   rm -f $ptmp
-	fi 
-	
+	fi
+
     # SoftwareChange_Request-2074
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
     for key in rssbookmarks rssportal forum pinboardwrite; do
         if grep -E $key $pfile > /dev/null; then
             ptmp=${pfile}.$$
-        
+
             sed -e "s;$key *,;;g" -e "s;, *$key;;g" $pfile > $ptmp
-        
+
             if [ -s $ptmp ]; then
                 cp $ptmp $pfile
             fi
             rm -f $ptmp
-        fi 
+        fi
     done
+
+    # SoftwareChange_Request-2323
+    VALUE=$(ox_read_property SENT_MAILFOLDER_EN_GB /opt/open-xchange/etc/AdminUser.properties)
+    if [ "SentMail" == "$VALUE" ]; then
+        ox_set_property SENT_MAILFOLDER_EN_GB "Sent Mail" /opt/open-xchange/etc/AdminUser.properties
+    fi
+
+    # SoftwareChange_Request-2197
+    ox_add_property SCHEMA_MOVE_MAINTENANCE_REASON 1431655765 /opt/open-xchange/etc/plugin/hosting.properties
+
 }
 
 setConfigFilePermissions() {

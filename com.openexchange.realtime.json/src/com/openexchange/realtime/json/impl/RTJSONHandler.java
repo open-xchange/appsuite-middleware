@@ -116,7 +116,8 @@ public class RTJSONHandler implements StanzaSender {
     public void shutDownCleanupTimer() {
         ScheduledTimerTask startCleanupTimer = this.startCleanupTimer;
         if (null != startCleanupTimer) {
-            startCleanupTimer.cancel();
+            stateManager.shutDown();
+            startCleanupTimer.cancel(true);
             this.startCleanupTimer = null;
         }
     }

@@ -97,9 +97,11 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.search.FieldCollectorVisitor;
 import com.openexchange.file.storage.search.SearchTerm;
@@ -117,7 +119,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageIgnorableVersionFileAccess {
+public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageIgnorableVersionFileAccess, FileStorageLockedFileAccess, FileStorageAdvancedSearchFileAccess {
 
     private static final class LockTokenKey {
 
@@ -595,16 +597,16 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        saveFileMetadata0(file, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        return saveFileMetadata0(file, null);
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        saveFileMetadata0(file, modifiedFields);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        return saveFileMetadata0(file, modifiedFields);
     }
 
-    private void saveFileMetadata0(final File file, final List<Field> modifiedFields) throws OXException {
+    private IDTuple saveFileMetadata0(final File file, final List<Field> modifiedFields) throws OXException {
         try {
             final String folderId = checkFolderId(file.getFolderId(), rootUri);
             final String id;
@@ -664,6 +666,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             } finally {
                 closeHttpMethod(davMethod);
             }
+            return new IDTuple(folderId, id);
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -722,27 +725,27 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
-        saveDocument0(file, data, null);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+        return saveDocument0(file, data, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        saveDocument0(file, data, modifiedFields);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        return saveDocument0(file, data, modifiedFields);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
         // Versioning is not supported by WebDAV
-        saveDocument0(file, data, modifiedFields);
+        return saveDocument0(file, data, modifiedFields);
     }
 
-    private void saveDocument0(final File file, final InputStream data, final List<Field> modifiedColumns) throws OXException {
+    private IDTuple saveDocument0(final File file, final InputStream data, final List<Field> modifiedColumns) throws OXException {
         try {
             /*
              * Save metadata
              */
-            saveFileMetadata0(file, modifiedColumns);
+            IDTuple result = saveFileMetadata0(file, modifiedColumns);
             /*
              * Save content
              */
@@ -769,6 +772,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     Streams.close(data);
                 }
             }
+            return result;
         } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
@@ -820,43 +824,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 }
             }
             return ret;
-        } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
-        for (final String version : versions) {
-            if (version != CURRENT_VERSION) {
-                throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
-            }
-        }
-        try {
-            final String fid = checkFolderId(folderId, rootUri);
-            final URI uri = new URI(fid + id, true);
-            final DeleteMethod deleteMethod = new DeleteMethod(uri.toString());
-            try {
-                initMethod(fid, id, deleteMethod);
-                client.executeMethod(deleteMethod);
-                /*
-                 * Check if request was successfully executed
-                 */
-                if (HttpServletResponse.SC_NOT_FOUND == deleteMethod.getStatusCode()) {
-                    /*
-                     * No-op for us...
-                     */
-                } else if (HttpServletResponse.SC_OK != deleteMethod.getStatusCode()) {
-                    throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(deleteMethod.getStatusText());
-                }
-            } finally {
-                closeHttpMethod(deleteMethod);
-            }
-            return new String[0];
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -1084,21 +1051,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
          * Return sorted result
          */
         return new FileTimedResult(files);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
     @Override

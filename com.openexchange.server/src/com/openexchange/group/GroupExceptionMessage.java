@@ -103,4 +103,7 @@ public class GroupExceptionMessage implements LocalizableStrings {
     // Group "%1$s" can not be changed.
     public final static String NO_GROUP_UPDATE_MSG = "Group \"%1$s\" can not be changed.";
 
+    // The display name "%1$s" is reserved. Please choose another one.
+    public static final String RESERVED_DISPLAY_NAME_MSG = "The display name \"%1$s\" is reserved. Please choose another one.";
+
 }

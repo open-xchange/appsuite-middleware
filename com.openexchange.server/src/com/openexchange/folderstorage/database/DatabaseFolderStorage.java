@@ -1615,6 +1615,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (null == con) {
             return;
         }
+
+        params.putParameter(getFolderType(), PARAM_CONNECTION, null);
         if (con.isWritable()) {
             try {
                 DBUtils.rollback(con.connection);
@@ -1624,7 +1626,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 if (null != databaseService) {
                     con.close(databaseService, params.getContext().getContextId());
                 }
-                params.putParameter(getFolderType(), PARAM_CONNECTION, null);
             }
         } else {
             final DatabaseService databaseService = services.getService(DatabaseService.class);

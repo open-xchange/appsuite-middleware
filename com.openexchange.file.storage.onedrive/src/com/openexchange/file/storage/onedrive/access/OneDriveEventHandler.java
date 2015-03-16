@@ -49,10 +49,8 @@
 
 package com.openexchange.file.storage.onedrive.access;
 
-import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
@@ -78,21 +76,14 @@ public final class OneDriveEventHandler implements EventHandler {
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         try {
-            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_STORED_SESSION.equals(topic)) {
-                // A single session was removed
-                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (!session.isTransient() && OneDriveAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId())) {
-                    LOG.debug("Live Connect access removed for user {} in context {}", session.getUserId(), session.getContextId());
-                }
-            } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                // A session container was removed
-                @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
-                    (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                // For each session
-                final OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
-                for (final Session session : sessionContainer.values()) {
-                    if (!session.isTransient() && registry.removeAccessIfLast(session.getContextId(), session.getUserId())) {
-                        LOG.debug("Live Connect access removed for user {} in context {}", session.getUserId(), session.getContextId());
+            if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                if (null != contextId) {
+                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                    if (null != userId) {
+                        if (OneDriveAccessRegistry.getInstance().removeAccessIfLast(contextId, userId)) {
+                            LOG.debug("Live Connect access removed for user {} in context {}", userId, contextId);
+                        }
                     }
                 }
             }

@@ -51,13 +51,12 @@ package com.openexchange.mailfilter.json.ajax;
 
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterRequest;
-import com.openexchange.session.Session;
 
 /**
  *
  * @author d7
  */
-public class MailFilterServlet extends AJAXServlet {
+public class MailFilterServlet extends AbstractMailFilterServlet {
 
     /**
      *
@@ -72,8 +71,8 @@ public class MailFilterServlet extends AJAXServlet {
     }
 
     @Override
-    protected MailFilterAction createAction(final Session session) {
-        return MailFilterAction.valueFor(session);
+    protected MailFilterAction getAction() {
+        return MailFilterAction.getInstance();
     }
 
     @Override

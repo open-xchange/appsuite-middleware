@@ -49,10 +49,14 @@
 
 package com.openexchange.calendar.itip.sender;
 
+import java.util.Arrays;
+import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
+import com.openexchange.calendar.CalendarField;
 import com.openexchange.calendar.itip.AppointmentNotificationPoolService;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.session.Session;
 

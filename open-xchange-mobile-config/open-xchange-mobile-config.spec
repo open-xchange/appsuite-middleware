@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 22
+%define        ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -68,44 +68,110 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Fri Mar 13 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Twelfth candidate for 7.6.2 release
+* Fri Mar 06 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Eleventh candidate for 7.6.2 release
 * Fri Mar 06 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-03-16
+* Wed Mar 04 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Tenth candidate for 7.6.2 release
+* Tue Mar 03 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Nineth candidate for 7.6.2 release
 * Thu Feb 26 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-02-23
+* Tue Feb 24 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Eighth candidate for 7.6.2 release
 * Mon Feb 23 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-02-25
+* Thu Feb 12 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2015-02-23
+* Thu Feb 12 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2015-02-23
+* Wed Feb 11 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Seventh candidate for 7.6.2 release
 * Fri Feb 06 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-02-10
 * Fri Feb 06 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-02-09
+* Fri Jan 30 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Sixth candidate for 7.6.2 release
+* Wed Jan 28 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Fifth candidate for 7.6.2 release
 * Mon Jan 26 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-10-27
 * Mon Jan 26 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-01-26
+* Wed Jan 21 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2015-01-29
 * Mon Jan 12 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-01-09
 * Wed Jan 07 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2015-01-12
+* Mon Jan 05 2015 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2015-01-12
+* Tue Dec 30 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2015-01-12
+* Tue Dec 16 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-12-10
+* Fri Dec 12 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Fourth candidate for 7.6.2 release
 * Mon Dec 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-12-15
+* Mon Dec 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-12-10
+* Mon Dec 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-12-15
+* Fri Dec 05 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Third candidate for 7.6.2 release
+* Thu Dec 04 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-12-09
 * Tue Dec 02 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-12-03
 * Tue Nov 25 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-12-01
 * Mon Nov 24 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-12-01
+* Mon Nov 24 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-12-01
+* Fri Nov 21 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Second candidate for 7.6.2 release
+* Thu Nov 20 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-12-01
+* Wed Nov 19 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-11-21
 * Tue Nov 18 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-11-20
 * Mon Nov 10 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-11-17
+* Mon Nov 10 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-11-17
+* Mon Nov 10 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-11-17
+* Tue Nov 04 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-11-10
+* Fri Oct 31 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First candidate for 7.6.2 release
+* Tue Oct 28 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-11-03
 * Mon Oct 27 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-10-30
+* Fri Oct 24 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-11-04
+* Fri Oct 24 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-11-03
+* Fri Oct 24 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-10-22
 * Fri Oct 17 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fifth candidate for 7.6.1 release
 * Fri Oct 10 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-10-20
+* Fri Oct 10 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fourth candidate for 7.6.1 release
+* Fri Oct 10 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-10-20
 * Thu Oct 09 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-10-13
 * Tue Oct 07 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
@@ -126,6 +192,8 @@ Build for patch 2014-10-06
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-09-23
+* Wed Sep 17 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for 7.6.2 release
 * Tue Sep 16 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>

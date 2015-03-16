@@ -51,6 +51,7 @@ package com.openexchange.snippet.json.action;
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +70,7 @@ import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
@@ -104,21 +106,31 @@ public final class UpdateAction extends SnippetAction {
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
-        final String id = snippetRequest.checkParameter("id");
-        final JSONObject jsonSnippet = (JSONObject) snippetRequest.getRequestData().getData();
+        String id = snippetRequest.checkParameter("id");
+        JSONObject jsonSnippet = (JSONObject) snippetRequest.getRequestData().getData();
         if (null == jsonSnippet) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
         //TESTING: UI should set the key "content-type" in order to specify the content type of the snippet, if none provided then text/plain would be set as default
         //jsonSnippet.getJSONObject("misc").put("content-type", "text/html");
         // Parse from JSON to snippet
-        final DefaultSnippet snippet = new DefaultSnippet();
-        final Set<Property> properties = EnumSet.noneOf(Property.class);
+        DefaultSnippet snippet = new DefaultSnippet();
+        Set<Property> properties = EnumSet.noneOf(Property.class);
         SnippetJsonParser.parse(jsonSnippet, snippet, properties);
+
+        // Process image in an <img> tag and add it as an attachment
+        String contentSubType = getContentSubType(snippet);
+        List<Attachment> attachments = Collections.<Attachment> emptyList();
+        if (contentSubType.equals("html")) {
+            SnippetProcessor snippetProcessor = new SnippetProcessor(snippetRequest.getSession());
+            attachments = new LinkedList<Attachment>();
+            snippetProcessor.processImages(snippet, attachments);
+        }
+
         // Update
-        final SnippetManagement management = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession());
-        final String newId = management.updateSnippet(id, snippet, properties, Collections.<Attachment> emptyList(), Collections.<Attachment> emptyList());
-        final Snippet newSnippet = management.getSnippet(newId);
+        SnippetManagement management = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession());
+        String newId = management.updateSnippet(id, snippet, properties, attachments, Collections.<Attachment> emptyList());
+        Snippet newSnippet = management.getSnippet(newId);
         return new AJAXRequestResult(newSnippet, "snippet");
     }
 

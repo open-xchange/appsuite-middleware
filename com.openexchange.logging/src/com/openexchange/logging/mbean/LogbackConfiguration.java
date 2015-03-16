@@ -64,11 +64,15 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.AsyncAppender;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.log.LogProperties.Name;
+import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
 import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
 import com.openexchange.management.MBeanMethodAnnotation;
 
@@ -83,6 +87,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     private static final Logger LOG = LoggerFactory.getLogger(LogbackConfiguration.class);
 
     private static final String WHITELIST_PROPERTY = "com.openexchange.logging.filter.loggerWhitelist";
+    
+    private static final String lineSeparator = System.getProperty("line.separator");
 
     // -------------------------------------------------------------------------------------------- //
 
@@ -152,6 +158,31 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     public void dispose() {
         rankingAwareTurboFilterList.removeTurboFilter(turboFilterCache);
         turboFilterCache.clear();
+    }
+    
+    @Override
+    public String getRootAppenderStats() {
+        ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+        Iterator<Appender<ILoggingEvent>> appenders = rootLogger.iteratorForAppenders();
+        StringBuilder sb = new StringBuilder();
+        while (appenders.hasNext()) {
+            Appender<ILoggingEvent> appender = appenders.next();
+            sb.append(appender.getClass().getSimpleName()).append(": ").append(appender.getName());
+            if (appender instanceof AsyncAppender) {
+                AsyncAppender asyncAppender = (AsyncAppender) appender;
+                sb.append(" [capacity=").append(asyncAppender.getQueueSize()).append(",size=").append(asyncAppender.getNumberOfElementsInQueue()).append(']');
+            } else if (appender instanceof LogstashSocketAppender) {
+                LogstashSocketAppender socketAppender = (LogstashSocketAppender) appender;
+                sb.append(" [capacity=").append(socketAppender.getQueueSize()).append(",size=").append(socketAppender.getNumberOfElementsInQueue()).append(']');
+            }
+
+            sb.append(lineSeparator);
+        }
+
+        if (sb.length() == 0) {
+            sb.append("No root appenders found.").append(lineSeparator);
+        }
+        return sb.toString();
     }
 
     @Override
@@ -248,6 +279,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                     response.addMessage(builder.toString(), MessageType.INFO);
                     LOG.info(builder.toString());
                 }
+                if (!filter.hasLoggers()) {
+                    turboFilterCache.remove(key);
+                }
             } else {
                 builder.setLength(0);
                 builder.append("Context filter with contextID \"").append(contextID).append("\" does not exist.");
@@ -283,6 +317,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                     LOG.info(builder.toString());
                     response.addMessage(builder.toString(), MessageType.INFO);
                 }
+                if (!filter.hasLoggers()) {
+                    turboFilterCache.remove(key);
+                }
             } else {
                 builder.append("User filter for user with ID \"").append(userID).append("\", context with ID \"").append(contextID).append("\" and policy \"ACCEPT\" does not exist");
                 LOG.info(builder.toString());
@@ -315,6 +352,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                         .append("\" and policy \"ACCEPT\"");
                     response.addMessage(builder.toString(), MessageType.INFO);
                     LOG.info(builder.toString());
+                }
+                if (!filter.hasLoggers()) {
+                    turboFilterCache.remove(key);
                 }
             } else {
                 builder.setLength(0);
@@ -349,7 +389,6 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     @Override
     public synchronized LogbackMBeanResponse clearFilters() {
         LogbackMBeanResponse response = new LogbackMBeanResponse();
-        rankingAwareTurboFilterList.clear();
         turboFilterCache.clear();
         String msg = "Removed all filters";
         LOG.info(msg);

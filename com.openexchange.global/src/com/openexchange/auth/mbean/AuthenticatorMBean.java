@@ -91,4 +91,20 @@ public interface AuthenticatorMBean {
      */
     void doUserAuthentication(String login, String password, int contextId) throws MBeanException;
 
+    /**
+     * Checks if master authentication has been disabled for associated machine.
+     *
+     * @return <code>true</code> if master authentication has been disabled; otherwise <code>false</code>
+     * @throws MBeanException If operation fails
+     */
+    boolean isMasterAuthenticationDisabled() throws MBeanException;
+
+    /**
+     * Checks if context authentication has been disabled for associated machine.
+     *
+     * @return <code>true</code> if context authentication has been disabled; otherwise <code>false</code>
+     * @throws MBeanException If operation fails
+     */
+    boolean isContextAuthenticationDisabled() throws MBeanException;
+
 }

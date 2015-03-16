@@ -61,6 +61,7 @@ import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -112,7 +113,7 @@ public class LogbackCLT {
         options.addOption(createOption("c", "context", true, false, "The context id for which to enable logging", false));
         options.addOption(createOption("oec", "override-exception-categories", true, false, "Override the exception categories to be suppressed", false));
         options.addOption(createOption("s", "session", true, false, "The session id for which to enable logging", false));
-        Option o = createOption("l", "level", false, true, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG)", false);
+        Option o = createOption("l", "level", false, true, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG). When the -d flag is present the arguments of this switch should be supplied without the level (e.g. -d -l com.openexchange.appsuite)", false);
         o.setArgs(Short.MAX_VALUE);
         options.addOption(o);
         options.addOption(createOption("h", "help", false, false, "Print usage of the command line tool", false));
@@ -120,6 +121,7 @@ public class LogbackCLT {
         options.addOption(createOption("lf", "list-filters", false, false, "Get a list with all logging filters of the system", false));
         options.addOption(createOption("cf", "clear-filters", false, false, "Clear all logging filters", false));
         options.addOption(createOption("le", "list-exception-category", false, false, "Get a list with all supressed exception categories", false));
+        options.addOption(createOption("la", "list-appenders", false, false, "Lists all root appenders and any available statistics", false));
         options.addOption(createOption("U", "JMX-User", true, false, "JMX user", false));
         options.addOption(createOption("U", "JMX-User", true, false, "JMX user", false));
         options.addOption(createOption("P", "JMX-Password", true, false, "JMX password", false));
@@ -228,6 +230,9 @@ public class LogbackCLT {
                 }
             } else if (cl.hasOption("cf")) {
                 method = "clearFilters";
+            } else if (cl.hasOption("la")) {
+                printRootAppenderStats();
+                System.exit(0);
             } else if (cl.hasOption("h")) {
                 printUsage(0);
             } else {
@@ -246,6 +251,23 @@ public class LogbackCLT {
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             printUsage(-1);
+        }
+    }
+    
+    private static void printRootAppenderStats() {
+        boolean error = true;
+        try {
+            LogbackConfigurationMBean mbean = MBeanServerInvocationHandler.newProxyInstance(connect(), getObjectName(), LogbackConfigurationMBean.class, false);
+            System.out.print(mbean.getRootAppenderStats());            
+            error = false;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (MalformedObjectNameException e) {
+            e.printStackTrace();
+        } finally {
+            if (error) {
+                printUsage(-1);
+            }
         }
     }
 
@@ -289,6 +311,19 @@ public class LogbackCLT {
             return Collections.emptyList();
         }
     }
+    
+    private static MBeanServerConnection connect() throws IOException {
+        JMXServiceURL jmxServiceURL = new JMXServiceURL(serviceURL + jmxPort + "/server");
+        JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, createEnvironment());
+        return jmxConnector.getMBeanServerConnection();
+    }
+    
+    private static ObjectName getObjectName() throws MalformedObjectNameException {
+        return new ObjectName(
+            LogbackConfigurationMBean.DOMAIN,
+            LogbackConfigurationMBean.KEY,
+            LogbackConfigurationMBean.VALUE);
+    }
 
     /**
      * Invoke the specified MBean method with the specified signature and specified parameters
@@ -301,13 +336,8 @@ public class LogbackCLT {
     private static final void invokeMBeanMethod(String methodName, Object[] params, String[] signature) {
         boolean error = true;
         try {
-            ObjectName logbackConfObjName = new ObjectName(
-                LogbackConfigurationMBean.DOMAIN,
-                LogbackConfigurationMBean.KEY,
-                LogbackConfigurationMBean.VALUE);
-            JMXServiceURL jmxServiceURL = new JMXServiceURL(serviceURL + jmxPort + "/server");
-            JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, createEnvironment());
-            MBeanServerConnection mbeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName logbackConfObjName = getObjectName();
+            MBeanServerConnection mbeanServerConnection = connect();
 
             Object o = mbeanServerConnection.invoke(logbackConfObjName, methodName, params, signature);
             if (o instanceof Set) {

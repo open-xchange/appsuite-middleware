@@ -2,30 +2,36 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippet MIME Bundle
 Bundle-SymbolicName: com.openexchange.snippet.mime
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cache,
  com.openexchange.caching,
  com.openexchange.config,
  com.openexchange.context,
+ com.openexchange.conversion,
  com.openexchange.crypto,
  com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.filemanagement,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.filestore,
  com.openexchange.groupware.update,
+ com.openexchange.html,
  com.openexchange.id,
+ com.openexchange.image,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.mail,
+ com.openexchange.mail.config,
  com.openexchange.mail.mime,
  com.openexchange.mail.mime.converters,
  com.openexchange.mail.mime.datasource,
+ com.openexchange.mail.mime.filler,
  com.openexchange.mail.mime.utils,
  com.openexchange.mail.utils,
  com.openexchange.osgi,
@@ -33,6 +39,7 @@ Import-Package: com.openexchange.cache,
  com.openexchange.secret.osgi.tools,
  com.openexchange.secret.recovery,
  com.openexchange.server,
+ com.openexchange.server.services,
  com.openexchange.session,
  com.openexchange.snippet,
  com.openexchange.snippet.db,
@@ -60,3 +67,4 @@ Import-Package: com.openexchange.cache,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.snippet.mime.osgi.MimeSnippetActivator
+Export-Package: com.openexchange.snippet.mime

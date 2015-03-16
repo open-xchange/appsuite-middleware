@@ -67,7 +67,7 @@ public class NotificationConfiguration implements Cloneable {
     }
 
     public boolean interestedInStateChanges() {
-        return interestedInChanges && interestedInStateChanges;
+        return interestedInStateChanges;
     }
 
     public boolean interestedInChanges() {

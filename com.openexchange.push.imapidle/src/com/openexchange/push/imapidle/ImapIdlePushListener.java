@@ -58,7 +58,10 @@ import java.util.concurrent.locks.LockSupport;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.slf4j.Logger;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
@@ -83,6 +86,7 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -193,6 +197,22 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         lastLockRefreshNanos = System.nanoTime();
     }
 
+    private boolean isUserValid() {
+        try {
+            ContextService contextService = services.getService(ContextService.class);
+            Context context = contextService.loadContext(session.getContextId());
+            if (!context.isEnabled()) {
+                return false;
+            }
+
+            UserService userService = services.getService(UserService.class);
+            User user = userService.getUser(session.getUserId(), context);
+            return user.isMailEnabled();
+        } catch (OXException e) {
+            return false;
+        }
+    }
+
     @Override
     public void notifyNewMail() throws OXException {
         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(accountId, fullName), session);
@@ -201,6 +221,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     @Override
     public void run() {
         if (canceled.get()) {
+            return;
+        }
+
+        if (!isUserValid()) {
+            cancel(false);
             return;
         }
 

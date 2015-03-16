@@ -95,7 +95,7 @@ public class Bug35129Test extends AbstractAJAXSession {
 
     @Test
     public void test4UnauthorizedResponse() throws Exception {
-        HttpAuthResponse response = myClient.execute(new EmptyHttpAuthRequest());
+        HttpAuthResponse response = myClient.execute(new EmptyHttpAuthRequest(false));
         Assert.assertEquals("Missing Authorization header should give according status code.", HttpServletResponse.SC_UNAUTHORIZED, response.getStatusCode());
         Assert.assertEquals("Authorization Required!", response.getReasonPhrase());
     }

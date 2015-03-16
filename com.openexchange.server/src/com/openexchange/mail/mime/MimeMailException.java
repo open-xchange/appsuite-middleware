@@ -297,7 +297,7 @@ public class MimeMailException extends OXException {
                 }
                 String serverInfo = getSmtpInfo(sendFailedError);
                 if (nextException instanceof com.sun.mail.smtp.SMTPAddressFailedException) {
-                    serverInfo = getSmtpInfo((com.sun.mail.smtp.SMTPSendFailedException) nextException);
+                    serverInfo = getSmtpInfo((com.sun.mail.smtp.SMTPAddressFailedException) nextException);
                 }
                 final Address[] addrs = sendFailedError.getInvalidAddresses();
                 if (null == addrs || addrs.length == 0) {

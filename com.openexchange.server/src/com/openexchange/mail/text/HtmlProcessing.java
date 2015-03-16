@@ -51,13 +51,13 @@ package com.openexchange.mail.text;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.isWhitespace;
-import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,29 +69,32 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.CharacterReference;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.OutputDocument;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.StartTag;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
-import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
-import com.openexchange.mail.conversion.InlineImageDataSource;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.HashUtility;
@@ -251,17 +254,20 @@ public final class HtmlProcessing {
                         /*
                          * Replace <body> with <div>
                          */
-                        retval.setContent(replaceBody(retval.getContent(), cssPrefix));
+                        retval.setContent(replaceBodyWithJericho(retval.getContent(), cssPrefix));
                     }
                 }
             }
         } else {
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
-                if (DisplayMode.DISPLAY.equals(mode)) {
+                if (DisplayMode.DISPLAY.isIncluded(mode)) {
                     retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
                     retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
                     if (usm.isUseColorQuote()) {
                         retval.setContent(replaceHTMLSimpleQuotesForDisplay(retval.getContent()));
+                    }
+                    if (DisplayMode.DOCUMENT.equals(mode)) {
+                        retval.setContent(htmlService.getConformHTML(retval.getContent(), "UTF-8"));
                     }
                 } else {
                     retval = htmlService.htmlFormat(retval.getContent(), true, null, maxContentSize);
@@ -345,6 +351,79 @@ public final class HtmlProcessing {
         return str.substring(length - (maxWidth));
     }
 
+    private static void replaceBodyWithJericho0(Source source, OutputDocument outputDocument, List<Element> styleElements, String cssPrefix) {
+        List<Element> bodyElements = source.getAllElements(HTMLElementName.BODY);
+        if (null == bodyElements || bodyElements.isEmpty()) {
+            // No body
+            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
+            outputDocument.insert(source.length() - 1, "</div>");
+        } else {
+            for (Element bodyElement : bodyElements) {
+                Segment content = bodyElement.getContent();
+                StringBuilder sb = new StringBuilder(content.length());
+                sb.append(getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix));
+                if (null != styleElements) {
+                    for (Element element : styleElements) {
+                        sb.append(element);
+                    }
+                }
+                sb.append(content);
+                sb.append("</div>");
+                outputDocument.replace(bodyElement, sb);
+            }
+        }
+    }
+
+    /**
+     * Replaces &lt;body&gt; tag with an appropriate &lt;div&gt; tag.
+     *
+     * @param htmlContent The HTML content
+     * @param cssPrefix The CSS prefix
+     * @return The HTML content with replaced body tag
+     */
+    private static String replaceBodyWithJericho(String htmlContent, String cssPrefix) {
+        Source source = new Source(htmlContent);
+        source.fullSequentialParse();
+        OutputDocument outputDocument = new OutputDocument(source);
+
+        Element htmlElement = source.getFirstElement(HTMLElementName.HTML);
+        if (null == htmlElement) {
+            // No <html> element
+            replaceBodyWithJericho0(source, outputDocument, null, cssPrefix);
+            return outputDocument.toString();
+        }
+
+        List<Element> styleElements = null;
+        {
+            Element headElement = source.getFirstElement(HTMLElementName.HEAD);
+            if (null != headElement) {
+                styleElements = headElement.getAllElements(HTMLElementName.STYLE);
+            }
+        }
+
+        replaceBodyWithJericho0(source, outputDocument, styleElements, cssPrefix);
+        return outputDocument.toString();
+    }
+
+    private static CharSequence getDivStartTagHTML(StartTag startTag, String cssPrefix) {
+        // tidies and filters out non-approved attributes
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("<div");
+        sb.append(' ').append("id=\"").append(cssPrefix).append('"');
+
+        for (Attribute attribute : startTag.getAttributes()) {
+            if (!"id".equals(attribute.getKey())) {
+                sb.append(' ').append(attribute.getName());
+                if (attribute.getValue() != null) {
+                    sb.append("=\"").append(CharacterReference.encode(attribute.getValue())).append('"');
+                }
+            }
+        }
+
+        sb.append('>');
+        return sb;
+    }
+
     private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern PATTERN_HEAD = Pattern.compile("<head.*?>(.*?)</head>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern PATTERN_BODY = Pattern.compile("<body(.*?)>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -356,23 +435,37 @@ public final class HtmlProcessing {
      * @param cssPrefix The CSS prefix
      * @return The HTML content with replaced body tag
      */
-    private static String replaceBody(final String htmlContent, final String cssPrefix) {
+    private static String replaceBody(String htmlContent, String cssPrefix) {
         if (isEmpty(htmlContent) || isEmpty(cssPrefix)) {
             return htmlContent;
         }
-        final Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
+
+        Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
         if (!htmlMatcher.find()) {
-            return replaceBodyPlain(htmlContent, cssPrefix);
+            String retval = replaceBodyPlain(htmlContent, cssPrefix);
+            return retval;
         }
-        final Matcher headMatcher = PATTERN_HEAD.matcher(htmlMatcher.group(1));
+
+        Matcher headMatcher = PATTERN_HEAD.matcher(htmlMatcher.group(1));
+        htmlMatcher = null;
         if (!headMatcher.find()) {
-            return replaceBodyPlain(htmlContent, cssPrefix);
+            String retval = replaceBodyPlain(htmlContent, cssPrefix);
+            return retval;
         }
-        final Matcher bodyMatcher = PATTERN_BODY.matcher(htmlContent);
+
+        Matcher bodyMatcher = PATTERN_BODY.matcher(htmlContent);
         if (!bodyMatcher.find()) {
-            return replaceBodyPlain(htmlContent, cssPrefix);
+            // No <body> tag contained in HTML content;
+            // replaceBodyPlain() does not work in this case as it relies on PATTERN_BODY, too
+            StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
+            sb.append("<div id=\"").append(cssPrefix).append("\">");
+            sb.append(htmlContent);
+            sb.append("</div>");
+            return sb.toString();
         }
-        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
+
+        // Replace <body> with <div>
+        StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
         sb.append("<div id=\"").append(cssPrefix).append('"');
         {
             final String rest = bodyMatcher.group(1);
@@ -381,14 +474,19 @@ public final class HtmlProcessing {
             }
         }
         sb.append('>');
-        final Matcher styleMatcher = PATTERN_STYLE.matcher(headMatcher.group(1));
+
+        // The content...
+        Matcher styleMatcher = PATTERN_STYLE.matcher(headMatcher.group(1));
+        headMatcher = null;
         while (styleMatcher.find()) {
             sb.append(styleMatcher.group());
         }
         sb.append(bodyMatcher.group(2));
+
         sb.append("</div>");
+
         // Is there more behind closing <body> tag?
-        final int end = bodyMatcher.end();
+        int end = bodyMatcher.end();
         if (end < htmlContent.length()) {
             sb.append(htmlContent.substring(end));
         }
@@ -398,14 +496,15 @@ public final class HtmlProcessing {
     private static final Pattern PAT_ATTR_BGCOLOR = Pattern.compile("bgcolor=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
     private static final Pattern PAT_ATTR_STYLE = Pattern.compile("style=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
 
-    private static String cleanUpRest(final String rest) {
+    private static String cleanUpRest(String rest) {
         Matcher m = PAT_ATTR_BGCOLOR.matcher(rest);
         if (!m.find()) {
             return rest;
         }
-        final String color = m.group(1);
-        final String ret = rest;
-        final StringBuffer sbuf = new StringBuffer(ret.length());
+
+        String color = m.group(1);
+        String ret = rest;
+        StringBuffer sbuf = new StringBuffer(ret.length());
         m.appendReplacement(sbuf, "");
         m.appendTail(sbuf);
         // Check for script attribute
@@ -419,14 +518,19 @@ public final class HtmlProcessing {
         return sbuf.toString();
     }
 
-    private static String replaceBodyPlain(final String htmlContent, final String cssPrefix) {
-        final Matcher m = PATTERN_BODY.matcher(htmlContent);
-        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
+    private static String replaceBodyPlain(String htmlContent, String cssPrefix) {
+        Matcher m = PATTERN_BODY.matcher(htmlContent);
+        StringBuffer sb = new StringBuffer(htmlContent.length() + 256);
         if (m.find()) {
-            mr.appendLiteralReplacement(sb, "<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>");
+            m.appendReplacement(sb, Matcher.quoteReplacement("<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>"));
+            m.appendTail(sb);
+        } else {
+            // No <body> tag contained in HTML content
+            sb.append("<div id=\"").append(cssPrefix).append("\">");
+            sb.append(htmlContent);
+            sb.append("</div>");
+            return sb.toString();
         }
-        mr.appendTail(sb);
         return sb.toString();
     }
 
@@ -856,10 +960,6 @@ public final class HtmlProcessing {
         "src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?",
         Pattern.CASE_INSENSITIVE);
 
-    private static final String STR_SRC = "src=";
-
-    // private static final String CHARSET_ISO8859 = "ISO-8859-1";
-
     /**
      * Filters inline images occurring in HTML content of a message:
      * <ul>
@@ -874,16 +974,39 @@ public final class HtmlProcessing {
      * @param msgUID The message's unique path in mailbox
      * @return The HTML content with all inline images replaced with valid links
      */
-    public static String filterInlineImages(final String content, final Session session, final MailPath msgUID) {
-        String ret = filterImgInlineImages(content, session, msgUID);
-        ret = filterBackgroundInlineImages(ret, session, msgUID);
+    public static String filterInlineImages(String content, Session session, MailPath msgUID) {
+        return filterInlineImages(content, session, msgUID, DefaultImageUriGenerator.getInstance());
+    }
+
+    /**
+     * Filters inline images occurring in HTML content of a message:
+     * <ul>
+     * <li>Inline images<br>
+     * The source of inline images is in the message itself. Thus loading the inline image is redirected to the appropriate message (image)
+     * attachment identified through header <code>Content-Id</code>; e.g.: <code>&lt;img
+     * src=&quot;cid:[cid-value]&quot; ... /&gt;</code>.</li>
+     * </ul>
+     *
+     * @param content The HTML content possibly containing images
+     * @param session The session
+     * @param msgUID The message's unique path in mailbox
+     * @param generator The image URI generator to use
+     * @return The HTML content with all inline images replaced with valid links
+     */
+    public static String filterInlineImages(String content, Session session, MailPath msgUID, ImageUriGenerator generator) {
+        String ret = filterImgInlineImages(content, session, msgUID, generator);
+        ret = filterBackgroundInlineImages(ret, session, msgUID, generator);
         return ret;
     }
 
-    private static final String EVENT_RESTRICTIONS = "\" onmousedown=\"return false;\" oncontextmenu=\"return false;\"";
-
     private static volatile String imageHost;
-    private static String imageHost() {
+
+    /**
+     * Gets the optional image host
+     *
+     * @return The optional image host
+     */
+    public static String imageHost() {
         String tmp = imageHost;
         if (null == tmp) {
             synchronized (HtmlProcessing.class) {
@@ -902,7 +1025,7 @@ public final class HtmlProcessing {
         return tmp;
     }
 
-    private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID) {
+    private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
         String reval = content;
         try {
             final Matcher imgMatcher = BACKGROUND_PATTERN.matcher(reval);
@@ -910,29 +1033,20 @@ public final class HtmlProcessing {
             final StringBuilder sb = new StringBuilder(reval.length());
             if (imgMatcher.find()) {
                 final StringBuilder linkBuilder = new StringBuilder(256);
-                /*
-                 * Replace inline images with Content-ID
-                 */
+                // Replace inline images with Content-ID
                 do {
-                    /*
-                     * Extract Content-ID
-                     */
+                    // Extract Content-ID
                     String cid = imgMatcher.group(2);
                     if (cid == null) {
                         cid = imgMatcher.group(3);
                     }
-                    /*
-                     * Compose corresponding image data
-                     */
-                    final String imageURL;
-                    {
-                        final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                        final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).optImageHost(imageHost()).build();
-                        imageURL = imgSource.generateUrl(imageLocation, session);
-                    }
+
+                    // Compose corresponding image data
                     linkBuilder.setLength(0);
-                    linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append(EVENT_RESTRICTIONS).append(imgMatcher.group(4));
-                    imgReplacer.appendLiteralReplacement(sb, linkBuilder.toString());
+                    String prefix = linkBuilder.append(imgMatcher.group(1)).append("background=").toString();
+                    linkBuilder.setLength(0);
+                    generator.generateImageUri(linkBuilder, prefix, imgMatcher.group(4), cid, msgUID, session);
+                    imgReplacer.appendLiteralReplacement(sb, 0 == linkBuilder.length() ? imgMatcher.group() : linkBuilder.toString());
                 } while (imgMatcher.find());
             }
             imgReplacer.appendTail(sb);
@@ -955,9 +1069,10 @@ public final class HtmlProcessing {
      * @param content The HTML content possibly containing images
      * @param session The session
      * @param msgUID The message's unique path in mailbox
+     * @param generator
      * @return The HTML content with all inline images replaced with valid links
      */
-    private static String filterImgInlineImages(final String content, final Session session, final MailPath msgUID) {
+    private static String filterImgInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
         String reval = content;
         try {
             final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
@@ -972,7 +1087,7 @@ public final class HtmlProcessing {
                  */
                 do {
                     final String imgTag = imgMatcher.group();
-                    if (!(replaceImgSrc(session, msgUID, imgTag, strBuffer, linkBuilder))) {
+                    if (!(replaceImgSrc(session, msgUID, imgTag, strBuffer, linkBuilder, generator))) {
                         /*
                          * No cid pattern found, try with filename
                          */
@@ -984,15 +1099,9 @@ public final class HtmlProcessing {
                             /*
                              * Compose corresponding image data
                              */
-                            final String imageURL;
-                            {
-                                final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                                final ImageLocation imageLocation = new ImageLocation.Builder(filename).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).optImageHost(imageHost()).build();
-                                imageURL = imgSource.generateUrl(imageLocation, session);
-                            }
                             linkBuilder.setLength(0);
-                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(filename).append(EVENT_RESTRICTIONS);
-                            mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
+                            generator.generateImageUri(linkBuilder, "src=", null, filename, msgUID, session);
+                            mr.appendLiteralReplacement(strBuffer, 0 == linkBuilder.length() ? imgMatcher.group() : linkBuilder.toString());
                         }
                         mr.appendTail(strBuffer);
                     }
@@ -1008,7 +1117,7 @@ public final class HtmlProcessing {
         return reval;
     }
 
-    private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag, final StringBuilder cidBuffer, final StringBuilder linkBuilder) throws OXException {
+    private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag, final StringBuilder cidBuffer, final StringBuilder linkBuilder, ImageUriGenerator generator) throws OXException {
         boolean retval = false;
         final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
         final MatcherReplacer cidReplacer = new MatcherReplacer(cidMatcher, imgTag);
@@ -1025,32 +1134,9 @@ public final class HtmlProcessing {
                 /*
                  * Compose corresponding image data
                  */
-                final String imageURL;
-                {
-                    final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                    // Check mail identifier
-                    String mailId = msgUID.getMailID();
-                    if (mailId.indexOf('%') >= 0) {
-                        final int unifiedINBOXAccountID = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
-                        if (unifiedINBOXAccountID < 0 || msgUID.getAccountId() != unifiedINBOXAccountID) {
-                            String tmp = AJAXUtility.decodeUrl(mailId, null);
-                            if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-                                // Expect mail path; e.g. "default0/INBOX/123"
-                                try {
-                                    mailId = new MailPath(tmp).getMailID();
-                                } catch (OXException e) {
-                                    // Ignore
-                                }
-                            }
-                        }
-                    }
-                    // Build image location
-                    final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(mailId).optImageHost(imageHost()).build();
-                    imageURL = imgSource.generateUrl(imageLocation, session);
-                }
                 linkBuilder.setLength(0);
-                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(cid).append(EVENT_RESTRICTIONS);
-                cidReplacer.appendLiteralReplacement(cidBuffer, linkBuilder.toString());
+                generator.generateImageUri(linkBuilder, "src=", null, cid, msgUID, session);
+                cidReplacer.appendLiteralReplacement(cidBuffer, 0 == linkBuilder.length() ? cidMatcher.group() : linkBuilder.toString());
             } while (cidMatcher.find());
         }
         cidReplacer.appendTail(cidBuffer);

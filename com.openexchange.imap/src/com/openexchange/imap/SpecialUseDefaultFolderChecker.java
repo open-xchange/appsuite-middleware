@@ -49,29 +49,13 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.java.Strings.isEmpty;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessagingException;
 import org.slf4j.Logger;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.imap.cache.ListLsubCache;
-import com.openexchange.imap.cache.ListLsubEntry;
-import com.openexchange.mail.MailSessionCache;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
-import com.openexchange.spamhandler.NoSpamHandler;
-import com.openexchange.spamhandler.SpamHandler;
-import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -82,22 +66,12 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
 
+    /** The logger constant */
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SpecialUseDefaultFolderChecker.class);
-
-    private static final String[] SPECIAL_USES;
-    static {
-        final String[] sa = new String[4];
-        sa[StorageUtility.INDEX_DRAFTS] = "\\Drafts";
-        sa[StorageUtility.INDEX_SENT] = "\\Sent";
-        sa[StorageUtility.INDEX_SPAM] = "\\Junk";
-        sa[StorageUtility.INDEX_TRASH] = "\\Trash";
-        SPECIAL_USES = sa;
-    }
 
     // -------------------------------------------------------------------------------------------------------------------------------- //
 
     private final boolean hasCreateSpecialUse;
-    private final boolean hasMetadata;
 
     /**
      * Initializes a new {@link SpecialUseDefaultFolderChecker}.
@@ -110,170 +84,44 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
      * @param hasCreateSpecialUse Whether the IMAP server advertises "CREATE-SPECIAL-USE" capability string
      * @param hasMetadata Whether the IMAP server advertises "METADATA" capability string
      */
-    public SpecialUseDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final IMAPStore imapStore, final IMAPAccess imapAccess, boolean hasCreateSpecialUse, boolean hasMetadata) {
-        super(accountId, session, ctx, imapStore, imapAccess);
+    public SpecialUseDefaultFolderChecker(int accountId, Session session, Context ctx, IMAPStore imapStore, IMAPAccess imapAccess, boolean hasCreateSpecialUse, boolean hasMetadata) {
+        super(accountId, session, ctx, imapStore, imapAccess, hasMetadata);
         this.hasCreateSpecialUse = hasCreateSpecialUse;
-        this.hasMetadata = hasMetadata;
     }
 
     @Override
-    protected void sequentiallyCheckFolders(final String prefix, final char sep, final int type, final MailSessionCache cache) throws OXException {
-        final AtomicBoolean modified = new AtomicBoolean(false);
-        final TIntSet indexes = new TIntHashSet(new int[] { StorageUtility.INDEX_DRAFTS, StorageUtility.INDEX_SENT, StorageUtility.INDEX_SPAM, StorageUtility.INDEX_TRASH });
-        try {
-            final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-            ListLsubEntry entry = ListLsubCache.getDraftsEntry(accountId, imapFolder, session);
-            if (null != entry) {
-                setDefaultMailFolder(StorageUtility.INDEX_DRAFTS, entry.getFullName(), cache);
-                indexes.remove(StorageUtility.INDEX_DRAFTS);
-                if (!entry.isSubscribed()) {
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
-                    modified.set(true);
-                }
-            }
-            entry = ListLsubCache.getJunkEntry(accountId, imapFolder, session);
-            if (null != entry) {
-                setDefaultMailFolder(StorageUtility.INDEX_SPAM, entry.getFullName(), cache);
-                indexes.remove(StorageUtility.INDEX_SPAM);
-                if (!entry.isSubscribed()) {
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
-                    modified.set(true);
-                }
-            }
-            entry = ListLsubCache.getSentEntry(accountId, imapFolder, session);
-            if (null != entry) {
-                setDefaultMailFolder(StorageUtility.INDEX_SENT, entry.getFullName(), cache);
-                indexes.remove(StorageUtility.INDEX_SENT);
-                if (!entry.isSubscribed()) {
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
-                    modified.set(true);
-                }
-            }
-            entry = ListLsubCache.getTrashEntry(accountId, imapFolder, session);
-            if (null != entry) {
-                setDefaultMailFolder(StorageUtility.INDEX_TRASH, entry.getFullName(), cache);
-                indexes.remove(StorageUtility.INDEX_TRASH);
-                if (!entry.isSubscribed()) {
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
-                    modified.set(true);
-                }
-            }
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
-        }
-        // Detect if spam option is enabled
-        final boolean isSpamOptionEnabled;
-        {
-            final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-            isSpamOptionEnabled = usm.isSpamOptionEnabled();
-        }
-        // Get default folders names and full names
-        final String[] fullNames;
-        final String[] names;
-        final SpamHandler spamHandler;
-        {
-            final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
-            if (isSpamOptionEnabled) {
-                fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(imapConfig, true);
-                names = defaultFolderNamesProvider.getDefaultFolderNames(imapConfig, true);
-                spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId);
-            } else {
-                fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(imapConfig, false);
-                names = defaultFolderNamesProvider.getDefaultFolderNames(imapConfig, false);
-                spamHandler = NoSpamHandler.getInstance();
-            }
-        }
-        // Special handling for full names in case of primary mail account
-        if (MailAccount.DEFAULT_ID == accountId) {
-            /*-
-             * Check full names for primary account:
-             *
-             * Null'ify full name if not on root level OR not equal to name; meaning not intended to create default folders next to INBOX
-             * In that case create them with respect to determined prefix
-             */
-            for (int i = 0; i < fullNames.length; i++) {
-                final String fullName = fullNames[i];
-                if (isEmpty(fullName) || fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
-                    // ^^^
-                    // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Zent
-                    fullNames[i] = null;
-                }
-            }
-        }
-        // Check folders
-        for (int index = 0; index < names.length; index++) {
-            String checkedFullName = null;
-            boolean apply = true;
-
-            // Determine the checked full name
-            {
-                // Get desired name and full name --> full name dominates name
-                final String name = names[index];
-                final String fullName = fullNames[index];
-
-                // Check folder & return its full name
-                if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
-                    if (spamHandler.isCreateConfirmedHam()) {
-                        checkedFullName = checkFullNameFor(index, prefix, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified);
-                    } else {
-                        LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", name);
-                    }
-                } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
-                    if (spamHandler.isCreateConfirmedSpam()) {
-                        checkedFullName = checkFullNameFor(index, prefix, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified);
-                    } else {
-                        LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", name);
-                    }
-                } else {
-                    if (indexes.contains(index)) {
-                        checkedFullName = checkFullNameFor(index, prefix, fullName, name, sep, type, 1, modified);
-                    } else {
-                        // Already applied above
-                        apply = false;
-                    }
-                }
-            }
-
-            // Set the checked full name (if applicable)
-            if (apply) {
-                setDefaultMailFolder(index, checkedFullName, cache);
-            }
-        }
-        /*
-         * Check for modifications
-         */
-        if (modified.get()) {
-            ListLsubCache.clearCache(accountId, session);
-        }
-    }
-
-    @Override
-    protected void createIfNonExisting(final IMAPFolder f, final int type, final char sep, final String detectedPrefix, final int index) throws MessagingException {
+    protected void createIfNonExisting(IMAPFolder f, int type, char sep, String namespace, int index) throws MessagingException {
         if (!f.exists()) {
             try {
                 if (hasCreateSpecialUse) {
                     // E.g. CREATE MyDrafts (USE (\Drafts))
-                    final List<String> specialUses = index < StorageUtility.INDEX_CONFIRMED_SPAM ? Collections.singletonList(SPECIAL_USES[index]) : null;
+                    List<String> specialUses = index <= StorageUtility.INDEX_TRASH ? Collections.singletonList(SPECIAL_USES[index]) : null;
                     IMAPCommandsCollection.createFolder(f, sep, type, false, specialUses);
                 } else {
                     IMAPCommandsCollection.createFolder(f, sep, type, false);
-                    if (index < StorageUtility.INDEX_CONFIRMED_SPAM) {
-                        if (hasMetadata) {
-                            // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
-                            IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(SPECIAL_USES[index]));
+                    if (hasMetadata && index <= StorageUtility.INDEX_TRASH) {
+                        // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
+                        String flag = SPECIAL_USES[index];
+                        try {
+                            IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(flag));
+                        } catch (Exception e) {
+                            LOG.info("Failed to set {} flag for new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                         }
                     }
                 }
-                LOG.info("Created new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), detectedPrefix, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-            } catch (final MessagingException e) {
-                LOG.warn("Failed to create new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), detectedPrefix, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                LOG.info("Created new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+            } catch (MessagingException e) {
+                LOG.warn("Failed to create new standard {} folder (full-name={}, namespace={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 throw e;
             }
         } else {
-            if (index < StorageUtility.INDEX_CONFIRMED_SPAM) {
-                if (hasMetadata) {
-                    // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
-                    IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(SPECIAL_USES[index]));
+            if (hasMetadata && index <= StorageUtility.INDEX_TRASH) {
+                // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
+                String flag = SPECIAL_USES[index];
+                try {
+                    IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(flag));
+                } catch (Exception e) {
+                    LOG.info("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                 }
             }
         }

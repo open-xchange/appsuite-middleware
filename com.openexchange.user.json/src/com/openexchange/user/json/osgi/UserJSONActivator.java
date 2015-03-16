@@ -59,6 +59,7 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContactResultConverter;
 import com.openexchange.user.json.actions.UserActionFactory;
+import com.openexchange.user.json.actions.UserMeActionFactory;
 import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
@@ -90,9 +91,13 @@ public class UserJSONActivator extends AJAXModuleActivator {
         try {
             PREFIX.set(getService(DispatcherPrefixService.class));
             /*
-             * Register user multiple service
+             * Register user action factory
              */
             registerModule(UserActionFactory.getInstance(), Constants.MODULE);
+            /*
+             * Register user/me action factory
+             */
+            registerModule(UserMeActionFactory.getInstance(), Constants.MODULE_ME);
             /*
              * Register result converter
              */

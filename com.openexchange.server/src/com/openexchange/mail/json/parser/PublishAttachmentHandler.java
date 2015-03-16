@@ -261,7 +261,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         final Map<Locale, ComposedMailMessage> internalMessages = new HashMap<Locale, ComposedMailMessage>(addresses.size());
         ComposedMailMessage externalMessage = null;
         for (final InternetAddress address : addresses) {
-            User user = null;
+            User user;
             try {
                 user = userService.searchUser(IDNA.toIDN(address.getAddress()), ctx);
             } catch (final OXException e) {
@@ -272,16 +272,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(e)) {
                     throw e;
                 }
-                /*
-                 * Retry
-                 */
-                try {
-                    user = userService.searchUser(IDNA.toIDN(address.getAddress()), ctx);
-                } catch (final OXException inner) {
-                    if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(inner)) {
-                        throw inner;
-                    }
-                }
+                user = null;
             }
             if (null == user) {
                 // External user

@@ -50,8 +50,11 @@
 package com.openexchange.calendar.osgi;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import javax.activation.MailcapCommandMap;
+import org.osgi.framework.Constants;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.api.CalendarFeature;
@@ -73,6 +76,7 @@ import com.openexchange.calendar.itip.sender.PoolingMailSenderService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
+import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -96,7 +100,7 @@ public class ITipActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HtmlService.class, AttachmentBase.class };
+        return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HtmlService.class, AttachmentBase.class, ITipParser.class };
     }
 
     @Override
@@ -128,9 +132,12 @@ public class ITipActivator extends HousekeepingActivator {
         AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, detailInterval, stateChangeInterval, priorityInterval);
         sender = new PoolingMailSenderService(pool, sender);
 
-
-        registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util, this));
-        registerService(ITipDingeMacherFactoryService.class, new DefaultITipDingeMacherFactoryService(util, sender, mails));
+        Dictionary<String, String> analyzerProps = new Hashtable<String, String>();
+        analyzerProps.put(Constants.SERVICE_RANKING, DefaultITipAnalyzerService.RANKING.toString()); // Default
+        registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util, this), analyzerProps);
+        Dictionary<String, String> factoryProps = new Hashtable<String, String>();
+        factoryProps.put(Constants.SERVICE_RANKING, DefaultITipDingeMacherFactoryService.RANKING.toString()); // Default
+        registerService(ITipDingeMacherFactoryService.class, new DefaultITipDingeMacherFactoryService(util, sender, mails), factoryProps);
 
         registerService(ITipMailGeneratorFactory.class, mails);
 

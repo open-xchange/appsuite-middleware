@@ -823,6 +823,20 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Gets all the recipient addresses for the message.<br>
+     * Extracts the TO, CC, and BCC recipients.
+     *
+     * @return The recipients
+     */
+    public InternetAddress[] getAllRecipients() {
+        Set<InternetAddress> set = new LinkedHashSet<InternetAddress>(6);
+        set.addAll(Arrays.asList(getTo()));
+        set.addAll(Arrays.asList(getCc()));
+        set.addAll(Arrays.asList(getBcc()));
+        return set.toArray(new InternetAddress[set.size()]);
+    }
+
+    /**
      * Adds an email address to <i>Reply-To</i>
      *
      * @param addr The address

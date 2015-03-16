@@ -51,11 +51,12 @@ package com.openexchange.database.migration.internal;
 
 import static com.openexchange.database.migration.internal.LiquibaseHelper.LIQUIBASE_NO_DEFINED_CONTEXT;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import liquibase.Liquibase;
-import liquibase.exception.LiquibaseException;
+import liquibase.changelog.ChangeSet;
 import liquibase.resource.ResourceAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,77 +75,85 @@ public class ConfigDBMigrationExecutor implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigDBMigrationExecutor.class);
 
     private final DatabaseService databaseService;
-
     private final Queue<ScheduledExecution> scheduledExecutions;
-
     private final Lock lock = new ReentrantLock();
-
     private Thread thread;
 
+    /**
+     * Initializes a new {@link ConfigDBMigrationExecutor}.
+     *
+     * @param databaseService The database service
+     */
     public ConfigDBMigrationExecutor(DatabaseService databaseService) {
         super();
         this.databaseService = databaseService;
         scheduledExecutions = new LinkedList<ScheduledExecution>();
     }
 
+    private ScheduledExecution nextExecution() {
+        lock.lock();
+        try {
+            ScheduledExecution scheduledExecution = scheduledExecutions.poll();
+            if (scheduledExecution == null) {
+                thread = null;
+            }
+            return scheduledExecution;
+        } finally {
+            lock.unlock();
+        }
+    }
+
     @Override
     public void run() {
-        boolean running = true;
-        ScheduledExecution scheduledExecution = null;
-        while (running) {
-            lock.lock();
-            try {
-                scheduledExecution = scheduledExecutions.poll();
-                if (scheduledExecution == null) {
-                    thread = null;
-                    running = false;
-                }
-            } finally {
-                lock.unlock();
-            }
-
+        for (ScheduledExecution scheduledExecution; (scheduledExecution = nextExecution()) != null;) {
             Exception exception = null;
-            if (scheduledExecution != null) {
-                Liquibase liquibase = null;
-                String fileLocation = scheduledExecution.getFileLocation();
-                try {
-                    liquibase = LiquibaseHelper.prepareLiquibase(databaseService, fileLocation, scheduledExecution.getResourceAccessor());
-                    DBMigrationMonitor.getInstance().addFile(fileLocation);
-                    if (scheduledExecution.isRollback()) {
-                        Object target = scheduledExecution.getRollbackTarget();
-                        if (target instanceof Integer) {
-                            int numberOfChangeSetsToRollback = (Integer) target;
-                            LOG.info("Rollback {} numbers of changesets of changelog {}", numberOfChangeSetsToRollback, fileLocation);
-                            liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_NO_DEFINED_CONTEXT);
-                        } else if (target instanceof String) {
-                            String changeSetTag = (String) target;
-                            LOG.info("Rollback to changeset {} of changelog {}", changeSetTag, fileLocation);
-                            liquibase.rollback(changeSetTag, LIQUIBASE_NO_DEFINED_CONTEXT);
-                        } else {
-                            throw DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR.create();
-                        }
+            Liquibase liquibase = null;
+            String fileLocation = scheduledExecution.getFileLocation();
+            try {
+                liquibase = LiquibaseHelper.prepareLiquibase(databaseService, fileLocation, scheduledExecution.getResourceAccessor());
+                DBMigrationMonitor.getInstance().addFile(fileLocation);
+                if (scheduledExecution.isRollback()) {
+                    Object target = scheduledExecution.getRollbackTarget();
+                    if (target instanceof Integer) {
+                        int numberOfChangeSetsToRollback = ((Integer) target).intValue();
+                        LOG.info("Rollback {} numbers of changesets of changelog {}", Integer.valueOf(numberOfChangeSetsToRollback), fileLocation);
+                        liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_NO_DEFINED_CONTEXT);
+                    } else if (target instanceof String) {
+                        String changeSetTag = (String) target;
+                        LOG.info("Rollback to changeset {} of changelog {}", changeSetTag, fileLocation);
+                        liquibase.rollback(changeSetTag, LIQUIBASE_NO_DEFINED_CONTEXT);
                     } else {
-                        LOG.info("Running migrations of changelog {}", fileLocation);
-                        liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
+                        throw DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR.create();
                     }
-                } catch (LiquibaseException e) {
-                    exception = e;
-                    LOG.error("", e);
-                } catch (OXException e) {
-                    exception = e;
-                    LOG.error("", e);
-                } catch (Exception e) {
-                    exception = e;
-                    LOG.error("", e);
-                } finally {
-                    scheduledExecution.setDone(exception);
-                    try {
-                        LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
-                    } catch (Exception e) {
-                        LOG.error("", e);
-                    }
-                    DBMigrationMonitor.getInstance().removeFile(fileLocation);
+                } else {
+                    LOG.info("Running migrations of changelog {}", fileLocation);
+                    liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
                 }
+            } catch (liquibase.exception.ValidationFailedException e) {
+                exception = e;
+                List<ChangeSet> invalidMD5Sums = e.getInvalidMD5Sums();
+                if (null == invalidMD5Sums || invalidMD5Sums.isEmpty()) {
+                    LOG.error("", e);
+                } else {
+                    LOG.debug("", e);
+                }
+            } catch (liquibase.exception.LiquibaseException e) {
+                exception = e;
+                LOG.error("", e);
+            } catch (OXException e) {
+                exception = e;
+                LOG.error("", e);
+            } catch (Exception e) {
+                exception = e;
+                LOG.error("", e);
+            } finally {
+                scheduledExecution.setDone(exception);
+                try {
+                    LiquibaseHelper.cleanUpLiquibase(databaseService, liquibase);
+                } catch (Exception e) {
+                    LOG.error("", e);
+                }
+                DBMigrationMonitor.getInstance().removeFile(fileLocation);
             }
         }
     }

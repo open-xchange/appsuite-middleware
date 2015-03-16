@@ -187,6 +187,15 @@ public final class FilterJerichoHandler implements JerichoHandler {
         return staticStyleMap;
     }
 
+    /**
+     * Gets the image CSS map.
+     *
+     * @return The image CSS map
+     */
+    public static Map<String, Set<String>> getImageStyleMap() {
+        return IMAGE_STYLE_MAP;
+    }
+
     /*-
      * Member stuff
      */
@@ -282,7 +291,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     /**
-     * Sets the max. content size. <= 0 means unlimited, <10000 will be set to 10000.
+     * Sets the max. content size. &lt;= <code>0</code> means unlimited, &lt; <code>10000</code> will be set to <code>10000</code>.
      *
      * @param maxContentSize The max. content size to set
      * @return This handler with new behavior applied
@@ -441,7 +450,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleUnknownTag(final Tag tag) {
         if (!body) {
-            htmlBuilder.append(tag.toString());
+            htmlBuilder.append(tag);
         }
     }
 
@@ -679,26 +688,29 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
         }
 
-        List<Attribute> uriAttributes = startTag.getURIAttributes();
+        List<Attribute> uriAttributes = replaceUrls ? startTag.getURIAttributes() : Collections.<Attribute> emptyList();
         for (Map.Entry<String, String> attribute : attrMap.entrySet()) {
             String attr = attribute.getKey();
             if ("style".equals(attr)) {
                 /*
                  * Handle style attribute
                  */
-                checkCSS(cssBuffer.append(attribute.getValue()), styleMap, true);
-                String checkedCSS = cssBuffer.toString();
-                cssBuffer.setLength(0);
-                if (dropExternalImages) {
-                    imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
-                    checkedCSS = cssBuffer.toString();
+                String css = attribute.getValue();
+                if (!Strings.isEmpty(css)) {
+                    checkCSS(cssBuffer.append(css), styleMap, true);
+                    css = cssBuffer.toString();
                     cssBuffer.setLength(0);
+                    if (dropExternalImages) {
+                        imageURLFound |= checkCSS(cssBuffer.append(css), IMAGE_STYLE_MAP, true, false);
+                        css = cssBuffer.toString();
+                        cssBuffer.setLength(0);
+                    }
                 }
-                if (containsCSSElement(checkedCSS)) {
-                    if (checkedCSS.indexOf('"') == -1) {
-                        attrBuilder.append(' ').append("style").append("=\"").append(checkedCSS).append('"');
+                if (containsCSSElement(css)) {
+                    if (css.indexOf('"') == -1) {
+                        attrBuilder.append(' ').append("style").append("=\"").append(css).append('"');
                     } else {
-                        attrBuilder.append(' ').append("style").append("='").append(checkedCSS).append('\'');
+                        attrBuilder.append(' ').append("style").append("='").append(css).append('\'');
                     }
                 }
             } else if ("class".equals(attr) || "id".equals(attr)) {
@@ -721,7 +733,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             }
                         } else {
                             if (replaceUrls && uriAttributes.contains(attribute)) {
-                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(replaceUrls ? checkPossibleURL(val) : val)).append('"');
+                                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                             } else {
                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                             }
@@ -748,7 +760,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                         }
                                     } else {
                                         if (replaceUrls && uriAttributes.contains(attribute)) {
-                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(replaceUrls ? checkPossibleURL(val) : val)).append('"');
+                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                                         } else {
                                             attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                                         }
@@ -769,7 +781,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
 
         htmlBuilder.append('<').append(tagName).append(attrBuilder.toString());
-        if (startTag.isSyntacticalEmptyElementTag()) {
+        if (startTag.isEmptyElementTag() && !startTag.isEndTagForbidden()) {
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
@@ -1028,7 +1040,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 + "html.style.background-attachment=\",scroll,fixed,\"\n"
                 + "html.style.background-color=\"c,transparent,\"\n"
                 + "html.style.background-image=\"u\"\n"
-                + "html.style.background-position=\",top,bottom,center,left,right,\"\n"
+                + "html.style.background-position=\",N,top,bottom,center,left,right,\"\n"
                 + "html.style.background-repeat=\",repeat,repeat-x,repeat-y,no-repeat,\"\n"
                 + "html.style.border=\"\"\n"
                 + "html.style.border-bottom=\"\"\n"
@@ -1152,7 +1164,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 + "\n"
                 + "# CSS combi-map\n"
                 + "\n"
-                + "html.style.combimap.background=\"uNc,scroll,fixed,transparent,top,bottom,center,left,right,repeat,repeat-x,repeat-y,no-repeat,\"\n"
+                + "html.style.combimap.background=\"uNc,scroll,fixed,transparent,top,bottom,center,left,right,repeat,repeat-x,repeat-y,no-repeat,radial-gradient,\"\n"
                 + "html.style.combimap.border=\"Nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,separate,collapse,\"\n"
                 + "html.style.combimap.border-bottom=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"
                 + "html.style.combimap.border-left=\"nc,transparent,none,hidden,dotted,dashed,solid,double,groove,ridge,inset,outset,\"\n"

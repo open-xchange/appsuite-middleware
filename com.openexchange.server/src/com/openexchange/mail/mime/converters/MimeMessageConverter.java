@@ -90,10 +90,12 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
+import javax.mail.util.SharedFileInputStream;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.ContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -250,12 +252,20 @@ public final class MimeMessageConverter {
             if (mailPart instanceof MailMessage) {
                 return convertMailMessage((MailMessage) mailPart);
             }
-            final int size = (int) mailPart.getSize();
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
-            mailPart.writeTo(out);
-            return new MimeBodyPart(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+            @SuppressWarnings("resource") ThresholdFileHolder sink = new ThresholdFileHolder();
+            mailPart.writeTo(sink.asOutputStream());
+            File tempFile = sink.getTempFile();
+            if (null == tempFile) {
+                return new MimeBodyPart(Streams.newByteArrayInputStream(sink.toByteArray()));
+            }
+            return new MimeBodyPart(new SharedFileInputStream(tempFile));
         } catch (final MessagingException e) {
-            throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -368,64 +378,55 @@ public final class MimeMessageConverter {
      * @see #BEHAVIOR_CLONE
      * @see #BEHAVIOR_STREAM2FILE
      */
-    public static Message convertMailMessage(final MailMessage mail, final int behavior) throws OXException {
+    public static Message convertMailMessage(MailMessage mail, int behavior) throws OXException {
         if (mail instanceof ComposedMailMessage) {
             return convertComposedMailMessage((ComposedMailMessage) mail);
         }
         try {
-            final Date receivedDate = mail.getReceivedDateDirect();
-            final int size = (int) mail.getSize();
-            final boolean clone = ((behavior & BEHAVIOR_CLONE) > 0);
-            final boolean stream2file = ((behavior & BEHAVIOR_STREAM2FILE) > 0);
-            final MimeMessage mimeMessage;
+            boolean clone = ((behavior & BEHAVIOR_CLONE) > 0);
+            boolean stream2file = ((behavior & BEHAVIOR_STREAM2FILE) > 0);
+
+            MimeMessage mimeMessage;
             if (!clone && (mail instanceof MimeMailMessage)) {
                 mimeMessage = ((MimeMailMessage) mail).getMimeMessage();
             } else {
-                final ManagedFileManagement fileManagement;
+                ManagedFileManagement fileManagement;
                 if (!stream2file || (null == (fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class)))) {
-                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
-                    mail.writeTo(out);
-                    if (receivedDate == null) {
-                        mimeMessage =
-                            new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
-                    } else {
-                        mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray())) {
-                            @Override
-                            public Date getReceivedDate() throws MessagingException {
-                                return receivedDate;
-                            }
-                        };
+                    ThresholdFileHolder sink = null;
+                    boolean closeSink = true;
+                    try {
+                        sink = new ThresholdFileHolder();
+                        mail.writeTo(sink.asOutputStream());
+                        File tempFile = sink.getTempFile();
+                        if (null == tempFile) {
+                            mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                        } else {
+                            mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile);
+                        }
+                        mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
+                        closeSink = false;
+                    } finally {
+                        if (closeSink && null != sink) {
+                            sink.close();
+                        }
                     }
-                    mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                 } else {
                     File file = checkForFile(mail);
-                    if (null == file) {
-                        FileOutputStream fos = null;
-                        try {
-                            final File newTempFile = fileManagement.newTempFile();
-                            fos = new FileOutputStream(newTempFile);
-                            mail.writeTo(fos);
-                            fos.flush();
-                            fos.close();
-                            fos = null;
-                            file = newTempFile;
-                        } catch (final IOException e) {
-                            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-                            }
-                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                        } finally {
-                            Streams.close(fos);
-                        }
-                    }
+                    boolean deleteOnError = false;
                     try {
-                        mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file, receivedDate);
-                        mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
-                    } catch (final IOException e) {
-                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                        if (null == file) {
+                            deleteOnError = true;
+                            File newTempFile = fileManagement.newTempFile();
+                            writeToFile(mail, newTempFile);
+                            file = newTempFile;
                         }
-                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                        mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file, mail.getReceivedDateDirect());
+                        mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
+                        deleteOnError = false;
+                    } finally {
+                        if (deleteOnError && null != file) {
+                            file.delete();
+                        }
                     }
                 }
             }
@@ -450,9 +451,26 @@ public final class MimeMessageConverter {
                 mimeMessage.setFlags(flags, true);
             }
             return mimeMessage;
-        } catch (final MessagingException e) {
+        } catch (IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static void writeToFile(MailMessage mail, File tempFile) throws IOException, OXException {
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(tempFile);
+            mail.writeTo(out);
+            out.flush();
+        } finally {
+            Streams.close(out);
+        }
+
     }
 
     private static File checkForFile(final MailMessage mail) {

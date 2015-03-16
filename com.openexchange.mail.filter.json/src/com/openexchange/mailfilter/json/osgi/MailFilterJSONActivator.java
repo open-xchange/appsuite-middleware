@@ -51,26 +51,21 @@ package com.openexchange.mailfilter.json.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
 import com.openexchange.mailfilter.json.ajax.servlet.MailFilterServletInit;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link MailFilterJSONActivator}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class MailFilterJSONActivator extends HousekeepingActivator {
@@ -83,62 +78,27 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
-        // final Logger LOG = LoggerFactory.getLogger(MailFilterJSONActivator.class);
         Services.setServiceLookup(this);
 
         MailFilterServletInit.getInstance().start();
 
-        final EventHandler eventHandler = new EventHandler() {
+        getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
 
-            @Override
-            public void handleEvent(final Event event) {
-                final String topic = event.getTopic();
-                if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                    handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
-                } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-                    @SuppressWarnings("unchecked") 
-                    final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                    for (final Session session : map.values()) {
-                        handleDroppedSession(session);
-                    }
-                }
-            }
-
-            private void handleDroppedSession(final Session session) {
-                if (!session.isTransient() && null == getService(SessiondService.class).getAnyActiveSessionForUser(
-                    session.getUserId(),
-                    session.getContextId())) {
-                    MailFilterAction.removeFor(session);
-                }
-            }
-        };
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-        dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-        registerService(EventHandler.class, eventHandler, dict);
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MailFilterChecker.CAPABILITY);
+        registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
-        final Logger LOG = LoggerFactory.getLogger(MailFilterJSONActivator.class);
+        Logger LOG = LoggerFactory.getLogger(MailFilterJSONActivator.class);
         try {
             super.stopBundle();
             MailFilterServletInit.getInstance().stop();

@@ -49,11 +49,8 @@
 
 package com.openexchange.ajax;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -68,6 +65,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
+import com.openexchange.ajax.container.ByteArrayRandomAccess;
+import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.InputStreamReadable;
+import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.BrowserDetector;
@@ -91,7 +92,6 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link MailAttachment}
@@ -169,7 +169,7 @@ public class MailAttachment extends AJAXServlet {
              * Write part to output stream
              */
             final MailPart mailPart = token.getAttachment();
-            InputStream attachmentInputStream = null;
+            Readable attachmentInputStream = null;
             ThresholdFileHolder tfh = null;
             try {
                 long length = -1L;
@@ -184,9 +184,9 @@ public class MailAttachment extends AJAXServlet {
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     final byte[] bytes = sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs));
                     length = bytes.length;
-                    attachmentInputStream = new UnsynchronizedByteArrayInputStream(bytes);
+                    attachmentInputStream = new ByteArrayRandomAccess(bytes);
                 } else {
-                    attachmentInputStream = mailPart.getInputStream();
+                    attachmentInputStream = new InputStreamReadable(mailPart.getInputStream());
                     /*-
                      * Unfortunately, size indicated by mail part is not exact, therefore skip it.
                      *
@@ -233,7 +233,7 @@ public class MailAttachment extends AJAXServlet {
                     resp.setContentType(contentType);
                 } else {
                     Session session = SessiondService.SERVICE_REFERENCE.get().getSession(token.getSessionId());
-                    final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(attachmentInputStream, fileName, mailPart.getContentType().toString(), userAgent, ServerSessionAdapter.valueOf(session));
+                    CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(attachmentInputStream, fileName, mailPart.getContentType().toString(), userAgent, ServerSessionAdapter.valueOf(session));
                     contentType = checkedDownload.getContentType();
                     resp.setContentType(contentType);
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
@@ -472,7 +472,7 @@ public class MailAttachment extends AJAXServlet {
     }
 
     /**
-     * Copy the given byte range of the given input to the given output.
+     * Copies the given byte range of the given input to the given output.
      *
      * @param inputStream The input to copy the given range to the given output for.
      * @param output The output to copy the given range from the given input for.
@@ -480,17 +480,17 @@ public class MailAttachment extends AJAXServlet {
      * @param length Length of the byte range.
      * @throws IOException If something fails at I/O level.
      */
-    private void copy(final InputStream inputStream, final OutputStream output, final long start, final long length) throws IOException {
-        // Write partial range.
-        final InputStream input;
-        if (!(inputStream instanceof BufferedInputStream) && !(inputStream instanceof ByteArrayInputStream)) {
-            input = new BufferedInputStream(inputStream, 8192);
-        } else {
-            input = inputStream;
+    private void copy(Readable inputStream, OutputStream output, long start, long length) throws IOException {
+        if (inputStream instanceof IFileHolder.RandomAccess) {
+            copy((IFileHolder.RandomAccess) inputStream, output, start, length);
+            return;
         }
+
+        // Write partial range.
         // Discard previous bytes
+        byte[] buffer = new byte[1];
         for (int i = 0; i < start; i++) {
-            if (input.read() < 0) {
+            if (inputStream.read(buffer, 0, 1) < 0) {
                 // Stream does not provide enough bytes
                 throw new IOException("Start index " + start + " out of range. Got only " + i);
             }
@@ -498,14 +498,50 @@ public class MailAttachment extends AJAXServlet {
         }
         long toRead = length;
 
-        final byte[] buffer = new byte[BUFLEN];
+        int buflen = BUFLEN;
+        buffer = new byte[buflen];
         int read;
-        while ((read = input.read(buffer)) > 0) {
+        while ((read = inputStream.read(buffer, 0, buflen)) > 0) {
             if ((toRead -= read) > 0) {
                 output.write(buffer, 0, read);
             } else {
                 output.write(buffer, 0, (int) toRead + read);
                 break;
+            }
+        }
+    }
+
+    /**
+     * Copies the given byte range of the given input to the given output.
+     *
+     * @param input The input to copy the given range to the given output for.
+     * @param output The output to copy the given range from the given input for.
+     * @param start Start of the byte range.
+     * @param length Length of the byte range.
+     * @throws IOException If something fails at I/O level.
+     */
+    private static void copy(IFileHolder.RandomAccess input, OutputStream output, long start, long length) throws IOException {
+        int buflen = BUFLEN;
+        byte[] buffer = new byte[buflen];
+        int read;
+
+        if (input.length() == length) {
+            // Write full range.
+            while ((read = input.read(buffer, 0, buflen)) > 0) {
+                output.write(buffer, 0, read);
+            }
+        } else {
+            // Write partial range.
+            input.seek(start);
+            long toRead = length;
+
+            while ((read = input.read(buffer, 0, buflen)) > 0) {
+                if ((toRead -= read) > 0) {
+                    output.write(buffer, 0, read);
+                } else {
+                    output.write(buffer, 0, (int) toRead + read);
+                    break;
+                }
             }
         }
     }

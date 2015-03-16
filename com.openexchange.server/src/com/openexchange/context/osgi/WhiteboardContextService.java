@@ -104,6 +104,11 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer<Contex
     }
 
     @Override
+    public void setAttribute(String name, String value, int contextId) throws OXException {
+        getDelegate().setAttribute(name, value, contextId);
+    }
+
+    @Override
     public Context getContext(int contextId) throws OXException {
         return getDelegate().getContext(contextId);
     }
@@ -121,6 +126,11 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer<Contex
     @Override
     public void invalidateContext(int contextId) throws OXException {
         getDelegate().invalidateContext(contextId);
+    }
+
+    @Override
+    public void invalidateContexts(int[] contextIDs) throws OXException {
+        getDelegate().invalidateContexts(contextIDs);
     }
 
     @Override

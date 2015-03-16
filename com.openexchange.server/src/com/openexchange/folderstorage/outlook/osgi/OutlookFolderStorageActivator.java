@@ -189,34 +189,16 @@ public class OutlookFolderStorageActivator extends HousekeepingActivator {
                     @Override
                     public void handleEvent(final Event event) {
                         final String topic = event.getTopic();
-                        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-                            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            for (final Session session : container.values()) {
-                                dropMemoryTable(session);
-                            }
-                        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                            dropMemoryTable((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
-                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            for (final Session session : container.values()) {
-                                dropMemoryTable(session);
+                        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                            if (null != contextId) {
+                                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                                if (null != userId) {
+                                    MemoryTable.dropMemoryTableFrom(userId.intValue(), contextId.intValue());
+                                }
                             }
                         }
                     }
-
-                    private void dropMemoryTable(final Session session) {
-                        if (session.isTransient()) {
-                            return;
-                        }
-                        /*
-                         * Any active session left?
-                         */
-                        final SessiondService service = getService(SessiondService.class);
-                        if (null == service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
-                            MemoryTable.dropMemoryTableFrom(session);
-                        }
-                    }
-
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());

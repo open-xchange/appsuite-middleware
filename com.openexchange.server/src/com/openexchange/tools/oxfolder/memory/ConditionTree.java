@@ -68,7 +68,7 @@ public final class ConditionTree {
     static final Condition CONDITION_ADMIN = new Condition() {
 
         @Override
-        public boolean fulfilled(final Permission p) {
+        public boolean fulfilled(Permission p) {
             return p.admin;
         }
     };
@@ -76,7 +76,7 @@ public final class ConditionTree {
     static final Condition CONDITION_READ_FOLDER = new Condition() {
 
         @Override
-        public boolean fulfilled(final Permission p) {
+        public boolean fulfilled(Permission p) {
             return p.readFolder;
         }
     };
@@ -85,7 +85,7 @@ public final class ConditionTree {
 
         @Override
         public boolean fulfilled(Permission p) {
-            return CONDITION_ADMIN.fulfilled(p) || CONDITION_READ_FOLDER.fulfilled(p);
+            return p.admin || p.readFolder;
         }
     };
 
@@ -113,7 +113,7 @@ public final class ConditionTree {
      * @param stamp The time stamp to compare with
      * @return <code>true</code> if elapsed; otherwise <code>false</code>
      */
-    public boolean isElapsed(final long stamp) {
+    public boolean isElapsed(long stamp) {
         return this.stamp < stamp;
     }
 
@@ -122,7 +122,7 @@ public final class ConditionTree {
      *
      * @param p The permission associated with a certain entity
      */
-    public void insert(final Permission p) {
+    public void insert(Permission p) {
         if (ignoreSharedAddressbook && (SYSTEM_GLOBAL_FOLDER_ID == p.fuid)) {
             return;
         }
@@ -147,14 +147,14 @@ public final class ConditionTree {
      * @param condition The condition to apply to returned identifiers
      * @return The visible folders' identifiers
      */
-    public TIntSet getVisibleFolderIds(final Condition condition) {
+    public TIntSet getVisibleFolderIds(Condition condition) {
         if (null == condition) {
             return new TIntHashSet(folderIds);
         }
-        final TIntSet retval = new TIntHashSet(folderIds);
-        for (final Permission p : permissions) {
-            if (!condition.fulfilled(p)) {
-                retval.remove(p.fuid);
+        TIntSet retval = new TIntHashSet(folderIds.size());
+        for (Permission p : permissions) {
+            if (condition.fulfilled(p)) {
+                retval.add(p.fuid);
             }
         }
         return retval;

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Configuration REST API
 Bundle-SymbolicName: com.openexchange.rest.services.configuration
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.rest.services.configuration.osgi.ConfigRESTServiceActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

@@ -52,16 +52,13 @@ package com.openexchange.mail.json.actions;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.DataFields;
@@ -269,7 +266,7 @@ public final class NewAction extends AbstractMailAction {
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                 final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
                 if (null != folder) {
-                    // Do the transport
+                    // Do the "fake" transport by providing poison address
                     MailTransport mailTransport = MailTransport.getInstance(session, accountId);
                     MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
 

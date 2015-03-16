@@ -184,9 +184,7 @@ public class AJAXRequestResult {
         /**
          * Signals a HTTP error
          */
-        @NonNull HTTP_ERROR,
-
-        ;
+        @NonNull HTTP_ERROR;
     }
 
     /**

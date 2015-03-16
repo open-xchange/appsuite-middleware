@@ -66,9 +66,20 @@ public final class CSVImportRequest extends AbstractImportRequest<CSVImportRespo
         this(folderId, csv, true);
     }
 
-    public CSVImportRequest(final int folderId, final InputStream csv,
-        final boolean failOnError) {
-        super(Action.CSV, folderId, csv);
+    public CSVImportRequest(final int folderId, final InputStream csv, final boolean failOnError) {
+        this(folderId, csv, failOnError, (Parameter[]) null);
+    }
+
+    /**
+     * Initializes a new {@link CSVImportRequest}.
+     *
+     * @param folderId The target folder identifier
+     * @param csv The input stream to upload
+     * @param failOnError <code>true</code> to fail the testcase in case of error in the response, <code>false</code>, otherwise
+     * @param additionalParameters Additional parameters to include in the request
+     */
+    public CSVImportRequest(int folderId, InputStream csv, boolean failOnError, Parameter...additionalParameters) {
+        super(Action.CSV, folderId, csv, additionalParameters);
         this.failOnError = failOnError;
     }
 

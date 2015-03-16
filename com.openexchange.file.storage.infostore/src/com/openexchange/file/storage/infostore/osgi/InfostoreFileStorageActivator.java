@@ -49,13 +49,16 @@
 
 package com.openexchange.file.storage.infostore.osgi;
 
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
 import com.openexchange.file.storage.infostore.Services;
+import com.openexchange.file.storage.infostore.internal.TrashCleanupHandler;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -69,7 +72,7 @@ public class InfostoreFileStorageActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class };
+            ContentTypeDiscoveryService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -86,6 +89,7 @@ public class InfostoreFileStorageActivator extends HousekeepingActivator {
                 return getService(InfostoreSearchEngine.class);
             }
         }, null);
+        registerService(LoginHandlerService.class, new TrashCleanupHandler());
     }
 
     @Override

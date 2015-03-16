@@ -213,9 +213,12 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         case UPDATE: confirm = getCurrentConfirmation(currentAppointment, owner); break;
         default: confirm = -1;
         }
-
-        String message = getCurrentMessage(currentAppointment, owner);
-
+        String message = null;
+        if (action.getMessage() != null && !action.getMessage().trim().equals("")) {
+            message = action.getMessage();
+        } else {
+            message = getCurrentMessage(currentAppointment, owner);
+        }
         Participant[] participants = appointment.getParticipants();
         boolean found = false;
         if (null != participants) {
@@ -239,6 +242,9 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             UserParticipant up = new UserParticipant(owner);
             if (confirm != -1) {
                 up.setConfirm(confirm);
+            }
+            if (message != null) {
+                up.setConfirmMessage(message);
             }
             Participant[] tmp = appointment.getParticipants();
             List<Participant> participantList = (null == tmp) ? new ArrayList<Participant>(1) : new ArrayList<Participant>(Arrays.asList(tmp));

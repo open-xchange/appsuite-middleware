@@ -179,4 +179,9 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public static final String ACCOUNT_DOES_NOT_EXIST_MSG = "Mail access is disabled for context administrator.";
 
+    public static final String MAX_DRIVE_ATTACHMENTS_EXCEEDED_MSG = "The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s.";
+
+    // The client request is not permitted.
+    public static final String REQUEST_NOT_PERMITTED_MSG = "The client request is not permitted.";
+
 }

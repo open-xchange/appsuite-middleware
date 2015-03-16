@@ -1,83 +1,304 @@
+* 2015-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37200: Do only advertise "edit_group"/"edit_resource" capability if both - backend service and permission bit are available
+
+* 2015-03-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37141: Do not discard subsequent inline test parts
+
+* 2015-03-04 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 36828: Delete of external recurring appointments caused problems under specific circumstances.
+
+* 2015-03-05 - thorben.betten@open-xchange.com, marcus.klein@open-xchange.com
+
+ - Fix for bug 37021: Removed Facebook contacts subscribe features. It does not make sense anymore because only contacts using the same
+   Facebook App Open-Xchange can be subscribed. This is only a small subset of your Facebook contacts making this feature useless.
+
+* 2015-03-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37078: Allow multiple values inside CSS elements and grant permission for numeric values inside "background-position" element
+ - Fix for bug 37087: Avoid possible null dereference if Reloadable signals no configuration files
+ - Fix for bug 37098: Check string length prior to performing a String.substring()
+ - Fix for bug 37106: Prevent from preliminary deletion of temporary files
+
+* 2015-03-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37058: Deny renaming standard groups
+
+* 2015-03-03 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 37064: Sanitize passwords during logging.
+
+* 2015-03-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37037: Appropriate display message for error code RES-0010 "Found resource(s) with same email address %1$s."
+ - Fix for bug 37039: Do also check a group's display name on create/update call
+
+* 2015-03-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36868: Removed fix for bug 32947 from replication monitor.
+
+* 2015-03-02 - backend@open-xchange.com
+
+ - Fix for bug 36943: Introduced special handling for situations when a string could not be stored successfully by MySQL
+
+* 2015-02-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35122: Ensure proper runtime values
+ - Fix for bug 36786: Deal with possibly multiple folders having the same SPECIAL-USE marker and prefer the one matching to remembered name/full name
+
+* 2015-02-26 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 36321: Partial fix. New ical4j library to avoid parsing error.
+
+* 2015-02-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36860: Perform simple search if no search term is supported by storage
+
+* 2015-02-26 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 36969: Include session information (sessionId, contextId and userId) to all relevant servlets.Remove filter artifacts. Correctly assert the filter rule.
+
+* 2015-02-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36666: Allow "unseen=1" parameter for /ajax/mail?action=attachment call to leave the associated message as unseen
+ - Fix for bug 36993: Refer to year 2015 in copyright note
+
 * 2015-02-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 36960: Select an appropriate predecessor for 'com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob' update task
  - Fix for bug 36866: Proper address header parsing in case of mail-safe encoded personal w/o quotes
 
+* 2015-02-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36687: Added support for semicolon delimiter and variable charsets
+
+* 2015-02-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36884: Fixed conditional checks whether notification mail is supposed to be sent or not
+
+* 2015-02-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36863: Fixed merging of config tree settings into JSlob
+ - Fix for bug 35304: Added appropriate index to table 'context_server2db_pool' for columns "write_db_pool_id" and "db_schema"
+ - Fix for bug 36879: Changed behavior for "CloudmarkSpamHandler" according to property documentation
+
 * 2015-02-19 - marcus.klein@open-xchange.com
 
  - Fix for bug 36276: If ticket is expired in session and AppSuite tab was closed, terminate the session and create a new with a new ticket.
+ - Fix for bug 36755: Created a new package open-xchange-linkedin containing the whole integration bundles for LinkedIN.
+
+* 2015-02-19 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 36821: Initialize the appenders prior entering the loop
+
+* 2015-02-18 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 36100: Use IDGenerator to block concurrent deleting threads to prevent MySQL deadlocks
+
+* 2015-02-17 - marc.arens@open-xchange.com
+
+ - Fix for bug 36742: Cache string representations of IDs
+
+* 2015-02-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36735: Pass proper file identifier when re-fetching file meta data after move operation
 
 * 2015-02-16 - thorben.betten@open-xchange.com
 
+ - Fix for bug 36605: Set proper message reference when doing a forward from Unified Mail Drafts folder
+ - Fix for bug 36236: Determine appropriate "From" address when generating reply/forward version from a mailing-list message
+ - Fix for bug 36719: Orderly stop IMAP-IDLE bundle on shut-down
+ - Fix for bug #36723: Keep parameters intact when performing a multiple action=get
  - Fix for bug 36729: Safe preparation of a parameterized header + handling for unexpected runtime errors
 
 * 2015-02-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 36688: Accept incoming POST's multipart without size restrictions in case 'publish-on-exceeded-quota' is enabled
 
+* 2015-02-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36478: Stick to positive capability "portal" only
+
 * 2015-02-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 36333: Ensure file resources stay open while parsing MIME message data
+ - Fix for bug 36585: Signal proper RENAME_FLAG for mail standard folders
+ - Fix for bug 36487: Subscribe folder incl. predecessor folders to the top to not leave a parent folder unsubscribed
  - Fix for bug 35954: Deal with corrupt BODYSTRUCTURE items in IMAP FETCH response that contain empty multipart sections
+ - Fix for bug 36661: Apply proper sort option to "unified" accounts when performing a search
+
+* 2015-02-11 - choeger@open-xchange.com
+
+ - Fix for bug 36656: SOAP: getContextCapabilities does not work
+
+* 2015-02-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36288: Don't hide "email1" property, even if the global address book permissions are limited
+
+* 2015-02-10 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 36228: Invalidate user after changing personal contact data
 
 * 2015-02-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 35794: Ignore un-subscribe attempt for a standard folder
 
+* 2015-02-09 - martin.schneider@open-xchange.com
+
+ - Fix for bug 36263: add primary key for table DATABASECHANGELOG and create presenceSubscriptions with primary key
+
+* 2015-02-06 - marcus.klein@open-xchange.com
+
+ - US 86092922: Backend start script terminates if it is run by a different user as open-xchange.
+
 * 2015-02-05 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 36484: In case of a negative IP check, invalidate the previous session and continue with the form-login procedure
 
-* 2015-02-02 - thorben.betten@open-xchange.com
+* 2015-02-03 - thorben.betten@open-xchange.com
 
- - Fix for bug 36412: Proper handling of weird pseudo CSS attributes in HTML elements
+ - Fix for bug 36431: Fixed typo in message's Content-Type header
+
+* 2015-02-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36420: Do not change OAuth configuration anymore for RPM based distros.
 
 * 2015-02-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 35504: Backported software change request 2249 and 2250.
 
+* 2015-02-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 36337: Automatically enhance filename in CIFS files storage to avoid conflicts with existing files
+
+* 2015-02-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36401: Drop superfluous <div> tags from HTML content on message composition
+ - Fix for bug 36347: Lowered log level in case folder column 3040 cannot be served due to missing "METADATA" capability from IMAP server
+ - Fix for bug 36320: Improved detection of transfer-encoding from a message part
+ - Fix for bug 36412: Proper handling of weird pseudo CSS attributes in HTML elements
+
+* 2015-01-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36343: Use Apache FileUpload's streaming capability to avoid duplicate file resource creation for an uploaded file
+
+* 2015-01-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35147: Remove -XX:MaxPermSize from JAVA_XTRAOPTS if Java 8 is in use.
+
+* 2015-01-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36359: Defined correct dependencies on Debian packages according to moved files.
+
+* 2015-01-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35733: List existing (external) file storage accounts below "InfoStore" folder in classic folder tree view
+ - Fix for bug 36291: Made number of run-loops configurable
+ - Fix for bug 35381: Avoid WARN logging at backend when retrieving all visible mail folders using Outlook-style folder tree
+
 * 2015-01-26 - marcus.klein@open-xchange.com
 
  - Fix for bug 35426: Execute SessionEnhancement earlier, so parameters added through this get populated with the session in the cluster.
 
+* 2015-01-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36279: Stick to Java's internal ConcurrentHashMap implementation to orderly free up occupied Heap
+ - Fix for bug 36275: Only apply string normalizing to URL sections to prevent from IDN homographical attacks
+
 * 2015-01-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 35899: Properly handle RTF part inside TNEF attachments to keep sequence identifiers in sync
+
+* 2015-01-22 - marcus.klein@open-xchange.com
+
+ - Fix for bug 35992: Drop external participants completely after deleting. Empty copies in a backup table do not make any sense.
+
+* 2015-01-21 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 35691: Adjusted the logic of the URL parsing to extract all relevant information in order to recreate the original publication URL. Enhanced 'getpublication' and 'deletepublication CLTs.
+
+* 2015-01-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36076: Serve "Range" requests for inline download requests
+ - Fix for bug 36235: Deduce the MIME type for uploaded files by their file names (if available)
 
 * 2015-01-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 35182: Schedule a timer for Kerberos ticket renewal removing the ticket from the session. Additionally a ticket reload from
    the client through SPNEGO or a new ticket authorization against KDC is triggered.
 
+* 2015-01-19 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 36095: Be more strict about the 'Reply-To' header while parsing
+
 * 2015-01-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 36141: Do proper url-encoding in composed redirect URI
 
-* 2015-01-14 - martin.herfurth@open-xchange.com
+* 2015-01-16 - jan.bauerdick@open-xchange.com
 
- - Fix for bug 36035: External updates override internal confirmation status.
+ - Fix for bug 34951: Check if WritePoolId and ReadPoolId are the same before increasing transaction counter
+
+* 2015-01-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36128: Deal with possible "javax.mail.IllegalWriteException: IMAPMessage is read-only" error
+
+* 2015-01-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36090: Support SPECIAL-USE marked standard folders
 
 * 2015-01-14 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 36072: Remove white spaces between encoded words as per RFC2047.
 
+* 2015-01-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 36035: External updates override internal confirmation status.
+
+* 2014-01-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36088: Removed post install script remnants of box.com and dropbox OAuth integration.
+
 * 2014-01-12 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 34617: Signal ENABLE_INTERNAL_USER_EDIT setting via io.ox/core//user/internalUserEdit
  - Fix for bug 31407: When evaluating the "has subfolders" flag, ignore subfolders that are no longer found
+ - Fix for bug 33278: Added "context_id" URL parameter to the redirect location of the form login response
+
+* 2015-01-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35965: Signal 404 - Not Found in case requested published file is no more available
 
 * 2015-01-09 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 36024: Replace occurrences of position:fixed by display:block in inline styles to prevent defacing the web ui.
 
+* 2015-01-09 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 36010: Repaired export of Task series.
+
+* 2015-01-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36021: Use much faster Trove collection instead of slow data structure implementations
+ - Fix for bug 36000: Consider an inline text part as (file) attachment in case mail body has already been detected
+
 * 2015-01-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 35982: Improved recognition of <script> tags to also cover "... <script/xss>..." occurrences
 
+* 2015-01-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 35355: Fixed bad ressource conflict for series exceptions.
+
 * 2015-01-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 35979: Null guard for passed cache keys
- - Fix for bug 35937: Fixed number of placeholders in prepared statement
- - Fix for bug 35348: Drop weird attributes from start tags that break HTML parsing and added <center> tag to white-list
+
+* 2014-01-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35760: Introduced new certificates and keys for APN and GCM in "drive-restricted" package
 
 * 2015-01-05 - ioannis.chouklis@open-xchange.com
 
@@ -87,31 +308,64 @@
 
  - Fix for bug 35948: Check for a valid prepared SQL statement prior to attempting to execute it
 
+* 2014-12-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35933: Check for possible duplicate subscription
+ - Fix for bug 35937: Fixed number of placeholders in prepared statement
+ - Fix for bug 35914: Dropped "ox.io" remnants from template files
+
 * 2014-12-22 - thorben.betten@open-xchange.com
 
- - Fix for bug35895: Have the message format set to BOTH by default on user creation.
+ - Fix for bug 35895: Have the message format set to BOTH by default on user creation.
                      Check for possibly preset message format preference in JSLob and align the DB value accordingly
 
 * 2014-12-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 35913: Fixed CacheEvent.aggregate(CacheEvent) implementation
 
-* 2014-12-21 - tobias.friedrich@open-xchange.com
-
- - Fix for bug 35913: Fixed CacheEvent.aggregate(CacheEvent) implementation
-
 * 2014-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 35889: Consider parent folder identifier when retrieving a file for publication
- 
+
+* 2014-12-17 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 35687: Correct alarm value for appointments in shared folders.
+
+* 2014-12-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35866: Allow deep-parsing of nested messages only on first level + improved handing with binary content
+
 * 2014-12-15 - martin.herfurth@open-xchange.com
 
  - Fix for bug 35610: Reset confirmation status on exception creation.
 
+* 2014-12-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35864: Use patched logback-classic bundle and enhanced "/opt/open-xchange/etc/ox-scriptconf.sh" by "-Dlogback.threadlocal.put.duplicate=false" system property
+
+* 2014-12-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35859: Fall back to virtual contact data in case no user contact data found in folder 6
+
+* 2014-12-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35846: Pass incoming index range to executed account-wise calls
+
+* 2014-12-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35808: Do ENVELOPE header decoding to not interpret "=? ?=" sequences as a whitespace
+
+* 2014-12-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35313: Added option to override language for drive "settings" request
+
+* 2014-12-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35777: Fixed typo in the name for the standard folder in en_GB
+
 * 2014-12-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 35641: Do not perform check for duplicate transport account in case transport server credentials are supposed to be taken from the mail settings
- - Fix for bug 34944: Ensure every threads holds its own IDBasedFileAccess instance
  - Fix for bug 35784: Examine passed "version" parameter if it represents "null"
 
 * 2014-12-05 - thorben.betten@open-xchange.com
@@ -121,46 +375,146 @@
 * 2014-12-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 35693: Fixed conditional expression to check for possible HTML content by Content-Type and/or file name values
+ - Fix for bug 35413: Fill properties for re-authenticate attempt
+ - Fix for bug 35716: In rare to impossible cases of an Exception during "MailServletInterface.close()" a DEBUG logging is performed
+
+* 2014-12-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21654: Log missing translations with level DEBUG.
+
+* 2014-12-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35673: Fill proper "From" on mail forward for external account
+
+* 2014-11-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34670: Added null guard when performing access combination look-up by name
+
+* 2014-11-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35651: Respect "protected" flag when applying changes to JSlob values that reflect a config-cascade property
+ - Fix for bug 35645: Bypass the check against "com.openexchange.html.maxLength" property in case the "max_size" URL parameter is available
 
 * 2014-11-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 35639: Write generated ZIP file directly to stream (if possible)
  - Fix for bug 35630: Keep URLs intact that contain double URL-encoded entities
+ - Fix for bug 35626: Try stream-based byte transfer and/or do file-based backup to relieve memory
+
+* 2014-11-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35622: Orderly apply cache fields to cached messages
+
+* 2014-11-26 - martin.schneider@open-xchange.com
+
+- Fix for bug 35619: Avoid ConcurrentModificationException and appropriate exception handling
 
 * 2014-11-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 35429: Recognize a previously "fixed" MIME message to access proper attachment position
 
+* 2014-11-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34834: Newappointments action also searches public folders.
+
+* 2014-11-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35546: Obey empty element tags when generating conform HTML content
+ - Fix for bug 35548: Have unique marker for attachments and avoid attaching duplicate parts
+
+* 2014-11-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35512: Check for "html" or "xhtml" prefix in Content-Type's subtype
+
 * 2014-11-17 - thorben.betten@open-xchange.com
 
+ - Fix for bug 35490: Synchronize calls when checking mail standard folders
  - Fix for bug 35426: Let session obfuscator properly maintain such parameters that are supposed to be taken over from session to stored
                       session representation
 
 * 2014-11-16 - thorben.betten@open-xchange.com
 
+ - Fix for bug 35471: Set NULL if Unified Mail is absent when serving 'io.ox/mail/unifiedInboxIdentifier' setting
+ - Fix for bug 35445: Ignore concurrent modification when writing last login time stamp
  - Fix for bug 35502: Apply max. file size and max. overall size when processing upload to abort uploading data once a threshold is exceeded
 
 * 2014-11-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 35470: Fixed check whether parent folder is a public PIM folder
 
+* 2014-11-11 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 35419: Useless mail notification on state changes.
+
+* 2014-11-11 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 35150: don't skip the '"' literal if it is preceded by a backslash '/'
+ - Fix for bug 35416: use the correct 'FilterType' flag when listing custom mail filters
+
 * 2014-11-11 - marcus.klein@open-xchange.com
 
  - Fix for bug 35408: corrected post install script for adding UserPermissionBits cache region to cache.ccf configuration file.
 
+* 2014-11-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35141: Do not require administrator credentials in case "MASTER_AUTHENTICATION_DISABLED" is set to true
+ - Fix for bug 35392: Added class guard when examining a cache event
+
+* 2014-11-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35373: Only add transport properties if transport data has been set/inserted before
+
 * 2014-11-06 - thorben.betten@open-xchange.com
 
+ - Fix for bug 35374: Pass incoming request's IP address on redeem token call
  - Fix for bug 35359: Improved special /ajax/mail?action=all request fired when loading portal page
+
+* 2014-11-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35139: Allow "data" URI scheme in <img> src attribute
+ - Fix for bug 35348: Drop weird attributes from start tags that break HTML parsing and added <center> tag to white-list
+
+* 2014-11-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35291: Obey forbidden end tags when generating conform/well-formed HTML content
+ - Fix for bug 34979: Honor "setFrom" parameter when composing forward message
+
+* 2014-10-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35267: Explicitly specify header encoding when parsing multipart/form-upload requests with Apache FileUpload
+
+* 2014-10-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34981: Corrected post installation script for property com.openexchange.sessiond.remoteParameterNames in sessiond.properties
+   configuration file.
 
 * 2014-10-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 35242: Added null guard & improved logging behavior to provide mail information in order to identify the mail later on
 
+* 2014-10-29 - martin.schneider@open-xchange.com
+
+ - Fix for bug 35073: set default subject when processed mail was sent without subject
+ - Fix for bug 34894: set default subject when processed mail was sent without subject
+ - Fix for bug 33966: Apply string normalization only to non-ascii characters
+
 * 2014-10-29 - thorben.betten@open-xchange.com
 
- - Fix for bug 35255: Also consider file extension if mail part claims to be HTML by Content-Type
- - Fix for bug 34465: Check for a POP3 account by mail account data fetched from storage. Do no longer rely on valid data sent by client
  - Fix for bug 35261: Enum for client parameters passed to IMAp store
+ - Fix for bug 35255: Also consider file extension if mail part claims to be HTML by Content-Type
+
+* 2014-10-27 - marc.arens@open-xchange.com
+
+ - Fix for bug 34973: Allow minimal caching to prevent superfluous browser requests.
+ - Fix for bug 35154: Shut down StateManager and interrupt already running CleanupTimer
+
+* 2014-10-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35198: Use Jericho HTML parser to perform necessary modifications
+
+* 2014-10-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34998: Restored previous default value for "com.openexchange.servlet.maxRate" property
 
 * 2014-10-28 - marcus.klein@open-xchange.com
 
@@ -170,6 +524,10 @@
 * 2014-10-23 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35168: Consider '#' as literals and not as comments when inside of double quotes
+
+* 2014-10-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 35059: Sort distribution list members by (display name, e-mail address) ascending when reading them from the database
 
 * 2014-10-23 - marcus.klein@open-xchange.com
 
@@ -182,22 +540,38 @@
 
 * 2014-10-21 - thorben.betten@open-xchange.com
 
+ - Fix for bug 34947: Check for a possible unrecoverable socket error when attempting to load mail settings (esp. standard folders); signal an empty value instead of throwing an error
+ - Fix for bug 35023: Orderly deal with absent user permission bits
  - Fix for bug 34706: Do not consult session storage in case session look-up is performed by alternative identifier and
                       ensure a timed-out (but still pending) session storage query get orderly interrupted to relieve pressure on Hazelcast
- - Fix for bug 35023: Orderly deal with absent user permission bits
- - Fix for bug 34947: Check for a possible unrecoverable socket error when attempting to load mail settings (esp. standard folders); signal an empty value instead of throwing an error
 
 * 2014-10-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 34928: Try to lookup existing stored session if http-auth.autologin is enabled
+
+* 2014-10-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34987: Added properties 'com.openexchange.oauth.google.redirectUrl' and 'com.openexchange.oauth.google.productName'
+                      to reloadable properties
 
 * 2014-10-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 34995: Removed Dropbox and Box.com remnants from packaging
  - Fix for bug 34985: Restrictive reading of configuration and improved logging in case a .properties file contains a malformed Unicode
                       escape sequence
+ - Fix for bug 34944: Ensure every threads holds its own IDBasedFileAccess instance
+ - Fix for bug 34975: Log an exceeded rate limit only once per minute
  - Fix for bug 34922: Properly re-initialize config-cascade's "server" configuration provider on configuration reload trigger
+ - Fix for bug 35001: Properly detect image URLs that contain curly braces
  - Fix for bug 34921: Do not generally apply HTML sanitizing to XML content
+
+* 2014-10-15 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 34962: Mail notification on state changes for organizer.
+
+* 2014-10-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 34517: Put Kerberos tickets of session parameters into distributed session storage.
 
 * 2014-10-14 - thorben.betten@open-xchange.com
 
@@ -219,6 +593,7 @@
 
  - Fix for bug 34776: Drop passed Message-ID header on draft-edit action
  - Fix for bug 34867: Added missing import to 'com.openexchange.mailfilter.json' bundle
+ - Fix for bug 34510: Respond with common JavaScript call-back snippet for USM user agent
 
 * 2014-10-09 - steffen.templin@open-xchange.com
 
@@ -626,10 +1001,6 @@
 * 2014-07-28 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 33577: Improved sanitizing of snippet management
-
-* 2014-07-28 - thorben.betten@open-xchange.com
-
- - Fix for bug 33728: Drop SUBSCRIPTION bit from capabilities bit mask if not allowed
 
 * 2014-07-26 - thorben.betten@open-xchange.com
 

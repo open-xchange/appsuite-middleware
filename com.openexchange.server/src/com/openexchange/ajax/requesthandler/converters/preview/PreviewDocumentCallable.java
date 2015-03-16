@@ -162,7 +162,8 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
                 } else {
                     LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
                 }
-                fileHolder = new ModifyableFileHolder(fileHolder).setContentType(mimeType);
+                fileHolder = new ModifyableFileHolder(fileHolder);
+                ((ModifyableFileHolder)fileHolder).setContentType(mimeType);
             }
 
             // Prepare properties for preview generation

@@ -68,13 +68,16 @@ import jcifs.smb.SmbFileFilter;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.file.storage.search.FieldCollectorVisitor;
@@ -92,7 +95,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageIgnorableVersionFileAccess/*, FileStorageSequenceNumberProvider*/ {
+public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageAdvancedSearchFileAccess/*, FileStorageSequenceNumberProvider*/ {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class);
 
@@ -204,50 +207,64 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        createSmbFile(file, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        SmbFile smbFile = createSmbFile(file, null);
+        return new IDTuple(file.getFolderId(), smbFile.getName());
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        createSmbFile(file, modifiedFields);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        SmbFile smbFile = createSmbFile(file, modifiedFields);
+        return new IDTuple(file.getFolderId(), smbFile.getName());
     }
 
+    /**
+     * Creates a new SMB file or updates an existing one, applying the supplied metadata.
+     *
+     * @param file The file metadata to apply
+     * @param modifiedFields The modified fields to take over, or <code>null</code> to apply all known metadata
+     * @return The SMB file reference
+     */
     private SmbFile createSmbFile(final File file, final List<Field> modifiedFields) throws OXException {
         try {
-            final Set<Field> set =
-                null == modifiedFields || modifiedFields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(modifiedFields);
+            Set<Field> set = null == modifiedFields || modifiedFields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(modifiedFields);
             /*
-             * Check
+             * check & create SMB file reference
              */
-            final String folderId = checkFolderId(file.getFolderId(), rootUrl);
-            final String id;
-            {
-                final String fid = file.getId();
-                if (null == fid) {
-                    String name = file.getFileName();
+            String folderId = checkFolderId(file.getFolderId(), rootUrl);
+            SmbFile smbFile;
+            if (FileStorageFileAccess.NEW == file.getId()) {
+                /*
+                 * create new file
+                 */
+                String name = file.getFileName();
+                if (isEmpty(name)) {
+                    name = file.getTitle();
                     if (isEmpty(name)) {
-                        name = file.getTitle();
-                        if (isEmpty(name)) {
-                            throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
-                        }
+                        throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
                     }
-                    id = name;
-                    file.setId(id);
-                } else {
-                    id = fid;
+                }
+                smbFile = getSmbFile(folderId + name);
+                /*
+                 * ensure filename uniqueness in target folder
+                 */
+                for (int i = 1; exists(smbFile); i++) {
+                    name = FileStorageUtility.enhance(name, i);
+                    smbFile = getSmbFile(folderId + name);
+                }
+                smbFile.createNewFile();
+            } else {
+                /*
+                 * use existing file reference
+                 */
+                smbFile = getSmbFile(folderId + file.getId());
+                if (false == smbFile.exists()) {
+                    throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(file.getId(), folderId);
                 }
             }
             /*
-             * Convert file to SMB representation
+             * apply supplied metadata to SMB file
              */
-            SmbFile smbFile = getSmbFile(folderId + id);
-            /*
-             * Create if non-existent
-             */
-            if (!exists(smbFile)) {
-                smbFile.createNewFile();
-            }
             final long now = System.currentTimeMillis();
             if (false == set.contains(Field.CREATED) || null == file.getCreated()) {
                 smbFile.setCreateTime(now);
@@ -272,7 +289,8 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * Check for filename
              */
-            if (set.contains(Field.FILENAME) && false == isEmpty(file.getFileName()) && false == file.getFileName().equals(smbFile.getName())) {
+            if (FileStorageFileAccess.NEW != file.getId() && set.contains(Field.FILENAME) &&
+                false == isEmpty(file.getFileName()) && false == file.getFileName().equals(smbFile.getName())) {
                 final SmbFile renamedFile = getSmbFile(folderId + file.getFileName());
                 smbFile.renameTo(renamedFile);
                 smbFile = renamedFile;
@@ -318,7 +336,14 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             if (isEmpty(targetFileName)) {
                 throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
             }
-            final SmbFile dest = getSmbFile(checkFolderId(destFolder, rootUrl) + targetFileName);
+            /*
+             * create target SMB file
+             */
+            String targetFolderID = checkFolderId(destFolder, rootUrl);
+            DefaultFile targetFile = new DefaultFile();
+            targetFile.setFileName(targetFileName);
+            targetFile.setFolderId(targetFolderID);
+            SmbFile dest = createSmbFile(targetFile, null);
             /*
              * Perform COPY
              */
@@ -340,7 +365,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * Return
              */
-            return new IDTuple(destFolder, targetFileName);
+            return new IDTuple(destFolder, dest.getName());
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
@@ -446,22 +471,16 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
-        saveDocument0(file, data, null);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+        return saveDocument0(file, data, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        saveDocument0(file, data, modifiedFields);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        return saveDocument0(file, data, modifiedFields);
     }
 
-    @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
-        // CIFS/SMB does not support versioning
-        saveDocument0(file, data, modifiedFields);
-    }
-
-    private void saveDocument0(final File file, final InputStream data, final List<Field> modifiedFields) throws OXException {
+    private IDTuple saveDocument0(final File file, final InputStream data, final List<Field> modifiedFields) throws OXException {
         try {
             /*
              * Save metadata
@@ -490,6 +509,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * Invalidate
              */
             SmbFileMapManagement.getInstance().dropFor(session);
+            return new IDTuple(file.getFolderId(), file.getId());
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
@@ -601,62 +621,6 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
-        for (final String version : versions) {
-            if (version != CURRENT_VERSION) {
-                throw CIFSExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
-            }
-        }
-        try {
-            final String fid = checkFolderId(folderId, rootUrl);
-            final String url = (fid + id);
-            /*
-             * Check validity
-             */
-            final SmbFile smbFile = getSmbFile(url);
-            if (!exists(smbFile)) {
-                /*
-                 * NO-OP for us
-                 */
-                return new String[0];
-            }
-            if (!smbFile.isFile()) {
-                throw CIFSExceptionCodes.NOT_A_FILE.create(url);
-            }
-            /*
-             * Delete
-             */
-            smbFile.delete();
-            /*
-             * Invalidate
-             */
-            SmbFileMapManagement.getInstance().dropFor(session);
-            /*
-             * Return empty array
-             */
-            return new String[0];
-        } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
-        } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public void unlock(final String folderId, final String id) throws OXException {
-        // Nothing to do
-
-    }
-
-    @Override
-    public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // Nothing to do
-
-    }
-
-    @Override
     public void touch(final String folderId, final String id) throws OXException {
         try {
             /*
@@ -760,21 +724,6 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
          * Return sorted result
          */
         return new FileTimedResult(files);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        return new FileTimedResult(Collections.singletonList(getFileMetadata(folderId, id, CURRENT_VERSION)));
     }
 
     @Override

@@ -52,7 +52,6 @@ package com.openexchange.continuation.osgi;
 import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -62,7 +61,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.continuation.internal.ContinuationRegistryServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 
@@ -116,43 +114,24 @@ public final class ContinuationActivator extends HousekeepingActivator {
                     @Override
                     public void handleEvent(final Event event) {
                         final String topic = event.getTopic();
-                        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-                            @SuppressWarnings("unchecked") final Map<String, Session> container =
-                                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            for (final Session session : container.values()) {
-                                if (!session.isTransient()) {
-                                    handleSession(session);
-                                }
-                            }
-                        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                            if (!session.isTransient()) {
-                                handleSession(session);
-                            }
-                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                            @SuppressWarnings("unchecked") final Map<String, Session> container =
-                                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            for (final Session session : container.values()) {
-                                if (!session.isTransient()) {
-                                    handleSession(session);
+                        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                            if (null != contextId) {
+                                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                                if (null != userId) {
+                                    try {
+                                        final CacheService cacheService = getService(CacheService.class);
+                                        if (null != cacheService) {
+                                            final Cache cache = cacheService.getCache(regionName);
+                                            cache.remove(new StringBuilder(16).append(userId).append('@').append(contextId).toString());
+                                        }
+                                    } catch (final Exception e) {
+                                        // Failed handling session
+                                    }
                                 }
                             }
                         }
                     }
-
-                    private void handleSession(final Session session) {
-                        try {
-                            final SessiondService service = getService(SessiondService.class);
-                            final CacheService cacheService = getService(CacheService.class);
-                            if (null != service && null != cacheService && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
-                                final Cache cache = cacheService.getCache(regionName);
-                                cache.remove(new StringBuilder(16).append(session.getUserId()).append('@').append(session.getContextId()).toString());
-                            }
-                        } catch (final Exception e) {
-                            // Failed handling session
-                        }
-                    }
-
                 };
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }

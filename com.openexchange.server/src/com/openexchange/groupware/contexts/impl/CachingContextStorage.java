@@ -51,7 +51,7 @@ package com.openexchange.groupware.contexts.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -131,7 +131,7 @@ public class CachingContextStorage extends ContextStorage {
     public List<Integer> getAllContextIds() throws OXException {
         return persistantImpl.getAllContextIds();
     }
-    
+
     @Override
     public List<Integer> getAllContextIdsForFilestore(int filestoreId) throws OXException {
         return persistantImpl.getAllContextIdsForFilestore(filestoreId);
@@ -145,6 +145,12 @@ public class CachingContextStorage extends ContextStorage {
         }
         persistantImpl.startUp();
         started = true;
+    }
+
+    @Override
+    public void setAttribute(String name, String value, int contextId) throws OXException {
+        persistantImpl.setAttribute(name, value, contextId);
+        invalidateContexts(new int[] { contextId });
     }
 
     @Override
@@ -181,7 +187,7 @@ public class CachingContextStorage extends ContextStorage {
          * gather cache keys to invalidate
          */
         Cache cache = cacheService.getCache(REGION_NAME);
-        List<Serializable> keys = new ArrayList<Serializable>();
+        List<Serializable> keys = new LinkedList<Serializable>();
         for (int contextID : contextIDs) {
             Integer key = Integer.valueOf(contextID);
             keys.add(key);

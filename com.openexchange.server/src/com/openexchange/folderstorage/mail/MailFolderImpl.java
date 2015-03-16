@@ -88,7 +88,6 @@ import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -373,14 +372,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
         }
 
-        {
-            int caps = mailConfig.getCapabilities().getCapabilities();
-            if ((caps & MailCapabilities.BIT_SUBSCRIPTION) > 0 && STANDARD_FOLDER_TYPES.contains(this.mailFolderType)) {
-                // Subscribe/unsubscribe not allowed for standard folder
-                caps &= ~MailCapabilities.BIT_SUBSCRIPTION;
-            }
-            this.capabilities = caps;
-        }
+        this.capabilities = mailConfig.getCapabilities().getCapabilities();
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
             mp.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
@@ -395,7 +387,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             permissionBits |= BIT_USER_FLAG;
         }
         final int canRename = mp.canRename();
-        if (canRename > 0) {
+        if (canRename > 0 && !STANDARD_FOLDER_TYPES.contains(this.mailFolderType)) {
+            // Rename only allowed to non-standard folders
             permissionBits |= BIT_RENAME_FLAG;
         }
         bits = permissionBits;
@@ -694,10 +687,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     @Override
     public String getLocalizedName(final Locale locale) {
         final String localizedName = this.localizedName;
-        if (null == localizedName) {
-            return name;
-        }
-        return localizedName;
+        return null == localizedName ? name : localizedName;
     }
 
 }

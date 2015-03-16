@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.redirect.actions;
 
+import java.io.IOException;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 import com.openexchange.ajax.framework.AbstractRedirectParser;
 
 /**
@@ -58,12 +63,30 @@ import com.openexchange.ajax.framework.AbstractRedirectParser;
  */
 public final class RedirectParser extends AbstractRedirectParser<RedirectResponse> {
 
-    RedirectParser(boolean failOnNonRedirect) {
-        super(false, failOnNonRedirect);
+    RedirectParser() {
+        super(false);
+    }
+
+    @Override
+    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+        setStatusCode(resp.getStatusLine().getStatusCode());
+        setReasonPhrase(resp.getStatusLine().getReasonPhrase());
+        Header[] headers = resp.getHeaders("Location");
+        if (headers.length > 0) {
+            setLocation(headers[0].getValue());
+        } else {
+            setLocation("");
+        }
+        return EntityUtils.toString(resp.getEntity());
+    }
+
+    @Override
+    public RedirectResponse parse(String location) {
+        return createResponse(location);
     }
 
     @Override
     protected RedirectResponse createResponse(String location) {
-        return new RedirectResponse(location);
+        return new RedirectResponse(getStatusCode(), getReasonPhrase(), location);
     }
 }

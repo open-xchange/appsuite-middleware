@@ -63,7 +63,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -83,7 +82,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -131,7 +129,6 @@ public class RdbUserStorage extends UserStorage {
     private static final String INSERT_ATTRIBUTES = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)";
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
-
 
     /**
      * Default constructor.
@@ -621,7 +618,7 @@ public class RdbUserStorage extends UserStorage {
                     }
                     con.commit();
                     rollback = false;
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     if (!condition.isFailedTransactionRollback(e)) {
                         throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                     }
@@ -659,100 +656,107 @@ public class RdbUserStorage extends UserStorage {
 
     /**
      * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
      * @param name Name of the attribute.
      * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
      * @param userId Identifier of the user that attribute should be set.
      * @param context Context the user resides in.
      * @throws OXException if writing the attribute fails.
+     * @see UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY
      */
     @Override
-    public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
+    public void setAttribute(String name, String value, int userId, Context context) throws OXException {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
-        
+
         Connection con = null;
         PreparedStatement stmt = null;
         try {
             con = DBPool.pickupWriteable(context);
             if (value == null) {
-            	stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
-            	stmt.setInt(1, context.getContextId());
-            	stmt.setInt(2, userId);
-            	stmt.setString(3, name);
-            	stmt.executeUpdate();
+                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, userId);
+                stmt.setString(3, name);
+                stmt.executeUpdate();
             } else {
-            	insertOrUpdateAttribute(name, value, userId, context, con);
+                insertOrUpdateAttribute(name, value, userId, context, con);
             }
         } catch (SQLException e) {
-        	throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
-        	Databases.closeSQLStuff(stmt);
-        	if (con != null) {        		
-        		DBPool.closeWriterSilent(context, con);
-        	}        	
+            Databases.closeSQLStuff(stmt);
+            if (con != null) {
+                DBPool.closeWriterSilent(context, con);
+            }
         }
     }
-    
-    private void insertOrUpdateAttribute(final String name, final String value, final int userId, final Context context, final Connection con) throws OXException {
+
+    private static void insertOrUpdateAttribute(String name, String value, int userId, Context context, Connection con) throws OXException {
+        int contextId = context.getContextId();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-	    	Databases.startTransaction(con);
-	    	stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
-	    	stmt.setInt(1, context.getContextId());
-	    	stmt.setInt(2, userId);
-	    	stmt.setString(3, name);
-	    	rs = stmt.executeQuery();
-	    	List<UUID> toUpdate = new LinkedList<UUID>();
-	    	while (rs.next()) {
-	    		toUpdate.add(UUIDs.toUUID(rs.getBytes(1)));
-	    	}
-	    	
-	    	Databases.closeSQLStuff(rs, stmt);
-			rs = null;
-	    	if (toUpdate.isEmpty()) {
-	    		stmt = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)");
-	        	stmt.setInt(1, context.getContextId());
-	        	stmt.setInt(2, userId);
-	        	stmt.setString(3, name);
-	        	stmt.setString(4, value);
-	            stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
-	            stmt.executeUpdate();
-	    	} else {
-	    		stmt = con.prepareStatement("UPDATE user_attribute SET value = ?, uuid = ? WHERE cid = ? AND id = ? AND name = ? AND uuid = ?");
-	    		for (UUID uuid : toUpdate) {
-	    			stmt.setString(1, value);
-	    			stmt.setBytes(2, UUIDs.toByteArray(UUID.randomUUID()));
-	            	stmt.setInt(3, context.getContextId());
-	            	stmt.setInt(4, userId);
-	            	stmt.setString(5, name);
-	            	stmt.setBytes(6, UUIDs.toByteArray(uuid));
-	    			stmt.addBatch();
-	    		}
-	    		int[] updateCounts = stmt.executeBatch();
-	    		for (int updateCount : updateCounts) {
-	    			// Concurrent modification of at least one attribute. We lost the race...
-	    			if (updateCount != 1) {
-	    				LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, userId, context.getContextId(), value);
-	    				throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(context.getContextId(), userId);
-	    			}
-	    		}
-	    	}
-	    	
-	    	con.commit();
-        } catch (OXException e) {
-        	Databases.rollback(con);
-        	throw e;
+            Databases.startTransaction(con);
+            stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid=? AND id=? AND name=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, name);
+            rs = stmt.executeQuery();
+            List<UUID> toUpdate = new LinkedList<UUID>();
+            while (rs.next()) {
+                toUpdate.add(UUIDs.toUUID(rs.getBytes(1)));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            if (toUpdate.isEmpty()) {
+                stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, name);
+                stmt.setString(4, value);
+                stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
+                stmt.executeUpdate();
+            } else {
+                stmt = con.prepareStatement("UPDATE user_attribute SET value=?,uuid=? WHERE cid=? AND id=? AND name=? AND uuid=?");
+                for (UUID uuid : toUpdate) {
+                    stmt.setString(1, value);
+                    stmt.setBytes(2, UUIDs.toByteArray(UUID.randomUUID()));
+                    stmt.setInt(3, contextId);
+                    stmt.setInt(4, userId);
+                    stmt.setString(5, name);
+                    stmt.setBytes(6, UUIDs.toByteArray(uuid));
+                    stmt.addBatch();
+                }
+                int[] updateCounts = stmt.executeBatch();
+                for (int updateCount : updateCounts) {
+                    // Concurrent modification of at least one attribute. We lost the race...
+                    if (updateCount != 1) {
+                        LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, I(userId), I(contextId), value);
+                        throw UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.create(I(contextId), I(userId));
+                    }
+                }
+            }
+            con.commit();
         } catch (SQLException e) {
-        	Databases.rollback(con);
-        	throw UserExceptionCode.SQL_ERROR.create(e.getMessage());
+            Databases.rollback(con);
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } catch (OXException e) {
+            Databases.rollback(con);
+            throw e;
+        } catch (RuntimeException e) {
+            Databases.rollback(con);
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-        	Databases.closeSQLStuff(stmt);
-        	Databases.autocommit(con);
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(con);
         }
     }
-    
+
     @Override
     public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
         if (null == name) {

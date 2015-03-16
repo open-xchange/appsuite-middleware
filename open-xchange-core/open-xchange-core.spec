@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 22
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -985,15 +985,22 @@ ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" 
 
 # SoftwareChange_Request-2037
 PFILE=/opt/open-xchange/etc/sessiond.properties
-ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
-
-# SoftwareChange_Request-2079
-ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
-ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
+if ! grep "com.openexchange.sessiond.remoteParameterNames" >/dev/null $PFILE; then
+    echo -e "\n# Specifies the colon-separated names of such parameters that are supposed to be taken over from session to stored session representation." >> $PFILE
+    echo "# The parameter names MUST NOT contain the ':' colon character that serves as a delimiter." >> $PFILE
+    echo "# E.g.    com.openexchange.sessiond.remoteParameterNames=remoteParameter1:remoteParameter2:...:remoteParameterN" >> $PFILE
+    echo "#" >> $PFILE
+    echo "# By default this setting is empty." >> $PFILE
+    echo "#com.openexchange.sessiond.remoteParameterNames=" >> $PFILE
+fi
 
 # SoftwareChange_Request-2055
 ox_add_property com.openexchange.rest.services.basic-auth.login "" /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.rest.services.basic-auth.password "" /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2079
+ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
+ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
 
 # SoftwareChange_Request-2081
 PFILE=/opt/open-xchange/etc/configdb.properties
@@ -1092,23 +1099,41 @@ for I in "${NAMES[@]}"; do
     ox_set_property $I "$VALUE" /opt/open-xchange/etc/quota.properties
 done
 
-# SoftwareChange_Request-2219
-VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
-if [ "1500" = "${VALUE}" ]; then
-    ox_set_property com.openexchange.servlet.maxRate 500 /opt/open-xchange/etc/server.properties
-fi
+# SoftwareChange_Request-2224
+ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2235
+ox_add_property com.openexchange.ajax.login.maxRateTimeWindow 300000 /opt/open-xchange/etc/login.properties
+ox_add_property com.openexchange.ajax.login.maxRate 50 /opt/open-xchange/etc/login.properties
 
 # SoftwareChange_Request-2243
-VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
-if [ "500" = "${VALUE}" ]; then
-    ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
+if [ ${1:-0} -eq 2 ]; then
+    VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
+    if [ "500" = "$VALUE" ]; then
+        ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
+    fi
 fi
+
+# SoftwareChange_Request-2245
+ox_add_property com.openexchange.sessiond.useDistributedTokenSessions false /opt/open-xchange/etc/sessiond.properties
 
 # SoftwareChange_Request-2249
 ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt/open-xchange/etc/requestwatcher.properties
 
 # SoftwareChange_Request-2250
 ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
+
+# SoftwareChange_Request-2270
+ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+
+# SoftwareChange_Request-2335
+PFILE=/opt/open-xchange/etc/ox-scriptconf.sh
+JOPTS=$(eval ox_read_property JAVA_XTRAOPTS $PFILE)
+JOPTS=${JOPTS//\"/}
+if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
+    JOPTS="$JOPTS -Dlogback.threadlocal.put.duplicate=false"
+    ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
+fi
 
 # SoftwareChange_Request-2342
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
@@ -1120,8 +1145,30 @@ if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatIn
 EOF
 fi
 
-# SoftwareChange_Request-2379
-ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+# SoftwareChange_Request-2350
+ox_add_property com.openexchange.mail.signature.maxImageSize 1 /opt/open-xchange/etc/mail.properties
+ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-2353
+ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
+
+# SoftwareChange_Request-2442
+VALUE=$(ox_read_property html.style.background-position /opt/open-xchange/etc/whitelist.properties)
+if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
+    ox_set_property html.style.background-position "\",N,top,bottom,center,left,right,\"" /opt/open-xchange/etc/whitelist.properties
+fi
+
+# SoftwareChange_Request-2444
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# v7.6.2 update tasks start here
+
+# Deletes remnants for removed Facebook subscription
+!com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask
+EOF
+fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -1154,6 +1201,8 @@ exit 0
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
+%dir /opt/open-xchange/etc/hazelcast/
+%config(noreplace) /opt/open-xchange/etc/hazelcast/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
@@ -1161,44 +1210,110 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Fri Mar 13 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Twelfth candidate for 7.6.2 release
+* Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Eleventh candidate for 7.6.2 release
 * Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-03-16
+* Wed Mar 04 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Tenth candidate for 7.6.2 release
+* Tue Mar 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Nineth candidate for 7.6.2 release
 * Thu Feb 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-02-23
+* Tue Feb 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Eighth candidate for 7.6.2 release
 * Mon Feb 23 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-02-25
+* Thu Feb 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-23
+* Thu Feb 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-02-23
+* Wed Feb 11 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.6.2 release
 * Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-02-10
 * Fri Feb 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-02-09
+* Fri Jan 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.6.2 release
+* Wed Jan 28 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth candidate for 7.6.2 release
 * Mon Jan 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-27
 * Mon Jan 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-26
+* Wed Jan 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-29
 * Mon Jan 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-09
 * Wed Jan 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-01-12
+* Mon Jan 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-12
+* Tue Dec 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-01-12
+* Tue Dec 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-10
+* Fri Dec 12 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.6.2 release
 * Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-15
+* Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-10
+* Mon Dec 08 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-15
+* Fri Dec 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.6.2 release
+* Thu Dec 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-09
 * Tue Dec 02 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-03
 * Tue Nov 25 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-01
 * Mon Nov 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-12-01
+* Mon Nov 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-01
+* Fri Nov 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.6.2 release
+* Thu Nov 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-12-01
+* Wed Nov 19 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-21
 * Tue Nov 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-20
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
+* Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-17
+* Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-17
+* Tue Nov 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-10
+* Fri Oct 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.6.2 release
+* Tue Oct 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-03
 * Mon Oct 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-30
+* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-04
+* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-11-03
+* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-22
 * Fri Oct 17 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-24
 * Tue Oct 14 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.6.1 release
 * Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-20
+* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.6.1 release
+* Fri Oct 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-10-20
 * Thu Oct 09 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-10-13
 * Tue Oct 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1219,6 +1334,8 @@ Build for patch 2014-10-06
 Build for patch 2014-10-02
 * Thu Sep 18 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-09-23
+* Wed Sep 17 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.2 release
 * Tue Sep 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.6.1
 * Mon Sep 08 2014 Marcus Klein <marcus.klein@open-xchange.com>

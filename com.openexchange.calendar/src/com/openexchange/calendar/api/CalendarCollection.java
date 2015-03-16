@@ -2954,6 +2954,12 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                 recColl.fillDAO(cdao);
                 clone.setRecurrence(cdao.getRecurrence());
             }
+            if (edao.containsChangeExceptions()) {
+                clone.setChangeExceptions(edao.getChangeException());
+            }
+            if (edao.containsDeleteExceptions()) {
+                clone.setDeleteExceptions(edao.getDeleteException());
+            }
         }
 
         if (!checkForConflictRelevantUpdate(cdao, edao)) {
@@ -2998,7 +3004,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
     public void detectFolderMoveAction(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (cdao.getFolderMove()) { // TODO: Recurring apointments are not allowed to move, this must be checked !!
             if (FolderObject.SHARED == cdao.getFolderType()) {
-                //throw new OXException(OXException.Code.SHARED_FOLDER_MOVE_NOT_SUPPORTED); // TODO: Allow move from a shared folder
                 return;
             }
             if (edao.getFolderType() == cdao.getFolderType()) {

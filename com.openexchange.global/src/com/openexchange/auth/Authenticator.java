@@ -49,6 +49,7 @@
 
 package com.openexchange.auth;
 
+import javax.management.MBeanException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -58,6 +59,22 @@ import com.openexchange.exception.OXException;
  * @since 7.4.2
  */
 public interface Authenticator {
+
+    /**
+     * Checks if master authentication has been disabled for associated machine.
+     *
+     * @return <code>true</code> if master authentication has been disabled; otherwise <code>false</code>
+     * @throws MBeanException If operation fails
+     */
+    boolean isMasterAuthenticationDisabled() throws OXException;
+
+    /**
+     * Checks if context authentication has been disabled for associated machine.
+     *
+     * @return <code>true</code> if context authentication has been disabled; otherwise <code>false</code>
+     * @throws MBeanException If operation fails
+     */
+    boolean isContextAuthenticationDisabled() throws OXException;
 
     /**
      * Authenticates the master administrator

@@ -384,9 +384,9 @@ public class OXMFPublicationService extends AbstractPublicationService {
     @Override
     public String getInformation(Publication publication) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Publication:").append("/n");
-        sb.append("Context: " + publication.getContext().getContextId()).append("/n");
-        sb.append("UserID:  " + publication.getUserId()).append("/n");
+        sb.append("Publication:").append(", ");
+        sb.append("Context: " + publication.getContext().getContextId()).append(", ");
+        sb.append("UserID:  " + publication.getUserId());
         return sb.toString();
     }
 

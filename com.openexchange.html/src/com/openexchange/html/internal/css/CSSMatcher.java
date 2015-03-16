@@ -734,9 +734,8 @@ public final class CSSMatcher {
             boolean modified = false;
             final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(128));
             final StringBuilder tmpBuilder = new StringBuilder(128);
-            /*
-             * Feed matcher with buffer's content and reset
-             */
+
+            // Feed matcher with buffer's content and reset
             if (cssBuilder.indexOf("{") < 0) {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
@@ -744,32 +743,36 @@ public final class CSSMatcher {
             final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             final Thread thread = Thread.currentThread();
-            cssBuilder.setLength(0);
-            int lastPos = 0;
-            while (!thread.isInterrupted() && m.find()) {
-                {
-                    int i = m.end();
-                    for (char c; (c = css.charAt(i++)) != '}';) {
-                        cssElemsBuffer.append(c);
+
+            // Check for CSS blocks
+            if (!thread.isInterrupted() && m.find()) {
+                cssBuilder.setLength(0);
+                int lastPos = 0;
+                do {
+                    {
+                        int i = m.end();
+                        for (char c; (c = css.charAt(i++)) != '}';) {
+                            cssElemsBuffer.append(c);
+                        }
+                        lastPos = i + 1;
                     }
-                    lastPos = i + 1;
+                    modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                    tmpBuilder.setLength(0);
+                    mr.appendLiteralReplacement(
+                        cssBuilder,
+                        tmpBuilder.append(m.group()).append(cssElemsBuffer.toString()).append('}').append('\n').toString());
+                    cssElemsBuffer.setLength(0);
+                } while (!thread.isInterrupted() && m.find());
+                if (lastPos < css.length()) {
+                    cssBuilder.append(css.substring(lastPos));
                 }
-                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                tmpBuilder.setLength(0);
-                mr.appendLiteralReplacement(
-                    cssBuilder,
-                    tmpBuilder.append(m.group()).append(cssElemsBuffer.toString()).append('}').append('\n').toString());
-                cssElemsBuffer.setLength(0);
+                return modified;
             }
-            if (lastPos < css.length()) {
-                cssBuilder.append(css.substring(lastPos));
-            }
-            return modified;
         }
         return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
     }
 
-    private static final Pattern PATTERN_STYLE_LINE = Pattern.compile("([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}\\p{L}&&[^;{}]]+);?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_STYLE_LINE = Pattern.compile("([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}\\p{L}&&[^;]]+);?", Pattern.CASE_INSENSITIVE);
 
     /**
      * Corrects rgb functions; e.g.<br>
@@ -929,13 +932,15 @@ public final class CSSMatcher {
                         elemBuilder.append(elementValues);
                         hasValues = true;
                     } else {
-                        final String[] tokens = splitToTokens(elementValues);
-                        for (int j = 0; j < tokens.length; j++) {
-                            if (matches(tokens[j], allowedValuesSet)) {
-                                if (j > 0) {
+                        boolean first = true;
+                        for (String token : splitToTokens(elementValues)) {
+                            if (matches(token, allowedValuesSet)) {
+                                if (first) {
+                                    first = false;
+                                } else {
                                     elemBuilder.append(' ');
                                 }
-                                elemBuilder.append(tokens[j]);
+                                elemBuilder.append(token);
                                 hasValues = true;
                             } else {
                                 modified = true;
@@ -966,7 +971,7 @@ public final class CSSMatcher {
         return modified;
     }
 
-    private static String[] splitToTokens(final String elementValues) {
+    private static List<String> splitToTokens(final String elementValues) {
         List<String> l = new LinkedList<String>();
         int length = elementValues.length();
         StringBuilder token = new StringBuilder(16);
@@ -1007,7 +1012,7 @@ public final class CSSMatcher {
             l.add(token.toString());
             token.setLength(0);
         }
-        return l.toArray(new String[l.size()]);
+        return l;
     }
 
     /**

@@ -49,10 +49,8 @@
 
 package com.openexchange.messaging.twitter.session;
 
-import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
@@ -72,21 +70,14 @@ public final class TwitterEventHandler implements EventHandler {
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         try {
-            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                // A single session was removed
-                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (!session.isTransient() && TwitterAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId())) {
-                    LOG.debug("Twitter access removed for user {} in context {}", session.getUserId(), session.getContextId());
-                }
-            } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-                // A session container was removed
-                @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
-                    (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                // For each session
-                final TwitterAccessRegistry accessRegistry = TwitterAccessRegistry.getInstance();
-                for (final Session session : sessionContainer.values()) {
-                    if (!session.isTransient() && accessRegistry.removeAccessIfLast(session.getContextId(), session.getUserId())) {
-                        LOG.debug("Twitter access removed for user {} in context {}", session.getUserId(), session.getContextId());
+            if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                if (null != contextId) {
+                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                    if (null != userId) {
+                        if (TwitterAccessRegistry.getInstance().removeAccessIfLast(contextId, userId)) {
+                            LOG.debug("Twitter access removed for user {} in context {}", userId, contextId);
+                        }
                     }
                 }
             }

@@ -73,11 +73,12 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.query.SqlPredicate;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.BoolReference;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.portable.PortableSession;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
@@ -333,6 +334,58 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Session> removeSessions(List<String> sessionIds) throws OXException {
+        List<Session> removedSessions = new ArrayList<Session>();
+
+        if ((sessionIds != null) && (sessionIds.size() > 0)) {
+            ensureActive();
+
+            IMap<String, PortableSession> sessions = sessions();
+            /*
+             * schedule remove operations
+             */
+            Map<String, Future<PortableSession>> futures = new HashMap<String, Future<PortableSession>>(sessionIds.size());
+            for (String sessionID : sessionIds) {
+                futures.put(sessionID, sessions.removeAsync(sessionID));
+            }
+            /*
+             * collect removed sessions
+             */
+            for (Entry<String, Future<PortableSession>> future : futures.entrySet()) {
+                try {
+                    PortableSession removedSession = future.getValue().get();
+                    if (null != removedSession) {
+                        removedSessions.add(removedSession);
+                    } else {
+                        LOG.debug("Session with ID '{}' not found, unable to remove from storage.", future.getKey());
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, future.getKey());
+                } catch (ExecutionException e) {
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof HazelcastInstanceNotActiveException) {
+                        throw handleNotActiveException((HazelcastInstanceNotActiveException) cause);
+                    }
+                    if (cause instanceof HazelcastException) {
+                        throw handleHazelcastException((HazelcastException) cause, SessionStorageExceptionCodes.REMOVE_FAILED.create(ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey()));
+                    }
+
+                    // Launder...
+                    throw SessionStorageExceptionCodes.REMOVE_FAILED.create(ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey());
+                }
+            }
+        }
+        return removedSessions;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Session[] removeUserSessions(final int userId, final int contextId) throws OXException {
         ensureActive();
@@ -345,41 +398,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null == sessionIDs || 0 == sessionIDs.size()) {
             return new Session[0];
         }
-        /*
-         * schedule remove operations
-         */
-        Map<String, Future<PortableSession>> futures = new HashMap<String, Future<PortableSession>>(sessionIDs.size());
-        for (String sessionID : sessionIDs) {
-            futures.put(sessionID, sessions.removeAsync(sessionID));
-        }
-        /*
-         * collect removed sessions
-         */
-        List<Session> removedSessions = new ArrayList<Session>(sessionIDs.size());
-        for (Entry<String, Future<PortableSession>> future : futures.entrySet()) {
-            try {
-                PortableSession removedSession = future.getValue().get();
-                if (null != removedSession) {
-                    removedSessions.add(removedSession);
-                } else {
-                    LOG.debug("Session with ID '{}' not found, unable to remove from storage.", future.getKey());
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, future.getKey());
-            } catch (ExecutionException e) {
-                final Throwable cause = e.getCause();
-                if (cause instanceof HazelcastInstanceNotActiveException) {
-                    throw handleNotActiveException((HazelcastInstanceNotActiveException) cause);
-                }
-                if (cause instanceof HazelcastException) {
-                    throw handleHazelcastException((HazelcastException) cause, SessionStorageExceptionCodes.REMOVE_FAILED.create(ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey()));
-                }
 
-                // Launder...
-                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey());
-            }
-        }
+        List<String> lSessionIds = new ArrayList<String>(sessionIDs);
+        List<Session> removedSessions = removeSessions(lSessionIds);
         return removedSessions.toArray(new Session[removedSessions.size()]);
     }
 

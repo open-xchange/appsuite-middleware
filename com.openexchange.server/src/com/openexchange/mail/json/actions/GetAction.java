@@ -61,12 +61,14 @@ import java.util.regex.Pattern;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringOutputStream;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -395,12 +397,23 @@ public final class GetAction extends AbstractMailAction {
                 }
             } else {
                 /*
-                 * Get message
+                 * Get & check message
                  */
-                final MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
+                MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
                 if (mail == null) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
+                    OXException oxe = MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
+                    if (VIEW_DOCUMENT.equals(req.getParameter(Mail.PARAMETER_VIEW))) {
+                        HttpServletResponse resp = req.getRequest().optHttpServletResponse();
+                        if (resp != null) {
+                            SessionServlet.writeErrorPage(HttpServletResponse.SC_NOT_FOUND, oxe.getDisplayMessage(session.getUser().getLocale()), resp);
+                            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+                        }
+                    }
+                    throw oxe;
                 }
+                /*
+                 * Mail found...
+                 */
                 if (!mail.containsAccountId()) {
                     mail.setAccountId(mailInterface.getAccountID());
                 }
@@ -450,8 +463,7 @@ public final class GetAction extends AbstractMailAction {
             return data;
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
-                LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
-                    e);
+                LOG.debug("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.", e);
                 final Object[] args = e.getDisplayArgs();
                 final String uid = null == args || 0 == args.length ? null : (null == args[0] ? null : args[0].toString());
                 if ("undefined".equalsIgnoreCase(uid)) {

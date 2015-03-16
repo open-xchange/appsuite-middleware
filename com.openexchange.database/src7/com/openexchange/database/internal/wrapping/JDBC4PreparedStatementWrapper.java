@@ -68,8 +68,9 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.MessageFormat;
 import java.util.Calendar;
+import com.openexchange.database.Databases;
+import com.openexchange.database.IncorrectStringSQLException;
 
 /**
  * {@link JDBC4PreparedStatementWrapper}
@@ -107,24 +108,57 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
 
     @Override
     public boolean execute() throws SQLException {
-        LOG.debug(MessageFormat.format("{0} executes: {1}", Thread.currentThread(), delegate.toString()));
-        boolean retval = delegate.execute();
-        con.updatePerformed();
-        return retval;
+        try {
+            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
+            boolean retval = delegate.execute();
+            con.updatePerformed();
+            return retval;
+        } catch (java.sql.SQLSyntaxErrorException syntaxError) {
+            LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
+            throw syntaxError;
+        } catch (java.sql.SQLException sqlException) {
+            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
+            if (null != incorrectStringError) {
+                throw incorrectStringError;
+            }
+            throw sqlException;
+        }
     }
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        LOG.debug(MessageFormat.format("{0} executes: {1}", Thread.currentThread(), delegate.toString()));
-        return new JDBC41ResultSetWrapper(delegate.executeQuery(), this);
+        try {
+            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
+            return new JDBC41ResultSetWrapper(delegate.executeQuery(), this);
+        } catch (java.sql.SQLSyntaxErrorException syntaxError) {
+            LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
+            throw syntaxError;
+        } catch (java.sql.SQLException sqlException) {
+            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
+            if (null != incorrectStringError) {
+                throw incorrectStringError;
+            }
+            throw sqlException;
+        }
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        LOG.debug(MessageFormat.format("{0} executes: {1}", Thread.currentThread(), delegate.toString()));
-        int retval = delegate.executeUpdate();
-        con.updatePerformed();
-        return retval;
+        try {
+            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
+            int retval = delegate.executeUpdate();
+            con.updatePerformed();
+            return retval;
+        } catch (java.sql.SQLSyntaxErrorException syntaxError) {
+            LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
+            throw syntaxError;
+        } catch (java.sql.SQLException sqlException) {
+            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
+            if (null != incorrectStringError) {
+                throw incorrectStringError;
+            }
+            throw sqlException;
+        }
     }
 
     @Override

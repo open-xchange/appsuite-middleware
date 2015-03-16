@@ -1,3 +1,81 @@
+open-xchange-system (7.6.2-12) stable; urgency=medium
+
+  * Twelfth candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 13 Mar 2015 17:12:58 +0100
+
+open-xchange-system (7.6.2-11) stable; urgency=medium
+
+  * Eleventh candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 06 Mar 2015 15:30:03 +0100
+
+open-xchange-system (7.6.2-10) stable; urgency=medium
+
+  * Tenth candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 04 Mar 2015 13:13:11 +0100
+
+open-xchange-system (7.6.2-9) stable; urgency=medium
+
+  * Nineth candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 03 Mar 2015 11:51:08 +0100
+
+open-xchange-system (7.6.2-8) stable; urgency=low
+
+  * Eighth candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Feb 2015 16:13:07 +0100
+
+open-xchange-system (7.6.2-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 11 Feb 2015 15:40:52 +0100
+
+open-xchange-system (7.6.2-6) stable; urgency=low
+
+  * Sixth candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 30 Jan 2015 16:11:35 +0100
+
+open-xchange-system (7.6.2-5) stable; urgency=low
+
+  * Fifth candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 28 Jan 2015 12:27:06 +0100
+
+open-xchange-system (7.6.2-4) stable; urgency=low
+
+  * Fourth candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 12 Dec 2014 13:08:55 +0100
+
+open-xchange-system (7.6.2-3) stable; urgency=medium
+
+  * Third candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 05 Dec 2014 13:57:40 +0100
+
+open-xchange-system (7.6.2-2) stable; urgency=low
+
+  * Second candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 21 Nov 2014 10:37:01 +0100
+
+open-xchange-system (7.6.2-1) stable; urgency=medium
+
+  * First candidate for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 31 Oct 2014 13:31:26 +0100
+
+open-xchange-system (7.6.2-0) unstable; urgency=medium
+
+  * prepare for 7.6.2 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 17 Sep 2014 12:35:41 +0200
+
 open-xchange-system (7.6.1-22) stable; urgency=medium
 
   * Build for patch 2015-03-16
@@ -56,13 +134,13 @@ open-xchange-system (7.6.1-13) stable; urgency=medium
 
   * Build for patch 2014-12-15
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 08 Dec 2014 15:10:54 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 08 Dec 2014 16:10:54 +0100
 
 open-xchange-system (7.6.1-12) stable; urgency=medium
 
   * Build for patch 2014-12-03
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Dec 2014 16:07:22 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Dec 2014 17:07:22 +0100
 
 open-xchange-system (7.6.1-11) stable; urgency=low
 
@@ -74,7 +152,7 @@ open-xchange-system (7.6.1-10) stable; urgency=medium
 
   * Build for patch 2014-12-01
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 24 Nov 2014 08:57:36 +0000
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 24 Nov 2014 09:57:36 +0100
 
 open-xchange-system (7.6.1-9) stable; urgency=low
 

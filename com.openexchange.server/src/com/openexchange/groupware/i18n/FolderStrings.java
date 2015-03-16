@@ -111,4 +111,8 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String VIRTUAL_LIST_FILES_FOLDER_NAME = "Other files";
 
+    // -----------------------------------------------------------------------------------------------------
+
+    public static final String FIELD_FOLDER_NAME = "Folder name";
+
 }

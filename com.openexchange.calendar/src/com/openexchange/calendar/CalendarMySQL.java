@@ -1469,28 +1469,28 @@ public class CalendarMySQL implements CalendarSqlImp {
                         sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
                     }
                 }
-                // Look into public folders
-                // where the user can read all objects
-                for (final TIntIterator iter = cfo.getPublicReadableAll().iterator(); iter.hasNext();) {
-                    final int folder = iter.next();
-                    if (first) {
-                        sb.append(" WHERE (");
-                        sb.append("(pd.fid = " + folder + ")");
-                        first = false;
-                    } else {
-                        sb.append(" OR (pd.fid = " + folder + ")");
-                    }
+            }
+            // Look into public folders
+            // where the user can read all objects
+            for (final TIntIterator iter = cfo.getPublicReadableAll().iterator(); iter.hasNext();) {
+                final int folder = iter.next();
+                if (first) {
+                    sb.append(" WHERE (");
+                    sb.append("(pd.fid = " + folder + ")");
+                    first = false;
+                } else {
+                    sb.append(" OR (pd.fid = " + folder + ")");
                 }
-                // where the user can read own objects
-                for (final TIntIterator iter = cfo.getPublicReadableOwn().iterator(); iter.hasNext();) {
-                    final int folder = iter.next();
-                    if (first) {
-                        sb.append(" WHERE (");
-                        sb.append("(pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
-                        first = false;
-                    } else {
-                        sb.append(" OR (pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
-                    }
+            }
+            // where the user can read own objects
+            for (final TIntIterator iter = cfo.getPublicReadableOwn().iterator(); iter.hasNext();) {
+                final int folder = iter.next();
+                if (first) {
+                    sb.append(" WHERE (");
+                    sb.append("(pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
+                    first = false;
+                } else {
+                    sb.append(" OR (pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
                 }
             }
             if (!first) {
@@ -2516,9 +2516,14 @@ public class CalendarMySQL implements CalendarSqlImp {
             final int alarm = member.alarm;
             if (alarm > -1) {
                 up.setAlarmMinutes(alarm);
-                if (up.getIdentifier() == uid && up.getAlarmMinutes() >= 0) {
+                if (up.getAlarmMinutes() >= 0) {
                     for (final CalendarDataObject cdao : cdaos) {
-                        cdao.setAlarm(up.getAlarmMinutes());
+                        int folderType = cdao.getFolderType();
+                        if (folderType == FolderObject.SHARED && up.getIdentifier() == cdao.getSharedFolderOwner()) {
+                            cdao.setAlarm(up.getAlarmMinutes());
+                        } else if ((folderType == FolderObject.PRIVATE || folderType == FolderObject.PUBLIC || folderType == -1) && up.getIdentifier() == uid) {
+                            cdao.setAlarm(up.getAlarmMinutes());
+                        }
                     }
                 }
             }
@@ -3711,9 +3716,13 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         pu.setInt(3, cdao.getActionFolder());
                                         mup.setPersonalFolderId(cdao.getActionFolder());
                                     }
-                                } else {
+                                } else if (cdao.getSharedFolderOwner() == mup.getIdentifier()){
                                     pu.setInt(3, cdao.getGlobalFolderID());
                                     mup.setPersonalFolderId(cdao.getGlobalFolderID());
+                                } else {
+                                    int pfid = access.getDefaultFolder(mup.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    pu.setInt(3, pfid);
+                                    mup.setPersonalFolderId(pfid);
                                 }
                             } else {
                                 pu.setInt(3, mup.getPersonalFolderId());
@@ -4913,6 +4922,7 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @param foldertype any of PRIVATE, PUBLIC or SHARED.
      */
     private void deleteSingleAppointment(final int cid, int oid, int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified) throws SQLException, OXException {
+        IDGenerator.getId(cid, Types.APPOINTMENT, writecon);
         deleteSingleAppointment(
             cid,
             oid,

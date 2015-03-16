@@ -52,6 +52,7 @@ package com.openexchange.push;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -91,8 +92,8 @@ public final class PushUtility {
      *
      * @throws OXException If posting event fails
      */
-    public static void triggerOSGiEvent(final String folder, final Session session) throws OXException {
-        triggerOSGiEvent(folder, session, true);
+    public static void triggerOSGiEvent(String folder, Session session) throws OXException {
+        triggerOSGiEvent(folder, session, null, true, false);
     }
 
     /**
@@ -100,12 +101,25 @@ public final class PushUtility {
      *
      * @param folder The folder identifier; including account information
      * @param session The session providing needed user data
-     * @param distributeRemotely <code>true</code> to add {@link CommonEvent} properties for remote distribution, <code>false</code>,
-     *                           otherwise
-     *
+     * @param props The optional additional properties to put into OSGi event
+     * @param includeCommonEvent <code>true</code> to add {@link CommonEvent} properties for remote distribution, <code>false</code>, otherwise
      * @throws OXException If posting event fails
      */
-    public static void triggerOSGiEvent(final String folder, final Session session, boolean distributeRemotely) throws OXException {
+    public static void triggerOSGiEvent(String folder, Session session, boolean includeCommonEvent) throws OXException {
+        triggerOSGiEvent(folder, session, null, includeCommonEvent, false);
+    }
+
+    /**
+     * Triggers the OSGi event system and posts a new event for new mails in given folder.
+     *
+     * @param folder The folder identifier; including account information
+     * @param session The session providing needed user data
+     * @param props The optional additional properties to put into OSGi event
+     * @param includeCommonEvent <code>true</code> to add {@link CommonEvent} properties for remote distribution, <code>false</code>, otherwise
+     * @param remoteMarker <code>true</code> to include remote marker; otherwise <code>false</code>
+     * @throws OXException If posting event fails
+     */
+    public static void triggerOSGiEvent(String folder, Session session, Map<String, Object> props, boolean includeCommonEvent, boolean remoteMarker) throws OXException {
         if (null == folder || null == session) {
             return;
         }
@@ -116,7 +130,7 @@ public final class PushUtility {
             /*
              * Create event's properties
              */
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(4);
+            Dictionary<String, Object> properties = null == props ? new Hashtable<String, Object>(4) : new Hashtable<String, Object>(props);
             properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
             properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(userId));
             properties.put(PushEventConstants.PROPERTY_SESSION, session);
@@ -131,7 +145,7 @@ public final class PushUtility {
              * (see com.openexchange.push.ms.osgi.PushMsActivator.startBundle() /
              *      com.openexchange.push.ms.PushMsHandler.handleEvent(Event) )
              */
-            if (distributeRemotely) {
+            if (includeCommonEvent) {
                 final EventFactoryService eventFactoryService = ServiceRegistry.getInstance().getService(EventFactoryService.class, true);
                 final CommonEvent commonEvent =
                     eventFactoryService.newCommonEvent(
@@ -146,6 +160,9 @@ public final class PushUtility {
                         null,
                         session);
                 properties.put(CommonEvent.EVENT_KEY, commonEvent);
+            }
+            if (remoteMarker) {
+                properties.put(CommonEvent.REMOTE_MARKER, Boolean.TRUE);
             }
             /*
              * Create event with push topic

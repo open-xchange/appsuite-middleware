@@ -304,21 +304,34 @@ public class NotificationMail {
         if (appointment != null && stateType.equals(Type.DELETED)) {
             return false;
         }
-        if (! anInterestingFieldChanged()) {
+
+        // Does the appointment have any change to notify about?
+        if (!anInterestingFieldChanged()) {
             return false;
         }
+
         if (stateType == Type.MODIFIED && onlyPseudoChangesOnParticipants()) {
             return false;
         }
         if (getRecipient().getConfiguration().sendITIP() && itipMessage != null) {
             return true;
         }
-        if (!getRecipient().getConfiguration().interestedInChanges()) {
+
+        // Not interested in anything
+        if (!getRecipient().getConfiguration().interestedInChanges() && !getRecipient().getConfiguration().interestedInStateChanges()) {
             return false;
         }
-        if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly()) {
-            return false;
+
+        // Interested in state changes, but not in other changes
+        if (getRecipient().getConfiguration().interestedInStateChanges() && !getRecipient().getConfiguration().interestedInChanges()) {
+            return isAboutStateChanges();
         }
+
+        // Interested in other changes, but not in state changes
+        if (!getRecipient().getConfiguration().interestedInStateChanges() && getRecipient().getConfiguration().interestedInChanges()) {
+            return !isAboutStateChangesOnly();
+        }
+
         return true;
     }
 
@@ -462,6 +475,14 @@ public class NotificationMail {
         	return false;
         }
         return diff.isAboutStateChangesOnly();
+    }
+
+	public boolean isAboutStateChanges() {
+        if (getDiff() == null) {
+            return false;
+        }
+
+        return diff.isAboutStateChanges();
     }
 
 	public boolean isAboutActorsStateChangeOnly() {

@@ -264,6 +264,9 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
     /** The identifier %1$s can't be parsed. */
     ID_PARSING_FAILED("The identifier %1$s can not be parsed.", null, Category.CATEGORY_ERROR, 261),
 
+    /** "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again." */
+    INCORRECT_STRING("Field \"%2$s\" contains invalid character: \"%1$s\"", ContactExceptionMessages.INCORRECT_STRING_DISPLAY, Category.CATEGORY_USER_INPUT, 262),
+
     /**
      * Number of documents attached to this contact is below zero. You can not
      * remove any more attachments.
@@ -381,12 +384,15 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
 
 	private OXException specials(OXException exc) {
 		switch(this) {
-		case CONTACT_NOT_FOUND: case CONTACT_OBJECT_MISSING:
+		case CONTACT_NOT_FOUND:
+	    case CONTACT_OBJECT_MISSING:
 			exc.setGeneric(Generic.NOT_FOUND);
 			break;
 		case OBJECT_HAS_CHANGED:
 			exc.setGeneric(Generic.CONFLICT);
 			break;
+        default:
+            break;
 		}
 		if (exc.getCategories().contains(Category.CATEGORY_PERMISSION_DENIED)) {
 			exc.setGeneric(Generic.NO_PERMISSION);

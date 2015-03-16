@@ -92,6 +92,7 @@ import org.slf4j.LoggerFactory;
 
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
@@ -222,9 +223,16 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             addSimpleFacets(facets, prefix, prefixTokens);
         }
 
-        boolean toAsDefaultOption = false;
+        MailFolder folder = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<MailFolder>() {
+            @Override
+            public MailFolder call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
+                return folder;
+            }
+        });
+
+        boolean toAsDefaultOption = folder.isSent();
         List<ActiveFacet> activeContactFacets = autocompleteRequest.getActiveFacets(MailFacetType.CONTACTS);
-        if (activeContactFacets != null && !activeContactFacets.isEmpty()) {
+        if (!toAsDefaultOption && activeContactFacets != null && !activeContactFacets.isEmpty()) {
             toAsDefaultOption = true;
         }
 
@@ -234,8 +242,65 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
-    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
-        String folderName = searchRequest.getFolderId();
+    public SearchResult doSearch(final SearchRequest searchRequest, ServerSession session) throws OXException {
+        int[] requestedColumns = searchRequest.getColumns();
+        MailField[] mailFields = MailField.FIELDS_LOW_COST;
+        if (requestedColumns != null) {
+            mailFields = MailField.getMatchingFields(requestedColumns);
+        }
+
+        final MailField[] fetchFields = mailFields;
+        List<MailMessage> messages = accessMailStorage(searchRequest, session, new MailAccessClosure<List<MailMessage>>() {
+            @Override
+            public List<MailMessage> call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
+                SearchTerm<?> searchTerm = prepareSearchTerm(folder, searchRequest);
+                IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                List<MailMessage> messages = searchMessages(
+                    messageStorage,
+                    folder,
+                    searchTerm,
+                    fetchFields,
+                    searchRequest.getStart(),
+                    searchRequest.getSize());
+                return messages;
+            }
+        });
+
+        List<Document> documents = new ArrayList<Document>(messages.size());
+        for (MailMessage message : messages) {
+            documents.add(new MailDocument(message));
+        }
+
+        return new SearchResult(-1, searchRequest.getStart(), documents, searchRequest.getActiveFacets());
+    }
+
+    private <R> R accessMailStorage(AbstractFindRequest request, ServerSession session, MailAccessClosure<R> closure) throws OXException {
+        long start = System.currentTimeMillis();
+        FullnameArgument fullnameArgument = determineFolder(request);
+        MailService mailService = Services.getMailService();
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = mailService.getMailAccess(session, fullnameArgument.getAccountId());
+            mailAccess.connect(false);
+            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            MailFolder folder = folderStorage.getFolder(fullnameArgument.getFullname());
+            return closure.call(mailAccess, folder);
+        } finally {
+            MailAccess.closeInstance(mailAccess);
+            long diff = System.currentTimeMillis() - start;
+            LOG.info("Transaction for MailAccess lasted {}ms. Request type: {}", diff, request.getClass().getSimpleName());
+        }
+    }
+
+    private static interface MailAccessClosure<R> {
+
+        R call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException;
+
+    }
+
+
+    private FullnameArgument determineFolder(AbstractFindRequest request) throws OXException {
+        String folderName = request.getFolderId();
         if (folderName == null && invalidAllMessagesFolder) {
             throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
         }
@@ -243,39 +308,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             folderName = virtualAllMessagesFolder;
         }
 
-        int[] requestedColumns = searchRequest.getColumns();
-        MailField[] mailFields = MailField.FIELDS_LOW_COST;
-        if (requestedColumns != null) {
-            mailFields = MailField.getMatchingFields(requestedColumns);
-        }
-
-        FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folderName);
-        int accountId = fullnameArgument.getAccountId();
-        MailService mailService = Services.getMailService();
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            mailAccess = mailService.getMailAccess(session, accountId);
-            mailAccess.connect();
-            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            MailFolder folder = folderStorage.getFolder(fullnameArgument.getFullname());
-            SearchTerm<?> searchTerm = prepareSearchTerm(folder, searchRequest);
-            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            List<MailMessage> messages = searchMessages(
-                messageStorage,
-                folder,
-                searchTerm,
-                mailFields,
-                searchRequest.getStart(),
-                searchRequest.getSize());
-            List<Document> documents = new ArrayList<Document>(messages.size());
-            for (MailMessage message : messages) {
-                documents.add(new MailDocument(message));
-            }
-
-            return new SearchResult(-1, searchRequest.getStart(), documents, searchRequest.getActiveFacets());
-        } finally {
-            MailAccess.closeInstance(mailAccess);
-        }
+        return MailFolderUtility.prepareMailFolderParam(folderName);
     }
 
     private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens) {

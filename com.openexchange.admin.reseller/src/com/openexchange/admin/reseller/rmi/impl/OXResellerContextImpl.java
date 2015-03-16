@@ -73,9 +73,11 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.tools.pipesnfilters.Filter;
 
@@ -456,6 +458,15 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
     public void exists(Context ctx, Credentials auth) throws PluginException {
         if (cache.isMasterAdmin(auth)) {
             return;
+        }
+        if (null == ctx.getId()) {
+            try {
+                ctx.setId(Integer.valueOf(OXToolStorageInterface.getInstance().getContextIDByContextname(ctx.getName())));
+            } catch (StorageException e) {
+                throw new PluginException(e);
+            } catch (NoSuchObjectException e) {
+                return;
+            }
         }
         checkOwnerShipAndSetSid(ctx, auth);
     }

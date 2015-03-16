@@ -108,6 +108,7 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
      * Detects and optimizes renamed directories at the client, i.e. the following pattern
      * <p/><code>
      * Server: REMOVE [version=/heinz | d41d8cd98f00b204e9800998ecf8427e [79348], newVersion=null, parameters={}]
+     * Server: SYNC [version=/otto | d41d8cd98f00b204e9800998ecf8427e, newVersion=null, parameters={}]
      * Client: ACKNOWLEDGE [version=/heinz | d41d8cd98f00b204e9800998ecf8427e, newVersion=null, parameters={}]
      * Client: SYNC [version=/otto | d41d8cd98f00b204e9800998ecf8427e, newVersion=null, parameters={}]
      * </code><p/>
@@ -125,7 +126,7 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
         List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
         /*
-         * Move of subfolder at client: check for client ACKNOWLEDGE / client SYNC / server REMOVE of identical version
+         * Move of subfolder at client: check for client ACKNOWLEDGE / client SYNC / server REMOVE / server SYNC of identical version
          */
         for (AbstractAction<DirectoryVersion> serverAction : result.getActionsForServer()) {
             /*
@@ -142,18 +143,21 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                         clientAction.wasCausedBy(Change.DELETED, Change.NONE) &&
                         matchesByPathAndChecksum(clientAction.getVersion(), serverAction.getVersion())) {
                         /*
-                         * find best matching client SYNC caused by a new matching directory at client
+                         * find best matching client & server SYNC caused by a new matching directory at client
                          * SYNC [version={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion=null, parameters={}]
                          */
                         AbstractAction<DirectoryVersion> clientSync = findBestMatchingAction(
                             optimizedActionsForClient, Action.SYNC, clientAction.getVersion(), Change.NEW, Change.NONE);
-                        if (null != clientSync) {
+                        AbstractAction<DirectoryVersion> serverSync = findBestMatchingAction(
+                            optimizedActionsForServer, Action.SYNC, clientAction.getVersion(), Change.NEW, Change.NONE);
+                        if (null != clientSync && null != serverSync) {
                             /*
                              * edit server directory instead, insert adjusted ACK and SYNC actions for client (acks for edits are done automatically with next sync)
                              * EDIT [version=/vorher | d41d8cd98f00b204e9800998ecf8427e [59408], newVersion={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, parameters={}]
                              * ACKNOWLEDGE [version={"path":"/vorher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion=null, parameters={}]
                              * SYNC [version={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion=null, parameters={}]
                              */
+                            optimizedActionsForServer.remove(serverSync);
                             optimizedActionsForServer.remove(serverAction);
                             optimizedActionsForServer.add(new EditDirectoryAction(serverAction.getVersion(), clientSync.getVersion(), null));
                             optimizedActionsForClient.remove(clientAction);

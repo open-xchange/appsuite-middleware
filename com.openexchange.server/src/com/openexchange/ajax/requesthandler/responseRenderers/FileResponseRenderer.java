@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import static com.openexchange.java.Streams.close;
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -74,6 +75,10 @@ import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.PushbackReadable;
+import com.openexchange.ajax.container.IFileHolder.RandomAccess;
+import com.openexchange.ajax.container.InputStreamReadable;
+import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
@@ -122,7 +127,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final int INITIAL_CAPACITY = 8192;
 
-    private static final int BUFLEN = 2048;
+    private static final int BUFLEN = 10240;
 
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
 
@@ -179,17 +184,17 @@ public class FileResponseRenderer implements ResponseRenderer {
      *
      * @param scaler The image scaler
      */
-    public void setScaler(final ImageTransformationService scaler) {
+    public void setScaler(ImageTransformationService scaler) {
         this.scaler = scaler;
     }
 
     @Override
-    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
+    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
         return (result.getResultObject() instanceof IFileHolder);
     }
 
     @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
         // Check if file is actually supplied by the request URL.
         if (file == null || hasNoFileItem(file)) {
@@ -202,7 +207,20 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             return;
         }
-        writeFileHolder(file, request, result, req, resp);
+        try {
+            writeFileHolder(file, request, result, req, resp);
+        } finally {
+            postProcessingTasks(file);
+        }
+    }
+
+    private void postProcessingTasks(IFileHolder file) {
+        List<Runnable> tasks = file.getPostProcessingTasks();
+        if (null != tasks && !tasks.isEmpty()) {
+            for (Runnable task : tasks) {
+                task.run();
+            }
+        }
     }
 
     /**
@@ -214,12 +232,12 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param req The HTTP request
      * @param resp The HTTP response
      */
-    public void writeFileHolder(final IFileHolder fileHolder, final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void writeFileHolder(IFileHolder fileHolder, AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         IFileHolder file = fileHolder;
         final String fileName = file.getName();
         final long length;
         final List<Closeable> closeables = new LinkedList<Closeable>();
-        InputStream documentData = null;
+        Readable documentData = null;
         try {
             final String fileContentType = file.getContentType();
             /*-
@@ -277,13 +295,18 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             // Set binary input stream
             {
-                final InputStream stream = file.getStream();
-                if (null != stream) {
-                    if ((stream instanceof ByteArrayInputStream) || (stream instanceof BufferedInputStream)) {
-                        documentData = stream;
-                    } else {
-                        documentData = new BufferedInputStream(stream, 65536);
+                RandomAccess ra = file.getRandomAccess();
+                if (null == ra) {
+                    InputStream stream = file.getStream();
+                    if (null != stream) {
+                        if ((stream instanceof ByteArrayInputStream) || (stream instanceof BufferedInputStream)) {
+                            documentData = new InputStreamReadable(stream);
+                        } else {
+                            documentData = new InputStreamReadable(new BufferedInputStream(stream, 65536));
+                        }
                     }
+                } else {
+                    documentData = ra;
                 }
             }
             // Check for null
@@ -296,7 +319,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             if (DOWNLOAD.equalsIgnoreCase(delivery) || (SAVE_AS_TYPE.equals(contentType) && !VIEW.equalsIgnoreCase(delivery))) {
                 // Write as a common file download: application/octet-stream
                 final StringBuilder sb = new StringBuilder(32);
-                sb.append(com.openexchange.java.Strings.isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
+                sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
                 DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(SAVE_AS_TYPE);
@@ -318,7 +341,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             temp.write(documentData);
                             // We know for sure
                             fileLength = temp.getLength();
-                            documentData = temp.getClosingStream();
+                            documentData = temp.getClosingRandomAccess();
                             cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
                                 cts = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : cts;
@@ -334,7 +357,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             temp.write(documentData);
                             // We know for sure
                             fileLength = temp.getLength();
-                            documentData = temp.getClosingStream();
+                            documentData = temp.getClosingRandomAccess();
                             cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
                                 cts = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : cts;
@@ -353,7 +376,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                  * Set headers...
                  */
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
-                    if (com.openexchange.java.Strings.isEmpty(contentDisposition)) {
+                    if (isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
                         if (contentDisposition.indexOf(';') >= 0) {
@@ -417,7 +440,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         final ThresholdFileHolder temp = new ThresholdFileHolder(DEFAULT_IN_MEMORY_THRESHOLD, INITIAL_CAPACITY);
                         closeables.add(temp);
                         temp.write(documentData);
-                        documentData = temp.getClosingStream();
+                        documentData = temp.getClosingRandomAccess();
                         preferredContentType = detectMimeType(temp.getStream());
                         if ("text/plain".equals(preferredContentType)) {
                             preferredContentType = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : preferredContentType;
@@ -483,7 +506,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 if ((length > 0) && (null != sRange)) {
                     // Taken from http://balusc.blogspot.co.uk/2009/02/fileservlet-supporting-resume-and.html
                     // Range header should match format "bytes=n-n,n-n,n-n...". If not, then return 416.
-                    if (!PATTERN_BYTE_RANGES.matcher(sRange).matches()) {
+                    if (!Tools.isByteRangeHeader(sRange)) {
                         resp.setHeader("Content-Range", "bytes */" + length); // Required in 416.
                         resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
                         return;
@@ -577,13 +600,6 @@ public class FileResponseRenderer implements ResponseRenderer {
                         outputStream.println(new StringBuilder("--").append(boundary).append("--").toString());
                     }
                 } else {
-                    // Check if "Range" header was sent by client although we do not know exact size/length
-                    if (length <= 0 && null != sRange) {
-                        // Client requested a range, but cannot be satisfied
-                        setHeaderSafe("Content-Range", "bytes */" + documentData.available(), resp); // Required in 416.
-                        resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                        return;
-                    }
                     // Check for "off"/"len" parameters
                     final int off = AJAXRequestDataTools.parseIntParameter(req.getParameter("off"), -1);
                     final int amount = AJAXRequestDataTools.parseIntParameter(req.getParameter("len"), -1);
@@ -624,9 +640,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                 final String lmsg = toLowerCase(e.getMessage());
                 if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                     // Assume client-initiated connection closure
-                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
@@ -641,13 +657,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                      * For the next write attempt by us, the peer's TCP stack will issue an RST,
                      * which results in this exception and message at the sender.
                      */
-                    LOG.debug("Client dropped connection while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             }
         } catch (final OXException e) {
-            final String message = "Exception while trying to output file" + (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName);
+            String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
             LOG.error(message, e);
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 Throwable cause = e;
@@ -660,7 +676,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
             }
         } catch (final Exception e) {
-            final String message = "Exception while trying to output file" + (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName);
+            String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
             LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
@@ -764,7 +780,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
-        final boolean isValidEtag = !com.openexchange.java.Strings.isEmpty(eTag);
+        final boolean isValidEtag = !isEmpty(eTag);
         final String previewLanguage = AbstractPreviewResultConverter.getUserLanguage(request.getSession());
         if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
@@ -780,6 +796,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 {
                     final InputStream inputStream = cachedResource.getInputStream();
                     if (null == inputStream) {
+                        @SuppressWarnings("resource")
                         final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedResource.getBytes());
                         responseFileHolder.setContentType(contentType);
                         responseFileHolder.setName(cachedResource.getFileName());
@@ -898,7 +915,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
             // (Asynchronously) Add to cache if possible
             final int size = transformed.length;
-            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
+            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
             final ServerSession session = request.getSession();
             final String fileName = file.getName();
             final String contentType = fileContentType;
@@ -1021,14 +1038,14 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @return The unquoted value or <code>null</code>
      */
     private String unquote(final String s) {
-        if (!com.openexchange.java.Strings.isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
             return s.substring(1, s.length() - 1);
         }
         return s;
     }
 
     private String getPrimaryType(final String contentType) {
-        if (com.openexchange.java.Strings.isEmpty(contentType)) {
+        if (isEmpty(contentType)) {
             return contentType;
         }
         final int pos = contentType.indexOf('/');
@@ -1062,7 +1079,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     /**
-     * Copy the given byte range of the given input to the given output.
+     * Copies the given byte range of the given input to the given output.
      *
      * @param inputStream The input to copy the given range to the given output for.
      * @param output The output to copy the given range from the given input for.
@@ -1070,17 +1087,17 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param length Length of the byte range.
      * @throws IOException If something fails at I/O level.
      */
-    private void copy(final InputStream inputStream, final OutputStream output, final long start, final long length) throws IOException {
-        // Write partial range.
-        final InputStream input;
-        if (!(inputStream instanceof BufferedInputStream) && !(inputStream instanceof ByteArrayInputStream)) {
-            input = new BufferedInputStream(inputStream, 8192);
-        } else {
-            input = inputStream;
+    private void copy(Readable inputStream, OutputStream output, long start, long length) throws IOException {
+        if (inputStream instanceof IFileHolder.RandomAccess) {
+            copy((IFileHolder.RandomAccess) inputStream, output, start, length);
+            return;
         }
+
+        // Write partial range.
         // Discard previous bytes
+        byte[] buffer = new byte[1];
         for (int i = 0; i < start; i++) {
-            if (input.read() < 0) {
+            if (inputStream.read(buffer, 0, 1) < 0) {
                 // Stream does not provide enough bytes
                 throw new OffsetOutOfRangeIOException(start, i);
             }
@@ -1088,9 +1105,10 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         long toRead = length;
 
-        final byte[] buffer = new byte[BUFLEN];
+        int buflen = BUFLEN;
+        buffer = new byte[buflen];
         int read;
-        while ((read = input.read(buffer)) > 0) {
+        while ((read = inputStream.read(buffer, 0, buflen)) > 0) {
             if ((toRead -= read) > 0) {
                 output.write(buffer, 0, read);
             } else {
@@ -1100,9 +1118,59 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
+    /**
+     * Copies the given byte range of the given input to the given output.
+     *
+     * @param input The input to copy the given range to the given output for.
+     * @param output The output to copy the given range from the given input for.
+     * @param start Start of the byte range.
+     * @param length Length of the byte range.
+     * @throws IOException If something fails at I/O level.
+     */
+    private static void copy(IFileHolder.RandomAccess input, OutputStream output, long start, long length) throws IOException {
+        int buflen = BUFLEN;
+        byte[] buffer = new byte[buflen];
+        int read;
+
+        if (input.length() == length) {
+            // Write full range.
+            while ((read = input.read(buffer, 0, buflen)) > 0) {
+                output.write(buffer, 0, read);
+            }
+        } else {
+            // Write partial range.
+            input.seek(start);   // ----> OffsetOutOfRangeIOException
+            long toRead = length;
+
+            // Check first byte
+            @SuppressWarnings("resource")
+            PushbackReadable readMe = new PushbackReadable(input);
+            {
+                byte[] bs = new byte[1];
+                int first = readMe.read(bs);
+                if (first <= 0) {
+                    // Not enough bytes
+                    throw new OffsetOutOfRangeIOException(start, input.length());
+                }
+
+                // Unread first byte
+                readMe.unread(bs[0] & 0xff);
+            }
+
+            while ((read = readMe.read(buffer, 0, buflen)) > 0) {
+                if ((toRead -= read) > 0) {
+                    output.write(buffer, 0, read);
+                } else {
+                    output.write(buffer, 0, (int) toRead + read);
+                    break;
+                }
+            }
+        }
+    }
+
     private boolean hasNoFileItem(final IFileHolder file) {
         final String fileMIMEType = file.getContentType();
-        return ((com.openexchange.java.Strings.isEmpty(fileMIMEType) || SAVE_AS_TYPE.equals(fileMIMEType)) && com.openexchange.java.Strings.isEmpty(file.getName()) && (file.getLength() <= 0L));
+        return ((isEmpty(fileMIMEType) || SAVE_AS_TYPE.equals(fileMIMEType)) && isEmpty(file.getName()) && (file.getLength() <= 0L));
     }
 
     private static final class Range {

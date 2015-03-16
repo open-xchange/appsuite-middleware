@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.servlet.http;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -62,6 +63,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.Cookie;
@@ -607,18 +609,12 @@ public final class Tools {
      * @param request The request to be evaluated.
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
-    public static final boolean isMultipartContent(final HttpServletRequest request) {
+    public static final boolean isMultipartContent(HttpServletRequest request) {
         if (null == request) {
             return false;
         }
-        final String contentType = request.getContentType();
-        if (contentType == null) {
-            return false;
-        }
-        if (toLowerCase(contentType).startsWith(MULTIPART)) {
-            return true;
-        }
-        return false;
+        String contentType = request.getContentType();
+        return null != contentType && asciiLowerCase(contentType).startsWith(MULTIPART);
     }
 
     /**
@@ -671,16 +667,32 @@ public final class Tools {
         return new AuthCookie(cookie);
     }
 
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
+
+    /**
+     * Checks if given HTTP request provides a "Range" header, whose value matches format "bytes=n-n,n-n,n-n..."
+     *
+     * @param req The HTTP request to check
+     * @return <code>true</code> if request queries a byte range; otherwise <code>false</code>
+     */
+    public static boolean hasRangeHeader(HttpServletRequest req) {
+        if (null == req) {
+            return false;
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
+        return isByteRangeHeader(req.getHeader("Range"));
     }
+
+    /**
+     * Checks if given "Range" header matches format "bytes=n-n,n-n,n-n..."
+     *
+     * @param range The "Range" header
+     * @return <code>true</code> for a byte range; otherwise <code>false</code>
+     */
+    public static boolean isByteRangeHeader(String range) {
+        // Range header should match format "bytes=n-n,n-n,n-n...".
+        return ((null != range) && PATTERN_BYTE_RANGES.matcher(range).matches());
+    }
+
 }

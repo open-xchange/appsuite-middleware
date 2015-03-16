@@ -101,7 +101,7 @@ public class DefaultSeparator implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
                 if (defaultSeparator == 0) {
-                    setting.setSingleValue("null");
+                    setting.setSingleValue(null);
                 } else {
                     setting.setSingleValue(Character.valueOf(defaultSeparator));
                 }

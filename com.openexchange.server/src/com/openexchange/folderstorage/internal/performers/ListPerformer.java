@@ -65,6 +65,7 @@ import java.util.concurrent.CompletionService;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -322,7 +323,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                     addWarning(warnings.iterator().next());
                                 }
                             } catch (final OXException e) {
-                                log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+                                if (OXExceptions.isUserInput(e)) {
+                                    log.debug("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+                                } else {
+                                    log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+                                }
                                 folders = null;
                             }
                             if (null == folders) {
@@ -338,7 +343,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                     try {
                                         subfolder = tmp.getFolder(treeId, id, newParameters);
                                     } catch (final OXException e) {
-                                        log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
+                                        if (OXExceptions.isUserInput(e)) {
+                                            log.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
+                                        } else {
+                                            log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
+                                        }
                                         addWarning(e);
                                         continue NextIndex;
                                     }
@@ -580,7 +589,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 addWarning(warnings.iterator().next());
                             }
                         } catch (final OXException e) {
-                            log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+                            if (OXExceptions.isUserInput(e)) {
+                                log.debug("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+                            } else {
+                                log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+                            }
                             folders = null;
                         }
                         if (null == folders) {
@@ -593,7 +606,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 try {
                                     subfolder = tmp.getFolder(treeId, id, newParameters);
                                 } catch (final OXException e) {
-                                    log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
+                                    if (OXExceptions.isUserInput(e)) {
+                                        log.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
+                                    } else {
+                                        log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
+                                    }
                                     addWarning(e);
                                     continue NextIndex;
                                 }

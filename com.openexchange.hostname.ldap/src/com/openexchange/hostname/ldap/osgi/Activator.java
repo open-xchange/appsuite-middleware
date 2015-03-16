@@ -57,16 +57,18 @@ import com.openexchange.hostname.ldap.LDAPHostnameCache;
 import com.openexchange.hostname.ldap.LDAPHostnameService;
 import com.openexchange.hostname.ldap.configuration.LDAPHostnameProperties;
 import com.openexchange.hostname.ldap.configuration.Property;
-import com.openexchange.hostname.ldap.services.HostnameLDAPServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 
+/**
+ * The activator for <i>"com.openexchange.hostname.ldap"</i> bundle
+ */
 public class Activator extends HousekeepingActivator {
 
     private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
-    private LDAPHostnameService hostnameservice;
-
+    /**
+     * Initializes a new {@link Activator}.
+     */
     public Activator() {
         super();
     }
@@ -77,46 +79,18 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-
-        HostnameLDAPServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-
-        HostnameLDAPServiceRegistry.getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
     protected void startBundle() throws Exception {
-
-        // try to load all the needed services like config service and hostnameservice
         try {
-            final ServiceRegistry registry = HostnameLDAPServiceRegistry.getServiceRegistry();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (int i = 0; i < classes.length; i++) {
-                final Object service = getService(classes[i]);
-                if (null != service) {
-                    registry.addService(classes[i], service);
-                }
-            }
+            Services.setServiceLookup(this);
 
-            checkConfiguration();
-
-            activateCaching();
-
-            // register hostname service to modify hostnames in directlinks, this will also init the cache class
-            hostnameservice = new LDAPHostnameService();
-
+            ConfigurationService configService = getService(ConfigurationService.class);
+            checkConfiguration(configService);
+            activateCaching(configService, getService(CacheService.class));
             LDAPHostnameCache.getInstance().outputSettings();
 
-            registerService(HostnameService.class, hostnameservice, null);
-
-        } catch (final Throwable t) {
+            // Register hostname service to modify hostnames in direct links, this will also initialize the cache class
+            registerService(HostnameService.class, new LDAPHostnameService(this), null);
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
@@ -125,31 +99,28 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        // Stop hostname service
         try {
-            // stop hostname service
-            cleanUp();
-
             deactivateCaching();
-
-            HostnameLDAPServiceRegistry.getServiceRegistry().clearRegistry();
+            super.stopBundle();
+            Services.setServiceLookup(null);
         } catch (final Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
 
-    private void activateCaching() throws OXException {
-        final String cacheConfigFile = LDAPHostnameProperties.getProperty(HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), Property.cache_config_file);
-        HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).loadConfiguration(cacheConfigFile.trim());
+    private void activateCaching(ConfigurationService configService, CacheService cacheService) throws OXException {
+        final String cacheConfigFile = LDAPHostnameProperties.getProperty(configService, Property.cache_config_file);
+        cacheService.loadConfiguration(cacheConfigFile.trim());
     }
 
-    private void checkConfiguration() throws OXException {
-        LDAPHostnameProperties.check(HostnameLDAPServiceRegistry.getServiceRegistry(), Property.values(), LDAPHostnameCache.REGION_NAME);
+    private void checkConfiguration(ConfigurationService configService) throws OXException {
+        LDAPHostnameProperties.check(configService, Property.values(), LDAPHostnameCache.REGION_NAME);
     }
 
     private void deactivateCaching() {
-        LDAPHostnameCache.releaseInstance();
-        final CacheService cacheService = HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class);
+        CacheService cacheService = getService(CacheService.class);
         if (null != cacheService) {
             try {
                 cacheService.freeCache(LDAPHostnameCache.REGION_NAME);

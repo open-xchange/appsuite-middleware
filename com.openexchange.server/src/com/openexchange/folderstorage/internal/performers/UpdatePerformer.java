@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
@@ -226,6 +227,20 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
                 }
             }
+            final boolean changedMetaInfo;
+            {
+                Map<String, Object> meta = folder.getMeta();
+                if (null == meta) {
+                    changedMetaInfo = false;
+                } else {
+                    Map<String, Object> storageMeta = storageFolder.getMeta();
+                    if (null == storageMeta) {
+                        changedMetaInfo = true;
+                    } else {
+                        changedMetaInfo = false == meta.equals(storageMeta);
+                    }
+                }
+            }
             /*
              * Do move?
              */
@@ -334,6 +349,22 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Change subscription either in real or in virtual storage
                  */
+                if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
+                    storage.updateFolder(folder, storageParameters);
+                } else {
+                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+                    if (null == realStorage) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+                    }
+                    if (storage.equals(realStorage)) {
+                        storage.updateFolder(folder, storageParameters);
+                    } else {
+                        checkOpenedStorage(realStorage, openedStorages);
+                        realStorage.updateFolder(folder, storageParameters);
+                        storage.updateFolder(folder, storageParameters);
+                    }
+                }
+            } else if (changedMetaInfo) {
                 if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
                     storage.updateFolder(folder, storageParameters);
                 } else {

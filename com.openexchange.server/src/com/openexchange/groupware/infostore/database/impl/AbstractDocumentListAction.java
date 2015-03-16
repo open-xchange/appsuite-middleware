@@ -61,6 +61,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
 public abstract class AbstractDocumentListAction extends AbstractInfostoreAction {
@@ -69,9 +70,11 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 
     /**
      * Initializes a new {@link AbstractDocumentListAction}.
+     *
+     * @param optSession The optional session
      */
-    protected AbstractDocumentListAction() {
-        super();
+    protected AbstractDocumentListAction(Session optSession) {
+        super(optSession);
     }
 
     /**
@@ -82,9 +85,8 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
      * @param context The context
      * @param documents The documents to create
      */
-    protected AbstractDocumentListAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
-        List<DocumentMetadata> documents) {
-        super();
+    protected AbstractDocumentListAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> documents, Session session) {
+        super(session);
         setQueryCatalog(queryCatalog);
         setContext(context);
         setProvider(provider);

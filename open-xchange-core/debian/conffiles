@@ -1,3 +1,4 @@
+opt/open-xchange/etc/hazelcast/serverTokenHz.properties
 opt/open-xchange/etc/attachment.properties
 opt/open-xchange/etc/autoconfig.properties
 opt/open-xchange/etc/cache.ccf
@@ -60,6 +61,7 @@ opt/open-xchange/etc/transport.properties
 opt/open-xchange/etc/tokens.properties
 opt/open-xchange/etc/user.properties
 opt/open-xchange/etc/whitelist.properties
+opt/open-xchange/etc/meta/infostore.yml
 opt/open-xchange/etc/meta/ui.yml
 opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties

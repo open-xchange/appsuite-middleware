@@ -53,7 +53,6 @@ import javax.mail.internet.InternetAddress;
 import junit.framework.TestCase;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 
-
 /**
  * {@link QuotedInternetAddressTest}
  *
@@ -61,6 +60,7 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
  * @since v7.6.1
  */
 public class QuotedInternetAddressTest extends TestCase {
+
     /**
      * Initializes a new {@link QuotedInternetAddressTest}.
      */

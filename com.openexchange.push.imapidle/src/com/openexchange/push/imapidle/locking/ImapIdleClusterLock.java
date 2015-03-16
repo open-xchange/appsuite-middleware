@@ -66,6 +66,20 @@ public interface ImapIdleClusterLock {
      */
     public static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
 
+    public static enum Type {
+        HAZELCAST,
+        DATABASE,
+        NONE,
+        ;
+    }
+
+    /**
+     * Gets the cluster lock type
+     *
+     * @return The type
+     */
+    Type getType();
+
     /**
      * Attempts to acquires the lock for given user
      *

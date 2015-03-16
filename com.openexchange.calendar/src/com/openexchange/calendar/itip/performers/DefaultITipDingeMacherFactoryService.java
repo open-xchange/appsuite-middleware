@@ -66,6 +66,8 @@ import com.openexchange.calendar.itip.sender.MailSenderService;
  */
 public class DefaultITipDingeMacherFactoryService implements ITipDingeMacherFactoryService {
 
+    public static final Integer RANKING = 0;
+
     private final EnumMap<ITipAction, ITipDingeMacher> macherRegistry = new EnumMap<ITipAction, ITipDingeMacher>(ITipAction.class);
 
     public DefaultITipDingeMacherFactoryService(CalendarITipIntegrationUtility util, MailSenderService sender, ITipMailGeneratorFactory generators) {

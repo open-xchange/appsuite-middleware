@@ -33,7 +33,8 @@ Import-Package: com.openexchange.tools.ssl,
  org.osgi.framework,
  org.slf4j,
  sun.security.util
-Export-Package: com.sun.mail.auth;version="1.5.2",
+Export-Package: com.boxbe.pub.email,
+ com.sun.mail.auth;version="1.5.2",
  com.sun.mail.dsn;version="1.5.2",
  com.sun.mail.handlers;version="1.5.2";
   uses:="javax.activation,
@@ -106,7 +107,8 @@ Export-Package: com.sun.mail.auth;version="1.5.2",
  net.freeutils.tnef,
  net.freeutils.tnef.mime,
  net.freeutils.tnef.msg
-Bundle-ClassPath: lib/libidn-1.9.jar,
+Bundle-ClassPath: lib/EmailAddress.jar,
+ lib/libidn-1.9.jar,
  lib/tnef-1.8.0.jar,
  .
 Bundle-Activator: javax.mail.osgi.JavaMailActivator

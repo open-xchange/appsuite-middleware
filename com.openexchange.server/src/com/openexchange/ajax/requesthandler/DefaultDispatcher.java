@@ -284,14 +284,20 @@ public class DefaultDispatcher implements Dispatcher {
                 final Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
 
                 while (iterator.hasNext()) {
-                    final AJAXActionCustomizer customizer = iterator.next();
+                    AJAXActionCustomizer customizer = iterator.next();
                     try {
-                        final AJAXRequestResult modified = customizer.outgoing(modifiedRequestData, result, session);
+                        AJAXRequestResult modified = customizer.outgoing(modifiedRequestData, result, session);
                         if (modified != null) {
                             result = modified;
+
+                            // Check (again) for direct result type
+                            if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
+                                // No further processing
+                                return result;
+                            }
                         }
                         iterator.remove();
-                    } catch (final FlowControl.Later l) {
+                    } catch (FlowControl.Later l) {
                         // Remains in list and is therefore retried
                     }
                 }
@@ -364,7 +370,8 @@ public class DefaultDispatcher implements Dispatcher {
                         } else {
                             sb.append('&');
                         }
-                        sb.append(entry.getKey()).append('=').append(entry.getValue());
+                        String value = LogProperties.getSanitizedValue(entry.getKey(), entry.getValue());
+                        sb.append(entry.getKey()).append('=').append(value);
                     }
                     sb.append('"');
                     LogProperties.putProperty(LogProperties.Name.SERVLET_QUERY_STRING, sb.toString());

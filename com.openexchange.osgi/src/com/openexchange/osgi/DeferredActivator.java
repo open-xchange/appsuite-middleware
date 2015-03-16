@@ -100,6 +100,17 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      */
     protected static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];
 
+    private static final class ReferencedService<S> {
+        final ServiceReference<S> reference;
+        final S service;
+
+        ReferencedService(S service, ServiceReference<S> reference) {
+            super();
+            this.service = service;
+            this.reference = reference;
+        }
+    }
+
     private <S> DeferredServiceTracker<S> newDeferredTracker(final BundleContext context, final Class<S> clazz, final int index) {
         return new DeferredServiceTracker<S>(context, clazz, index);
     }
@@ -109,7 +120,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         private static final String SERVICE_RANKING = Constants.SERVICE_RANKING;
 
         private final Class<? extends S> clazz;
-
         private final int index;
 
         /**
@@ -119,62 +129,69 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
          * @param clazz The service's clazz
          * @param index The index
          */
-        protected DeferredServiceTracker(final BundleContext context, final Class<S> clazz, final int index) {
+        protected DeferredServiceTracker(BundleContext context, Class<S> clazz, int index) {
             super(context, clazz, null);
             this.clazz = clazz;
             this.index = index;
         }
 
         @Override
-        public S addingService(final ServiceReference<S> reference) {
-            final S service = super.addingService(reference);
-            // Get provider
-            ServiceProvider<S> serviceProvider = (ServiceProvider<S>) services.get(clazz);
-            if (null == serviceProvider) {
-                ServiceProvider<S> newProvider = new DefaultServiceProvider<S>();
-                serviceProvider = (ServiceProvider<S>) services.putIfAbsent(clazz, newProvider);
+        public S addingService(ServiceReference<S> reference) {
+            S service = super.addingService(reference);
+            try {
+                // Get provider
+                ServiceProvider<S> serviceProvider = (ServiceProvider<S>) services.get(clazz);
                 if (null == serviceProvider) {
-                    serviceProvider = newProvider;
-                }
-            }
-            // Add service to provider
-            int ranking = 0;
-            {
-                Object oRanking = reference.getProperty(SERVICE_RANKING);
-                if (null != oRanking) {
-                    try {
-                        ranking = Integer.parseInt(oRanking.toString().trim());
-                    } catch (NumberFormatException e) {
-                        ranking = 0;
+                    ServiceProvider<S> newProvider = new DefaultServiceProvider<S>();
+                    serviceProvider = (ServiceProvider<S>) services.putIfAbsent(clazz, newProvider);
+                    if (null == serviceProvider) {
+                        serviceProvider = newProvider;
                     }
                 }
+
+                // Add service to provider
+                int ranking = 0;
+                {
+                    Object oRanking = reference.getProperty(SERVICE_RANKING);
+                    if (null != oRanking) {
+                        try {
+                            ranking = Integer.parseInt(oRanking.toString().trim());
+                        } catch (NumberFormatException e) {
+                            ranking = 0;
+                        }
+                    }
+                }
+                serviceProvider.addService(service, ranking);
+
+                // Signal availability
+                signalAvailability(index, clazz);
+                updateServiceState();
+                return service;
+            } catch (Exception e) {
+                LOG.error("Failed to add service {}", service.getClass().getName(), e);
+                context.ungetService(reference);
+                return null;
             }
-            serviceProvider.addService(service, ranking);
-            /*
-             * Signal availability
-             */
-            signalAvailability(index, clazz);
-            updateServiceState();
-            return service;
         }
 
         @Override
-        public void removedService(final org.osgi.framework.ServiceReference<S> reference, final S service) {
-            /*
-             * Signal unavailability
-             */
+        public void removedService(org.osgi.framework.ServiceReference<S> reference, S service) {
+            // Signal unavailability
             signalUnavailability(index, clazz);
-            /*
-             * ... and remove from services
-             */
+
+            // ... and remove from services
+            ConcurrentMap<Class<?>, ServiceProvider<?>> services = DeferredActivator.this.services;
             if (services != null) {
                 services.remove(clazz);
             }
+
             updateServiceState();
             super.removedService(reference, service);
         }
 
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------ //
 
     /**
      * An atomic boolean to keep track of started/stopped status.
@@ -207,11 +224,17 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     protected ConcurrentMap<Class<?>, ServiceProvider<?>> services;
 
     /**
+     * Additionally fetched services.
+     */
+    protected final ConcurrentMap<Class<?>, ReferencedService<?>> additionalServices;
+
+    /**
      * Initializes a new {@link DeferredActivator}.
      */
     protected DeferredActivator() {
         super();
         started = new AtomicBoolean();
+        additionalServices = new ConcurrentHashMap<Class<?>, ReferencedService<?>>(6);
     }
 
     /**
@@ -298,9 +321,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * Resets this deferred activator's members.
      */
     private final void reset() {
+        // Close trackers
         if (null != neededServiceTrackers) {
             for (int i = 0; i < neededServiceTrackers.length; i++) {
-                final ServiceTracker<?, ?> tracker = neededServiceTrackers[i];
+                ServiceTracker<?, ?> tracker = neededServiceTrackers[i];
                 if (tracker != null) {
                     tracker.close();
                     neededServiceTrackers[i] = null;
@@ -310,11 +334,21 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
         availability = 0;
         allAvailable = -1;
+
+        // Unget additional services
+        for (ReferencedService<?> referencedService : additionalServices.values()) {
+            context.ungetService(referencedService.reference);
+        }
+        additionalServices.clear();
+
+        // Empty tracked services
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null != services) {
             services.clear();
             this.services = null;
         }
+
+        // Release context reference
         context = null;
     }
 
@@ -333,6 +367,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         final List<String> missing = new ArrayList<String>(classes.length);
         final List<String> present = new ArrayList<String>(classes.length);
 
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         for (final Class<?> clazz : classes) {
             if (services != null && services.containsKey(clazz)) {
                 present.add(clazz.getName());
@@ -386,7 +421,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     /*
                      * Shut-down
                      */
-                    reset();
                     if (Bundle.STARTING == bundle.getState()) {
                         /*
                          * Bundle cannot be stopped by same thread if still in STARTING state
@@ -401,6 +435,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     } else {
                         shutDownBundle(bundle, errorBuilder);
                     }
+                    reset();
                 }
             }
         }
@@ -520,6 +555,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      */
     @Override
     public <S extends Object> S getService(final Class<? extends S> clazz) {
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services) {
             /*
              * Services not initialized
@@ -540,13 +576,34 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         return clazz.cast(service);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
-        final ServiceReference<? extends S> serviceReference = context.getServiceReference(clazz);
-        if (serviceReference == null) {
-        	return null;
+        ServiceProvider<?> serviceProvider = services.get(clazz);
+        if (null != serviceProvider) {
+            Object service = serviceProvider.getService();
+            if (null != service) {
+                return clazz.cast(service);
+            }
         }
-        return context.getService(serviceReference);
+
+        ReferencedService<S> referencedService = (ReferencedService<S>) additionalServices.get(clazz);
+        if (null == referencedService) {
+            ServiceReference<S> serviceReference = (ServiceReference<S>) context.getServiceReference(clazz);
+            if (serviceReference == null) {
+                return null;
+            }
+
+            S service = context.getService(serviceReference);
+            ReferencedService<S> newReferencedService = new ReferencedService<S>(service, serviceReference);
+            referencedService = (ReferencedService<S>) additionalServices.putIfAbsent(clazz, newReferencedService);
+            if (null == referencedService) {
+                referencedService = newReferencedService;
+            } else {
+                context.ungetService(serviceReference);
+            }
+        }
+        return referencedService.service;
     }
 
     /**
@@ -558,6 +615,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @return <code>true</code> if service is added; otherwise <code>false</code> if not initialized or such a service already exists
      */
     protected <S> boolean addService(final Class<S> clazz, final S service) {
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services || !clazz.isInstance(service)) {
             /*
              * Services not initialized
@@ -576,6 +634,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @return <code>true</code> if service is added; otherwise <code>false</code> if not initialized or such a service already exists
      */
     protected <S> boolean addServiceAlt(final Class<? extends S> clazz, final S service) {
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services || !clazz.isInstance(service)) {
             /*
              * Services not initialized
@@ -593,6 +652,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @return <code>true</code> if service is removes; otherwise <code>false</code> if not initialized or absent
      */
     protected <S> boolean removeService(final Class<? extends S> clazz) {
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services) {
             /*
              * Services not initialized

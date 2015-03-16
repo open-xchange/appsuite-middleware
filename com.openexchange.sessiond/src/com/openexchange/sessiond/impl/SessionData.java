@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -81,12 +82,17 @@ final class SessionData {
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionData.class);
 
     private final int maxSessions;
+
     private final long randomTokenTimeout;
+
     private final boolean autoLogin;
 
     private final LinkedList<SessionContainer> sessionList;
+
     private final Map<String, String> randoms;
+
     private final Lock rlock;
+
     private final Lock wlock;
 
     private final LinkedList<SessionMap> longTermList;
@@ -96,15 +102,18 @@ final class SessionData {
     private final UserRefCounter longTermUserGuardian = new UserRefCounter();
 
     private final Lock wlongTermLock;
+
     private final Lock rlongTermLock;
 
     /**
      * Map to remember if there is already a task that should move the session to the first container.
      */
     private final ConcurrentMap<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
+
     private final AtomicReference<ThreadPoolService> threadPoolService;
 
     private final AtomicReference<TimerService> timerService;
+
     protected Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
 
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
@@ -159,23 +168,41 @@ final class SessionData {
         // A write access to lists
         wlock.lock();
         try {
+            List<SessionControl> removedSessions = new LinkedList<SessionControl>(sessionList.removeLast().getSessionControls());
             sessionList.addFirst(new SessionContainer());
-            final List<SessionControl> retval = new ArrayList<SessionControl>(maxSessions);
-            retval.addAll(sessionList.removeLast().getSessionControls());
-            if (autoLogin) {
+
+            if (autoLogin && false == removedSessions.isEmpty()) {
+                List<SessionControl> transientSessions = null;
+
                 wlongTermLock.lock();
                 try {
-                    final SessionMap first = longTermList.getFirst();
-                    for (final SessionControl control : retval) {
+                    SessionMap first = longTermList.getFirst();
+                    for (Iterator<SessionControl> it = removedSessions.iterator(); it.hasNext();) {
+                        final SessionControl control = it.next();
                         final SessionImpl session = control.getSession();
-                        first.putBySessionId(session.getSessionID(), control);
-                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                        if (false == session.isTransient()) {
+                            // A regular, non-transient session
+                            first.putBySessionId(session.getSessionID(), control);
+                            longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                        } else {
+                            // A transient session -- do not move to long-term container
+                            it.remove();
+                            if (null == transientSessions) {
+                                transientSessions = new LinkedList<SessionControl>();
+                            }
+                            transientSessions.add(control);
+                        }
                     }
                 } finally {
                     wlongTermLock.unlock();
                 }
+
+                if (null != transientSessions) {
+                    SessionHandler.postContainerRemoval(transientSessions, true);
+                }
             }
-            return retval;
+
+            return removedSessions;
         } finally {
             wlock.unlock();
         }
@@ -185,7 +212,7 @@ final class SessionData {
         wlongTermLock.lock();
         try {
             longTermList.addFirst(new SessionMap(256));
-            final List<SessionControl> retval = new ArrayList<SessionControl>(longTermList.removeLast().values());
+            final List<SessionControl> retval = new LinkedList<SessionControl>(longTermList.removeLast().values());
             for (final SessionControl sessionControl : retval) {
                 final SessionImpl session = sessionControl.getSession();
                 longTermUserGuardian.remove(session.getUserId(), session.getContextId());
@@ -231,33 +258,6 @@ final class SessionData {
         }
     }
 
-    /**
-     * Checks if given user in specified context has an active session kept in session container(s)
-     *
-     * @param userId The user ID
-     * @param contextId The user's context ID
-     * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
-     */
-    boolean isUserActive(final int userId, final int contextId) {
-        // A read-only access to session list
-        rlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                if (container.containsUser(userId, contextId)) {
-                    return true;
-                }
-            }
-        } finally {
-            rlock.unlock();
-        }
-        rlongTermLock.lock();
-        try {
-            return hasLongTermSession(userId, contextId);
-        } finally {
-            rlongTermLock.unlock();
-        }
-    }
-
     private final boolean hasLongTermSession(final int userId, final int contextId) {
         return this.longTermUserGuardian.contains(userId, contextId);
     }
@@ -268,7 +268,7 @@ final class SessionData {
 
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
         // Removing sessions is a write operation.
-        final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final List<SessionControl> retval = new LinkedList<SessionControl>();
         wlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -305,7 +305,7 @@ final class SessionData {
 
     List<SessionControl> removeContextSessions(final int contextId) {
         // Removing sessions is a write operation.
-        final List<SessionControl> list = new ArrayList<SessionControl>();
+        final List<SessionControl> list = new LinkedList<SessionControl>();
         wlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -337,6 +337,50 @@ final class SessionData {
         } finally {
             wlongTermLock.unlock();
         }
+        return list;
+    }
+
+    /**
+     * Removes all sessions belonging to given contexts out of long- and short-term container.
+     *
+     * @param contextIds - Set with the context identifiers to remove sessions for
+     * @return List of {@link SessionControl} objects for each handled session
+     */
+    List<SessionControl> removeContextSessions(final Set<Integer> contextIds) {
+        // Removing sessions is a write operation.
+        final List<SessionControl> list = new ArrayList<SessionControl>();
+        wlock.lock();
+        try {
+            for (final SessionContainer container : sessionList) {
+                list.addAll(container.removeSessionsByContexts(contextIds));
+            }
+            for (final SessionControl control : list) {
+                unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID());
+            }
+        } finally {
+            wlock.unlock();
+        }
+
+        wlongTermLock.lock();
+        for (int contextId : contextIds) {
+            if (!hasLongTermSession(contextId)) {
+                continue;
+            }
+            for (final SessionMap longTerm : longTermList) {
+                final Iterator<SessionControl> iter = longTerm.values().iterator();
+                while (iter.hasNext()) {
+                    final SessionControl control = iter.next();
+                    final Session session = control.getSession();
+                    if (session.getContextId() == contextId) {
+                        longTerm.removeBySessionId(session.getSessionID());
+                        longTermUserGuardian.remove(session.getUserId(), contextId);
+                        list.add(control);
+                    }
+                }
+            }
+        }
+        wlongTermLock.unlock();
+
         return list;
     }
 
@@ -422,7 +466,7 @@ final class SessionData {
 
     SessionControl[] getUserSessions(final int userId, final int contextId) {
         // A read-only access to session list
-        final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final List<SessionControl> retval = new LinkedList<SessionControl>();
         // Short term ones
         rlock.lock();
         try {
@@ -748,7 +792,7 @@ final class SessionData {
 
     List<SessionControl> getShortTermSessions() {
         // A read.only access
-        final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final List<SessionControl> retval = new LinkedList<SessionControl>();
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -761,7 +805,7 @@ final class SessionData {
     }
 
     List<SessionControl> getLongTermSessions() {
-        final List<SessionControl> retval = new ArrayList<SessionControl>();
+        final List<SessionControl> retval = new LinkedList<SessionControl>();
         rlongTermLock.lock();
         try {
             for (final SessionMap longTermMap : longTermList) {
@@ -878,6 +922,7 @@ final class SessionData {
         if (null == threadPoolService) {
             final Move2FirstContainerTask tmp = task;
             new Thread(new Runnable() {
+
                 @Override
                 public void run() {
                     try {
@@ -902,7 +947,9 @@ final class SessionData {
     private class Move2FirstContainerTask extends AbstractTask<Void> {
 
         private final String sessionId;
+
         private final boolean longTerm;
+
         private boolean deactivated = false;
 
         Move2FirstContainerTask(final String sessionId, final boolean longTerm) {

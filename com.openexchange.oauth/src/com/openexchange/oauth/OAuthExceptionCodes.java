@@ -143,7 +143,107 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * There was a problem while creating a connection to the remote service.
      */
-    CONNECT_ERROR("There was a problem while creating a connection to the remote service.", CATEGORY_CONNECTIVITY, 18, OAuthExceptionMessages.CONNECT_ERROR_MSG);
+    CONNECT_ERROR("There was a problem while creating a connection to the remote service.", CATEGORY_CONNECTIVITY, 18, OAuthExceptionMessages.CONNECT_ERROR_MSG),
+
+    /**
+     * The user needs to give additional %1$s oauth permissions before the consumer is allowed access to the resource.
+     */
+    OAUTH_PROBLEM_ADDITIONAL_AUTHORIZATION_REQUIRED("The user needs to give additional %1$s oauth permissions before the consumer is allowed access to the resource.", CATEGORY_TRY_AGAIN, 19, OAuthExceptionMessages.OAUTH_PROBLEM_ADDITIONAL_AUTHORIZATION_REQUIRED_MSG),
+
+    /**
+     * The %1$s oauth consumer key is temporarily unacceptable to the service provider.
+     */
+    OAUTH_PROBLEM_CONSUMER_KEY_REFUSED("The %1$s oauth consumer key is temporarily unacceptable to the Service Provider.", CATEGORY_ERROR, 20, null),
+
+    /**
+     * The %1$s oauth consumer key is permanently unacceptable to the service provider.
+     */
+    OAUTH_PROBLEM_CONSUMER_KEY_REJECTED("The %1$s oauth consumer key is permanently unacceptable to the service provider.", CATEGORY_ERROR, 21, null),
+
+    /**
+     * The %1$s oauth consumer key is unknown to the service provider.
+     */
+    OAUTH_PROBLEM_CONSUMER_KEY_UNKNOWN("The %1$s oauth consumer key is unknown to the service provider.", CATEGORY_ERROR, 22, null),
+
+    /**
+     * The oauth nonce value was used in a previous request, and consequently can't be used now.
+     */
+    OAUTH_PROBLEM_NONCE_USED("The oauth nonce value was used in a previous request, and consequently can't be used now.", CATEGORY_ERROR, 23, null),
+
+    /**
+     * A required parameter wasn't received. Required parameter: %1$s.
+     */
+    OAUTH_PROBLEM_PARAMETER_ABSENT("A required parameter wasn't received. Required parameter: %1$s.", CATEGORY_ERROR, 24, null),
+
+    /**
+     * An unexpected parameter was received. Rejected parameter: %1$s.
+     */
+    OAUTH_PROBLEM_PARAMETER_REJECTED("An unexpected parameter was received. Rejected parameter: %1$s.", CATEGORY_ERROR, 25, null),
+
+    /**
+     * The user refused to permit this Consumer to access the protected resources.
+     */
+    OAUTH_PROBLEM_PERMISSION_DENIED("The user refused to permit this Consumer to access the protected resources.", CATEGORY_PERMISSION_DENIED, 26, null),
+
+    /**
+     * The user hasn't decided whether to permit this consumer to access protected resources.
+     */
+    OAUTH_PROBLEM_PERMISSION_UNKNOWN("The user hasn't decided whether to permit this consumer to access protected resources", CATEGORY_PERMISSION_DENIED, 27, null),
+
+    /**
+     * The oauth signature doesn't match the one computed by the service provider.
+     */
+    OAUTH_PROBLEM_SIGNATURE_INVALID("The oauth signature doesn't match the one computed by the service provider.", CATEGORY_ERROR, 28, null),
+
+    /**
+     * The oauth signature method is unacceptable to the service provider
+     */
+    OAUTH_PROBLEM_SIGNATURE_METHOD_REJECTED("The oauth signature method is unacceptable to the service provider", CATEGORY_ERROR, 29, null),
+
+    /**
+     * The oauth timestamp value is unacceptable to the service provider. Acceptable timestamp: %1$s.
+     */
+    OAUTH_PROBLEM_TIMESTAMP_REFUSED("The oauth timestamp value is unacceptable to the service provider. Acceptable timestamp: %1$s.",CATEGORY_ERROR, 30, null),
+
+    /**
+     * The %1$s oauth token has expired.
+     */
+    OAUTH_PROBLEM_TOKEN_EXPIRED("The %1$s oauth token has expired.", CATEGORY_TRY_AGAIN, 31, OAuthExceptionMessages.TOKEN_EXPIRED_MSG),
+
+    /**
+     * The %1$s oauth token is unacceptable to the service provider.
+     */
+    OAUTH_PROBLEM_TOKEN_REJECTED("The %1$s oauth token is unacceptable to the service provider.", CATEGORY_TRY_AGAIN, 32, OAuthExceptionMessages.OAUTH_PROBLEM_TOKEN_REJECTED_MSG),
+
+    /**
+     * The %1$s oauth token has been revoked.
+     */
+    OAUTH_PROBLEM_TOKEN_REVOKED("The %1$s oauth token has been revoked.", CATEGORY_TRY_AGAIN, 33, OAuthExceptionMessages.OAUTH_PROBLEM_TOKEN_REVOKED_MSG),
+
+    /**
+     * The oauth token has been consumed and can't be used any more.
+     */
+    OAUTH_PROBLEM_TOKEN_USED("The %1$s oauth token has been consumed and can't be used any more.", CATEGORY_TRY_AGAIN, 34, null),
+
+    /**
+     * The user is temporarily unacceptable to the service provider.
+     */
+    OAUTH_PROBLEM_USER_REFUSED("The user is temporarily unacceptable to %1$s.", CATEGORY_TRY_AGAIN, 35, null),
+
+    /**
+     * The oauth verifier is incorrect.
+     */
+    OAUTH_PROBLEM_VERIFIER_INVALID("The oauth verifier is incorrect.", CATEGORY_ERROR, 36, null),
+
+    /**
+     * The oauth version isn't supported by the service provider. Acceptable versions: %1$s.
+     */
+    OAUTH_PROBLEM_VERSION_REJECTED("The oauth version isn't supported by the service provider. Acceptable versions: %1$s", CATEGORY_ERROR, 37, null),
+
+    /**
+     * An unexpected OAuth problem occurred: %1$s
+     */
+    OAUTH_PROBLEM_UNEXPECTED("An unexpected OAuth problem occurred: %1$s", CATEGORY_ERROR, 38, null);
 
     private final Category category;
     private final int number;
@@ -220,4 +320,5 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }

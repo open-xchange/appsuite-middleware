@@ -59,7 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
-import com.openexchange.tools.servlet.RateLimitedException;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
  * {@link WebDavServlet} - An abstract class for servlets serving WebDAV requests

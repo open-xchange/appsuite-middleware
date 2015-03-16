@@ -52,8 +52,6 @@ package com.openexchange.file.storage.googledrive.access;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.file.storage.googledrive.osgi.Services;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link GoogleDriveAccessRegistry}
@@ -126,21 +124,17 @@ public final class GoogleDriveAccessRegistry {
      * @return <code>true</code> if a Google Drive access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeAccessIfNoSessionAvailable(final int contextId, final int userId) {
-        final SessiondService sessiondService = Services.getService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            /*
-             * No sessions left for user
-             */
-            final ConcurrentMap<String, GoogleDriveAccess> inner = map.remove(SimpleKey.valueOf(contextId, userId));
-            if (null == inner || inner.isEmpty()) {
-                return false;
-            }
-            for (final GoogleDriveAccess access : inner.values()) {
-                access.dispose();
-            }
-            return !inner.isEmpty();
+        /*
+         * No sessions left for user
+         */
+        final ConcurrentMap<String, GoogleDriveAccess> inner = map.remove(SimpleKey.valueOf(contextId, userId));
+        if (null == inner || inner.isEmpty()) {
+            return false;
         }
-        return false;
+        for (final GoogleDriveAccess access : inner.values()) {
+            access.dispose();
+        }
+        return !inner.isEmpty();
     }
 
     /**

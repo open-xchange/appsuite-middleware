@@ -645,7 +645,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("", e);
                 }
             }
-            final boolean certainPassword = false; //("10.20.30.205".equals(config.getServer()) && 17 == session.getUserId());
+            boolean certainPassword = false; //("dovecot.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
             if (certainPassword) {
                 tmpPass = "secret";
             }
@@ -926,7 +926,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         {
             Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
             clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
-            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), session.getSessionID() + "-" + imapStore.hashCode());
+            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), IMAPClientParameters.generateSessionInformation(session, imapStore));
             clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
             clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
             imapStore.setClientParameters(clientParams);
@@ -958,10 +958,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return imapStore;
     }
 
-    private IMAPStore borrowIMAPStore(javax.mail.Session imapSession, String server, int port, String login, String pw, boolean propagateClientIp) throws MessagingException, OXException {
-        return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, propagateClientIp);
-    }
-
     /**
      * This method triggers the connect to the IMAP server on the given {@link IMAPStore} object.
      * Furthermore this method contains a thread synchronization if Kerberos is used. If the Kerberos subject is found in the properties of
@@ -985,6 +981,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapStore.connect(server, port, login, pw);
             }
         }
+    }
+
+    private IMAPStore borrowIMAPStore(javax.mail.Session imapSession, String server, int port, String login, String pw, boolean propagateClientIp) throws MessagingException, OXException {
+        return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, propagateClientIp);
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws OXException, IMAPException {

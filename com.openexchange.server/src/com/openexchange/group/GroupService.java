@@ -69,9 +69,10 @@ public interface GroupService {
      * @param ctx Context.
      * @param user User for permission checks.
      * @param group group to create.
+     * @param checkI18nNames Whether to check i18n names
      * @throws OXException if some problem occurs.
      */
-    void create(Context ctx, User user, Group group) throws OXException;
+    void create(Context ctx, User user, Group group, boolean checkI18nNames) throws OXException;
 
     /**
      * Updates a group.
@@ -80,9 +81,10 @@ public interface GroupService {
      * @param user User for permission checks.
      * @param group group to update.
      * @param lastRead timestamp when the group to update has last been read.
+     * @param checkI18nNames Whether to check i18n names
      * @throws OXException if some problem occurs.
      */
-    void update(Context ctx, User user, Group group, Date lastRead) throws OXException;
+    void update(Context ctx, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException;
 
     /**
      * Deletes a group.

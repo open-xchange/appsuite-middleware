@@ -72,25 +72,65 @@ public class ActionCommand extends ControlOrActionCommand {
      * string> keep discard
      */
 
+    /**
+     * <p>
+     * Enum Arguments:
+     * </p>
+     * <ul>
+     * <li>Command name</li>
+     * <li>Minimum number of arguments</li>
+     * <li>Tag arguments</li>
+     * <li>JSON name</li>
+     * <li>Required directive</li>
+     * </ul>
+     */
     public enum Commands {
         KEEP("keep", 0, new Hashtable<String, Integer>(), "keep", Collections.<String> emptyList()),
         DISCARD("discard", 0, new Hashtable<String, Integer>(), "discard", Collections.<String> emptyList()),
         REDIRECT("redirect", 1, new Hashtable<String, Integer>(), "redirect", Collections.<String> emptyList()),
         FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "move", Collections.singletonList("fileinto")),
-        ADDHEADER("addheader", 0, addheadertags(), "addheader", Collections.singletonList("editheader")),
         REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", Collections.singletonList("reject")),
         STOP("stop", 0, new Hashtable<String, Integer>(), "stop", Collections.<String> emptyList()),
         VACATION("vacation", 1, vacationtags(), "vacation", Collections.singletonList("vacation")),
         ENOTIFY("notify", 1, enotifytags(), "notify", Collections.singletonList("enotify")),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
-        PGP_ENCRYPT("pgp_encrypt", 0, pgp_encrypt_tags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt"));
+        PGP_ENCRYPT("pgp_encrypt", 0, pgp_encrypt_tags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
+        ADDHEADER("addheader", 2, addheadertags(), "addheader", Collections.singletonList("editheader")),
+        DELETEHEADER("deleteheader", 1, deleteheadertags(), "deleteheader", Collections.singletonList("editheader")),
+        SET("set", 2, variables_tags(), "set", Collections.singletonList("variables"));
 
         private static Hashtable<String, Integer> addheadertags() {
             /*
+             * http://tools.ietf.org/html/rfc5293
+             *
              * "addheader" [":last"] <field-name: string> <value: string>
              */
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
-            retval.put(":last", Integer.valueOf(2));
+            retval.put(":last", Integer.valueOf(0));
+            return retval;
+        }
+
+        private static Hashtable<String, Integer> deleteheadertags() {
+            /*
+             * http://tools.ietf.org/html/rfc5293
+             *
+             * "deleteheader" [":index" <fieldno: number> [":last"]]
+             *     [COMPARATOR] [MATCH-TYPE]
+             *      <field-name: string>
+             *     [<value-patterns: string-list>]
+             */
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
+            return retval;
+        }
+
+        private static Hashtable<String, Integer> variables_tags() {
+            /*
+             * http://tools.ietf.org/html/rfc5229
+             *
+             *    Usage:  ":lower" / ":upper" / ":lowerfirst" /
+             *    ":upperfirst" / ":quotewildcard" / ":length"
+             */
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             return retval;
         }
 
@@ -231,8 +271,10 @@ public class ActionCommand extends ControlOrActionCommand {
                     this.tagarguments.put(tag, new ArrayList<String>());
                 }
             } else {
-                if (i != (size - 1)) {
-                    throw new SieveException("The main argument has to stand at the last position in rule: " + this.toString());
+                for (String tag : command.getTagargs().keySet()) {
+                    if (command.getTagargs().get(tag) > 0 && i == 0) {
+                        throw new SieveException("The main arguments have to stand after the tag argument in the rule: " + this.toString());
+                    }
                 }
             }
         }
@@ -266,10 +308,10 @@ public class ActionCommand extends ControlOrActionCommand {
             }
         }
         final int counttags = counttags();
+
         if (null != this.arguments && this.command.getMinNumberOfArguments() >= 0 && (this.arguments.size() - counttags) < this.command.getMinNumberOfArguments()) {
             throw new SieveException("The number of arguments for " + this.command.getCommandname() + " is not valid. ; " + this.toString());
         }
-
     }
 
     /**

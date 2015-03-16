@@ -52,8 +52,6 @@ package com.openexchange.file.storage.dropbox.access;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link DropboxOAuthAccessRegistry}
@@ -139,21 +137,17 @@ public final class DropboxOAuthAccessRegistry {
      * @return <code>true</code> if a Dropbox OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeAccessIfLast(final int contextId, final int userId) {
-        final SessiondService sessiondService = DropboxServices.getService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            /*
-             * No sessions left for user
-             */
-            final ConcurrentMap<String, DropboxOAuthAccess> inner = map.remove(SimpleKey.valueOf(contextId, userId));
-            if (null == inner || inner.isEmpty()) {
-                return false;
-            }
-            for (final DropboxOAuthAccess dropboxOAuthAccess : inner.values()) {
-                dropboxOAuthAccess.dispose();
-            }
-            return !inner.isEmpty();
+        /*
+         * No sessions left for user
+         */
+        final ConcurrentMap<String, DropboxOAuthAccess> inner = map.remove(SimpleKey.valueOf(contextId, userId));
+        if (null == inner || inner.isEmpty()) {
+            return false;
         }
-        return false;
+        for (final DropboxOAuthAccess dropboxOAuthAccess : inner.values()) {
+            dropboxOAuthAccess.dispose();
+        }
+        return !inner.isEmpty();
     }
 
     /**

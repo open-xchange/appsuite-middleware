@@ -2,10 +2,22 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange SessionD
 Bundle-SymbolicName: com.openexchange.sessiond
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.authentication,
+Import-Package: com.hazelcast.config,
+ com.hazelcast.core,
+ com.hazelcast.instance,
+ com.hazelcast.logging,
+ com.hazelcast.map,
+ com.hazelcast.multimap,
+ com.hazelcast.nio,
+ com.hazelcast.nio.serialization,
+ com.hazelcast.query,
+ com.hazelcast.queue,
+ com.hazelcast.transaction,
+ com.hazelcast.util,
+ com.openexchange.authentication,
  com.openexchange.config,
  com.openexchange.context,
  com.openexchange.crypto,
@@ -13,6 +25,8 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
+ com.openexchange.hazelcast.configuration,
+ com.openexchange.hazelcast.serialization,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
@@ -21,7 +35,9 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
+ com.openexchange.sessiond.event,
  com.openexchange.sessionstorage,
+ com.openexchange.sessionstorage.hazelcast.serialization,
  com.openexchange.threadpool,
  com.openexchange.timer,
  gnu.trove,
@@ -29,10 +45,10 @@ Import-Package: com.openexchange.authentication,
  gnu.trove.map.hash,
  gnu.trove.procedure,
  javax.management,
+ org.apache.commons.lang,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.sessiond.osgi.SessiondActivator
-Export-Package: com.openexchange.sessiond.event

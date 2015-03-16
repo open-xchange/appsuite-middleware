@@ -266,12 +266,61 @@ public class Strings {
     }
 
     /**
-     * Splits given string by comma separator.
+     * Splits given string by tokens/quoted-strings.
      *
-     * @param s The string to split
+     * @param str The string to split
+     * @return The tokens/quoted-strings
+     */
+    public static String[] splitByTokensOrQuotedStrings(String str) {
+        if (null == str) {
+            return null;
+        }
+        List<String> splitted = new LinkedList<String>();
+        int inQuotes = 0;
+        boolean escaped = false;
+        StringBuilder s = new StringBuilder(16);
+
+        int length = str.length();
+        for (int i = 0; i < length; i++) {
+            char c = str.charAt(i);
+            if (Strings.isWhitespace(c)) {
+                if (inQuotes > 0) {
+                    if (inQuotes == c && !escaped) {
+                        inQuotes = 0;
+                    }
+                    s.append(c);
+                    escaped = false;
+                } else {
+                    if (s.length() > 0) {
+                        splitted.add(s.toString().trim());
+                        s.setLength(0);
+                    }
+                }
+            } else if ('\\' == c) {
+                escaped = !escaped;
+                s.append(c);
+            } else {
+                if (('"' == c || '\'' == c) && !escaped) {
+                    inQuotes = inQuotes > 0 ? 0 : c;
+                }
+                s.append(c);
+                escaped = false;
+            }
+        }
+        if (s.length() > 0) {
+            splitted.add(s.toString().trim());
+        }
+        return splitted.toArray(new String[splitted.size()]);
+    }
+
+    /**
+     * Splits given string by specifies delimiter.
+     *
+     * @param str The string to split
+     * @param delim The delimiting character
      * @return The split string
      */
-    public static String[] splitByCommaNotInQuotes(String str) {
+    public static String[] splitByDelimNotInQuotes(String str, char delim) {
         if (null == str) {
             return null;
         }
@@ -283,7 +332,7 @@ public class Strings {
         int length = str.length();
         for (int i = 0; i < length; i++) {
             char c = str.charAt(i);
-            if (c == ',') {
+            if (c == delim) {
                 if (inQuotes) {
                     if ('"' == c && !escaped) {
                         inQuotes = !inQuotes;
@@ -309,6 +358,16 @@ public class Strings {
         return splitted.toArray(new String[splitted.size()]);
     }
 
+    /**
+     * Splits given string by comma separator.
+     *
+     * @param str The string to split
+     * @return The split string
+     */
+    public static String[] splitByCommaNotInQuotes(String str) {
+        return splitByDelimNotInQuotes(str, ',');
+    }
+
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
 
     /**
@@ -330,13 +389,28 @@ public class Strings {
      * Splits given string by dots.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByDots(final String s) {
         if (null == s) {
             return null;
         }
         return P_SPLIT_DOT.split(s, 0);
+    }
+
+    private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
+
+    /**
+     * Splits given string by ampersands <code>'&'</code>.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByAmps(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_AMP.split(s, 0);
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
@@ -417,6 +491,11 @@ public class Strings {
 
     /**
      * Replaces control characters with space characters.
+     * <p>
+     * A subsequent range of control characters gets replaced with a whitespace; e.g.
+     * <pre>
+     * <code>"\r\n\t"</code> -&gt; <code>" "</code>
+     * </pre>
      *
      * @param str The string to sanitize
      * @return The sanitized string
@@ -1082,6 +1161,33 @@ public class Strings {
             }
         }
         return string;
+    }
+
+    /**
+     * Converts specified wildcard string to a regular expression
+     *
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    public static String wildcardToRegex(String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
+                s.append('\\');
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
     private static boolean contains(char c, char[] charArray) {

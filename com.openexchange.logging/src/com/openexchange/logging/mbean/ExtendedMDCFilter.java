@@ -97,14 +97,14 @@ public class ExtendedMDCFilter extends TurboFilter {
         boolean loggerCheck = false;
         if (check) {
             for (String s : levels.keySet()) {
-                if (logger.getName().startsWith(s) && levels.get(s).isGreaterOrEqual(level)) {
+                if (logger.getName().startsWith(s) && level.levelInt <= levels.get(s).levelInt) {
                     loggerCheck = true;
                     break;
                 }
             }
         }
 
-        if ((check && levels.isEmpty()) || (check && loggerCheck)) {
+        if (check && loggerCheck) {
             for (Tuple t : tuples) {
                 String v = MDC.get(t.getKey());
                 if (v == null) {
@@ -147,6 +147,10 @@ public class ExtendedMDCFilter extends TurboFilter {
      */
     public void removeLogger(String loggerName) {
         levels.remove(loggerName);
+    }
+    
+    public boolean hasLoggers() {
+        return (levels.size() > 0);
     }
 
     /*

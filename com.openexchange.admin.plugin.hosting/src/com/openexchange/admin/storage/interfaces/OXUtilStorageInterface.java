@@ -314,7 +314,7 @@ public abstract class OXUtilStorageInterface {
     public abstract Database[] searchForDatabase(final String search_pattern) throws StorageException;
 
     /**
-     * Searchs for server matching given search_pattern
+     * Searches for server matching given search_pattern
      *
      * @param search_pattern
      *            a pattern to search for
@@ -323,5 +323,12 @@ public abstract class OXUtilStorageInterface {
      */
     public abstract Server[] searchForServer(final String search_pattern) throws StorageException;
 
-
+    /**
+     * Get the write pool identifier for the specified cluster
+     * 
+     * @param clusterId The cluster identifier
+     * @return The write pool identifier
+     * @throws StorageException
+     */
+    public abstract int getWritePoolIdForCluster(final int clusterId) throws StorageException;
 }

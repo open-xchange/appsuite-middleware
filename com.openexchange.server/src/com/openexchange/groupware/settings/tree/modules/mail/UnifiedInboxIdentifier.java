@@ -101,11 +101,11 @@ public class UnifiedInboxIdentifier implements PreferencesItemService {
                     if (id >= 0) {
                         setting.setSingleValue(MailFolderUtility.prepareFullname(id, "INBOX"));
                     } else {
-                        setting.setSingleValue("null");
+                        setting.setSingleValue(null);
                     }
                 } catch (final OXException e) {
                     LOG.warn("", e);
-                    setting.setSingleValue("null");
+                    setting.setSingleValue(null);
                     return;
                 }
 

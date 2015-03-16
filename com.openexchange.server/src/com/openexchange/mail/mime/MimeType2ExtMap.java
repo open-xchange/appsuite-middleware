@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime;
 
 import static com.openexchange.java.Strings.toLowerCase;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,7 +65,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.SystemConfig;
@@ -92,7 +90,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MimeType2ExtMap {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeType2ExtMap.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeType2ExtMap.class);
 
     private static volatile ConcurrentMap<String, String> typeMap;
 

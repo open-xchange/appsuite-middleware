@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippted RDB Bundle
 Bundle-SymbolicName: com.openexchange.snippet.rdb
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.snippet.rdb.osgi.RdbSnippetActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -15,6 +15,7 @@ Import-Package: com.openexchange.cache,
  com.openexchange.datatypes.genericonf,
  com.openexchange.datatypes.genericonf.storage,
  com.openexchange.exception,
+ com.openexchange.filemanagement,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,

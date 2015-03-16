@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -57,6 +56,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
@@ -104,9 +104,9 @@ public final class SessionImpl implements PutIfAbsent {
      * @param client The client type
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId,
-        final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash,
-        final String client, final boolean tranzient) {
+    public SessionImpl(int userId, String loginName, String password, int contextId, String sessionId,
+        String secret, String randomToken, String localIp, String login, String authId, String hash,
+        String client, boolean tranzient) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -371,7 +371,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setLocalIp(final String localIp, final boolean propagate) {
         this.localIp = localIp;
         if (propagate) {
-            final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 final String sessionId = this.sessionId;
                 Task<Void> c = new AbstractTask<Void>() {
@@ -453,7 +453,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setHash(final String hash, final boolean propagate) {
         this.hash = hash;
         if (propagate) {
-            final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 final String sessionId = this.sessionId;
                 Task<Void> c = new AbstractTask<Void>() {
@@ -510,7 +510,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setClient(final String client, final boolean propagate) {
         this.client = client;
         if (propagate) {
-            final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 final String sessionId = this.sessionId;
                 Task<Void> c = new AbstractTask<Void>() {

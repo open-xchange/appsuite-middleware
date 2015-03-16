@@ -56,7 +56,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
@@ -67,18 +66,15 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.Services;
 import com.openexchange.sessionstorage.hazelcast.Unregisterer;
-import com.openexchange.sessionstorage.hazelcast.portable.PortableSessionFactory;
-import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastSessionStorageActivator}
@@ -102,7 +98,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class, HazelcastConfigurationService.class, ConfigurationService.class };
+        return new Class<?>[] { ThreadPoolService.class, TimerService.class, HazelcastConfigurationService.class, ConfigurationService.class };
     }
 
     @Override
@@ -115,11 +111,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
             LOG.warn("com.openexchange.sessionstorage.hazelcast will be disabled due to disabled Hazelcast services");
         } else {
             /*
-             * create & register portable session factory
-             */
-            registerService(CustomPortableFactory.class, new PortableSessionFactory());
-            /*
-             * start session storage lifecycle to hazelcast instance, in case com.openexchange.sessionstorage.hazelcast is enabled
+             * start session storage life-cycle to Hazelcast instance, in case com.openexchange.sessionstorage.hazelcast is enabled
              */
             final boolean storageEnabled;
             {
@@ -130,6 +122,8 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
             if (storageEnabled) {
                 final BundleContext context = this.context;
                 final Unregisterer unregisterer = this;
+                trackService(SessiondService.class);
+                final ServiceLookup services = this;
                 ServiceTracker<HazelcastInstance, HazelcastInstance> hzSessionStorageRegistrationTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
                     private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
@@ -143,45 +137,12 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
                          * create & register session storage service
                          */
                         String sessionsMapName = discoverSessionsMapName(hazelcastInstance.getConfig());
-                        final HazelcastSessionStorageService sessionStorageService = new HazelcastSessionStorageService(sessionsMapName, unregisterer);
-                        sessionStorageRegistration = context.registerService(SessionStorageService.class, sessionStorageService, null);
+                        final HazelcastSessionStorageService sessionStorage = new HazelcastSessionStorageService(sessionsMapName, unregisterer);
+                        sessionStorageRegistration = context.registerService(SessionStorageService.class, sessionStorage, null);
                         /*
                          * create & register event handler
                          */
-                        final EventHandler eventHandler = new EventHandler() {
-
-                            @Override
-                            public void handleEvent(Event osgiEvent) {
-                                if (null != osgiEvent && SessiondEventConstants.TOPIC_TOUCH_SESSION.equals(osgiEvent.getTopic())) {
-                                    final Session touchedSession = (Session)osgiEvent.getProperty(SessiondEventConstants.PROP_SESSION);
-                                    if (null != touchedSession && null != touchedSession.getSessionID()) {
-                                        // Handle session-touched event asynchronously if possible
-                                        final ThreadPoolService threadPool = getService(ThreadPoolService.class);
-                                        if (null == threadPool) {
-                                            try {
-                                                sessionStorageService.touch(touchedSession.getSessionID());
-                                            } catch (final Exception e) {
-                                                LOG.warn("error handling OSGi event", e);
-                                            }
-                                        } else {
-                                            final AbstractTask<Void> task = new AbstractTask<Void>() {
-
-                                                @Override
-                                                public Void call() throws Exception {
-                                                    try {
-                                                        sessionStorageService.touch(touchedSession.getSessionID());
-                                                    } catch (final Exception e) {
-                                                        LOG.warn("error handling OSGi event", e);
-                                                    }
-                                                    return null;
-                                                }
-                                            };
-                                            threadPool.submit(task, CallerRunsBehavior.<Void> getInstance());
-                                        }
-                                    }
-                                }
-                            }
-                        };
+                        final EventHandler eventHandler = new EventHandlerImpl(sessionStorage, services);
                         Dictionary<String, String> properties = new Hashtable<String, String>(1);
                         properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
                         eventHandlerRegistration = context.registerService(EventHandler.class, eventHandler, properties);

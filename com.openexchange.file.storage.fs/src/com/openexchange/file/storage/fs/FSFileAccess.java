@@ -73,7 +73,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
-import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -213,12 +212,12 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, Arrays.asList(Field.values()));
+    public IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, Arrays.asList(Field.values()));
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (modifiedFields.contains(Field.FILENAME) || modifiedFields.contains(Field.TITLE)) {
             String origName = file.getId();
             String title = file.getTitle();
@@ -237,7 +236,9 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
                 toFile(file.getFolderId(), origName).renameTo(toFile(file.getFolderId(), renameTo));
                 file.setId(renameTo);
             }
+            return new IDTuple(file.getFolderId(), file.getId());
         }
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
@@ -329,14 +330,15 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
         save(toFile(file.getFolderId(), file.getFileName()), data);
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         saveFileMetadata(file, sequenceNumber);
-        saveDocument(file, data, sequenceNumber);
+        return saveDocument(file, data, sequenceNumber);
     }
 
     @Override
@@ -361,21 +363,6 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
             toFile(idTuple.getFolder(), idTuple.getId()).delete();
         }
         return Collections.emptyList();
-    }
-
-    @Override
-    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        return versions;
-    }
-
-    @Override
-    public void unlock(String folderId, String id) throws OXException {
-
-    }
-
-    @Override
-    public void lock(String folderId, String id, long diff) throws OXException {
-
     }
 
     @Override
@@ -415,21 +402,6 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
         List<File> files = list(folderId);
         Collections.sort(files, order.comparatorBy(sort));
         return new FileTimedResult(files);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        return new FileTimedResult(Arrays.asList(getFileMetadata(folderId, id, "")));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        return new FileTimedResult(Arrays.asList(getFileMetadata(folderId, id, "")));
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        return new FileTimedResult(Arrays.asList(getFileMetadata(folderId, id, "")));
     }
 
     @Override
@@ -494,11 +466,6 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
             Collections.<File> emptyList(),
             Collections.<File> emptyList(),
             UNDEFINED_SEQUENCE_NUMBER);
-    }
-
-    @Override
-    public SearchIterator<File> search(List<String> folderIds, final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        return SearchIteratorAdapter.emptyIterator();
     }
 
     @Override

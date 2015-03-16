@@ -71,6 +71,7 @@ import java.util.concurrent.ExecutorService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
 import com.openexchange.database.tx.DBService;
@@ -91,6 +92,7 @@ import com.openexchange.groupware.infostore.database.BatchFilenameReserver;
 import com.openexchange.groupware.infostore.database.FilenameReservation;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReserver;
+import com.openexchange.groupware.infostore.database.impl.AbstractInfostoreAction;
 import com.openexchange.groupware.infostore.database.impl.BatchFilenameReserverImpl;
 import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
@@ -233,13 +235,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession session) throws OXException {
-        saveDocument(document, null, sequenceNumber, session);
+    public int saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession session) throws OXException {
+        return saveDocument(document, null, sequenceNumber, session);
     }
 
     @Override
-    public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
-        saveDocument(document, null, sequenceNumber, modifiedColumns, session);
+    public int saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
+        return saveDocument(document, null, sequenceNumber, modifiedColumns, session);
     }
 
     @Override
@@ -316,18 +318,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public void touch(final int id, final ServerSession sessionObj) throws OXException {
+    public void touch(final int id, final ServerSession session) throws OXException {
         try {
-            final Context context = sessionObj.getContext();
+            final Context context = session.getContext();
             final DocumentMetadata oldDocument = load(id, CURRENT_VERSION, context);
             final DocumentMetadata document = new DocumentMetadataImpl(oldDocument);
             Metadata[] modifiedColums = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL };
             long sequenceNumber = oldDocument.getSequenceNumber();
 
             document.setLastModified(new Date());
-            document.setModifiedBy(sessionObj.getUserId());
-            perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber), true);
-            perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber), true);
+            document.setModifiedBy(session.getUserId());
+            perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber, session), true);
+            perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber, session), true);
         } catch (final OXException x) {
             throw x;
         } catch (final Exception e) {
@@ -535,7 +537,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
+    public int saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
         final Context context = session.getContext();
         security.checkFolderId(document.getFolderId(), context);
 
@@ -573,7 +575,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 document.getFileName(),
                 document.getFolderId(),
                 document.getId(),
-                context, true);
+                context, true, session);
 
             document.setFileName(reservation.getFilename());
             if(titleAlso) {
@@ -613,7 +615,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     document.setVersion(0);
                 }
 
-                perform(new CreateDocumentAction(this, QUERIES, context, Collections.singletonList(document)), true);
+                perform(new CreateDocumentAction(this, QUERIES, context, Collections.singletonList(document), session), true);
 
                 final DocumentMetadata version0 = new DocumentMetadataImpl(document);
                 version0.setFileName(null);
@@ -623,7 +625,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 version0.setVersion(0);
                 version0.setFilestoreLocation(null);
 
-                perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0)), true);
+                perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0), session), true);
 
                 if (data != null) {
                     SaveFileAction saveFile = new SaveFileAction(getFileStorage(context), data, document.getFileSize());
@@ -633,17 +635,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     document.setFileMD5Sum(saveFile.getChecksum());
                     document.setFileSize(saveFile.getByteCount());
 
-                    perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document)), true);
+                    perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document), session), true);
                 }
 
                 indexDocument(context, session.getUserId(), document.getId(), -1L, wasCreation);
+
+                return document.getId();
             } finally {
                 if (reservation != null) {
                     reservation.destroySilently();
                 }
             }
         } else {
-            saveDocument(document, data, sequenceNumber, nonNull(document), session);
+            return saveDocument(document, data, sequenceNumber, nonNull(document), session);
         }
     }
 
@@ -726,11 +730,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return retval + 1;
     }
 
-    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx, final boolean adjust) throws OXException {
-        return reserve(filename, folderId, id, ctx, adjust ? 0 : -1);
+    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx, final boolean adjust, ServerSession session) throws OXException {
+        return reserve(filename, folderId, id, ctx, adjust ? 0 : -1, session);
     }
 
-    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx, final int count) throws OXException {
+    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx, final int count, ServerSession session) throws OXException {
         InfostoreFilenameReservation reservation = null;
         try {
             reservation = filenameReserver.reserveFilename(filename, folderId, id, ctx, this);
@@ -739,10 +743,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(filename, "");
                 }
                 int cnt = count;
-                InfostoreFilenameReservation r = reserve(FileStorageUtility.enhance(filename, ++cnt), folderId, id, ctx, cnt);
+                InfostoreFilenameReservation r = reserve(FileStorageUtility.enhance(filename, ++cnt), folderId, id, ctx, cnt, session);
                 r.setWasAdjusted(true);
                 return r;
             }
+        } catch (final IncorrectStringSQLException e) {
+            throw AbstractInfostoreAction.handleIncorrectStringError(e, Metadata.FILENAME_LITERAL, session);
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         }
@@ -765,28 +771,28 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
-        saveDocument(document, data, sequenceNumber, modifiedColumns, false, session);
+    public int saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
+        return saveDocument(document, data, sequenceNumber, modifiedColumns, false, session);
     }
 
     @Override
-    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession session) throws OXException {
-        saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, -1L, session);
+    public int saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession session) throws OXException {
+        return saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, -1L, session);
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, final ServerSession session) throws OXException {
-        saveDocument(document, data, sequenceNumber, modifiedColumns, true, offset, session);
+    public int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, final ServerSession session) throws OXException {
+        return saveDocument(document, data, sequenceNumber, modifiedColumns, true, offset, session);
     }
 
-    protected void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, final ServerSession session) throws OXException {
+    protected int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, final ServerSession session) throws OXException {
         if (0 < offset && (NEW == document.getId() || false == ignoreVersion)) {
             throw InfostoreExceptionCodes.NO_OFFSET_FOR_NEW_VERSIONS.create();
         }
         if (document.getId() == NEW) {
-            saveDocument(document, data, sequenceNumber, session);
+            int result = saveDocument(document, data, sequenceNumber, session);
             indexDocument(session.getContext(), session.getUserId(), document.getId(), -1L, true);
-            return;
+            return result;
         }
         final Context context = session.getContext();
         // Check permission
@@ -856,7 +862,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     fileName,
                     document.getFolderId(),
                     oldDocument.getId(),
-                    context, true);
+                    context, true, session);
                 reservations.add(reservation);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
@@ -867,7 +873,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     document.getFileName(),
                     oldDocument.getFolderId(),
                     oldDocument.getId(),
-                    context, true);
+                    context, true, session);
                 reservations.add(reservation);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
@@ -931,7 +937,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     updatedCols.add(Metadata.VERSION_LITERAL);
                     updatedCols.add(Metadata.FILESTORE_LOCATION_LITERAL);
                     action = new UpdateVersionAction(this, QUERIES, context, document, oldDocument,
-                        updatedCols.toArray(new Metadata[updatedCols.size()]), sequenceNumber);
+                        updatedCols.toArray(new Metadata[updatedCols.size()]), sequenceNumber, session);
 
                     // Remove old file "version" if not appended
                     if (0 >= offset) {
@@ -952,7 +958,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         releaseReadConnection(context, con);
                     }
 
-                    action = new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document));
+                    action = new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document), session);
                 }
                 // Perform action
                 perform(action, true);
@@ -960,12 +966,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 if (!updatedCols.contains(Metadata.VERSION_LITERAL)) {
                     document.setVersion(oldDocument.getVersion());
                 }
-                perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedCols, sequenceNumber), true);
+                perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedCols, sequenceNumber, session), true);
             }
 
             modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
             if (QUERIES.updateDocument(modifiedCols)) {
-                perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedCols, Long.MAX_VALUE), true);
+                perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedCols, Long.MAX_VALUE, session), true);
             }
 
             // insert tombstone row to del_infostore table in case of move operations to aid folder based synchronizations
@@ -973,11 +979,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 DocumentMetadataImpl tombstoneDocument = new DocumentMetadataImpl(oldDocument);
                 tombstoneDocument.setLastModified(document.getLastModified());
                 tombstoneDocument.setModifiedBy(document.getModifiedBy());
-                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, session.getContext(), tombstoneDocument), true);
+                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, session.getContext(), tombstoneDocument, session), true);
             }
 
             final long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();
             indexDocument(context, session.getUserId(), oldDocument.getId(), indexFolderId, false);
+            return oldDocument.getId();
         } finally {
             for (final InfostoreFilenameReservation infostoreFilenameReservation : reservations) {
                 infostoreFilenameReservation.destroySilently();
@@ -1001,7 +1008,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         removeDocuments(allDocuments, allVersions, date, session, null);
     }
 
-    protected void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession sessionObj, final List<DocumentMetadata> rejected) throws OXException {
+    protected void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession session, final List<DocumentMetadata> rejected) throws OXException {
         final List<DocumentMetadata> delDocs = new ArrayList<DocumentMetadata>();
         final List<DocumentMetadata> delVers = new ArrayList<DocumentMetadata>();
         final Set<Integer> rejectedIds = new HashSet<Integer>();
@@ -1016,18 +1023,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 rejected.add(m);
                 rejectedIds.add(Integer.valueOf(m.getId()));
             } else {
-                checkWriteLock(m, sessionObj);
+                checkWriteLock(m, session);
                 m.setLastModified(now);
                 delDocs.add(m);
             }
         }
 
-        final Context context = sessionObj.getContext();
+        final Context context = session.getContext();
 
         /*
          * Move records into del_* tables
          */
-        perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, context, delDocs), true);
+        perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, context, delDocs, session), true);
         /*
          * Remove referenced files from underlying storage
          */
@@ -1046,14 +1053,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * Delete documents and all versions from database
          */
-        perform(new DeleteDocumentAction(this, QUERIES, context, delDocs), true);
+        perform(new DeleteDocumentAction(this, QUERIES, context, delDocs, session), true);
 
         /*
          * Remove from index
          */
-        removeFromIndex(context, sessionObj.getUserId(), delDocs);
+        removeFromIndex(context, session.getUserId(), delDocs);
         // TODO: This triggers a full re-indexing and can be improved. We only have to re-index if the latest version is affected.
-        removeFromIndex(context, sessionObj.getUserId(), delVers);
+        removeFromIndex(context, session.getUserId(), delVers);
     }
 
     /**
@@ -1213,18 +1220,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 /*
                  * perform tombstone creations
                  */
-                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, session.getContext(), tombstoneDocuments), true);
+                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, session.getContext(), tombstoneDocuments, session), true);
                 /*
                  * perform document move
                  */
                 perform(new UpdateDocumentAction(this, QUERIES, session.getContext(), documentsToUpdate, sourceDocuments, new Metadata[] {
-                    Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL }, sequenceNumber), true);
+                    Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL }, sequenceNumber, session), true);
                 /*
                  * perform version update (only required in case of adjusted filenames)
                  */
                 if (0 < versionsToUpdate.size()) {
                     perform(new UpdateVersionAction(this, QUERIES, session.getContext(), versionsToUpdate, sourceDocuments,
-                        new Metadata[] { Metadata.FILENAME_LITERAL, Metadata.TITLE_LITERAL }, sequenceNumber), true);
+                        new Metadata[] { Metadata.FILENAME_LITERAL, Metadata.TITLE_LITERAL }, sequenceNumber, session), true);
                 }
                 /*
                  * re-index moved documents
@@ -1434,7 +1441,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             perform(new UpdateVersionAction(this, QUERIES, context, version0, oldVersion0, new Metadata[] {
                 Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.URL_LITERAL, Metadata.LAST_MODIFIED_LITERAL,
-                Metadata.MODIFIED_BY_LITERAL, Metadata.FILE_MIMETYPE_LITERAL }, Long.MAX_VALUE), true);
+                Metadata.MODIFIED_BY_LITERAL, Metadata.FILE_MIMETYPE_LITERAL }, Long.MAX_VALUE, session), true);
 
             // Set new Version Number
             update.setVersion(db.getMaxActiveVersion(metadata.getId(), context, allVersions));
@@ -1444,7 +1451,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         if (removeCurrent) {
             metadata = load(metadata.getId(), update.getVersion(), context);
-            InfostoreFilenameReservation reservation = reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), context, true);
+            InfostoreFilenameReservation reservation = reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), context, true, session);
             if (reservation.wasAdjusted()) {
                 update.setFileName(reservation.getFilename());
                 updatedFields.add(Metadata.FILENAME_LITERAL);
@@ -1455,10 +1462,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         }
         perform(new UpdateDocumentAction(this, QUERIES, context, update, metadata,
-            updatedFields.toArray(new Metadata[updatedFields.size()]), Long.MAX_VALUE), true);
+            updatedFields.toArray(new Metadata[updatedFields.size()]), Long.MAX_VALUE, session), true);
 
         // Remove Versions
-        perform(new DeleteVersionAction(this, QUERIES, context, allVersions), true);
+        perform(new DeleteVersionAction(this, QUERIES, context, allVersions, session), true);
 
         final int[] retval = new int[versionSet.size()];
         int i = 0;

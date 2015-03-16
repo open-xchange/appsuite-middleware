@@ -56,7 +56,6 @@ import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
-import com.openexchange.drive.actions.EditDirectoryAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.SyncSession;
@@ -86,7 +85,6 @@ public class EmptyDirectoryOptimizer extends DirectoryActionOptimizer {
                 null != clientAction.getVersion() && DriveConstants.EMPTY_MD5.equals(clientAction.getVersion().getChecksum())) {
                 optimizedActionsForClient.remove(clientAction);
                 optimizedActionsForClient.add(new AcknowledgeDirectoryAction(null, clientAction.getVersion(), null));
-                optimizedActionsForServer.add(new EditDirectoryAction(clientAction.getVersion(), null, null));
             }
         }
         /*

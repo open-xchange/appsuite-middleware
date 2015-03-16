@@ -78,12 +78,9 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
-import com.openexchange.file.storage.search.FileNameTerm;
-import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
@@ -196,17 +193,17 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, null);
     }
 
     @Override
-    public void saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(final File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-            perform(new BoxClosure<Void>() {
+            return perform(new BoxClosure<IDTuple>() {
 
                 @Override
-                protected Void doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                protected IDTuple doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                     try {
                         BoxClient boxClient = boxAccess.getBoxClient();
                         BoxFile boxfile = boxClient.getFilesManager().getFile(file.getId(), null);
@@ -214,15 +211,15 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                         BoxFileRequestObject requestObject = BoxFileRequestObject.getRequestObject();
                         requestObject.setName(file.getFileName());
-                        boxClient.getFilesManager().updateFileInfo(file.getId(), requestObject);
-
-                        return null;
+                        boxfile = boxClient.getFilesManager().updateFileInfo(file.getId(), requestObject);
+                        return new IDTuple(file.getFolderId(), boxfile.getId());
                     } catch (final BoxServerException e) {
                         throw handleHttpResponseError(file.getId(), e);
                     }
                 }
             });
         }
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
@@ -385,16 +382,16 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        saveDocument(file, data, sequenceNumber, null);
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+        return saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        perform(new BoxClosure<Void>() {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        return perform(new BoxClosure<IDTuple>() {
 
             @Override
-            protected Void doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected IDTuple doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
 
@@ -403,7 +400,8 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, file.getFileName(), data);
-                        boxClient.getFilesManager().uploadFile(reqObj);
+                        BoxFile boxFile = boxClient.getFilesManager().uploadFile(reqObj);
+                        return new IDTuple(file.getFolderId(), boxFile.getId());
                     } else {
                         BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
                         checkFileValidity(boxfile);
@@ -411,10 +409,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         //String prevVersion = boxfile.getVersionNumber();
 
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, id, data);
-                        boxClient.getFilesManager().uploadNewVersion(id, reqObj);
+                        BoxFile boxFile = boxClient.getFilesManager().uploadNewVersion(id, reqObj);
+                        return new IDTuple(file.getFolderId(), boxFile.getId());
                     }
-
-                    return null;
                 } catch (BoxJSONException e) {
                     throw BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
                 } catch (InterruptedException e) {
@@ -478,46 +475,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 return Collections.emptyList();
             }
         });
-    }
-
-    @Override
-    public String[] removeVersion(String folderId, final String id, String[] versions) throws OXException {
-        /*
-         * No versioning support
-         */
-        for (final String version : versions) {
-            if (version != CURRENT_VERSION) {
-                throw BoxExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
-            }
-        }
-        return perform(new BoxClosure<String[]>() {
-
-            @Override
-            protected String[] doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                BoxClient boxClient = boxAccess.getBoxClient();
-
-                try {
-                    boxClient.getFilesManager().deleteFile(id, null);
-                } catch (BoxServerException e) {
-                    if (404 != e.getStatusCode()) {
-                        throw e;
-                    }
-                }
-
-                return new String[0];
-            }
-
-        });
-    }
-
-    @Override
-    public void unlock(String folderId, String id) throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void lock(String folderId, String id, long diff) throws OXException {
-        // Nope
     }
 
     @Override
@@ -626,43 +583,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     }
 
     @Override
-    public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        return perform(new BoxClosure<TimedResult<File>>() {
-
-            @Override
-            protected TimedResult<File> doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                BoxClient boxClient = boxAccess.getBoxClient();
-
-                BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
-                List<File> files = Collections.<File> singletonList(new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId).parseBoxFile(boxfile));
-
-                return new FileTimedResult(files);
-            }
-        });
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        return getVersions(folderId, id);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(final String folderId, final String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        return perform(new BoxClosure<TimedResult<File>>() {
-
-            @Override
-            protected TimedResult<File> doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
-                BoxClient boxClient = boxAccess.getBoxClient();
-
-                BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
-                List<File> files = Collections.<File> singletonList(new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId).parseBoxFile(boxfile));
-
-                return new FileTimedResult(files);
-            }
-        });
-    }
-
-    @Override
     public TimedResult<File> getDocuments(final List<IDTuple> ids, List<Field> fields) throws OXException {
         return perform(new BoxClosure<TimedResult<File>>() {
 
@@ -691,15 +611,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
-    }
-
-    @Override
-    public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, final SortDirection order, int start, int end) throws OXException {
-        if (FileNameTerm.class.isInstance(searchTerm) && (null == folderIds || 1 == folderIds.size())) {
-            String pattern = ((FileNameTerm) searchTerm).getPattern();
-            return search(pattern, fields, null != folderIds && 1 == folderIds.size() ? folderIds.get(0) : null, sort, order, start, end);
-        }
-        throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
     }
 
     @Override

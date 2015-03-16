@@ -57,10 +57,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.database.DatabaseService;
@@ -107,7 +105,7 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
             startTransaction(con);
             rollback = true;
 
-            List<Map<String, Object>> messageFormats = getMessageFormats(con);
+            List<Object[]> messageFormats = getMessageFormats(con);
             applytMessageFormats(messageFormats, con);
 
             con.commit();
@@ -125,13 +123,13 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
         }
     }
 
-    private void applytMessageFormats(List<Map<String, Object>> messageFormats, Connection con) throws SQLException {
+    private void applytMessageFormats(List<Object[]> messageFormats, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE user_setting_mail SET msg_format=? WHERE cid=? AND user=? AND msg_format<>?");
 
-            for (Map<String, Object> messageFormat : messageFormats) {
-                String format = (String) messageFormat.get("messageFormat");
+            for (Object[] objs : messageFormats) {
+                String format = (String) objs[2];
                 int iFormat;
                 if ("html".equalsIgnoreCase(format)) {
                     iFormat = UserSettingMail.MSG_FORMAT_HTML_ONLY;
@@ -141,8 +139,8 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
                     iFormat = UserSettingMail.MSG_FORMAT_BOTH;
                 }
                 stmt.setInt(1, iFormat);
-                stmt.setInt(2, ((Integer) messageFormat.get("contextId")).intValue());
-                stmt.setInt(3, ((Integer) messageFormat.get("userId")).intValue());
+                stmt.setInt(2, ((Integer) objs[0]).intValue());
+                stmt.setInt(3, ((Integer) objs[1]).intValue());
                 stmt.setInt(4, iFormat);
                 stmt.addBatch();
             }
@@ -153,7 +151,7 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
         }
     }
 
-    private List<Map<String, Object>> getMessageFormats(Connection con) throws SQLException {
+    private List<Object[]> getMessageFormats(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -165,17 +163,17 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
             if (false == rs.next()) {
                 return Collections.emptyList();
             }
-            List<Map<String, Object>> results = new LinkedList<Map<String,Object>>();
+            List<Object[]> results = new LinkedList<Object[]>();
             do {
                 try {
                     int contextId = rs.getInt(1);
                     int userId = rs.getInt(2);
                     String format = new JSONObject(rs.getString(3)).getString("messageFormat");
-                    Map<String, Object> map = new HashMap<String, Object>(5);
-                    map.put("contextId", Integer.valueOf(contextId));
-                    map.put("userId", Integer.valueOf(userId));
-                    map.put("messageFormat", format);
-                    results.add(map);
+                    Object[] objs = new Object[3];
+                    objs[0] = Integer.valueOf(contextId);
+                    objs[1] = Integer.valueOf(userId);
+                    objs[2] = format;
+                    results.add(objs);
                 } catch (JSONException e) {
                     // Corrupt JSLob. Ignore
                 }

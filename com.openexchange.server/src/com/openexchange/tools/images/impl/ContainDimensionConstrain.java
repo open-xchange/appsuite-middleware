@@ -50,14 +50,13 @@
 package com.openexchange.tools.images.impl;
 
 import java.awt.Dimension;
-import com.mortennobel.imagescaling.DimensionConstrain;
 
 /**
  * {@link ContainDimensionConstrain}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ContainDimensionConstrain extends DimensionConstrain {
+public class ContainDimensionConstrain implements DimensionConstrain {
 
     private final int maxWidth;
 

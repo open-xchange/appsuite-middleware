@@ -35,7 +35,20 @@
             <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%message%n%lmdc%exception{full}</pattern>
         </encoder>
     </appender>
-
+    
+    <!-- Logstash appender -->
+    <!--<property scope="context" name="com.openexchange.logback.extensions.logstash.enabled" value="true" />
+   	<property scope="context" name="com.openexchange.logback.extensions.logstash.alwaysPersistEvents" value="true" />
+   	<property scope="context" name="com.openexchange.logback.extensions.logstash.loadFactor" value="0.67" />
+    <appender name="LOGSTASH" class="com.openexchange.logback.extensions.logstash.LogstashSocketAppender">
+        <remoteHost>localhost</remoteHost>
+        <port>31337</port>
+        <reconnectionDelay>10000</reconnectionDelay>
+        <eventDelayLimit>30000</eventDelayLimit>
+        <encoder class="com.openexchange.logback.extensions.logstash.LogstashEncoder"/>
+        <queueSize>2048</queueSize>
+    </appender>-->
+	
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>2048</queueSize>
         <discardingThreshold>0</discardingThreshold>
@@ -44,7 +57,8 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="ASYNC" />
+       	<appender-ref ref="ASYNC" />
+        <!--<appender-ref ref="LOGSTASH" />-->
     </root>
 
     <!--
@@ -85,5 +99,6 @@
 
     <!-- Set this to DEBUG to log spreadsheet operations more in detail -->
     <!-- <logger name="com.openexchange.office.calcengine.client.impl.CalcEngineJob" level="DEBUG"/> -->
+    <!--<logger name="com.openexchange" level="DEBUG"/>-->
 
 </configuration>

@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import com.openexchange.ajax.framework.Header;
 
 /**
@@ -64,8 +65,15 @@ import com.openexchange.ajax.framework.Header;
  */
 public class EmptyHttpAuthRequest extends HttpAuthRequest {
 
+    final boolean locationNeeded;
+
     public EmptyHttpAuthRequest() {
+        this(true);
+    }
+
+    public EmptyHttpAuthRequest(boolean locationNeeded) {
         super(null, null);
+        this.locationNeeded = locationNeeded;
     }
 
     @Override
@@ -81,10 +89,26 @@ public class EmptyHttpAuthRequest extends HttpAuthRequest {
             public String checkResponse(HttpResponse resp) throws ParseException, IOException {
                 setStatusCode(resp.getStatusLine().getStatusCode());
                 setReasonPhrase(resp.getStatusLine().getReasonPhrase());
+                if (locationNeeded) {
+                    parseLocationHeader(resp);
+                } else {
+                    org.apache.http.Header[] headers = resp.getHeaders("Location");
+                    if (headers.length > 0) {
+                        setLocation(headers[0].getValue());
+                    }
+                }
                 if (HttpServletResponse.SC_MOVED_TEMPORARILY == getStatusCode()) {
                     return EntityUtils.toString(resp.getEntity());
                 }
                 return null;
+            }
+
+            @Override
+            public HttpAuthResponse parse(String body) throws JSONException {
+                if (locationNeeded) {
+                    return super.parse(body);
+                }
+                return createResponse(getLocation());
             }
         };
     }

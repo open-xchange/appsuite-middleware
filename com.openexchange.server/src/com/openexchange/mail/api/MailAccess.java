@@ -59,15 +59,24 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.IMailAccessCache;
@@ -78,6 +87,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSession;
@@ -101,6 +111,26 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
+    private static final ConcurrentMap<Key, AcquiredLatch> SYNCHRONIZER = new ConcurrentHashMap<Key, AcquiredLatch>(256);
+
+    private static AcquiredLatch acquireFor(Key key) {
+        AcquiredLatch latch = SYNCHRONIZER.get(key);
+        if (null == latch) {
+            AcquiredLatch newLatch = new AcquiredLatch(Thread.currentThread(), new CountDownLatch(1));
+            latch = SYNCHRONIZER.putIfAbsent(key, newLatch);
+            if (null == latch) {
+                latch = newLatch;
+            }
+        }
+        return latch;
+    }
+
+    private static void releaseFor(Key key) {
+        SYNCHRONIZER.remove(key);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------- //
+
     static final class FastThrowable extends Throwable {
 
         FastThrowable() {
@@ -115,12 +145,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
+    /** The session parameter that may hold the established {@link MailAccess} instance for the <b>primary</b> mail account */
+    public static final String PARAM_MAIL_ACCESS = "__mailaccess";
+
+    // --------------------------------------------------------------------------------------------------------------------------------- //
+
     /*-
      * ############### MEMBERS ###############
      */
-
-    /** Line separator string. This is the value of the line.separator property at the moment that the MailAccess was created. */
-    protected final String lineSeparator;
 
     /** The associated session */
     protected final transient Session session;
@@ -174,7 +206,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     protected MailAccess(final Session session, final int accountId) {
         super();
-        lineSeparator = System.getProperty("line.separator");
         warnings = new ArrayList<OXException>(2);
         this.session = session;
         this.accountId = accountId;
@@ -297,7 +328,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return A proper instance of <tt>MailAccess</tt>
      * @throws OXException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final Session session) throws OXException {
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(Session session) throws OXException {
         return getInstance(session, MailAccount.DEFAULT_ID);
     }
 
@@ -325,30 +356,24 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return A proper instance of <tt>MailAccess</tt>
      * @throws OXException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final Session session, final int accountId) throws OXException {
-        /*
-         * Check for proper initialization
-         */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(Session session, int accountId) throws OXException {
+        // Check for proper initialization
         if (!MailInitialization.getInstance().isInitialized()) {
             throw MailExceptionCode.INITIALIZATION_PROBLEM.create();
         }
-        if (MailAccount.DEFAULT_ID == accountId) {
-            /*
-             * No cached connection available, check for admin login
-             */
-            checkAdminLogin(session, accountId);
-        }
-        /*
-         * Occupy free slot
-         */
-        final Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
+
+        // Check login attempt
+        checkLogin(session, accountId);
+
+        // Occupy free slot
+        Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
         if (null == tmp || toBool(tmp)) {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
             }
         }
-        final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
+        MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
         return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
     }
 
@@ -394,15 +419,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If re-connect attempt fails
      * @see #getNewInstance(Session, int)
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> reconnect(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> reconnect(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         if (null == mailAccess) {
             return null;
         }
-        final Session session = mailAccess.getSession();
-        final int accountId = mailAccess.getAccountId();
+        Session session = mailAccess.getSession();
+        int accountId = mailAccess.getAccountId();
         mailAccess.close(true);
+
         // A new instance, freshly initialized
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newAccess = MailAccess.getNewInstance(session, accountId);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newAccess = MailAccess.getNewInstance(session, accountId);
         newAccess.connect();
         return newAccess;
     }
@@ -431,7 +457,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return An appropriate {@link MailAccess mail access}
      * @throws OXException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final int userId, final int contextId) throws OXException {
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(int userId, int contextId) throws OXException {
         return getInstance(userId, contextId, MailAccount.DEFAULT_ID);
     }
 
@@ -460,17 +486,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return An appropriate {@link MailAccess mail access}
      * @throws OXException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final int userId, final int contextId, final int accountId) throws OXException {
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(int userId, int contextId, int accountId) throws OXException {
+        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null != sessiondService) {
-            final Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
+            Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
             if (session != null) {
                 return getInstance(session, accountId);
             }
         }
-        /*
-         * No appropriate session found.
-         */
+
+        // No appropriate session found.
         throw MailExceptionCode.UNEXPECTED_ERROR.create("No appropriate session found.");
     }
 
@@ -689,6 +714,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 checkDefaultFolderOnConnect();
             }
         }
+        if ((MailAccount.DEFAULT_ID == accountId) && (session instanceof PutIfAbsent)) {
+            ((PutIfAbsent) session).setParameterIfAbsent(PARAM_MAIL_ACCESS, this);
+        }
         if (isTrackable() && false == tracked) {
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
@@ -696,24 +724,66 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     private void checkDefaultFolderOnConnect() throws OXException {
-        try {
-            getFolderStorage().checkDefaultFolders();
-        } catch (final OXException e) {
-            throw e;
-        } catch (final Exception e) {
-            final MailConfig mailConfig = getMailConfig();
-            final OXException mailExc =
-                MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED.create(
-                    e,
-                    mailConfig.getServer(),
-                    Integer.valueOf(session.getUserId()),
-                    mailConfig.getLogin(),
-                    Integer.valueOf(session.getContextId()),
-                    e.getMessage());
-            LOG.error("", mailExc);
-            closeInternal();
-            throw mailExc;
+        if (isDefaultFoldersChecked()) {
+            return;
         }
+
+        Key key = new Key(session.getUserId(), session.getContextId());
+        AcquiredLatch acquiredLatch = acquireFor(key);
+        CountDownLatch latch = acquiredLatch.latch;
+        if (Thread.currentThread() == acquiredLatch.owner) {
+            // Perform the standard folder check
+            try {
+                getFolderStorage().checkDefaultFolders();
+                acquiredLatch.result.set(Boolean.TRUE);
+                return;
+            } catch (OXException e) {
+                acquiredLatch.result.set(e);
+                throw e;
+            } catch (Exception e) {
+                MailConfig mailConfig = getMailConfig();
+                String server = mailConfig.getServer();
+                String login = mailConfig.getLogin();
+                Integer contextId = Integer.valueOf(session.getContextId());
+                Integer userId = Integer.valueOf(session.getUserId());
+
+                OXException mailExc = MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED.create(e, server, userId, login, contextId, e.getMessage());
+                LOG.error("", mailExc);
+                closeInternal();
+                acquiredLatch.result.set(mailExc);
+                throw mailExc;
+            } finally {
+                latch.countDown();
+                releaseFor(key);
+            }
+        }
+
+        try {
+            // Need to await 'til check done by concurrent thread
+            latch.await();
+
+            // Check if already locally available...
+            Object result = acquiredLatch.result.get();
+            if (result instanceof OXException) {
+                throw  (OXException) result;
+            }
+        } catch (InterruptedException e) {
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, new Object[0]);
+        }
+    }
+
+    /**
+     * Gets the value of <code>"mail.deffldflag"</code> cache entry.
+     *
+     * @return The value
+     */
+    protected boolean isDefaultFoldersChecked() {
+        MailSessionCache cache = MailSessionCache.getInstance(session);
+        if (null == cache) {
+            return false;
+        }
+        Boolean b = cache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
+        return (b != null) && b.booleanValue();
     }
 
     /**
@@ -764,6 +834,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             // Close mail connection
             closeInternal();
         } finally {
+            if (MailAccount.DEFAULT_ID == accountId) {
+                session.setParameter(PARAM_MAIL_ACCESS, null);
+            }
             // Remove from watcher no matter if cached or closed
             if (tracked) {
                 MailAccessWatcher.removeMailAccess(this);
@@ -804,50 +877,51 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Logs the trace of the thread that lastly obtained this access.
      *
      */
-    public void logTrace(final StringBuilder sBuilder, final org.slf4j.Logger log) {
-        final Thread usingThread = this.usingThread;
+    public void logTrace(StringBuilder sBuilder, org.slf4j.Logger log) {
+        String lineSeparator = System.getProperty("line.separator");
+        Thread usingThread = this.usingThread;
         if (null != usingThread) {
-            final Map<String, String> taskProps = usingThreadProperties;
+            Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
-                final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Entry<String, String> entry : taskProps.entrySet()) {
-                    final String propertyName = entry.getKey();
-                    final String value = entry.getValue();
+                Map<String, String> sorted = new TreeMap<String, String>();
+                for (Entry<String, String> entry : taskProps.entrySet()) {
+                    String propertyName = entry.getKey();
+                    String value = entry.getValue();
                     if (null != value) {
                         sorted.put(propertyName, value);
                     }
                 }
-                for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                for (Map.Entry<String, String> entry : sorted.entrySet()) {
                     sBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
                 }
                 sBuilder.append(lineSeparator);
             }
         }
         sBuilder.append(toString());
-        final StackTraceElement[] traze = trace;
-        final int length;
+        StackTraceElement[] traze = trace;
+        int length;
         if (null != traze && (length = traze.length) > 3) {
             sBuilder.append(lineSeparator).append("Mail connection established (or fetched from cache) at: ").append(lineSeparator);
             /*
              * Start at index 3
              */
             {
-                final StackTraceElement[] tmp = new StackTraceElement[length - 3];
+                StackTraceElement[] tmp = new StackTraceElement[length - 3];
                 System.arraycopy(traze, 3, tmp, 0, tmp.length);
-                final Throwable thr = new Throwable();
+                Throwable thr = new Throwable();
                 thr.setStackTrace(tmp);
                 log.info(sBuilder.toString(), thr);
                 sBuilder.setLength(0);
             }
             if ((null != usingThread) && usingThread.isAlive()) {
-                final StackTraceElement[] trace = usingThread.getStackTrace();
+                StackTraceElement[] trace = usingThread.getStackTrace();
                 if (null != trace && trace.length > 0) {
                     sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
                     /*
                      * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
                      * MailAccessWatcher.
                      */
-                    final Throwable thr = new FastThrowable();
+                    Throwable thr = new FastThrowable();
                     thr.setStackTrace(trace);
                     log.info(sBuilder.toString(), thr);
                 }
@@ -863,7 +937,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return The trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        final StringBuilder sBuilder = new StringBuilder(2048);
+        String lineSeparator = System.getProperty("line.separator");
+        StringBuilder sBuilder = new StringBuilder(2048);
         {
             final Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
@@ -895,7 +970,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
              * MailAccessWatcher.
              */
-            final StackTraceElement[] trace = usingThread.getStackTrace();
+            StackTraceElement[] trace = usingThread.getStackTrace();
             sBuilder.append("    at ").append(trace[0]);
             for (int i = 1; i < trace.length; i++) {
                 sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
@@ -964,23 +1039,23 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Checks if session's user denotes the context admin user and whether admin user's try to login to mail system is permitted or not.
+     * Checks if user's attempt to login to mail system is permitted or not.
      *
      * @param session The session
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @throws OXException If session's user denotes the context admin user and admin user's try to login to mail system is not permitted
      */
-    private static final void checkAdminLogin(final Session session, final int accountId) throws OXException {
-        if (!MailProperties.getInstance().isAdminMailLoginEnabled()) {
-            /*
-             * Admin mail login is not permitted per configuration
-             */
-            final Context ctx;
-            if (session instanceof ServerSession) {
-                ctx = ((ServerSession) session).getContext();
-            } else {
-                ctx = ContextStorage.getStorageContext(session.getContextId());
-            }
+    private static final void checkLogin(Session session, int accountId) throws OXException {
+        // Check permission
+        UserPermissionBits permissionBits =  (session instanceof ServerSession) ? ((ServerSession) session).getUserPermissionBits() : UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContextId());
+        if (!permissionBits.hasWebMail()) {
+            throw OXExceptions.noPermissionForModule("mail");
+        }
+
+        // Check admin login
+        if (MailAccount.DEFAULT_ID == accountId && !MailProperties.getInstance().isAdminMailLoginEnabled()) {
+            // Admin mail login is not permitted per configuration
+            Context ctx = (session instanceof ServerSession) ? ((ServerSession) session).getContext() : ContextStorage.getStorageContext(session.getContextId());
             if (session.getUserId() == ctx.getMailadmin()) {
                 throw MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.create(Integer.valueOf(ctx.getContextId()));
             }
@@ -1162,5 +1237,67 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If shutdown actions fail
      */
     protected abstract void shutdown() throws OXException;
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    private static final class Key {
+
+        private final int contextId;
+        private final int userId;
+        private final int hash;
+
+        Key(int userId, int contextId) {
+            super();
+            this.userId = userId;
+            this.contextId = contextId;
+
+            int prime = 31;
+            int result = prime * 1 + contextId;
+            result = prime * result + userId;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            Key other = (Key) obj;
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static final class AcquiredLatch {
+
+        /** The associated latch */
+        final CountDownLatch latch;
+
+        /** The thread owning this instance */
+        final Thread owner;
+
+        /** The reference to resulting object */
+        final AtomicReference<Object> result;
+
+        AcquiredLatch(Thread owner, CountDownLatch latch) {
+            super();
+            this.owner = owner;
+            this.latch = latch;
+            result = new AtomicReference<Object>();
+        }
+    }
 
 }

@@ -500,7 +500,6 @@ public final class SessionUtility {
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
-        LogProperties.putSessionProperties(session);
         /*
          * Get session secret
          */
@@ -695,7 +694,7 @@ public final class SessionUtility {
             return false;
         }
         BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
-        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && "5.0".equals(bd.getBrowserVersion());
+        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
     }
 
     /**
@@ -847,7 +846,7 @@ public final class SessionUtility {
             }
             final String queryString = httpRequest.getQueryString();
             if (null != queryString) {
-                LogProperties.put(LogProperties.Name.SERVLET_QUERY_STRING, queryString);
+                LogProperties.put(LogProperties.Name.SERVLET_QUERY_STRING, LogProperties.getSanitizedQueryString(queryString));
             }
         }
         return null;

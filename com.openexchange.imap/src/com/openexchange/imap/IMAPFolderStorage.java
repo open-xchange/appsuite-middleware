@@ -364,13 +364,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private IMAPDefaultFolderChecker getChecker() {
         if (null == checker) {
             Map<String, String> caps = imapConfig.asMap();
+            boolean hasMetadata = caps.containsKey("METADATA"); // http://tools.ietf.org/html/rfc5464#section-1
             if (caps.containsKey("SPECIAL-USE")) {
                 // Supports SPECIAL-USE capability
                 boolean hasCreateSpecialUse = caps.containsKey("CREATE-SPECIAL-USE"); // http://tools.ietf.org/html/rfc6154#section-3
-                boolean hasMetadata = caps.containsKey("METADATA"); // http://tools.ietf.org/html/rfc5464#section-1
                 checker = new SpecialUseDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess, hasCreateSpecialUse, hasMetadata);
             } else {
-                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess);
+                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess, hasMetadata);
             }
         }
         return checker;
@@ -1916,7 +1916,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                     }
                 }
-                if (/* !MailProperties.getInstance().isIgnoreSubscription() && */performSubscription) {
+                if (performSubscription) {
                     /*
                      * Check read permission
                      */
@@ -1933,9 +1933,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, fullName);
                         }
                     }
-                    final boolean subscribe = toUpdate.isSubscribed();
-                    updateMe.setSubscribed(subscribe);
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), subscribe);
+                    boolean subscribe = toUpdate.isSubscribed();
+                    setSubscribed(subscribe, updateMe);
                     FolderCache.removeCachedFolders(session, accountId);
                     changed = true;
                 }
@@ -1950,6 +1949,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } finally {
             if (changed) {
                 ListLsubCache.clearCache(accountId, session);
+            }
+        }
+    }
+
+    private void setSubscribed(boolean subscribe, IMAPFolder imapFolder) throws MessagingException {
+        imapFolder.setSubscribed(subscribe);
+        IMAPCommandsCollection.forceSetSubscribed(imapStore, imapFolder.getFullName(), subscribe);
+
+        if (subscribe) {
+            // Ensure parent gets subscribed, too
+            try {
+                IMAPFolder parent = (IMAPFolder) imapFolder.getParent();
+                if ((null != parent) && (parent.getFullName().length() > 0)) {
+                    setSubscribed(subscribe, parent);
+                }
+            } catch (Exception e) {
+                // Ignore
             }
         }
     }

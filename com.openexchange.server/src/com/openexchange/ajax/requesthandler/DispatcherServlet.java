@@ -81,6 +81,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -417,50 +418,19 @@ public class DispatcherServlet extends SessionServlet {
              * ... and send response
              */
             sendResponse(requestData, result, httpRequest, httpResponse);
+        } catch (UploadException e) {
+            if (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e)) {
+                // An upload failed
+                httpResponse.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
+                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+                return;
+            }
+
+            // Dispatch it...
+            dispatchOXException(e, httpRequest, httpResponse);
         } catch (OXException e) {
-            if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
-                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
-                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
-                sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
-                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-            if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
-                Object[] logArgs = e.getLogArgs();
-                Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-                int sc = ((Integer) logArgs[0]).intValue();
-                sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
-                Throwable cause = e.getNonOXExceptionCause();
-                if (null == cause) {
-                    logException(e, LogLevel.DEBUG, sc);
-                } else {
-                    logException(e);
-                }
-                return;
-            }
-
-            // Handle other OXExceptions
-
-            if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
-                Throwable cause = e.getCause();
-                LOG.error("Unexpected error", null == cause ? e : cause);
-            } else {
-                // Ignore special "folder not found" error
-                if (ignore(e)) {
-                    logException(e, LogLevel.DEBUG, -1);
-                } else {
-                    logException(e);
-                }
-            }
-
-            if (APIResponseRenderer.expectsJsCallback(httpRequest)) {
-                writeErrorAsJsCallback(e, httpRequest, httpResponse);
-            } else {
-                handleOXException(e, httpRequest, httpResponse);
-            }
+            // Dispatch it...
+            dispatchOXException(e, httpRequest, httpResponse);
         } catch (RuntimeException e) {
             logException(e);
             handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
@@ -468,6 +438,52 @@ public class DispatcherServlet extends SessionServlet {
             if (null != state) {
                 dispatcher.end(state);
             }
+        }
+    }
+
+    private void dispatchOXException(OXException e, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+        if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
+            sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
+            logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+            sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), httpResponse);
+            logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
+            Object[] logArgs = e.getLogArgs();
+            Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+            int sc = ((Integer) logArgs[0]).intValue();
+            sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), httpResponse);
+            Throwable cause = e.getNonOXExceptionCause();
+            if (null == cause) {
+                logException(e, LogLevel.DEBUG, sc);
+            } else {
+                logException(e);
+            }
+            return;
+        }
+
+        // Handle other OXExceptions
+
+        if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
+            Throwable cause = e.getCause();
+            LOG.error("Unexpected error", null == cause ? e : cause);
+        } else {
+            // Ignore special "folder not found" error
+            if (ignore(e)) {
+                logException(e, LogLevel.DEBUG, -1);
+            } else {
+                logException(e);
+            }
+        }
+
+        if (APIResponseRenderer.expectsJsCallback(httpRequest)) {
+            writeErrorAsJsCallback(e, httpRequest, httpResponse);
+        } else {
+            handleOXException(e, httpRequest, httpResponse);
         }
     }
 
@@ -578,7 +594,7 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpRequest The associated HTTP Servlet request
      * @param httpResponse The associated HTTP Servlet response
      */
-    protected void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    protected static void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
         Iterator<ResponseRenderer> iter = responseRenderers.iterator();
         for (int i = responseRenderers.size(); i-- > 0;) {

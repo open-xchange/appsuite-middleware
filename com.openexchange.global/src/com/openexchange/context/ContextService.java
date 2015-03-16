@@ -74,7 +74,7 @@ public interface ContextService {
      * @throws OXException
      *             if an error occurs.
      */
-    public abstract int getContextId(String loginContextInfo) throws OXException;
+    int getContextId(String loginContextInfo) throws OXException;
 
     /**
      * Gets the context for the given context unique identifier.
@@ -83,7 +83,7 @@ public interface ContextService {
      * @return The context
      * @throws OXException If the specified context cannot be found or the update is running/started.
      */
-    public Context getContext(int contextId) throws OXException;
+    Context getContext(int contextId) throws OXException;
 
     /**
      * This method works like {@link #getContext(int)} but it does not give a {@link OXException} if an update is running or must is
@@ -92,7 +92,20 @@ public interface ContextService {
      * @return an implementation of the context or <code>null</code> if the context with the given identifier can't be found.
      * @throws OXException if an error occurs.
      */
-    public Context loadContext(int contextId) throws OXException;
+    Context loadContext(int contextId) throws OXException;
+
+    /**
+     * Stores a internal context attribute.
+     * <p>
+     * This method might throw a {@link ContextExceptionCodes#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param contextId Identifier of the context that attribute should be set.
+     * @throws OXException if writing the attribute fails.
+     */
+    void setAttribute(String name, String value, int contextId) throws OXException;
 
     /**
      * Invalidates the context object in cache(s).
@@ -103,7 +116,15 @@ public interface ContextService {
      * @throws OXException
      *             if invalidating the context fails
      */
-    public void invalidateContext(int contextId) throws OXException;
+    void invalidateContext(int contextId) throws OXException;
+
+    /**
+     * Invalidates the context objects in cache(s).
+     *
+     * @param contextIDs unique identifiers of the contexts to invalidate
+     * @throws OXException if invalidating the context fails
+     */
+    public void invalidateContexts(final int[] contextIDs) throws OXException;
 
     /**
      * Invalidates a login information in the cache.
@@ -114,7 +135,7 @@ public interface ContextService {
      * @throws OXException
      *             if invalidating the login information fails.
      */
-    public void invalidateLoginInfo(String loginContextInfo) throws OXException;
+    void invalidateLoginInfo(String loginContextInfo) throws OXException;
 
     /**
      * Gives a list of all context ids which are stored in the config database.
@@ -123,5 +144,6 @@ public interface ContextService {
      * @throws OXException
      *             if reading the contexts fails.
      */
-    public abstract List<Integer> getAllContextIds() throws OXException;
+    List<Integer> getAllContextIds() throws OXException;
+
 }
