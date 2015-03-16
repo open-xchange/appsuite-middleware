@@ -84,12 +84,12 @@ public final class ContentDisposition extends ParameterizedHeader {
     /**
      * Initializes a new {@link ContentDisposition}
      *
-     * @param contentDisp The content disposition
+     * @param contentDisposition The content disposition
      * @throws OXException If content disposition cannot be parsed
      */
-    public ContentDisposition(final String contentDisp) throws OXException {
+    public ContentDisposition(final String contentDisposition) throws OXException {
         super();
-        parseContentDisp(contentDisp);
+        parseContentDisp(contentDisposition);
     }
 
     @Override
@@ -136,12 +136,12 @@ public final class ContentDisposition extends ParameterizedHeader {
         return true;
     }
 
-    private void parseContentDisp(final String contentDisp) throws OXException {
-        parseContentDisp(contentDisp, true);
+    private void parseContentDisp(final String contentDisposition) throws OXException {
+        parseContentDisp(contentDisposition, true);
     }
 
-    private void parseContentDisp(final String contentDispArg, final boolean paramList) throws OXException {
-        if ((null == contentDispArg) || (contentDispArg.length() == 0)) {
+    private void parseContentDisp(final String contentDisposition, final boolean paramList) throws OXException {
+        if ((null == contentDisposition) || (contentDisposition.length() == 0)) {
             /*
              * Nothing to parse
              */
@@ -149,25 +149,25 @@ public final class ContentDisposition extends ParameterizedHeader {
             parameterList = new ParameterList();
             return;
         }
-        final String contentDisp = prepareParameterizedHeader(contentDispArg);
-        int semicolonPos = contentDisp.indexOf(';');
-        String disp = (semicolonPos < 0 ? contentDisp : contentDisp.substring(0, semicolonPos)).trim();
-        if (disp.indexOf('%') >= 0) {
-            // Possibly encoded
-            disp = decodeUrl(disp);
-        }
-        disposition = Strings.toLowerCase(disp);
-        if (paramList) {
-            if (semicolonPos >= 0) {
-                try {
-                    parameterList = semicolonPos < contentDisp.length() ? new ParameterList(contentDisp.substring(semicolonPos + 1)) : new ParameterList();
-                } catch (final RuntimeException e) {
-                    throw MailExceptionCode.INVALID_CONTENT_DISPOSITION.create(contentDispArg);
-                }
-            } else {
-                // Assume no parameters
-                parameterList = new ParameterList();
+        try {
+            final String contentDisp = prepareParameterizedHeader(contentDisposition);
+            int semicolonPos = contentDisp.indexOf(';');
+            String disp = (semicolonPos < 0 ? contentDisp : contentDisp.substring(0, semicolonPos)).trim();
+            if (disp.indexOf('%') >= 0) {
+                // Possibly encoded
+                disp = decodeUrl(disp);
             }
+            disposition = Strings.toLowerCase(disp);
+            if (paramList) {
+                if (semicolonPos >= 0) {
+                    parameterList = semicolonPos < contentDisp.length() ? new ParameterList(contentDisp.substring(semicolonPos + 1)) : new ParameterList();
+                } else {
+                    // Assume no parameters
+                    parameterList = new ParameterList();
+                }
+            }
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.INVALID_CONTENT_DISPOSITION.create(e, contentDisposition);
         }
     }
 

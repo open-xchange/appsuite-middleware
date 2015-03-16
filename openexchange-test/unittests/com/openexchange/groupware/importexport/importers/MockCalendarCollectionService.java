@@ -316,15 +316,6 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.groupware.calendar.CalendarCollectionService#cloneObjectForRecurringException(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject, int)
-     */
-    @Override
-    public CalendarDataObject cloneObjectForRecurringException(CalendarDataObject cdao, CalendarDataObject edao, int sessionUser) throws OXException {
-        // Nothing to do
-        return null;
-    }
-
-    /* (non-Javadoc)
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#closePreparedStatement(java.sql.PreparedStatement)
      */
     @Override
@@ -1044,5 +1035,22 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
 		// Nothing to do
 
 	}
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.calendar.CalendarCollectionService#removeConfirmations(com.openexchange.groupware.calendar.CalendarDataObject, int)
+     */
+    @Override
+    public void removeConfirmations(CalendarDataObject cdao, int uid) {
+        // TODO Auto-generated method stub
+
+    }
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.calendar.CalendarCollectionService#cloneObjectForRecurringException(com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.calendar.CalendarDataObject, com.openexchange.groupware.contexts.Context, com.openexchange.session.Session, int)
+     */
+    @Override
+    public CalendarDataObject cloneObjectForRecurringException(CalendarDataObject cdao, CalendarDataObject edao, Context ctx, Session session, int inFolder) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

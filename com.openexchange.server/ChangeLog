@@ -1,3 +1,16 @@
+* 2015-02-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36960: Select an appropriate predecessor for 'com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob' update task
+ - Fix for bug 36866: Proper address header parsing in case of mail-safe encoded personal w/o quotes
+
+* 2015-02-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36276: If ticket is expired in session and AppSuite tab was closed, terminate the session and create a new with a new ticket.
+
+* 2015-02-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36729: Safe preparation of a parameterized header + handling for unexpected runtime errors
+
 * 2015-02-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 36688: Accept incoming POST's multipart without size restrictions in case 'publish-on-exceeded-quota' is enabled
@@ -5,6 +18,7 @@
 * 2015-02-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 36333: Ensure file resources stay open while parsing MIME message data
+ - Fix for bug 35954: Deal with corrupt BODYSTRUCTURE items in IMAP FETCH response that contain empty multipart sections
 
 * 2015-02-10 - thorben.betten@open-xchange.com
 
@@ -47,6 +61,10 @@
 
  - Fix for bug 36072: Remove white spaces between encoded words as per RFC2047.
 
+* 2014-01-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31407: When evaluating the "has subfolders" flag, ignore subfolders that are no longer found
+
 * 2015-01-09 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 36024: Replace occurrences of position:fixed by display:block in inline styles to prevent defacing the web ui.
@@ -85,6 +103,10 @@
 * 2014-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 35889: Consider parent folder identifier when retrieving a file for publication
+ 
+* 2014-12-15 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 35610: Reset confirmation status on exception creation.
 
 * 2014-12-09 - thorben.betten@open-xchange.com
 

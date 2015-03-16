@@ -479,14 +479,22 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  */
                 if (folder.isGlobalID()) {
                     for (int i = 0; (null == dummyId) && i < length; i++) {
-                        final String id = subfolders[i];
-                        final FolderStorage tmp = getOpenedStorage(id, treeId, storageParameters, openedStorages);
-                        /*
-                         * Get subfolder from appropriate storage
-                         */
-                        final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
-                        if ((all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) && CalculatePermission.isVisible(subfolder, getUser(), getContext(), getAllowedContentTypes())) {
-                            dummyId = id;
+                        try {
+                            final String id = subfolders[i];
+                            final FolderStorage tmp = getOpenedStorage(id, treeId, storageParameters, openedStorages);
+                            /*
+                             * Get subfolder from appropriate storage
+                             */
+                            final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
+                            if ((all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) && CalculatePermission.isVisible(subfolder, getUser(), getContext(), getAllowedContentTypes())) {
+                                dummyId = id;
+                            }
+                        } catch (OXException e) {
+                            if ("FLD-0008".equals(e.getErrorCode())) {
+                                // subfolder not / no longer found; try next
+                                continue;
+                            }
+                            throw e;
                         }
                     }
                 } else if (all || folder.hasSubscribedSubfolders()) { // User-only folder
