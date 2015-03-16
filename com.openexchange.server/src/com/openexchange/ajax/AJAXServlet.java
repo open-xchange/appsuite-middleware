@@ -255,6 +255,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_RAMPUP = "rampup";
 
+    public static final String ACTION_REDEEM_RESERVATION = "redeemReservation";
+
     public static final String ACTION_LOGOUT = "logout";
 
     public static final String ACTION_REDIRECT = "redirect";

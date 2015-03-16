@@ -61,17 +61,13 @@ import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.session.Session;
 import com.openexchange.session.reservation.Reservation;
-import com.openexchange.session.reservation.ReservationInfo;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.session.reservation.impl.portable.PortableReservation;
 import com.openexchange.sessiond.AddSessionParameter;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link SessionReservationServiceImpl}
@@ -162,36 +158,6 @@ public class SessionReservationServiceImpl implements SessionReservationService 
         }
     }
 
-    private Reservation peekReservation(String token) {
-        blocker.acquire();
-        try {
-            return useHzMap ? peekFromHzMap(hzMapName, token) : reservations.get(token);
-        } finally {
-            blocker.release();
-        }
-    }
-
-    private Reservation peekFromHzMap(String mapIdentifier, String token) {
-        IMap<String, PortableReservation> hzMap = hzMap(mapIdentifier);
-        if (null == hzMap) {
-            LOG.trace("Hazelcast map for remote reservations is not available.");
-            return null;
-        }
-
-        PortableReservation portableReservation = hzMap.get(token);
-        if (null == portableReservation) {
-            return null;
-        }
-        ReservationImpl reservation = new ReservationImpl();
-        reservation.setContextId(portableReservation.getContextId());
-        reservation.setUserId(portableReservation.getUserId());
-        reservation.setTimeoutMillis(portableReservation.getTimeout());
-        reservation.setCreationStamp(portableReservation.getCreationStamp());
-        reservation.setToken(token);
-        reservation.setState(portableReservation.getState());
-        return reservation;
-    }
-
     private Reservation pollReservation(String token) {
         blocker.acquire();
         try {
@@ -240,7 +206,7 @@ public class SessionReservationServiceImpl implements SessionReservationService 
 
     @Override
     public Reservation getReservation(String token) throws OXException {
-        Reservation reservation = peekReservation(token);
+        Reservation reservation = pollReservation(token);
         if (null == reservation) {
             return null;
         }
@@ -250,19 +216,6 @@ public class SessionReservationServiceImpl implements SessionReservationService 
         }
 
         return reservation;
-    }
-
-    @Override
-    public Session redeemReservation(ReservationInfo reservationInfo) throws OXException {
-        Reservation reservation = pollReservation(reservationInfo.getToken());
-        if (null == reservation || ((System.currentTimeMillis() - reservation.getCreationStamp()) > reservation.getTimeoutMillis())) {
-            return null;
-        }
-
-        SessiondService sessiondService = Services.getService(SessiondService.class);
-        ContextService contextService = Services.getService(ContextService.class);
-        AddSessionParameterImpl param = new AddSessionParameterImpl(reservation.getUserId(), contextService.getContext(reservation.getContextId()), reservationInfo);
-        return sessiondService.addSession(param);
     }
 
     // ---------------------------------------------------------------------------------------------------
@@ -305,85 +258,6 @@ public class SessionReservationServiceImpl implements SessionReservationService 
             LOG.info("Reservations backing map changed to hazelcast");
         } finally {
             blocker.unblock();
-        }
-    }
-
-    // ---------------------------------------------------------------------------------------------------------
-
-    private final class AddSessionParameterImpl implements AddSessionParameter {
-
-        private final ReservationInfo reservationInfo;
-        private final int userId;
-        private final Context context;
-
-        /**
-         * Initializes a new {@link SessionReservationServiceImpl.AddSessionParameterImpl}.
-         */
-        AddSessionParameterImpl(int userId, Context context, ReservationInfo reservationInfo) {
-            super();
-            this.reservationInfo = reservationInfo;
-            this.userId = userId;
-            this.context = context;
-        }
-
-        @Override
-        public boolean isTransient() {
-            return reservationInfo.isTransient();
-        }
-
-        @Override
-        public String getUserLoginInfo() {
-            return reservationInfo.getUserLoginInfo();
-        }
-
-        @Override
-        public int getUserId() {
-            return userId;
-        }
-
-        @Override
-        public String getPassword() {
-            return reservationInfo.getPassword();
-        }
-
-        @Override
-        public String getHash() {
-            return reservationInfo.getHash();
-        }
-
-        @Override
-        public String getFullLogin() {
-            return reservationInfo.getFullLogin();
-        }
-
-        @Override
-        public SessionEnhancement getEnhancement() {
-            return reservationInfo.getEnhancement();
-        }
-
-        @Override
-        public Context getContext() {
-            return context;
-        }
-
-        @Override
-        public String getClientToken() {
-            return null;
-        }
-
-        @Override
-        public String getClientIP() {
-            return reservationInfo.getClientIP();
-        }
-
-        @Override
-        public String getClient() {
-            return reservationInfo.getClient();
-        }
-
-        @Override
-        public String getAuthId() {
-            return reservationInfo.getAuthId();
         }
     }
 

@@ -67,6 +67,7 @@ import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tokenlogin.TokenLoginService;
 
 /**
@@ -118,6 +119,7 @@ public class LoginActivator extends HousekeepingActivator {
         rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context, rampUp)));
 
         track(TokenLoginService.class, new TokenLoginCustomizer(context));
+        track(SessionReservationService.class, new SessionReservationCustomizer(context));
         openTrackers();
 
         final ConfigurationService configurationService = getService(ConfigurationService.class);

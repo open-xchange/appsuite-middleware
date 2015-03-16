@@ -56,8 +56,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.session.Session;
-import com.openexchange.session.SimSession;
 
 /**
  * {@link SimSessionReservationService}
@@ -79,16 +77,7 @@ public class SimSessionReservationService implements SessionReservationService {
 
     @Override
     public Reservation getReservation(String token) throws OXException {
-        return reservations.get(token);
-    }
-
-    @Override
-    public Session redeemReservation(ReservationInfo reservationInfo) throws OXException {
-        Reservation reservation = reservations.remove(reservationInfo.getToken());
-        if (reservation == null) {
-            return null;
-        }
-        return new SimSession(reservation.getUserId(), reservation.getContextId());
+        return reservations.remove(token);
     }
 
     private static class ReservationImpl implements Reservation {

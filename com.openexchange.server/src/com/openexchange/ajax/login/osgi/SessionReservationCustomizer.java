@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,48 @@
  *
  */
 
-package com.openexchange.session.reservation;
+package com.openexchange.ajax.login.osgi;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.reservation.SessionReservationService;
 
 
 /**
- * {@link SessionReservationService} - Used to reserve a session while obtaining a token and to redeem that token against a valid session
- * later on.
+ * {@link SessionReservationCustomizer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
  */
-@SingletonService
-public interface SessionReservationService {
+public class SessionReservationCustomizer implements ServiceTrackerCustomizer<SessionReservationService, SessionReservationService> {
+
+    private final BundleContext context;
 
     /**
-     * Generates a session reservation for given arguments.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param timeout The associated timeout
-     * @param unit The timeout's time unit
-     * @param optState An optional state that will be applied to resulting reservation
-     * @return The generated reservation
-     * @throws OXException If operation fails
+     * Initializes a new {@link SessionReservationCustomizer}.
      */
-    String reserveSessionFor(int userId, int contextId, long timeout, TimeUnit unit, Map<String, String> optState) throws OXException;
+    public SessionReservationCustomizer(BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-    /**
-     * Gets the reservation associated with given token.
-     *
-     * @param token The reservation's token
-     * @return The reservation or <code>null</code> if there is no such reservation or reservation is elapsed
-     * @throws OXException If operation fails
-     */
-    Reservation getReservation(String token) throws OXException;
+    @Override
+    public SessionReservationService addingService(ServiceReference<SessionReservationService> reference) {
+        SessionReservationService service = context.getService(reference);
+        ServerServiceRegistry.getInstance().addService(SessionReservationService.class, service);
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<SessionReservationService> reference, SessionReservationService service) {
+        // nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<SessionReservationService> reference, SessionReservationService service) {
+        ServerServiceRegistry.getInstance().removeService(SessionReservationService.class);
+        context.ungetService(reference);
+    }
 
 }

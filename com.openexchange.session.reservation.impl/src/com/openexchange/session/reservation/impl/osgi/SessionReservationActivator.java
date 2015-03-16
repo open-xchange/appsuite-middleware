@@ -69,7 +69,6 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.session.reservation.impl.HazelcastInstanceNotActiveExceptionHandler;
-import com.openexchange.session.reservation.impl.ReservationLoginHandler;
 import com.openexchange.session.reservation.impl.Services;
 import com.openexchange.session.reservation.impl.SessionReservationServiceImpl;
 import com.openexchange.sessiond.SessiondService;
@@ -157,9 +156,6 @@ public class SessionReservationActivator extends HousekeepingActivator implement
 
         // Register service instance
         registerService(SessionReservationService.class, serviceImpl);
-        Dictionary<String, String> props = new Hashtable<String, String>();
-        props.put(AJAXServlet.PARAMETER_ACTION, "redeemReservation");
-        registerService(LoginRequestHandler.class, new ReservationLoginHandler(serviceImpl, this), props);
     }
 
     @Override

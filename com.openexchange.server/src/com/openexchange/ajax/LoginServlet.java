@@ -84,6 +84,7 @@ import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.login.OAuthLogin;
 import com.openexchange.ajax.login.RampUp;
 import com.openexchange.ajax.login.RedeemToken;
+import com.openexchange.ajax.login.RedeemReservationLogin;
 import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.writer.LoginWriter;
@@ -640,6 +641,7 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
         handlerMap.put("/httpAuth", new HTTPAuthLogin(conf));
+        handlerMap.put(ACTION_REDEEM_RESERVATION, new RedeemReservationLogin(conf));
     }
 
     public LoginRequestHandler addRequestHandler(String action, LoginRequestHandler handler) {
