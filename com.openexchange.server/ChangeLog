@@ -87,6 +87,10 @@
 
  - Fix for bug 37249: Ignore already processed images when updating a snippet.
 
+* 2015-03-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37213: Also consider remote sessions when trying to re-establish a terminated IMAP-IDLE listener
+
 * 2015-03-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 37200: Do only advertise "edit_group"/"edit_resource" capability if both - backend service and permission bit are available

@@ -64,6 +64,7 @@ import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 
 
 /**
@@ -231,12 +232,15 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      * @throws OXException If operation fails
      */
     public ImapIdlePushListener injectAnotherListenerFor(Session oldSession) {
+        int contextId = oldSession.getContextId();
+        int userId = oldSession.getUserId();
+        String oldSessionId = oldSession.getSessionID();
+
+        // Look-up sessions
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (null != sessiondService) {
-            int contextId = oldSession.getContextId();
-            int userId = oldSession.getUserId();
+            // Query local ones first
             Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
-            String oldSessionId = oldSession.getSessionID();
             for (Session session : sessions) {
                 if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
                     ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, services);
@@ -245,7 +249,21 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     return listener;
                 }
             }
+
+            // Look-up remote sessions, too, if possible
+            if (sessiondService instanceof SessiondServiceExtended) {
+                sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
+                for (Session session : sessions) {
+                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
+                        ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, services);
+                        // Replace old/existing one
+                        listeners.put(SimpleKey.valueOf(userId, contextId), listener);
+                        return listener;
+                    }
+                }
+            }
         }
+
         return null;
     }
 
