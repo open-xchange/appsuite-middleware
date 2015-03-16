@@ -207,8 +207,6 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
 
                             map.put("SYNC_EVENT", "NEW_MAIL");
                             map.put("title", "OX Mail");
-                            map.put("message", "You've received a new mail");
-                            map.put("msgcnt", "1");
                             map.put(MailPushUtility.KEY_PATH, folder + ":" + mailId);
                             map.put(MailPushUtility.KEY_SUBJECT, subject == null ? "(no subject)" : subject);
                             map.put(MailPushUtility.KEY_SENDER, personalFrom == null ? receivedFrom : personalFrom);
