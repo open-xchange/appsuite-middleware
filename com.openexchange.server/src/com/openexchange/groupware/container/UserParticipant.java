@@ -76,7 +76,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     private int confirm = CalendarObject.NONE;
 
     private String confirmMessage;
-    
+
     private String displayName;
 
     private String emailaddress;
@@ -168,6 +168,11 @@ public class UserParticipant implements Participant, Comparable<Participant> {
         return confirm;
     }
 
+    public void removeConfirm() {
+        this.confirm = CalendarObject.NONE;
+        b_confirm = false;
+    }
+
     public void setConfirmMessage(final String confirmMessage) {
         this.confirmMessage = confirmMessage;
         b_confirmMessage = true;
@@ -175,6 +180,11 @@ public class UserParticipant implements Participant, Comparable<Participant> {
 
     public String getConfirmMessage() {
         return confirmMessage;
+    }
+
+    public void removeConfirmMessage() {
+        this.confirmMessage = null;
+        b_confirmMessage = false;
     }
 
     /**
