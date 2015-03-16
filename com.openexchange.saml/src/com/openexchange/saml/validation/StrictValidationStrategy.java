@@ -52,12 +52,15 @@ package com.openexchange.saml.validation;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Audience;
 import org.opensaml.saml2.core.AudienceRestriction;
 import org.opensaml.saml2.core.Conditions;
 import org.opensaml.saml2.core.EncryptedAssertion;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.Subject;
 import org.opensaml.saml2.core.SubjectConfirmation;
@@ -94,25 +97,11 @@ import com.openexchange.saml.validation.ResponseValidators.ResponseStatusCodeVal
 
 
 /**
- * <p>
- *   A validation strategy that tries to strictly obey the SAML 2.0 spec. It is meant as reference implementation for validating
- *   authentication responses. The validation is divided into three subsequent steps while the result of each predecessor method
- *   is passed as an argument to the successor method. Every method can abort further validation by returning an error that
- *   describes why the validation failed. The first method basically validates the response object and its contained assertions.
- *   Encrypted assertions are decrypted here. The second one looks for the first basically valid bearer assertion. In the last step
- *   that bearer assertion is checked further in terms of fulfilled conditions etc.
- * </p>
- * <p>
- *   The JavaDoc of every method denotes the validation steps that are necessary to obey the SAML 2.0 specification. Nevertheless,
- *   the IDP of a concrete deployment may not obey the spec in such a strict way and validation will fail even if the received assertions
- *   must be accepted. In these cases you need to implement your own validation strategy. Best practice is to base your implementation
- *   on this one and only remove/relax the single validation steps to let the validation pass.
- * </p>
- * <p>
- *   Several validation steps are commented with excerpts from the SAML 2.0 specification. Those excerpts are always annotated with their
- *   origin. E.g. [core 06 - 1.1p7] means "Cited from core specification, working draft 06, section 1.1 on page 7". The "errata composite"
- *   documents from https://wiki.oasis-open.org/security/FrontPage have been used as implementation reference.
- * </p>
+ * A validation strategy that tries to strictly obey the SAML 2.0 spec. It is meant as reference implementation for validating
+ * SAML messages from the IDP. Several validation steps are commented with excerpts from the SAML 2.0 specification. Those
+ * excerpts are always annotated with their origin. E.g. [core 06 - 1.1p7] means "Cited from core specification, working draft 06,
+ * section 1.1 on page 7". The "errata composite" documents from https://wiki.oasis-open.org/security/FrontPage have been used as
+ * implementation reference.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -141,12 +130,74 @@ public class StrictValidationStrategy implements ValidationStrategy {
         this.stateManagement = stateManagement;
     }
 
+    /**
+     * <p>
+     *   The response validation is divided into three subsequent steps while the result of each predecessor method
+     *   is passed as an argument to the successor method. Every method can abort further validation by returning an error that
+     *   describes why the validation failed. The first method basically validates the response object and its contained assertions.
+     *   Encrypted assertions are decrypted here. The second one looks for the first basically valid bearer assertion. In the last step
+     *   that bearer assertion is checked further in terms of fulfilled conditions etc.
+     * </p>
+     * <p>
+     *   The JavaDoc of every method denotes the validation steps that are necessary to obey the SAML 2.0 specification. Nevertheless,
+     *   the IDP of a concrete deployment may not obey the spec in such a strict way and validation will fail even if the received assertions
+     *   must be accepted. In these cases you need to implement your own validation strategy. Best practice is to base your implementation
+     *   on this one and only remove/relax the single validation steps to let the validation pass.
+     * </p>
+     */
     @Override
-    public ValidationResult validate(Response response, Binding binding) throws ValidationException {
+    public AuthnResponseValidationResult validateAuthnResponse(Response response, Binding binding) throws ValidationException {
         List<Assertion> responseValidationResult = validateResponse(binding, response);
         Assertion bearerAssertion = determineAssertion(binding, response, responseValidationResult);
         AuthnRequestInfo authnRequestInfo = validateBearerAssertion(binding, response, bearerAssertion);
-        return new ValidationResult(bearerAssertion, authnRequestInfo);
+        return new AuthnResponseValidationResult(bearerAssertion, authnRequestInfo);
+    }
+
+    @Override
+    public void validateLogoutRequest(LogoutRequest logoutRequest, HttpServletRequest httpRequest, Binding binding) throws ValidationException {
+        ValidationError error = verifyLogoutRequestSignature(logoutRequest, httpRequest, binding);
+        if (error != null) {
+            throw error.toValidationException();
+        }
+
+        /*
+         * The <Issuer> element MUST be present and MUST contain the unique identifier of the requesting entity;
+         * the Format attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity.
+         * [profiles 06 - 4.4.4.1p39]
+         */
+        Issuer issuer = logoutRequest.getIssuer();
+        if (issuer == null) {
+            throw new ValidationException(ValidationFailedReason.MISSING_ELEMENT, "'Issuer' is missing in LogoutRequest '" + logoutRequest.getID() + "'");
+        }
+
+        if (!config.getIdentityProviderEntityID().equals(issuer.getValue())) {
+            throw new ValidationException(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' of LogoutRequest '" + logoutRequest.getID() + "' contains an unexpected value: " + issuer.getValue());
+        }
+    }
+
+    private ValidationError verifyLogoutRequestSignature(LogoutRequest logoutRequest, HttpServletRequest httpRequest, Binding binding) {
+        /*
+         * The <LogoutResponse> message MUST be signed if the HTTP POST or Redirect binding is used.
+         * [profiles 06 - 4.4.3.4p39]
+         *
+         * Nevertheless, we can only check the signature if we have according credentials...
+         */
+        if ((binding == Binding.HTTP_POST || binding == Binding.HTTP_REDIRECT) && credentialProvider.hasValidationCredential()) {
+            if (binding == Binding.HTTP_REDIRECT) {
+                // Signature is part of the URL
+                return SignatureHelper.validateURISignature(httpRequest, credentialProvider.getValidationCredential());
+            } else {
+                if (!logoutRequest.isSigned()) {
+                    return new ValidationError(ValidationFailedReason.INVALID_REQUEST, "LogoutResponse was not signed");
+                }
+
+                return SignatureHelper.validateSignature(logoutRequest, credentialProvider.getValidationCredential());
+            }
+        } else if (logoutRequest.isSigned() && credentialProvider.hasValidationCredential()) {
+            return SignatureHelper.validateSignature(logoutRequest, credentialProvider.getValidationCredential());
+        }
+
+        return null;
     }
 
     /**
@@ -184,7 +235,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
         List<ResponseValidator> responseValidators = getResponseValidators(binding, response);
         ValidationError error = validateResponse(response, responseValidators);
         if (error != null) {
-            throw new ValidationException(error.getReason(), error.getMessage());
+            throw error.toValidationException();
         }
 
         try {
@@ -196,7 +247,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
             List<AssertionValidator> assertionValidators = getAssertionValidators(binding, response);
             error = validateAssertions(response, allAssertions, assertionValidators);
             if (error != null) {
-                throw new ValidationException(error.getReason(), error.getMessage());
+                throw error.toValidationException();
             }
 
             return allAssertions;
@@ -209,7 +260,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
 
     /**
      * <p>
-     *   Takes the assertions that are returned from {@link #validate(Response, Binding)}, and determines the bearer assertion that
+     *   Takes the assertions that are returned from {@link #validateAuthnResponse(Response, Binding)}, and determines the bearer assertion that
      *   asserts a certain users authentication. If none of the passed assertions is a valid bearer assertion, a validation exception is
      *   thrown.
      * </p>

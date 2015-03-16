@@ -196,4 +196,10 @@ public class DefaultConfig implements SAMLConfig {
         return null;
     }
 
+    @Override
+    public Binding getLogoutResponseBinding() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

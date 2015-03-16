@@ -49,8 +49,11 @@
 
 package com.openexchange.saml.impl;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.session.Reply;
@@ -67,6 +70,8 @@ import com.openexchange.session.inspector.SessionInspectorService;
  */
 public class SAMLSessionInspector implements SessionInspectorService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SAMLSessionInspector.class);
+
     private final WebSSOProvider provider;
 
     public SAMLSessionInspector(WebSSOProvider provider) {
@@ -81,13 +86,23 @@ public class SAMLSessionInspector implements SessionInspectorService {
 
     @Override
     public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        provider.respondWithAuthnRequest(request, response);
+        try {
+            provider.respondWithAuthnRequest(request, response);
+        } catch (IOException e) {
+            LOG.error("", e);
+        }
+
         return Reply.STOP;
     }
 
     @Override
     public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        provider.respondWithAuthnRequest(request, response);
+        try {
+            provider.respondWithAuthnRequest(request, response);
+        } catch (IOException e) {
+            LOG.error("", e);
+        }
+
         return Reply.STOP;
     }
 

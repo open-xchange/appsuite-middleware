@@ -53,11 +53,7 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.core.Response;
-import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureValidator;
-import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,18 +93,13 @@ public class AssertionValidators {
         public ValidationError validate(Response response, Assertion assertion) {
             String assertionID = assertion.getID();
             if (assertion.isSigned()) {
-                try {
-                    Signature signature = assertion.getSignature();
-                    SAMLSignatureProfileValidator profileValidator = new SAMLSignatureProfileValidator();
-                    profileValidator.validate(signature);
-                    SignatureValidator signatureValidator = new SignatureValidator(validationCredential);
-                    signatureValidator.validate(signature);
-                } catch (ValidationException e) {
-                    LOG.debug("", e);
-                    return new ValidationError(ValidationFailedReason.INVALID_ASSERTION_SIGNATURE, e.getMessage());
+                ValidationError error = SignatureHelper.validateSignature(response, validationCredential);
+                if (error == null) {
+                    LOG.debug("Assertion '{}' contains a valid signature", assertionID);
+                } else if (error.getThrowable() != null) {
+                    LOG.debug("", error.getThrowable());
                 }
-
-                LOG.debug("Assertion '{}' contains a valid signature", assertionID);
+                return error;
             } else {
                 /*
                  * A SAML assertion may be embedded within another SAML element, such as an enclosing <Assertion>
@@ -121,7 +112,7 @@ public class AssertionValidators {
                  * [core 06 - 5.3p70/71]
                  */
                 if (!response.isSigned() && enforceSignature) {
-                    return new ValidationError(ValidationFailedReason.INVALID_ASSERTION_SIGNATURE, "Assertion '" + assertionID + "' is not signed");
+                    return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, "Assertion '" + assertionID + "' is not signed");
                 }
             }
 

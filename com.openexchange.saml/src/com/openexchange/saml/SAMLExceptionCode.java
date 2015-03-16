@@ -67,33 +67,37 @@ public enum SAMLExceptionCode implements DisplayableOXExceptionCode {
      */
     CREDENTIAL_PROBLEM("An error regarding the SAML credential provider occurred: %1$s", Category.CATEGORY_CONFIGURATION, 1),
     /**
-     * An error occurred while trying to marshall a SAML object to XML: %1$s
-     */
-    MARSHALLING_PROBLEM("An error occurred while trying to marshall a SAML object to XML: %1$s", Category.CATEGORY_ERROR, 2),
-    /**
      * An error occurred while trying to encode a SAML message for transport: %1$s
      */
-    ENCODING_ERROR("An error occurred while trying to encode a SAML message for transport: %1$s", Category.CATEGORY_ERROR, 3),
+    ENCODING_ERROR("An error occurred while trying to encode a SAML message for transport: %1$s", Category.CATEGORY_ERROR, 2),
     /**
      * An error occurred while decoding a SAML message: %1$s
      */
-    DECODING_ERROR("An error occurred while decoding a SAML message: %1$s", Category.CATEGORY_ERROR, 4),
+    DECODING_ERROR("An error occurred while decoding a SAML message: %1$s", Category.CATEGORY_ERROR, 3),
+    /**
+     * An error occurred while trying to marshall a SAML object: %1$s
+     */
+    MARSHALLING_PROBLEM("An error occurred while trying to marshall a SAML object: %1$s", Category.CATEGORY_ERROR, 4),
+    /**
+     * An error occurred while trying to unmarshall a SAML object: %1$s
+     */
+    UNMARSHALLING_ERROR("An error occurred while trying to unmarshall a SAML object: %1$s", Category.CATEGORY_ERROR, 5),
     /**
      * The binding '%1$s' is not supported for this operation
      */
-    UNSUPPORTED_BINDING("The binding '%1$s' is not supported for this operation", Category.CATEGORY_ERROR, 5),
+    UNSUPPORTED_BINDING("The binding '%1$s' is not supported for this operation", Category.CATEGORY_ERROR, 6),
     /**
-     * SAML response validation failed: %1$s (%2$s)
+     * SAML message validation failed: %1$s (%2$s)
      */
-    VALIDATION_FAILED("SAML response validation failed: %1$s (%2$s)", Category.CATEGORY_ERROR, 6),
+    VALIDATION_FAILED("SAML message validation failed: %1$s (%2$s)", Category.CATEGORY_ERROR, 7),
     /**
      * A SAML request was considered invalid. Reason: %1$s
      */
-    INVALID_REQUEST("A SAML request was considered invalid. Reason: %1$s", Category.CATEGORY_ERROR, 7),
+    INVALID_REQUEST("A SAML request was considered invalid. Reason: %1$s", Category.CATEGORY_ERROR, 8),
     /**
      * An internal error occurred: %1$s
      */
-    INTERNAL_ERROR("An internal error occurred: %1$s", Category.CATEGORY_ERROR, 8),
+    INTERNAL_ERROR("An internal error occurred: %1$s", Category.CATEGORY_ERROR, 9),
     ;
 
     private final Category category;

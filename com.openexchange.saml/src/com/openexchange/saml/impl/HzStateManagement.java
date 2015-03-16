@@ -50,6 +50,7 @@
 package com.openexchange.saml.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
@@ -113,6 +114,12 @@ public class HzStateManagement implements StateManagement {
     public boolean hasAuthnResponse(String responseID) throws OXException {
         Object value = getResponseInfoMap().get(responseID);
         return value != null;
+    }
+
+    @Override
+    public List<String> removeSessionIds(List<String> keys) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private IMap<String, Map<String, String>> getRequestInfoMap() {

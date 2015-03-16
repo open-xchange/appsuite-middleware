@@ -68,8 +68,10 @@ public interface WebSSOProvider {
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
+     * @throws OXException If preparing the AuthnRequest fails
+     * @throws IOException If writing to the servlet response fails
      */
-    void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException;
+    void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException;
 
     /**
      * Handles an authentication response.
@@ -77,8 +79,20 @@ public interface WebSSOProvider {
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
      * @param binding The binding used to call the assertion consumer service
+     * @throws OXException If an error occurs while processing the response
+     * @throws IOException If writing to the servlet response fails
      */
     void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException;
+
+    /**
+     * handles a single logout request.
+     *
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @param binding The binding used to call the single logout service
+     * @throws IOException If writing to the servlet response fails
+     */
+    void handleLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws IOException;
 
     /**
      * Generates the service providers metadata XML.

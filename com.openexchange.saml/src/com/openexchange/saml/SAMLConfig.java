@@ -49,7 +49,6 @@
 
 package com.openexchange.saml;
 
-
 /**
  * Contains configuration settings of the SAML feature.
  *
@@ -60,8 +59,7 @@ package com.openexchange.saml;
 public interface SAMLConfig {
 
     public enum Binding {
-        HTTP_REDIRECT,
-        HTTP_POST;
+        HTTP_REDIRECT, HTTP_POST;
     }
 
     /**
@@ -100,6 +98,13 @@ public interface SAMLConfig {
     Binding getResponseBinding();
 
     /**
+     * Gets the binding via which LogoutResponse messages shall be delivered.
+     *
+     * @return The binding or <code>null</code> if single logout is not configured.
+     */
+    Binding getLogoutResponseBinding();
+
+    /**
      * Gets the entity ID of the identity provider.
      *
      * @return The ID. Never <code>null</code>.
@@ -114,8 +119,7 @@ public interface SAMLConfig {
     String getIdentityProviderURL();
 
     /**
-     * Whether the single logout profile is supported. Note: currently only IDP-initiated
-     * single logout is implemented.
+     * Whether the single logout profile is supported. Note: currently only IDP-initiated single logout is implemented.
      *
      * @return <code>true</code> if the profile is supported, otherwise false.
      */

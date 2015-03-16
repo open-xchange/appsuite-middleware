@@ -52,10 +52,12 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.SAMLConfig.Binding;
 
 
 
@@ -138,7 +140,31 @@ public interface SAMLWebSSOCustomizer {
      * @return The decoded XML or <code>null</code> if the response shall be decoded in the normal way by the core implementation.
      * @throws OXException If thrown the further processing will be aborted
      */
-    String decodeResponse(HttpServletRequest httpRequest) throws OXException;
+    String decodeAuthnResponse(HttpServletRequest httpRequest) throws OXException;
+
+    /**
+     * Customizes the given logout response. The passed response was prepared based on the processed logout request and
+     * the properties in <code>saml.properties</code>.
+     *
+     * @param logoutResponse The prepared logout response
+     * @param requestContext The request context
+     * @return The customized instance. This allows a full replacement of the response. Always return a valid request,
+     * not <code>null</code>!
+     * @throws OXException If thrown the further processing will be aborted
+     */
+    LogoutResponse customizeLogoutResponse(LogoutResponse logoutResponse, RequestContext requestContext) throws OXException;
+
+    /**
+     * Allows to customize the decoding of the logout request. The result of this method is expected to be the full XML
+     * representation of the &lt;LogoutRequest&gt; element. The implementation of this method is optional, you may return
+     * <code>null</code> if the request shall be decoded in the normal (spec-conform) way.
+     *
+     * @param httpRequest The servlet request containing the logout request
+     * @param binding The binding via which the request was received
+     * @return The decoded XML or <code>null</code> if the request shall be decoded in the normal way by the core implementation.
+     * @throws OXException If thrown the further processing will be aborted
+     */
+    String decodeLogoutRequest(HttpServletRequest httpRequest, Binding binding) throws OXException;
 
     /**
      * Customizes the SPSSODescriptor of the metadata XML. This method is called right after the descriptor
@@ -150,5 +176,6 @@ public interface SAMLWebSSOCustomizer {
      * @throws OXException If thrown the further processing will be aborted
      */
     SPSSODescriptor customizeSPSSODescriptor(SPSSODescriptor descriptor) throws OXException;
+
 
 }

@@ -47,33 +47,42 @@
  *
  */
 
-package com.openexchange.saml.state;
+package com.openexchange.saml.http;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import com.openexchange.exception.OXException;
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.WebSSOProvider;
 
 
 /**
- * The state management is used to assign authentication responses to previously generated requests
- * and to cache responses to check for replay attacks.
+ * {@link SingleLogoutService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface StateManagement {
+public class SingleLogoutService extends HttpServlet {
 
-    void addAuthnRequest(AuthnRequestInfo requestInfo, long timeout, TimeUnit timeUnit) throws OXException;
+    private static final long serialVersionUID = 8167911323803230663L;
 
-    AuthnRequestInfo getAuthnRequest(String requestID) throws OXException;
+    private final WebSSOProvider provider;
 
-    void removeAuthnRequestInfo(String requestID) throws OXException;
+    public SingleLogoutService(WebSSOProvider provider) {
+        super();
+        this.provider = provider;
+    }
 
-    void addAuthnResponse(String responseID, long timeout, TimeUnit timeUnit) throws OXException;
+    @Override
+    protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
+        provider.handleLogoutRequest(httpRequest, httpResponse, Binding.HTTP_REDIRECT);
+    }
 
-    boolean hasAuthnResponse(String responseID) throws OXException;
-
-    List<String> removeSessionIds(List<String> keys);
-
+    @Override
+    protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
+        provider.handleLogoutRequest(httpRequest, httpResponse, Binding.HTTP_POST);
+    }
 
 }

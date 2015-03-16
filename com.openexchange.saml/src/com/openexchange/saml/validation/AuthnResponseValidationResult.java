@@ -59,29 +59,29 @@ import com.openexchange.saml.state.AuthnRequestInfo;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class ValidationResult {
+public class AuthnResponseValidationResult {
 
     private final Assertion bearerAssertion;
 
     private final AuthnRequestInfo requestInfo;
 
     /**
-     * Initializes a new {@link ValidationResult}.
+     * Initializes a new {@link AuthnResponseValidationResult}.
      * @param bearerAssertion
      * @param requestInfo
      */
-    public ValidationResult(Assertion bearerAssertion, AuthnRequestInfo requestInfo) {
+    public AuthnResponseValidationResult(Assertion bearerAssertion, AuthnRequestInfo requestInfo) {
         super();
         this.bearerAssertion = bearerAssertion;
         this.requestInfo = requestInfo;
     }
 
     /**
-     * Initializes a new {@link ValidationResult}.
+     * Initializes a new {@link AuthnResponseValidationResult}.
      * @param bearerAssertion
      * @param requestInfo
      */
-    public ValidationResult(Assertion bearerAssertion) {
+    public AuthnResponseValidationResult(Assertion bearerAssertion) {
         super();
         this.bearerAssertion = bearerAssertion;
         this.requestInfo = null;

@@ -51,8 +51,10 @@ package com.openexchange.saml.spi;
 
 import javax.servlet.http.HttpServletRequest;
 import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import com.openexchange.exception.OXException;
+import com.openexchange.saml.SAMLConfig.Binding;
 
 
 /**
@@ -71,7 +73,17 @@ public abstract class AbstractWebSSOCustomizer implements SAMLWebSSOCustomizer {
     }
 
     @Override
-    public String decodeResponse(HttpServletRequest httpRequest) throws OXException {
+    public String decodeAuthnResponse(HttpServletRequest httpRequest) throws OXException {
+        return null;
+    }
+
+    @Override
+    public LogoutResponse customizeLogoutResponse(LogoutResponse logoutResponse, RequestContext requestContext) throws OXException {
+        return logoutResponse;
+    }
+
+    @Override
+    public String decodeLogoutRequest(HttpServletRequest httpRequest, Binding binding) throws OXException {
         return null;
     }
 

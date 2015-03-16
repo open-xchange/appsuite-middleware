@@ -50,6 +50,7 @@
 package com.openexchange.saml.spi;
 
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
@@ -128,6 +129,15 @@ public interface SAMLBackend {
      * @return The authentication information
      * @throws OXException If the principal cannot be resolved
      */
-    AuthenticationInfo resolveResponse(Response response, Assertion assertion) throws OXException;
+    AuthenticationInfo resolveAuthnResponse(Response response, Assertion assertion) throws OXException;
+
+    /**
+     * Resolves a logout request and determines which sessions are to be terminated.
+     *
+     * @param request The logout request
+     * @return The logout info
+     * @throws OXException If the sessions to terminate cannot be determined
+     */
+    LogoutInfo resolveLogoutRequest(LogoutRequest request) throws OXException;
 
 }

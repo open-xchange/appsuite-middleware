@@ -57,13 +57,13 @@ package com.openexchange.saml.validation;
  */
 public enum ValidationFailedReason {
     /**
-     * The response is digitally signed but its signature cannot be verified.
+     * The SAML request is invalid.
      */
-    INVALID_RESPONSE_SIGNATURE("The response is digitally signed but its signature cannot be verified."),
+    INVALID_REQUEST("The SAML request is invalid."),
     /**
-     * The assertion is digitally signed but its signature cannot be verified.
+     * The object is digitally signed but its signature cannot be verified.
      */
-    INVALID_ASSERTION_SIGNATURE("The assertion is digitally signed but its signature cannot be verified."),
+    INVALID_SIGNATURE("The response is digitally signed but its signature cannot be verified."),
     /**
      * A required XML element is missing.
      */

@@ -55,11 +55,7 @@ import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.Status;
 import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.saml2.core.StatusMessage;
-import org.opensaml.security.SAMLSignatureProfileValidator;
 import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.signature.SignatureValidator;
-import org.opensaml.xml.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,18 +92,14 @@ public class ResponseValidators {
              * [core 06 - 5.1p70]
              */
             if (response.isSigned()) {
-                try {
-                    Signature signature = response.getSignature();
-                    SAMLSignatureProfileValidator profileValidator = new SAMLSignatureProfileValidator();
-                    profileValidator.validate(signature);
-
-                    SignatureValidator signatureValidator = new SignatureValidator(validationCredential);
-                    signatureValidator.validate(signature);
+                ValidationError error = SignatureHelper.validateSignature(response, validationCredential);
+                if (error == null) {
                     LOG.debug("Response is signed and the signature is valid");
-                } catch (ValidationException e) {
-                    LOG.debug("", e);
-                    return new ValidationError(ValidationFailedReason.INVALID_RESPONSE_SIGNATURE, e.getMessage());
+                } else if (error.getThrowable() != null) {
+                    LOG.debug("", error.getThrowable());
                 }
+
+                return error;
             }
 
             return null;

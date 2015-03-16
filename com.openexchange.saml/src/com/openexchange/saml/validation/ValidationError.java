@@ -62,6 +62,8 @@ public class ValidationError {
 
     private final String message;
 
+    private final Throwable throwable;
+
     /**
      * Initializes a new {@link ValidationError}.
      * @param reason
@@ -71,6 +73,19 @@ public class ValidationError {
         super();
         this.reason = reason;
         this.message = message;
+        throwable = null;
+    }
+
+    /**
+     * Initializes a new {@link ValidationError}.
+     * @param reason
+     * @param message
+     */
+    public ValidationError(ValidationFailedReason reason, String message, Throwable throwable) {
+        super();
+        this.reason = reason;
+        this.message = message;
+        this.throwable = throwable;
     }
 
     public ValidationFailedReason getReason() {
@@ -79,6 +94,14 @@ public class ValidationError {
 
     public String getMessage() {
         return message;
+    }
+
+    public Throwable getThrowable() {
+        return throwable;
+    }
+
+    public ValidationException toValidationException() {
+        return new ValidationException(reason, message, throwable);
     }
 
 }

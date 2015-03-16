@@ -49,13 +49,15 @@
 
 package com.openexchange.saml.validation;
 
+import javax.servlet.http.HttpServletRequest;
+import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.state.AuthnRequestInfo;
 
 
 /**
- * Interface for the strategy that is used to validate SAML authentication responses.
+ * Interface for the strategy that is used to validate SAML messages.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -72,6 +74,8 @@ public interface ValidationStrategy {
      *         {@link AuthnRequestInfo} denoting the AuthnRequest that initiated the authentication flow.
      * @throws ValidationException If the response validation fails
      */
-    ValidationResult validate(Response response, Binding binding) throws ValidationException;
+    AuthnResponseValidationResult validateAuthnResponse(Response response, Binding binding) throws ValidationException;
+
+    void validateLogoutRequest(LogoutRequest logoutRequest, HttpServletRequest httpRequest, Binding binding) throws ValidationException;
 
 }
