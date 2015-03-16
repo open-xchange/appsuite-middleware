@@ -61,11 +61,9 @@ import com.openexchange.mobilepush.events.storage.UserToken;
  */
 public class MailPushUtility {
 
-    public static final String KEY_SUBJECT = "subject";
+    public static final String KEY_MESSAGE = "message";
 
     public static final String KEY_UNREAD = "unread";
-
-    public static final String KEY_SENDER = "sender";
 
     public static final String KEY_PATH = "path";
 
@@ -176,10 +174,10 @@ public class MailPushUtility {
      * @param messageData
      * @return
      */
-    public static String getSubject(Map<String, Object> messageData) {
-        if (messageData.containsKey(KEY_SUBJECT)) {
-            if (messageData.get(KEY_SUBJECT) instanceof String) {
-                return (String) messageData.get(KEY_SUBJECT);
+    public static String getMessage(Map<String, Object> messageData) {
+        if (messageData.containsKey(KEY_MESSAGE)) {
+            if (messageData.get(KEY_MESSAGE) instanceof String) {
+                return (String) messageData.get(KEY_MESSAGE);
             }
         }
         return "";
@@ -194,20 +192,6 @@ public class MailPushUtility {
         if (messageData.containsKey(KEY_PATH)) {
             if (messageData.get(KEY_PATH) instanceof String) {
                 return (String) messageData.get(KEY_PATH);
-            }
-        }
-        return "";
-    }
-
-    /**
-     *
-     * @param messageData
-     * @return
-     */
-    public static String getSender(Map<String, Object> messageData) {
-        if (messageData.containsKey(KEY_SENDER)) {
-            if (messageData.get(KEY_SENDER) instanceof String) {
-                return (String) messageData.get(KEY_SENDER);
             }
         }
         return "";

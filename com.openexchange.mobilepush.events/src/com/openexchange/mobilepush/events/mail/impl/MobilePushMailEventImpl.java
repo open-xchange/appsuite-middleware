@@ -205,11 +205,16 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                             String mailId = mm.getMailId();
                             String folder = mm.getFolder();
 
-                            map.put("SYNC_EVENT", "NEW_MAIL");
-                            map.put("title", "OX Mail");
                             map.put(MailPushUtility.KEY_PATH, folder + ":" + mailId);
-                            map.put(MailPushUtility.KEY_SUBJECT, subject == null ? "(no subject)" : subject);
-                            map.put(MailPushUtility.KEY_SENDER, personalFrom == null ? receivedFrom : personalFrom);
+
+                            String strSubject = subject == null ? "(no subject)" : subject;
+                            String strSender = personalFrom == null ? receivedFrom : personalFrom;
+
+                            StringBuffer sb = new StringBuffer(strSender);
+                            sb.append("\n");
+                            sb.append(strSubject);
+
+                            map.put(MailPushUtility.KEY_MESSAGE, sb.toString());
                             map.put(MailPushUtility.KEY_UNREAD, unread);
                             props.add(map);
                         }
@@ -257,9 +262,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         List<Map<String, Object>> props = new ArrayList<Map<String, Object>>(1);
         Map<String, Object> map = new HashMap<String, Object>(4);
         map.put("SYNC_EVENT", "MAIL");
-        map.put("title", "OX Mail");
         map.put("message", "refresh");
-        map.put("msgcnt", "1");
         props.add(map);
         return props;
     }
