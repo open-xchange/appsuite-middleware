@@ -61,9 +61,9 @@ import java.util.Set;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
-import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.actions.AbstractAction;
 import com.openexchange.drive.impl.actions.DownloadFileAction;
 import com.openexchange.drive.impl.actions.ErrorFileAction;
@@ -176,14 +176,8 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                 LOG.warn("Got exception during server-side execution of download action: {}\nSession: {}, path: {}, action: {}",
                     e.getMessage(), session, path, action, e);
                 if (DriveUtils.indicatesQuotaExceeded(e)) {
-                    /*
-                     * quota exceeded
-                     */
                     addNewActionsForClient(DriveUtils.handleQuotaExceeded(session, e, path, action.getVersion(), action.getNewVersion()));
-                } else if ("IFO-0100".equals(e.getErrorCode())) {
-                    /*
-                     * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
-                     */
+                } else if (DriveUtils.indicatesFailedSave(e)) {
                     addNewActionForClient(new ErrorFileAction(null, action.getNewVersion(), null, path, e, true));
                 } else {
                     throw e;
@@ -196,10 +190,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             } catch (OXException e) {
                 LOG.warn("Got exception during server-side execution of edit action: {}\nSession: {}, path: {}, action: {}",
                     e.getMessage(), session, path, action, e);
-                if ("IFO-0100".equals(e.getErrorCode())) {
-                    /*
-                     * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
-                     */
+                if (DriveUtils.indicatesFailedSave(e)) {
                     addNewActionForClient(new ErrorFileAction(null, action.getNewVersion(), null, path, e, true));
                 } else {
                     throw e;

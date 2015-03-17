@@ -59,22 +59,22 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryPattern;
+import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.DriveSettings;
-import com.openexchange.drive.DriveUtility;
-import com.openexchange.drive.FilePattern;
-import com.openexchange.drive.DirectoryVersion;
-import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.drive.impl.DriveUtils;
+import com.openexchange.drive.DriveSettings;
+import com.openexchange.drive.DriveUtility;
+import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
+import com.openexchange.drive.impl.DriveConstants;
+import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.actions.AbstractAction;
 import com.openexchange.drive.impl.actions.AbstractFileAction;
 import com.openexchange.drive.impl.actions.AcknowledgeFileAction;
@@ -316,10 +316,7 @@ public class DriveServiceImpl implements DriveService {
                 e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength, e);
             if (DriveUtils.indicatesQuotaExceeded(e)) {
                 syncResult.addActionsForClient(DriveUtils.handleQuotaExceeded(syncSession, e, path, originalVersion, newVersion));
-            } else if ("IFO-0100".equals(e.getErrorCode())) {
-                /*
-                 * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
-                 */
+            } else if (DriveUtils.indicatesFailedSave(e)) {
                 syncResult.addActionForClient(new ErrorFileAction(null, newVersion, null, path, e, true));
             } else {
                 throw e;

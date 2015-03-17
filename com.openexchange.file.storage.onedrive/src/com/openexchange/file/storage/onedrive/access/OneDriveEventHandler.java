@@ -73,10 +73,10 @@ public final class OneDriveEventHandler implements EventHandler {
     }
 
     @Override
-    public void handleEvent(final Event event) {
-        final String topic = event.getTopic();
-        try {
-            if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+    public void handleEvent(Event event) {
+        String topic = event.getTopic();
+        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+            try {
                 Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
                 if (null != contextId) {
                     Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
@@ -86,9 +86,9 @@ public final class OneDriveEventHandler implements EventHandler {
                         }
                     }
                 }
+            } catch (final Exception e) {
+                LOG.error("Error while handling SessionD event \"{}\"", topic, e);
             }
-        } catch (final Exception e) {
-            LOG.error("Error while handling SessionD event \"{}\"", topic, e);
         }
     }
 }

@@ -20,11 +20,11 @@ package org.apache.felix.eventadmin.impl.tasks;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
 import org.osgi.service.event.Event;
 
-import EDU.oswego.cs.dl.util.concurrent.TimeoutException;
 
 /**
  * This class does the actual work of the synchronous event delivery.
@@ -99,8 +99,7 @@ public class SyncDeliverTasks
      * event is send (or a timeout occurs).
      *
      * @param tasks The event handler dispatch tasks to execute
-     * @param event The event
-     * @param filterAsyncUnordered Signals unordered asynchronous execution
+     *
      */
     public void execute(final Collection<EventHandlerProxy> tasks, final Event event, final boolean filterAsyncUnordered)
     {

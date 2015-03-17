@@ -201,7 +201,7 @@ public class OutlookFolderStorageActivator extends HousekeepingActivator {
                     }
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
                 registerService(EventHandler.class.getName(), sessionEventHandler, dict);
             }
         } catch (final Exception e) {

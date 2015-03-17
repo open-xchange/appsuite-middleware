@@ -19,13 +19,11 @@
 package org.apache.felix.eventadmin.impl.tasks;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
 import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 
 /**
  * This class does the actual work of the asynchronous event dispatch.
@@ -44,11 +42,12 @@ public class AsyncDeliverTasks
     final SyncDeliverTasks m_deliver_task;
 
     /** A map of running threads currently delivering async events. */
-    final Map<Thread, TaskExecuter> m_running_threads = new HashMap<Thread, TaskExecuter>();
+    private final Map<Long, TaskExecuter> m_running_threads = new ConcurrentHashMap<Long, TaskExecuter>();
 
     /** The counter for pending events */
     final AtomicLong postedEvents;
 
+    /** The counter for delivered events */
     final AtomicLong deliveredEvents;
 
     /**
@@ -61,16 +60,20 @@ public class AsyncDeliverTasks
      */
     public AsyncDeliverTasks(final DefaultThreadPool pool, final SyncDeliverTasks deliverTask)
     {
+        super();
         m_pool = pool;
         m_deliver_task = deliverTask;
         postedEvents = new AtomicLong();
         deliveredEvents = new AtomicLong();
     }
 
+    /**
+     * Creates a new measurement from current state.
+     *
+     * @return The current measurement
+     */
     public Measurement createMeasurement() {
-        long tmpDelivered = deliveredEvents.get();
-        long tmpPosted = postedEvents.get();
-        return new Measurement(tmpPosted, tmpDelivered);
+        return new Measurement(postedEvents.get(), deliveredEvents.get());
     }
 
     /**
@@ -99,91 +102,112 @@ public class AsyncDeliverTasks
         }
         if ( hasOrdered )
         {*/
-            final Thread currentThread = Thread.currentThread();
-            TaskExecuter executer = null;
-            synchronized (m_running_threads )
+            final TaskInfo info = new TaskInfo(tasks, event);
+            final Long currentThreadId = Long.valueOf(Thread.currentThread().getId());
+            TaskExecuter executer = m_running_threads.get(currentThreadId);
+            if ( executer == null )
             {
-                final TaskExecuter runningExecutor = m_running_threads.get(currentThread);
-                if ( runningExecutor != null )
-                {
-                    if (postedEvents.incrementAndGet() < 0L) {
-                        postedEvents.set(0L);
-                    }
-                    runningExecutor.add(tasks, event);
-                }
-                else
-                {
-                    executer = new TaskExecuter( tasks, event, currentThread );
-                    m_running_threads.put(currentThread, executer);
-                }
+                executer = new TaskExecuter(m_running_threads, deliveredEvents);
             }
-            if ( executer != null )
+            synchronized ( executer )
             {
                 if (postedEvents.incrementAndGet() < 0L) {
                     postedEvents.set(0L);
                 }
-                m_pool.executeTask(executer);
+                executer.add(info);
+                if ( !executer.isActive() )
+                {
+                    // reactivate thread
+                    executer.setSyncDeliverTasks(m_deliver_task);
+                    m_pool.executeTask(executer);
+                    m_running_threads.put(currentThreadId, executer);
+                }
             }
         //}
     }
 
-    private final class TaskExecuter implements Runnable
+    private final static class TaskInfo {
+        public final Collection<EventHandlerProxy> tasks;
+        public final Event event;
+
+        public TaskInfo next;
+
+        public TaskInfo(final Collection<EventHandlerProxy> tasks, final Event event) {
+            this.tasks = tasks;
+            this.event = event;
+        }
+    }
+
+    private final static class TaskExecuter implements Runnable
     {
-        private final LinkedList<EventTask> m_tasks = new LinkedList<EventTask>();
+        private volatile TaskInfo first;
+        private volatile TaskInfo last;
 
-        private final Object m_key;
+        private volatile SyncDeliverTasks m_deliver_task;
 
-        public TaskExecuter(final Collection<EventHandlerProxy> tasks, final Event event, final Object key)
+        private final Map<Long, TaskExecuter> m_running_threads;
+        private final AtomicLong m_deliveredEvents;
+
+        public TaskExecuter(Map<Long, TaskExecuter> runningThreads, AtomicLong deliveredEvents) {
+            super();
+            m_running_threads = runningThreads;
+            m_deliveredEvents = deliveredEvents;
+        }
+
+        public boolean isActive()
         {
-            m_key = key;
-            m_tasks.addLast(new EventTask(tasks, event));
+            return this.m_deliver_task != null;
+        }
+
+        public void setSyncDeliverTasks(final SyncDeliverTasks syncDeliverTasks)
+        {
+            this.m_deliver_task = syncDeliverTasks;
         }
 
         @Override
         public void run()
         {
-            final Thread currentThread = Thread.currentThread();
             boolean running;
             do
             {
-                EventTask eventTask = null;
-                synchronized ( m_tasks )
+                TaskInfo info = null;
+                synchronized ( this )
                 {
-                    eventTask = m_tasks.removeFirst();
-                }
-                m_deliver_task.execute(eventTask.tasks, eventTask.event, true);
-                if (deliveredEvents.incrementAndGet() < 0L) {
-                    deliveredEvents.set(0L);
-                }
-                synchronized ( m_running_threads )
-                {
-                    running = !m_tasks.isEmpty(); //  m_tasks.size() > 0;
-                    if ( !running )
+                    info = first;
+                    first = info.next;
+                    if ( first == null )
                     {
-                        m_running_threads.remove(m_key);
+                        last = null;
                     }
                 }
-            } while ( running && !currentThread.isInterrupted() );
+                m_deliver_task.execute(info.tasks, info.event, true);
+                if (m_deliveredEvents.incrementAndGet() < 0L) {
+                    m_deliveredEvents.set(0L);
+                }
+                synchronized ( this )
+                {
+                    running = first != null;
+                    if ( !running )
+                    {
+                        this.m_deliver_task = null;
+                        this.m_running_threads.remove(this);
+                    }
+                }
+            } while ( running );
         }
 
-        public void add(final Collection<EventHandlerProxy> tasks, final Event event)
+        public void add(final TaskInfo info)
         {
-            synchronized ( m_tasks )
+            if ( first == null )
             {
-                m_tasks.addLast(new EventTask(tasks, event));
+                first = info;
+                last = info;
             }
-        }
-    }
-
-    private final class EventTask {
-
-        final Collection<EventHandlerProxy> tasks;
-        final Event event;
-
-        EventTask(Collection<EventHandlerProxy> tasks, Event event) {
-            super();
-            this.tasks = tasks;
-            this.event = event;
+            else
+            {
+                last.next = info;
+                last = info;
+            }
         }
     }
 
