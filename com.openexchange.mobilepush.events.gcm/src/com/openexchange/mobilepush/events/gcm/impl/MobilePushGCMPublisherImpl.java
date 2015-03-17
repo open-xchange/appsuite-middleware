@@ -61,11 +61,11 @@ import com.google.android.gcm.Result;
 import com.google.android.gcm.Sender;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.mobilepush.events.MailPushUtility;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
-import com.openexchange.mobilepush.events.MailPushUtility;
 import com.openexchange.mobilepush.events.gcm.osgi.Services;
-import com.openexchange.mobilepush.events.storage.ContextUsers;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.mobilepush.events.storage.Subscription;
 
@@ -109,46 +109,42 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     }
 
     private void publishByContextUsers(List<String> subscriptions, MobilePushEvent loginEvent) {
-        List<ContextUsers> contextUsers = loginEvent.getContextUsers();
-
-        if (contextUsers != null && contextUsers.size() > 0) {
-            if (null != contextUsers && 0 < contextUsers.size()) {
-                Sender sender = null;
-                try {
-                    sender = getSender();
-                } catch (OXException e) {
-                    LOG.error("Error getting GCM sender", e);
+        if (subscriptions != null && subscriptions.size() > 0) {
+            Sender sender = null;
+            try {
+                sender = getSender();
+            } catch (OXException e) {
+                LOG.error("Error getting GCM sender", e);
+            }
+            if (null == sender) {
+                return;
+            }
+            for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
+                /*
+                 * prepare chunk
+                 */
+                int length = Math.min(subscriptions.size(), i + MULTICAST_LIMIT) - i;
+                List<String> registrationIDs = new ArrayList<String>(length);
+                for (int j = 0; j < length; j++) {
+                    registrationIDs.add(subscriptions.get(i + j));
                 }
-                if (null == sender) {
-                    return;
-                }
-                for (int i = 0; i < contextUsers.size(); i += MULTICAST_LIMIT) {
-                    /*
-                     * prepare chunk
-                     */
-                    int length = Math.min(contextUsers.size(), i + MULTICAST_LIMIT) - i;
-                    List<String> registrationIDs = new ArrayList<String>(length);
-                    for (int j = 0; j < length; j++) {
-                        registrationIDs.add(subscriptions.get(i + j));
+                /*
+                 * send chunk
+                 */
+                if (0 < registrationIDs.size()) {
+                    MulticastResult result = null;
+                    try {
+                        result = sender.sendNoRetry(getMessage(loginEvent), registrationIDs);
+                    } catch (IOException e) {
+                        LOG.warn("error publishing mobile notification event", e);
+                    }
+                    if (null != result) {
+                        LOG.debug("{}", result);
                     }
                     /*
-                     * send chunk
+                     * process results
                      */
-                    if (0 < registrationIDs.size()) {
-                        MulticastResult result = null;
-                        try {
-                            result = sender.sendNoRetry(getMessage(loginEvent), registrationIDs);
-                        } catch (IOException e) {
-                            LOG.warn("error publishing mobile notification event", e);
-                        }
-                        if (null != result) {
-                            LOG.debug("{}", result);
-                        }
-                        /*
-                         * process results
-                         */
-                        processResult(loginEvent, registrationIDs, result);
-                    }
+                    processResult(loginEvent, registrationIDs, result);
                 }
             }
         }
@@ -156,43 +152,41 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
 
     private void publishBySubscriptions(List<Subscription> subscriptions, MobilePushEvent event) {
         if (subscriptions != null && subscriptions.size() > 0) {
-            if (null != subscriptions && 0 < subscriptions.size()) {
-                Sender sender = null;
-                try {
-                    sender = getSender();
-                } catch (OXException e) {
-                    LOG.error("Error getting GCM sender", e);
+            Sender sender = null;
+            try {
+                sender = getSender();
+            } catch (OXException e) {
+                LOG.error("Error getting GCM sender", e);
+            }
+            if (null == sender) {
+                return;
+            }
+            for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
+                /*
+                 * prepare chunk
+                 */
+                int length = Math.min(subscriptions.size(), i + MULTICAST_LIMIT) - i;
+                List<String> registrationIDs = new ArrayList<String>(length);
+                for (int j = 0; j < length; j++) {
+                    registrationIDs.add(subscriptions.get(i + j).getToken());
                 }
-                if (null == sender) {
-                    return;
-                }
-                for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
-                    /*
-                     * prepare chunk
-                     */
-                    int length = Math.min(subscriptions.size(), i + MULTICAST_LIMIT) - i;
-                    List<String> registrationIDs = new ArrayList<String>(length);
-                    for (int j = 0; j < length; j++) {
-                        registrationIDs.add(subscriptions.get(i + j).getToken());
+                /*
+                 * send chunk
+                 */
+                if (0 < registrationIDs.size()) {
+                    MulticastResult result = null;
+                    try {
+                        result = sender.sendNoRetry(getMessage(event), registrationIDs);
+                    } catch (IOException e) {
+                        LOG.warn("error publishing mobile notification event", e);
+                    }
+                    if (null != result) {
+                        LOG.debug("{}", result);
                     }
                     /*
-                     * send chunk
+                     * process results
                      */
-                    if (0 < registrationIDs.size()) {
-                        MulticastResult result = null;
-                        try {
-                            result = sender.sendNoRetry(getMessage(event), registrationIDs);
-                        } catch (IOException e) {
-                            LOG.warn("error publishing mobile notification event", e);
-                        }
-                        if (null != result) {
-                            LOG.debug("{}", result);
-                        }
-                        /*
-                         * process results
-                         */
-                        processResult(event, registrationIDs, result);
-                    }
+                    processResult(event, registrationIDs, result);
                 }
             }
         }
@@ -200,8 +194,9 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
 
     private Message getMessage(MobilePushEvent event) {
         Message.Builder message = new Message.Builder();
-        message.collapseKey("NEW_MAIL");
-
+        if (false == Strings.isEmpty(event.getCollapseKey())) {
+            message.collapseKey(event.getCollapseKey());
+        }
         Map<String, Object> messageData = event.getMessageData();
         for (Entry<String, Object> entry : messageData.entrySet()) {
             //Cast to string cause google only allows strings..
@@ -210,7 +205,7 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
         }
 
         int currentLength = MailPushUtility.getPayloadLength(message.toString());
-        if(currentLength > MAX_PAYLOAD_SIZE) {
+        if (currentLength > MAX_PAYLOAD_SIZE) {
             int bytesToCut = currentLength - MAX_PAYLOAD_SIZE;
             MailPushUtility.cutMessage(messageData, bytesToCut);
         }
@@ -324,9 +319,9 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
                 } else {
                     LOG.warn("Registration ID {} not removed.", registrationID);
                 }
-            /**
-             * Removes subscriptions for a user for the given registration id
-             */
+                /**
+                 * Removes subscriptions for a user for the given registration id
+                 */
             } else {
                 if (true == mnss.deleteSubscription(event.getContextId(), registrationID, SERVICE_ID)) {
                     LOG.info("Successfully removed registration ID {}.", registrationID);

@@ -65,7 +65,7 @@ public class MailPushUtility {
 
     public static final String KEY_UNREAD = "unread";
 
-    public static final String KEY_PATH = "path";
+    public static final String KEY_CID = "cid";
 
     private static final String DEFAULT_CHARACTER_ENCODING = "UTF-8";
 
@@ -189,9 +189,9 @@ public class MailPushUtility {
      * @return
      */
     public static String getPath(Map<String, Object> messageData) {
-        if (messageData.containsKey(KEY_PATH)) {
-            if (messageData.get(KEY_PATH) instanceof String) {
-                return (String) messageData.get(KEY_PATH);
+        if (messageData.containsKey(KEY_CID)) {
+            if (messageData.get(KEY_CID) instanceof String) {
+                return (String) messageData.get(KEY_CID);
             }
         }
         return "";

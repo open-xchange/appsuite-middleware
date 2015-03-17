@@ -94,4 +94,17 @@ public interface MobilePushEvent {
      * @return the user id
      */
     int getUserId();
+
+    /**
+     * Google specific key to stack messages; can be <code>null</code>
+     * The collapse key
+     */
+    String getCollapseKey();
+
+    /**
+     * Sets the Google specific COLLAPSE_KEY to stack messages belonging to the key
+     *
+     * @param collapseKey
+     */
+    void setCollapseKey(String collapseKey);
 }

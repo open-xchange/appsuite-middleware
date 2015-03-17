@@ -98,7 +98,7 @@ public class Statements {
         + "WHERE cid=? AND user=? AND service=? AND provider=?;";
 
     public static final String SELECT_TOKENS = "SELECT token "
-        + "FROM mobileEventSubscriptions WHERE cid=? AND user=? AND provider=? GROUP BY user;";
+        + "FROM mobileEventSubscriptions WHERE cid=? AND user=? AND provider=? AND service=? GROUP BY user;";
 
 
     /**
