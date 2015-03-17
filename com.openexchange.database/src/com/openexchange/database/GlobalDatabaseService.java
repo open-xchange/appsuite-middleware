@@ -62,6 +62,22 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface GlobalDatabaseService {
 
     /**
+     * Gets a value indicating whether a global database is available for a specific context group or not.
+     *
+     * @param group The context group to check availability for, or <code>null</code> to check for the default fallback
+     * @return <code>true</code> if a global database is available, <code>false</code>, otherwise
+     */
+    boolean isGlobalDatabaseAvailable(String group) throws OXException;
+
+    /**
+     * Gets a value indicating whether a global database is available for a specific group a context is associated with or not.
+     *
+     * @param group The identifier of the context to check availability for
+     * @return <code>true</code> if a global database is available, <code>false</code>, otherwise
+     */
+    boolean isGlobalDatabaseAvailable(int contextId) throws OXException;
+
+    /**
      * Gets a connection for read-only access to the global database of a specific context group.
      *
      * @param group The context group to get the connection for, or <code>null</code> to use the global fallback

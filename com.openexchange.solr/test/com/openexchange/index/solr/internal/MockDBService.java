@@ -341,4 +341,14 @@ public class MockDBService implements DatabaseService {
 
     }
 
+    @Override
+    public boolean isGlobalDatabaseAvailable(String group) throws OXException {
+        return false;
+    }
+
+    @Override
+    public boolean isGlobalDatabaseAvailable(int contextId) throws OXException {
+        return false;
+    }
+
 }

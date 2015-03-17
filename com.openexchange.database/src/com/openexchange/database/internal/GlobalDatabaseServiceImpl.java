@@ -178,6 +178,18 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
     }
 
     @Override
+    public boolean isGlobalDatabaseAvailable(String group) throws OXException {
+        String name = Strings.isEmpty(group) ? GlobalDbConfig.DEFAULT_GROUP : group;
+        return globalDbConfigs.containsKey(name);
+    }
+
+    @Override
+    public boolean isGlobalDatabaseAvailable(int contextId) throws OXException {
+        String group = configViewFactory.getView(-1, contextId).opt("com.openexchange.context.group", String.class, null);
+        return isGlobalDatabaseAvailable(group);
+    }
+
+    @Override
     public Connection getReadOnlyForGlobal(String group) throws OXException {
         return get(getAssignment(group), false, false);
     }
