@@ -104,7 +104,7 @@ public final class BoxActivator extends HousekeepingActivator {
              * Register event handler
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new BoxEventHandler(), serviceProperties);
         } catch (final Exception e) {
             logger.error("", e);

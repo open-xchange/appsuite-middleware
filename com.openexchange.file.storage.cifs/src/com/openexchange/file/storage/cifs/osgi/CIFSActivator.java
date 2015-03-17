@@ -120,7 +120,7 @@ public final class CIFSActivator extends HousekeepingActivator {
                     }
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
                 registerService(EventHandler.class, eventHandler, dict);
             }
         } catch (final Exception e) {

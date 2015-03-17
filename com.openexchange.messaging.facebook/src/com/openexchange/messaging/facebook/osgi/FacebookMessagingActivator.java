@@ -116,7 +116,7 @@ public final class FacebookMessagingActivator extends HousekeepingActivator {
              * Register event handler to detect removed sessions
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new FacebookEventHandler(), serviceProperties);
             registerService(OAuthAccountDeleteListener.class, new FacebookOAuthAccountDeleteListener(), null);
             registerService(OAuthAccountInvalidationListener.class, new FacebookOAuthAccountDeleteListener(), null);

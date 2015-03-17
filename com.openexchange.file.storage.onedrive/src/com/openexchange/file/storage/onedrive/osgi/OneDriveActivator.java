@@ -103,7 +103,7 @@ public final class OneDriveActivator extends HousekeepingActivator {
              * Register event handler
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new OneDriveEventHandler(), serviceProperties);
         } catch (final Exception e) {
             logger.error("", e);

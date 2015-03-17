@@ -131,7 +131,7 @@ public final class TwitterMessagingActivator extends HousekeepingActivator {
              * Register event handler to detect removed sessions
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new TwitterEventHandler(), serviceProperties);
             registerService(OAuthAccountDeleteListener.class, new TwitterOAuthAccountDeleteListener(), null);
             registerService(OAuthAccountInvalidationListener.class, new TwitterOAuthAccountDeleteListener(), null);
