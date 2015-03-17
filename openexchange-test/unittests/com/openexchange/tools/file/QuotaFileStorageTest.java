@@ -446,6 +446,16 @@ public class QuotaFileStorageTest extends TestCase {
         public void backWritableForGlobal(int contextId, Connection connection) {
 
         }
+
+        @Override
+        public boolean isGlobalDatabaseAvailable(String group) throws OXException {
+            return false;
+        }
+
+        @Override
+        public boolean isGlobalDatabaseAvailable(int contextId) throws OXException {
+            return false;
+        }
     }
 
     private static void rmdir(final File tempFile) {
