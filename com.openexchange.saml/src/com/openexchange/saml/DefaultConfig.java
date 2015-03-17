@@ -50,12 +50,15 @@
 package com.openexchange.saml;
 
 import static com.openexchange.saml.SAMLProperties.ACS_URL;
+import static com.openexchange.saml.SAMLProperties.AUTHN_REQUEST_BINDING;
+import static com.openexchange.saml.SAMLProperties.AUTHN_RESPONSE_BINDING;
 import static com.openexchange.saml.SAMLProperties.ENTITY_ID;
 import static com.openexchange.saml.SAMLProperties.IDP_ENTITY_ID;
-import static com.openexchange.saml.SAMLProperties.IDP_URL;
+import static com.openexchange.saml.SAMLProperties.IDP_LOGIN_URL;
+import static com.openexchange.saml.SAMLProperties.IDP_LOGOUT_URL;
 import static com.openexchange.saml.SAMLProperties.PROVIDER_NAME;
-import static com.openexchange.saml.SAMLProperties.REQUEST_BINDING;
-import static com.openexchange.saml.SAMLProperties.RESPONSE_BINDING;
+import static com.openexchange.saml.SAMLProperties.SLS_URL;
+import static com.openexchange.saml.SAMLProperties.SUPPORT_SINGLE_LOGOUT;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -75,13 +78,21 @@ public class DefaultConfig implements SAMLConfig {
 
     private String acsURL;
 
-    private Binding requestBinding;
+    private Binding authnRequestBinding;
 
-    private Binding responseBinding;
+    private Binding authnResponseBinding;
 
-    private String idpURL;
+    private Binding logoutResponseBinding;
+
+    private String idpAuthnURL;
 
     private String idpEntityID;
+
+    private String idpLogoutURL;
+
+    private String slsURL;
+
+    private boolean supportSingleLogout;
 
 
     private DefaultConfig() {
@@ -93,10 +104,18 @@ public class DefaultConfig implements SAMLConfig {
         config.setProviderName(checkProperty(configService, PROVIDER_NAME));
         config.setEntityID(checkProperty(configService, ENTITY_ID));
         config.setAcsURL(checkProperty(configService, ACS_URL));
+
         config.setIdpEntityID(checkProperty(configService, IDP_ENTITY_ID));
-        config.setIdpURL(checkProperty(configService, IDP_URL));
-        config.setResponseBinding(checkBinding(configService, RESPONSE_BINDING));
-        config.setRequestBinding(checkBinding(configService, REQUEST_BINDING));
+        config.setIdpURL(checkProperty(configService, IDP_LOGIN_URL));
+        config.setResponseBinding(checkBinding(configService, AUTHN_RESPONSE_BINDING));
+        config.setRequestBinding(checkBinding(configService, AUTHN_REQUEST_BINDING));
+        config.setLogoutResponseBinding(checkBinding(configService, AUTHN_REQUEST_BINDING));
+        config.setIdentityProviderLogoutURL(checkProperty(configService, IDP_LOGOUT_URL));
+        boolean supportSingleLogout = configService.getBoolProperty(SUPPORT_SINGLE_LOGOUT, true);
+        config.setSupportSingleLogout(supportSingleLogout);
+        if (supportSingleLogout) {
+            config.setSingleLogoutServiceURL(checkProperty(configService, SLS_URL));
+        }
 
         return config;
     }
@@ -137,13 +156,23 @@ public class DefaultConfig implements SAMLConfig {
     }
 
     @Override
+    public String getSingleLogoutServiceURL() {
+        return slsURL;
+    }
+
+    @Override
     public Binding getRequestBinding() {
-        return requestBinding;
+        return authnRequestBinding;
     }
 
     @Override
     public Binding getResponseBinding() {
-        return responseBinding;
+        return authnResponseBinding;
+    }
+
+    @Override
+    public Binding getLogoutResponseBinding() {
+        return logoutResponseBinding;
     }
 
     @Override
@@ -152,8 +181,18 @@ public class DefaultConfig implements SAMLConfig {
     }
 
     @Override
-    public String getIdentityProviderURL() {
-        return idpURL;
+    public String getIdentityProviderAuthnURL() {
+        return idpAuthnURL;
+    }
+
+    @Override
+    public String getIdentityProviderLogoutURL() {
+        return idpLogoutURL;
+    }
+
+    @Override
+    public boolean supportSingleLogout() {
+        return supportSingleLogout;
     }
 
     private void setProviderName(String providerName) {
@@ -168,12 +207,20 @@ public class DefaultConfig implements SAMLConfig {
         this.acsURL = acsURL;
     }
 
+    private void setSingleLogoutServiceURL(String slsURL) {
+        this.slsURL = slsURL;
+    }
+
     private void setRequestBinding(Binding binding) {
-        this.requestBinding = binding;
+        this.authnRequestBinding = binding;
     }
 
     private void setResponseBinding(Binding binding) {
-        this.responseBinding = binding;
+        this.authnResponseBinding = binding;
+    }
+
+    private void setLogoutResponseBinding(Binding logoutResponseBinding) {
+        this.logoutResponseBinding = logoutResponseBinding;
     }
 
     private void setIdpEntityID(String idpEntityID) {
@@ -181,25 +228,15 @@ public class DefaultConfig implements SAMLConfig {
     }
 
     private void setIdpURL(String idpURL) {
-        this.idpURL = idpURL;
+        this.idpAuthnURL = idpURL;
     }
 
-    @Override
-    public boolean supportSingleLogout() {
-        // TODO Auto-generated method stub
-        return false;
+    private void setIdentityProviderLogoutURL(String idpLogoutURL) {
+        this.idpLogoutURL = idpLogoutURL;
     }
 
-    @Override
-    public String getSingleLogoutServiceURL() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Binding getLogoutResponseBinding() {
-        // TODO Auto-generated method stub
-        return null;
+    private void setSupportSingleLogout(boolean supportSingleLogout) {
+        this.supportSingleLogout = supportSingleLogout;
     }
 
 }

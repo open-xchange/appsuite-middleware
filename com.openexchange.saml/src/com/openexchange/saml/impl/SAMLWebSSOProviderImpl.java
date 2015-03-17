@@ -302,6 +302,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         try {
             LogoutResponse logoutResponse = customizeLogoutResponse(prepareLogoutResponse(status, logoutRequest == null ? null : logoutRequest.getID()), httpRequest, httpResponse);
             String responseXML = openSAML.marshall(logoutResponse);
+            LOG.debug("Marshalled LogoutResponse: {}", responseXML);
             switch (config.getLogoutResponseBinding()) {
                 case HTTP_REDIRECT:
                     sendLogoutResponseViaRedirect(responseXML, httpRequest, httpResponse);
@@ -327,7 +328,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         LogoutResponse logoutResponse = openSAML.buildSAMLObject(LogoutResponse.class);
         logoutResponse.setStatus(status);
         logoutResponse.setIssuer(issuer);
-        // logoutResponse.setDestination(""); // TODO: URL
+        logoutResponse.setDestination(config.getIdentityProviderLogoutURL());
         logoutResponse.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
         logoutResponse.setIssueInstant(new DateTime());
         logoutResponse.setVersion(SAMLVersion.VERSION_20);
@@ -354,8 +355,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     private void sendLogoutResponseViaRedirect(String responseXML, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         try {
             String encoded = deflateAndEncode(responseXML);
-            // FIXME: separate URL
-            URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderURL()).setParameter("SAMLResponse", encoded);
+            URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderLogoutURL()).setParameter("SAMLResponse", encoded);
             String relayState = httpRequest.getParameter("RelayState");
             if (relayState != null) {
                 redirectLocationBuilder.setParameter("RelayState", relayState);
@@ -491,7 +491,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         String encoded = deflateAndEncode(authnRequestXML);
         try {
             // TODO: integrity protect RelayState
-            URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
+            URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderAuthnURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
             trySignRedirectHeader(redirectLocationBuilder);
             String redirectLocation = redirectLocationBuilder.build().toString();
             LOG.debug("Sending AuthnRequest via redirect: {}", redirectLocation );
@@ -581,7 +581,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
         authnRequest.setProtocolBinding(getBindingURI(config.getResponseBinding()));
         authnRequest.setAssertionConsumerServiceURL(config.getAssertionConsumerServiceURL());
-        authnRequest.setDestination(config.getIdentityProviderURL());
+        authnRequest.setDestination(config.getIdentityProviderAuthnURL());
         authnRequest.setIsPassive(Boolean.FALSE);
         authnRequest.setForceAuthn(Boolean.FALSE);
         authnRequest.setID(UUIDs.getUnformattedString(UUID.randomUUID()));

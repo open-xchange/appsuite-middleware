@@ -51,7 +51,7 @@ package com.openexchange.saml;
 
 
 /**
- * Constants that denote the keys of <code>saml.properties</code>.
+ * Contains the keys of <code>saml.properties</code>.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -66,19 +66,34 @@ public class SAMLProperties {
     /**
      * The binding used to send out authentication requests.
      */
-    public static final String REQUEST_BINDING = "com.openexchange.saml.requestBinding";
+    public static final String AUTHN_REQUEST_BINDING = "com.openexchange.saml.authnRequestBinding";
 
     /**
      * The binding via which authentication responses are to be received. This value is also used
      * as value for the <code>ProtocolBinding</code> attribute in AuthnRequest objects and contained
      * in the generated metadata XML of the service provider.
      */
-    public static final String RESPONSE_BINDING = "com.openexchange.saml.responseBinding";
+    public static final String AUTHN_RESPONSE_BINDING = "com.openexchange.saml.authnResponseBinding";
+
+    /**
+     * The binding via which logout responses are sent.
+     */
+    public static final String LOGOUT_RESPONSE_BINDING = "com.openexchange.saml.logoutResponseBinding";
 
     /**
      * The URL of the assertion consumer service.
      */
     public static final String ACS_URL = "com.openexchange.saml.acsURL";
+
+    /**
+     * Whether single logout is supported.
+     */
+    public static final String SUPPORT_SINGLE_LOGOUT = "com.openexchange.saml.supportSingleLogout";
+
+    /**
+     * The URL of the single logout service.
+     */
+    public static final String SLS_URL = "com.openexchange.saml.slsURL";
 
     /**
      * The unique entity ID of the service provider.
@@ -98,7 +113,12 @@ public class SAMLProperties {
     /**
      * The URL of the identity provider where authentication requests are redirected to.
      */
-    public static final String IDP_URL = "com.openexchange.saml.idpURL";
+    public static final String IDP_LOGIN_URL = "com.openexchange.saml.idpAuthnURL";
+
+    /**
+     * The URL of the identity provider where logout responses are redirected/posted to.
+     */
+    public static final String IDP_LOGOUT_URL = "com.openexchange.saml.idpLogoutURL";
 
 
 }

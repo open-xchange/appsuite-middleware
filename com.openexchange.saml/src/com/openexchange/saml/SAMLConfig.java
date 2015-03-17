@@ -84,6 +84,13 @@ public interface SAMLConfig {
     String getAssertionConsumerServiceURL();
 
     /**
+     * Gets the URL of the single logout service.
+     *
+     * @return The URL or <code>null</code> if single logout is not enabled.
+     */
+    String getSingleLogoutServiceURL();
+
+    /**
      * Gets the binding used to send out authentication requests.
      *
      * @return The binding. Never <code>null</code>.
@@ -116,7 +123,7 @@ public interface SAMLConfig {
      *
      * @return The URL. Never <code>null</code>.
      */
-    String getIdentityProviderURL();
+    String getIdentityProviderAuthnURL();
 
     /**
      * Whether the single logout profile is supported. Note: currently only IDP-initiated single logout is implemented.
@@ -130,6 +137,6 @@ public interface SAMLConfig {
      *
      * @return The URL or <code>null</code>, if the profile is not supported.
      */
-    String getSingleLogoutServiceURL();
+    String getIdentityProviderLogoutURL();
 
 }

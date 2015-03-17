@@ -160,6 +160,13 @@ public class StrictValidationStrategy implements ValidationStrategy {
             throw error.toValidationException();
         }
 
+        String destination = logoutRequest.getDestination();
+        if (destination != null) {
+            if (!config.getSingleLogoutServiceURL().equals(destination)) {
+                throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "Attribute 'Destination' of LogoutRequest '" + logoutRequest.getID() + "' contains an unexpected value: " + destination);
+            }
+        }
+
         /*
          * The <Issuer> element MUST be present and MUST contain the unique identifier of the requesting entity;
          * the Format attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity.
@@ -172,6 +179,17 @@ public class StrictValidationStrategy implements ValidationStrategy {
 
         if (!config.getIdentityProviderEntityID().equals(issuer.getValue())) {
             throw new ValidationException(ValidationFailedReason.INVALID_ELEMENT, "'Issuer' of LogoutRequest '" + logoutRequest.getID() + "' contains an unexpected value: " + issuer.getValue());
+        }
+
+        DateTime notOnOrAfter = logoutRequest.getNotOnOrAfter();
+        if (notOnOrAfter != null) {
+            if (notOnOrAfter.isBeforeNow() || notOnOrAfter.isEqualNow()) {
+                throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "Attribute 'NotOnOrAfter' contains an unexpected value: " + notOnOrAfter + " for LogoutRequest '" + logoutRequest.getID() + "'");
+            }
+        }
+
+        if (logoutRequest.getBaseID() == null && logoutRequest.getNameID() == null && logoutRequest.getEncryptedID() == null) {
+            throw new ValidationException(ValidationFailedReason.MISSING_ELEMENT, "Neither 'BaseID' nor 'NameID' nor 'EncryptedID' is contained in LogoutRequest '" + logoutRequest.getID() + "'");
         }
     }
 

@@ -73,6 +73,7 @@ import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLProperties;
 import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.http.AssertionConsumerService;
+import com.openexchange.saml.http.SingleLogoutService;
 import com.openexchange.saml.impl.HzStateManagement;
 import com.openexchange.saml.impl.SAMLSessionInspector;
 import com.openexchange.saml.impl.SAMLWebSSOProviderImpl;
@@ -80,6 +81,7 @@ import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link SAMLFeature}
@@ -97,7 +99,8 @@ public class SAMLFeature extends DependentServiceStarter {
         DispatcherPrefixService.class,
         SessionReservationService.class,
         SAMLBackend.class,
-        HazelcastInstance.class
+        HazelcastInstance.class,
+        SessiondService.class
     };
 
     private final static Class<?>[] OPTIONAL_SERVICES = new Class[] {
@@ -124,10 +127,18 @@ public class SAMLFeature extends DependentServiceStarter {
             HzStateManagement hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
             WebSSOProvider serviceProvider = new SAMLWebSSOProviderImpl(config, openSAML, hzStateManagement, services);
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
-            String acsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/acs";
-            servlets.push(acsServletPath);
+
             SAMLBackend samlBackend = services.getService(SAMLBackend.class);
-            services.getService(HttpService.class).registerServlet(acsServletPath, new AssertionConsumerService(serviceProvider, samlBackend.getExceptionHandler()), null, null);
+            HttpService httpService = services.getService(HttpService.class);
+            String acsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/acs";
+            httpService.registerServlet(acsServletPath, new AssertionConsumerService(serviceProvider, samlBackend.getExceptionHandler()), null, null);
+            servlets.push(acsServletPath);
+
+            if (config.supportSingleLogout()) {
+                String slsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/sls";
+                httpService.registerServlet(slsServletPath, new SingleLogoutService(serviceProvider), null, null);
+                servlets.push(slsServletPath);
+            }
         } else {
             LOG.info("SAML 2.0 support is disabled by configuration. Skipping initialization...");
         }

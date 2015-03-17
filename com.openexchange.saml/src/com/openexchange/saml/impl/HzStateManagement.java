@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,7 +120,7 @@ public class HzStateManagement implements StateManagement {
     @Override
     public List<String> removeSessionIds(List<String> keys) {
         // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
     }
 
     private IMap<String, Map<String, String>> getRequestInfoMap() {
