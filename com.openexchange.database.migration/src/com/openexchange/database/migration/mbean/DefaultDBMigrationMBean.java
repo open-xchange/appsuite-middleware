@@ -59,7 +59,7 @@ import javax.management.StandardMBean;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import com.openexchange.database.migration.DBMigration;
-import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.exception.OXException;
 
 /**
@@ -73,7 +73,7 @@ public class DefaultDBMigrationMBean extends StandardMBean implements DBMigratio
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDBMigrationMBean.class);
 
-    private final DBMigrationExecutorService dbMigrationExecutorService;
+    private final DBMigrationExecutorServiceImpl dbMigrationExecutorService;
     private final DBMigration migration;
 
     /**
@@ -83,7 +83,7 @@ public class DefaultDBMigrationMBean extends StandardMBean implements DBMigratio
      * @param migration The DB migration
      * @throws NotCompliantMBeanException
      */
-    public DefaultDBMigrationMBean(DBMigrationExecutorService dbMigrationExecutorService, DBMigration migration) throws NotCompliantMBeanException {
+    public DefaultDBMigrationMBean(DBMigrationExecutorServiceImpl dbMigrationExecutorService, DBMigration migration) throws NotCompliantMBeanException {
         super(DBMigrationMBean.class);
         Validate.notNull(dbMigrationExecutorService, "DBMigrationExecuterService must not be null!");
         Validate.notNull(migration, "DBMigration must not be null!");

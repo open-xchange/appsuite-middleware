@@ -60,7 +60,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.migration.DBMigration;
-import com.openexchange.database.migration.DBMigrationExecutorService;
+import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -73,7 +73,7 @@ public class MBeanRegisterer implements ServiceTrackerCustomizer<ManagementServi
     private static final ObjectName PLACEHOLDER = getObjectnameSilent(new DBMigration(null, "placeholder", null, "placeholder"));
 
     private final BundleContext context;
-    private final DBMigrationExecutorService dbMigrationExecutorService;
+    private final DBMigrationExecutorServiceImpl dbMigrationExecutorService;
     private final ConcurrentMap<DBMigration, ObjectName> migrations;
 
     private volatile ManagementService managementService;
@@ -84,7 +84,7 @@ public class MBeanRegisterer implements ServiceTrackerCustomizer<ManagementServi
      * @param context The bundle context
      * @param dbMigrationExecutorService A reference to the DB migration service
      */
-    public MBeanRegisterer(BundleContext context, DBMigrationExecutorService dbMigrationExecutorService) {
+    public MBeanRegisterer(BundleContext context, DBMigrationExecutorServiceImpl dbMigrationExecutorService) {
         super();
         this.context = context;
         this.dbMigrationExecutorService = dbMigrationExecutorService;

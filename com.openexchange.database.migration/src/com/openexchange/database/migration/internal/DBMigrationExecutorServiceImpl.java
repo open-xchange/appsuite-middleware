@@ -159,7 +159,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         return !DBMigrationMonitor.getInstance().getScheduledFiles().isEmpty();
     }
 
-    @Override
+    /**
+     * Gets some textual information about the status of a database migration.
+     *
+     * @param migration The migration to get the status for
+     * @return The database migration status
+     */
     public String getDBStatus(DBMigration migration) throws OXException {
         Connection connection = null;
         Liquibase liquibase = null;
@@ -179,7 +184,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         }
     }
 
-    @Override
+    /**
+     * Gets some textual information about any resent locks for a database migration.
+     *
+     * @param migration The migration to get the locks for
+     * @return The database migration locks
+     */
     public String listDBLocks(DBMigration migration) throws OXException {
         Connection connection = null;
         Liquibase liquibase = null;
