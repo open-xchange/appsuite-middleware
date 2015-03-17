@@ -63,6 +63,9 @@ public class Attributes implements TaskAttributes {
 
     private final WorkingLevel level;
 
+    /**
+     * Default attributes for an update tasks are a blocking update task working on schema level.
+     */
     public Attributes() {
         this(BLOCKING, SCHEMA);
     }
