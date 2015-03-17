@@ -819,7 +819,7 @@ public class DriveStorage {
                     for (FileStorageFolder folder : subfolders) {
                         String normalizedFolderName = PathNormalizer.normalize(folder.getName());
                         knownFolders.remember(currentPath + normalizedFolderName, folder);
-                        if (normalizedName.equals(normalizedFolderName)) {
+                        if (normalizedName.equalsIgnoreCase(normalizedFolderName)) {
                             existingFolder = folder;
                         }
                     }

@@ -53,11 +53,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.drive.Action;
-import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.actions.AbstractAction;
+import com.openexchange.drive.impl.actions.ErrorDirectoryAction;
 import com.openexchange.drive.impl.checksum.FileChecksum;
 import com.openexchange.drive.impl.comparison.ServerFileVersion;
 import com.openexchange.drive.impl.internal.SyncSession;
@@ -89,9 +90,6 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
     @Override
     protected void batchExecute(Action action, List<AbstractAction<DirectoryVersion>> actions) throws OXException {
         switch (action) {
-        case SYNC:
-            batchSync(actions);
-            break;
         case REMOVE:
             batchRemove(actions);
             break;
@@ -120,45 +118,6 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
         }
     }
 
-    private void batchSync(List<AbstractAction<DirectoryVersion>> syncActions) throws OXException {
-        List<FolderID> foldersIDsToReset = new ArrayList<FolderID>();
-        for (AbstractAction<DirectoryVersion> action : syncActions) {
-            /*
-             * check action
-             */
-            if (false == Action.SYNC.equals(action.getAction()) ||
-                false == Boolean.TRUE.equals(action.getParameters().get(DriveAction.PARAMETER_RESET))) {
-                throw new IllegalStateException("Can't perform action " + action + " on server");
-            }
-            /*
-             * collect sync reset(s)
-             */
-            if (null == action.getVersion()) {
-                /*
-                 * Clear all stored file- and directory-checksums of all folders
-                 */
-                for (Entry<String, FileStorageFolder> entry : session.getStorage().getFolders().entrySet()) {
-                    foldersIDsToReset.add(new FolderID(entry.getValue().getId()));
-                }
-            } else {
-                /*
-                 * Clear all stored file- and directory-checksums of referenced folder
-                 */
-                FileStorageFolder folder = session.getStorage().optFolder(action.getVersion().getPath(), false);
-                if (null != folder) {
-                    foldersIDsToReset.add(new FolderID(folder.getId()));
-                }
-            }
-        }
-        /*
-         * invalidate checksums
-         */
-        if (0 < foldersIDsToReset.size()) {
-            session.getChecksumStore().removeDirectoryChecksums(foldersIDsToReset);
-            session.getChecksumStore().removeFileChecksumsInFolders(foldersIDsToReset);
-        }
-    }
-
     private void sync(AbstractAction<DirectoryVersion> action) throws OXException {
         if (Boolean.TRUE.equals(action.getParameters().get(DriveAction.PARAMETER_RESET))) {
             if (null == action.getVersion()) {
@@ -181,6 +140,19 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                     session.getChecksumStore().removeFileChecksumsInFolder(id);
                 }
             }
+        } else if (null != action.getVersion()) {
+            /*
+             * create new, empty directory at server
+             */
+            try {
+                session.getStorage().getFolderID(action.getVersion().getPath(), true);
+            } catch (OXException e) {
+                if (DriveUtils.indicatesFailedSave(e)) {
+                    addNewActionForClient(new ErrorDirectoryAction(null, action.getVersion(), null, e, true, false));
+                } else {
+                    throw e;
+                }
+            }
         } else {
             throw new IllegalStateException("Can't perform action " + action + " on server");
         }
@@ -192,14 +164,37 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
          */
         if (null == action.getNewVersion() && null != action.getVersion() &&
             DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum())) {
-            session.getStorage().getFolderID(action.getVersion().getPath(), true);
-            return;
+            try {
+                session.getStorage().getFolderID(action.getVersion().getPath(), true);
+                return;
+            } catch (OXException e) {
+                if (DriveUtils.indicatesFailedSave(e)) {
+                    DirectoryVersion clientVersion;
+                    if (null != action.getComparison() && null != action.getComparison().getClientVersion()) {
+                        clientVersion = action.getComparison().getClientVersion();
+                    } else {
+                        clientVersion = action.getVersion();
+                    }
+                    addNewActionForClient(new ErrorDirectoryAction(null, clientVersion, null, e, true, false));
+                    return;
+                }
+                throw e;
+            }
         }
         /*
          * edit folder name and/or path
          */
         String folderID = session.getStorage().getFolderID(action.getVersion().getPath());
-        String newFolderID = session.getStorage().moveFolder(action.getVersion().getPath(), action.getNewVersion().getPath());
+        String newFolderID;
+        try {
+            newFolderID = session.getStorage().moveFolder(action.getVersion().getPath(), action.getNewVersion().getPath());
+        } catch (OXException e) {
+            if (DriveUtils.indicatesFailedSave(e)) {
+                addNewActionForClient(new ErrorDirectoryAction(action.getVersion(), action.getNewVersion(), null, e, true, false));
+                return;
+            }
+            throw e;
+        }
         /*
          * update stored checksums if needed
          */
