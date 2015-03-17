@@ -29,26 +29,26 @@ public final class CapabilitiesEventHandler implements EventHandler {
     }
 
     @Override
-    public void handleEvent(final Event event) {
-        final String topic = event.getTopic();
+    public void handleEvent(Event event) {
+        String topic = event.getTopic();
         if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
             Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
             if (null != contextId) {
                 Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                 if (null != userId) {
-                    final CacheService cacheService = serviceLookup.getService(CacheService.class);
+                    CacheService cacheService = serviceLookup.getService(CacheService.class);
                     if (null != cacheService) {
                         try {
-                            final Cache cache = cacheService.getCache("Capabilities");
-                            cache.removeFromGroup(userId, contextId.toString());
-                        } catch (final Exception x) {
+                            Cache cache = cacheService.getCache("Capabilities");
+                            cache.localRemoveFromGroup(userId, contextId.toString());
+                        } catch (Exception x) {
                             // Ignore
                         }
 
                         try {
-                            final Cache cache = cacheService.getCache("CapabilitiesUser");
-                            cache.removeFromGroup(userId, contextId.toString());
-                        } catch (final Exception x) {
+                            Cache cache = cacheService.getCache("CapabilitiesUser");
+                            cache.localRemoveFromGroup(userId, contextId.toString());
+                        } catch (Exception x) {
                             // Ignore
                         }
                     }
