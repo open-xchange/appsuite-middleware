@@ -1130,27 +1130,24 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         /*
          * Try global cache key
          */
-        Folder folder;
         if (folderId.length() <= 0 || Strings.isDigit(folderId.charAt(0))) {
-            folder = (Folder) globalCache.getFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
-        } else {
-            folder = null;
-        }
-        if (null != folder) {
-            /*
-             * Return a cloned version from global cache
-             */
-            return folder;
+            Folder folder = (Folder) globalCache.getFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
+            if (null != folder) {
+                /*
+                 * Return version from global cache
+                 */
+                return folder;
+            }
         }
         /*
          * Try user cache key
          */
         FolderMap folderMap = optFolderMapFor(params);
         if (null != folderMap) {
-            folder = folderMap.get(folderId, treeId, params.getSession());
+            Folder folder = folderMap.get(folderId, treeId, params.getSession());
             if (null != folder) {
                 /*
-                 * Return a cloned version from user-bound cache
+                 * Return version from user-bound cache
                  */
                 if (folder instanceof RemoveAfterAccessFolder) {
                     RemoveAfterAccessFolder raaf = (RemoveAfterAccessFolder) folder;

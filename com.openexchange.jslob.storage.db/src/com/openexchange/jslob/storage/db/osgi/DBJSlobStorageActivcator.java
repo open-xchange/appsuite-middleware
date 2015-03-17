@@ -136,7 +136,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
                             final CacheService cacheService = context.getService(reference);
                             try {
                                 final byte[] ccf =
-                                    ("jcs.region." + regionName + "=LTCP\n"
+                                    ("jcs.region." + regionName + "=\n"
                                    + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n"
                                    + "jcs.region." + regionName + ".cacheattributes.MaxObjects=10000000\n"
                                    + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n"

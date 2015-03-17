@@ -55,6 +55,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import liquibase.resource.ResourceAccessor;
 import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationState;
 
@@ -71,6 +72,7 @@ public class ScheduledExecution implements DBMigrationState {
     private final Condition wasExecuted = lock.newCondition();
     private final Object rollbackTarget;
     private final DBMigration migration;
+    private final DBMigrationCallback callback;
 
     private ExecutionException exception = null;
     private boolean done = false;
@@ -78,22 +80,34 @@ public class ScheduledExecution implements DBMigrationState {
     /**
      * Initializes a new {@link ScheduledExecution}.
      *
+     * @param callback A migration callback to get notified on completion, or <code>null</code> if not set
      * @param migration The database migration
      */
-    public ScheduledExecution(DBMigration migration) {
-        this(migration, null);
+    public ScheduledExecution(DBMigration migration, DBMigrationCallback callback) {
+        this(migration, callback, null);
     }
 
     /**
      * Initializes a new {@link ScheduledExecution}.
      *
      * @param migration The database migration
+     * @param callback A migration callback to get notified on completion, or <code>null</code> if not set
      * @param rollbackTarget The rollback target
      */
-    public ScheduledExecution(DBMigration migration, Object rollbackTarget) {
+    public ScheduledExecution(DBMigration migration, DBMigrationCallback callback, Object rollbackTarget) {
         super();
         this.migration = migration;
+        this.callback = callback;
         this.rollbackTarget = rollbackTarget;
+    }
+
+    /**
+     * Gets the migration callback.
+     *
+     * @return The migration callback, or <code>null</code> if not set
+     */
+    DBMigrationCallback getCallback() {
+        return callback;
     }
 
     /**

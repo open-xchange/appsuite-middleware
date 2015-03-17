@@ -51,6 +51,7 @@ package com.openexchange.database.migration.internal;
 
 import static com.openexchange.database.migration.internal.LiquibaseHelper.LIQUIBASE_NO_DEFINED_CONTEXT;
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -61,6 +62,7 @@ import liquibase.changelog.ChangeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -77,7 +79,7 @@ public class DBMigrationExecutor implements Runnable {
 
     private final Queue<ScheduledExecution> scheduledExecutions;
     private final Lock lock = new ReentrantLock();
-    private Thread thread;
+    private volatile Thread thread;
 
     /**
      * Initializes a new {@link DBMigrationExecutor}.
@@ -87,30 +89,34 @@ public class DBMigrationExecutor implements Runnable {
         scheduledExecutions = new LinkedList<ScheduledExecution>();
     }
 
-    private ScheduledExecution nextExecution() {
-        lock.lock();
-        try {
-            ScheduledExecution scheduledExecution = scheduledExecutions.poll();
-            if (scheduledExecution == null) {
-                thread = null;
-            }
-            return scheduledExecution;
-        } finally {
-            lock.unlock();
-        }
+    /**
+     * Gets a value indicating whether migrations are currently executed or not.
+     *
+     * @return <code>true</code> if the executor is currently active, <code>false</code>, otherwise
+     */
+    public boolean isActive() {
+        return null != thread;
     }
 
     @Override
     public void run() {
         for (ScheduledExecution scheduledExecution; (scheduledExecution = nextExecution()) != null;) {
+            if (false == needsUpdate(scheduledExecution)) {
+                LOG.debug("No unrun liquibase changesets detected, skipping migration {}.", scheduledExecution.getMigration());
+                scheduledExecution.setDone(null);
+                notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
+                continue;
+            }
             Exception exception = null;
             Liquibase liquibase = null;
+            DBMigrationListener migrationListener = new DBMigrationListener();
             String fileLocation = scheduledExecution.getFileLocation();
             DBMigrationConnectionProvider connectionProvider = scheduledExecution.getConnectionProvider();
             Connection connection = null;
             try {
                 connection = connectionProvider.get();
-                liquibase = LiquibaseHelper.prepareLiquibase(connection, fileLocation, scheduledExecution.getResourceAccessor());
+                liquibase = LiquibaseHelper.prepareLiquibase(connection, scheduledExecution.getMigration());
+                liquibase.setChangeExecListener(migrationListener);
                 DBMigrationMonitor.getInstance().addFile(fileLocation);
                 if (scheduledExecution.isRollback()) {
                     Object target = scheduledExecution.getRollbackTarget();
@@ -128,14 +134,6 @@ public class DBMigrationExecutor implements Runnable {
                 } else {
                     LOG.info("Running migrations of changelog {}", fileLocation);
                     liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
-                }
-            } catch (liquibase.exception.ValidationFailedException e) {
-                exception = e;
-                List<ChangeSet> invalidMD5Sums = e.getInvalidMD5Sums();
-                if (null == invalidMD5Sums || invalidMD5Sums.isEmpty()) {
-                    LOG.error("", e);
-                } else {
-                    LOG.debug("", e);
                 }
             } catch (liquibase.exception.LiquibaseException e) {
                 exception = e;
@@ -158,6 +156,7 @@ public class DBMigrationExecutor implements Runnable {
                 }
                 DBMigrationMonitor.getInstance().removeFile(fileLocation);
             }
+            notify(scheduledExecution.getCallback(), migrationListener.getExecuted(), migrationListener.getRolledBack());
         }
     }
 
@@ -165,34 +164,93 @@ public class DBMigrationExecutor implements Runnable {
      * Schedules a database migration.
      *
      * @param migration The database migration
+     * @param callback A migration callback to get notified on completion, or <code>null</code> if not set
      * @return The scheduled migration
      */
-    public ScheduledExecution scheduleMigration(DBMigration migration) {
-        return schedule(new ScheduledExecution(migration));
+    public ScheduledExecution scheduleMigration(DBMigration migration, DBMigrationCallback callback) {
+        return schedule(new ScheduledExecution(migration, callback));
     }
 
     /**
      * Schedules a database migration rollback.
      *
      * @param migration The database migration
+     * @param callback A migration callback to get notified on completion, or <code>null</code> if not set
      * @param rollbackTarget The rollback target
      */
-    public ScheduledExecution scheduleRollback(DBMigration migration, Object rollbackTarget) {
-        return schedule(new ScheduledExecution(migration, rollbackTarget));
+    public ScheduledExecution scheduleRollback(DBMigration migration, DBMigrationCallback callback, Object rollbackTarget) {
+        return schedule(new ScheduledExecution(migration, callback, rollbackTarget));
     }
 
     private ScheduledExecution schedule(ScheduledExecution scheduledExecution) {
         lock.lock();
         try {
             scheduledExecutions.add(scheduledExecution);
-            if (thread == null) {
-                thread = new Thread(this);
+            if (this.thread == null) {
+                Thread thread = new Thread(this);
+                this.thread = thread;
                 thread.start();
             }
         } finally {
             lock.unlock();
         }
         return scheduledExecution;
+    }
+
+    private ScheduledExecution nextExecution() {
+        lock.lock();
+        try {
+            ScheduledExecution scheduledExecution = scheduledExecutions.poll();
+            if (scheduledExecution == null) {
+                this.thread = null;
+            }
+            return scheduledExecution;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Performs an unsynchronized check to determine if there are any unrun changesets in the scheduled execution or not.
+     *
+     * @param scheduledExecution The scheduled execution
+     * @return <code>true</code> if unrun changesets are signaled by liquibase or if the unrun changesets can't be evaluated, <code>false</code>, otherwise
+     */
+    private static boolean needsUpdate(ScheduledExecution scheduledExecution) {
+        Liquibase liquibase = null;
+        boolean releaseLocks = true;
+        Connection connection = null;
+        try {
+            connection = scheduledExecution.getConnectionProvider().get();
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, scheduledExecution.getMigration());
+            if (false == scheduledExecution.isRollback()) {
+                List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT);
+                releaseLocks = false;
+                return null != unrunChangeSets && 0 < unrunChangeSets.size();
+            }
+        } catch (Exception e) {
+            LOG.warn("Error determining if liquibase update is required, assuming yes.", e);
+        } finally {
+            try {
+                LiquibaseHelper.cleanUpLiquibase(liquibase, releaseLocks);
+            } catch (Exception e) {
+                LOG.warn("", e);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Notifies a migration callback about a finished execution.
+     *
+     * @param callback The migration callback, or <code>null</code> if not set
+     * @param executed A list of changesets that have been executed during the migration, or an empty list if there are none
+     * @param rolledBack A list of changesets that have been rolled back during the migration, or an empty list if there are none
+     */
+    private static void notify(DBMigrationCallback callback, List<ChangeSet> executed, List<ChangeSet> rolledBack) {
+        if (null != callback) {
+            callback.onMigrationFinished(executed, rolledBack);
+        }
     }
 
 }

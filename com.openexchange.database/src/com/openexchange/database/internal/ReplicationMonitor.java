@@ -170,7 +170,7 @@ public class ReplicationMonitor {
                     throw createException(assign, true, e2);
                 }
             }
-            if (!write && assign.isTransactionInitialized()) {
+            if (!write && assign.isTransactionInitialized() && false == assign.isToConfigDB()) {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
@@ -274,10 +274,6 @@ public class ReplicationMonitor {
     }
 
     private static long readTransaction(final Connection con, final int ctxId) throws OXException {
-        // If ctxId is 0, the connection leads to configdb, which does not have a replication monitor.
-        if (ctxId == 0) {
-            return 0;
-        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         final long retval;

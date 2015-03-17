@@ -89,6 +89,20 @@ public interface DBMigrationExecutorService {
     DBMigrationState scheduleDBMigration(DBMigration migration);
 
     /**
+     * Schedules a database migration based on the given file location and {@link ResourceAccessor}.
+     * The migration file must be resolvable by its location via the accessor.
+     *
+     * You probably want to use a XML file contained in your bundle-jar. {@link BundleResourceAccessor}
+     * is the right choice then. The files location must then be specified absolute, starting at the
+     * bundles root directory.
+     *
+     * @param migration The database migration
+     * @param callback A migration callback to get notified on completion, or <code>null</code> if not set
+     * @return A {@link DBMigrationState} instance, that can be used to wait for completion.
+     */
+    DBMigrationState scheduleDBMigration(DBMigration migration, DBMigrationCallback callback);
+
+    /**
      * Schedules a rollback of the database for the given number of change sets
      *
      * @param migration The database migration
@@ -121,9 +135,5 @@ public interface DBMigrationExecutorService {
      * @return true, if migrations are running; otherwise false
      */
     boolean migrationsRunning();
-
-    String getDBStatus(DBMigration migration) throws OXException;
-
-    String listDBLocks(DBMigration migration) throws OXException;
 
 }
