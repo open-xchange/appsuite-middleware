@@ -68,8 +68,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
     /**
      * The logger.
      */
-    protected static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(AttachmentTokenRegistry.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentTokenRegistry.class);
 
     private static volatile AttachmentTokenRegistry singleton;
 

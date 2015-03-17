@@ -50,9 +50,10 @@
 package com.openexchange.ajax.container;
 
 import java.io.InputStream;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.ajax.fileholder.ByteArrayRandomAccess;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
