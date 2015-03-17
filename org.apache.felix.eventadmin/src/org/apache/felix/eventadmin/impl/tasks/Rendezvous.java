@@ -18,7 +18,11 @@
  */
 package org.apache.felix.eventadmin.impl.tasks;
 
-import EDU.oswego.cs.dl.util.concurrent.*;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 
 /**
  * This is a simplified version of the CyclicBarrier implementation.
@@ -52,15 +56,13 @@ public class Rendezvous extends CyclicBarrier
         }
         try
         {
-            this.barrier();
+            this.await();
         }
         catch (BrokenBarrierException ignore1)
         {
-            // Ignore
         }
         catch (InterruptedException ignore2)
         {
-            // Ignore
         }
     }
 
@@ -72,12 +74,11 @@ public class Rendezvous extends CyclicBarrier
     {
         try
         {
-            this.attemptBarrier(timeout);
-            this.restart();
+            this.await(timeout, TimeUnit.MILLISECONDS);
+            this.reset();
         }
         catch (BrokenBarrierException ignore1)
         {
-            // Ignore
         }
         catch (TimeoutException te)
         {
@@ -86,7 +87,6 @@ public class Rendezvous extends CyclicBarrier
         }
         catch (InterruptedException ignore2)
         {
-            // Ignore
         }
     }
 }

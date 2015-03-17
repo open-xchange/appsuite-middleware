@@ -82,6 +82,8 @@ public class Activator implements BundleActivator
         System.setProperty(Configuration.PROP_TIMEOUT, "0");
         System.setProperty(Configuration.PROP_REQUIRE_TOPIC, "true");
         System.setProperty(Configuration.PROP_IGNORE_TIMEOUT, "");
+        System.setProperty(Configuration.PROP_ASYNC_TO_SYNC_THREAD_RATIO, "0.5");
+        System.setProperty(Configuration.PROP_IGNORE_TOPIC, "");
     }
 
     /**
