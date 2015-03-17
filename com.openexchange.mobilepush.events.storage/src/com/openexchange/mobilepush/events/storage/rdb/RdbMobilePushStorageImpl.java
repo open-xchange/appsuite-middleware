@@ -396,6 +396,7 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
                 stmt.setInt(++index, contextId);
                 stmt.setInt(++index, userToken.getUserId());
                 stmt.setString(++index, provider.getProviderName());
+                stmt.setString(++index, serviceId);
 
                 ResultSet results = Statements.logExecuteQuery(stmt);
                 while (results.next()) {

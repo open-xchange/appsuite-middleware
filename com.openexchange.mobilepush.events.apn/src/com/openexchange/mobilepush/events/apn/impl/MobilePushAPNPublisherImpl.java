@@ -264,7 +264,7 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
 
         payload.addAlert(message);
         payload.addBadge(unread);
-        payload.addCustomDictionary("path", path);
+        payload.addCustomDictionary("cid", path);
         return payload;
     }
 
