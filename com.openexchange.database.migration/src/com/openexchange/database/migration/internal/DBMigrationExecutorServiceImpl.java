@@ -63,6 +63,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.exception.ValidationFailedException;
 import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationState;
@@ -100,7 +101,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     @Override
     public DBMigrationState scheduleDBMigration(DBMigration migration) {
-        return executor.scheduleMigration(migration);
+        return scheduleDBMigration(migration, null);
+    }
+
+    @Override
+    public DBMigrationState scheduleDBMigration(DBMigration migration, DBMigrationCallback callback) {
+        return executor.scheduleMigration(migration, callback);
     }
 
     @Override
@@ -110,12 +116,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     @Override
     public DBMigrationState scheduleDBRollback(DBMigration migration, int numberOfChangeSets) {
-        return executor.scheduleRollback(migration, numberOfChangeSets);
+        return executor.scheduleRollback(migration, null, numberOfChangeSets);
     }
 
     @Override
     public DBMigrationState scheduleDBRollback(DBMigration migration, String changeSet) {
-        return executor.scheduleRollback(migration, changeSet);
+        return executor.scheduleRollback(migration, null, changeSet);
     }
 
     @Override
@@ -124,7 +130,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         Liquibase liquibase = null;
         try {
             connection = migration.getConnectionProvider().get();
-        	liquibase = LiquibaseHelper.prepareLiquibase(connection, migration.getFileLocation(), migration.getAccessor());
+        	liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
         	return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));
         } catch (Exception exception) {
             if (exception instanceof OXException) {
@@ -159,7 +165,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         Liquibase liquibase = null;
         try {
             connection = migration.getConnectionProvider().get();
-            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration.getFileLocation(), migration.getAccessor());
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
             StringWriter sw = new StringWriter();
             liquibase.reportStatus(true, LIQUIBASE_NO_DEFINED_CONTEXT, sw);
             return sw.toString();
@@ -179,7 +185,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         Liquibase liquibase = null;
         try {
             connection = migration.getConnectionProvider().get();
-            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration.getFileLocation(), migration.getAccessor());
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(os);
             liquibase.reportLocks(ps);
