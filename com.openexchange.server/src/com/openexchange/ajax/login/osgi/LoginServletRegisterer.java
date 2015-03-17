@@ -66,6 +66,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.SSOLogout;
+import com.openexchange.ajax.login.SSOLogoutHandler;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -132,6 +134,13 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
                 if (null != login) {
                     login.addRequestHandler(action, handler);
                 }
+            }
+        }
+        if (obj instanceof SSOLogoutHandler) {
+            SSOLogout handler = new SSOLogout((SSOLogoutHandler) obj);
+            handlers.put(LoginServlet.ACTION_SSO_LOGOUT, handler);
+            if (null != login) {
+                login.addRequestHandler(LoginServlet.ACTION_SSO_LOGOUT, handler);
             }
         }
         if (needsRegistration) {
@@ -220,6 +229,9 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
                 if (null != tmp && tmp instanceof String) {
                     removeAction = (String) tmp;
                 }
+            }
+            if (service instanceof SSOLogoutHandler) {
+                removeAction = LoginServlet.ACTION_SSO_LOGOUT;
             }
         } finally {
             lock.unlock();

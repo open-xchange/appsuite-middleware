@@ -50,13 +50,13 @@
 package com.openexchange.ajax.login.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.SSOLogoutHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.LoginRampUpService;
@@ -66,6 +66,7 @@ import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.osgi.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tokenlogin.TokenLoginService;
@@ -115,7 +116,12 @@ public class LoginActivator extends HousekeepingActivator {
         ServiceSet<LoginRampUpService> rampUp = new ServiceSet<LoginRampUpService>();
         track(LoginRampUpService.class, rampUp);
 
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + LoginRequestHandler.class.getName() + "))");
+        Filter filter = Tools.generateServiceFilter(context,
+            ConfigurationService.class,
+            HttpService.class,
+            DispatcherPrefixService.class,
+            LoginRequestHandler.class,
+            SSOLogoutHandler.class);
         rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context, rampUp)));
 
         track(TokenLoginService.class, new TokenLoginCustomizer(context));
