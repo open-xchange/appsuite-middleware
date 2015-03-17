@@ -57,11 +57,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import liquibase.changelog.ChangeSet;
 import org.osgi.framework.FrameworkUtil;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.GlobalDatabaseService;
 import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationState;
@@ -121,7 +123,8 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
              * use a special assignment override that pretends a connection to the config database to prevent accessing a not yet existing
              * replication monitor
              */
-            final AssignmentImpl assignment = new AssignmentImpl(dbConfig.getAssignment()) {
+            final AssignmentImpl assignment = dbConfig.getAssignment();
+            final AssignmentImpl firstAssignment = new AssignmentImpl(assignment) {
 
                 private static final long serialVersionUID = -6801059791528227771L;
 
@@ -134,7 +137,7 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
 
                 @Override
                 public Connection get() throws OXException {
-                    return GlobalDatabaseServiceImpl.this.get(assignment, true, true);
+                    return GlobalDatabaseServiceImpl.this.get(firstAssignment, true, true);
                 }
 
                 @Override
@@ -143,11 +146,33 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
                 }
             };
             /*
+             * use a migration callback that fetches & returns a writable connection to trigger the replication monitor once after
+             * migrations were executed
+             */
+            DBMigrationCallback migrationCallback = new DBMigrationCallback() {
+
+                @Override
+                public void onMigrationFinished(List<ChangeSet> executed, List<ChangeSet> rolledBack) {
+                    if (null != executed && 0 < executed.size() || null != rolledBack && 0 < rolledBack.size()) {
+                        Connection connection = null;
+                        try {
+                            connection = monitor.checkActualAndFallback(pools, assignment, true, true);
+                        } catch (OXException e) {
+                            LOG.warn("Unexpected error during migration callback", e);
+                        } finally {
+                            ConnectionState connectionState = new ConnectionState(false);
+                            connectionState.setUsedForUpdate(true);
+                            monitor.backAndIncrementTransaction(pools, assignment, connection, true, true, connectionState);
+                        }
+                    }
+                }
+            };
+            /*
              * register utility MBean and schedule migration
              */
             DBMigration migration = new DBMigration(connectionProvider, GLOBALDB_CHANGE_LOG, localResourceAccessor, assignment.getSchema());
             migrationService.registerMBean(migration);
-            migrationStates.add(migrationService.scheduleDBMigration(migration));
+            migrationStates.add(migrationService.scheduleDBMigration(migration, migrationCallback));
         }
         return migrationStates;
     }
