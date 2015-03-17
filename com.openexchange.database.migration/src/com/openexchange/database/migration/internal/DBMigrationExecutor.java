@@ -79,7 +79,7 @@ public class DBMigrationExecutor implements Runnable {
 
     private final Queue<ScheduledExecution> scheduledExecutions;
     private final Lock lock = new ReentrantLock();
-    private Thread thread;
+    private volatile Thread thread;
 
     /**
      * Initializes a new {@link DBMigrationExecutor}.
@@ -89,17 +89,13 @@ public class DBMigrationExecutor implements Runnable {
         scheduledExecutions = new LinkedList<ScheduledExecution>();
     }
 
-    private ScheduledExecution nextExecution() {
-        lock.lock();
-        try {
-            ScheduledExecution scheduledExecution = scheduledExecutions.poll();
-            if (scheduledExecution == null) {
-                thread = null;
-            }
-            return scheduledExecution;
-        } finally {
-            lock.unlock();
-        }
+    /**
+     * Gets a value indicating whether migrations are currently executed or not.
+     *
+     * @return <code>true</code> if the executor is currently active, <code>false</code>, otherwise
+     */
+    public boolean isActive() {
+        return null != thread;
     }
 
     @Override
@@ -138,14 +134,6 @@ public class DBMigrationExecutor implements Runnable {
                 } else {
                     LOG.info("Running migrations of changelog {}", fileLocation);
                     liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
-                }
-            } catch (liquibase.exception.ValidationFailedException e) {
-                exception = e;
-                List<ChangeSet> invalidMD5Sums = e.getInvalidMD5Sums();
-                if (null == invalidMD5Sums || invalidMD5Sums.isEmpty()) {
-                    LOG.error("", e);
-                } else {
-                    LOG.debug("", e);
                 }
             } catch (liquibase.exception.LiquibaseException e) {
                 exception = e;
@@ -198,14 +186,28 @@ public class DBMigrationExecutor implements Runnable {
         lock.lock();
         try {
             scheduledExecutions.add(scheduledExecution);
-            if (thread == null) {
-                thread = new Thread(this);
+            if (this.thread == null) {
+                Thread thread = new Thread(this);
+                this.thread = thread;
                 thread.start();
             }
         } finally {
             lock.unlock();
         }
         return scheduledExecution;
+    }
+
+    private ScheduledExecution nextExecution() {
+        lock.lock();
+        try {
+            ScheduledExecution scheduledExecution = scheduledExecutions.poll();
+            if (scheduledExecution == null) {
+                this.thread = null;
+            }
+            return scheduledExecution;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**

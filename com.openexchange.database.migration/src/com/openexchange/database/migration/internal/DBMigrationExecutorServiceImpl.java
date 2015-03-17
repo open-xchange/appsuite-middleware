@@ -156,7 +156,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     @Override
     public boolean migrationsRunning() {
-        return !DBMigrationMonitor.getInstance().getScheduledFiles().isEmpty();
+        return executor.isActive();
     }
 
     /**
