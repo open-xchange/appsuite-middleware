@@ -80,7 +80,7 @@ public interface Cache {
      *
      * @return <code>true</code> if this cache has a distributed nature; otherwise <code>false</code> (a replicated nature)
      */
-    public boolean isDistributed();
+    boolean isDistributed();
 
     /**
      * Indicates if this cache is replicated.
@@ -89,35 +89,35 @@ public interface Cache {
      *
      * @return <code>true</code> if this cache has a replicated nature; otherwise <code>false</code> (a distributed nature)
      */
-    public boolean isReplicated();
+    boolean isReplicated();
 
     /**
      * Gets the currently cached elements.
      *
      * @return The values
      */
-    public Collection<Serializable> values();
+    Collection<Serializable> values();
 
     /**
      * Checks if this cache is local-only.
      *
      * @return <code>true</code> if local-only; otherwise <code>false</code>
      */
-    public boolean isLocal();
+    boolean isLocal();
 
     /**
      * Removes all of the elements from cache.
      *
      * @throws OXException If cache cannot be cleared
      */
-    public void clear() throws OXException;
+    void clear() throws OXException;
 
     /**
      * Disposes this cache. Flushes objects to and closes auxiliary caches. This is a shutdown command.
      * <p>
      * To simply remove all elements from the cache use {@link #clear()}
      */
-    public void dispose();
+    void dispose();
 
     /**
      * Retrieves the object from the cache which is bound to specified key.
@@ -125,7 +125,7 @@ public interface Cache {
      * @param key The key
      * @return The cached object if found or <code>null</code>
      */
-    public Object get(Serializable key);
+    Object get(Serializable key);
 
     /**
      * This method returns the cache element wrapper which provides access to element info and other attributes.
@@ -139,7 +139,7 @@ public interface Cache {
      * @param key The key
      * @return A reference to cache element wrapper if found or <code>null</code>
      */
-    public CacheElement getCacheElement(Serializable key);
+    CacheElement getCacheElement(Serializable key);
 
     /**
      * Retrieves a <b>copy</b> of the default element attributes used by this cache. This does not provide a reference to the element
@@ -150,7 +150,7 @@ public interface Cache {
      * @return The default element attributes used by this cache.
      * @throws OXException If default element attributes cannot be returned
      */
-    public ElementAttributes getDefaultElementAttributes() throws OXException;
+    ElementAttributes getDefaultElementAttributes() throws OXException;
 
     /**
      * Gets an item out of the cache that is in specified group.
@@ -159,14 +159,14 @@ public interface Cache {
      * @param group The group name.
      * @return The cached value, <code>null</code> if not found.
      */
-    public Object getFromGroup(Serializable key, String group);
+    Object getFromGroup(Serializable key, String group);
 
     /**
      * Invalidates a group: remove all the group members
      *
      * @param group The name of the group to invalidate
      */
-    public void invalidateGroup(String group);
+    void invalidateGroup(String group);
 
     /**
      * Place a new object in the cache, associated with key name. If there is currently an object associated with name in the cache it is
@@ -178,7 +178,7 @@ public interface Cache {
      * @deprecated Use {@link #put(Serializable, Serializable, boolean)} instead and supply the <code>invalidate</code>-flag explicitly.
      */
     @Deprecated
-    public void put(Serializable key, Serializable obj) throws OXException;
+    void put(Serializable key, Serializable obj) throws OXException;
 
     /**
      * Place a new object in the cache, associated with key name. If there is currently an object associated with name in the cache it is
@@ -193,7 +193,7 @@ public interface Cache {
      * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
      * @exception OXException If put operation on cache fails
      */
-    public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException;
+    void put(Serializable key, Serializable obj, boolean invalidate) throws OXException;
 
     /**
      * Constructs a cache element with these attributes, and puts it into the cache.
@@ -208,7 +208,7 @@ public interface Cache {
      *             flag explicitly.
      */
     @Deprecated
-    public void put(Serializable key, Serializable val, ElementAttributes attr) throws OXException;
+    void put(Serializable key, Serializable val, ElementAttributes attr) throws OXException;
 
     /**
      * Constructs a cache element with these attributes, and puts it into the cache.
@@ -225,7 +225,7 @@ public interface Cache {
      * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
      * @exception OXException If put operation on cache fails
      */
-    public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException;
+    void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException;
 
     /**
      * Allows the user to put an object into a group within a particular cache. This method allows the object's attributes to be
@@ -240,7 +240,7 @@ public interface Cache {
      *             <code>invalidate</code>-flag explicitly.
      */
     @Deprecated
-    public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr) throws OXException;
+    void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr) throws OXException;
 
     /**
      * Allows the user to put an object into a group within a particular cache. This method allows the object's attributes to be
@@ -257,7 +257,7 @@ public interface Cache {
      * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
      * @throws OXException If put operation on cache fails
      */
-    public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException;
+    void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException;
 
     /**
      * Allows the user to put an object into a group within a particular cache. This method sets the object's attributes to the default for
@@ -271,7 +271,7 @@ public interface Cache {
      *             flag explicitly.
      */
     @Deprecated
-    public void putInGroup(Serializable key, String groupName, Serializable value) throws OXException;
+    void putInGroup(Serializable key, String groupName, Serializable value) throws OXException;
 
     /**
      * Allows the user to put an object into a group within a particular cache. This method sets the object's attributes to the default for
@@ -287,7 +287,7 @@ public interface Cache {
      * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
      * @throws OXException If put operation on cache fails
      */
-    public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException;
+    void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException;
 
     /**
      * Place a new object in the cache, associated with key. If there is currently an object associated with key in the cache an exception
@@ -297,7 +297,7 @@ public interface Cache {
      * @param value Object to store
      * @exception OXException If the item is already in the cache.
      */
-    public void putSafe(Serializable key, Serializable value) throws OXException;
+    void putSafe(Serializable key, Serializable value) throws OXException;
 
     /**
      * Removes the object from the cache which is bound to specified key.
@@ -305,7 +305,7 @@ public interface Cache {
      * @param key The key
      * @throws OXException If remove operation on cache fails
      */
-    public void remove(Serializable key) throws OXException;
+    void remove(Serializable key) throws OXException;
 
     /**
      * Removes multiple objects from the cache which are bound to the specified keys.
@@ -316,6 +316,14 @@ public interface Cache {
     void remove(List<Serializable> keys) throws OXException;
 
     /**
+     * Clears (optional operation) the cache without propagating that operation neither laterally nor remotely.
+     *
+     * @throws OXException If clears operation
+     * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
+     */
+    void localClear() throws OXException;
+
+    /**
      * Removes (optional operation) the object from the cache which is bound to specified key without propagating that operation neither
      * laterally nor remotely.
      *
@@ -323,7 +331,7 @@ public interface Cache {
      * @throws OXException If remove operation on cache fails
      * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
-    public void localRemove(Serializable key) throws OXException;
+    void localRemove(Serializable key) throws OXException;
 
     /**
      * Puts (optional operation) the object into the cache which is bound to specified key without propagating that operation neither
@@ -334,7 +342,7 @@ public interface Cache {
      * @throws OXException If put operation on cache fails
      * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
-    public void localPut(Serializable key, Serializable value) throws OXException;
+    void localPut(Serializable key, Serializable value) throws OXException;
 
     /**
      * Removes the object located in specified group and bound to given key.
@@ -342,7 +350,7 @@ public interface Cache {
      * @param key The key
      * @param group The group name.
      */
-    public void removeFromGroup(Serializable key, String group);
+    void removeFromGroup(Serializable key, String group);
 
     /**
      * Removes multiple objects located in a specified group and bound the given keys.
@@ -360,7 +368,7 @@ public interface Cache {
      * @param group The group name.
      * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
-    public void localRemoveFromGroup(Serializable key, String group);
+    void localRemoveFromGroup(Serializable key, String group);
 
     /**
      * This method does not reset the attributes for items already in the cache. It could potentially do this for items in memory, and maybe
@@ -370,7 +378,7 @@ public interface Cache {
      * @param attr The default attributes.
      * @throws OXException If default element attributes cannot be applied.
      */
-    public void setDefaultElementAttributes(ElementAttributes attr) throws OXException;
+    void setDefaultElementAttributes(ElementAttributes attr) throws OXException;
 
     /**
      * This returns the cache statistics with information on this region and its auxiliaries.
@@ -379,7 +387,7 @@ public interface Cache {
      *
      * @return The cache statistics with information on this region and its auxiliaries.
      */
-    public CacheStatistics getStatistics();
+    CacheStatistics getStatistics();
 
     /**
      * Creates a new instance of {@link CacheKey} consisting of specified context ID and object ID.
@@ -390,7 +398,7 @@ public interface Cache {
      * @param objectId The object ID
      * @return The new instance of {@link CacheKey}
      */
-    public CacheKey newCacheKey(int contextId, int objectId);
+    CacheKey newCacheKey(int contextId, int objectId);
 
     /**
      * Creates a new instance of {@link CacheKey} consisting of specified context ID and serializable object.
@@ -401,27 +409,27 @@ public interface Cache {
      * @param objs The objects for the key
      * @return new instance of {@link CacheKey}
      */
-    public CacheKey newCacheKey(int contextId, String... objs);
+    CacheKey newCacheKey(int contextId, String... objs);
 
     /**
      * Gets the set of keys of objects currently in the group.
      * @param group
      * @return a set of keys
      */
-    public Set<?> getGroupKeys(String group) throws OXException;
+    Set<?> getGroupKeys(String group) throws OXException;
 
     /**
      * Gets the set of group names in the cache
      * @return a set of group names
      */
-    public Set<String> getGroupNames() throws OXException;
+    Set<String> getGroupNames() throws OXException;
 
     /**
      * Gets all the set of keys in the cache
      * @return a set of keys in the cache
      * @throws OXException
      */
-    public Set<?> getAllKeys() throws OXException;
+    Set<?> getAllKeys() throws OXException;
 
     /**
      * Get a ranged set of keys
@@ -430,5 +438,5 @@ public interface Cache {
      * @return a set of keys in cache
      * @throws OXException
      */
-    public Set<?> getKeysInRange(int start, int end) throws OXException;
+    Set<?> getKeysInRange(int start, int end) throws OXException;
 }
