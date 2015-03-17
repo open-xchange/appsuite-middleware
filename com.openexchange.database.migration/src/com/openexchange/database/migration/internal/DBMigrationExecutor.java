@@ -139,6 +139,14 @@ public class DBMigrationExecutor implements Runnable {
                     LOG.info("Running migrations of changelog {}", fileLocation);
                     liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
                 }
+            } catch (liquibase.exception.ValidationFailedException e) {
+                exception = e;
+                List<ChangeSet> invalidMD5Sums = e.getInvalidMD5Sums();
+                if (null == invalidMD5Sums || invalidMD5Sums.isEmpty()) {
+                    LOG.error("", e);
+                } else {
+                    LOG.debug("", e);
+                }
             } catch (liquibase.exception.LiquibaseException e) {
                 exception = e;
                 LOG.error("", e);
