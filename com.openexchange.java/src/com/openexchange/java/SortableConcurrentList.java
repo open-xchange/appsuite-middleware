@@ -104,6 +104,35 @@ public class SortableConcurrentList<E extends Comparable<E>> extends ConcurrentL
     }
 
     /**
+     * Appends the specified element to the end of this list and sorts its elements afterwards.
+     * <p>
+     * Thus it is basically the chained invocation of {@link #add(Object)} followed by {@link #sort()}; except that it is performed atomically.
+     *
+     * @param e The element to be appended to this list
+     * @return <tt>true</tt> if this collection changed; otherwise <code>false</code>
+     * @see Comparable
+     */
+    public boolean addAndSortIfAbsent(E e) {
+        boolean added;
+        List<E> expected;
+        List<E> list;
+        do {
+            expected = ref.get();
+            list = new ArrayList<E>(expected);
+            if (list.contains(e)) {
+                added = false;
+            } else {
+                added = list.add(e);
+                if (added) {
+                    Collections.sort(list);
+                }
+            }
+        } while (!ref.compareAndSet(expected, list));
+
+        return added;
+    }
+
+    /**
      * Sorts the specified list into ascending order, according to the <i>natural ordering</i> of its elements. All elements in the list
      * must implement the <tt>Comparable</tt> interface. Furthermore, all elements in the list must be <i>mutually comparable</i> (that is,
      * <tt>e1.compareTo(e2)</tt> must not throw a <tt>ClassCastException</tt> for any elements <tt>e1</tt> and <tt>e2</tt> in the list).
