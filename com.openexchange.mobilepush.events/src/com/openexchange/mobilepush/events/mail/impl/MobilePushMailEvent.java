@@ -72,6 +72,8 @@ public class MobilePushMailEvent implements MobilePushEvent {
 
     private final Map<String, Object> messageData;
 
+    private String collapseKey;
+
     private final static MobilePushProviders PROVIDER = MobilePushProviders.MAIL;
 
     /**
@@ -118,6 +120,16 @@ public class MobilePushMailEvent implements MobilePushEvent {
     @Override
     public List<ContextUsers> getContextUsers() {
         return contextUsers;
+    }
+
+    @Override
+    public String getCollapseKey() {
+        return collapseKey;
+    }
+
+    @Override
+    public void setCollapseKey(String collapseKey) {
+        this.collapseKey = collapseKey;
     }
 
     @Override

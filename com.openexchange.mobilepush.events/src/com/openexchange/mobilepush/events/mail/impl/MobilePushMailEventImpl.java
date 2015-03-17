@@ -84,9 +84,6 @@ import com.openexchange.session.Session;
  */
 public class MobilePushMailEventImpl implements org.osgi.service.event.EventHandler, MobilePushEventService {
 
-    /**
-     * INBOX
-     */
     private static final String INBOX = "INBOX";
 
     private final List<MobilePushPublisher> publishers;
@@ -195,9 +192,11 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                     mailAccess.connect(false);
                     MailMessage[] mms = fetchMessageInformation(mailAccess, mailIds, event, session);
                     int unread = mailAccess.getUnreadMessagesCount(INBOX);
+                    String rootFolder = mailAccess.getFolderStorage().getRootFolder().getFullname();
                     if (mms != null) {
                         Map<String, Object> map = new HashMap<String, Object>();
                         for (MailMessage mm : mms) {
+                            int accountId = mm.getAccountId();
                             String subject = mm.getSubject();
                             InternetAddress[] ia = mm.getFrom();
                             String personalFrom = ia[0].getPersonal();
@@ -205,7 +204,6 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                             String mailId = mm.getMailId();
                             String folder = mm.getFolder();
 
-                            map.put(MailPushUtility.KEY_PATH, folder + ":" + mailId);
 
                             String strSubject = subject == null ? "(no subject)" : subject;
                             String strSender = personalFrom == null ? receivedFrom : personalFrom;
@@ -214,6 +212,9 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                             sb.append("\n");
                             sb.append(strSubject);
 
+                            String cid = generateCid(rootFolder, folder, accountId, mailId);
+
+                            map.put(MailPushUtility.KEY_CID, cid);
                             map.put(MailPushUtility.KEY_MESSAGE, sb.toString());
                             map.put(MailPushUtility.KEY_UNREAD, unread);
                             props.add(map);
@@ -233,6 +234,16 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
             }
         }
         return props;
+    }
+
+    private String generateCid(String folderRootName, String folder, int accountId, String mailId) {
+        StringBuffer sb = new StringBuffer(folderRootName);
+        sb.append(accountId);
+        sb.append("/");
+        sb.append(folder);
+        sb.append(":");
+        sb.append(mailId);
+        return sb.toString();
     }
 
     /**
@@ -301,6 +312,8 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
 
         Map<String, Object> props = getLoginMessagePayload();
         MobilePushMailEvent loginEvent = new MobilePushMailEvent(contextUsers, props);
+        // GCM specific key
+        loginEvent.setCollapseKey("LOGIN");
         for (MobilePushPublisher publisher : publishers) {
             LOG.debug("Publishing new login event: {}", contextUsers);
             publisher.multiPublish(loginEvent);
@@ -308,11 +321,8 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     }
 
     private Map<String, Object> getLoginMessagePayload() {
-        Map<String, Object> props = new HashMap<String, Object>(4);
-        props.put("SYNC_EVENT", "LOGIN");
-        props.put("title", "OX Mail");
+        Map<String, Object> props = new HashMap<String, Object>(2);
         props.put("message", "You've received a new login");
-        props.put("msgcnt", "1");
         return props;
     }
 }
