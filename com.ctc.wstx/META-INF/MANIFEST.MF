@@ -112,6 +112,6 @@ Import-Package: javax.xml.namespace,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Bundle-ClassPath: lib/woodstox-core-asl-4.2.0.jar,
+Bundle-ClassPath: lib/woodstox-core-asl-4.4.1.jar,
  .
 Bundle-Activator: com.ctc.wstx.osgi.delegate.WstxDelegateBundleActivator
