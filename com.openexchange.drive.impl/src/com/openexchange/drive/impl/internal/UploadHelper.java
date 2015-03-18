@@ -63,11 +63,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
-import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.impl.DriveConstants;
+import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
-import com.openexchange.drive.impl.storage.DriveStorage;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.drive.impl.sync.RenameTools;
 import com.openexchange.exception.OXException;
@@ -396,14 +396,14 @@ public class UploadHelper {
              * create new upload file
              */
             if (session.isTraceEnabled()) {
-                session.trace("Creating new upload file at: " + DriveStorage.combine(uploadPath, uploadFileName));
+                session.trace("Creating new upload file at: " + DriveUtils.combine(uploadPath, uploadFileName));
             }
             uploadFile = session.getStorage().createFile(uploadPath, uploadFileName);
             if (null != uploadFile && session.isTraceEnabled()) {
                 session.trace("Upload file created: [" + uploadFile.getFolderId() + '/' + uploadFile.getId() + ']');
             }
         } else if (null != uploadFile && session.isTraceEnabled()) {
-            session.trace("Using existing upload file at " + DriveStorage.combine(uploadPath, uploadFileName) +
+            session.trace("Using existing upload file at " + DriveUtils.combine(uploadPath, uploadFileName) +
                 " [" + uploadFile.getFolderId() + '/' + uploadFile.getId() + "], current size: " + uploadFile.getFileSize() +
                 ", last modified: " + (null != uploadFile.getLastModified() ?
                     DriveConstants.LOG_DATE_FORMAT.get().format(uploadFile.getLastModified()) : "(unknown)"));
