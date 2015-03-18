@@ -1,3 +1,7 @@
+* 2015-03-18 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 37249: Ignore already processed images when updating a snippet.
+
 * 2015-03-16 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 36100: Use IDGenerator to block concurrent deleting threads to prevent MySQL deadlocks #2
