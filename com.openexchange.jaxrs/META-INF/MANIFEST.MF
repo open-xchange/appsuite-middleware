@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.jaxrs
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax,
+Import-Package: com.eclipsesource.jaxrs.publisher;version="4.2.1",
+ com.openexchange.ajax,
  com.openexchange.ajax.login,
  com.openexchange.ajax.requesthandler,
  com.openexchange.config,

@@ -65,9 +65,11 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
 import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.jaxrs.jersey.JSONReaderWriter;
+import com.openexchange.jaxrs.jersey.JerseyConfiguration;
 import com.openexchange.jaxrs.jersey.OXExceptionMapper;
 import com.openexchange.jaxrs.security.AuthenticationFilter;
 
@@ -120,7 +122,6 @@ public class Activator implements BundleActivator {
                             properties = new Hashtable<String, Object>(1);
                         }
                         properties.put("root", "/rest");
-                        properties.put(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, true);
                         configuration.update(properties);
                     } catch (IOException e) {
                         LOG.error("Could not set root path for jersey servlet. REST API will not be available!", e);
@@ -147,6 +148,7 @@ public class Activator implements BundleActivator {
 
         context.registerService(JSONReaderWriter.class, new JSONReaderWriter(), null);
         context.registerService(OXExceptionMapper.class, new OXExceptionMapper(), null);
+        context.registerService(ApplicationConfiguration.class, new JerseyConfiguration(), null);
     }
 
     @Override
