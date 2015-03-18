@@ -1,6 +1,10 @@
 * 2015-04-02- thorben.betten@open-xchange.com
 
  - Fix for bug 37527: Pass header/cookie information on password change to AuthenticationService instance
+ 
+* 2015-03-18 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 37249: Ignore already processed images when updating a snippet.
 
 * 2015-03-12 - thorben.betten@open-xchange.com
 
