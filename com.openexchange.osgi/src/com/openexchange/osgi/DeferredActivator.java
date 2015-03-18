@@ -246,7 +246,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @return <code>true</code> to stop on service absence; otherwise <code>false</code>
      */
     protected boolean stopOnServiceUnavailability() {
-        return true;
+        return false;
     }
 
     /**
