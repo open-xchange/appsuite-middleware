@@ -49,7 +49,6 @@
 
 package com.openexchange.saml.validation;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -66,22 +65,11 @@ import org.opensaml.saml2.core.Subject;
 import org.opensaml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml2.core.SubjectConfirmationData;
 import org.opensaml.saml2.encryption.Decrypter;
-import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
-import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
 import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
-import org.opensaml.xml.encryption.SimpleKeyInfoReferenceEncryptedKeyResolver;
-import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
-import org.opensaml.xml.security.keyinfo.KeyInfoProvider;
-import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
-import org.opensaml.xml.security.keyinfo.provider.DEREncodedKeyValueProvider;
-import org.opensaml.xml.security.keyinfo.provider.DSAKeyValueProvider;
-import org.opensaml.xml.security.keyinfo.provider.InlineX509DataProvider;
-import org.opensaml.xml.security.keyinfo.provider.KeyInfoReferenceProvider;
-import org.opensaml.xml.security.keyinfo.provider.RSAKeyValueProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.saml.CryptoHelper;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.spi.CredentialProvider;
@@ -593,31 +581,6 @@ public class StrictValidationStrategy implements ValidationStrategy {
         return null;
     }
 
-    protected Decrypter getDecrypter() {
-        /*
-         * Currently this decrypter is only able to decrypt assertions
-         * that come along with their symmetric encrytion keys which are
-         * in turn encrypted with the public key of 'encryptionCredential'
-         */
-        List<KeyInfoProvider> keyInfoProviders = new ArrayList<KeyInfoProvider>(4);
-        keyInfoProviders.add(new InlineX509DataProvider());
-        keyInfoProviders.add(new KeyInfoReferenceProvider());
-        keyInfoProviders.add(new DEREncodedKeyValueProvider());
-        keyInfoProviders.add(new RSAKeyValueProvider());
-        keyInfoProviders.add(new DSAKeyValueProvider());
-
-        ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
-        encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new SimpleKeyInfoReferenceEncryptedKeyResolver());
-
-        StaticKeyInfoCredentialResolver kekCredentialResolver = new StaticKeyInfoCredentialResolver(credentialProvider.getDecryptionCredential());
-        Decrypter decrypter = new Decrypter(null, kekCredentialResolver, encryptedKeyResolver);
-        decrypter.setRootInNewDocument(true);
-        return decrypter;
-    }
-
     private static ValidationError validateResponse(Response response, List<ResponseValidator> responseValidators) {
         for (ResponseValidator responseValidator : responseValidators) {
             ValidationError error = responseValidator.validate(response);
@@ -646,7 +609,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
         List<Assertion> assertions = new LinkedList<Assertion>();
         List<EncryptedAssertion> encryptedAssertions = response.getEncryptedAssertions();
         if (encryptedAssertions.size() > 0) {
-            Decrypter decrypter = getDecrypter();
+            Decrypter decrypter = CryptoHelper.getDecrypter(credentialProvider);
             for (EncryptedAssertion encryptedAssertion : encryptedAssertions) {
                 assertions.add(decrypter.decrypt(encryptedAssertion));
             }

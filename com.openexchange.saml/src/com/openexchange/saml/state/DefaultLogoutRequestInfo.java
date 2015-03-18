@@ -47,69 +47,46 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.state;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.saml.SAMLConfig.Binding;
-import com.openexchange.session.Session;
 
 /**
- * The interface for SAML 2.0 Web SSO support.
+ * {@link DefaultLogoutRequestInfo}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface WebSSOProvider {
+public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
 
-    /**
-     * Responds with an authentication request based on the configured binding.
-     *
-     * @param httpRequest The servlet request
-     * @param httpResponse The servlet response
-     * @throws OXException If preparing the AuthnRequest fails
-     * @throws IOException If writing to the servlet response fails
-     */
-    void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException;
+    private String requestId;
 
-    /**
-     * Handles an authentication response.
-     *
-     * @param httpRequest The servlet request
-     * @param httpResponse The servlet response
-     * @param binding The binding used to call the assertion consumer service
-     * @throws OXException If an error occurs while processing the response
-     * @throws IOException If writing to the servlet response fails
-     */
-    void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException;
+    private String sessionId;
 
-    /**
-     * @param session
-     * @throws OXException
-     *
-     */
-    void respondWithLogoutRequest(HttpServletRequest req, HttpServletResponse resp, Session session) throws OXException, IOException;
+    private String relayState;
 
-    /**
-     * handles a single logout request.
-     *
-     * @param httpRequest The servlet request
-     * @param httpResponse The servlet response
-     * @param binding The binding used to call the single logout service
-     * @throws IOException If writing to the servlet response fails
-     */
-    void handleLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws IOException;
+    @Override
+    public String getRequestId() {
+        return requestId;
+    }
+    @Override
+    public String getSessionId() {
+        return sessionId;
+    }
+    @Override
+    public String getRelayState() {
+        return relayState;
+    }
 
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
 
-    /**
-     * Generates the service providers metadata XML.
-     *
-     * @return The XML as string
-     */
-    String getMetadataXML() throws OXException;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
-    void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding httpRedirect) throws OXException, IOException;
+    public void setRelayState(String relayState) {
+        this.relayState = relayState;
+    }
 
 }

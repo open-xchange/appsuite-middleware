@@ -75,5 +75,8 @@ public interface StateManagement {
 
     List<String> removeSessionIds(List<String> keys);
 
+    void addLogoutRequest(LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException;
+
+    LogoutRequestInfo removeLogoutRequest(String requestId) throws OXException;
 
 }

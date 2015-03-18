@@ -132,7 +132,8 @@ public interface SAMLBackend {
     AuthenticationInfo resolveAuthnResponse(Response response, Assertion assertion) throws OXException;
 
     /**
-     * Resolves a logout request and determines which sessions are to be terminated.
+     * Resolves a logout request and determines which sessions are to be terminated. This method is only
+     * called if single logout is activated.
      *
      * @param request The logout request
      * @return The logout info

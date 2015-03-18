@@ -50,12 +50,11 @@
 package com.openexchange.saml;
 
 import static com.openexchange.saml.SAMLProperties.ACS_URL;
-import static com.openexchange.saml.SAMLProperties.AUTHN_REQUEST_BINDING;
-import static com.openexchange.saml.SAMLProperties.AUTHN_RESPONSE_BINDING;
 import static com.openexchange.saml.SAMLProperties.ENTITY_ID;
 import static com.openexchange.saml.SAMLProperties.IDP_ENTITY_ID;
 import static com.openexchange.saml.SAMLProperties.IDP_LOGIN_URL;
 import static com.openexchange.saml.SAMLProperties.IDP_LOGOUT_URL;
+import static com.openexchange.saml.SAMLProperties.LOGOUT_RESPONSE_BINDING;
 import static com.openexchange.saml.SAMLProperties.PROVIDER_NAME;
 import static com.openexchange.saml.SAMLProperties.SLS_URL;
 import static com.openexchange.saml.SAMLProperties.SUPPORT_SINGLE_LOGOUT;
@@ -78,9 +77,9 @@ public class DefaultConfig implements SAMLConfig {
 
     private String acsURL;
 
-    private Binding authnRequestBinding;
-
-    private Binding authnResponseBinding;
+//    private Binding authnRequestBinding;
+//
+//    private Binding authnResponseBinding;
 
     private Binding logoutResponseBinding;
 
@@ -107,9 +106,9 @@ public class DefaultConfig implements SAMLConfig {
 
         config.setIdpEntityID(checkProperty(configService, IDP_ENTITY_ID));
         config.setIdpURL(checkProperty(configService, IDP_LOGIN_URL));
-        config.setResponseBinding(checkBinding(configService, AUTHN_RESPONSE_BINDING));
-        config.setRequestBinding(checkBinding(configService, AUTHN_REQUEST_BINDING));
-        config.setLogoutResponseBinding(checkBinding(configService, AUTHN_REQUEST_BINDING));
+//        config.setResponseBinding(checkBinding(configService, AUTHN_RESPONSE_BINDING));
+//        config.setRequestBinding(checkBinding(configService, AUTHN_REQUEST_BINDING));
+        config.setLogoutResponseBinding(checkBinding(configService, LOGOUT_RESPONSE_BINDING));
         config.setIdentityProviderLogoutURL(checkProperty(configService, IDP_LOGOUT_URL));
         boolean supportSingleLogout = configService.getBoolProperty(SUPPORT_SINGLE_LOGOUT, true);
         config.setSupportSingleLogout(supportSingleLogout);
@@ -160,15 +159,15 @@ public class DefaultConfig implements SAMLConfig {
         return slsURL;
     }
 
-    @Override
-    public Binding getRequestBinding() {
-        return authnRequestBinding;
-    }
-
-    @Override
-    public Binding getResponseBinding() {
-        return authnResponseBinding;
-    }
+//    @Override
+//    public Binding getRequestBinding() {
+//        return authnRequestBinding;
+//    }
+//
+//    @Override
+//    public Binding getResponseBinding() {
+//        return authnResponseBinding;
+//    }
 
     @Override
     public Binding getLogoutResponseBinding() {
@@ -211,13 +210,13 @@ public class DefaultConfig implements SAMLConfig {
         this.slsURL = slsURL;
     }
 
-    private void setRequestBinding(Binding binding) {
-        this.authnRequestBinding = binding;
-    }
-
-    private void setResponseBinding(Binding binding) {
-        this.authnResponseBinding = binding;
-    }
+//    private void setRequestBinding(Binding binding) {
+//        this.authnRequestBinding = binding;
+//    }
+//
+//    private void setResponseBinding(Binding binding) {
+//        this.authnResponseBinding = binding;
+//    }
 
     private void setLogoutResponseBinding(Binding logoutResponseBinding) {
         this.logoutResponseBinding = logoutResponseBinding;

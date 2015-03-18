@@ -47,84 +47,76 @@
  *
  */
 
-package com.openexchange.saml.http;
+package com.openexchange.saml.impl;
 
 import java.io.IOException;
-import java.util.Enumeration;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.SAMLConfig.Binding;
-import com.openexchange.saml.WebSSOProvider;
+import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
- * {@link SingleLogoutService}
+ * {@link SAMLLogoutRequestHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SingleLogoutService extends HttpServlet {
+public class SAMLLogoutRequestHandler implements LoginRequestHandler {
 
-    private static final long serialVersionUID = 8167911323803230663L;
-
-    private final WebSSOProvider provider;
-
-    public SingleLogoutService(WebSSOProvider provider) {
-        super();
-        this.provider = provider;
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(SAMLLogoutHandler.class);
 
     @Override
-    protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        handleRequest(httpRequest, httpResponse, Binding.HTTP_REDIRECT);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        handleRequest(httpRequest, httpResponse, Binding.HTTP_POST);
-    }
-
-    private void handleRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws ServletException, IOException {
-        switch (getRequestType(httpRequest)) {
-            case SAML_REQUEST:
-                provider.handleLogoutRequest(httpRequest, httpResponse, binding);
-                break;
-            case SAML_RESPONSE:
-            try {
-                provider.handleLogoutResponse(httpRequest, httpResponse, binding);
-            } catch (OXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            Session session = null;
+            String sessionId = req.getParameter(AJAXServlet.PARAMETER_SESSION);
+            if (sessionId == null) {
+                LOG.info("Missing session id in SAML logout request");
+            } else {
+                session = LoginPerformer.getInstance().lookupSession(sessionId);
             }
-                break;
-            default:
-                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                break;
-        }
-    }
 
-    private Type getRequestType(HttpServletRequest httpRequest) {
-        @SuppressWarnings("unchecked")
-        Enumeration<String> params = httpRequest.getParameterNames();
-        while (params.hasMoreElements()) {
-            String param = params.nextElement();
-            if ("SAMLRequest".equals(param)) {
-                return Type.SAML_REQUEST;
-            } else if ("SAMLResponse".equals(param)) {
-                return Type.SAML_RESPONSE;
+            if (session != null) {
+                LoginConfiguration conf = LoginServlet.getLoginConfiguration();
+                SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
+                final String secret = SessionUtility.extractSecret(
+                    conf.getHashSource(),
+                    req,
+                    session.getHash(),
+                    session.getClient());
+
+                if (secret != null && !session.getSecret().equals(secret)) {
+                    LoginPerformer.getInstance().doLogout(sessionId);
+                    // Drop relevant cookies
+                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                    SessionUtility.removeJSESSIONID(req, resp);
+                } else {
+                    LOG.info("Missing or non-matching secret for session {}", sessionId);
+                }
             }
+        } catch (OXException e) {
+            LOG.error("Logout failed", e);
         }
 
-        return Type.INVALID;
-    }
-
-    private static enum Type {
-        SAML_REQUEST,
-        SAML_RESPONSE,
-        INVALID
+        resp.reset();
+        resp.setContentType(null);
+        Tools.disableCaching(resp);
+        String redirectLocation = req.getParameter("location");
+        if (redirectLocation == null) {
+            resp.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            resp.sendRedirect(redirectLocation);
+        }
     }
 
 }

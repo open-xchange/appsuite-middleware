@@ -49,6 +49,7 @@
 
 package com.openexchange.saml;
 
+import java.io.StringReader;
 import javax.xml.namespace.QName;
 import org.joda.time.format.DateTimeFormatter;
 import org.opensaml.Configuration;
@@ -59,10 +60,13 @@ import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.io.UnmarshallerFactory;
+import org.opensaml.xml.io.UnmarshallingException;
 import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.xml.parse.XMLParserException;
 import org.opensaml.xml.security.SecurityConfiguration;
 import org.opensaml.xml.util.XMLHelper;
 import org.opensaml.xml.validation.ValidatorSuite;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -197,5 +201,12 @@ public final class OpenSAML {
     public String marshall(XMLObject object) throws MarshallingException {
         Element authRequestElement = getMarshallerFactory().getMarshaller(object).marshall(object);
         return XMLHelper.nodeToString(authRequestElement);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T unmarshall(Class<T> clazz, String xml) throws XMLParserException, UnmarshallingException, ClassCastException {
+        Document doc = getParserPool().parse(new StringReader(xml));
+        Element element = doc.getDocumentElement();
+        return (T) getUnmarshallerFactory().getUnmarshaller(element).unmarshall(element);
     }
 }

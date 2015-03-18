@@ -47,84 +47,58 @@
  *
  */
 
-package com.openexchange.saml.http;
+package com.openexchange.saml.impl;
 
 import java.io.IOException;
-import java.util.Enumeration;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.SSOLogoutHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.WebSSOProvider;
+import com.openexchange.saml.spi.ExceptionHandler;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link SingleLogoutService}
+ * {@link SAMLLogoutHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SingleLogoutService extends HttpServlet {
-
-    private static final long serialVersionUID = 8167911323803230663L;
+public class SAMLLogoutHandler implements SSOLogoutHandler {
 
     private final WebSSOProvider provider;
 
-    public SingleLogoutService(WebSSOProvider provider) {
+    private final ExceptionHandler exceptionHandler;
+
+    /**
+     * Initializes a new {@link SAMLLogoutHandler}.
+     * @param provider
+     * @param exceptionHandler
+     */
+    public SAMLLogoutHandler(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
         super();
         this.provider = provider;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        handleRequest(httpRequest, httpResponse, Binding.HTTP_REDIRECT);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        handleRequest(httpRequest, httpResponse, Binding.HTTP_POST);
-    }
-
-    private void handleRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws ServletException, IOException {
-        switch (getRequestType(httpRequest)) {
-            case SAML_REQUEST:
-                provider.handleLogoutRequest(httpRequest, httpResponse, binding);
-                break;
-            case SAML_RESPONSE:
-            try {
-                provider.handleLogoutResponse(httpRequest, httpResponse, binding);
-            } catch (OXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-                break;
-            default:
-                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                break;
-        }
-    }
-
-    private Type getRequestType(HttpServletRequest httpRequest) {
-        @SuppressWarnings("unchecked")
-        Enumeration<String> params = httpRequest.getParameterNames();
-        while (params.hasMoreElements()) {
-            String param = params.nextElement();
-            if ("SAMLRequest".equals(param)) {
-                return Type.SAML_REQUEST;
-            } else if ("SAMLResponse".equals(param)) {
-                return Type.SAML_RESPONSE;
-            }
+    public Result handle(HttpServletRequest req, HttpServletResponse resp, Session session, LoginConfiguration loginConfiguration) throws IOException {
+        Result result = new Result();
+        if (session == null) {
+            result.continueWithLogout = true;
+            return result;
         }
 
-        return Type.INVALID;
+        try {
+            provider.respondWithLogoutRequest(req, resp, session);
+        } catch (OXException e) {
+            result.error = e;
+            result.respondWithError = true;
+        }
+        return result;
     }
 
-    private static enum Type {
-        SAML_REQUEST,
-        SAML_RESPONSE,
-        INVALID
-    }
 
 }

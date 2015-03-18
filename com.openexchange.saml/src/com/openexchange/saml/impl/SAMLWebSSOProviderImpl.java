@@ -69,25 +69,33 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.utils.URIBuilder;
 import org.joda.time.DateTime;
+import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.AuthnStatement;
+import org.opensaml.saml2.core.BaseID;
+import org.opensaml.saml2.core.EncryptedID;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
+import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.SessionIndex;
 import org.opensaml.saml2.core.Status;
 import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.saml2.core.StatusMessage;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.KeyDescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.SingleLogoutService;
 import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.encryption.DecryptionException;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.io.UnmarshallingException;
 import org.opensaml.xml.parse.XMLParserException;
@@ -112,10 +120,12 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.saml.CryptoHelper;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.SAMLExceptionCode;
+import com.openexchange.saml.SessionProperties;
 import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.spi.AuthenticationInfo;
 import com.openexchange.saml.spi.CredentialProvider;
@@ -125,11 +135,14 @@ import com.openexchange.saml.spi.SAMLWebSSOCustomizer;
 import com.openexchange.saml.spi.SAMLWebSSOCustomizer.RequestContext;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
+import com.openexchange.saml.state.DefaultLogoutRequestInfo;
+import com.openexchange.saml.state.LogoutRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 import com.openexchange.saml.validation.AuthnResponseValidationResult;
 import com.openexchange.saml.validation.ValidationException;
 import com.openexchange.saml.validation.ValidationStrategy;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
@@ -141,6 +154,11 @@ import com.openexchange.tools.servlet.http.Tools;
 public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(SAMLWebSSOProviderImpl.class);
+
+    /**
+     * The number of milliseconds for which a LogoutRequest sent by us is considered valid.
+     */
+    private static final long LOGOUT_REQUEST_TIMEOUT = 5 * 60 * 1000l;
 
     private final SAMLConfig config;
 
@@ -174,18 +192,8 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         stateManagement.addAuthnRequest(requestInfo, 5, TimeUnit.MINUTES);
         try {
             String authnRequestXML = openSAML.marshall(authnRequest);
-            Binding requestBinding = config.getRequestBinding();
-            LOG.debug("Responding with AuthnRequest via " + requestBinding.toString() + ":\n{}", authnRequestXML);
-            switch (requestBinding) {
-            case HTTP_POST:
-                // sendFormResponse(authnRequestXML, httpResponse);
-                break;
-            case HTTP_REDIRECT:
-                sendRedirect(authnRequestXML, relayState, httpRequest, httpResponse);
-                break;
-            default:
-                throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(requestBinding);
-            }
+            LOG.debug("Responding with AuthnRequest:\n{}", authnRequestXML);
+            sendAuthnRequestRedirect(authnRequestXML, relayState, httpRequest, httpResponse);
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
         }
@@ -201,20 +209,13 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
             throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(binding.name());
         }
 
+        String redirectHost = httpRequest.getParameter("RelayState");
+        if (redirectHost == null) {
+            throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was not set");
+        }
+
         Response response = extractAuthnResponse(httpRequest);
         try {
-            /*
-             * TODO: If the identity provider supports the Single Logout profile, defined in Section 4.4, any authentication statements MUST
-             * include a SessionIndex attribute to enable per-session logout requests by the service provider. [profiles 06 - 4.1.4.2p20]
-             */
-
-            /*
-             * TODO: If an <AuthnStatement> used to establish a security context for the principal contains a SessionNotOnOrAfter attribute,
-             * the security context SHOULD be discarded once this time is reached, unless the service provider reestablishes the principal's
-             * identity by repeating the use of this profile. Note that if multiple <AuthnStatement> elements are present, the
-             * SessionNotOnOrAfter value closest to the present time SHOULD be honored.
-             */
-
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
             AuthnResponseValidationResult validationResult = validationStrategy.validateAuthnResponse(response, binding);
             AuthnRequestInfo requestInfo = validationResult.getRequestInfo();
@@ -226,16 +227,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
             AuthenticationInfo authInfo = backend.resolveAuthnResponse(response, bearerAssertion);
             LOG.debug("User {} in context {} is considered authenticated", authInfo.getUserId(), authInfo.getContextId());
 
-            String relayState = httpRequest.getParameter("RelayState");
-            if (relayState == null) {
-                throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was not set");
-            }
-
-            String redirectHost = relayState; // TODO: integrity check and fail on null
-
-            /*
-             * TODO state: - session index for logout - SessionNotOnOrAfter
-             */
+            enhanceAuthInfo(authInfo, bearerAssertion);
             Map<String, String> properties = authInfo.getProperties();
             String sessionToken = sessionReservationService.reserveSessionFor(
                 authInfo.getUserId(),
@@ -244,26 +236,77 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
                 TimeUnit.SECONDS,
                 properties.isEmpty() ? null : properties);
 
-            ConfigurationService configService = services.getService(ConfigurationService.class);
-            boolean secure = Tools.considerSecure(
-                httpRequest,
-                Boolean.parseBoolean(configService.getProperty(
-                    Property.FORCE_HTTPS.getPropertyName(),
-                    Property.FORCE_HTTPS.getDefaultValue())));
+            URI redirectLocation = new URIBuilder()
+                .setScheme(getRedirectScheme(httpRequest))
+                .setHost(redirectHost)
+                .setPath(getRedirectPathPrefix() + "login")
+                .setParameter("action", "redeemReservation")
+                .setParameter("token", sessionToken)
+                .build();
 
-            DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-            String prefix = prefixService.getPrefix();
-
-            URI redirectLocation = new URIBuilder().setScheme(secure ? "https" : "http").setHost(redirectHost).setPath(prefix + "login").setParameter(
-                "action",
-                "redeemReservation").setParameter("token", sessionToken).build();
-
+            Tools.disableCaching(httpResponse);
             httpResponse.sendRedirect(redirectLocation.toString());
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         } catch (ValidationException e) {
             throw SAMLExceptionCode.VALIDATION_FAILED.create(e.getReason().getMessage(), e.getMessage());
         }
+    }
+
+    @Override
+    public void respondWithLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Session session) throws OXException, IOException {
+        LogoutRequest logoutRequest = customizeLogoutRequest(prepareLogoutRequest(session), httpRequest, httpResponse);
+        String relayState = getFrontendDomain(httpRequest);
+        DefaultLogoutRequestInfo requestInfo = new DefaultLogoutRequestInfo();
+        requestInfo.setRequestId(logoutRequest.getID());
+        requestInfo.setSessionId(session.getSessionID());
+        requestInfo.setRelayState(relayState);
+        stateManagement.addLogoutRequest(requestInfo, LOGOUT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
+
+        try {
+            String logoutRequestXML = openSAML.marshall(logoutRequest);
+            LOG.debug("Responding with LogoutRequest:\n{}", logoutRequestXML);
+            sendLogoutRequestRedirect(logoutRequestXML, relayState, httpRequest, httpResponse);
+        } catch (MarshallingException e) {
+            throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException {
+        LogoutResponse response = extractLogoutResponse(httpRequest, binding);
+        String redirectHost = httpRequest.getParameter("RelayState");
+        if (redirectHost == null) {
+            throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was not set");
+        }
+
+        try {
+            // TODO:any backend handling?
+            // TODO: null for broken IDPs?
+            LogoutRequestInfo requestInfo = stateManagement.removeLogoutRequest(response.getInResponseTo());
+            if (requestInfo == null) {
+                throw SAMLExceptionCode.INVALID_REQUEST.create("LogoutResponse contains no valid 'InResponseTo' attribute");
+            }
+
+            String sessionId = requestInfo.getSessionId();
+            URI redirectLocationBuilder = new URIBuilder()
+                .setScheme(getRedirectScheme(httpRequest))
+                .setHost(redirectHost)
+                .setPath(getRedirectPathPrefix() + "login")
+                .setParameter("action", "samlLogout")
+                .setParameter("session", sessionId)
+                .setParameter("location", "http://www.virginmedia.com") // TODO:
+                .build();
+
+            Tools.disableCaching(httpResponse);
+            String redirectLocation = redirectLocationBuilder.toString();
+            LOG.debug("LogoutResponse '{}' is considered valid. Redirecting to logout action: {}", response.getID(), redirectLocation);
+            httpResponse.sendRedirect(redirectLocation);
+        } catch (URISyntaxException e) {
+            throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
+        } /*catch (ValidationException e) {
+            throw SAMLExceptionCode.VALIDATION_FAILED.create(e.getReason().getMessage(), e.getMessage());
+        }*/
     }
 
     @Override
@@ -299,6 +342,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
             status.setStatusMessage(statusMessage);
         }
 
+        Tools.disableCaching(httpResponse);
         try {
             LogoutResponse logoutResponse = customizeLogoutResponse(prepareLogoutResponse(status, logoutRequest == null ? null : logoutRequest.getID()), httpRequest, httpResponse);
             String responseXML = openSAML.marshall(logoutResponse);
@@ -319,6 +363,138 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
             LOG.error("Could not compile LogoutResponse", e);
             httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public String getMetadataXML() throws OXException {
+        SPSSODescriptor spssoDescriptor = openSAML.buildSAMLObject(SPSSODescriptor.class);
+        spssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
+
+        AssertionConsumerService acs = openSAML.buildSAMLObject(AssertionConsumerService.class);
+        acs.setIndex(1);
+        acs.setIsDefault(Boolean.TRUE);
+        acs.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+        acs.setLocation(config.getAssertionConsumerServiceURL());
+        spssoDescriptor.getAssertionConsumerServices().add(acs);
+
+        if (config.supportSingleLogout()) {
+            SingleLogoutService slService = openSAML.buildSAMLObject(SingleLogoutService.class);
+            slService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+            slService.setLocation(config.getSingleLogoutServiceURL());
+            spssoDescriptor.getSingleLogoutServices().add(slService);
+        }
+
+        try {
+            X509KeyInfoGeneratorFactory keyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
+            keyInfoGeneratorFactory.setEmitEntityCertificate(true);
+            KeyInfoGenerator keyInfoGenerator = keyInfoGeneratorFactory.newInstance();
+            CredentialProvider credentialProvider = backend.getCredentialProvider();
+            if (credentialProvider.hasSigningCredential()) {
+                KeyDescriptor signKeyDescriptor = openSAML.buildSAMLObject(KeyDescriptor.class);
+                signKeyDescriptor.setUse(UsageType.SIGNING);
+                KeyInfo keyInfo = keyInfoGenerator.generate(credentialProvider.getSigningCredential());
+                signKeyDescriptor.setKeyInfo(keyInfo);
+                spssoDescriptor.getKeyDescriptors().add(signKeyDescriptor);
+                spssoDescriptor.setAuthnRequestsSigned(Boolean.TRUE);
+            } else {
+                spssoDescriptor.setAuthnRequestsSigned(Boolean.FALSE);
+            }
+
+            if (credentialProvider.hasDecryptionCredential()) {
+                KeyDescriptor encryptionKeyDescriptor = openSAML.buildSAMLObject(KeyDescriptor.class);
+                encryptionKeyDescriptor.setUse(UsageType.ENCRYPTION);
+                encryptionKeyDescriptor.setKeyInfo(keyInfoGenerator.generate(credentialProvider.getDecryptionCredential()));
+                spssoDescriptor.getKeyDescriptors().add(encryptionKeyDescriptor);
+                spssoDescriptor.setWantAssertionsSigned(Boolean.TRUE);
+            } else {
+                spssoDescriptor.setWantAssertionsSigned(Boolean.FALSE);
+            }
+        } catch (SecurityException e) {
+            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
+        }
+
+        spssoDescriptor = customizeDescriptor(spssoDescriptor);
+        try {
+            EntityDescriptor spDescriptor = openSAML.buildSAMLObject(EntityDescriptor.class);
+            spDescriptor.setEntityID(config.getEntityID());
+            spDescriptor.getRoleDescriptors().add(spssoDescriptor);
+            return openSAML.marshall(spDescriptor);
+        } catch (MarshallingException e) {
+            throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
+        }
+    }
+
+    private void sendLogoutRequestRedirect(String logoutRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+        String encoded = deflateAndEncode(logoutRequestXML);
+        try {
+            URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderLogoutURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
+            trySignRedirectHeader(redirectLocationBuilder);
+            String redirectLocation = redirectLocationBuilder.build().toString();
+            LOG.debug("Sending LogoutRequest via redirect: {}", redirectLocation);
+//            throw LoginExceptionCodes.REDIRECT.create(redirectLocation); TODO
+        } catch (URISyntaxException e) {
+            throw SAMLExceptionCode.ENCODING_ERROR.create(e, "Could not construct redirect location");
+        }
+    }
+
+    private LogoutRequest prepareLogoutRequest(Session session) throws OXException {
+        Issuer issuer = openSAML.buildSAMLObject(Issuer.class);
+        issuer.setValue(config.getEntityID());
+
+        LogoutRequest logoutRequest = openSAML.buildSAMLObject(LogoutRequest.class);
+        logoutRequest.setIssuer(issuer);
+        logoutRequest.setDestination(config.getIdentityProviderLogoutURL());
+        logoutRequest.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
+        logoutRequest.setIssueInstant(new DateTime());
+        logoutRequest.setVersion(SAMLVersion.VERSION_20);
+        logoutRequest.setReason(LogoutRequest.USER_REASON);
+        logoutRequest.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + LOGOUT_REQUEST_TIMEOUT));
+        String sessionIndex = (String) session.getParameter(SessionProperties.SESSION_INDEX);
+        if (sessionIndex != null) {
+            SessionIndex indexElement = openSAML.buildSAMLObject(SessionIndex.class);
+            indexElement.setSessionIndex(sessionIndex);
+            logoutRequest.getSessionIndexes().add(indexElement);
+        }
+
+        String subjectID = (String) session.getParameter(SessionProperties.SUBJECT_ID);
+        if (subjectID != null) {
+            try {
+                SAMLObject subjectIDElement = openSAML.unmarshall(SAMLObject.class, subjectID);
+                /*
+                 * TODO: implement subject ID encryption. Needs the CredentialProvider to be extended by an
+                 * encryption credential first.
+                 */
+                if (subjectIDElement instanceof BaseID) {
+                    logoutRequest.setBaseID((BaseID) subjectIDElement);
+                } else if (subjectIDElement instanceof NameID) {
+                    logoutRequest.setNameID((NameID) subjectIDElement);
+                } else {
+                    throw SAMLExceptionCode.UNMARSHALLING_ERROR.create("Not a valid BaseID or NameID: " + subjectID);
+                }
+            } catch (ClassCastException e) {
+                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(subjectID);
+            } catch (XMLParserException e) {
+                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(subjectID);
+            } catch (UnmarshallingException e) {
+                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(subjectID);
+            }
+        }
+
+        return logoutRequest;
+    }
+
+    private LogoutRequest customizeLogoutRequest(LogoutRequest logoutRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        if (customizer != null) {
+            RequestContext requestContext = new RequestContext();
+            requestContext.config = config;
+            requestContext.openSAML = openSAML;
+            requestContext.httpRequest = httpRequest;
+            requestContext.httpResponse = httpResponse;
+            return customizer.customizeLogoutRequest(logoutRequest, requestContext);
+        }
+
+        return logoutRequest;
     }
 
     private LogoutResponse prepareLogoutResponse(Status status, String inResponseTo) {
@@ -373,13 +549,13 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
     }
 
-    private void terminateSessions(LogoutRequest logoutRequest, LogoutInfo logoutInfo, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private void terminateSessions(LogoutRequest logoutRequest, LogoutInfo logoutInfo, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         SessiondService sessiondService = services.getService(SessiondService.class);
         int contextId = logoutInfo.getContextId();
         int userId = logoutInfo.getUserId();
         if (logoutInfo.isTerminateAll()) {
             if (contextId > 0 && userId > 0) {
-                // FIXME: sessiondService.removeUserSessionsGlobal();
+                sessiondService.removeUserSessionsGlobal(userId, contextId);
                 LOG.debug("Removed sessions globally for user {} in context {}", userId, contextId);
             } else {
                 LOG.warn("LogoutInfo says terminateAll=true but no valid user and context were set");
@@ -428,69 +604,65 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
     }
 
-    @Override
-    public String getMetadataXML() throws OXException {
-        SPSSODescriptor spssoDescriptor = openSAML.buildSAMLObject(SPSSODescriptor.class);
-        spssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
+    private String getRedirectPathPrefix() {
+        DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
+        return prefixService.getPrefix();
+    }
 
-        AssertionConsumerService acs = openSAML.buildSAMLObject(AssertionConsumerService.class);
-        acs.setIndex(1);
-        acs.setIsDefault(Boolean.TRUE);
-        acs.setBinding(getBindingURI(config.getResponseBinding()));
-        acs.setLocation(config.getAssertionConsumerServiceURL());
-        spssoDescriptor.getAssertionConsumerServices().add(acs);
+    private String getRedirectScheme(HttpServletRequest httpRequest) {
+        ConfigurationService configService = services.getService(ConfigurationService.class);
+        boolean secure = Tools.considerSecure(
+            httpRequest,
+            Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue())));
 
-        if (config.supportSingleLogout()) {
-            SingleLogoutService slService = openSAML.buildSAMLObject(SingleLogoutService.class);
-            slService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
-            slService.setLocation(config.getSingleLogoutServiceURL());
-            spssoDescriptor.getSingleLogoutServices().add(slService);
+        return secure ? "https" : "http";
+    }
+
+    private void enhanceAuthInfo(AuthenticationInfo authInfo, Assertion bearerAssertion) {
+        Map<String, String> properties = authInfo.getProperties();
+        String sessionIndex = extractSessionIndex(bearerAssertion);
+        if (sessionIndex != null) {
+            /*
+             * The SAML specification states that the bearer assertion must contain a <code>SessionIndex</code> attribute in its
+             * <code>AuthnStatement</code> element:
+             * If the identity provider supports the Single Logout profile, defined in Section 4.4, any authentication statements
+             * MUST include a SessionIndex attribute to enable per-session logout requests by the service provider.
+             * [profiles 06 - 4.1.4.2p20]
+             *
+             * We need this for subsequent logout requests. However if the IDP does not comply to the specification,
+             * the attribute might be missing.
+             */
+            properties.put(SessionProperties.SESSION_INDEX, sessionIndex);
         }
 
-        try {
-            X509KeyInfoGeneratorFactory keyInfoGeneratorFactory = new X509KeyInfoGeneratorFactory();
-            keyInfoGeneratorFactory.setEmitEntityCertificate(true);
-            KeyInfoGenerator keyInfoGenerator = keyInfoGeneratorFactory.newInstance();
-            CredentialProvider credentialProvider = backend.getCredentialProvider();
-            if (credentialProvider.hasSigningCredential()) {
-                KeyDescriptor signKeyDescriptor = openSAML.buildSAMLObject(KeyDescriptor.class);
-                signKeyDescriptor.setUse(UsageType.SIGNING);
-                KeyInfo keyInfo = keyInfoGenerator.generate(credentialProvider.getSigningCredential());
-                signKeyDescriptor.setKeyInfo(keyInfo);
-                spssoDescriptor.getKeyDescriptors().add(signKeyDescriptor);
-                spssoDescriptor.setAuthnRequestsSigned(Boolean.TRUE);
-            } else {
-                spssoDescriptor.setAuthnRequestsSigned(Boolean.FALSE);
-            }
-
-            if (credentialProvider.hasDecryptionCredential()) {
-                KeyDescriptor encryptionKeyDescriptor = openSAML.buildSAMLObject(KeyDescriptor.class);
-                encryptionKeyDescriptor.setUse(UsageType.ENCRYPTION);
-                encryptionKeyDescriptor.setKeyInfo(keyInfoGenerator.generate(credentialProvider.getDecryptionCredential()));
-                spssoDescriptor.getKeyDescriptors().add(encryptionKeyDescriptor);
-                spssoDescriptor.setWantAssertionsSigned(Boolean.TRUE);
-            } else {
-                spssoDescriptor.setWantAssertionsSigned(Boolean.FALSE);
-            }
-        } catch (SecurityException e) {
-            throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
+        String sessionNotOnOrAfter = extractSessionNotOnOrAfter(bearerAssertion);
+        if (sessionNotOnOrAfter != null) {
+            /*
+             * If an <AuthnStatement> used to establish a security context for the principal contains a SessionNotOnOrAfter attribute,
+             * the security context SHOULD be discarded once this time is reached, unless the service provider reestablishes the principal's
+             * identity by repeating the use of this profile. Note that if multiple <AuthnStatement> elements are present, the
+             * SessionNotOnOrAfter value closest to the present time SHOULD be honored.
+             * [profiles 06 - 4.1.4.3p21]
+             *
+             * The SAMLSessionInspector takes care of that parameter and logs out expired sessions if necessary.
+             */
+            properties.put(SessionProperties.SESSION_NOT_ON_OR_AFTER, sessionNotOnOrAfter);
         }
 
-        spssoDescriptor = customizeDescriptor(spssoDescriptor);
-        try {
-            EntityDescriptor spDescriptor = openSAML.buildSAMLObject(EntityDescriptor.class);
-            spDescriptor.setEntityID(config.getEntityID());
-            spDescriptor.getRoleDescriptors().add(spssoDescriptor);
-            return openSAML.marshall(spDescriptor);
-        } catch (MarshallingException e) {
-            throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
+        /*
+         * The bearer assertions subject must contain a <code>NameID</code>, <code>BaseID</code> or <code>EncryptedID</code>
+         * element. We need to remember the elements XML representation, as it will be later on used to compile logout requests.
+         * However if the IDP does not comply to the specification, the attribute might be missing.
+         */
+        String subjectID = extractSubjectID(bearerAssertion);
+        if (subjectID != null) {
+            properties.put(SessionProperties.SUBJECT_ID, subjectID);
         }
     }
 
-    private void sendRedirect(String authnRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+    private void sendAuthnRequestRedirect(String authnRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         String encoded = deflateAndEncode(authnRequestXML);
         try {
-            // TODO: integrity protect RelayState
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderAuthnURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
             trySignRedirectHeader(redirectLocationBuilder);
             String redirectLocation = redirectLocationBuilder.build().toString();
@@ -579,7 +751,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         if (!Strings.isEmpty(providerName)) {
             authnRequest.setProviderName(providerName);
         }
-        authnRequest.setProtocolBinding(getBindingURI(config.getResponseBinding()));
+        authnRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
         authnRequest.setAssertionConsumerServiceURL(config.getAssertionConsumerServiceURL());
         authnRequest.setDestination(config.getIdentityProviderAuthnURL());
         authnRequest.setIsPassive(Boolean.FALSE);
@@ -596,6 +768,58 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
 
         return spssoDescriptor;
+    }
+
+    private LogoutResponse extractLogoutResponse(HttpServletRequest httpRequest, Binding binding) throws OXException {
+        Document responseDoc;
+        try {
+            String responseXML = customDecodeLogoutResponse(httpRequest, binding);
+            if (responseXML == null) {
+                responseDoc = decodeLogoutResponse(httpRequest, binding);
+            } else {
+                responseDoc = openSAML.getParserPool().parse(new StringReader(responseXML));
+            }
+        } catch (XMLParserException e) {
+            throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
+        }
+
+        try {
+            Element documentElement = responseDoc.getDocumentElement();
+            XMLObject unmarshalled = openSAML.getUnmarshallerFactory().getUnmarshaller(documentElement).unmarshall(documentElement);
+            if (!(unmarshalled instanceof LogoutResponse)) {
+                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create("XML was not a valid LogoutResponse element");
+            }
+
+            final LogoutResponse logoutResponse = (LogoutResponse) unmarshalled;
+            LOG.debug("Received SAMLResponse:\n{}", new Object() {
+                @Override
+                public String toString() {
+                    return XMLHelper.prettyPrintXML(logoutResponse.getDOM());
+                }
+            });
+            return logoutResponse;
+        } catch (UnmarshallingException e) {
+            throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private Document decodeLogoutResponse(HttpServletRequest httpRequest, Binding binding) throws OXException {
+        String b64Request = httpRequest.getParameter("SAMLResponse");
+        if (b64Request == null) {
+            throw SAMLExceptionCode.DECODING_ERROR.create("Request parameter 'SAMLResponse' is missing");
+        }
+
+        byte[] requestBytes = Base64.decodeBase64(b64Request);
+        try {
+            if (binding == Binding.HTTP_REDIRECT) {
+                // bytes are deflated in redirect binding
+                return openSAML.getParserPool().parse(new InflaterInputStream(new ByteArrayInputStream(requestBytes)));
+            } else {
+                return openSAML.getParserPool().parse(new ByteArrayInputStream(requestBytes));
+            }
+        } catch (XMLParserException e) {
+            throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
+        }
     }
 
     private LogoutRequest extractLogoutRequest(HttpServletRequest httpRequest, Binding binding) throws OXException {
@@ -620,7 +844,6 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
             final LogoutRequest logoutRequest = (LogoutRequest) unmarshalled;
             LOG.debug("Received SAMLRequest:\n{}", new Object() {
-
                 @Override
                 public String toString() {
                     return XMLHelper.prettyPrintXML(logoutRequest.getDOM());
@@ -660,6 +883,15 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         return null;
     }
 
+    private String customDecodeLogoutResponse(HttpServletRequest httpRequest, Binding binding) throws OXException {
+        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        if (customizer != null) {
+            return customizer.decodeLogoutResponse(httpRequest, binding);
+        }
+
+        return null;
+    }
+
     private Response extractAuthnResponse(HttpServletRequest httpRequest) throws OXException {
         String responseXML = customDecodeAuthnResponse(httpRequest);
         if (responseXML == null) {
@@ -680,7 +912,6 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
             final Response response = (Response) unmarshalledResponse;
             LOG.debug("Received SAMLResponse:\n{}", new Object() {
-
                 @Override
                 public String toString() {
                     return XMLHelper.prettyPrintXML(response.getDOM());
@@ -698,6 +929,75 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
         if (customizer != null) {
             return customizer.decodeAuthnResponse(httpRequest);
+        }
+
+        return null;
+    }
+
+    private static String extractSessionIndex(Assertion assertion) {
+        List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
+        for (AuthnStatement statement : authnStatements) {
+            String sessionIndex = statement.getSessionIndex();
+            if (sessionIndex != null) {
+                return sessionIndex;
+            }
+        }
+
+        return null;
+    }
+
+    private static String extractSessionNotOnOrAfter(Assertion assertion) {
+        List<AuthnStatement> authnStatements = assertion.getAuthnStatements();
+        for (AuthnStatement statement : authnStatements) {
+            DateTime sessionNotOnOrAfter = statement.getSessionNotOnOrAfter();
+            if (sessionNotOnOrAfter != null) {
+                return Long.toString(sessionNotOnOrAfter.getMillis());
+            }
+        }
+
+        return null;
+    }
+
+    private String extractSubjectID(Assertion assertion) {
+        Subject subject = assertion.getSubject();
+        if (subject == null) {
+            return null;
+        }
+
+        BaseID baseID = subject.getBaseID();
+        if (baseID != null) {
+            try {
+                return openSAML.marshall(baseID);
+            } catch (MarshallingException e) {
+                LOG.warn("Could not marshall BaseID of assertions '{}' subject. Single logout for this session will probably fail.", assertion.getID(), e);
+            }
+        }
+
+        NameID nameID = subject.getNameID();
+        if (nameID != null) {
+            try {
+                return openSAML.marshall(nameID);
+            } catch (MarshallingException e) {
+                LOG.warn("Could not marshall NameID of assertions '{}' subject. Single logout for this session will probably fail.", assertion.getID(), e);
+            }
+        }
+
+        EncryptedID encryptedID = subject.getEncryptedID();
+        if (encryptedID != null) {
+            CredentialProvider credentialProvider = backend.getCredentialProvider();
+            if (credentialProvider.hasDecryptionCredential()) {
+                Decrypter decrypter = CryptoHelper.getDecrypter(credentialProvider);
+                try {
+                    SAMLObject decrypted = decrypter.decrypt(encryptedID);
+                    return openSAML.marshall(decrypted);
+                } catch (DecryptionException e) {
+                    LOG.warn("Could not decrypt EncryptedID of assertions '{}' subject. Single logout for this session will probably fail.", assertion.getID(), e);
+                } catch (MarshallingException e) {
+                    LOG.warn("Could not marshall decrypted EncryptedID of assertions '{}' subject. Single logout for this session will probably fail.", assertion.getID(), e);
+                }
+            } else {
+                LOG.warn("Could not decrypt EncryptedID of assertions '{}' subject as no credential is available. Single logout for this session will probably fail.", assertion.getID());
+            }
         }
 
         return null;

@@ -55,6 +55,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.saml.SessionProperties;
 import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
@@ -81,22 +83,33 @@ public class SAMLSessionInspector implements SessionInspectorService {
 
     @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        Object parameter = session.getParameter(SessionProperties.SESSION_NOT_ON_OR_AFTER);
+        if (parameter != null && parameter instanceof String) {
+            try {
+                long notOnOrAfter = Long.parseLong((String) parameter);
+                if (System.currentTimeMillis() >= notOnOrAfter) {
+                    LoginPerformer.getInstance().doLogout(session.getSessionID());
+                    return respondWithAuthnRequest(request, response);
+                }
+            } catch (NumberFormatException e) {
+                LOG.warn("Session contained parameter '{}' but its value was not a valid timestamp: {}", SessionProperties.SESSION_NOT_ON_OR_AFTER, parameter);
+            }
+        }
+
         return Reply.CONTINUE;
     }
 
     @Override
     public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        try {
-            provider.respondWithAuthnRequest(request, response);
-        } catch (IOException e) {
-            LOG.error("", e);
-        }
-
-        return Reply.STOP;
+        return respondWithAuthnRequest(request, response);
     }
 
     @Override
     public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        return respondWithAuthnRequest(request, response);
+    }
+
+    private Reply respondWithAuthnRequest(HttpServletRequest request, HttpServletResponse response) throws OXException {
         try {
             provider.respondWithAuthnRequest(request, response);
         } catch (IOException e) {

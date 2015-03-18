@@ -110,4 +110,48 @@ public class DefaultExceptionHandler implements ExceptionHandler {
         }
     }
 
+    @Override
+    public void handleLogoutRequestFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
+        String message = exception.getDisplayMessage(Locale.US);
+        if (message == null) {
+            message = exception.getMessage();
+            if (message == null) {
+                message = "An internal error occurred, please try again later.";
+            }
+        }
+
+        String response =
+            "<!DOCTYPE html>\n" +
+            "<html lang=\"en\">\n" +
+            "  <head>\n" +
+            "    <meta charset=\"utf-8\">\n" +
+            "    <title>500 - Internal Server Error</title>\n" +
+            "  </head>\n" +
+            "  <body>\n" +
+            "    <h1>500 - Internal Server Error</h1>" +
+            "    <p>" + message + "</p>" +
+            "  </body>\n" +
+            "</html>";
+        byte[] responseBytes = response.getBytes();
+
+        Tools.disableCaching(httpResponse);
+        httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        httpResponse.setCharacterEncoding(Charsets.UTF_8_NAME);
+        httpResponse.setContentType("text/html");
+        httpResponse.setContentLength(responseBytes.length);
+        try {
+            httpResponse.getWriter().write(response);
+        } catch (IOException e) {
+            try {
+                httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            } catch (IOException e1) {
+                // nothing to do here
+            } catch (IllegalStateException e1) {
+                // nothing to do here
+            }
+        } catch (IllegalStateException e) {
+            // response already commited
+        }
+    }
+
 }

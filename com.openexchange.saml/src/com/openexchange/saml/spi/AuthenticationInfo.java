@@ -101,7 +101,7 @@ public class AuthenticationInfo {
     }
 
     /**
-     * Gets the properties
+     * Gets the properties as mutable map.
      *
      * @return The properties, possibly empty but not <code>null</code>
      */
@@ -110,7 +110,10 @@ public class AuthenticationInfo {
     }
 
     /**
-     * Sets a property. Will be overriden if a property for the same name already exists.
+     * Sets a property. Please note that internally some attributes may be contributed to this
+     * map. They will always be prefixed with <code>com.openexchange.saml</code>. You should
+     * either use your own namespace for those properties or use un-qualified keys. A property
+     * will be overridden if it is set more than once.
      *
      * @param key The key
      * @param value The value

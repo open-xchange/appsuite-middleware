@@ -51,6 +51,8 @@ package com.openexchange.saml.osgi;
 
 import java.security.Provider;
 import java.security.Security;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Stack;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.opensaml.Configuration;
@@ -64,6 +66,9 @@ import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.SSOLogoutHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -75,8 +80,11 @@ import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.http.AssertionConsumerService;
 import com.openexchange.saml.http.SingleLogoutService;
 import com.openexchange.saml.impl.HzStateManagement;
+import com.openexchange.saml.impl.SAMLLogoutHandler;
+import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
 import com.openexchange.saml.impl.SAMLSessionInspector;
 import com.openexchange.saml.impl.SAMLWebSSOProviderImpl;
+import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.inspector.SessionInspectorService;
@@ -126,12 +134,18 @@ public class SAMLFeature extends DependentServiceStarter {
 
             HzStateManagement hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
             WebSSOProvider serviceProvider = new SAMLWebSSOProviderImpl(config, openSAML, hzStateManagement, services);
-            serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
-
             SAMLBackend samlBackend = services.getService(SAMLBackend.class);
+            ExceptionHandler exceptionHandler = samlBackend.getExceptionHandler();
+
+            serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
+            serviceRegistrations.push(context.registerService(SSOLogoutHandler.class, new SAMLLogoutHandler(serviceProvider, exceptionHandler), null));
+            Dictionary<String, Object> lrhProperties = new Hashtable<String, Object>();
+            lrhProperties.put(AJAXServlet.PARAMETER_ACTION, "samlLogout");
+            serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(), lrhProperties));
+
             HttpService httpService = services.getService(HttpService.class);
             String acsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/acs";
-            httpService.registerServlet(acsServletPath, new AssertionConsumerService(serviceProvider, samlBackend.getExceptionHandler()), null, null);
+            httpService.registerServlet(acsServletPath, new AssertionConsumerService(serviceProvider, exceptionHandler), null, null);
             servlets.push(acsServletPath);
 
             if (config.supportSingleLogout()) {

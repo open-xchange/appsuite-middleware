@@ -89,21 +89,21 @@ public interface SAMLConfig {
      * @return The URL or <code>null</code> if single logout is not enabled.
      */
     String getSingleLogoutServiceURL();
-
-    /**
-     * Gets the binding used to send out authentication requests.
-     *
-     * @return The binding. Never <code>null</code>.
-     */
-    Binding getRequestBinding();
-
-    /**
-     * Gets the binding via which authentication responses are to be received.
-     *
-     * @return The binding. Never <code>null</code>.
-     */
-    Binding getResponseBinding();
-
+//
+//    /**
+//     * Gets the binding used to send out authentication requests.
+//     *
+//     * @return The binding. Never <code>null</code>.
+//     */
+//    Binding getRequestBinding();
+//
+//    /**
+//     * Gets the binding via which authentication responses are to be received.
+//     *
+//     * @return The binding. Never <code>null</code>.
+//     */
+//    Binding getResponseBinding();
+//
     /**
      * Gets the binding via which LogoutResponse messages shall be delivered.
      *
@@ -138,5 +138,7 @@ public interface SAMLConfig {
      * @return The URL or <code>null</code>, if the profile is not supported.
      */
     String getIdentityProviderLogoutURL();
+//
+//    Binding getLogoutRequestBinding();
 
 }

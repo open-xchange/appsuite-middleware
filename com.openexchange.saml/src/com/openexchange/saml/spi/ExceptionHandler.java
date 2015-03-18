@@ -74,4 +74,6 @@ public interface ExceptionHandler {
      */
     void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception);
 
+    void handleLogoutRequestFailed(HttpServletRequest req, HttpServletResponse resp, OXException e);
+
 }
