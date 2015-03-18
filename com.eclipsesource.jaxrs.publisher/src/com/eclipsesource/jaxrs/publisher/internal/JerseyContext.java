@@ -23,6 +23,7 @@ import org.glassfish.jersey.server.ServerProperties;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
 import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 
 
@@ -34,27 +35,24 @@ public class JerseyContext {
   private final String rootPath;
   private final ServletContainerBridge servletContainerBridge;
   private final ServletConfiguration servletConfigurationService;
+  private final ApplicationConfiguration applicationConfiguration;
   private final ResourcePublisher resourcePublisher;
   private boolean isApplicationRegistered;
-  private final Dictionary jerseyServerProperties;
   
-  public JerseyContext( HttpService httpService, String rootPath, Dictionary jerseyServerProperties, long publishDelay ) {
-    this( httpService, rootPath, jerseyServerProperties, publishDelay, null ); 
+  public JerseyContext( HttpService httpService, String rootPath, long publishDelay ) {
+    this( httpService, rootPath, publishDelay, null, null ); 
   }
 
   public JerseyContext( HttpService httpService,
                         String rootPath,
-                        Dictionary jerseyServerProperties,
                         long publishDelay,
+                        ApplicationConfiguration applicationConfiguration,
                         ServletConfiguration servletConfigurationService )
   {
     this.httpService = httpService;
-    this.jerseyServerProperties = jerseyServerProperties;
+    this.applicationConfiguration = applicationConfiguration;
     this.rootPath = rootPath == null ? "/services" : rootPath;
     this.application = new RootApplication();
-    applyJerseyConfiguration();
-    disableAutoDiscovery();
-    disableWadl();
     this.servletContainerBridge = new ServletContainerBridge( application );
     this.servletConfigurationService = servletConfigurationService;
     this.resourcePublisher = new ResourcePublisher( servletContainerBridge, publishDelay );
@@ -67,43 +65,6 @@ public class JerseyContext {
     this.application.addProperty(ServerProperties.FEATURE_AUTO_DISCOVERY_DISABLE, true );
   }
 
-  /**
-   * WADL generation is enabled in Jersey by default. This means that OPTIONS methods are added by
-   * default to each resource and an auto-generated /application.wadl resource is deployed too. In
-   * case you want to disable that you can set this property to true.
-   * 
-   * @deprecated The 'disableWadl' property can be directly injected to Jersey's configuration 
-   *    via the 'jerseyProperties' dictionary, hence this could be marked as deprecated and can be removed.
-   */
-  private void disableWadl() {
-    final boolean disableWadl;
-    {
-        Object o = jerseyServerProperties.get(ServerProperties.WADL_FEATURE_DISABLE);
-        if (o == null) {
-            disableWadl = false;
-        } else {
-            disableWadl = Boolean.parseBoolean((String) o);
-        }
-    }
-    this.application.addProperty( ServerProperties.WADL_FEATURE_DISABLE, disableWadl );
-  }
-  
-  /**
-   * Apply the jersey configuration. The Server configuration properties that are supported can be 
-   * found in {@link org.glassfish.jersey.server.ServerProperties}
-   */
-  private void applyJerseyConfiguration() {
-      Enumeration enumeration = jerseyServerProperties.keys();
-      while(enumeration.hasMoreElements()) {
-        String key = (String) enumeration.nextElement();
-        
-        if (key.startsWith("jersey.config") || key.startsWith("javax.ws.rs")) {
-          Object value = jerseyServerProperties.get(key);
-          this.application.addProperty(key, value);
-        }
-      }
-  }
-
   public void addResource( Object resource ) {
     getRootApplication().addResource( resource );
     registerServletWhenNotAlreadyRegistered();
@@ -113,6 +74,7 @@ public class JerseyContext {
   void registerServletWhenNotAlreadyRegistered() {
     if( !isApplicationRegistered ) {
       isApplicationRegistered = true;
+      applicationConfiguration.configure(application);
       registerApplication();
     }
   }

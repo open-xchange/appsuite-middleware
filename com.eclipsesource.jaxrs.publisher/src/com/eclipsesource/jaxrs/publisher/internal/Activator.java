@@ -39,6 +39,7 @@ public class Activator implements BundleActivator {
   private ResourceTracker allTracker;
   private ServletConfigurationTracker servletConfigurationTracker;
   private ServiceRegistration configRegistration;
+  private ApplicationConfigurationTracker applicationConfigurationTracker;
 
   @Override
   public void start( BundleContext context ) throws Exception {
@@ -51,6 +52,7 @@ public class Activator implements BundleActivator {
     openHttpServiceTracker( context );
     openServletConfigurationTracker( context );
     openAllServiceTracker( context );
+    openApplicationConfigurationTracker( context );
   }
 
   private void registerConfiguration( BundleContext context ) {
@@ -83,6 +85,11 @@ public class Activator implements BundleActivator {
     allTracker = new ResourceTracker( context, allResourceFilter.getFilter(), jaxRsConnector );
     allTracker.open();
   }
+  
+  private void openApplicationConfigurationTracker( BundleContext context ) {
+    applicationConfigurationTracker = new ApplicationConfigurationTracker( context, jaxRsConnector );
+    applicationConfigurationTracker.open();
+  }
 
   private ResourceFilter getResourceFilter( BundleContext context ) {
     ServiceReference filterReference = context.getServiceReference( ResourceFilter.class.getName() );
@@ -97,6 +104,7 @@ public class Activator implements BundleActivator {
     httpTracker.close();
     servletConfigurationTracker.close();
     allTracker.close();
+    applicationConfigurationTracker.close();
     connectorRegistration.unregister();
     configRegistration.unregister();
   }

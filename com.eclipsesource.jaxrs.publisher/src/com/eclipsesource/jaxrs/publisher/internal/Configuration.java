@@ -22,7 +22,6 @@ public class Configuration implements ManagedService {
 
   static final String CONFIG_SERVICE_PID = "com.eclipsesource.jaxrs.connector";
   static final String PROPERTY_ROOT = "root";
-  static final String PROPERTY_WADL_DISABLE = "disableWadl";
   static final String PROPERTY_PUBLISH_DELAY = "publishDelay";
   static final long DEFAULT_PUBLISH_DELAY = 150;
   
@@ -39,7 +38,7 @@ public class Configuration implements ManagedService {
       ensureRootIsPresent( root );
       String rootPath = ( String )root;
       ensureRootIsValid( rootPath );
-      connector.updateConfiguration( rootPath, getPublishDelay( properties ), properties );
+      connector.updateConfiguration( rootPath, getPublishDelay( properties ) );
     }
   }
   

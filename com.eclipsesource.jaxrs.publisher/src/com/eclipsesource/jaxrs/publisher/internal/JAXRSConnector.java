@@ -19,6 +19,7 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
+import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
 import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 import com.eclipsesource.jaxrs.publisher.internal.ServiceContainer.ServiceHolder;
 
@@ -36,9 +37,9 @@ public class JAXRSConnector {
   private final BundleContext bundleContext;
   private final List<ServiceHolder> resourceCache;
   private ServletConfiguration servletConfiguration;
+  private ApplicationConfiguration applicationConfiguration;
   private String rootPath;
   private long publishDelay;
-  private Dictionary jerseyServerProperties;
 
   JAXRSConnector( BundleContext bundleContext ) {
     this.bundleContext = bundleContext;
@@ -49,15 +50,14 @@ public class JAXRSConnector {
     this.publishDelay = Configuration.DEFAULT_PUBLISH_DELAY;
   }
   
-  void updateConfiguration( String rootPath, long publishDelay, Dictionary jerseyServerProperties ) {
+  void updateConfiguration( String rootPath, long publishDelay ) {
     synchronized( lock ) {
-      doUpdateConfiguration( rootPath, publishDelay, jerseyServerProperties );
+      doUpdateConfiguration( rootPath, publishDelay );
     }
   }
 
-  private void doUpdateConfiguration( String rootPath, long publishDelay, Dictionary jerseyServerProperties ) {
+  private void doUpdateConfiguration( String rootPath, long publishDelay ) {
     this.rootPath = rootPath;
-    this.jerseyServerProperties = jerseyServerProperties;
     this.publishDelay = publishDelay;
     doUpdateHttpServices();
   }
@@ -97,7 +97,7 @@ public class JAXRSConnector {
     ServiceHolder serviceHolder = httpServices.add( reference );
     HttpService service = ( HttpService )serviceHolder.getService();
     contextMap.put( service, 
-                    createJerseyContext( service, rootPath, jerseyServerProperties, publishDelay, servletConfiguration ) );
+                    createJerseyContext( service, rootPath, publishDelay, applicationConfiguration, servletConfiguration ) );
     clearCache();
     return service;
   }
@@ -209,10 +209,26 @@ public class JAXRSConnector {
   // For testing purpose
   JerseyContext createJerseyContext( HttpService service,
                                      String rootPath,
-                                     Dictionary jerseyServerProperties,
                                      long publishDelay,
+                                     ApplicationConfiguration applicationConfiguration, 
                                      ServletConfiguration servletConfiguration )
   {
-    return new JerseyContext( service, rootPath, jerseyServerProperties, publishDelay, servletConfiguration );
+    return new JerseyContext( service, rootPath, publishDelay, applicationConfiguration, servletConfiguration );
   }
+
+  ApplicationConfiguration setApplicationConfiguration(ServiceReference reference) {
+    if (applicationConfiguration == null ) {
+        applicationConfiguration = (ApplicationConfiguration) bundleContext.getService(reference);
+        return applicationConfiguration;
+    }
+    return null;
+  }
+  
+  void unsetApplicationConfiguration(ServiceReference reference, ApplicationConfiguration service) {
+      if( applicationConfiguration == service ) {
+          applicationConfiguration = null;
+        bundleContext.ungetService( reference );
+        doUpdateHttpServices();
+      }
+    } 
 }
