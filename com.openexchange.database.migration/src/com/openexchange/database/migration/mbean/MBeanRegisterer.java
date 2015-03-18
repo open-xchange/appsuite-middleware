@@ -171,10 +171,9 @@ public class MBeanRegisterer implements ServiceTrackerCustomizer<ManagementServi
     }
 
     private static ObjectName getObjectname(DBMigration migration) throws MalformedObjectNameException {
-        Hashtable<String, String> table = new Hashtable<String, String>(3);
+        Hashtable<String, String> table = new Hashtable<String, String>(2);
         table.put("name", migration.getSchemaName());
         table.put("source", migration.getFileLocation());
-        table.put("type", DBMigrationMBean.class.getName());
         return new ObjectName(DBMigrationMBean.DOMAIN, table);
     }
 

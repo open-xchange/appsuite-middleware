@@ -211,7 +211,10 @@ public class AsyncDeliverTasks
         }
     }
 
-    public final class Measurement {
+    /**
+     * Represents a measurement for a certain point in time.
+     */
+    public static final class Measurement {
 
         private final long timestamp;
         private final long measuredPostedEvents;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.container;
+package com.openexchange.ajax.fileholder;
 
 import java.io.IOException;
 import com.openexchange.ajax.fileholder.Readable;

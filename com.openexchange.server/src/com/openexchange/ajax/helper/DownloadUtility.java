@@ -62,10 +62,10 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.SessionServlet;
-import com.openexchange.ajax.container.ByteArrayRandomAccess;
-import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
-import com.openexchange.ajax.container.InputStreamReadable;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.ByteArrayRandomAccess;
+import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
+import com.openexchange.ajax.fileholder.InputStreamReadable;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
@@ -132,6 +132,22 @@ public final class DownloadUtility {
         return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent, session);
     }
 
+    /**
+     * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
+     *
+     * @param inputStream The input stream
+     * @param size The size of the passed stream
+     * @param fileName The file name
+     * @param sContentType The <i>Content-Type</i> string
+     * @param overridingDisposition Optionally overrides the <i>Content-Disposition</i> header
+     * @param userAgent The <i>User-Agent</i>
+     * @param session The associated session
+     * @return The checked download providing input stream, content type, and content disposition to use
+     * @throws OXException If checking download fails
+     */
+    public static CheckedDownload checkInlineDownload(Readable inputStream, long size, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
+        return checkInlineDownload(inputStream, size, fileName, sContentType, overridingDisposition, userAgent, session.getUser().getLocale());
+    }
 
     private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
 
@@ -148,7 +164,7 @@ public final class DownloadUtility {
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(Readable inputStream, long sizer, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
+    public static CheckedDownload checkInlineDownload(Readable inputStream, long size, String fileName, String sContentType, String overridingDisposition, String userAgent, Locale locale) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             /*
@@ -166,7 +182,7 @@ public final class DownloadUtility {
                 contentType.setSubType(ct.substring(pos + 1));
             }
             String sContentDisposition = overridingDisposition;
-            long sz = sizer;
+            long sz = size;
             Readable in = inputStream;
             // Some variables
             String fn = fileName;
@@ -196,7 +212,6 @@ public final class DownloadUtility {
                     if (sink.getLength() > HtmlServices.htmlThreshold()) {
                         // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
                         OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
-                        Locale locale = session.getUser().getLocale();
                         htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
                     } else {
                         htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
@@ -444,7 +459,6 @@ public final class DownloadUtility {
                         if (sink.getLength() > HtmlServices.htmlThreshold()) {
                             // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
                             OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
-                            Locale locale = session.getUser().getLocale();
                             htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
                         } else {
                             htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));

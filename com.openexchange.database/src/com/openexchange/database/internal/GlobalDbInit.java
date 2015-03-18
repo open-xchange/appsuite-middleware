@@ -125,10 +125,22 @@ public class GlobalDbInit {
             return;
         }
         for (GlobalDbConfig dbConfig : dbConfigs) {
-            AssignmentImpl assignment = dbConfig.getAssignment();
+            /*
+             * use a special assignment override that pretends a connection to the config database to prevent accessing a not yet existing
+             * replication monitor
+             */
+            AssignmentImpl firstAssignment = new AssignmentImpl(dbConfig.getAssignment()) {
+
+                private static final long serialVersionUID = -6801059792528227771L;
+
+                @Override
+                public boolean isToConfigDB() {
+                    return true;
+                }
+            };
             Connection connection = null;
             try {
-                connection = monitor.checkFallback(pools, assignment, true, true, true);
+                connection = monitor.checkFallback(pools, firstAssignment, true, true, true);
                 connection.setAutoCommit(false);
                 prepare(connection, dbConfig.getSchema());
                 connection.commit();
@@ -143,18 +155,19 @@ public class GlobalDbInit {
     }
 
     /**
-     * Initializes a global database by ensuring that the database schemas and the table layouts exist, creating the missing parts as
-     * needed.
+     * Initializes a global database by ensuring that the database schema exists, creating it as needed.
      *
      * @param connection The connection to use
      * @param schema The name of the database schema to prepare
+     * @return <code>true</code> if the schema was newly created, <code>false</code> if it already existed
      */
-    private static void prepare(Connection connection, String schema) throws SQLException {
+    private static boolean prepare(Connection connection, String schema) throws SQLException {
         if (false == schemaExists(connection, schema) && 0 < createSchema(connection, schema)) {
             LOG.info("Created schema for global database: {}", schema);
-        } else {
-            LOG.debug("Global databse schema {} already exists.", schema);
+            return true;
         }
+        LOG.debug("Global databse schema {} already exists.", schema);
+        return false;
     }
 
     /**
@@ -303,7 +316,8 @@ public class GlobalDbInit {
                 String name = resultSet.getString(1);
                 int writePoolId = resultSet.getInt(2);
                 int readPoolId = resultSet.getInt(3);
-                dbConfigs.put(Integer.valueOf(writePoolId), new GlobalDbConfig(getSchemaName(name), readPoolId, writePoolId));
+                GlobalDbConfig config = new GlobalDbConfig(getSchemaName(name), 0 == readPoolId ? writePoolId : readPoolId, writePoolId);
+                dbConfigs.put(Integer.valueOf(writePoolId), config);
             }
         } finally {
             DBUtils.closeSQLStuff(resultSet, statement);
