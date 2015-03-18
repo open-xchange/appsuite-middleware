@@ -52,16 +52,47 @@ package com.openexchange.ajax.login;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link SSOLogoutHandler}
+ * Implements the logout handling for a specific SSO implementation.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
 public interface SSOLogoutHandler {
 
-    void performLogout(HttpServletRequest req, HttpServletResponse resp) throws IOException;
+    public static final class Result {
+
+        /**
+         * Whether the caller shall proceed with the default logout processing, i.e. verify the session,
+         * invalidate it and remove cookies. If set to <code>false</code> no further processing is performed.
+         * Default: <code>false</code>.
+         */
+        public boolean continueWithLogout = false;
+
+        /**
+         *
+         */
+        public boolean respondWithError = false;
+
+        public OXException error;
+
+    }
+
+    /**
+     * Allows to implement a special handling for logout requests in SSO environments.
+     *
+     * @param req The servlet request
+     * @param resp The servlet response
+     * @param session The session or <code>null</code> if it could not be determined
+     * @param loginConfiguration The login configuration
+     * @return The result of the custom logout handling, don't return <code>null</code> here!
+     * @throws IOException If writing to the servlet response stream fails
+     * @throws OXException
+     */
+    Result handle(HttpServletRequest req, HttpServletResponse resp, Session session, LoginConfiguration loginConfiguration) throws IOException;
 
 }

@@ -83,8 +83,10 @@ import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.login.OAuthLogin;
 import com.openexchange.ajax.login.RampUp;
-import com.openexchange.ajax.login.RedeemToken;
 import com.openexchange.ajax.login.RedeemReservationLogin;
+import com.openexchange.ajax.login.RedeemToken;
+import com.openexchange.ajax.login.SSOLogoutHandler;
+import com.openexchange.ajax.login.SSOLogoutHandler.Result;
 import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.writer.LoginWriter;
@@ -212,6 +214,7 @@ public class LoginServlet extends AJAXServlet {
 
     /**
      * Gets the name of the public session cookie for specified HTTP request.
+     *
      * <pre>
      *  "open-xchange-public-session-" + &lt;hash(req.userAgent)&gt;
      * </pre>
@@ -224,6 +227,8 @@ public class LoginServlet extends AJAXServlet {
     }
 
     // --------------------------------------------------------------------------------------- //
+
+    private final AtomicReference<SSOLogoutHandler> ssoLogoutHandlerRef = new AtomicReference<SSOLogoutHandler>();
 
     private final Map<String, LoginRequestHandler> handlerMap;
 
@@ -262,18 +267,51 @@ public class LoginServlet extends AJAXServlet {
 
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-                // The magic spell to disable caching
-                Tools.disableCaching(resp);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final String sessionId = req.getParameter(PARAMETER_SESSION);
-                if (sessionId == null) {
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                    return;
+                Session session = null;
+                String sessionId = req.getParameter(AJAXServlet.PARAMETER_SESSION);
+                if (sessionId != null) {
+                    try {
+                        session = LoginPerformer.getInstance().lookupSession(sessionId);
+                    } catch (OXException e) {
+                        LOG.error("Session lookup failed", e);
+                    }
                 }
+
+                /*
+                 * Allow custom logout handling in SSO environments
+                 */
+                Result result = null;
+                LoginConfiguration conf = LoginServlet.getLoginConfiguration();
+                SSOLogoutHandler ssoLogoutHandler = ssoLogoutHandlerRef.get();
+                if (ssoLogoutHandler != null) {
+                    result = ssoLogoutHandler.handle(req, resp, session, conf);
+                }
+
+                if (result == null) {
+                    logout(req, resp, sessionId, session, conf);
+                } else {
+                    if (result.continueWithLogout) {
+                        logout(req, resp, sessionId, session, conf);
+                        return;
+                    }
+
+                    if (result.respondWithError && result.error != null) {
+                        LoginServlet.logAndSendException(resp, result.error);
+                    }
+                }
+            }
+
+            private void logout(final HttpServletRequest req, final HttpServletResponse resp, final String sessionId, final Session session, LoginConfiguration conf) throws IOException {
                 try {
-                    final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
+                    Tools.disableCaching(resp);
+                    resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+
+                    if (sessionId == null) {
+                        resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                        return;
+                    }
+
                     if (session != null) {
-                        final LoginConfiguration conf = confReference.get();
                         SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
                         final String secret = SessionUtility.extractSecret(
                             conf.getHashSource(),
@@ -292,7 +330,7 @@ public class LoginServlet extends AJAXServlet {
                         SessionUtility.removeOXCookies(session.getHash(), req, resp);
                         SessionUtility.removeJSESSIONID(req, resp);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("Logout failed", e);
                 }
             }
@@ -306,7 +344,7 @@ public class LoginServlet extends AJAXServlet {
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 String randomToken = null;
-                if(conf.isRandomTokenEnabled()) {
+                if (conf.isRandomTokenEnabled()) {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
@@ -333,7 +371,12 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                                    LOG.info(
+                                        "Changing IP of session {} with authID: {} from {} to {}.",
+                                        session.getSessionID(),
+                                        session.getAuthId(),
+                                        oldIP,
+                                        newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -363,7 +406,10 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info(
+                            "Status code 403 (FORBIDDEN): Either context {} or user {} not enabled",
+                            context.getContextId(),
+                            user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -372,7 +418,10 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info(
+                        "Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}",
+                        session.getContextId(),
+                        session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -430,14 +479,22 @@ public class LoginServlet extends AJAXServlet {
                             session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
                             if (null != secret) {
-                                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
+                                LOG.info(
+                                    "Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".",
+                                    secret,
+                                    session.getSecret());
                             }
                             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {
                             // In case changing IP is intentionally requested by client, log it only if DEBUG aka FINE log level is enabled
-                            LOG.info("Changing IP of session {} with authID: {} from {} to {}", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                            LOG.info(
+                                "Changing IP of session {} with authID: {} from {} to {}",
+                                session.getSessionID(),
+                                session.getAuthId(),
+                                oldIP,
+                                newIP);
                             session.setLocalIp(newIP);
                         }
                         response.setData("1");
@@ -469,7 +526,7 @@ public class LoginServlet extends AJAXServlet {
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 String randomToken = null;
-                if(conf.isRandomTokenEnabled()) {
+                if (conf.isRandomTokenEnabled()) {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
@@ -496,7 +553,12 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                                    LOG.info(
+                                        "Changing IP of session {} with authID: {} from {} to {}.",
+                                        session.getSessionID(),
+                                        session.getAuthId(),
+                                        oldIP,
+                                        newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -526,7 +588,10 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info(
+                            "Status code 403 (FORBIDDEN): Either context {} or user {} not enabled",
+                            context.getContextId(),
+                            user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -535,7 +600,10 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info(
+                        "Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}",
+                        session.getContextId(),
+                        session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -650,6 +718,16 @@ public class LoginServlet extends AJAXServlet {
 
     public LoginRequestHandler removeRequestHandler(String action) {
         return handlerMap.remove(action);
+    }
+
+    /**
+     * Sets the SSO logout handler. If it was already set before, the instance will be overridden.
+     * You can pass <code>null</code> here to unset the handler.
+     *
+     * @param ssoLogoutHandler The handler or <code>null</code>
+     */
+    public void setSSOLogoutHandler(SSOLogoutHandler ssoLogoutHandler) {
+        this.ssoLogoutHandlerRef.set(ssoLogoutHandler);
     }
 
     @Override

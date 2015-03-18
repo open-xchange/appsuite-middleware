@@ -66,7 +66,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.ajax.login.SSOLogout;
 import com.openexchange.ajax.login.SSOLogoutHandler;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
@@ -95,6 +94,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
     private DispatcherPrefixService prefixService;
 
     private LoginServlet login;
+    private SSOLogoutHandler ssoLogoutHandler;
 
     public LoginServletRegisterer(final BundleContext context, final ServiceSet<LoginRampUpService> rampUp) {
         super();
@@ -137,15 +137,17 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             }
         }
         if (obj instanceof SSOLogoutHandler) {
-            SSOLogout handler = new SSOLogout((SSOLogoutHandler) obj);
-            handlers.put(LoginServlet.ACTION_SSO_LOGOUT, handler);
+            ssoLogoutHandler = (SSOLogoutHandler) obj;
             if (null != login) {
-                login.addRequestHandler(LoginServlet.ACTION_SSO_LOGOUT, handler);
+                login.setSSOLogoutHandler(ssoLogoutHandler);
             }
         }
         if (needsRegistration) {
             for (Entry<String, LoginRequestHandler> entry : handlers.entrySet()) {
                 login.addRequestHandler(entry.getKey(), entry.getValue());
+            }
+            if (ssoLogoutHandler != null) {
+                login.setSSOLogoutHandler(ssoLogoutHandler);
             }
             final Dictionary<String, String> params = new Hashtable<String, String>(32);
             addProperty(params, Property.UI_WEB_PATH);
@@ -225,9 +227,9 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
                 httpService = null;
             }
             if (service instanceof LoginRequestHandler) {
-                Object tmp = reference.getProperty(PARAMETER_ACTION);
-                if (null != tmp && tmp instanceof String) {
-                    removeAction = (String) tmp;
+                ssoLogoutHandler = null;
+                if (null != login) {
+                    login.setSSOLogoutHandler(null);
                 }
             }
             if (service instanceof SSOLogoutHandler) {

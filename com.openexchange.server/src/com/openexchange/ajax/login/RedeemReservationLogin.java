@@ -60,6 +60,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.Cookie;
+import com.openexchange.authentication.Header;
+import com.openexchange.authentication.ResponseEnhancement;
+import com.openexchange.authentication.ResultCode;
+import com.openexchange.authentication.SessionEnhancement;
+import com.openexchange.authentication.service.Authentication;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -67,7 +74,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.Reservation;
@@ -152,15 +161,21 @@ public class RedeemReservationLogin implements LoginRequestHandler {
 
     private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, Map<String, String> optState, LoginConfiguration loginConfiguration) throws OXException {
         // The properties derived from optional state
-        Map<String, Object> props = optState == null ? new HashMap<String, Object>(4) : new HashMap<String, Object>(optState);
+        final Map<String, Object> props = optState == null ? new HashMap<String, Object>(4) : new HashMap<String, Object>(optState);
 
         // The login request
         String login = user.getLoginInfo() + '@' + context.getLoginInfo()[0];
         String defaultClient = loginConfiguration.getDefaultClient();
-        LoginRequestImpl loginRequest = LoginTools.parseLogin(httpRequest, login, null, false, defaultClient, conf.isCookieForceHTTPS(), false);
+        final LoginRequestImpl loginRequest = LoginTools.parseLogin(httpRequest, login, null, false, defaultClient, conf.isCookieForceHTTPS(), false);
 
         // Do the login
-        return LoginPerformer.getInstance().doLogin(loginRequest, props);
+        return LoginPerformer.getInstance().doLogin(loginRequest, props, new LoginMethodClosure() {
+            @Override
+            public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
+                Authenticated prototype = Authentication.login(loginRequest.getLogin(), loginRequest.getPassword(), props);
+                return new AuthenticatedImpl(prototype, props);
+            }
+        });
     }
 
     private static String generateRedirectURL(Session session, String language, String uiWebPath, String shouldStore) {
@@ -178,6 +193,87 @@ public class RedeemReservationLogin implements LoginRequestHandler {
             retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);
         }
         return retval;
+    }
+
+    private static final class AuthenticatedImpl implements Authenticated, ResponseEnhancement, SessionEnhancement {
+
+        private final Authenticated prototype;
+
+        private final Map<String, Object> properties;
+
+        private final Header[] headers;
+
+        private final Cookie[] cookies;
+
+        private final ResultCode resultCode;
+
+        private final String redirect;
+
+
+        private AuthenticatedImpl(Authenticated prototype, Map<String, Object> properties) {
+            super();
+            this.prototype = prototype;
+            this.properties = properties;
+            if (prototype instanceof ResponseEnhancement) {
+                ResponseEnhancement re = (ResponseEnhancement) prototype;
+                headers = re.getHeaders();
+                cookies = re.getCookies();
+                resultCode = re.getCode();
+                redirect = re.getRedirect();
+            } else {
+                headers = new Header[0];
+                cookies = new Cookie[0];
+                resultCode = ResultCode.SUCCEEDED;
+                redirect = null;
+            }
+        }
+
+        @Override
+        public void enhanceSession(Session session) {
+            if (prototype instanceof SessionEnhancement) {
+                ((SessionEnhancement) prototype).enhanceSession(session);
+            }
+
+            for (String key : properties.keySet()) {
+                Object value = properties.get(key);
+                if (value != null && value instanceof String) {
+                    if (!session.containsParameter(key)) {
+                        session.setParameter(key, value);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public ResultCode getCode() {
+            return resultCode;
+        }
+
+        @Override
+        public Header[] getHeaders() {
+            return headers;
+        }
+
+        @Override
+        public Cookie[] getCookies() {
+            return cookies;
+        }
+
+        @Override
+        public String getRedirect() {
+            return redirect;
+        }
+
+        @Override
+        public String getContextInfo() {
+            return prototype.getContextInfo();
+        }
+
+        @Override
+        public String getUserInfo() {
+            return prototype.getUserInfo();
+        }
+
     }
 
 }
