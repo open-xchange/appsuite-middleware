@@ -316,7 +316,8 @@ public class GlobalDbInit {
                 String name = resultSet.getString(1);
                 int writePoolId = resultSet.getInt(2);
                 int readPoolId = resultSet.getInt(3);
-                dbConfigs.put(Integer.valueOf(writePoolId), new GlobalDbConfig(getSchemaName(name), readPoolId, writePoolId));
+                GlobalDbConfig config = new GlobalDbConfig(getSchemaName(name), 0 == readPoolId ? writePoolId : readPoolId, writePoolId);
+                dbConfigs.put(Integer.valueOf(writePoolId), config);
             }
         } finally {
             DBUtils.closeSQLStuff(resultSet, statement);
