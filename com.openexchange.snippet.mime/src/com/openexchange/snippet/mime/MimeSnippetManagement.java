@@ -929,9 +929,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
         Set<String> set = new HashSet<String>(2);
         do {
-            String imageId = ImageUtility.parseImageLocationFrom(matcher.group(1)).getImageId();
-            if (null != imageId) {
-                set.add(imageId);
+            String imageUri = matcher.group(1);
+            if (!imageUri.startsWith("cid:")) {
+                String imageId = ImageUtility.parseImageLocationFrom(imageUri).getImageId();
+                if (null != imageId) {
+                    set.add(imageId);
+                }
             }
         } while (matcher.find());
         return set;
