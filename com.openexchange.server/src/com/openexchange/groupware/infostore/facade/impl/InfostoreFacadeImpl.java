@@ -933,9 +933,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             DocumentMetadata oldDocument = parameters.getOldDocument();
             Context context = parameters.getContext();
             ServerSession session = parameters.getSession();
+            int checkedVersion = -1;
 
             if (updatedCols.contains(Metadata.VERSION_LITERAL)) {
-                final String fname = load(document.getId(), document.getVersion(), context).getFileName();
+                String fname = load(document.getId(), document.getVersion(), context).getFileName();
+                checkedVersion = document.getVersion();
                 if (!updatedCols.contains(Metadata.FILENAME_LITERAL)) {
                     updatedCols.add(Metadata.FILENAME_LITERAL);
                     document.setFileName(fname);
@@ -998,6 +1000,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         document.setVersion(oldDocument.getVersion());
                     }
 
+                    // Ensure version existence
+                    if (checkedVersion > 0 && checkedVersion != document.getVersion()) {
+                        load(document.getId(), document.getVersion(), context);
+                    }
+
+                    // Perform the version-related updates
                     perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedCols, parameters.getSequenceNumber(), session), true);
                 }
             }
@@ -1005,9 +1013,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             if (QUERIES.updateDocument(modifiedCols)) {
                 perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedCols, Long.MAX_VALUE, session), true);
             }
-            /*
-             * update object permissions as needed
-             */
+
+            // Update object permissions as needed
             if (updatedCols.contains(Metadata.OBJECT_PERMISSIONS_LITERAL)) {
                 perform(new UpdateObjectPermissionAction(this, context, document, oldDocument), true);
             }
