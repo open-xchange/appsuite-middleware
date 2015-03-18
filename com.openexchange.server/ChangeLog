@@ -1,3 +1,8 @@
+* 2015-03-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37109: Aligned logging behavior and added proper standard folder detection for such subscribed IMAP accounts that signal the
+                      personal namespace to be root "", but deny folder creation on root level later on
+
 * 2015-03-18 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 37249: Ignore already processed images when updating a snippet.
