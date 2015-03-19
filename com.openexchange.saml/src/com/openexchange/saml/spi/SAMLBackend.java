@@ -49,6 +49,9 @@
 
 package com.openexchange.saml.spi;
 
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
@@ -140,5 +143,16 @@ public interface SAMLBackend {
      * @throws OXException If the sessions to terminate cannot be determined
      */
     LogoutInfo resolveLogoutRequest(LogoutRequest request) throws OXException;
+
+    /**
+     * If the single logout profile is enabled, this method is called after the IDP sent his LogoutResponse
+     * and the logout was performed on our side. The SAML backend is then responsible to finish the request,
+     * most likely by returning a special HTML page or redirecting the user agent to a certain website.
+     *
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @throws IOException If writing to to servlet output stream fails
+     */
+    void finishLogout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException;
 
 }

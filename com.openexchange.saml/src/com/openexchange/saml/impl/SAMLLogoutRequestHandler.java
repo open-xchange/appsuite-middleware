@@ -61,8 +61,8 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -75,11 +75,18 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(SAMLLogoutHandler.class);
 
+    private final SAMLBackend backend;
+
+    public SAMLLogoutRequestHandler(SAMLBackend backend) {
+        super();
+        this.backend = backend;
+    }
+
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void handleRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         try {
             Session session = null;
-            String sessionId = req.getParameter(AJAXServlet.PARAMETER_SESSION);
+            String sessionId = httpRequest.getParameter(AJAXServlet.PARAMETER_SESSION);
             if (sessionId == null) {
                 LOG.info("Missing session id in SAML logout request");
             } else {
@@ -88,18 +95,18 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
 
             if (session != null) {
                 LoginConfiguration conf = LoginServlet.getLoginConfiguration();
-                SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
+                SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, httpRequest.getRemoteAddr(), conf.getIpCheckWhitelist());
                 final String secret = SessionUtility.extractSecret(
                     conf.getHashSource(),
-                    req,
+                    httpRequest,
                     session.getHash(),
                     session.getClient());
 
-                if (secret != null && !session.getSecret().equals(secret)) {
+                if (secret != null && session.getSecret().equals(secret)) {
                     LoginPerformer.getInstance().doLogout(sessionId);
                     // Drop relevant cookies
-                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
-                    SessionUtility.removeJSESSIONID(req, resp);
+                    SessionUtility.removeOXCookies(session.getHash(), httpRequest, httpResponse);
+                    SessionUtility.removeJSESSIONID(httpRequest, httpResponse);
                 } else {
                     LOG.info("Missing or non-matching secret for session {}", sessionId);
                 }
@@ -108,15 +115,7 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
             LOG.error("Logout failed", e);
         }
 
-        resp.reset();
-        resp.setContentType(null);
-        Tools.disableCaching(resp);
-        String redirectLocation = req.getParameter("location");
-        if (redirectLocation == null) {
-            resp.setStatus(HttpServletResponse.SC_OK);
-        } else {
-            resp.sendRedirect(redirectLocation);
-        }
+        backend.finishLogout(httpRequest, httpResponse);
     }
 
 }

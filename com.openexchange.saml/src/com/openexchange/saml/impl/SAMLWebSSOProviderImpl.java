@@ -281,9 +281,12 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
 
         try {
-            // TODO:any backend handling?
-            // TODO: null for broken IDPs?
-            LogoutRequestInfo requestInfo = stateManagement.removeLogoutRequest(response.getInResponseTo());
+            String inResponseTo = response.getInResponseTo();
+            if (inResponseTo == null) {
+                throw SAMLExceptionCode.INVALID_REQUEST.create("LogoutResponse contains no valid 'InResponseTo' attribute");
+            }
+
+            LogoutRequestInfo requestInfo = stateManagement.removeLogoutRequest(inResponseTo);
             if (requestInfo == null) {
                 throw SAMLExceptionCode.INVALID_REQUEST.create("LogoutResponse contains no valid 'InResponseTo' attribute");
             }
@@ -295,7 +298,6 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter("action", "samlLogout")
                 .setParameter("session", sessionId)
-                .setParameter("location", "http://www.virginmedia.com") // TODO:
                 .build();
 
             Tools.disableCaching(httpResponse);
