@@ -53,7 +53,6 @@ import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
-import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -797,20 +796,7 @@ public final class SessionUtility {
         for (final String cookieName : cookieNames) {
             final Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
-                final String value = cookie.getValue();
-                final Cookie respCookie = new Cookie(cookieName, value);
-                respCookie.setPath("/");
-                final String domain = getDomainValue(req.getServerName());
-                if (null != domain) {
-                    respCookie.setDomain(domain);
-                    // Once again without domain parameter
-                    final Cookie respCookie2 = new Cookie(cookieName, value);
-                    respCookie2.setPath("/");
-                    respCookie2.setMaxAge(0); // delete
-                    resp.addCookie(respCookie2);
-                }
-                respCookie.setMaxAge(0); // delete
-                resp.addCookie(respCookie);
+                removeCookie(cookie, resp);
             }
         }
     }
@@ -829,21 +815,32 @@ public final class SessionUtility {
         final String name = Tools.JSESSIONID_COOKIE;
         final Cookie cookie = cookies.get(name);
         if (null != cookie) {
-            final String value = cookie.getValue();
-            final Cookie respCookie = new Cookie(name, value);
-            respCookie.setPath("/");
-            final String domain = extractDomainValue(value);
-            if (null != domain) {
-                respCookie.setDomain(domain);
-                // Once again without domain parameter
-                final Cookie respCookie2 = new Cookie(name, value);
-                respCookie2.setPath("/");
-                respCookie2.setMaxAge(0); // delete
-                resp.addCookie(respCookie2);
-            }
-            respCookie.setMaxAge(0); // delete
-            resp.addCookie(respCookie);
+            removeCookie(cookie, resp);
         }
+    }
+
+    /**
+     * Removes a given cookie by setting its MaxAge parameter to 0.
+     *
+     * @param cookie The cookie
+     * @param resp The HTTP Servlet response
+     */
+    public static void removeCookie(final Cookie cookie, final HttpServletResponse resp) {
+        final String name = cookie.getName();
+        final String value = cookie.getValue();
+        final Cookie respCookie = new Cookie(name, value);
+        respCookie.setPath("/");
+        final String domain = extractDomainValue(value);
+        if (null != domain) {
+            respCookie.setDomain(domain);
+            // Once again without domain parameter
+            final Cookie respCookie2 = new Cookie(name, value);
+            respCookie2.setPath("/");
+            respCookie2.setMaxAge(0); // delete
+            resp.addCookie(respCookie2);
+        }
+        respCookie.setMaxAge(0); // delete
+        resp.addCookie(respCookie);
     }
 
     /**
