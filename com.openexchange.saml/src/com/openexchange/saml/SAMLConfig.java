@@ -90,20 +90,6 @@ public interface SAMLConfig {
      */
     String getSingleLogoutServiceURL();
 //
-//    /**
-//     * Gets the binding used to send out authentication requests.
-//     *
-//     * @return The binding. Never <code>null</code>.
-//     */
-//    Binding getRequestBinding();
-//
-//    /**
-//     * Gets the binding via which authentication responses are to be received.
-//     *
-//     * @return The binding. Never <code>null</code>.
-//     */
-//    Binding getResponseBinding();
-//
     /**
      * Gets the binding via which LogoutResponse messages shall be delivered.
      *
@@ -126,7 +112,7 @@ public interface SAMLConfig {
     String getIdentityProviderAuthnURL();
 
     /**
-     * Whether the single logout profile is supported. Note: currently only IDP-initiated single logout is implemented.
+     * Whether the single logout profile is supported.
      *
      * @return <code>true</code> if the profile is supported, otherwise false.
      */
@@ -138,7 +124,13 @@ public interface SAMLConfig {
      * @return The URL or <code>null</code>, if the profile is not supported.
      */
     String getIdentityProviderLogoutURL();
-//
-//    Binding getLogoutRequestBinding();
+
+    /**
+     * Whether the SPs metadata XML shall be made available via HTTP. The according
+     * servlet will then be available under <code>http(s)://{hostname}/{prefix}/saml/metadata</code>.
+     *
+     * @return <code>true</code> if the servlet shall be registered, otherwise <code>false</code>.
+     */
+    boolean enableMetadataService();
 
 }

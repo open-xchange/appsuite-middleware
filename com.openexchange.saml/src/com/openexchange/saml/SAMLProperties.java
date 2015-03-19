@@ -120,5 +120,10 @@ public class SAMLProperties {
      */
     public static final String IDP_LOGOUT_URL = "com.openexchange.saml.idpLogoutURL";
 
+    /**
+     * Whether the metadata service shall be enabled.
+     */
+    public static final String ENABLE_METADATA_SERVICE = "com.openexchange.saml.enableMetadataService";
+
 
 }

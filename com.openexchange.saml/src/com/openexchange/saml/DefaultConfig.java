@@ -50,6 +50,7 @@
 package com.openexchange.saml;
 
 import static com.openexchange.saml.SAMLProperties.ACS_URL;
+import static com.openexchange.saml.SAMLProperties.ENABLE_METADATA_SERVICE;
 import static com.openexchange.saml.SAMLProperties.ENTITY_ID;
 import static com.openexchange.saml.SAMLProperties.IDP_ENTITY_ID;
 import static com.openexchange.saml.SAMLProperties.IDP_LOGIN_URL;
@@ -77,10 +78,6 @@ public class DefaultConfig implements SAMLConfig {
 
     private String acsURL;
 
-//    private Binding authnRequestBinding;
-//
-//    private Binding authnResponseBinding;
-
     private Binding logoutResponseBinding;
 
     private String idpAuthnURL;
@@ -93,6 +90,8 @@ public class DefaultConfig implements SAMLConfig {
 
     private boolean supportSingleLogout;
 
+    private boolean enableMetadataService;
+
 
     private DefaultConfig() {
         super();
@@ -103,11 +102,8 @@ public class DefaultConfig implements SAMLConfig {
         config.setProviderName(checkProperty(configService, PROVIDER_NAME));
         config.setEntityID(checkProperty(configService, ENTITY_ID));
         config.setAcsURL(checkProperty(configService, ACS_URL));
-
         config.setIdpEntityID(checkProperty(configService, IDP_ENTITY_ID));
         config.setIdpURL(checkProperty(configService, IDP_LOGIN_URL));
-//        config.setResponseBinding(checkBinding(configService, AUTHN_RESPONSE_BINDING));
-//        config.setRequestBinding(checkBinding(configService, AUTHN_REQUEST_BINDING));
         boolean supportSingleLogout = configService.getBoolProperty(SUPPORT_SINGLE_LOGOUT, true);
         if (supportSingleLogout) {
             config.setSupportSingleLogout(supportSingleLogout);
@@ -116,6 +112,7 @@ public class DefaultConfig implements SAMLConfig {
             config.setLogoutResponseBinding(checkBinding(configService, LOGOUT_RESPONSE_BINDING));
         }
 
+        config.setEnableMetadataService(configService.getBoolProperty(ENABLE_METADATA_SERVICE, false));
         return config;
     }
 
@@ -159,16 +156,6 @@ public class DefaultConfig implements SAMLConfig {
         return slsURL;
     }
 
-//    @Override
-//    public Binding getRequestBinding() {
-//        return authnRequestBinding;
-//    }
-//
-//    @Override
-//    public Binding getResponseBinding() {
-//        return authnResponseBinding;
-//    }
-
     @Override
     public Binding getLogoutResponseBinding() {
         return logoutResponseBinding;
@@ -194,6 +181,11 @@ public class DefaultConfig implements SAMLConfig {
         return supportSingleLogout;
     }
 
+    @Override
+    public boolean enableMetadataService() {
+        return enableMetadataService;
+    }
+
     private void setProviderName(String providerName) {
         this.providerName = providerName;
     }
@@ -209,14 +201,6 @@ public class DefaultConfig implements SAMLConfig {
     private void setSingleLogoutServiceURL(String slsURL) {
         this.slsURL = slsURL;
     }
-
-//    private void setRequestBinding(Binding binding) {
-//        this.authnRequestBinding = binding;
-//    }
-//
-//    private void setResponseBinding(Binding binding) {
-//        this.authnResponseBinding = binding;
-//    }
 
     private void setLogoutResponseBinding(Binding logoutResponseBinding) {
         this.logoutResponseBinding = logoutResponseBinding;
@@ -236,6 +220,10 @@ public class DefaultConfig implements SAMLConfig {
 
     private void setSupportSingleLogout(boolean supportSingleLogout) {
         this.supportSingleLogout = supportSingleLogout;
+    }
+
+    private void setEnableMetadataService(boolean enableMetadataService) {
+        this.enableMetadataService = enableMetadataService;
     }
 
 }

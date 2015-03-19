@@ -78,6 +78,7 @@ import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLProperties;
 import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.http.AssertionConsumerService;
+import com.openexchange.saml.http.MetadataService;
 import com.openexchange.saml.http.SingleLogoutService;
 import com.openexchange.saml.impl.HzStateManagement;
 import com.openexchange.saml.impl.SAMLLogoutHandler;
@@ -140,18 +141,25 @@ public class SAMLFeature extends DependentServiceStarter {
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
 
             HttpService httpService = services.getService(HttpService.class);
-            String acsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/acs";
-            httpService.registerServlet(acsServletPath, new AssertionConsumerService(serviceProvider, exceptionHandler), null, null);
-            servlets.push(acsServletPath);
+            String prefix = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/";
+            String acsServletAlias = prefix + "acs";
+            httpService.registerServlet(acsServletAlias, new AssertionConsumerService(serviceProvider, exceptionHandler), null, null);
+            servlets.push(acsServletAlias);
 
             if (config.supportSingleLogout()) {
                 Dictionary<String, Object> lrhProperties = new Hashtable<String, Object>();
                 lrhProperties.put(AJAXServlet.PARAMETER_ACTION, "samlLogout");
-                serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(), lrhProperties));
+                serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(samlBackend), lrhProperties));
                 serviceRegistrations.push(context.registerService(SSOLogoutHandler.class, new SAMLLogoutHandler(serviceProvider, exceptionHandler), null));
-                String slsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/sls";
-                httpService.registerServlet(slsServletPath, new SingleLogoutService(serviceProvider), null, null);
-                servlets.push(slsServletPath);
+                String slsServletAlias = prefix + "sls";
+                httpService.registerServlet(slsServletAlias, new SingleLogoutService(serviceProvider), null, null);
+                servlets.push(slsServletAlias);
+            }
+
+            if (config.enableMetadataService()) {
+                String metadataServletAlias = prefix + "metadata";
+                httpService.registerServlet(metadataServletAlias, new MetadataService(serviceProvider), null, null);
+                servlets.push(metadataServletAlias);
             }
         } else {
             LOG.info("SAML 2.0 support is disabled by configuration. Skipping initialization...");
