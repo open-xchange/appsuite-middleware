@@ -431,7 +431,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
             trySignRedirectHeader(redirectLocationBuilder);
             String redirectLocation = redirectLocationBuilder.build().toString();
             LOG.debug("Sending LogoutRequest via redirect: {}", redirectLocation);
-//            throw LoginExceptionCodes.REDIRECT.create(redirectLocation); TODO
+            throw LoginExceptionCodes.REDIRECT.create(redirectLocation);
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.ENCODING_ERROR.create(e, "Could not construct redirect location");
         }
