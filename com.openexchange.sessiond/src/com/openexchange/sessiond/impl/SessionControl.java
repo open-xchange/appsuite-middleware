@@ -97,9 +97,10 @@ public class SessionControl {
      */
     public SessionControl(final SessionImpl session, final long idleTime) {
         super();
-        lastAccessed = new AtomicLong(System.currentTimeMillis());
+        long currentTimeMillis = System.currentTimeMillis();
+        lastAccessed = new AtomicLong(currentTimeMillis);
         this.session = session;
-        creationTime = System.currentTimeMillis();
+        creationTime = currentTimeMillis;
         this.idleTime = idleTime;
     }
 
