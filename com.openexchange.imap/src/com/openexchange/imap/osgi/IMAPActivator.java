@@ -65,7 +65,9 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.group.GroupService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
@@ -118,7 +120,7 @@ public final class IMAPActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
-            EventAdmin.class };
+            EventAdmin.class, GroupService.class, ContextService.class };
     }
 
     @Override
