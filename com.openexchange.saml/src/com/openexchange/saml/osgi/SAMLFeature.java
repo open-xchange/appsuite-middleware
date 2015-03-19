@@ -138,10 +138,6 @@ public class SAMLFeature extends DependentServiceStarter {
             ExceptionHandler exceptionHandler = samlBackend.getExceptionHandler();
 
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
-            serviceRegistrations.push(context.registerService(SSOLogoutHandler.class, new SAMLLogoutHandler(serviceProvider, exceptionHandler), null));
-            Dictionary<String, Object> lrhProperties = new Hashtable<String, Object>();
-            lrhProperties.put(AJAXServlet.PARAMETER_ACTION, "samlLogout");
-            serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(), lrhProperties));
 
             HttpService httpService = services.getService(HttpService.class);
             String acsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/acs";
@@ -149,6 +145,10 @@ public class SAMLFeature extends DependentServiceStarter {
             servlets.push(acsServletPath);
 
             if (config.supportSingleLogout()) {
+                Dictionary<String, Object> lrhProperties = new Hashtable<String, Object>();
+                lrhProperties.put(AJAXServlet.PARAMETER_ACTION, "samlLogout");
+                serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(), lrhProperties));
+                serviceRegistrations.push(context.registerService(SSOLogoutHandler.class, new SAMLLogoutHandler(serviceProvider, exceptionHandler), null));
                 String slsServletPath = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/sls";
                 httpService.registerServlet(slsServletPath, new SingleLogoutService(serviceProvider), null, null);
                 servlets.push(slsServletPath);

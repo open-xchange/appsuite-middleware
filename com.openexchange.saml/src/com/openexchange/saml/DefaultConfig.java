@@ -108,12 +108,12 @@ public class DefaultConfig implements SAMLConfig {
         config.setIdpURL(checkProperty(configService, IDP_LOGIN_URL));
 //        config.setResponseBinding(checkBinding(configService, AUTHN_RESPONSE_BINDING));
 //        config.setRequestBinding(checkBinding(configService, AUTHN_REQUEST_BINDING));
-        config.setLogoutResponseBinding(checkBinding(configService, LOGOUT_RESPONSE_BINDING));
-        config.setIdentityProviderLogoutURL(checkProperty(configService, IDP_LOGOUT_URL));
         boolean supportSingleLogout = configService.getBoolProperty(SUPPORT_SINGLE_LOGOUT, true);
-        config.setSupportSingleLogout(supportSingleLogout);
         if (supportSingleLogout) {
+            config.setSupportSingleLogout(supportSingleLogout);
             config.setSingleLogoutServiceURL(checkProperty(configService, SLS_URL));
+            config.setIdentityProviderLogoutURL(checkProperty(configService, IDP_LOGOUT_URL));
+            config.setLogoutResponseBinding(checkBinding(configService, LOGOUT_RESPONSE_BINDING));
         }
 
         return config;
