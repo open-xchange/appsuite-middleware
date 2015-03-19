@@ -52,6 +52,8 @@ package com.openexchange.drive.impl.storage;
 import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
 import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
 import static com.openexchange.drive.impl.DriveConstants.TEMP_PATH;
+import static com.openexchange.drive.impl.DriveUtils.combine;
+import static com.openexchange.drive.impl.DriveUtils.split;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -936,32 +938,6 @@ public class DriveStorage {
         }
         String newFolderID = getFolderAccess().createFolder(newFolder);
         return getFolderAccess().getFolder(newFolderID);
-    }
-
-    public static LinkedList<String> split(String path) throws OXException {
-        if (null == path || false == path.startsWith(ROOT_PATH)) {
-            throw DriveExceptionCodes.INVALID_PATH.create(path);
-        }
-        LinkedList<String> names = new LinkedList<String>();
-        for (String name : path.split(String.valueOf(PATH_SEPARATOR))) {
-            if (Strings.isEmpty(name)) {
-                continue;
-            }
-            names.addLast(name);
-        }
-        return names;
-    }
-
-    public static String combine(String path1, String path2) {
-        if (Strings.isEmpty(path1)) {
-            return path2;
-        } else if (Strings.isEmpty(path2)) {
-            return path1;
-        } else if (path1.endsWith("/")) {
-            return path2.startsWith("/") ? path1 + path2.substring(1) : path1 + path2;
-        } else {
-            return path2.startsWith("/") ? path1 + path2 : path1 + '/' + path2;
-        }
     }
 
     public IDBasedFolderAccess getFolderAccess() throws OXException {

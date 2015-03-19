@@ -49,13 +49,21 @@
 
 package com.openexchange.drive.impl;
 
+import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
+import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.drive.*;
+import com.openexchange.drive.DirectoryPattern;
+import com.openexchange.drive.DriveClientType;
+import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.FilePattern;
+import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.actions.AbstractAction;
 import com.openexchange.drive.impl.actions.DownloadFileAction;
 import com.openexchange.drive.impl.actions.EditFileAction;
@@ -64,7 +72,6 @@ import com.openexchange.drive.impl.comparison.ServerFileVersion;
 import com.openexchange.drive.impl.internal.PathNormalizer;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.drive.impl.management.DriveConfig;
-import com.openexchange.drive.impl.storage.DriveStorage;
 import com.openexchange.drive.impl.sync.RenameTools;
 import com.openexchange.drive.impl.sync.SimpleFileVersion;
 import com.openexchange.exception.OXException;
@@ -121,7 +128,7 @@ public class DriveUtils {
         if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(path).matches()) {
             return true; // no invalid paths
         }
-        for (String pathSegment : DriveStorage.split(path)) {
+        for (String pathSegment : split(path)) {
             if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < pathSegment.length()) {
                 return true; // no too long paths
             }
@@ -354,6 +361,45 @@ public class DriveUtils {
             mimeType = file.getFileMIMEType();
         }
         return mimeType;
+    }
+
+    /**
+     * Splits the supplied path string into segments based on {@link DriveConstants#PATH_SEPARATOR} character.
+     *
+     * @param path The path to split
+     * @return A linked list holding the path segments from left to right, or an empty list if the path equals the root path
+     */
+    public static LinkedList<String> split(String path) throws OXException {
+        if (null == path || false == path.startsWith(ROOT_PATH)) {
+            throw DriveExceptionCodes.INVALID_PATH.create(path);
+        }
+        LinkedList<String> names = new LinkedList<String>();
+        for (String name : path.split(String.valueOf(PATH_SEPARATOR))) {
+            if (Strings.isEmpty(name)) {
+                continue;
+            }
+            names.addLast(name);
+        }
+        return names;
+    }
+
+    /**
+     * Combines a directory path with another file- or directory path, i.e. appends the latter one to the first path.
+     *
+     * @param path1 The path to combine
+     * @param path2 The path to append
+     * @return The combined path
+     */
+    public static String combine(String path1, String path2) {
+        if (Strings.isEmpty(path1)) {
+            return path2;
+        } else if (Strings.isEmpty(path2)) {
+            return path1;
+        } else if (path1.endsWith("/")) {
+            return path2.startsWith("/") ? path1 + path2.substring(1) : path1 + path2;
+        } else {
+            return path2.startsWith("/") ? path1 + path2 : path1 + '/' + path2;
+        }
     }
 
     private DriveUtils() {

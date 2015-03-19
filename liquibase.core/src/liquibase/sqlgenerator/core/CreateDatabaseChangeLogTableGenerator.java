@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -26,10 +25,10 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
 
     @Override
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
+
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
-                .addColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")"), null, null, null, new NotNullConstraint())
+                .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")"), null, null, null, new NotNullConstraint())
                 .addColumn("AUTHOR", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getAuthorColumnSize() + ")"), null, null, null, new NotNullConstraint())
                 .addColumn("FILENAME", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getFilenameColumnSize() + ")"), null, null, null, new NotNullConstraint())
                 .addColumn("DATEEXECUTED", DataTypeFactory.getInstance().fromDescription("datetime"), null, new NotNullConstraint())

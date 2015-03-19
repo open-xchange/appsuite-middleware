@@ -122,16 +122,6 @@ public final class IMAPActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-    }
-
-    @Override
     public void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);

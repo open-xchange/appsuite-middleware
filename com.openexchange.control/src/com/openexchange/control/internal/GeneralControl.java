@@ -205,13 +205,13 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
      * @return <code>true</code> if the shutdown did complete successfully. This is only valid if waitForExit parameter is set to
      * <code>true</code>.
      */
-    public static final boolean shutdown(final BundleContext bundleContext, final boolean waitForExit) {
+    public static boolean shutdown(BundleContext bundleContext, boolean waitForExit) {
         boolean completed = false;
         try {
             /*
              * Simply shut-down the system bundle to enforce invocation of close() method on all running bundles
              */
-            final Bundle systemBundle = bundleContext.getBundle(0);
+            Bundle systemBundle = getSystemBundleSafe(bundleContext);
             if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
                 LOG.info("Stopping system bundle...");
                 // Note that stopping process is done in a separate thread
@@ -219,7 +219,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                 if (waitForExit) {
                     // Wait on condition. The BundleListener for the system bundle does not work reliably therefore we have to poll the
                     // state.
-                    final long timeout = System.currentTimeMillis() + 120 * 1000;
+                    long timeout = System.currentTimeMillis() + 120 * 1000;
                     while (!completed && System.currentTimeMillis() < timeout) {
                         try {
                             Thread.sleep(100);
@@ -230,10 +230,19 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                     }
                 }
             }
-        } catch (final BundleException e) {
+        } catch (BundleException e) {
             LOG.error("", e);
         }
         return completed;
+    }
+
+    private static Bundle getSystemBundleSafe(BundleContext bundleContext) {
+        try {
+            return bundleContext.getBundle(0);
+        } catch (Exception e) {
+            LOG.debug("Unable to acquire system bundle", e);
+        }
+        return null;
     }
 
     @Override

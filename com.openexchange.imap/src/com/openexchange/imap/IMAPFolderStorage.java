@@ -2467,6 +2467,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     }
                 }
             }
+
             // Try NAMESPACE command
             String prefix = null;
             try {
@@ -2483,8 +2484,19 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 LOG.info("NAMESPACE command failed for any reason on IMAP server {} for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 return prefixByInferiors;
             }
-            // Return prefix as indicated by NAMESPACE command
-            return prefix.length() == 0 ? prefix : new StringBuilder(prefix).append(((DefaultFolder) imapStore.getDefaultFolder()).getSeparator()).toString();
+            if (prefix.length() != 0) {
+                return new StringBuilder(prefix).append(((DefaultFolder) imapStore.getDefaultFolder()).getSeparator()).toString();
+            }
+
+            // The empty prefix so far; verify against root-folder capability
+            DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+            if (!RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, defaultFolder)) {
+                // Impossible to create folders on root level; hence adjust prefix to be:  "INBOX" + <separator>
+                return new StringBuilder(STR_INBOX).append(defaultFolder.getSeparator()).toString();
+            }
+
+            // Grant empty prefix as standard folder prefix
+            return prefix;
         } catch (final MessagingException e) {
             throw handleMessagingException(e);
         } catch (final RuntimeException e) {

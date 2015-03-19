@@ -140,11 +140,12 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
      * @param alias The alias
      */
     protected void unregisterServlet(String alias) {
-        HttpService httpService = getService(HttpService.class);
-        if (null != httpService) {
-            httpService.unregister(alias);
+        if (servlets.remove(alias)) {
+            HttpService httpService = getService(HttpService.class);
+            if (null != httpService) {
+                httpService.unregister(alias);
+            }
         }
-        servlets.remove(alias);
     }
 
 }

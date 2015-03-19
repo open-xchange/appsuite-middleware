@@ -496,6 +496,8 @@ public class IMAPDefaultFolderChecker {
         }
 
         // Check folders
+        TIntObjectMap<String> toSet = (MailAccount.DEFAULT_ID == accountId) ? null : new TIntObjectHashMap<String>(6);
+        boolean added = false;
         for (int index = 0; index < names.length; index++) {
             if (!checkedIndexes.containsKey(index)) {
                 String checkedFullName = null;
@@ -523,10 +525,24 @@ public class IMAPDefaultFolderChecker {
                     } else {
                         checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, 1, modified);
                     }
+
+                    // Check against account data
+                    if ((null != toSet) && (null != checkedFullName) && (false == isEmpty(fullName)) && !checkedFullName.equals(fullName)) {
+                        toSet.put(index, checkedFullName);
+                        added = true;
+                    }
                 }
 
                 // Set the checked full name
                 setDefaultMailFolder(index, checkedFullName, cache);
+            }
+        }
+
+        // Update account data if necessary
+        if (added && (null != toSet)) {
+            MailAccount modifiedAccount = setAccountFullNames(toSet);
+            if (null != modifiedAccount) {
+                imapConfig.applyStandardNames(modifiedAccount);
             }
         }
 
@@ -548,7 +564,7 @@ public class IMAPDefaultFolderChecker {
      * @param subscribe Whether to subscribe
      * @param modified Whether folders has been modified during check
      * @param cache The associated cache
-     * @return Dummy <code>null</code>
+     * @return The checked full name
      * @throws OXException If an error occurs
      */
     protected String checkFullNameFor(int index, String namespace, String fullName, String name, char sep, int type, int subscribe, AtomicBoolean modified) throws OXException {
@@ -578,18 +594,26 @@ public class IMAPDefaultFolderChecker {
              * Not possible to retry since connection is broken
              */
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
+        } catch (AlreadyLoggedMessagingException alreadyLogged) {
+            handleMessagingErrorOnCheckFullName(alreadyLogged.messagingException, namespace, fullName, name, false);
         } catch (MessagingException e) {
-            if (isOverQuotaException(e)) {
-                /*
-                 * Special handling for over-quota error
-                 */
-                throw MimeMailException.handleMessagingException(e, imapConfig, session);
-            }
-            LOG.warn("Couldn't check default folder: {}. Namespace prefix: \"{}\"", (null == fullName ? (namespace + name) : fullName), (null == namespace ? "null" : namespace), e);
-            OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
-            imapAccess.addWarnings(Collections.singleton(warning));
+            handleMessagingErrorOnCheckFullName(e, namespace, fullName, name, true);
         }
         return null;
+    }
+
+    private void handleMessagingErrorOnCheckFullName(MessagingException e, String namespace, String fullName, String name, boolean logWarning) throws OXException {
+        if (isOverQuotaException(e)) {
+            /*
+             * Special handling for over-quota error
+             */
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+        }
+        if (logWarning) {
+            LOG.warn("Couldn't check default folder: {}. Namespace prefix: \"{}\"", (null == fullName ? (namespace + name) : fullName), (null == namespace ? "null" : namespace), e);
+        }
+        OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
+        imapAccess.addWarnings(Collections.singleton(warning));
     }
 
     /**
@@ -706,10 +730,11 @@ public class IMAPDefaultFolderChecker {
                     checkSpecialUse = false;
                     modified.set(true);
                 } catch (MessagingException e) {
-                    if (isOverQuotaException(e)) {
+                    MessagingException toAnalyze = (e instanceof AlreadyLoggedMessagingException) ? ((AlreadyLoggedMessagingException) e).messagingException : e;
+                    if (isOverQuotaException(toAnalyze)) {
                         throw e;
                     }
-                    if (isAlreadyExistsException(e)) {
+                    if (isAlreadyExistsException(toAnalyze)) {
                         // Grab the first in sight
                         closeSafe(f);
                         if (!candidates.isEmpty()) {
@@ -834,7 +859,7 @@ public class IMAPDefaultFolderChecker {
                 String msg = e.getMessage();
                 if (null == msg || Strings.toUpperCase(msg).indexOf("[ALREADYEXISTS]") < 0) {
                     LOG.warn("Failed to create new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
-                    throw e;
+                    throw new AlreadyLoggedMessagingException(e);
                 }
                 // Obviously such a folder does already exist; treat as being successfully created
                 LOG.info("Standard {} folder does already exist (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
@@ -1040,6 +1065,29 @@ public class IMAPDefaultFolderChecker {
             } catch (Exception e) {
                 // Ignore
             }
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------
+
+    /**
+     * Wraps an already logged {@link MessagingException} instance.
+     */
+    protected static class AlreadyLoggedMessagingException extends MessagingException {
+
+        private static final long serialVersionUID = 1973917919275287767L;
+
+        /** The associated {@link MessagingException} instance. */
+        protected final MessagingException messagingException;
+
+        /**
+         * Initializes a new {@link AlreadyLoggedMessagingException}.
+         *
+         * @param messagingException The already logged messaging exception instance.
+         */
+        protected AlreadyLoggedMessagingException(MessagingException messagingException) {
+            super(messagingException.getMessage(), messagingException);
+            this.messagingException = messagingException;
         }
     }
 

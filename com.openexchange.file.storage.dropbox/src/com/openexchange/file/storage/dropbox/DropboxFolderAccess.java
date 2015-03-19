@@ -146,7 +146,8 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
             for (Entry childEntry : entry.contents) {
                 if (childEntry.isDir && false == childEntry.isDeleted) {
-                    list.add(new DropboxFolder(childEntry, userId, accountDisplayName));
+                    Entry ce = dropboxAPI.metadata(childEntry.path, 0, null, true, null);
+                    list.add(new DropboxFolder(ce, userId, accountDisplayName));
                 }
             }
             return list.toArray(new FileStorageFolder[0]);

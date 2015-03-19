@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.osgi;
 
 import java.util.HashSet;
 import java.util.Set;
+import javax.servlet.http.HttpServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -122,8 +123,8 @@ import com.openexchange.user.UserService;
  */
 public class DispatcherActivator extends AbstractSessionServletActivator {
 
-    private final Set<String> servlets = new HashSet<String>();
-    private volatile String prefix;
+    final Set<String> servlets = new HashSet<String>();
+    volatile String prefix;
 
     @Override
     protected void startBundle() throws Exception {
@@ -275,24 +276,22 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
-                if (!servlets.contains(module)) {
+                if (!servlets.add(module)) {
                     registerSessionServlet(prefix + module, dispatcherServlet);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
                         registerSessionServlet(prefix + "oauth/modules/" + module, oAuthDispatcherServlet);
                     }
-                    servlets.add(module);
                 }
             }
 
             @Override
             public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
-                if (servlets.contains(module)) {
+                if (servlets.remove(module)) {
                     unregisterServlet(prefix + module);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
                         unregisterServlet(prefix + "oauth/modules/" + module);
                     }
-                    servlets.remove(module);
                 }
                 dispatcher.remove(module, service);
             }
@@ -381,6 +380,16 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
         return new Class<?>[] { DispatcherPrefixService.class };
+    }
+
+    @Override
+    public void registerSessionServlet(String alias, HttpServlet servlet, String... configKeys) {
+        super.registerSessionServlet(alias, servlet, configKeys);
+    }
+
+    @Override
+    public void unregisterServlet(String alias) {
+        super.unregisterServlet(alias);
     }
 
 }
