@@ -49,10 +49,10 @@
 
 package com.openexchange.jaxrs.jersey;
 
-import javax.ws.rs.core.Application;
+import java.util.Collections;
+import java.util.Map;
 import org.glassfish.jersey.server.ServerProperties;
 import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
-
 
 /**
  * {@link JerseyConfiguration}
@@ -62,8 +62,8 @@ import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
 public class JerseyConfiguration implements ApplicationConfiguration {
 
     @Override
-    public void configure(Application application) {
-        application.getProperties().put(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, true);
+    public Map<String, Object> getProperties() {
+        return Collections.<String, Object> singletonMap(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, true);
     }
 
 }
