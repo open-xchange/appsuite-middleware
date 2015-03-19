@@ -161,7 +161,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             Drive drive = googleDriveAccess.getDrive(session);
 
             Drive.Children.List list = drive.children().list(toGoogleDriveFolderId(parentIdentifier));
-            list.setQ(QUERY_STRING_DIRECTORIES_ONLY);
+            list.setQ(GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
             ChildList childList = list.execute();
 
             if (childList.getItems().isEmpty()) {
