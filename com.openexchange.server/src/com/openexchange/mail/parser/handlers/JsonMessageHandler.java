@@ -856,7 +856,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 /*
                  * Add HTML part as attachment
                  */
-                asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                try {
+                    JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                    attachment.put(VIRTUAL, true);
+                } catch (final JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
             }
         } else {
             /*
@@ -941,7 +946,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         /*
                          * Add alternative part as attachment
                          */
-                        asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                        try {
+                            JSONObject attachment = asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                            attachment.put(VIRTUAL, true);
+                        } catch (final JSONException e) {
+                            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                        }
                         return true;
                     } else if (DisplayMode.RAW.equals(displayMode)) {
                         /*
@@ -1018,7 +1028,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
                              * Add alternative part as attachment
                              */
                             if (null != contentType.getParameter("realfilename") && plainTextContentArg.length() > 0) {
-                                asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                                try {
+                                    JSONObject attachment = asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                                    attachment.put(VIRTUAL, true);
+                                } catch (final JSONException e) {
+                                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                                }
                                 return true;
                             }
                         } else if (DisplayMode.RAW.equals(displayMode)) {
@@ -1056,8 +1071,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         /*
                          * Append inline text as an attachment, too
                          */
-                        final JSONObject textObject =
-                            asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, new HtmlSanitizeResult(sanitizeResult.getContent()));
+                        JSONObject textObject = asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, new HtmlSanitizeResult(sanitizeResult.getContent()));
+                        textObject.put(VIRTUAL, true);
                         if (includePlainText) {
                             textObject.put("plain_text", plainTextContentArg);
                         }
@@ -1570,6 +1585,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 originalVersion.put(DISPOSITION, Part.ATTACHMENT);
                 originalVersion.put(SIZE, htmlContent.length());
                 originalVersion.put(CONTENT, JSONObject.NULL);
+                originalVersion.put(VIRTUAL, true);
                 if (fileName == null) {
                     originalVersion.put(ATTACHMENT_FILE_NAME, JSONObject.NULL);
                 } else {
