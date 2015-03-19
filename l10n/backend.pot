@@ -3392,6 +3392,11 @@ msgid ""
 "login %2$s. Please try again."
 msgstr ""
 
+#. The specified group \"%4$s\" is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
+msgid "The specified group \"%4$s\" is not supported."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:61
 msgid "Could not export the folder %1$s."
 msgstr ""
