@@ -195,22 +195,24 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         return retval;
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------
+
     private static final class AuthenticatedImpl implements Authenticated, ResponseEnhancement, SessionEnhancement {
 
         private final Authenticated prototype;
-
         private final Map<String, Object> properties;
-
         private final Header[] headers;
-
         private final Cookie[] cookies;
-
         private final ResultCode resultCode;
-
         private final String redirect;
 
-
-        private AuthenticatedImpl(Authenticated prototype, Map<String, Object> properties) {
+        /**
+         * Initializes a new {@link AuthenticatedImpl}.
+         *
+         * @param prototype The prototype
+         * @param properties The associated properties
+         */
+        AuthenticatedImpl(Authenticated prototype, Map<String, Object> properties) {
             super();
             this.prototype = prototype;
             this.properties = properties;
@@ -274,6 +276,6 @@ public class RedeemReservationLogin implements LoginRequestHandler {
             return prototype.getUserInfo();
         }
 
-    }
+    } // End of class AuthenticatedImpl
 
 }
