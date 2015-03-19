@@ -1183,6 +1183,9 @@ fi
 # SoftwareChange_Request-2456
 ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
 
+# SoftwareChange_Request-2456
+ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1223,6 +1226,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue Mar 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-03-18
 * Fri Mar 13 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Twelfth candidate for 7.6.2 release
 * Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>

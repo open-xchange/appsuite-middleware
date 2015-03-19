@@ -67,6 +67,8 @@ ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
 /sbin/rcopen-xchange
 
 %changelog
+* Tue Mar 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-03-18
 * Fri Mar 13 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Twelfth candidate for 7.6.2 release
 * Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
