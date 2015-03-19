@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.infostore;
 
-import static com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -86,6 +85,7 @@ import com.openexchange.tools.session.ServerSession;
 public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFolderAwareFolderAccess {
 
     private static final String INFOSTORE_FOLDER_ID = "9";
+    private static final String TREE_ID = "1";
 
     private final ServerSession session;
     private final InfostoreFacade infostore;
@@ -109,7 +109,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
-        getFolderService().clearFolder(REAL_TREE_ID, folderId, session);
+        getFolderService().clearFolder(TREE_ID, folderId, session);
     }
 
     @Override
@@ -124,14 +124,14 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
-        getFolderService().deleteFolder(REAL_TREE_ID, folderId, null, session, initDecorator().put("hardDelete", String.valueOf(hardDelete))).getResponse();
+        getFolderService().deleteFolder(TREE_ID, folderId, null, session, initDecorator().put("hardDelete", String.valueOf(hardDelete))).getResponse();
         return folderId;
     }
 
     @Override
     public boolean exists(String folderId) throws OXException {
         try {
-            getFolderService().getFolder(REAL_TREE_ID, folderId, session, initDecorator());
+            getFolderService().getFolder(TREE_ID, folderId, session, initDecorator());
             return true;
         } catch (OXException e) {
             return false;
@@ -140,7 +140,8 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
-        return FolderWriter.writeFolder(getFolderService().getFolder(REAL_TREE_ID, folderId, session, initDecorator()));
+        FolderServiceDecorator decorator = initDecorator();
+        return FolderWriter.writeFolder(getFolderService().getFolder(TREE_ID, folderId, session, decorator), decorator.getLocale());
     }
 
     @Override
@@ -180,14 +181,16 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
-        UserizedFolder[] subfolders = getFolderService().getSubfolders(REAL_TREE_ID, "15", true, session, initDecorator()).getResponse();
-        return FolderWriter.writeFolders(subfolders);
+        FolderServiceDecorator decorator = initDecorator();
+        UserizedFolder[] subfolders = getFolderService().getSubfolders(TREE_ID, "15", true, session, decorator).getResponse();
+        return FolderWriter.writeFolders(subfolders, decorator.getLocale());
     }
 
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
-        UserizedFolder[] folders = getFolderService().getPath(REAL_TREE_ID, folderId, session, initDecorator()).getResponse();
-        return FolderWriter.writeFolders(folders);
+        FolderServiceDecorator decorator = initDecorator();
+        UserizedFolder[] folders = getFolderService().getPath(TREE_ID, folderId, session, decorator).getResponse();
+        return FolderWriter.writeFolders(folders, decorator.getLocale());
     }
 
     @Override
@@ -235,8 +238,9 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        UserizedFolder[] subfolders = getFolderService().getSubfolders(REAL_TREE_ID, parentIdentifier, all, session, initDecorator()).getResponse();
-        return FolderWriter.writeFolders(subfolders);
+        FolderServiceDecorator decorator = initDecorator();
+        UserizedFolder[] subfolders = getFolderService().getSubfolders(TREE_ID, parentIdentifier, all, session, decorator).getResponse();
+        return FolderWriter.writeFolders(subfolders, decorator.getLocale());
     }
 
     @Override
@@ -274,7 +278,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
      */
     private String moveFolder(final String folderId, final String newParentId, String newName, FolderServiceDecorator decorator) throws OXException {
         ParsedFolder folder = new ParsedFolder();
-        folder.setTreeID(REAL_TREE_ID);
+        folder.setTreeID(TREE_ID);
         folder.setID(folderId);
         if (null != newParentId) {
             folder.setParentID(newParentId);
@@ -287,9 +291,10 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
     }
 
     private FileStorageFolder getDefaultFolder(com.openexchange.folderstorage.Type type) throws OXException {
+        FolderServiceDecorator decorator = initDecorator();
         try {
             return FolderWriter.writeFolder(getFolderService().getDefaultFolder(
-                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), type, session, initDecorator()));
+                session.getUser(), TREE_ID, InfostoreContentType.getInstance(), type, session, decorator), decorator.getLocale());
         } catch (OXException e) {
             if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
                 throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
@@ -312,6 +317,8 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
         if (null != connection) {
             decorator.put(Connection.class.getName(), connection);
         }
+        decorator.put("altNames", Boolean.TRUE.toString());
+        decorator.setLocale(session.getUser().getLocale());
         return decorator;
     }
 

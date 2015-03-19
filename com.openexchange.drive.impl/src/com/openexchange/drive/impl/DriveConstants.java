@@ -134,8 +134,9 @@ public class DriveConstants {
      * 1: initial api version
      * 2: client defined exclusion filters
      * 3: .drive-meta
+     * 4: subfolders action, sharing
      */
-    public static int SUPPORTED_API_VERSION = 3;
+    public static int SUPPORTED_API_VERSION = 4;
 
     /**
      * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd HH:mm:ss.SSS" as pattern.

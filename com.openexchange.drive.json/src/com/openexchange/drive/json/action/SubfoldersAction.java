@@ -47,62 +47,46 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.folder;
+package com.openexchange.drive.json.action;
 
-import java.util.Locale;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Strings;
 
 /**
- * {@link FolderWriter}
+ * {@link SubfoldersAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class FolderWriter {
+public class SubfoldersAction extends AbstractDriveAction {
 
-    /**
-     * Initializes a new {@link FolderWriter}.
-     */
-    private FolderWriter() {
-        super();
+    private static String ROOT_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+
+    @Override
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        /*
+         * get parent folder identifier & prepare custom drive session containing an appropriate root folder for the subfolders request
+         */
+        String parentFolderID = requestData.getParameter("parent");
+        String rootFolderID = Strings.isEmpty(parentFolderID) ? ROOT_FOLDER_ID : parentFolderID;
+        DefaultDriveSession driveSession = new DefaultDriveSession(
+            session.getServerSession(), rootFolderID, session.getHostData(), session.getApiVersion(), session.getClientVersion(), session.getLocale());
+        /*
+         * get & return metadata for subfolders as JSON
+         */
+        List<JSONObject> metadata = getDriveService().getUtility().getSubfolderMetadata(driveSession);
+        return new AJAXRequestResult(new JSONArray(metadata), "json");
     }
 
-    /**
-     * Writes a folder.
-     *
-     * @param folder The folder
-     * @param locale The locale to use, or <code>null</code> if not available
-     * @return The written folder
-     */
-    public static FileStorageFolder writeFolder(UserizedFolder folder, Locale locale) throws OXException {
-        if (null == folder) {
-            return null;
-        }
-        try {
-            return new UserizedFileStorageFolder(folder, locale);
-        } catch (RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Converts an array of userized folders into their file storage folder equivalents.
-     *
-     * @param folders The userized folders to convert
-     * @param locale The locale to use, or <code>null</code> if not available
-     * @return The file storage folders
-     */
-    public static FileStorageFolder[] writeFolders(UserizedFolder[] folders, Locale locale) throws OXException {
-        if (null == folders) {
-            return null;
-        }
-        FileStorageFolder[] fileStorageFolders = new FileStorageFolder[folders.length];
-        for (int i = 0; i < folders.length; i++) {
-            fileStorageFolders[i] = writeFolder(folders[i], locale);
-        }
-        return fileStorageFolders;
+    @Override
+    protected boolean requiresRootFolderID() {
+        return false;
     }
 
 }
