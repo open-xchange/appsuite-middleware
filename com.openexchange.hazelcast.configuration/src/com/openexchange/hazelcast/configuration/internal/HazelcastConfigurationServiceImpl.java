@@ -102,7 +102,13 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     /** Name of the subdirectory containing the hazelcast data structure properties */
     private static final String DIRECTORY_NAME = "hazelcast";
 
-    private Config config;
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
+    /** The Hazelcast configuration instance */
+    private volatile Config config;
+
+    /** The <i>shutdown-on-out-of-memory</i> flag */
+    private boolean shutdownOnOutOfMemory;
 
     /**
      * Initializes a new {@link HazelcastConfigurationServiceImpl}.
@@ -112,14 +118,27 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     }
 
     @Override
-    public boolean isEnabled() throws OXException {
-        return Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.hazelcast.enabled", true);
+    public boolean shutdownOnOutOfMemory() {
+        ConfigurationService service = Services.optService(ConfigurationService.class);
+        return null == service ? false : service.getBoolProperty("com.openexchange.hazelcast.shutdownOnOutOfMemory", false);
     }
 
     @Override
-    public synchronized Config getConfig() throws OXException {
+    public boolean isEnabled() throws OXException {
+        return Services.requireService(ConfigurationService.class).getBoolProperty("com.openexchange.hazelcast.enabled", true);
+    }
+
+    @Override
+    public Config getConfig() throws OXException {
+        Config config = this.config;
         if (null == config) {
-            config = loadConfig();
+            synchronized (this) {
+                config = this.config;
+                if (null == config) {
+                    config = loadConfig();
+                    this.config = config;
+                }
+            }
         }
         return config;
     }
@@ -141,6 +160,8 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         throw exception;
     }
 
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
     /**
      * Loads and configures the hazelcast configuration.
      *
@@ -157,7 +178,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * Set values from properties file
          */
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        ConfigurationService configService = Services.requireService(ConfigurationService.class);
         /*
          * General
          */
@@ -315,7 +336,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * Register serialization factory
          */
-        DynamicPortableFactory dynamicPortableFactory = Services.getService(DynamicPortableFactory.class, true);
+        DynamicPortableFactory dynamicPortableFactory = Services.requireService(DynamicPortableFactory.class);
 
         config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID,
             dynamicPortableFactory);
@@ -384,7 +405,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         } catch (IllegalAccessException e) {
             throw ConfigurationExceptionCodes.CLASS_NOT_FOUND.create(e, dataConfigType.toString());
         }
-        StringParser stringParser = Services.getService(StringParser.class);
+        StringParser stringParser = Services.requireService(StringParser.class);
         Field[] declaredFields = dataConfigType.getDeclaredFields();
         for (String propertyName : properties.stringPropertyNames()) {
             Field field = findMatching(declaredFields, propertyName);
@@ -420,7 +441,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     }
 
     private static File[] listPropertyFiles() throws OXException {
-        File directory = Services.getService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
+        File directory = Services.requireService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
         if (null == directory) {
             return new File[0];
         }
@@ -449,13 +470,13 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     }
 
     /**
-     * Loads a hazelcast configuration from a file named <code>hazelcast.xml</code> in the {@link #DIRECTORY_NAME} folder if present.
+     * Loads a Hazelcast configuration from a file named <code>hazelcast.xml</code> in the {@link #DIRECTORY_NAME} folder if present.
      *
-     * @return The loaded hazelcast config, or <code>null</code> if no such file exists or can't be loaded
+     * @return The loaded Hazelcast configuration, or <code>null</code> if no such file exists or can't be loaded
      * @throws OXException
      */
     private static Config loadXMLConfig() throws OXException {
-        File directory = Services.getService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
+        File directory = Services.requireService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
         if (null != directory) {
             File xmlConfigFile = new File(directory, "hazelcast.xml");
             if (xmlConfigFile.exists()) {

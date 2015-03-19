@@ -79,14 +79,28 @@ public class Services {
         return ref.get();
     }
 
-    public static <S extends Object> S getService(Class<? extends S> c) throws OXException {
-        return getService(c, true);
+    /**
+     * Optionally gets specified service.
+     *
+     * @param c The service class
+     * @return The service or <code>null</code>
+     */
+    public static <S extends Object> S optService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(c);
     }
 
-    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+    /**
+     * Requires specified service
+     *
+     * @param c The service class
+     * @return The service
+     * @throws OXException If no such service is available
+     */
+    public static <S extends Object> S requireService(Class<? extends S> c) throws OXException {
         ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getService(c);
-        if (null == service && throwOnAbsence) {
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        if (null == service) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
         }
         return service;

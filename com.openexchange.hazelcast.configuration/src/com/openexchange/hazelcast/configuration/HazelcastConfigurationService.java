@@ -89,4 +89,11 @@ public interface HazelcastConfigurationService  {
      */
     String dicoverMapName(String namePrefix) throws OXException;
 
+    /**
+     * Signals whether Hazelcast is supposed to be shut-down in case an Out-Of-Memory error occurred
+     *
+     * @return <code>true</code> to shut-down; otherwise <code>false</code>
+     */
+    boolean shutdownOnOutOfMemory();
+
 }
