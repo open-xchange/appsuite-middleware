@@ -72,11 +72,14 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondServiceImpl.class);
 
+    private final long defaultIdleTime;
+
     /**
      * Initializes a new {@link SessiondServiceImpl}.
      */
     public SessiondServiceImpl() {
         super();
+        defaultIdleTime = SessionHandler.getConfig().getLifeTime();
     }
 
     @Override
@@ -195,7 +198,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             }
             return null;
         }
-        return sessionControl.touch().getSession();
+        return sessionControl.getSession();
     }
 
     @Override
@@ -216,7 +219,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             LOG.info("Session not found by alternative identifier. Alternative ID: {}", altId);
             return null;
         }
-        return sessionControl.touch().getSession();
+        return sessionControl.getSession();
     }
 
     @Override

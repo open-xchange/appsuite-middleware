@@ -81,6 +81,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("fileMetadata", new FileMetadataAction());
         actions.put("directoryMetadata", new DirectoryMetadataAction());
         actions.put("jump", new JumpAction());
+        actions.put("subfolders", new SubfoldersAction());
     }
 
     @Override

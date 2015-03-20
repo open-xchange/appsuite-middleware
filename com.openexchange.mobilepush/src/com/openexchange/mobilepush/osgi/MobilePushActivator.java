@@ -50,10 +50,14 @@
 package com.openexchange.mobilepush.osgi;
 
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRampUpService;
+import com.openexchange.mobilepush.loginhandler.SessionToucher;
 import com.openexchange.mobilepush.rampup.MobileLoginRampUp;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link MobilePushActivator}
@@ -64,7 +68,7 @@ public class MobilePushActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ThreadPoolService.class, Dispatcher.class };
+        return new Class[] { ThreadPoolService.class, Dispatcher.class, TimerService.class, SessiondService.class };
     }
 
     @Override
@@ -73,6 +77,7 @@ public class MobilePushActivator extends HousekeepingActivator {
         try {
             logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
             registerService(LoginRampUpService.class, new MobileLoginRampUp(this));
+            registerService(LoginHandlerService.class, new SessionToucher(this));
         } catch (Exception e) {
             logger.error("starting bundle {} failed: ", context.getBundle().getSymbolicName(), e);
             throw e;

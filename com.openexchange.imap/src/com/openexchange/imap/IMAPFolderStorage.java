@@ -2947,17 +2947,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws OXException {
-        final List<ACL> acls = new ArrayList<ACL>(perms.length);
+    private ACL[] permissions2ACL(OCLPermission[] perms, IMAPFolder imapFolder) throws OXException {
+        List<ACL> acls = new ArrayList<ACL>(perms.length);
+        Entity2ACLArgs entity2AclArgs = IMAPFolderConverter.getEntity2AclArgs(session, imapFolder, imapConfig);
         for (int i = 0; i < perms.length; i++) {
-            final ACLPermission aclPermission = getACLPermission(perms[i]);
+            ACLPermission aclPermission = getACLPermission(perms[i]);
             try {
-                acls.add(aclPermission.getPermissionACL(
-                    IMAPFolderConverter.getEntity2AclArgs(session, imapFolder, imapConfig),
-                    imapConfig,
-                    imapStore,
-                    ctx));
-            } catch (final OXException e) {
+                acls.add(aclPermission.getPermissionACL(entity2AclArgs, imapConfig, imapStore, ctx));
+            } catch (OXException e) {
                 if (Entity2ACLExceptionCode.UNKNOWN_USER.equals(e)) {
                     // Obviously the user is not known, skip
                     LOG.debug("User {} is not known on IMAP server \"{}\"", Integer.valueOf(aclPermission.getEntity()), imapConfig.getImapServerAddress());
@@ -2972,11 +2969,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return acls.toArray(new ACL[acls.size()]);
     }
 
-    private ACLPermission getACLPermission(final OCLPermission permission) {
+    private ACLPermission getACLPermission(OCLPermission permission) {
         if (permission instanceof ACLPermission) {
             return (ACLPermission) permission;
         }
-        final ACLPermission retval = new ACLPermission();
+        ACLPermission retval = new ACLPermission();
         retval.setEntity(permission.getEntity());
         retval.setDeleteObjectPermission(permission.getDeletePermission());
         retval.setFolderAdmin(permission.isFolderAdmin());

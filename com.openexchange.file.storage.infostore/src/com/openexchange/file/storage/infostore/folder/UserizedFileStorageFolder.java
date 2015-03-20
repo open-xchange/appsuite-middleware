@@ -52,6 +52,7 @@ package com.openexchange.file.storage.infostore.folder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -69,6 +70,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
+import com.openexchange.i18n.LocaleTools;
 
 /**
  * {@link UserizedFileStorageFolder}
@@ -83,16 +85,25 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
      * Initializes a new {@link UserizedFileStorageFolder} from the supplied userized folder
      *
      * @param folder The userized folder to construct the file storage folder from
-     * @throws OXException
      */
     public UserizedFileStorageFolder(UserizedFolder folder) throws OXException {
+        this(folder, null);
+    }
+
+    /**
+     * Initializes a new {@link UserizedFileStorageFolder} from the supplied userized folder
+     *
+     * @param folder The userized folder to construct the file storage folder from
+     * @param locale The locale to use, or <code>null</code> to fall back to the default locale
+     */
+    public UserizedFileStorageFolder(UserizedFolder folder, Locale locale) throws OXException {
         super();
         setCreationDate(folder.getCreationDateUTC());
         setDefaultFolder(folder.isDefault());
         setExists(true);
         setId(folder.getID());
         setLastModifiedDate(folder.getLastModifiedUTC());
-        setName(folder.getName());
+        setName(folder.getLocalizedName(null == locale ? LocaleTools.DEFAULT_LOCALE : locale, folder.isAltNames()));
         setParentId(folder.getParentID());
         setPermissions(parsePermission(folder.getPermissions()));
         setOwnPermission(parsePermission(folder.getOwnPermission()));

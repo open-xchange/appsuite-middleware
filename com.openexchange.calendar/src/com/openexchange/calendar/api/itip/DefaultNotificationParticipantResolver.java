@@ -58,6 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.calendar.itip.generators.NotificationConfiguration;
@@ -91,6 +93,8 @@ import com.openexchange.user.UserService;
  */
 public class DefaultNotificationParticipantResolver implements
 		NotificationParticipantResolver {
+    
+    Logger LOG = LoggerFactory.getLogger(DefaultNotificationParticipantResolver.class);
 
 	private final UserService userService;
 	private final GroupService groupService;
@@ -456,10 +460,15 @@ public class DefaultNotificationParticipantResolver implements
 			final NotificationParticipant notificationOrganizer = new NotificationParticipant(
 					ITipRole.ORGANIZER, organizerUser == null, organizer);
 			final NotificationConfiguration configuration = defaultConfiguration.clone();
-			if (organizerUser != null) {
-				configure(organizerUser, ctx, configuration, true);
-				notificationOrganizer.setUser(organizerUser);
-				notificationOrganizer.setContext(ctx);
+			if (organizerUser == null) {
+			    LOG.warn("Unable to resolve Organizer for appointment: " + appointment.getObjectID() + " in context " + ctx.getContextId());
+			} else {
+			    configure(organizerUser, ctx, configuration, true);
+			    notificationOrganizer.setUser(organizerUser);
+			    notificationOrganizer.setContext(ctx);
+			    notificationOrganizer.setDisplayName(organizerUser.getDisplayName());
+			    notificationOrganizer.setLocale(organizerUser.getLocale());
+			    notificationOrganizer.setTimezone(TimeZone.getTimeZone(organizerUser.getTimeZone()));			    
 			}
 			notificationOrganizer.setConfiguration(configuration);
 

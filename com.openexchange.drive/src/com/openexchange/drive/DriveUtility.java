@@ -49,6 +49,8 @@
 
 package com.openexchange.drive;
 
+import java.util.List;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -105,5 +107,14 @@ public interface DriveUtility {
      * @return <code>true</code> if the session belongs to a known drive client, <code>false</code>, otherwise
      */
     boolean isDriveSession(Session session);
+
+    /**
+     * Gets metadata for all (direct) subfolders of the drive session's root folder. The JSON format of the metadata is the same as used
+     * inside the <code>.drive-meta</code> files, yet without the metadata for contained files.
+     *
+     * @param session The drive session, holding the root folder identifier to get the subfolders for
+     * @return The metadata of the subfolders as a list of JSON objects, or an empty list if no subfolders were found
+     */
+    List<JSONObject> getSubfolderMetadata(DriveSession session) throws OXException;
 
 }

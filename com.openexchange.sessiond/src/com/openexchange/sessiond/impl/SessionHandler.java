@@ -179,6 +179,15 @@ public final class SessionHandler {
     }
 
     /**
+     * Gets the configuration
+     *
+     * @return The configuration
+     */
+    public static SessiondConfigInterface getConfig() {
+        return config;
+    }
+
+    /**
      * Gets the session obfuscator that performs the conversion into/from a stored session
      *
      * @return The session obfuscator instance
@@ -1324,24 +1333,12 @@ public final class SessionHandler {
         List<SessionControl> controls = sessionData.rotateShort();
         if (config.isAutoLogin()) {
             for (final SessionControl sessionControl : controls) {
-                LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", new Object() {
-
-                    @Override
-                    public String toString() {
-                        return sessionControl.getSession().getSessionID();
-                    }
-                });
+                LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
             }
             postSessionDataRemoval(controls);
         } else {
             for (final SessionControl sessionControl : controls) {
-                LOG.info("Session timed out. ID: {}", new Object() {
-
-                    @Override
-                    public String toString() {
-                        return sessionControl.getSession().getSessionID();
-                    }
-                });
+                LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
             }
             postContainerRemoval(controls, true);
         }
@@ -1640,16 +1637,10 @@ public final class SessionHandler {
             sessionData.addTimerService(service);
         }
         long containerTimeout = config.getSessionContainerTimeout();
-        shortSessionContainerRotator = service.scheduleWithFixedDelay(
-            new ShortSessionContainerRotator(),
-            containerTimeout,
-            containerTimeout);
+        shortSessionContainerRotator = service.scheduleWithFixedDelay(new ShortSessionContainerRotator(), containerTimeout, containerTimeout);
         if (config.isAutoLogin()) {
             long longContainerTimeout = config.getLongTermSessionContainerTimeout();
-            longSessionContainerRotator = service.scheduleWithFixedDelay(
-                new LongSessionContainerRotator(),
-                longContainerTimeout,
-                longContainerTimeout);
+            longSessionContainerRotator = service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
         }
     }
 

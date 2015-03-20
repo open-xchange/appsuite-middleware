@@ -49,10 +49,18 @@
 
 package com.openexchange.drive.impl.internal;
 
-import com.openexchange.drive.DriveUtility;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.DriveUtility;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
+import com.openexchange.drive.impl.metadata.JsonDirectoryMetadata;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.session.Session;
 
 /**
@@ -103,6 +111,20 @@ public class DriveUtilityImpl implements DriveUtility {
     @Override
     public boolean isDriveSession(Session session) {
         return DriveUtils.isDriveSession(session);
+    }
+
+    @Override
+    public List<JSONObject> getSubfolderMetadata(DriveSession session) throws OXException {
+        SyncSession syncSession = new SyncSession(session);
+        Map<String, FileStorageFolder> subfolders = syncSession.getStorage().getSubfolders(DriveConstants.ROOT_PATH);
+        if (null == subfolders || 0 == subfolders.size()) {
+            return Collections.emptyList();
+        }
+        List<JSONObject> metadata = new ArrayList<JSONObject>();
+        for (FileStorageFolder subfolder : subfolders.values()) {
+            metadata.add(new JsonDirectoryMetadata(syncSession, subfolder).build(false));
+        }
+        return metadata;
     }
 
 }

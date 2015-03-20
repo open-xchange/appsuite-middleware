@@ -50,6 +50,7 @@
 package com.openexchange.mobilepush.rampup;
 
 import com.openexchange.login.DefaultAppSuiteLoginRampUp;
+import com.openexchange.mobilepush.Constants;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -61,6 +62,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public class MobileLoginRampUp extends DefaultAppSuiteLoginRampUp {
 
+    private static final String CLIENT_ID = Constants.CLIENT_ID;
+
     /**
      * Initializes a new {@link MobileLoginRampUp}.
      */
@@ -70,7 +73,7 @@ public class MobileLoginRampUp extends DefaultAppSuiteLoginRampUp {
 
     @Override
     public boolean contributesTo(String client) {
-        return "open-xchange-mailapp".equals(client);
+        return CLIENT_ID.equals(client);
     }
 
 }

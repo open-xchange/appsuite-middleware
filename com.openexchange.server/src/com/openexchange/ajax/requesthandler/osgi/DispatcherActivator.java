@@ -276,7 +276,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
-                if (!servlets.add(module)) {
+                if (servlets.add(module)) {
                     registerSessionServlet(prefix + module, dispatcherServlet);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
                         registerSessionServlet(prefix + "oauth/modules/" + module, oAuthDispatcherServlet);

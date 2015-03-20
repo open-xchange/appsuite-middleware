@@ -93,37 +93,26 @@ public enum Entity2ACLExceptionCode implements DisplayableOXExceptionCode {
     /**
      * User %1$s from context %2$s is not known on IMAP server "%3$s".
      */
-    UNKNOWN_USER("User %1$s from context %2$s is not known on IMAP server \"%3$s\".", Category.CATEGORY_ERROR, 9, null);
-
+    UNKNOWN_USER("User %1$s from context %2$s is not known on IMAP server \"%3$s\".", Category.CATEGORY_ERROR, 9, null),
     /**
-     * Category of the exception.
+     * Group %1$s from context %2$s is not known on IMAP server \"%3$s\" (display name=%4$s).
      */
-    final Category category;
+    UNKNOWN_GROUP("Group %1$s from context %2$s is not known on IMAP server \"%3$s\" (display name=%4$s).", Category.CATEGORY_USER_INPUT, 10, Entity2ACLExceptionMessages.UNKNOWN_GROUP_MSG),
+    ;
 
-    /**
-     * Message of the exception.
-     */
-    final String message;
-
-    /**
-     * Detail number of the exception.
-     */
-    final int number;
-    
-    private String displayMessage;
+    private final Category category;
+    private final String message;
+    private final int number;
+    private final String displayMessage;
 
     /**
      * Default constructor.
-     *
-     * @param message message.
-     * @param category category.
-     * @param detailNumber detail number.
      */
     private Entity2ACLExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.category = category;
         this.number = detailNumber;
-        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -154,7 +143,7 @@ public enum Entity2ACLExceptionCode implements DisplayableOXExceptionCode {
     public int getNumber() {
         return number;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

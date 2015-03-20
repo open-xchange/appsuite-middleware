@@ -274,9 +274,8 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}", lf, lf, lf);
             return null;
         }
-        /*
-         * Create hazelcast instance from configuration
-         */
+
+        // Create Hazelcast instance from configuration
         Config config = configService.getConfig();
         {
             LOG.info("{}Hazelcast:{}    Creating new hazelcast instance...{}", lf, lf, lf);
@@ -289,15 +288,18 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
         }
 
         // Custom OutOfMemoryHandler implementation
+        final boolean shutdownOnOutOfMemory = configService.shutdownOnOutOfMemory();
         OutOfMemoryHandler handler = new OutOfMemoryHandler() {
 
             @Override
             public void onOutOfMemory(OutOfMemoryError oom, HazelcastInstance[] hazelcastInstances) {
-                try {
-                    closeTrackers();
-                    stopHazelcast();
-                } catch (Exception e) {
-                    LOG.error("Failed to shut-down Hazelcast", e);
+                if (shutdownOnOutOfMemory) {
+                    try {
+                        closeTrackers();
+                        stopHazelcast();
+                    } catch (Exception e) {
+                        LOG.error("Failed to shut-down Hazelcast", e);
+                    }
                 }
                 ExceptionUtils.handleOOM(oom);
             }

@@ -115,11 +115,20 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
     public JSONObject build(boolean includeFiles) throws OXException {
         try {
             JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", folder.getId());
+            jsonObject.put("name", folder.getName());
             jsonObject.put("path", session.getStorage().getPath(folderID));
-            jsonObject.put("created", folder.getCreationDate().getTime());
-            jsonObject.put("modified", folder.getLastModifiedDate().getTime());
+            if (null != folder.getCreationDate()) {
+                jsonObject.put("created", folder.getCreationDate().getTime());
+            }
+            if (null != folder.getLastModifiedDate()) {
+                jsonObject.put("modified", folder.getLastModifiedDate().getTime());
+            }
             if (folder.isDefaultFolder()) {
                 jsonObject.put("default_folder", true);
+            }
+            if (folder.hasSubfolders()) {
+                jsonObject.put("has_subfolders", true);
             }
             if (TypeAware.class.isInstance(folder)) {
                 switch (((TypeAware) folder).getType()) {
@@ -154,27 +163,26 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
                     jsonObject.put("shared", true);
                 }
             }
-            List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
-            List<Field> fields = new ArrayList<Field>(Arrays.asList(
-                Field.CREATED, Field.LAST_MODIFIED, Field.FILENAME, Field.CREATED_BY, Field.MODIFIED_BY, Field.FILE_MIMETYPE));
-            if (session.getStorage().supports(FileStorageCapability.OBJECT_PERMISSIONS)) {
-                specialCapabilites.add(FileStorageCapability.OBJECT_PERMISSIONS);
-                fields.add(Field.OBJECT_PERMISSIONS);
-            }
-            if (session.getStorage().supports(FileStorageCapability.LOCKS)) {
-                specialCapabilites.add(FileStorageCapability.LOCKS);
-                fields.add(Field.LOCKED_UNTIL);
-            }
-            if (session.getStorage().supports(FileStorageCapability.FILE_VERSIONS)) {
-                specialCapabilites.add(FileStorageCapability.FILE_VERSIONS);
-                fields.add(Field.NUMBER_OF_VERSIONS);
-                fields.add(Field.VERSION);
-                fields.add(Field.VERSION_COMMENT);
-            }
             if (includeFiles) {
+                List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
+                List<Field> fields = new ArrayList<Field>(Arrays.asList(
+                    Field.CREATED, Field.LAST_MODIFIED, Field.FILENAME, Field.CREATED_BY, Field.MODIFIED_BY, Field.FILE_MIMETYPE));
+                if (session.getStorage().supports(FileStorageCapability.OBJECT_PERMISSIONS)) {
+                    specialCapabilites.add(FileStorageCapability.OBJECT_PERMISSIONS);
+                    fields.add(Field.OBJECT_PERMISSIONS);
+                }
+                if (session.getStorage().supports(FileStorageCapability.LOCKS)) {
+                    specialCapabilites.add(FileStorageCapability.LOCKS);
+                    fields.add(Field.LOCKED_UNTIL);
+                }
+                if (session.getStorage().supports(FileStorageCapability.FILE_VERSIONS)) {
+                    specialCapabilites.add(FileStorageCapability.FILE_VERSIONS);
+                    fields.add(Field.NUMBER_OF_VERSIONS);
+                    fields.add(Field.VERSION);
+                    fields.add(Field.VERSION_COMMENT);
+                }
                 List<File> files = session.getStorage().getFilesInFolder(folderID, false, null, fields);
-                jsonObject.putOpt("files", getJSONFiles(
-                    files, specialCapabilites.toArray(new FileStorageCapability[specialCapabilites.size()])));
+                jsonObject.putOpt("files", getJSONFiles(files, specialCapabilites.toArray(new FileStorageCapability[specialCapabilites.size()])));
             }
             return jsonObject;
         } catch (JSONException e) {
