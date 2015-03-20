@@ -6,9 +6,9 @@
     {
       "collectionId": "e80e9463-1461-7081-a309-a2d148a854fb",
       "id": "038fb14a-6ac6-35da-dd0c-51f8456025cd",
-      "name": "Get Contacts Quota",
+      "name": "Get MAX_UPLOAD_SIZE",
       "description": "",
-      "url": "http://{{ox}}:8009/rest/configuration/v1/property/com.openexchange.quota.contact",
+      "url": "http://{{ox}}:8009/rest/configuration/v1/property/MAX_UPLOAD_SIZE",
       "method": "GET",
       "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
       "data": [
@@ -32,7 +32,7 @@
     {
       "collectionId": "e80e9463-1461-7081-a309-a2d148a854fb",
       "id": "39d7bbc3-0fb3-e492-270d-9478a64ef25c",
-      "name": "Get Find Config",
+      "name": "Get Find Config (all with prefix)",
       "description": "",
       "url": "http://{{ox}}:8009/rest/configuration/v1/withPrefix/com.openexchange.find",
       "method": "GET",
@@ -58,9 +58,9 @@
     {
       "collectionId": "e80e9463-1461-7081-a309-a2d148a854fb",
       "id": "5f2cf74e-b1b2-4a85-9409-265e591e8972",
-      "name": "Get Contacts Quota For User",
+      "name": "Get MAX_UPLOAD_SIZE For User",
       "description": "",
-      "url": "http://{{ox}}:8009/rest/configuration/v1/property/com.openexchange.quota.contact/424242669/84",
+      "url": "http://{{ox}}:8009/rest/configuration/v1/property/MAX_UPLOAD_SIZE/424242669/4126",
       "method": "GET",
       "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
       "data": [
