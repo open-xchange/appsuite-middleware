@@ -91,7 +91,8 @@ public class SessionToucher implements LoginHandlerService {
 
     @Override
     public void handleLogin(LoginResult login) throws OXException {
-        if (CLIENT_ID.equals(login.getSession().getClient())) {
+        Session session = login.getSession();
+        if ((null != session) && CLIENT_ID.equals(session.getClient())) {
             TimerService timerService = services.getService(TimerService.class);
             if (null != timerService) {
                 Toucher toucher = new Toucher(CLIENT_ID, System.currentTimeMillis() + LIFETIME);
