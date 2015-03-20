@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,40 @@
  *
  */
 
-package com.openexchange.mobilepush.osgi;
-
-import com.openexchange.ajax.requesthandler.Dispatcher;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.login.LoginRampUpService;
-import com.openexchange.mobilepush.loginhandler.SessionToucher;
-import com.openexchange.mobilepush.rampup.MobileLoginRampUp;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.timer.TimerService;
+package com.openexchange.mobilepush;
 
 /**
- * {@link MobilePushActivator}
+ * {@link Constants} - Constants for the Mobile Push module.
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class MobilePushActivator extends HousekeepingActivator {
+public class Constants {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ThreadPoolService.class, Dispatcher.class, TimerService.class, SessiondService.class };
+    /**
+     * Initializes a new {@link Constants}.
+     */
+    private Constants() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MobilePushActivator.class);
-        try {
-            logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
-            registerService(LoginRampUpService.class, new MobileLoginRampUp(this));
-            registerService(LoginHandlerService.class, new SessionToucher(this));
-        } catch (Exception e) {
-            logger.error("starting bundle {} failed: ", context.getBundle().getSymbolicName(), e);
-            throw e;
-        }
-    }
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The client identifier for the mobile application.
+     */
+    public static final String CLIENT_ID = "open-xchange-mailapp";
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The frequency for a session toucher.
+     */
+    public static final long SESSION_TOUCHER_FREQUENCY = 6L * 60L * 1000L; // 6 minutes
+
+    /**
+     * The life time for a session toucher.
+     */
+    public static final long SESSION_TOUCHER_LIFETIME = 8L * 60L * 60L * 1000L; // 8 hours
 
 }

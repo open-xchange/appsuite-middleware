@@ -179,6 +179,15 @@ public final class SessionHandler {
     }
 
     /**
+     * Gets the configuration
+     *
+     * @return The configuration
+     */
+    public static SessiondConfigInterface getConfig() {
+        return config;
+    }
+
+    /**
      * Gets the session obfuscator that performs the conversion into/from a stored session
      *
      * @return The session obfuscator instance
@@ -1628,16 +1637,10 @@ public final class SessionHandler {
             sessionData.addTimerService(service);
         }
         long containerTimeout = config.getSessionContainerTimeout();
-        shortSessionContainerRotator = service.scheduleWithFixedDelay(
-            new ShortSessionContainerRotator(),
-            containerTimeout,
-            containerTimeout);
+        shortSessionContainerRotator = service.scheduleWithFixedDelay(new ShortSessionContainerRotator(), containerTimeout, containerTimeout);
         if (config.isAutoLogin()) {
             long longContainerTimeout = config.getLongTermSessionContainerTimeout();
-            longSessionContainerRotator = service.scheduleWithFixedDelay(
-                new LongSessionContainerRotator(),
-                longContainerTimeout,
-                longContainerTimeout);
+            longSessionContainerRotator = service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
         }
     }
 
