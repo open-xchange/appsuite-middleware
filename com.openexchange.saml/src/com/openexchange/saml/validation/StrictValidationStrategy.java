@@ -60,7 +60,9 @@ import org.opensaml.saml2.core.Conditions;
 import org.opensaml.saml2.core.EncryptedAssertion;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.LogoutRequest;
+import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.StatusResponseType;
 import org.opensaml.saml2.core.Subject;
 import org.opensaml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml2.core.SubjectConfirmationData;
@@ -75,6 +77,7 @@ import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.state.AuthnRequestInfo;
+import com.openexchange.saml.state.LogoutRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 import com.openexchange.saml.validation.AssertionValidators.AssertionIssuerValidator;
 import com.openexchange.saml.validation.AssertionValidators.AssertionSignatureValidator;
@@ -134,11 +137,11 @@ public class StrictValidationStrategy implements ValidationStrategy {
      * </p>
      */
     @Override
-    public AuthnResponseValidationResult validateAuthnResponse(Response response, Binding binding) throws ValidationException {
-        List<Assertion> responseValidationResult = validateResponse(binding, response);
+    public AuthnResponseValidationResult validateAuthnResponse(Response response, AuthnRequestInfo requestInfo, Binding binding) throws ValidationException {
+        List<Assertion> responseValidationResult = validateResponse(binding, response, requestInfo);
         Assertion bearerAssertion = determineAssertion(binding, response, responseValidationResult);
-        AuthnRequestInfo authnRequestInfo = validateBearerAssertion(binding, response, bearerAssertion);
-        return new AuthnResponseValidationResult(bearerAssertion, authnRequestInfo);
+        validateBearerAssertion(binding, response, requestInfo, bearerAssertion);
+        return new AuthnResponseValidationResult(bearerAssertion);
     }
 
     @Override
@@ -178,6 +181,15 @@ public class StrictValidationStrategy implements ValidationStrategy {
 
         if (logoutRequest.getBaseID() == null && logoutRequest.getNameID() == null && logoutRequest.getEncryptedID() == null) {
             throw new ValidationException(ValidationFailedReason.MISSING_ELEMENT, "Neither 'BaseID' nor 'NameID' nor 'EncryptedID' is contained in LogoutRequest '" + logoutRequest.getID() + "'");
+        }
+    }
+
+    @Override
+    public void validateLogoutResponse(LogoutResponse response, LogoutRequestInfo requestInfo, Binding binding) throws ValidationException {
+        List<ResponseValidator> responseValidators = getLogoutResponseValidators(binding, response, requestInfo);
+        ValidationError error = validateResponse(response, responseValidators);
+        if (error != null) {
+            throw error.toValidationException();
         }
     }
 
@@ -234,11 +246,12 @@ public class StrictValidationStrategy implements ValidationStrategy {
      *
      * @param binding The binding via which the response was received
      * @param response The response
+     * @param requestInfo The request info
      * @return All assertions contained in the response
      * @throws ValidationException If validation fails
      */
-    protected List<Assertion> validateResponse(Binding binding, Response response) throws ValidationException {
-        List<ResponseValidator> responseValidators = getResponseValidators(binding, response);
+    protected List<Assertion> validateResponse(Binding binding, Response response, AuthnRequestInfo requestInfo) throws ValidationException {
+        List<ResponseValidator> responseValidators = getAuthnResponseValidators(binding, response, requestInfo);
         ValidationError error = validateResponse(response, responseValidators);
         if (error != null) {
             throw error.toValidationException();
@@ -368,8 +381,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
 
     /**
      * <p>
-     *   Takes the determined bearer assertion and performs some final validation steps. If a {@link AuthnRequestInfo} belonging to the response could be determined
-     *   via {@link StateManagement}, it is returned. If any validation step fails, a validation exception is thrown.
+     *   Takes the determined bearer assertion and performs some final validation steps. If any validation step fails, a validation exception is thrown.
      * </p>
      *
      * <p>Validation steps:</p>
@@ -386,7 +398,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
      * @return The {@link AuthnRequestInfo} according to the response based on possibly set InResponseTo attributes or <code>null</code> if InResponseTo is not set
      * @throws ValidationException If any validation step fails
      */
-    protected AuthnRequestInfo validateBearerAssertion(Binding binding, Response response, Assertion bearerAssertion) throws ValidationException {
+    protected void validateBearerAssertion(Binding binding, Response response, AuthnRequestInfo requestInfo, Assertion bearerAssertion) throws ValidationException {
         /*
          * At lease one bearer <SubjectConfirmation> element MUST contain a
          * <SubjectConfirmationData> element that itself MUST contain a Recipient attribute containing
@@ -413,6 +425,10 @@ public class StrictValidationStrategy implements ValidationStrategy {
             throw new ValidationException(ValidationFailedReason.MISSING_ATTRIBUTE, "SubjectConfirmationData contains no 'InResponseTo' attribute");
         }
 
+        if (!inResponseTo.equals(requestInfo.getRequestId())) {
+            throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "SubjectConfirmationData contains invalid 'InResponseTo' attribute: " + inResponseTo);
+        }
+
         /*
          * Check conditions
          */
@@ -434,24 +450,23 @@ public class StrictValidationStrategy implements ValidationStrategy {
          * [profiles 06 - 4.1.4.2p21]
          */
         checkForReplayAttack(response);
-
-        return getAccordingRequestInfo(response, confirmationData);
     }
 
     /**
-     * Override this method to change the basic validation steps for the response objects.
+     * Override this method to change the basic validation steps for the authentication response objects.
      *
      * @param binding The binding via which the response was received
      * @param response The response
+     * @param requestInfo The request info
      * @return The list of {@link ResponseValidator}s used to the response
      */
-    protected List<ResponseValidator> getResponseValidators(Binding binding, Response response) {
+    protected List<ResponseValidator> getAuthnResponseValidators(Binding binding, Response response, AuthnRequestInfo requestInfo) {
         List<ResponseValidator> responseValidators = new LinkedList<ResponseValidator>();
 
         /*
          * If response is signed, we need to verify the signature
          */
-        responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredential()));
+        responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredential(), false));
 
         /*
          * If the message is signed, the Destination XML attribute in the root SAML element of the protocol
@@ -477,6 +492,73 @@ public class StrictValidationStrategy implements ValidationStrategy {
          */
         boolean allowNullIssuer = !(response.isSigned() || response.getEncryptedAssertions().size() > 0);
         responseValidators.add(new ResponseIssuerValidator(config.getIdentityProviderEntityID(), allowNullIssuer));
+
+        /*
+         * A reference to the identifier of the request to which the response corresponds, if any. If the response
+         * is not generated in response to a request, or if the ID attribute value of a request cannot be
+         * determined (for example, the request is malformed), then this attribute MUST NOT be present.
+         * Otherwise, it MUST be present and its value MUST match the value of the corresponding request's ID
+         * attribute.
+         * [core 06 - 3.2.2p38]
+         *
+         * We don't support unsolicited responses, so InResponseTo must be set
+         */
+        responseValidators.add(new ResponseValidators.InResponseToValidator(requestInfo.getRequestId(), false));
+
+        return responseValidators;
+    }
+
+    /**
+     * Override this method to change the basic validation steps for the logout response objects.
+     *
+     * @param binding The binding via which the response was received
+     * @param response The response
+     * @param requestInfo The request info
+     * @return The list of {@link ResponseValidator}s used to the response
+     */
+    protected List<ResponseValidator> getLogoutResponseValidators(Binding binding, StatusResponseType response, LogoutRequestInfo requestInfo) {
+        List<ResponseValidator> responseValidators = new LinkedList<ResponseValidator>();
+
+        /*
+         * The responder MUST authenticate itself to the requester and ensure message integrity, either by signing
+         * the message or using a binding-specific mechanism.
+         * [profiles 06 - 4.4.4.1p39]
+         */
+        responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredential(), true));
+
+        /*
+         * If the message is signed, the Destination XML attribute in the root SAML element of the protocol
+         * message MUST contain the URL to which the sender has instructed the user agent to deliver the
+         * message. The recipient MUST then verify that the value matches the location at which the message has
+         * been received.
+         * [bindings 05 - 3.4.5.2p19/3.5.5.2p24]
+         */
+        boolean allowNullDestination = !((binding == Binding.HTTP_POST || binding == Binding.HTTP_REDIRECT) && response.isSigned());
+        responseValidators.add(new ResponseDestinationValidator(config.getAssertionConsumerServiceURL(), allowNullDestination));
+
+        /*
+         * The status code of the response must be 'urn:oasis:names:tc:SAML:2.0:status:Success'
+         */
+        responseValidators.add(new ResponseStatusCodeValidator());
+
+        /*
+         * The <Issuer> element MUST be present and MUST contain the unique identifier of the responding entity;
+         * the Format attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity.
+         * [profiles 06 - 4.4.4.1p39]
+         */
+        responseValidators.add(new ResponseIssuerValidator(config.getIdentityProviderEntityID(), false));
+
+        /*
+         * A reference to the identifier of the request to which the response corresponds, if any. If the response
+         * is not generated in response to a request, or if the ID attribute value of a request cannot be
+         * determined (for example, the request is malformed), then this attribute MUST NOT be present.
+         * Otherwise, it MUST be present and its value MUST match the value of the corresponding request's ID
+         * attribute.
+         * [core 06 - 3.2.2p38]
+         *
+         * We don't support unsolicited responses, so InResponseTo must be set
+         */
+        responseValidators.add(new ResponseValidators.InResponseToValidator(requestInfo.getRequestId(), false));
 
         return responseValidators;
     }
@@ -504,51 +586,6 @@ public class StrictValidationStrategy implements ValidationStrategy {
          */
         assertionValidators.add(new AssertionIssuerValidator(config.getIdentityProviderEntityID()));
         return assertionValidators;
-    }
-
-    /**
-     * Gets the request info according to the passed response. The request is determined by the <code>InResponseTo</code> attributes
-     * of the response or the subject confirmation data. If the attribute is not set in any of both, <code>null</code> is returned.
-     * A validation exception is thrown if:
-     * <ul>
-     *  <li>The attribute is set in both but differs</li>
-     *  <li>No authentication info can be found for the given value</li>
-     * </ul>
-     *
-     * @param The response
-     * @param confirmationData The subject confirmation data of the chosen bearer assertion
-     */
-    protected AuthnRequestInfo getAccordingRequestInfo(Response response, SubjectConfirmationData confirmationData) throws ValidationException {
-        String rInResponseTo = response.getInResponseTo();
-        String scdInResponseTo = confirmationData.getInResponseTo();
-        if (rInResponseTo == null && scdInResponseTo == null) {
-            return null;
-        }
-
-        String inResponseTo;
-        if (rInResponseTo == null) {
-            inResponseTo = scdInResponseTo;
-        } else {
-            if (scdInResponseTo != null) {
-                if (!rInResponseTo.equals(scdInResponseTo)) {
-                    throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "'InResponseTo' attributes of Response and SubjectConfirmationData do not match: " + rInResponseTo + " vs." + scdInResponseTo);
-                }
-            }
-
-            inResponseTo = rInResponseTo;
-        }
-
-        try {
-            AuthnRequestInfo authnRequest = stateManagement.getAuthnRequest(inResponseTo);
-            if (authnRequest == null) {
-                throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "SubjectConfirmationData contains invalid 'InResponseTo' attribute: " + inResponseTo);
-            }
-
-            return authnRequest;
-        } catch (OXException e) {
-            LOG.error("", e);
-            throw new ValidationException(ValidationFailedReason.INTERNAL_ERROR, e.getMessage(), e);
-        }
     }
 
     /**
@@ -581,7 +618,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
         return null;
     }
 
-    private static ValidationError validateResponse(Response response, List<ResponseValidator> responseValidators) {
+    private static ValidationError validateResponse(StatusResponseType response, List<ResponseValidator> responseValidators) {
         for (ResponseValidator responseValidator : responseValidators) {
             ValidationError error = responseValidator.validate(response);
             if (error != null) {

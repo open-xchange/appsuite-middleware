@@ -66,13 +66,14 @@ public interface AuthnRequestInfo {
      *
      * @return The ID
      */
-    String getRequestID();
+    String getRequestId();
 
     /**
-     * Gets the relay state that was sent out with the AuthnRequest.
+     * Gets the domain name via which the HTTP request initiating the AuthnRequest was
+     * received.
      *
-     * @return The relay state
+     * @return The domain name
      */
-    String getRelayState();
+    String getDomainName();
 
 }

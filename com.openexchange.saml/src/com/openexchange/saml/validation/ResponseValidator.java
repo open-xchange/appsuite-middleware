@@ -49,7 +49,7 @@
 
 package com.openexchange.saml.validation;
 
-import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.StatusResponseType;
 
 /**
  * An interface for response validators. Allows to build fine grained validation steps
@@ -67,5 +67,5 @@ public interface ResponseValidator {
      * @return A {@link ValidationError} with an according reason and message if the validation fails.
      * If the validation is successful, <code>null</code> is returned.
      */
-    ValidationError validate(Response response);
+    ValidationError validate(StatusResponseType response);
 }

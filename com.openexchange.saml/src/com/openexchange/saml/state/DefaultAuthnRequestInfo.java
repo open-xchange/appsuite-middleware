@@ -60,16 +60,16 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
 
     private String requestId;
 
-    private String relayState;
+    private String domainName;
 
     @Override
-    public String getRequestID() {
+    public String getRequestId() {
         return requestId;
     }
 
     @Override
-    public String getRelayState() {
-        return relayState;
+    public String getDomainName() {
+        return domainName;
     }
 
 
@@ -78,15 +78,15 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
     }
 
 
-    public void setRelayState(String relayState) {
-        this.relayState = relayState;
+    public void setDomainName(String relayState) {
+        this.domainName = relayState;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((relayState == null) ? 0 : relayState.hashCode());
+        result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
         result = prime * result + ((requestId == null) ? 0 : requestId.hashCode());
         return result;
     }
@@ -100,10 +100,10 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         if (getClass() != obj.getClass())
             return false;
         DefaultAuthnRequestInfo other = (DefaultAuthnRequestInfo) obj;
-        if (relayState == null) {
-            if (other.relayState != null)
+        if (domainName == null) {
+            if (other.domainName != null)
                 return false;
-        } else if (!relayState.equals(other.relayState))
+        } else if (!domainName.equals(other.domainName))
             return false;
         if (requestId == null) {
             if (other.requestId != null)
@@ -115,7 +115,7 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
 
     @Override
     public String toString() {
-        return "DefaultAuthnRequestInfo [requestId=" + requestId + ", relayState=" + relayState + "]";
+        return "DefaultAuthnRequestInfo [requestId=" + requestId + ", domainName=" + domainName + "]";
     }
 
 }

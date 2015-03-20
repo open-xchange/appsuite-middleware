@@ -66,12 +66,23 @@ public interface ExceptionHandler {
     /**
      * This method is called when {@link WebSSOProvider#handleAuthnResponse(HttpServletRequest, HttpServletResponse, com.openexchange.saml.SAMLConfig.Binding)}
      * failed with an exception. An exception handler is responsible for answering the HTTP request then. Normally the request is a redirect, triggered by the
-     * IDP and the result is directly visible to the user.
+     * IDP and the result is directly visible to the user. I.e. this method is responsible to help the user out of this messed up situation.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
      * @param exception The thrown exception
      */
     void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception);
+
+    /**
+     * This method is called when {@link WebSSOProvider#handleLogoutRequest(HttpServletRequest, HttpServletResponse, com.openexchange.saml.SAMLConfig.Binding)}
+     * failed with an exception. An exception handler is responsible for answering the HTTP request then. Normally the request is a redirect, triggered by the
+     * IDP and the result is directly visible to the user. I.e. this method is responsible to help the user out of this messed up situation.
+     *
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @param exception The thrown exception
+     */
+    void handleLogoutResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException e);
 
 }

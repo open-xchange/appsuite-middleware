@@ -62,7 +62,7 @@ public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
 
     private String sessionId;
 
-    private String relayState;
+    private String domainName;
 
     @Override
     public String getRequestId() {
@@ -73,8 +73,8 @@ public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
         return sessionId;
     }
     @Override
-    public String getRelayState() {
-        return relayState;
+    public String getDomainName() {
+        return domainName;
     }
 
     public void setRequestId(String requestId) {
@@ -85,8 +85,50 @@ public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
         this.sessionId = sessionId;
     }
 
-    public void setRelayState(String relayState) {
-        this.relayState = relayState;
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
+        result = prime * result + ((requestId == null) ? 0 : requestId.hashCode());
+        result = prime * result + ((sessionId == null) ? 0 : sessionId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DefaultLogoutRequestInfo other = (DefaultLogoutRequestInfo) obj;
+        if (domainName == null) {
+            if (other.domainName != null)
+                return false;
+        } else if (!domainName.equals(other.domainName))
+            return false;
+        if (requestId == null) {
+            if (other.requestId != null)
+                return false;
+        } else if (!requestId.equals(other.requestId))
+            return false;
+        if (sessionId == null) {
+            if (other.sessionId != null)
+                return false;
+        } else if (!sessionId.equals(other.sessionId))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultLogoutRequestInfo [requestId=" + requestId + ", sessionId=" + sessionId + ", domainName=" + domainName + "]";
     }
 
 }

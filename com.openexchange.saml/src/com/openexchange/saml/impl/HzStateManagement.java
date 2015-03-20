@@ -53,10 +53,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.DefaultLogoutRequestInfo;
@@ -84,32 +86,30 @@ public class HzStateManagement implements StateManagement {
     }
 
     @Override
-    public void addAuthnRequest(AuthnRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException {
+    public String addAuthnRequestInfo(AuthnRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException {
         Map<String, String> infoMap = new HashMap<String, String>(2);
-        String relayState = requestInfo.getRelayState();
-        if (relayState != null) {
-            infoMap.put("relayState", relayState);
+        infoMap.put("requestId", requestInfo.getRequestId());
+        String domainName = requestInfo.getDomainName();
+        if (domainName != null) {
+            infoMap.put("domainName", domainName);
         }
 
-        getRequestInfoMap().put(requestInfo.getRequestID(), infoMap, ttl, timeUnit);
+        String id = generateID();
+        getRequestInfoMap().put(id, infoMap, ttl, timeUnit);
+        return id;
     }
 
     @Override
-    public AuthnRequestInfo getAuthnRequest(String id) throws OXException {
-        Map<String, String> infoMap = getRequestInfoMap().get(id);
+    public AuthnRequestInfo removeAuthnRequestInfo(String id) throws OXException {
+        Map<String, String> infoMap = getRequestInfoMap().remove(id);
         if (infoMap == null) {
             return null;
         }
 
         DefaultAuthnRequestInfo requestInfo = new DefaultAuthnRequestInfo();
-        requestInfo.setRequestId(id);
-        requestInfo.setRelayState(infoMap.get("relayState"));
+        requestInfo.setRequestId(infoMap.get("requestId"));
+        requestInfo.setDomainName(infoMap.get("domainName"));
         return requestInfo;
-    }
-
-    @Override
-    public void removeAuthnRequestInfo(String requestID) throws OXException {
-        getRequestInfoMap().remove(requestID);
     }
 
     @Override
@@ -125,32 +125,35 @@ public class HzStateManagement implements StateManagement {
     }
 
     @Override
-    public void addLogoutRequest(LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException {
-        Map<String, String> infoMap = new HashMap<String, String>(4);
-        String relayState = requestInfo.getRelayState();
-        if (relayState != null) {
-            infoMap.put("relayState", relayState);
+    public String addLogoutRequestInfo(LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException {
+        Map<String, String> infoMap = new HashMap<String, String>(5);
+        infoMap.put("requestId", requestInfo.getRequestId());
+        String domainName = requestInfo.getDomainName();
+        if (domainName != null) {
+            infoMap.put("domainName", domainName);
         }
         String sessionId = requestInfo.getSessionId();
         if (sessionId != null) {
             infoMap.put("sessionId", sessionId);
         }
 
-        getRequestInfoMap().put(requestInfo.getRequestId(), infoMap, ttl, timeUnit);
+        String id = generateID();
+        getRequestInfoMap().put(id, infoMap, ttl, timeUnit);
+        return id;
     }
 
     @Override
-    public LogoutRequestInfo removeLogoutRequest(String requestId) throws OXException {
-        Map<String, String> infoMap = getRequestInfoMap().remove(requestId);
+    public LogoutRequestInfo removeLogoutRequestInfo(String id) throws OXException {
+        Map<String, String> infoMap = getRequestInfoMap().remove(id);
         if (infoMap == null) {
             return null;
         }
 
         DefaultLogoutRequestInfo requestInfo = new DefaultLogoutRequestInfo();
-        requestInfo.setRequestId(requestId);
-        String relayState = infoMap.get("relayState");
-        if (relayState != null) {
-            requestInfo.setRelayState(relayState);
+        requestInfo.setRequestId(infoMap.get("requestId"));
+        String domainName = infoMap.get("domainName");
+        if (domainName != null) {
+            requestInfo.setDomainName(domainName);
         }
         String sessionId = infoMap.get("sessionId");
         if (sessionId != null) {
@@ -174,6 +177,10 @@ public class HzStateManagement implements StateManagement {
     private IMap<String, Object> getResponseInfoMap() {
         IMap<String, Object> hzMap = hazelcast.getMap("com.openexchange.saml.impl.HzStateManagement.ResponseInfos");
         return hzMap;
+    }
+
+    private static String generateID() {
+        return UUIDs.getUnformattedString(UUID.randomUUID());
     }
 
 }

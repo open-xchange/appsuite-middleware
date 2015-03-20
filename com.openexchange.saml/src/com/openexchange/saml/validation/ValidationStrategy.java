@@ -51,9 +51,11 @@ package com.openexchange.saml.validation;
 
 import javax.servlet.http.HttpServletRequest;
 import org.opensaml.saml2.core.LogoutRequest;
+import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.core.Response;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.state.AuthnRequestInfo;
+import com.openexchange.saml.state.LogoutRequestInfo;
 
 
 /**
@@ -69,13 +71,32 @@ public interface ValidationStrategy {
      * of a certain subject.
      *
      * @param response The response
+     * @param requestInfo The request info according to the response
      * @param binding The binding
      * @return The validation result containing the determined bearer assertion and optionally an according
      *         {@link AuthnRequestInfo} denoting the AuthnRequest that initiated the authentication flow.
      * @throws ValidationException If the response validation fails
      */
-    AuthnResponseValidationResult validateAuthnResponse(Response response, Binding binding) throws ValidationException;
+    AuthnResponseValidationResult validateAuthnResponse(Response response, AuthnRequestInfo requestInfo, Binding binding) throws ValidationException;
 
+    /**
+     * Validates a logout request.
+     *
+     * @param response The request
+     * @param httpRequest The according servlet request
+     * @param binding The binding
+     * @throws ValidationException If the response validation fails
+     */
     void validateLogoutRequest(LogoutRequest logoutRequest, HttpServletRequest httpRequest, Binding binding) throws ValidationException;
+
+    /**
+     * Validates a logout response.
+     *
+     * @param response The response
+     * @param requestInfo The request info according to the response
+     * @param binding The binding
+     * @throws ValidationException If the response validation fails
+     */
+    void validateLogoutResponse(LogoutResponse response, LogoutRequestInfo requestInfo, Binding binding) throws ValidationException;
 
 }

@@ -50,7 +50,7 @@
 package com.openexchange.saml.spi;
 
 /**
- * Encapsulates information about which sessions are to be terminated.
+ * Encapsulates information about whose sessions are to be terminated.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -61,12 +61,6 @@ public class LogoutInfo {
 
     private int userId = -1;
 
-    private boolean terminateAll = false;
-
-    private boolean removeSessionCookies = false;
-
-    private boolean heedSessionIndexes = false;
-
     public LogoutInfo() {
         super();
     }
@@ -74,7 +68,7 @@ public class LogoutInfo {
     /**
      * Gets the context ID.
      *
-     * @return The context ID or <code>-1</code> if not set
+     * @return The context ID or <code>-1</code> if the context could not be determined
      */
     public int getContextId() {
         return contextId;
@@ -83,7 +77,7 @@ public class LogoutInfo {
     /**
      * Sets the context ID.
      *
-     * @param contextId The context ID or <code>-1</code> if not set
+     * @param contextId The context ID
      */
     public void setContextId(int contextId) {
         this.contextId = contextId;
@@ -92,7 +86,7 @@ public class LogoutInfo {
     /**
      * Gets the user ID.
      *
-     * @return The user ID
+     * @return The user ID or <code>-1</code> if the user could not be determined
      */
     public int getUserId() {
         return userId;
@@ -107,71 +101,11 @@ public class LogoutInfo {
         this.userId = userId;
     }
 
-    /**
-     * Gets whether all sessions for the denoted user and context shall be terminated cluster-wide.
-     *
-     * @return <code>true</code> if all shall be terminated, otherwise <code>false</code>
-     */
-    public boolean isTerminateAll() {
-        return terminateAll;
-    }
-
-    /**
-     * Sets whether all sessions for the denoted user and context shall be terminated cluster-wide. If set to <code>true</code>, valid IDs
-     * for context and user must be set. Default: <code>false</code>.
-     *
-     * @param terminateAll <code>true</code> if all shall be terminated, otherwise <code>false</code>
-     */
-    public void setTerminateAll(boolean terminateAll) {
-        this.terminateAll = terminateAll;
-    }
-
-    /**
-     * Gets whether existing session cookies shall be removed with the logout response that is sent over to the IDP.
-     *
-     * @return <code>true</code> if cookies shall be removed, otherwise <code>false</code>
-     */
-    public boolean isRemoveSessionCookies() {
-        return removeSessionCookies;
-    }
-
-    /**
-     * Sets whether existing session cookies shall be removed with the logout response that is sent over to the IDP. This only makes sense,
-     * when a binding is used, where the user agent is involved, i.e. HTTP-Redirect or HTTP-POST. Default: <code>false</code>.
-     *
-     * @param removeSessionCookies <code>true</code> if cookies shall be removed, otherwise <code>false</code>
-     */
-    public void setRemoveSessionCookies(boolean removeSessionCookies) {
-        this.removeSessionCookies = removeSessionCookies;
-    }
-
-    /**
-     * Gets whether the &lt;SessionIndex&gt; elements of the logout request shall be used to determine session IDs that will be terminated.
-     *
-     * @return <code>true</code> if sessions shall be removed by their IDP indexes, otherwise <code>false</code>
-     */
-    public boolean isHeedSessionIndexes() {
-        return heedSessionIndexes;
-    }
-
-    /**
-     * Sets whether the &lt;SessionIndex&gt; elements of the logout request shall be used to determine session IDs that will be terminated.
-     * Default: <code>false</code>.
-     *
-     * @param heedSessionIndexes <code>true</code> if sessions shall be removed by their IDP indexes, otherwise <code>false</code>
-     */
-    public void setHeedSessionIndexes(boolean heedSessionIndexes) {
-        this.heedSessionIndexes = heedSessionIndexes;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + contextId;
-        result = prime * result + (heedSessionIndexes ? 1231 : 1237);
-        result = prime * result + (removeSessionCookies ? 1231 : 1237);
-        result = prime * result + (terminateAll ? 1231 : 1237);
         result = prime * result + userId;
         return result;
     }
@@ -187,12 +121,6 @@ public class LogoutInfo {
         LogoutInfo other = (LogoutInfo) obj;
         if (contextId != other.contextId)
             return false;
-        if (heedSessionIndexes != other.heedSessionIndexes)
-            return false;
-        if (removeSessionCookies != other.removeSessionCookies)
-            return false;
-        if (terminateAll != other.terminateAll)
-            return false;
         if (userId != other.userId)
             return false;
         return true;
@@ -200,7 +128,7 @@ public class LogoutInfo {
 
     @Override
     public String toString() {
-        return "LogoutInfo [contextId=" + contextId + ", userId=" + userId + ", terminateAll=" + terminateAll + ", removeSessionCookies=" + removeSessionCookies + ", heedSessionIndexes=" + heedSessionIndexes + "]";
+        return "LogoutInfo [contextId=" + contextId + ", userId=" + userId + "]";
     }
 
 }

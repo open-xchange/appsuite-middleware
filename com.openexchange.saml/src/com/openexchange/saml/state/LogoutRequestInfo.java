@@ -50,17 +50,36 @@
 package com.openexchange.saml.state;
 
 /**
- * {@link LogoutRequestInfo}
+ * Contains the available information about an already sent logout request.
+ * This is for example used to assign responses to their according requests, i.e.
+ * to validate InResponseTo attributes of response objects.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
+ * @see DefaultLogoutRequestInfo
  */
 public interface LogoutRequestInfo {
 
-    public abstract String getRequestId();
+    /**
+     * Gets the ID of the sent logout request.
+     *
+     * @return The ID
+     */
+    String getRequestId();
 
-    public abstract String getSessionId();
+    /**
+     * Gets the ID of the session that is to be terminated.
+     *
+     * @return The session ID
+     */
+     String getSessionId();
 
-    public abstract String getRelayState();
+    /**
+     * Gets the domain name via which the HTTP request initiating the AuthnRequest was
+     * received.
+     *
+     * @return The domain name
+     */
+     String getDomainName();
 
 }

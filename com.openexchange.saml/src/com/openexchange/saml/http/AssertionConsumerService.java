@@ -89,7 +89,7 @@ public class AssertionConsumerService extends HttpServlet {
         try {
             provider.handleAuthnResponse(httpRequest, httpResponse, Binding.HTTP_POST);
         } catch (OXException e) {
-            LOG.error("Error while handling SAML login response", e);
+            LOG.error("Error while handling SAML authentication response", e);
             exceptionHandler.handleAuthnResponseFailed(httpRequest, httpResponse, e);
         }
     }

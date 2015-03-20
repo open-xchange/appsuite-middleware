@@ -59,7 +59,10 @@ import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
- * A default implementation of {@link ExceptionHandler}.
+ * A default implementation of {@link ExceptionHandler}. It basically responds with a not-so-pretty
+ * error page, displaying a technical error message. You will probably use this one during development,
+ * but return a pretty error page or redirect the user to a different location in production by implementing
+ * your own {@link ExceptionHandler}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -68,6 +71,15 @@ public class DefaultExceptionHandler implements ExceptionHandler {
 
     @Override
     public void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
+        sendErrorPage(httpRequest, httpResponse, exception);
+    }
+
+    @Override
+    public void handleLogoutResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
+        sendErrorPage(httpRequest, httpResponse, exception);
+    }
+
+    private static void sendErrorPage(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
         String message = exception.getDisplayMessage(Locale.US);
         if (message == null) {
             message = exception.getMessage();

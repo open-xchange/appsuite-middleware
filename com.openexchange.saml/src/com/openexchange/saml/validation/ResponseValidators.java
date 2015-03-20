@@ -51,10 +51,10 @@ package com.openexchange.saml.validation;
 
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDType;
-import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.Status;
 import org.opensaml.saml2.core.StatusCode;
 import org.opensaml.saml2.core.StatusMessage;
+import org.opensaml.saml2.core.StatusResponseType;
 import org.opensaml.xml.security.credential.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,16 +77,20 @@ public class ResponseValidators {
 
         private final Credential validationCredential;
 
+        private final boolean enforceSignature;
+
         /**
          * @param validationCredential The credential containing a public key to verify the signature
+         * @param enforceSignature Whether validation should fail if response is not signed
          */
-        public ResponseSignatureValidator(Credential validationCredential) {
+        public ResponseSignatureValidator(Credential validationCredential, boolean enforceSignature) {
             super();
             this.validationCredential = validationCredential;
+            this.enforceSignature = enforceSignature;
         }
 
         @Override
-        public ValidationError validate(Response response) {
+        public ValidationError validate(StatusResponseType response) {
             /*
              * All SAML protocol request and response messages MAY be signed using XML Signature.
              * [core 06 - 5.1p70]
@@ -100,6 +104,8 @@ public class ResponseValidators {
                 }
 
                 return error;
+            } else if (enforceSignature) {
+                return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, "Response '" + response.getID() + "' is not signed");
             }
 
             return null;
@@ -126,7 +132,7 @@ public class ResponseValidators {
         }
 
         @Override
-        public ValidationError validate(Response response) {
+        public ValidationError validate(StatusResponseType response) {
             String actual = response.getDestination();
             if (actual == null) {
                 if (allowNull) {
@@ -165,7 +171,7 @@ public class ResponseValidators {
         }
 
         @Override
-        public ValidationError validate(Response response) {
+        public ValidationError validate(StatusResponseType response) {
             Status status = response.getStatus();
             if (status == null) {
                 return new ValidationError(ValidationFailedReason.MISSING_ELEMENT, "'Status' is missing in response");
@@ -209,7 +215,7 @@ public class ResponseValidators {
         }
 
         @Override
-        public ValidationError validate(Response response) {
+        public ValidationError validate(StatusResponseType response) {
             Issuer issuer = response.getIssuer();
             if (issuer == null) {
                 if (allowNull) {
@@ -231,7 +237,45 @@ public class ResponseValidators {
             LOG.debug("Response contains a valid 'Issuer' element: {}", issuerValue);
             return null;
         }
+    }
 
+    /**
+     * Validates the issuer of the given response
+     */
+    public static final class InResponseToValidator implements ResponseValidator {
+
+        private final String expected;
+
+        private final boolean allowNull;
+
+        /**
+         * @param expected The expected issuer value
+         * @param allowNull <code>true</code> if InResponseTo may be <code>null</code> within the response
+         */
+        public InResponseToValidator(String expected, boolean allowNull) {
+            super();
+            this.expected = expected;
+            this.allowNull = allowNull;
+        }
+
+        @Override
+        public ValidationError validate(StatusResponseType response) {
+            String inResponseTo = response.getInResponseTo();
+            if (inResponseTo == null) {
+                if (allowNull) {
+                    return null;
+                }
+                return new ValidationError(ValidationFailedReason.MISSING_ATTRIBUTE, "'InResponseTo' is missing in response");
+            } else {
+                if (inResponseTo.equals(expected)) {
+                    LOG.debug("Response has valid 'InResponseTo' attribute: {}", response.getID(), inResponseTo);
+                } else {
+                    return new ValidationError(ValidationFailedReason.INVALID_ATTRIBUTE, "'InResponseTo' attribute of response contains unexpected value: " + inResponseTo);
+                }
+            }
+
+            return null;
+        }
     }
 
 }

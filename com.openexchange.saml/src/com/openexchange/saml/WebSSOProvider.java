@@ -52,6 +52,7 @@ package com.openexchange.saml;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.session.Session;
@@ -65,11 +66,11 @@ import com.openexchange.session.Session;
 public interface WebSSOProvider {
 
     /**
-     * Responds with an authentication request based on the configured binding.
+     * Responds with an authentication request.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
-     * @throws OXException If preparing the AuthnRequest fails
+     * @throws OXException To force a client redirect (via {@link LoginExceptionCodes#REDIRECT} or if preparing the AuthnRequest fails
      * @throws IOException If writing to the servlet response fails
      */
     void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException;
@@ -86,14 +87,28 @@ public interface WebSSOProvider {
     void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException;
 
     /**
-     * @param session
-     * @throws OXException
+     * Responds with a logout request based on the configured binding.
      *
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @throws OXException To force a client redirect (via {@link LoginExceptionCodes#REDIRECT} or if preparing the AuthnRequest fails
+     * @throws IOException If writing to the servlet response fails
      */
     void respondWithLogoutRequest(HttpServletRequest req, HttpServletResponse resp, Session session) throws OXException, IOException;
 
     /**
-     * handles a single logout request.
+     * Handles a logout response.
+     *
+     * @param httpRequest The servlet request
+     * @param httpResponse The servlet response
+     * @param binding The binding used to call the assertion consumer service
+     * @throws OXException If an error occurs while processing the response
+     * @throws IOException If writing to the servlet response fails
+     */
+    void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding httpRedirect) throws IOException, OXException;
+
+    /**
+     * Handles a single logout request.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
@@ -110,6 +125,5 @@ public interface WebSSOProvider {
      */
     String getMetadataXML() throws OXException;
 
-    void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding httpRedirect) throws OXException, IOException;
 
 }

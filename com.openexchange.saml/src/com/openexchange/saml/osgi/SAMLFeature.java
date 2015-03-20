@@ -152,7 +152,7 @@ public class SAMLFeature extends DependentServiceStarter {
                 serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(samlBackend), lrhProperties));
                 serviceRegistrations.push(context.registerService(SSOLogoutHandler.class, new SAMLLogoutHandler(serviceProvider), null));
                 String slsServletAlias = prefix + "sls";
-                httpService.registerServlet(slsServletAlias, new SingleLogoutService(serviceProvider), null, null);
+                httpService.registerServlet(slsServletAlias, new SingleLogoutService(serviceProvider, exceptionHandler), null, null);
                 servlets.push(slsServletAlias);
             }
 

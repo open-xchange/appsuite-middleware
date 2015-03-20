@@ -63,7 +63,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
@@ -160,6 +159,11 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
      */
     private static final long LOGOUT_REQUEST_TIMEOUT = 5 * 60 * 1000l;
 
+    /**
+     * The number of milliseconds for which an AuthnRequestInfo is remembered.
+     */
+    private static final long AUTHN_REQUEST_TIMEOUT = 5 * 60 * 1000l;
+
     private final SAMLConfig config;
 
     private final OpenSAML openSAML;
@@ -185,11 +189,11 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     @Override
     public void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         final AuthnRequest authnRequest = customizeAuthnRequest(prepareAuthnRequest(), httpRequest, httpResponse);
-        String relayState = getFrontendDomain(httpRequest);
+        String domainName = getDomainName(httpRequest);
         DefaultAuthnRequestInfo requestInfo = new DefaultAuthnRequestInfo();
         requestInfo.setRequestId(authnRequest.getID());
-        requestInfo.setRelayState(relayState);
-        stateManagement.addAuthnRequest(requestInfo, 5, TimeUnit.MINUTES);
+        requestInfo.setDomainName(domainName);
+        String relayState = stateManagement.addAuthnRequestInfo(requestInfo, AUTHN_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
         try {
             String authnRequestXML = openSAML.marshall(authnRequest);
             LOG.debug("Responding with AuthnRequest:\n{}", new Object() {
@@ -209,25 +213,28 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         if (binding != Binding.HTTP_POST) {
             /*
              * The HTTP Redirect binding MUST NOT be used, as the response will typically exceed the URL length permitted by most user
-             * agents. [profiles 06 - 4.1.2p17] We don't support artifact binding yet. If you need it, feel free to implement it ;-)
+             * agents.
+             * [profiles 06 - 4.1.2p17]
+             *
+             * We don't support artifact binding yet. If you need it, feel free to implement it ;-)
              */
             throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(binding.name());
         }
 
-        String redirectHost = httpRequest.getParameter("RelayState");
-        if (redirectHost == null) {
+        String relayState = httpRequest.getParameter("RelayState");
+        if (relayState == null) {
             throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was not set");
+        }
+
+        AuthnRequestInfo requestInfo = stateManagement.removeAuthnRequestInfo(relayState);
+        if (requestInfo == null) {
+            throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was invalid");
         }
 
         Response response = extractAuthnResponse(httpRequest);
         try {
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
-            AuthnResponseValidationResult validationResult = validationStrategy.validateAuthnResponse(response, binding);
-            AuthnRequestInfo requestInfo = validationResult.getRequestInfo();
-            if (requestInfo != null) {
-                stateManagement.removeAuthnRequestInfo(requestInfo.getRequestID());
-            }
-
+            AuthnResponseValidationResult validationResult = validationStrategy.validateAuthnResponse(response, requestInfo, binding);
             Assertion bearerAssertion = validationResult.getBearerAssertion();
             AuthenticationInfo authInfo = backend.resolveAuthnResponse(response, bearerAssertion);
             LOG.debug("User {} in context {} is considered authenticated", authInfo.getUserId(), authInfo.getContextId());
@@ -243,7 +250,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
             URI redirectLocation = new URIBuilder()
                 .setScheme(getRedirectScheme(httpRequest))
-                .setHost(redirectHost)
+                .setHost(requestInfo.getDomainName())
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter("action", "redeemReservation")
                 .setParameter("token", sessionToken)
@@ -261,12 +268,12 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     @Override
     public void respondWithLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Session session) throws OXException, IOException {
         final LogoutRequest logoutRequest = customizeLogoutRequest(prepareLogoutRequest(session), httpRequest, httpResponse);
-        String relayState = getFrontendDomain(httpRequest);
+        String domainName = getDomainName(httpRequest);
         DefaultLogoutRequestInfo requestInfo = new DefaultLogoutRequestInfo();
         requestInfo.setRequestId(logoutRequest.getID());
         requestInfo.setSessionId(session.getSessionID());
-        requestInfo.setRelayState(relayState);
-        stateManagement.addLogoutRequest(requestInfo, LOGOUT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
+        requestInfo.setDomainName(domainName);
+        String relayState = stateManagement.addLogoutRequestInfo(requestInfo, LOGOUT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
 
         try {
             String logoutRequestXML = openSAML.marshall(logoutRequest);
@@ -283,33 +290,27 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     @Override
-    public void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException {
-        LogoutResponse response = extractLogoutResponse(httpRequest, binding);
-        String redirectHost = httpRequest.getParameter("RelayState");
-        if (redirectHost == null) {
+    public void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws IOException, OXException {
+        String relayState = httpRequest.getParameter("RelayState");
+        if (relayState == null) {
             throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was not set");
         }
 
+        LogoutRequestInfo requestInfo = stateManagement.removeLogoutRequestInfo(relayState);
+        if (requestInfo == null) {
+            throw SAMLExceptionCode.INVALID_REQUEST.create("LogoutResponse contains no valid 'InResponseTo' attribute");
+        }
+
+        LogoutResponse response = extractLogoutResponse(httpRequest, binding);
         try {
-            String inResponseTo = response.getInResponseTo();
-            if (inResponseTo == null) {
-                throw SAMLExceptionCode.INVALID_REQUEST.create("LogoutResponse contains no valid 'InResponseTo' attribute");
-            }
-
-            LogoutRequestInfo requestInfo = stateManagement.removeLogoutRequest(inResponseTo);
-            if (requestInfo == null) {
-                throw SAMLExceptionCode.INVALID_REQUEST.create("LogoutResponse contains no valid 'InResponseTo' attribute");
-            }
-
-            // TODO: add full validation
-
-            String sessionId = requestInfo.getSessionId();
+            ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
+            validationStrategy.validateLogoutResponse(response, requestInfo, binding);
             URI redirectLocationBuilder = new URIBuilder()
                 .setScheme(getRedirectScheme(httpRequest))
-                .setHost(redirectHost)
+                .setHost(requestInfo.getDomainName())
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter("action", "samlLogout")
-                .setParameter("session", sessionId)
+                .setParameter("session", requestInfo.getSessionId())
                 .build();
 
             Tools.disableCaching(httpResponse);
@@ -318,6 +319,8 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
             httpResponse.sendRedirect(redirectLocation);
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
+        } catch (ValidationException e) {
+            throw SAMLExceptionCode.VALIDATION_FAILED.create(e.getReason().getMessage(), e.getMessage());
         }
     }
 
@@ -330,11 +333,6 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
             validationStrategy.validateLogoutRequest(logoutRequest, httpRequest, binding);
             LogoutInfo logoutInfo = backend.resolveLogoutRequest(logoutRequest);
-            /*
-             * TODO:
-             * - look for session indexes and use them
-             * - if none are contained, delete all sessions for the determined user
-             */
             LOG.debug("LogoutRequest is considered valid, starting to terminate sessions based on {}", logoutInfo);
             terminateSessions(logoutRequest, logoutInfo, httpRequest, httpResponse);
             StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
@@ -461,7 +459,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         LogoutRequest logoutRequest = openSAML.buildSAMLObject(LogoutRequest.class);
         logoutRequest.setIssuer(issuer);
         logoutRequest.setDestination(config.getIdentityProviderLogoutURL());
-        logoutRequest.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
+        logoutRequest.setID(generateID());
         logoutRequest.setIssueInstant(new DateTime());
         logoutRequest.setVersion(SAMLVersion.VERSION_20);
         logoutRequest.setReason(LogoutRequest.USER_REASON);
@@ -522,12 +520,13 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         logoutResponse.setStatus(status);
         logoutResponse.setIssuer(issuer);
         logoutResponse.setDestination(config.getIdentityProviderLogoutURL());
-        logoutResponse.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
+        logoutResponse.setID(generateID());
         logoutResponse.setIssueInstant(new DateTime());
         logoutResponse.setVersion(SAMLVersion.VERSION_20);
         if (inResponseTo != null) {
             logoutResponse.setInResponseTo(inResponseTo);
         }
+
         return logoutResponse;
     }
 
@@ -568,56 +567,40 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
     private void terminateSessions(LogoutRequest logoutRequest, LogoutInfo logoutInfo, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         SessiondService sessiondService = services.getService(SessiondService.class);
-        int contextId = logoutInfo.getContextId();
-        int userId = logoutInfo.getUserId();
-        if (logoutInfo.isTerminateAll()) {
+        List<SessionIndex> sessionIndexes = logoutRequest.getSessionIndexes();
+        boolean removedAnySession = false;
+        if (sessionIndexes.size() > 0) {
+            List<String> keys = new ArrayList<String>(sessionIndexes.size());
+            for (SessionIndex sessionIndex : sessionIndexes) {
+                keys.add(sessionIndex.getSessionIndex());
+            }
+
+            // FIXME
+            List<String> sessionIds = stateManagement.removeSessionIds(keys);
+            LOG.debug("Found {} session IDs for {} indexes", sessionIds.size(), keys.size());
+
+            for (String sessionId : sessionIds) {
+                if (sessiondService.removeSession(sessionId)) {
+                    removedAnySession = true;
+                    LOG.debug("Session {} was terminated", sessionId);
+                } else {
+                    LOG.debug("Session {} did not exist anymore", sessionId);
+                }
+            }
+        } else {
+            int contextId = logoutInfo.getContextId();
+            int userId = logoutInfo.getUserId();
             if (contextId > 0 && userId > 0) {
                 sessiondService.removeUserSessionsGlobal(userId, contextId);
+                removedAnySession = true;
                 LOG.debug("Removed sessions globally for user {} in context {}", userId, contextId);
             } else {
-                LOG.warn("LogoutInfo says terminateAll=true but no valid user and context were set");
+                LOG.warn("LogoutRequest contained no session indexes but no valid user and context were determined. Cannot invalidate any session...");
             }
         }
 
-        if (logoutInfo.isHeedSessionIndexes()) {
-            List<SessionIndex> sessionIndexes = logoutRequest.getSessionIndexes();
-            if (sessionIndexes.size() > 0) {
-                List<String> keys = new ArrayList<String>(sessionIndexes.size());
-                for (SessionIndex sessionIndex : sessionIndexes) {
-                    keys.add(sessionIndex.getSessionIndex());
-                }
-
-                List<String> sessionIds = stateManagement.removeSessionIds(keys);
-                LOG.debug("Found {} session IDs for {} indexes", sessionIds.size(), keys.size());
-
-                for (String sessionId : sessionIds) {
-                    if (sessiondService.removeSession(sessionId)) {
-                        LOG.debug("Session {} was terminated", sessionId);
-                    } else {
-                        LOG.debug("Session {} did not exist anymore", sessionId);
-                    }
-                }
-            } else {
-                LOG.debug("No session indexes contained in LogoutRequest");
-            }
-        }
-
-        if (logoutInfo.isRemoveSessionCookies()) {
-            Cookie[] cookies = httpRequest.getCookies();
-            if (cookies == null) {
-                LOG.debug("No cookies will be removed, as none are contained in the HTTP request");
-            } else {
-                /*
-                 * TODO: brute-force approach, maybe we should match 'open-xchange-' prefixes here and provide an extension point to remove custom cookies.
-                 * Unfortunately we have no reliable way to get the original cookie hash here...
-                 */
-                LOG.debug("{} cookies will be removed", cookies.length);
-                for (Cookie cookie : cookies) {
-                    Cookie toDelete = (Cookie) cookie.clone();
-                    toDelete.setMaxAge(0);
-                    httpResponse.addCookie(toDelete);
-                }
-            }
+        if (!removedAnySession) {
+            LOG.warn("Received LogoutRequest but no session was removed");
         }
     }
 
@@ -724,7 +707,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
     }
 
-    private String getFrontendDomain(HttpServletRequest httpRequest) {
+    private String getDomainName(HttpServletRequest httpRequest) {
         HostnameService hostnameService = services.getOptionalService(HostnameService.class);
         if (hostnameService == null) {
             return httpRequest.getServerName();
@@ -773,7 +756,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         authnRequest.setDestination(config.getIdentityProviderAuthnURL());
         authnRequest.setIsPassive(Boolean.FALSE);
         authnRequest.setForceAuthn(Boolean.FALSE);
-        authnRequest.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
+        authnRequest.setID(generateID());
         authnRequest.setIssueInstant(new DateTime());
         return authnRequest;
     }
@@ -1018,6 +1001,10 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
 
         return null;
+    }
+
+    private static String generateID() {
+        return UUIDs.getUnformattedString(UUID.randomUUID());
     }
 
 }

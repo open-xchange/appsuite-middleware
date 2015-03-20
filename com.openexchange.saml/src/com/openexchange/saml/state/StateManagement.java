@@ -63,11 +63,23 @@ import com.openexchange.exception.OXException;
  */
 public interface StateManagement {
 
-    void addAuthnRequest(AuthnRequestInfo requestInfo, long timeout, TimeUnit timeUnit) throws OXException;
+    /**
+     * Adds an {@link AuthnRequestInfo} to the distributed state management.
+     *
+     * @param requestInfo The request info
+     * @param ttl The time to live
+     * @param timeUnit The time unit of <code>ttl</code>
+     * @return The ID via which the stored request can be retrieved later on
+     */
+    String addAuthnRequestInfo(AuthnRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException;
 
-    AuthnRequestInfo getAuthnRequest(String requestID) throws OXException;
-
-    void removeAuthnRequestInfo(String requestID) throws OXException;
+    /**
+     * Gets an {@link AuthnRequestInfo} by its ID and removes it from the state management.
+     *
+     * @param id The ID
+     * @return The request info or <code>null</code> if the ID is invalid or the time to live is already expired
+     */
+    AuthnRequestInfo removeAuthnRequestInfo(String id) throws OXException;
 
     void addAuthnResponse(String responseID, long timeout, TimeUnit timeUnit) throws OXException;
 
@@ -75,8 +87,22 @@ public interface StateManagement {
 
     List<String> removeSessionIds(List<String> keys);
 
-    void addLogoutRequest(LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException;
+    /**
+     * Adds a {@link LogoutRequestInfo} to the distributed state management.
+     *
+     * @param requestInfo The request info
+     * @param ttl The time to live
+     * @param timeUnit The time unit of <code>ttl</code>
+     * @return The ID via which the stored request can be retrieved later on
+     */
+    String addLogoutRequestInfo(LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException;
 
-    LogoutRequestInfo removeLogoutRequest(String requestId) throws OXException;
+    /**
+     * Gets a {@link LogoutRequestInfo} by its ID and removes it from the state management.
+     *
+     * @param id The ID
+     * @return The request info or <code>null</code> if the ID is invalid or the time to live is already expired
+     */
+    LogoutRequestInfo removeLogoutRequestInfo(String id) throws OXException;
 
 }

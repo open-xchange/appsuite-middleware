@@ -50,7 +50,6 @@
 package com.openexchange.saml.validation;
 
 import org.opensaml.saml2.core.Assertion;
-import com.openexchange.saml.state.AuthnRequestInfo;
 
 
 /**
@@ -63,19 +62,6 @@ public class AuthnResponseValidationResult {
 
     private final Assertion bearerAssertion;
 
-    private final AuthnRequestInfo requestInfo;
-
-    /**
-     * Initializes a new {@link AuthnResponseValidationResult}.
-     * @param bearerAssertion
-     * @param requestInfo
-     */
-    public AuthnResponseValidationResult(Assertion bearerAssertion, AuthnRequestInfo requestInfo) {
-        super();
-        this.bearerAssertion = bearerAssertion;
-        this.requestInfo = requestInfo;
-    }
-
     /**
      * Initializes a new {@link AuthnResponseValidationResult}.
      * @param bearerAssertion
@@ -84,7 +70,6 @@ public class AuthnResponseValidationResult {
     public AuthnResponseValidationResult(Assertion bearerAssertion) {
         super();
         this.bearerAssertion = bearerAssertion;
-        this.requestInfo = null;
     }
 
     /**
@@ -94,15 +79,6 @@ public class AuthnResponseValidationResult {
      */
     public Assertion getBearerAssertion() {
         return bearerAssertion;
-    }
-
-    /**
-     * Gets the {@link AuthnRequestInfo} of the authentication request according to the validated response.
-     *
-     * @return The authentication info or <code>null</code> if no InResponseTo were contained.
-     */
-    public AuthnRequestInfo getRequestInfo() {
-        return requestInfo;
     }
 
 }

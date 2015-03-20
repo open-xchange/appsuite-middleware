@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.WebSSOProvider;
+import com.openexchange.saml.spi.ExceptionHandler;
 
 
 /**
@@ -76,9 +77,12 @@ public class SingleLogoutService extends HttpServlet {
 
     private final WebSSOProvider provider;
 
-    public SingleLogoutService(WebSSOProvider provider) {
+    private final ExceptionHandler exceptionHandler;
+
+    public SingleLogoutService(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
         super();
         this.provider = provider;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -100,8 +104,8 @@ public class SingleLogoutService extends HttpServlet {
                 try {
                     provider.handleLogoutResponse(httpRequest, httpResponse, binding);
                 } catch (OXException e) {
-                    LOG.error("Error while handling SAML logout response", e);
-                    httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    LOG.error("Error while handling SAML login response", e);
+                    exceptionHandler.handleLogoutResponseFailed(httpRequest, httpResponse, e);
                 }
                 break;
             default:
