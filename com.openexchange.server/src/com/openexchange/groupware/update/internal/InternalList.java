@@ -92,6 +92,7 @@ import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTables;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
+import com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTask;
@@ -759,6 +760,10 @@ public final class InternalList {
 
         // Delete remnants for removed Facebook subscription
         list.add(new com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.6.3 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new MigrateAliasUpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

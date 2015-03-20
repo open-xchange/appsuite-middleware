@@ -63,6 +63,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -82,8 +83,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.alias.UserAliasStorage;
+import com.openexchange.groupware.alias.UserAliasStorageProvider;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -91,6 +95,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
@@ -482,7 +487,7 @@ public class RdbUserStorage extends UserStorage {
         if (lockRows && users.size() != 1) {
             throw UserExceptionCode.LOCKING_NOT_ALLOWED.create(I(users.size()));
         }
-        final TIntObjectMap<Map<String, UserAttribute>> usersAttrs = new TIntObjectHashMap<Map<String,UserAttribute>>();
+        final TIntObjectMap<Map<String, UserAttribute>> usersAttrs = new TIntObjectHashMap<Map<String, UserAttribute>>();
         try {
             final TIntIterator iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
@@ -528,24 +533,28 @@ public class RdbUserStorage extends UserStorage {
         } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
-        // Proceed iterating users
+
+        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorageProvider.class).getUserAliasStorage();
+         // Proceed iterating users
         for (final UserImpl user : users.valueCollection()) {
             final Map<String, UserAttribute> attrs = usersAttrs.get(user.getId());
-            // Check for aliases
             {
-                UserAttribute aliases = attrs.get("alias");
-                if (aliases == null) {
-                    user.setAliases(new String[0]);
-                } else {
-                    final List<String> tmp = new ArrayList<String>(aliases.size());
-                    for (final String alias : aliases.getStringValues()) {
+                Set<String> aliases = userAlias.getAliases(contextId, user.getId());
+                final List<String> tmp = new ArrayList<String>(aliases.size());
+                if(aliases != null && false == aliases.isEmpty()) {
+                    for (final String alias : aliases) {
                         try {
                             tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
                         } catch (Exception e) {
                             tmp.add(alias);
                         }
                     }
+                    // For compatibility reason; also add alias to user attributes
+                    attrs.put("alias", new UserAttribute("alias", aliases));
+
                     user.setAliases(tmp.toArray(new String[tmp.size()]));
+                } else {
+                    user.setAliases(new String[0]);
                 }
             }
             // Apply attributes
@@ -639,6 +648,7 @@ public class RdbUserStorage extends UserStorage {
      * Stores a public user attribute. This attribute is prepended with "attr_". This prefix is used to separate public user attributes from
      * internal user attributes. Public user attributes prefixed with "attr_" can be read and written by every client through the HTTP/JSON
      * API.
+     *
      * @param name Name of the attribute.
      * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
      * @param userId Identifier of the user that attribute should be set.
@@ -1001,10 +1011,14 @@ public class RdbUserStorage extends UserStorage {
     static void calculateDifferences(Map<String, UserAttribute> oldAttributes, Map<String, UserAttribute> newAttributes, Map<String, UserAttribute> added, Map<String, UserAttribute> removed, Map<String, UserAttribute> changed) {
         // Find added keys
         added.putAll(newAttributes);
-        for (final String key : oldAttributes.keySet()) { added.remove(key); }
+        for (final String key : oldAttributes.keySet()) {
+            added.remove(key);
+        }
         // Find removed keys
         removed.putAll(oldAttributes);
-        for (final String key : newAttributes.keySet()) { removed.remove(key); }
+        for (final String key : newAttributes.keySet()) {
+            removed.remove(key);
+        }
         // Now the keys that are contained in old and new attributes.
         for (final String key : newAttributes.keySet()) {
             if (oldAttributes.containsKey(key)) {
@@ -1151,23 +1165,16 @@ public class RdbUserStorage extends UserStorage {
             }
             try {
                 if (userId == -1 && considerAliases) {
-                    sql = "SELECT id FROM user_attribute WHERE cid=? AND name=? AND value LIKE ?";
-                    stmt = con.prepareStatement(sql);
-                    int pos = 1;
-                    stmt.setInt(pos++, context.getContextId());
-                    stmt.setString(pos++, "alias");
-                    stmt.setString(pos++, pattern);
-                    result = stmt.executeQuery();
-                    if (result.next()) {
-                        userId = result.getInt(1);
+                    UserAliasStorage alias = ServerServiceRegistry.getInstance().getService(UserAliasStorageProvider.class).getUserAliasStorage();
+                    int retUserId = alias.getUserId(context.getContextId(), pattern);
+                    if(retUserId != -1) {
+                        userId = retUserId;
                     }
                 }
                 if (userId == -1) {
                     throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }
                 return getUser(context, con, new int[] { userId })[0];
-            } catch (final SQLException e) {
-                throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
             } finally {
                 closeSQLStuff(result, stmt);
             }
