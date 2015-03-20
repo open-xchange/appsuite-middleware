@@ -61,7 +61,7 @@ public final class CIFSConstants implements FileStorageConstants {
     /**
      * The identifier for CIFS/SMB file storage service.
      */
-    public static final String ID = "com.openexchange.file.storage.cifs";
+    public static final String ID = "cifs";
 
     /**
      * The scheme of a CIFS/SMB URL: <code>"smb://"</code>.
