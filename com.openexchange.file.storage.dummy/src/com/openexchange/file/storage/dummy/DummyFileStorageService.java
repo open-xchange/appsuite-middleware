@@ -74,18 +74,18 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DummyFileStorageService implements FileStorageService, FileStorageServiceFactory {
-    
+
     private final ServiceLookup services;
-    
+
     private final ConcurrentHashMap<String, DummyFileStorageFileAccess> fileAccesses = new ConcurrentHashMap<String, DummyFileStorageFileAccess>();
 
     public DummyFileStorageService(ServiceLookup services) {
         this.services = services;
     }
-    
+
     @Override
     public String getId() {
-        return "com.openexchange.file.storage.dummy";
+        return "dummy";
     }
 
     @Override
@@ -101,7 +101,7 @@ public class DummyFileStorageService implements FileStorageService, FileStorageS
     @Override
     public FileStorageAccountManager getAccountManager() {
         return new SingleAccountManager(this) {
-            
+
             @Override
             public FileStorageAccount getAccount(Session session) {
                 DefaultFileStorageAccount account = new DefaultFileStorageAccount();

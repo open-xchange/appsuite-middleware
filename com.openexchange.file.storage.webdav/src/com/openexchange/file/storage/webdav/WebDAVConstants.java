@@ -62,7 +62,7 @@ public final class WebDAVConstants implements FileStorageConstants {
     /**
      * The identifier for WebDAV file storage service.
      */
-    public static final String ID = "com.openexchange.file.storage.webdav";
+    public static final String ID = "webdav";
 
     /**
      * The configuration property name for login.

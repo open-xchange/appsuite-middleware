@@ -61,7 +61,7 @@ public final class DropboxConstants implements FileStorageConstants {
     /**
      * The identifier for Dropbox file storage service.
      */
-    public static final String ID = "com.openexchange.file.storage.dropbox";
+    public static final String ID = "dropbox";
 
     /**
      * The configuration property name for Dropbox API key.

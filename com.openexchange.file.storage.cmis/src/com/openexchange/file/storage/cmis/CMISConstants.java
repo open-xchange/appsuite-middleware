@@ -61,7 +61,7 @@ public final class CMISConstants implements FileStorageConstants {
     /**
      * The identifier for CMIS file storage service.
      */
-    public static final String ID = "com.openexchange.file.storage.cmis";
+    public static final String ID = "cmis";
 
     /**
      * The scheme of a CMIS URL: <code>"cmis://"</code>.
