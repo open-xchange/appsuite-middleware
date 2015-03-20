@@ -1,3 +1,7 @@
+* 2015-03-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37282: Added support for startup with Java 9.
+
 * 2015-03-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 37102: Improved handling for special "FLS-0017" error code
