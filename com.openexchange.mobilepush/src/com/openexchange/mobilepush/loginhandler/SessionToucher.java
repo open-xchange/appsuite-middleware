@@ -1,0 +1,160 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mobilepush.loginhandler;
+
+import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
+import com.openexchange.login.LoginHandlerService;
+import com.openexchange.login.LoginResult;
+import com.openexchange.mobilepush.Constants;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
+
+/**
+ * {@link SessionToucher}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
+ */
+public class SessionToucher implements LoginHandlerService {
+
+    /** The logger */
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SessionToucher.class);
+
+    private static final String CLIENT_ID = Constants.CLIENT_ID;
+    private static final long DELAY = Constants.SESSION_TOUCHER_FREQUENCY; // 6 minutes
+    private static final long LIFETIME = Constants.SESSION_TOUCHER_LIFETIME;
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
+    /** The tracked OSGi services */
+    final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link SessionToucher}.
+     */
+    public SessionToucher(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    @Override
+    public void handleLogin(LoginResult login) throws OXException {
+        if (CLIENT_ID.equals(login.getSession().getClient())) {
+            TimerService timerService = services.getService(TimerService.class);
+            if (null != timerService) {
+                Toucher toucher = new Toucher(CLIENT_ID, System.currentTimeMillis() + LIFETIME);
+                ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(toucher, DELAY, DELAY);
+                toucher.setTimerTask(timerTask);
+            }
+        }
+    }
+
+    @Override
+    public void handleLogout(LoginResult logout) throws OXException {
+        // Nothing to do
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
+    private class Toucher implements Runnable {
+
+        private final String sessionId;
+        private final long stamp;
+        private final AtomicReference<ScheduledTimerTask> timerTaskRef;
+
+        /**
+         * Initializes a new {@link SessionToucher.Toucher}.
+         */
+        public Toucher(String sessionId, long stamp) {
+            super();
+            this.sessionId = sessionId;
+            timerTaskRef = new AtomicReference<ScheduledTimerTask>();
+            this.stamp = stamp;
+        }
+
+        /**
+         * Sets the timer task.
+         *
+         * @param timerTask The timer task
+         */
+        public void setTimerTask(ScheduledTimerTask timerTask) {
+            timerTaskRef.set(timerTask);
+        }
+
+        @Override
+        public void run() {
+            try {
+                SessiondService sessiondService = services.getService(SessiondService.class);
+                if (null != sessiondService) {
+                    Session session = sessiondService.getSession(sessionId);
+                    if ((null == session) || (System.currentTimeMillis() > stamp)) {
+                        // Either absent session or toucher elapsed... Cancel
+                        ScheduledTimerTask timerTask;
+                        do {
+                            timerTask = timerTaskRef.get();
+                        } while (!timerTaskRef.compareAndSet(timerTask, null));
+
+                        if (null != timerTask) {
+                            timerTask.cancel();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("Error while attempting to touch session {}", sessionId, e);
+            }
+        }
+    } // End of class Toucher
+
+}
