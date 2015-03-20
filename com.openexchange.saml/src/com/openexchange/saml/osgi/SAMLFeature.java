@@ -146,7 +146,7 @@ public class SAMLFeature extends DependentServiceStarter {
             httpService.registerServlet(acsServletAlias, new AssertionConsumerService(serviceProvider, exceptionHandler), null, null);
             servlets.push(acsServletAlias);
 
-            if (config.supportSingleLogout()) {
+            if (config.singleLogoutEnabled()) {
                 Dictionary<String, Object> lrhProperties = new Hashtable<String, Object>();
                 lrhProperties.put(AJAXServlet.PARAMETER_ACTION, "samlLogout");
                 serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(samlBackend), lrhProperties));

@@ -112,11 +112,11 @@ public interface SAMLConfig {
     String getIdentityProviderAuthnURL();
 
     /**
-     * Whether the single logout profile is supported.
+     * Whether the single logout profile is enabled.
      *
-     * @return <code>true</code> if the profile is supported, otherwise false.
+     * @return <code>true</code> if the profile is enabled, otherwise false.
      */
-    boolean supportSingleLogout();
+    boolean singleLogoutEnabled();
 
     /**
      * The URL of the single logout service.

@@ -184,7 +184,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
     @Override
     public void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
-        AuthnRequest authnRequest = customizeAuthnRequest(prepareAuthnRequest(), httpRequest, httpResponse);
+        final AuthnRequest authnRequest = customizeAuthnRequest(prepareAuthnRequest(), httpRequest, httpResponse);
         String relayState = getFrontendDomain(httpRequest);
         DefaultAuthnRequestInfo requestInfo = new DefaultAuthnRequestInfo();
         requestInfo.setRequestId(authnRequest.getID());
@@ -192,7 +192,12 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         stateManagement.addAuthnRequest(requestInfo, 5, TimeUnit.MINUTES);
         try {
             String authnRequestXML = openSAML.marshall(authnRequest);
-            LOG.debug("Responding with AuthnRequest:\n{}", authnRequestXML);
+            LOG.debug("Responding with AuthnRequest:\n{}", new Object() {
+                @Override
+                public String toString() {
+                    return XMLHelper.prettyPrintXML(authnRequest.getDOM());
+                }
+            });
             sendAuthnRequestRedirect(authnRequestXML, relayState, httpRequest, httpResponse);
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
@@ -255,7 +260,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
     @Override
     public void respondWithLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Session session) throws OXException, IOException {
-        LogoutRequest logoutRequest = customizeLogoutRequest(prepareLogoutRequest(session), httpRequest, httpResponse);
+        final LogoutRequest logoutRequest = customizeLogoutRequest(prepareLogoutRequest(session), httpRequest, httpResponse);
         String relayState = getFrontendDomain(httpRequest);
         DefaultLogoutRequestInfo requestInfo = new DefaultLogoutRequestInfo();
         requestInfo.setRequestId(logoutRequest.getID());
@@ -265,7 +270,12 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
         try {
             String logoutRequestXML = openSAML.marshall(logoutRequest);
-            LOG.debug("Responding with LogoutRequest:\n{}", logoutRequestXML);
+            LOG.debug("Responding with LogoutRequest:\n{}", new Object() {
+                @Override
+                public String toString() {
+                    return XMLHelper.prettyPrintXML(logoutRequest.getDOM());
+                }
+            });
             sendLogoutRequestRedirect(logoutRequestXML, relayState, httpRequest, httpResponse);
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
@@ -384,7 +394,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         acs.setLocation(config.getAssertionConsumerServiceURL());
         spssoDescriptor.getAssertionConsumerServices().add(acs);
 
-        if (config.supportSingleLogout()) {
+        if (config.singleLogoutEnabled()) {
             SingleLogoutService slService = openSAML.buildSAMLObject(SingleLogoutService.class);
             slService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
             slService.setLocation(config.getSingleLogoutServiceURL());
@@ -1008,17 +1018,6 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
 
         return null;
-    }
-
-    private static String getBindingURI(Binding binding) {
-        switch (binding) {
-        case HTTP_POST:
-            return SAMLConstants.SAML2_POST_BINDING_URI;
-        case HTTP_REDIRECT:
-            return SAMLConstants.SAML2_REDIRECT_BINDING_URI;
-        default:
-            return null;
-        }
     }
 
 }

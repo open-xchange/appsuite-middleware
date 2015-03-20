@@ -64,18 +64,6 @@ public class SAMLProperties {
     public static final String ENABLED = "com.openexchange.saml.enabled";
 
     /**
-     * The binding used to send out authentication requests.
-     */
-    public static final String AUTHN_REQUEST_BINDING = "com.openexchange.saml.authnRequestBinding";
-
-    /**
-     * The binding via which authentication responses are to be received. This value is also used
-     * as value for the <code>ProtocolBinding</code> attribute in AuthnRequest objects and contained
-     * in the generated metadata XML of the service provider.
-     */
-    public static final String AUTHN_RESPONSE_BINDING = "com.openexchange.saml.authnResponseBinding";
-
-    /**
      * The binding via which logout responses are sent.
      */
     public static final String LOGOUT_RESPONSE_BINDING = "com.openexchange.saml.logoutResponseBinding";
@@ -88,7 +76,7 @@ public class SAMLProperties {
     /**
      * Whether single logout is supported.
      */
-    public static final String SUPPORT_SINGLE_LOGOUT = "com.openexchange.saml.supportSingleLogout";
+    public static final String ENABLE_SINGLE_LOGOUT = "com.openexchange.saml.enableSingleLogout";
 
     /**
      * The URL of the single logout service.

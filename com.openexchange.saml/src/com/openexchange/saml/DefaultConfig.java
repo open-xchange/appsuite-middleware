@@ -51,6 +51,7 @@ package com.openexchange.saml;
 
 import static com.openexchange.saml.SAMLProperties.ACS_URL;
 import static com.openexchange.saml.SAMLProperties.ENABLE_METADATA_SERVICE;
+import static com.openexchange.saml.SAMLProperties.ENABLE_SINGLE_LOGOUT;
 import static com.openexchange.saml.SAMLProperties.ENTITY_ID;
 import static com.openexchange.saml.SAMLProperties.IDP_ENTITY_ID;
 import static com.openexchange.saml.SAMLProperties.IDP_LOGIN_URL;
@@ -58,7 +59,6 @@ import static com.openexchange.saml.SAMLProperties.IDP_LOGOUT_URL;
 import static com.openexchange.saml.SAMLProperties.LOGOUT_RESPONSE_BINDING;
 import static com.openexchange.saml.SAMLProperties.PROVIDER_NAME;
 import static com.openexchange.saml.SAMLProperties.SLS_URL;
-import static com.openexchange.saml.SAMLProperties.SUPPORT_SINGLE_LOGOUT;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -104,7 +104,7 @@ public class DefaultConfig implements SAMLConfig {
         config.setAcsURL(checkProperty(configService, ACS_URL));
         config.setIdpEntityID(checkProperty(configService, IDP_ENTITY_ID));
         config.setIdpURL(checkProperty(configService, IDP_LOGIN_URL));
-        boolean supportSingleLogout = configService.getBoolProperty(SUPPORT_SINGLE_LOGOUT, true);
+        boolean supportSingleLogout = configService.getBoolProperty(ENABLE_SINGLE_LOGOUT, false);
         if (supportSingleLogout) {
             config.setSupportSingleLogout(supportSingleLogout);
             config.setSingleLogoutServiceURL(checkProperty(configService, SLS_URL));
@@ -177,7 +177,7 @@ public class DefaultConfig implements SAMLConfig {
     }
 
     @Override
-    public boolean supportSingleLogout() {
+    public boolean singleLogoutEnabled() {
         return supportSingleLogout;
     }
 
