@@ -50,6 +50,7 @@
 package com.openexchange.configuration;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -469,6 +470,41 @@ public final class ServerConfig implements Reloadable {
                 value = Integer.parseInt(prop.trim());
             } catch (final NumberFormatException e) {
                 throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(e, property.getPropertyName());
+            }
+        }
+        return value;
+    }
+
+    public static Long getLong(final Property property) throws OXException {
+        final Long value;
+        switch (property) {
+        case MaxFileUploadSize:
+            value = L(SINGLETON.maxFileUploadSize);
+            break;
+        case MaxUploadIdleTimeMillis:
+            value = L(SINGLETON.maxUploadIdleTimeMillis);
+            break;
+        case JMX_PORT:
+            value = L(SINGLETON.jmxPort);
+            break;
+        case COOKIE_TTL:
+            value = L(SINGLETON.cookieTTL);
+            break;
+        case MAX_BODY_SIZE:
+            value = L(SINGLETON.maxBodySize);
+            break;
+        case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
+            value = L(SINGLETON.defaultMaxConcurrentAJAXRequests);
+            break;
+        default:
+            try {
+                final String prop = getProperty(property.getPropertyName());
+                if (prop == null) {
+                    throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property.getPropertyName());
+                }
+                value = Long.valueOf(getProperty(property.getPropertyName()));
+            } catch (final NumberFormatException e) {
+                throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(property.getPropertyName());
             }
         }
         return value;

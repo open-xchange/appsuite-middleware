@@ -164,12 +164,12 @@ public final class NewAction extends AbstractMailAction {
                         maxSize = -1L;
                     } else {
                         LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-                        int globalQuota;
+                        Long globalQuota;
                         try {
-                            globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
+                            globalQuota = ServerConfig.getLong(Property.MAX_UPLOAD_SIZE);
                         } catch (final OXException e) {
                             LOG.error("", e);
-                            globalQuota = 0;
+                            globalQuota = 0L;
                         }
                         maxSize = globalQuota <= 0 ? -1L : globalQuota;
                     }
