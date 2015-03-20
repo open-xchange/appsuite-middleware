@@ -68,6 +68,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
     private static final String userAttributeTableName = "user_attribute";
     private static final String resourceTableName = "resource";
     private static final String delResourceTableName = "del_resource";
+    private static final String aliasTableName = "user_alias";
 
     private static final String createGroupsTable = "CREATE TABLE groups ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -201,6 +202,13 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
+    private static final String createAliasTable = "CREATE TABLE user_alias ( "
+        + "cid INT4 UNSIGNED NOT NULL, "
+        + "user INT4 UNSIGNED NOT NULL, "
+        + "alias VARCHAR(255) NOT NULL, "
+        + "PRIMARY KEY (cid, user, alias) "
+      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
     /**
      * Initializes a new {@link CreateLdap2SqlTables}.
      */
@@ -217,13 +225,13 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
     public String[] tablesToCreate() {
         return new String[] { groupsTableName, delGroupsTableName, userTableName, delUserTableName,
             groupsMemberTableName, login2UserTableName, userAttributeTableName, resourceTableName,
-            delResourceTableName };
+            delResourceTableName, aliasTableName };
     }
 
     @Override
     protected String[] getCreateStatements() {
         return new String[] { createGroupsTable, createDelGroupsTable, createUserTable, createDelUserTable, createGroupsMemberTable,
-            createLogin2UserTable, createUserAttributeTablePrimaryKey, createResourceTable, createDelResourceTable };
+            createLogin2UserTable, createUserAttributeTablePrimaryKey, createResourceTable, createDelResourceTable, createAliasTable };
     }
 
 }

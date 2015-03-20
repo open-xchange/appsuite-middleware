@@ -136,6 +136,9 @@ import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
+import com.openexchange.groupware.alias.UserAliasStorage;
+import com.openexchange.groupware.alias.UserAliasStorageProvider;
+import com.openexchange.groupware.alias.osgi.OsgiUserAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
@@ -585,6 +588,19 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track UnifiedViewService
          */
         track(UnifiedViewService.class, new RegistryCustomizer<UnifiedViewService>(context, UnifiedViewService.class));
+
+        /*
+         * Track UserAliasStorages
+         */
+        final OsgiUserAliasStorage aliasStorage = new OsgiUserAliasStorage(context);
+        rememberTracker(aliasStorage);
+
+        ServerServiceRegistry.getInstance().addService(UserAliasStorageProvider.class, new UserAliasStorageProvider() {
+            @Override
+            public UserAliasStorage getUserAliasStorage() throws OXException {
+                return aliasStorage;
+            }
+        });
 
         /*
          * User Service

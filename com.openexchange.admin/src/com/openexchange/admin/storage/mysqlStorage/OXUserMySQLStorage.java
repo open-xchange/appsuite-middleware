@@ -102,6 +102,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -690,34 +691,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             changeStorageDataImpl(usrdata, ctx, con);
 
             // update user aliases
+            UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
             final HashSet<String> alias = usrdata.getAliases();
-            if (null != alias) {
-                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, "alias");
-                stmt.executeUpdate();
-                stmt.close();
+            if(null != alias) {
+                aliasStorage.deleteAliase(con, contextId, userId);
+
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
-                        stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
-                        byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
-                        stmt.setInt(1, contextId);
-                        stmt.setInt(2, userId);
-                        stmt.setString(3, "alias");
-                        stmt.setString(4, elem);
-                        stmt.setBytes(5, uuidBinary);
-                        stmt.executeUpdate();
-                        stmt.close();
+                        aliasStorage.createAlias(con, contextId, userId, elem);
                     }
                 }
             } else if (usrdata.isAliasesset()) {
-                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, "alias");
-                stmt.executeUpdate();
-                stmt.close();
+                aliasStorage.deleteAliase(con, contextId, userId);
             }
 
             if(usrdata.isUserAttributesset()) {
@@ -1518,7 +1503,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         }
                     }
                 }
-
                 // now check if gidnumber feature is enabled
                 // if yes, update user table to correct gidnumber of users
                 // default group
@@ -1729,16 +1713,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     while (itr.hasNext()) {
                         final String tmp_mail = itr.next().toString().trim();
                         if (tmp_mail.length() > 0) {
-                            stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
-                            UUID uuid = UUID.randomUUID();
-                            byte[] uuidBinary = UUIDs.toByteArray(uuid);
-                            stmt.setInt(1, contextId);
-                            stmt.setInt(2, userId);
-                            stmt.setString(3, "alias");
-                            stmt.setString(4, tmp_mail);
-                            stmt.setBytes(5, uuidBinary);
-                            stmt.executeUpdate();
-                            stmt.close();
+                            UserAliasStorage userAlias = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+                            userAlias.createAlias(con, contextId, userId, tmp_mail);
                         }
                     }
                 }
@@ -2441,15 +2417,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 rs.close();
 
+                //
+                UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+                Set<String> aliases = aliasStorage.getAliases(contextId, user_id);
+                if(aliases != null && false == aliases.isEmpty()) {
+                    for(String alias : aliases) {
+                        newuser.addAlias(alias);
+                    }
+                }
+
                 stmtuserattributes.setInt(2, user_id);
                 rs = stmtuserattributes.executeQuery();
                 while (rs.next()) {
                     final String name = rs.getString("name");
                     final String value = rs.getString("value");
-
-                    if(ALIAS.equals(name)) {
-                        newuser.addAlias(value);
-                    } else if (isDynamicAttribute(name)) {
+                    if (isDynamicAttribute(name)) {
                         final String[] namespaced = parseDynamicAttribute(name);
                         newuser.setUserAttribute(namespaced[0], namespaced[1], value);
                     }
@@ -2672,6 +2654,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     }
                 }
                 // End of JCS
+
+                //Delete aliases
+                UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
+                aliasStorage.deleteAliase(write_ox_con, contextId, userId);
 
                 log.info("Deleted user {}({}) ...", user.getId(), ctx.getId());
 
