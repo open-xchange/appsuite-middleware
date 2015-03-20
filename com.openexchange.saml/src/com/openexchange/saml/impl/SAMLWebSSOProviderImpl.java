@@ -291,6 +291,8 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
                 throw SAMLExceptionCode.INVALID_REQUEST.create("LogoutResponse contains no valid 'InResponseTo' attribute");
             }
 
+            // TODO: add full validation
+
             String sessionId = requestInfo.getSessionId();
             URI redirectLocationBuilder = new URIBuilder()
                 .setScheme(getRedirectScheme(httpRequest))
@@ -306,9 +308,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
             httpResponse.sendRedirect(redirectLocation);
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
-        } /*catch (ValidationException e) {
-            throw SAMLExceptionCode.VALIDATION_FAILED.create(e.getReason().getMessage(), e.getMessage());
-        }*/
+        }
     }
 
     @Override
@@ -320,6 +320,11 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
             validationStrategy.validateLogoutRequest(logoutRequest, httpRequest, binding);
             LogoutInfo logoutInfo = backend.resolveLogoutRequest(logoutRequest);
+            /*
+             * TODO:
+             * - look for session indexes and use them
+             * - if none are contained, delete all sessions for the determined user
+             */
             LOG.debug("LogoutRequest is considered valid, starting to terminate sessions based on {}", logoutInfo);
             terminateSessions(logoutRequest, logoutInfo, httpRequest, httpResponse);
             StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);

@@ -58,6 +58,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.saml.WebSSOProvider;
@@ -71,6 +73,8 @@ import com.openexchange.tools.servlet.http.Tools;
  * @since v7.6.1
  */
 public class MetadataService extends HttpServlet {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MetadataService.class);
 
     private static final long serialVersionUID = -2932533507293972575L;
 
@@ -92,6 +96,7 @@ public class MetadataService extends HttpServlet {
             httpResponse.setContentLength(metadataXML.getBytes().length);
             httpResponse.getWriter().write(metadataXML);
         } catch (OXException e) {
+            LOG.error("Error while generating SAML metadata", e);
             String message = e.getDisplayMessage(Locale.US);
             if (message == null) {
                 message = e.getMessage();

@@ -56,7 +56,6 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.SSOLogoutHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.WebSSOProvider;
-import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.session.Session;
 
 
@@ -70,17 +69,13 @@ public class SAMLLogoutHandler implements SSOLogoutHandler {
 
     private final WebSSOProvider provider;
 
-    private final ExceptionHandler exceptionHandler;
-
     /**
      * Initializes a new {@link SAMLLogoutHandler}.
      * @param provider
-     * @param exceptionHandler
      */
-    public SAMLLogoutHandler(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
+    public SAMLLogoutHandler(WebSSOProvider provider) {
         super();
         this.provider = provider;
-        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -94,6 +89,9 @@ public class SAMLLogoutHandler implements SSOLogoutHandler {
         try {
             provider.respondWithLogoutRequest(req, resp, session);
         } catch (OXException e) {
+            /*
+             * TODO: make pretty
+             */
             result.error = e;
             result.respondWithError = true;
         }

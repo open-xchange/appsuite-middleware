@@ -90,6 +90,7 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
             if (sessionId == null) {
                 LOG.info("Missing session id in SAML logout request");
             } else {
+                LOG.debug("Received logout request for session {}", sessionId);
                 session = LoginPerformer.getInstance().lookupSession(sessionId);
             }
 
@@ -103,8 +104,8 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
                     session.getClient());
 
                 if (secret != null && session.getSecret().equals(secret)) {
+                    LOG.debug("Performing logout for session {}", sessionId);
                     LoginPerformer.getInstance().doLogout(sessionId);
-                    // Drop relevant cookies
                     SessionUtility.removeOXCookies(session.getHash(), httpRequest, httpResponse);
                     SessionUtility.removeJSESSIONID(httpRequest, httpResponse);
                 } else {

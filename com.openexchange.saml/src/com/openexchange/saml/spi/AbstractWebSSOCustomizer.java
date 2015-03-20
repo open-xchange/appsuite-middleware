@@ -59,7 +59,7 @@ import com.openexchange.saml.SAMLConfig.Binding;
 
 
 /**
- * A convenient class that allows implementors of {@link SAMLWebSSOCustomizer} to only
+ * A convenience class that allows implementors of {@link SAMLWebSSOCustomizer} to only
  * implement the methods that are really needed. All methods of the interface are pre-
  * implemented with default implementations, i.e. no customization takes place.
  *

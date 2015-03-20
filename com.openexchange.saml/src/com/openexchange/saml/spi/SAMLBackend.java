@@ -63,7 +63,6 @@ import com.openexchange.saml.validation.ResponseValidator;
 import com.openexchange.saml.validation.StrictValidationStrategy;
 import com.openexchange.saml.validation.ValidationStrategy;
 
-
 /**
  * A {@link SAMLBackend} must be implemented and registered as OSGi service to enable
  * SAML-based SSO. It provides the necessary deployment-specific objects that are needed

@@ -55,6 +55,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.WebSSOProvider;
@@ -67,6 +69,8 @@ import com.openexchange.saml.WebSSOProvider;
  * @since v7.6.1
  */
 public class SingleLogoutService extends HttpServlet {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SingleLogoutService.class);
 
     private static final long serialVersionUID = 8167911323803230663L;
 
@@ -93,12 +97,12 @@ public class SingleLogoutService extends HttpServlet {
                 provider.handleLogoutRequest(httpRequest, httpResponse, binding);
                 break;
             case SAML_RESPONSE:
-            try {
-                provider.handleLogoutResponse(httpRequest, httpResponse, binding);
-            } catch (OXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+                try {
+                    provider.handleLogoutResponse(httpRequest, httpResponse, binding);
+                } catch (OXException e) {
+                    LOG.error("Error while handling SAML logout response", e);
+                    httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
                 break;
             default:
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);

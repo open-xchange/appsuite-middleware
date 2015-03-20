@@ -60,8 +60,6 @@ import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
 
-
-
 /**
  * In order to fulfill the requirements of a certain identity provider, it might be necessary
  * to customize the generated XML objects of the service provider side. This interface provides
