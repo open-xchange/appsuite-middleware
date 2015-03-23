@@ -88,6 +88,7 @@ import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.TypeAware;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -506,9 +507,6 @@ public class DriveStorage {
         if (null == folderIDs || 0 == folderIDs.size()) {
             return Collections.emptyMap();
         }
-        if (false == supports(FileStorageCapability.SEQUENCE_NUMBERS)) {
-            throw new UnsupportedOperationException("IDBasedSequenceNumberProvider is needed");
-        }
         Map<String, Long> storedSequenceNumbers = getFileAccess().getSequenceNumbers(folderIDs);
         if (3 <= session.getDriveSession().getApiVersion()) {
             for (String folderID : folderIDs) {
@@ -640,8 +638,9 @@ public class DriveStorage {
         if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(name)) {
             return new DriveMetadata(session, getFolder(path, false));
         }
-        List<File> files = FileNameFilter.byName(name, normalizeFileNames).findAll(getDocuments(getFolderID(path), name, fields));
-        if (null == files || 0 == files.size() && false == supports(FileStorageCapability.SEARCH_BY_TERM)) {
+        String folderID = getFolderID(path);
+        List<File> files = FileNameFilter.byName(name, normalizeFileNames).findAll(getDocuments(folderID, name, fields));
+        if (null == files || 0 == files.size() && false == supports(new FolderID(folderID), FileStorageCapability.SEARCH_BY_TERM)) {
             /*
              * also search file by listing the directory's contents as fallback for limited storages
              */
@@ -794,7 +793,7 @@ public class DriveStorage {
     private SearchIterator<File> getDocuments(String folderID, String filename, List<Field> fields) throws OXException {
         if (null == filename) {
             return getDocuments(folderID, fields);
-        } else if (supports(FileStorageCapability.SEARCH_BY_TERM)) {
+        } else if (supports(new FolderID(folderID), FileStorageCapability.SEARCH_BY_TERM)) {
             return getFileAccess().search(Collections.singletonList(folderID), new FileNameTerm(filename, false, false),
                 null != fields ? fields : DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT,
                 FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
@@ -903,6 +902,9 @@ public class DriveStorage {
         if (TEMP_PATH.equals(path)) {
             return true;
         }
+        if (DriveUtils.isInvalidPath(path) || DriveUtils.isInvalidFolderName(folder.getName())) {
+            return true;
+        }
         if (TypeAware.class.isInstance(folder) && FileStorageFolderType.TRASH_FOLDER.equals(((TypeAware)folder).getType())) {
             return true;
         }
@@ -959,10 +961,32 @@ public class DriveStorage {
     /**
      * Gets a value indicating if the underlying storage system supports one or more capabilities or not.
      *
+     * @param fileID The file identifier to check the capabilities for
      * @return <code>true</code> if all capabilities are supported, <code>false</code>, otherwise
      */
-    public boolean supports(FileStorageCapability...capabilities) throws OXException {
-        return getFileAccess().supports(rootFolderID.getService(), rootFolderID.getAccountId(), capabilities);
+    public boolean supports(FileID fileID, FileStorageCapability...capabilities) throws OXException {
+        return supports(fileID.getService(), fileID.getAccountId(), capabilities);
+    }
+
+    /**
+     * Gets a value indicating if the underlying storage system supports one or more capabilities or not.
+     *
+     * @param folderID The folder identifier to check the capabilities for
+     * @return <code>true</code> if all capabilities are supported, <code>false</code>, otherwise
+     */
+    public boolean supports(FolderID folderID, FileStorageCapability...capabilities) throws OXException {
+        return supports(folderID.getService(), folderID.getAccountId(), capabilities);
+    }
+
+    /**
+     * Gets a value indicating if the underlying storage system supports one or more capabilities or not.
+     *
+     * @param serviceID The service identifier
+     * @param accountID The account identifier
+     * @return <code>true</code> if all capabilities are supported, <code>false</code>, otherwise
+     */
+    private boolean supports(String serviceID, String accountID, FileStorageCapability...capabilities) throws OXException {
+        return getFileAccess().supports(serviceID, accountID, capabilities);
     }
 
     @Override

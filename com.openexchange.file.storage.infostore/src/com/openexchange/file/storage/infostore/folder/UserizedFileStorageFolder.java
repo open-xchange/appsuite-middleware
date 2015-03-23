@@ -61,6 +61,8 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.DocumentsType;
@@ -111,8 +113,14 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         setSubscribed(folder.isSubscribed());
         String[] subfolderIDs = folder.getSubfolderIDs();
         setSubfolders(subfolderIDs != null && subfolderIDs.length > 0);
-        setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
+        FolderID folderID = new FolderID(folder.getID());
         setType(getType(folder.getType()));
+        /*
+         * only assume all infostore capabilities if it's really an infostore folder
+         */
+        if (FileID.INFOSTORE_SERVICE_ID.equals(folderID.getService()) && FileID.INFOSTORE_ACCOUNT_ID.equals(folderID.getAccountId())) {
+            setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
+        }
     }
 
     @Override

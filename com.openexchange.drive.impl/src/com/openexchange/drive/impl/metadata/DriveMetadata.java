@@ -63,6 +63,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.FileStorageCapability;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -187,7 +188,7 @@ public class DriveMetadata extends DefaultFile {
 
     @Override
     public long getSequenceNumber() {
-        long sequenceNumber = folder.getLastModifiedDate().getTime();
+        long sequenceNumber = null != folder.getLastModifiedDate() ? folder.getLastModifiedDate().getTime() : 0;
         try {
             sequenceNumber = sequenceNumber + getContentsSequenceNumber();
         } catch (OXException e) {
@@ -220,7 +221,7 @@ public class DriveMetadata extends DefaultFile {
             /*
              * try and get sequence number for folder contents directly
              */
-            if (session.getStorage().supports(FileStorageCapability.SEQUENCE_NUMBERS)) {
+            if (session.getStorage().supports(new FolderID(getFolderId()), FileStorageCapability.SEQUENCE_NUMBERS)) {
                 IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
                 Map<String, Long> sequenceNumbers = fileAccess.getSequenceNumbers(Collections.singletonList(getFolderId()));
                 Long sequenceNumber = sequenceNumbers.get(getFolderId());
