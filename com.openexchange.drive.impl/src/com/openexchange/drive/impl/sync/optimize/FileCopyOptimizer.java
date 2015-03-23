@@ -59,9 +59,9 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
-import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.actions.AbstractAction;
 import com.openexchange.drive.impl.actions.AcknowledgeFileAction;
 import com.openexchange.drive.impl.actions.DownloadFileAction;
@@ -236,7 +236,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
      */
     private static Map<String, ServerFileVersion> searchMatchingFileVersions(final SyncSession session, final List<String> folderIDs, final List<String> checksums) throws OXException {
         Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
-        if (0 < checksums.size() && session.getStorage().supports(FileStorageCapability.SEARCH_BY_TERM)) {
+        if (0 < checksums.size() && session.getStorage().supports(new FolderID(session.getRootFolderID()), FileStorageCapability.SEARCH_BY_TERM)) {
             List<FileChecksum> checksumsToInsert = new ArrayList<FileChecksum>();
             SearchIterator<File> searchIterator = null;
             try {

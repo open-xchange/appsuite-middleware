@@ -66,6 +66,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FileStorageCapability;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.type.DocumentsType;
 import com.openexchange.folderstorage.type.MusicType;
@@ -164,30 +165,35 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
                 }
             }
             if (includeFiles) {
-                List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
-                List<Field> fields = new ArrayList<Field>(Arrays.asList(
-                    Field.CREATED, Field.LAST_MODIFIED, Field.FILENAME, Field.CREATED_BY, Field.MODIFIED_BY, Field.FILE_MIMETYPE));
-                if (session.getStorage().supports(FileStorageCapability.OBJECT_PERMISSIONS)) {
-                    specialCapabilites.add(FileStorageCapability.OBJECT_PERMISSIONS);
-                    fields.add(Field.OBJECT_PERMISSIONS);
-                }
-                if (session.getStorage().supports(FileStorageCapability.LOCKS)) {
-                    specialCapabilites.add(FileStorageCapability.LOCKS);
-                    fields.add(Field.LOCKED_UNTIL);
-                }
-                if (session.getStorage().supports(FileStorageCapability.FILE_VERSIONS)) {
-                    specialCapabilites.add(FileStorageCapability.FILE_VERSIONS);
-                    fields.add(Field.NUMBER_OF_VERSIONS);
-                    fields.add(Field.VERSION);
-                    fields.add(Field.VERSION_COMMENT);
-                }
-                List<File> files = session.getStorage().getFilesInFolder(folderID, false, null, fields);
-                jsonObject.putOpt("files", getJSONFiles(files, specialCapabilites.toArray(new FileStorageCapability[specialCapabilites.size()])));
+                jsonObject.putOpt("files", getJSONFiles());
             }
             return jsonObject;
         } catch (JSONException e) {
             throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private JSONArray getJSONFiles() throws JSONException, OXException {
+        List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
+        List<Field> fields = new ArrayList<Field>(Arrays.asList(
+            Field.CREATED, Field.LAST_MODIFIED, Field.FILENAME, Field.CREATED_BY, Field.MODIFIED_BY, Field.FILE_MIMETYPE));
+        FolderID folderID = new FolderID(this.folderID);
+        if (session.getStorage().supports(folderID, FileStorageCapability.OBJECT_PERMISSIONS)) {
+            specialCapabilites.add(FileStorageCapability.OBJECT_PERMISSIONS);
+            fields.add(Field.OBJECT_PERMISSIONS);
+        }
+        if (session.getStorage().supports(folderID, FileStorageCapability.LOCKS)) {
+            specialCapabilites.add(FileStorageCapability.LOCKS);
+            fields.add(Field.LOCKED_UNTIL);
+        }
+        if (session.getStorage().supports(folderID, FileStorageCapability.FILE_VERSIONS)) {
+            specialCapabilites.add(FileStorageCapability.FILE_VERSIONS);
+            fields.add(Field.NUMBER_OF_VERSIONS);
+            fields.add(Field.VERSION);
+            fields.add(Field.VERSION_COMMENT);
+        }
+        List<File> files = session.getStorage().getFilesInFolder(this.folderID, false, null, fields);
+        return getJSONFiles(files, specialCapabilites.toArray(new FileStorageCapability[specialCapabilites.size()]));
     }
 
     private JSONArray getJSONFiles(List<File> files, FileStorageCapability[] specialCapabilities) throws JSONException, OXException {

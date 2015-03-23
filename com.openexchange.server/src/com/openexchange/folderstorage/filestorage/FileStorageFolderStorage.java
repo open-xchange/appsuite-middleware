@@ -70,7 +70,6 @@ import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -86,7 +85,6 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.TransactionManager;
-import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
@@ -390,29 +388,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-
-        // Check for root folder
-        FolderID folderID = new FolderID(folderId);
-        {
-            if (FileStorageFolder.ROOT_FULLNAME.equals(folderID.getFolderId())) {
-                FileStorageServiceRegistry fsr = Services.getService(FileStorageServiceRegistry.class);
-                String serviceId = folderID.getService();
-                String displayName = fsr.getFileStorageService(serviceId).getAccountManager().getAccount(folderID.getAccountId(), storageParameters.getSession()).getDisplayName();
-                FileStorageFolder fsFolder = new FileStorageRootFolder(storageParameters.getUserId(), displayName);
-                boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                FileStorageFolderImpl retval = new FileStorageFolderImpl(fsFolder, storageParameters.getSession(), altNames);
-                boolean hasSubfolders = fsFolder.hasSubfolders();
-                retval.setTreeID(treeId);
-                retval.setID(folderId);
-                retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
-                retval.setParentID(REAL_TREE_ID.equals(treeId) ? PRIVATE_FOLDER_ID : INFOSTORE);
-                return retval;
-            }
-        }
-
-        // Non-root folder
-        IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
-        FileStorageFolder fsFolder = folderAccess.getFolder(folderID);
+        FileStorageFolder fsFolder = getFolderAccess(storageParameters).getFolder(new FolderID(folderId));
         boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
         FileStorageFolderImpl retval = new FileStorageFolderImpl(fsFolder, storageParameters.getSession(), altNames);
         boolean hasSubfolders = fsFolder.hasSubfolders();

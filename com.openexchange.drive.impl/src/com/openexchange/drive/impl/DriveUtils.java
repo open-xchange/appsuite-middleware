@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -79,6 +80,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -134,6 +136,19 @@ public class DriveUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied folder name is invalid, i.e. it contains illegal characters or is not supported for
+     * other reasons.
+     *
+     * @param name The folder name to check
+     * @return <code>true</code> if the name is considered invalid, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public static boolean isInvalidFolderName(String name) throws OXException {
+        // same check as for filenames for now
+        return isInvalidFileName(name);
     }
 
     /**
@@ -400,6 +415,53 @@ public class DriveUtils {
         } else {
             return path2.startsWith("/") ? path1 + path2 : path1 + '/' + path2;
         }
+    }
+
+    /**
+     * Filters out the those folders that support all of the specified file storage capabilities.
+     *
+     * @param session The sync session
+     * @param folderIDs The folder identifiers that should be supported
+     * @param capabilities The capabilities to check for each folder
+     * @return A list of folder identifiers whose storage supports all capabilities, or an empty list if there are none
+     */
+    public static List<String> filterByCapabilities(SyncSession session, List<String> folderIDs, FileStorageCapability...capabilities) throws OXException {
+        Set<String> knowinglySupported = new HashSet<String>();
+        Set<String> knowinglyUnsupported = new HashSet<String>();
+        List<String> filteredFolderIDs = new ArrayList<String>(folderIDs);
+        Iterator<String> iterator = filteredFolderIDs.iterator();
+        while (iterator.hasNext()) {
+            FolderID folderID = new FolderID(iterator.next());
+            String key = folderID.getService() + ':' + folderID.getAccountId();
+            if (knowinglySupported.contains(key)) {
+                // keep
+            } else if (knowinglyUnsupported.contains(key)) {
+                // skip
+                iterator.remove();
+            } else if (session.getStorage().supports(folderID, capabilities)) {
+                // keep & remember
+                knowinglySupported.add(key);
+            } else {
+                // skip & remember
+                iterator.remove();
+                knowinglyUnsupported.add(key);
+            }
+        }
+        return filteredFolderIDs;
+    }
+
+    /**
+     * Converts a list of folder ID strings to a list of {@link FolderID}s.
+     *
+     * @param folderIDs The folder identifiers to convert
+     * @return The converted folder IDs
+     */
+    public static List<FolderID> getFolderIDs(List<String> folderIDs) {
+        List<FolderID> fids = new ArrayList<FolderID>(folderIDs.size());
+        for (String folderID : folderIDs) {
+            fids.add(new FolderID(folderID));
+        }
+        return fids;
     }
 
     private DriveUtils() {
