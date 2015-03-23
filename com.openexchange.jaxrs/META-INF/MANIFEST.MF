@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Jaxrs
+Bundle-Name: Open-Xchange  REST Services Bundle
 Bundle-SymbolicName: com.openexchange.jaxrs
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
@@ -34,7 +34,7 @@ Import-Package: com.eclipsesource.jaxrs.publisher,
  org.json,
  org.osgi.framework,
  org.osgi.service.cm,
- org.osgi.service.http;version="1.2.1",
+ org.osgi.service.http,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy

@@ -52,9 +52,7 @@ package com.openexchange.jaxrs.osgi;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.glassfish.jersey.server.ServerProperties;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -72,7 +70,6 @@ import com.openexchange.jaxrs.jersey.JSONReaderWriter;
 import com.openexchange.jaxrs.jersey.JerseyConfiguration;
 import com.openexchange.jaxrs.jersey.OXExceptionMapper;
 import com.openexchange.jaxrs.security.AuthenticationFilter;
-
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -94,23 +91,8 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        ServletConfiguration sc = new ServletConfiguration() {
-            
-            @Override
-            public Dictionary<String, String> getInitParams(HttpService httpService, String rootPath) {
-                Dictionary<String, String> dict = new Hashtable<String, String>();
-                dict.put("jersey.config.server.response.setStatusOverSendError", "true");
-                return dict;
-            }
-            
-            @Override
-            public HttpContext getHttpContext(HttpService httpService, String rootPath) {
-                return httpService.createDefaultHttpContext();
-            }
-        };
-        context.registerService(ServletConfiguration.class, sc, null);
-        
         cmTracker = new ServiceTracker<ConfigurationAdmin, ConfigurationAdmin>(context, ConfigurationAdmin.class, null) {
+
             @Override
             public ConfigurationAdmin addingService(ServiceReference<ConfigurationAdmin> reference) {
                 ConfigurationAdmin service = super.addingService(reference);
@@ -121,7 +103,7 @@ public class Activator implements BundleActivator {
                         if (properties == null) {
                             properties = new Hashtable<String, Object>(1);
                         }
-                        properties.put("root", "/rest");
+                        properties.put("root", "/preliminary");
                         configuration.update(properties);
                     } catch (IOException e) {
                         LOG.error("Could not set root path for jersey servlet. REST API will not be available!", e);
@@ -133,6 +115,7 @@ public class Activator implements BundleActivator {
         cmTracker.open();
 
         csTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, null) {
+
             @Override
             public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
                 ConfigurationService service = super.addingService(reference);
