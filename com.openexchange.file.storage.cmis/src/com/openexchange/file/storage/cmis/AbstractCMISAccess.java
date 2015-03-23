@@ -52,6 +52,7 @@ package com.openexchange.file.storage.cmis;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.session.Session;
 
 /**
@@ -60,6 +61,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCMISAccess {
+    
+    protected static final String SERVICE_ID = "CMIS";
 
     /**
      * The string constant for <code>'/'</code> character.
@@ -115,9 +118,9 @@ public abstract class AbstractCMISAccess {
     protected static OXException handleCmisException(final CmisBaseException e) {
         final String errorContent = e.getErrorContent();
         if (null == errorContent) {
-            return CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+            return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        return CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage() + " - " + errorContent);
+        return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage() + " - " + errorContent);
     }
 
 }

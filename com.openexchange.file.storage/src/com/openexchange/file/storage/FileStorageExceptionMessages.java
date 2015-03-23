@@ -56,6 +56,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * {@link OXExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since Open-Xchange v6.18.2
  */
 public final class FileStorageExceptionMessages implements LocalizableStrings {
@@ -113,6 +114,18 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
     public static final String FILE_UPDATE_ABORTED_MSG = "The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.";
+
+    // The %1$s URL does not denote a file: %2$s
+    public static final String NOT_A_FILE_MSG = "The %1$s URL does not denote a file: %1$s";
+
+    // The %1$s URL does not denote a directory: %2$s
+    public static final String NOT_A_FOLDER_MSG = "The %1$s URL does not denote a directory: %2$s";
+
+    // Missing file name.
+    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
+    
+    // Update denied for %1$s resource: %2$s
+    public static final String UPDATE_DENIED_MSG = "Update denied for %1$s resource: %2$s";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.

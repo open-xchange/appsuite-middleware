@@ -170,7 +170,7 @@ public final class CMISFile extends DefaultFile {
                     setVersionComment(null);
                 }
             } catch (final CmisRuntimeException e) {
-                throw CMISExceptionCodes.CMIS_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }

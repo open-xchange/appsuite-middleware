@@ -59,6 +59,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link FileStorageExceptionCodes} - Enumeration of all {@link OXException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since Open-Xchange v6.18.2
  */
 public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
@@ -239,6 +240,26 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * File update aborted: %2$s
      */
     FILE_UPDATE_ABORTED("File update aborted: %2$s", Category.CATEGORY_CONFLICT, 45, FileStorageExceptionMessages.FILE_UPDATE_ABORTED_MSG),
+    /**
+     * Versioning not supported by '%1$s' file storage.
+     */
+    VERSIONING_NOT_SUPPORTED("Versioning not supported by '%1$s%' file storage.", Category.CATEGORY_ERROR, 46, null),
+    /**
+     * The %1$s URL does not denote a file: %2$s
+     */
+    NOT_A_FILE("The %1$s URL does not denote a file: %2$s", CATEGORY_USER_INPUT, 47, FileStorageExceptionMessages.NOT_A_FILE_MSG),
+    /**
+     * The %1$s CMIS URL does not denote a directory: %2$s
+     */
+    NOT_A_FOLDER("The %1$s URL does not denote a directory: %2$s", CATEGORY_USER_INPUT, 48, FileStorageExceptionMessages.NOT_A_FOLDER_MSG),
+    /**
+     * Missing file name.
+     */
+    MISSING_FILE_NAME("Missing file name.", CATEGORY_USER_INPUT, 49, FileStorageExceptionMessages.MISSING_FILE_NAME_MSG),
+    /**
+     * Update denied for %1$s resource: %2$s
+     */
+    UPDATE_DENIED("Update denied for %1$s resource: %2$s", CATEGORY_USER_INPUT, 50, FileStorageExceptionMessages.UPDATE_DENIED_MSG),
 
     ;
 
