@@ -79,11 +79,11 @@ import org.junit.Test;
 import com.openexchange.database.DatabaseMocking.QueryStubBuilder;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.services.database.DatabaseRESTService;
-import com.openexchange.rest.services.database.internal.DatabaseEnvironment;
-import com.openexchange.rest.services.database.migrations.VersionChecker;
-import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeper;
-import com.openexchange.rest.services.database.transactions.Transaction;
+import com.openexchange.jaxrs.database.DatabaseRESTService;
+import com.openexchange.jaxrs.database.internal.DatabaseEnvironment;
+import com.openexchange.jaxrs.database.migrations.VersionChecker;
+import com.openexchange.jaxrs.database.transactions.InMemoryTransactionKeeper;
+import com.openexchange.jaxrs.database.transactions.Transaction;
 import com.openexchange.server.MockingServiceLookup;
 
 /**

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange  REST Services Bundle
-Bundle-SymbolicName: com.openexchange.rest.services
+Bundle-SymbolicName: com.openexchange.jaxrs
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -38,6 +38,6 @@ Import-Package: com.eclipsesource.jaxrs.publisher,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy
-Export-Package: com.openexchange.rest.services
-Bundle-Activator: com.openexchange.rest.services.osgi.Activator
+Export-Package: com.openexchange.jaxrs
+Bundle-Activator: com.openexchange.jaxrs.osgi.Activator
 Bundle-ClassPath: .

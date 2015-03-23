@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Users Mail Mapping REST API
-Bundle-SymbolicName: com.openexchange.rest.services.users.mailMapping
+Bundle-SymbolicName: com.openexchange.jaxrs.users.mailmapping
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -18,4 +18,4 @@ Import-Package: com.openexchange.context,
  javax.ws.rs.core,
  org.json,
  org.osgi.framework
-Bundle-Activator: com.openexchange.rest.services.users.mailMapping.osgi.MailMappingActivator
+Bundle-Activator: com.openexchange.jaxrs.users.mailmapping.osgi.MailMappingActivator

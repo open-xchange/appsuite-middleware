@@ -1,15 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: MailMapping REST API
-Bundle-SymbolicName: com.openexchange.TOBEREMOVED.rest.services.users.mailMapping
+Bundle-SymbolicName: com.openexchange.rest.services.users.mailMapping
 Bundle-Version: 7.8.0
-Bundle-Activator: com.openexchange.TOBEREMOVED.rest.services.users.mailmapping.osgi.MailMappingActivator
+Bundle-Activator: com.openexchange.rest.services.users.mailmapping.osgi.MailMappingActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.TOBEREMOVED.rest.services,
- com.openexchange.TOBEREMOVED.rest.services.annotations,
- com.openexchange.TOBEREMOVED.rest.services.osgiservice,
- com.openexchange.ajax.requesthandler,
+Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.context,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
@@ -18,7 +15,10 @@ Import-Package: com.openexchange.TOBEREMOVED.rest.services,
  com.openexchange.mailmapping,
  com.openexchange.mailmapping.osgiservice,
  com.openexchange.osgi,
+ com.openexchange.rest.services,
+ com.openexchange.rest.services.annotations,
+ com.openexchange.rest.services.osgiservice,
  com.openexchange.server,
  com.openexchange.user,
  org.osgi.framework;version="1.3.0"
-Export-Package: com.openexchange.TOBEREMOVED.rest.services.users.mailmapping
+Export-Package: com.openexchange.rest.services.users.mailmapping
