@@ -1,3 +1,16 @@
+* 2015-03-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37211: Ensure correct folder type when moving below public infostore folder 15
+
+* 2015-03-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37282: Added support for startup with Java 9.
+
+* 2015-03-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37102: Improved handling for special "FLS-0017" error code
+                      (in addition to changes performed with commit 0aa8866b944c35dbec6c4b9d5ecd1c66ede08057)
+
 * 2015-03-20 - martin.herfurth@open-xchange.com
 
  - Fix for bug 37286: Support Long values for MAX_UPLOAD_SIZE.

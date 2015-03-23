@@ -49,10 +49,10 @@
 
 package com.openexchange.tools.oxfolder;
 
-import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
-import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
@@ -1184,7 +1184,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     folderIDs.add(Integer.valueOf(sourceFolder.getObjectID()));
                     folderIDs.addAll(OXFolderSQL.getSubfolderIDs(sourceFolder.getObjectID(), readCon, ctx, true));
                 }
-                return 0 < OXFolderSQL.updateFolderType(writeCon, ctx, destinationFolder.getType(), folderIDs);
+                int type = FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == destinationFolder.getObjectID() ? FolderObject.PUBLIC : destinationFolder.getType();
+                return 0 < OXFolderSQL.updateFolderType(writeCon, ctx, type, folderIDs);
             }
         }
         return false;

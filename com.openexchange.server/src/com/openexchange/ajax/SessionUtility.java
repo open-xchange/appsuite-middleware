@@ -271,7 +271,7 @@ public final class SessionUtility {
             }
 
             // No such "public_session" parameter
-            if (mayUseFallbackSession && isChangeableUserAgent(req.getHeader(USER_AGENT))) {
+            if (mayUseFallbackSession && (isChangeableClient(null == session ? null : session.getClient()) || isChangeableUserAgent(req.getHeader(USER_AGENT)))) {
                 for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
                     if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
                         return handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
@@ -693,6 +693,12 @@ public final class SessionUtility {
             LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
         }
         return null;
+    }
+
+    private static final Set<String> CHANGEABLE_CLIENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange-mailapp")));
+
+    private static boolean isChangeableClient(String client) {
+        return !Strings.isEmpty(client) && CHANGEABLE_CLIENTS.contains(client);
     }
 
     private static boolean isChangeableUserAgent(String userAgent) {
