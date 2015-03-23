@@ -60,7 +60,9 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -93,7 +95,6 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         Connection conn = Database.getNoTimeout(ctxId, true);
         try {
             conn.setAutoCommit(false);
-
             boolean exists = Tools.tableExists(conn, NEW_TABLE_NAME);
             if (!exists) {
                 createTable(conn);
@@ -173,6 +174,11 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[] {};
+    }
+
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes(com.openexchange.groupware.update.UpdateConcurrency.BLOCKING);
     }
 
     private class Alias {
