@@ -658,6 +658,12 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         if (subjectID != null) {
             properties.put(SessionProperties.SUBJECT_ID, subjectID);
         }
+
+        /*
+         * This parameter must be checked within the AuthenticationService implementation. If not set, the login request is triggered
+         * by any other authentication mechanism (e.g. HTTP Basic Auth) and its credentials must be checked.
+         */
+        properties.put(SessionProperties.AUTHENTICATED, Boolean.TRUE.toString());
     }
 
     private String compileAuthnRequestRedirectURI(String authnRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {

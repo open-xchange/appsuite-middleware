@@ -58,10 +58,24 @@ package com.openexchange.saml;
  */
 public class SessionProperties {
 
+    /**
+     * com.openexchange.saml.Authenticated
+     */
+    public static final String AUTHENTICATED = "com.openexchange.saml.Authenticated";
+
+    /**
+     * com.openexchange.saml.SubjectID
+     */
     public static final String SUBJECT_ID = "com.openexchange.saml.SubjectID";
 
+    /**
+     * com.openexchange.saml.SessionNotOnOrAfter
+     */
     public static final String SESSION_NOT_ON_OR_AFTER = "com.openexchange.saml.SessionNotOnOrAfter";
 
+    /**
+     * com.openexchange.saml.SessionIndex
+     */
     public static final String SESSION_INDEX = "com.openexchange.saml.SessionIndex";
 
 }
