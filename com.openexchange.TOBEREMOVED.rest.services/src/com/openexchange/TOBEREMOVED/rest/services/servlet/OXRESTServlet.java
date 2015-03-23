@@ -84,7 +84,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXRESTServlet.class);
 
-    private static final String PREFIX = "/preliminary";
+    private static final String PREFIX = "/rest";
 
     /**
      * The OX REST registry instance.
