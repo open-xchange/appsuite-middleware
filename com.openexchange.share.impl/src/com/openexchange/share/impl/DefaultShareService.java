@@ -778,7 +778,7 @@ public class DefaultShareService implements ShareService {
         /*
          * create new guest user & contact
          */
-        UserImpl guestUser = ShareTool.prepareGuestUser(services, sharingUser, recipient);
+        UserImpl guestUser = ShareTool.prepareGuestUser(services, context.getContextId(), sharingUser, recipient);
         Contact contact = ShareTool.prepareGuestContact(services, context.getContextId(), sharingUser, guestUser);
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
         guestUser.setContactId(contactId);
@@ -800,7 +800,9 @@ public class DefaultShareService implements ShareService {
                 LOG.error("Required service GuestService absent");
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("GuestService");
             }
-            guestService.addGuest(guestUser.getMail(), context.getContextId(), guestID);
+            String groupId = services.getService(ConfigViewFactory.class).getView(sharingUser.getId(), context.getContextId()).opt("com.openexchange.context.group", String.class, "default");
+
+            guestService.addGuest(guestUser.getMail(), groupId, context.getContextId(), guestID, guestUser.getUserPassword(), guestUser.getPasswordMech());
 
             LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), permissionBits, context.getContextId(), guestID);
         }

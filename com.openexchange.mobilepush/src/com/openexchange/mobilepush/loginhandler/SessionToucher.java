@@ -95,7 +95,7 @@ public class SessionToucher implements LoginHandlerService {
         if ((null != session) && CLIENT_ID.equals(session.getClient())) {
             TimerService timerService = services.getService(TimerService.class);
             if (null != timerService) {
-                Toucher toucher = new Toucher(CLIENT_ID, System.currentTimeMillis() + LIFETIME);
+                Toucher toucher = new Toucher(login.getSession().getSessionID(), System.currentTimeMillis() + LIFETIME);
                 ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(toucher, DELAY, DELAY);
                 toucher.setTimerTask(timerTask);
             }

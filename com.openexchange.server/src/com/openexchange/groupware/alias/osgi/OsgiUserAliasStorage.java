@@ -47,102 +47,64 @@
  *
  */
 
-package com.openexchange.guest;
+package com.openexchange.groupware.alias.osgi;
 
-import java.io.Serializable;
+import java.sql.Connection;
+import java.util.Set;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.alias.UserAliasStorage;
+import com.openexchange.server.ServiceExceptionCode;
+
 
 /**
- * This class handles an assignment of a guest (identified by the mail address) to a context and user.
+ * {@link OsgiUserAliasStorage}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.8.0
  */
-public class GuestAssignment implements Serializable {
+public class OsgiUserAliasStorage extends ServiceTracker<UserAliasStorage, UserAliasStorage> implements UserAliasStorage {
 
-    private static final long serialVersionUID = 622650365568736720L;
-
-    /**
-     * The context the guest is assigned to.
-     */
-    private final int contextId;
-
-    /**
-     * The user id within the given context;
-     */
-    private final int userId;
-
-    /**
-     * The mail address the user is registered with
-     */
-    private final long guestId;
-
-    /**
-     * The password of the user
-     */
-    private final String password;
-
-    /**
-     * The mechanism the password is encrypted with
-     */
-    private final String passwordMech;
-
-    /**
-     * Initializes a new {@link GuestAssignment}.
-     *
-     * @param guestId - internal guest id of the user
-     * @param contextId - context id the user is in
-     * @param userId - user id in the context
-     */
-    public GuestAssignment(long guestId, int contextId, int userId, String password, String passwordMech) {
-        this.guestId = guestId;
-        this.contextId = contextId;
-        this.userId = userId;
-        this.password = password;
-        this.passwordMech = passwordMech;
+    public OsgiUserAliasStorage(BundleContext context) {
+        super(context, UserAliasStorage.class, null);
     }
 
-    /**
-     * Gets the contextId
-     *
-     * @return The contextId
-     */
-    public int getContextId() {
-        return contextId;
+    @Override
+    public Set<String> getAliases(int contextId, int userId) throws OXException {
+        return getUserAliasStorage().getAliases(contextId, userId);
     }
 
-    /**
-     * Gets the userId
-     *
-     * @return The userId
-     */
-    public int getUserId() {
-        return userId;
+    @Override
+    public int getUserId(int contextId, String alias) throws OXException {
+        return getUserAliasStorage().getUserId(contextId, alias);
     }
 
-    /**
-     * Gets the guestId
-     *
-     * @return The guestId
-     */
-    public long getGuestId() {
-        return guestId;
+    @Override
+    public boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException {
+        return getUserAliasStorage().createAlias(con, contextId, userId, alias);
     }
 
-    /**
-     * Gets the password
-     *
-     * @return The password
-     */
-    public String getPassword() {
-        return password;
+    @Override
+    public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
+        return getUserAliasStorage().updateAlias(con, contextId, userId, oldAlias, newAlias);
     }
 
-    /**
-     * Gets the passwordMech
-     *
-     * @return The passwordMech
-     */
-    public String getPasswordMech() {
-        return passwordMech;
+    @Override
+    public boolean deleteAlias(Connection con, int contextId, int userId, String alias) throws OXException {
+        return getUserAliasStorage().deleteAlias(con, contextId, userId, alias);
+    }
+
+    @Override
+    public boolean deleteAliase(Connection con, int contextId, int userId) throws OXException {
+        return getUserAliasStorage().deleteAliase(con, contextId, userId);
+    }
+
+    private UserAliasStorage getUserAliasStorage() throws OXException {
+        UserAliasStorage userAlias = getService();
+        if(userAlias == null) {
+            throw ServiceExceptionCode.absentService(UserAliasStorage.class);
+        }
+        return userAlias;
     }
 }

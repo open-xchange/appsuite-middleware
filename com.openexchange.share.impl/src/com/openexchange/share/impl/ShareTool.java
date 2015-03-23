@@ -64,7 +64,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -267,11 +267,11 @@ public class ShareTool {
      * @param recipient The recipient description
      * @return The guest user
      */
-    public static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, ShareRecipient recipient) throws OXException {
+    public static UserImpl prepareGuestUser(ServiceLookup services, int contextId, User sharingUser, ShareRecipient recipient) throws OXException {
         if (AnonymousRecipient.class.isInstance(recipient)) {
             return prepareGuestUser(services, sharingUser, (AnonymousRecipient) recipient);
         } else if (GuestRecipient.class.isInstance(recipient)) {
-            return prepareGuestUser(services, sharingUser, (GuestRecipient) recipient);
+            return prepareGuestUser(services, contextId, sharingUser, (GuestRecipient) recipient);
         } else {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create("unsupported share recipient: " + recipient);
         }
@@ -285,15 +285,14 @@ public class ShareTool {
      * @param recipient The recipient description
      * @return The guest user
      */
-    private static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, GuestRecipient recipient) throws OXException {
-        if (services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.share.crossContextGuests", false)) {
-            /*
-             * try to lookup & reuse data from existing guest in other context via guest service
-             */
-            UserImpl copiedUser = services.getService(GuestService.class).createUserCopy(recipient.getEmailAddress());
-            if (copiedUser != null) {
-                return prepareGuestUser(sharingUser, copiedUser);
-            }
+    private static UserImpl prepareGuestUser(ServiceLookup services, int contextId, User sharingUser, GuestRecipient recipient) throws OXException {
+        String groupId = services.getService(ConfigViewFactory.class).getView(sharingUser.getId(), contextId).opt("com.openexchange.context.group", String.class, "default");
+        /*
+         * try to lookup & reuse data from existing guest in other context via guest service
+         */
+        UserImpl copiedUser = services.getService(GuestService.class).createUserCopy(recipient.getEmailAddress(), groupId, contextId);
+        if (copiedUser != null) {
+            return prepareGuestUser(sharingUser, copiedUser);
         }
         /*
          * prepare new guest user for recipient
@@ -381,14 +380,13 @@ public class ShareTool {
      * @return The guest contact
      */
     public static Contact prepareGuestContact(ServiceLookup services, int contextId, User sharingUser, User guestUser) throws OXException {
-        if (services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.share.crossContextGuests", false)) {
-            /*
-             * try to lookup & reuse data from existing guest in other context via guest service
-             */
-            Contact copiedContact = services.getService(GuestService.class).createContactCopy(guestUser.getMail(), contextId, sharingUser.getId());
-            if (null != copiedContact) {
-                return copiedContact;
-            }
+        String groupId = services.getService(ConfigViewFactory.class).getView(sharingUser.getId(), contextId).opt("com.openexchange.context.group", String.class, "default");
+        /*
+         * try to lookup & reuse data from existing guest in other context via guest service
+         */
+        Contact copiedContact = services.getService(GuestService.class).createContactCopy(guestUser.getMail(), groupId, contextId, guestUser.getId());
+        if (null != copiedContact) {
+            return copiedContact;
         }
         /*
          * prepare new contact for recipient

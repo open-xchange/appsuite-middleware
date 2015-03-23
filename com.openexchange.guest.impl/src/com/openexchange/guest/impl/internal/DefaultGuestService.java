@@ -54,13 +54,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.validator.routines.EmailValidator;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestAssignment;
@@ -82,9 +81,10 @@ public class DefaultGuestService implements GuestService {
 
     private final UserService userService;
 
-    private final ContextService contextService;
 
     private final ContactUserStorage contactUserStorage;
+
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link DefaultGuestService}.
@@ -92,18 +92,19 @@ public class DefaultGuestService implements GuestService {
      * @param userService
      * @param contextService
      * @param contactUserStorage
+     * @param configViewFactory
      */
-    public DefaultGuestService(UserService userService, ContextService contextService, ContactUserStorage contactUserStorage) {
+    public DefaultGuestService(UserService userService, ContactUserStorage contactUserStorage, ConfigViewFactory configViewFactory) {
         this.userService = userService;
-        this.contextService = contextService;
         this.contactUserStorage = contactUserStorage;
+        this.configViewFactory = configViewFactory;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void addGuest(String mailAddress, int contextId, int userId) throws OXException {
+    public void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech) throws OXException {
         if (Strings.isEmpty(mailAddress)) {
             LOG.info("Cannot add user with id {} in context {} as a guest as the provided mail address is empty.", userId, contextId);
             throw GuestExceptionCodes.EMTPY_EMAIL_ADDRESS.create();
@@ -111,11 +112,11 @@ public class DefaultGuestService implements GuestService {
 
         check(mailAddress);
 
-        ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
+        GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, contextId);
         try {
             connectionHelper.start();
 
-            long guestId = GuestStorage.getInstance().getGuestId(mailAddress, connectionHelper.getConnection());
+            long guestId = GuestStorage.getInstance().getGuestId(mailAddress, groupId, connectionHelper.getConnection());
 
             if (GuestStorage.getInstance().isAssignmentExisting(guestId, contextId, userId, connectionHelper.getConnection())) {
                 LOG.info("Guest with mail address '{}' in context {} with id {} already existing. Will not add him to mapping as a new guest.", mailAddress, contextId, userId);
@@ -123,16 +124,16 @@ public class DefaultGuestService implements GuestService {
             }
 
             if (guestId != GuestStorage.NOT_FOUND) { // already existing, only add assignment
-                GuestStorage.getInstance().addGuestAssignment(guestId, contextId, userId, connectionHelper.getConnection());
+                GuestStorage.getInstance().addGuestAssignment(new GuestAssignment(guestId, contextId, userId, password, passwordMech), connectionHelper.getConnection());
                 connectionHelper.commit();
                 return;
             }
 
-            long newGuest = GuestStorage.getInstance().addGuest(mailAddress, connectionHelper.getConnection());
+            long newGuest = GuestStorage.getInstance().addGuest(mailAddress, groupId, connectionHelper.getConnection());
             if (newGuest == GuestStorage.NOT_FOUND) {
                 throw GuestExceptionCodes.GUEST_CREATION_ERROR.create();
             }
-            GuestStorage.getInstance().addGuestAssignment(newGuest, contextId, userId, connectionHelper.getConnection());
+            GuestStorage.getInstance().addGuestAssignment(new GuestAssignment(newGuest, contextId, userId, password, passwordMech), connectionHelper.getConnection());
 
             connectionHelper.commit();
         } finally {
@@ -145,11 +146,13 @@ public class DefaultGuestService implements GuestService {
      */
     @Override
     public void removeGuest(int contextId, int userId) throws OXException {
-        ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
+        GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, contextId);
         try {
             connectionHelper.start();
 
-            final long relatedGuestId = GuestStorage.getInstance().getGuestId(contextId, userId, connectionHelper.getConnection()); // this has to happen before guest assignment is removed!
+            String groupId = configViewFactory.getView(userId, contextId).opt("com.openexchange.context.group", String.class, "default");
+            User user = userService.getUser(userId, contextId);
+            final long relatedGuestId = GuestStorage.getInstance().getGuestId(user.getMail(), groupId, connectionHelper.getConnection()); // this has to happen before guest assignment is removed!
 
             if (relatedGuestId == GuestStorage.NOT_FOUND) {
                 LOG.info("Guest with context {} and user id {} cannot be removed! No internal guest to remove found.", contextId, userId);
@@ -175,7 +178,7 @@ public class DefaultGuestService implements GuestService {
      */
     @Override
     public void removeGuests(int contextId) throws OXException {
-        ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true);
+        GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, contextId);
         try {
             connectionHelper.start();
 
@@ -220,24 +223,24 @@ public class DefaultGuestService implements GuestService {
             throw GuestExceptionCodes.GUEST_UPDATE_ERROR.create();
         }
 
-        List<GuestAssignment> guestAssignments = retrieveGuestAssignments(contextId, user.getId());
+        int userId = user.getId();
+        String groupId = configViewFactory.getView(userId, contextId).opt("com.openexchange.context.group", String.class, "default");
+        List<GuestAssignment> guestAssignments = retrieveGuestAssignments(user.getMail(), groupId);
 
         if (guestAssignments != null) {
-            for (GuestAssignment guestAssignment : guestAssignments) {
+            GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, groupId);
+            try {
+                connectionHelper.start();
 
-                ConnectionHelper contextConnectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true, guestAssignment.getContextId());
+                for (GuestAssignment guestAssignment : guestAssignments) {
+                    GuestAssignment newAssignment = new GuestAssignment(guestAssignment.getGuestId(), guestAssignment.getContextId(), guestAssignment.getUserId(), user.getUserPassword(), user.getPasswordMech());
 
-                Context context = contextService.getContext(guestAssignment.getContextId());
-                try {
-                    contextConnectionHelper.start();
-
-                    updateUser(user, contextConnectionHelper.getConnection(), guestAssignment.getUserId(), context);
-
-                    contextConnectionHelper.commit();
-                } finally {
-                    contextConnectionHelper.finish();
+                    GuestStorage.getInstance().updateGuestAssignment(newAssignment, connectionHelper.getConnection());
                 }
-                userService.invalidateUser(context, guestAssignment.getUserId());
+                connectionHelper.commit();
+            }
+            finally {
+                connectionHelper.finish();
             }
         }
     }
@@ -252,12 +255,13 @@ public class DefaultGuestService implements GuestService {
         }
 
         int userId = contact.getInternalUserId();
-        List<GuestAssignment> guestAssignments = retrieveGuestAssignments(contextId, userId);
+        String groupId = configViewFactory.getView(userId, contextId).opt("com.openexchange.context.group", String.class, "default");
+        List<GuestAssignment> guestAssignments = retrieveGuestAssignments(contact.getEmail1(), groupId);
 
         if (guestAssignments != null) {
             for (GuestAssignment guestAssignment : guestAssignments) {
 
-                ConnectionHelper contextConnectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), true, guestAssignment.getContextId());
+                ContextConnectionHelper contextConnectionHelper = new ContextConnectionHelper(GuestStorageServiceLookup.get(), true, guestAssignment.getContextId());
                 try {
                     contextConnectionHelper.start();
 
@@ -272,19 +276,19 @@ public class DefaultGuestService implements GuestService {
     }
 
     /**
-     * Returns all assignments for the user associated with the given context and user id.
+     * Returns all assignments for the user associated with the mail address and group id.
      *
-     * @param contextId - context id to find the guest for
-     * @param userId - user id to find the guest for
-     * @return
+     * @param mailAddress - the mail address of the user to retrieve assignments for
+     * @param groupId - the group id the user of the context is assigned to
+     * @return List with {@link GuestAssignment}s
      * @throws OXException
      */
-    private List<GuestAssignment> retrieveGuestAssignments(int contextId, int userId) throws OXException {
+    private List<GuestAssignment> retrieveGuestAssignments(String mailAddress, String groupId) throws OXException {
         List<GuestAssignment> guestAssignments = new ArrayList<GuestAssignment>();
-        ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), false);
+        GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), false, groupId);
         try {
             connectionHelper.start();
-            long guestId = GuestStorage.getInstance().getGuestId(contextId, userId, connectionHelper.getConnection());
+            long guestId = GuestStorage.getInstance().getGuestId(mailAddress, groupId, connectionHelper.getConnection());
 
             guestAssignments.addAll(GuestStorage.getInstance().getGuestAssignments(guestId, connectionHelper.getConnection()));
             connectionHelper.commit();
@@ -292,78 +296,6 @@ public class DefaultGuestService implements GuestService {
             connectionHelper.finish();
         }
         return guestAssignments;
-    }
-
-    /**
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GuestAssignment> getExistingAssignments(String mailAddress) throws OXException {
-        if (Strings.isEmpty(mailAddress)) {
-            LOG.warn("Provided mail address to get assignments for is empty. Return empty list.");
-            return Collections.emptyList();
-        }
-
-        List<GuestAssignment> guestAssignments = new ArrayList<GuestAssignment>();
-
-        ConnectionHelper connectionHelper = new ConnectionHelper(GuestStorageServiceLookup.get(), false);
-        try {
-            connectionHelper.start();
-
-            final long guestId = GuestStorage.getInstance().getGuestId(mailAddress, connectionHelper.getConnection());
-            if (guestId == GuestStorage.NOT_FOUND) {
-                LOG.warn("Guest for mail address {} not found. Cannot update password.", mailAddress);
-                return guestAssignments;
-            }
-
-            guestAssignments.addAll(GuestStorage.getInstance().getGuestAssignments(guestId, connectionHelper.getConnection()));
-            if (guestAssignments.size() == 0) {
-                LOG.error("No assignment for the guest with mail address {} found. This might indicate incosistences as there is a guest existing without assignments. Guest id: {}.", mailAddress, guestId);
-                throw GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_ERROR.create(mailAddress, Long.toString(guestId));
-            }
-        } finally {
-            connectionHelper.finish();
-        }
-
-        return guestAssignments;
-    }
-
-    /**
-     * Copies information from the given {@link User} to the {@link User} that is associated with the given {@link GuestAssignment}. To be able to update the user within the correct context the provided {@link Connection} should be valid for
-     * the context id provided within the {@link GuestAssignment}<br>
-     * <br>
-     * Currently only the password, passwordMech, timezone and mail address are updated for the given user.
-     *
-     * @param user - the {@link User} the information should be copied from
-     * @param contextConnection - the {@link Connection} with up to date information
-     * @param assignment - the assignment that should be updated
-     * @throws OXException
-     */
-    private void updateUser(User user, Connection contextConnection, int userId, Context context) throws OXException {
-        UserImpl userToUpdate = new UserImpl();
-        userToUpdate.setId(userId);
-
-        if (user.getUserPassword() != null) {
-            userToUpdate.setUserPassword(user.getUserPassword());
-        }
-        if (user.getPasswordMech() != null) {
-            userToUpdate.setPasswordMech(user.getPasswordMech());
-        }
-        if (user.getPreferredLanguage() != null) {
-            userToUpdate.setPreferredLanguage(user.getPreferredLanguage());
-        }
-        if (user.getTimeZone() != null) {
-            userToUpdate.setTimeZone(user.getTimeZone());
-        }
-        if (user.getMail() != null) {
-            userToUpdate.setMail(user.getMail());
-        }
-        User origUser = userService.getUser(userId, context);
-        // the following is required to identify the user as guest within com.openexchange.groupware.ldap.RdbUserStorage.updateUserPassword(Connection, User, Context)
-        userToUpdate.setCreatedBy(origUser.getCreatedBy());
-
-        userService.updateUser(contextConnection, userToUpdate, context);
     }
 
     /**
@@ -382,8 +314,11 @@ public class DefaultGuestService implements GuestService {
         Contact updatedContact = contact.clone();
         updatedContact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
         updatedContact.setCreatedBy(storageContact.getCreatedBy());
+        updatedContact.setModifiedBy(storageContact.getModifiedBy());
         updatedContact.setContextId(storageContact.getContextId());
+        updatedContact.setObjectID(storageContact.getObjectID());
         updatedContact.setEmail1(storageContact.getEmail1());
+        updatedContact.setInternalUserId(storageContact.getInternalUserId());
 
         contactUserStorage.updateGuestContact(assignment.getContextId(), updatedContact.getObjectID(), updatedContact, contextConnection);
     }
@@ -392,8 +327,8 @@ public class DefaultGuestService implements GuestService {
      * {@inheritDoc}
      */
     @Override
-    public UserImpl createUserCopy(String mailAddress) throws OXException {
-        List<GuestAssignment> existingAssignments = getExistingAssignments(mailAddress);
+    public UserImpl createUserCopy(String mailAddress, String groupId, int contextId) throws OXException {
+        List<GuestAssignment> existingAssignments = getExistingAssignments(mailAddress, groupId);
 
         if ((existingAssignments == null) || (existingAssignments.isEmpty())) {
             return null;
@@ -418,8 +353,8 @@ public class DefaultGuestService implements GuestService {
      * {@inheritDoc}
      */
     @Override
-    public Contact createContactCopy(String mailAddress, int contextId, int createdById) throws OXException {
-        List<GuestAssignment> existingAssignments = getExistingAssignments(mailAddress);
+    public Contact createContactCopy(String mailAddress, String groupId, int contextId, int createdById) throws OXException {
+        List<GuestAssignment> existingAssignments = getExistingAssignments(mailAddress, groupId);
 
         if ((existingAssignments == null) || (existingAssignments.isEmpty())) {
             return null;
@@ -437,5 +372,40 @@ public class DefaultGuestService implements GuestService {
         contactCopy.setEmail1(mailAddress);
 
         return contactCopy;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) throws OXException {
+        if (Strings.isEmpty(mailAddress)) {
+            LOG.warn("Provided mail address to get assignments for is empty. Return empty list.");
+            return Collections.emptyList();
+        }
+
+        List<GuestAssignment> guestAssignments = new ArrayList<GuestAssignment>();
+
+        GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), false, groupId);
+        try {
+            connectionHelper.start();
+
+            final long guestId = GuestStorage.getInstance().getGuestId(mailAddress, groupId, connectionHelper.getConnection());
+            if (guestId == GuestStorage.NOT_FOUND) {
+                LOG.warn("Guest for mail address {} in group {} not found. Cannot update password.", mailAddress, groupId);
+                return guestAssignments;
+            }
+
+            guestAssignments.addAll(GuestStorage.getInstance().getGuestAssignments(guestId, connectionHelper.getConnection()));
+            if (guestAssignments.size() == 0) {
+                LOG.error("No assignment for the guest with mail address {} in group {} found. This might indicate incosistences as there is a guest existing without assignments. Guest id: {}.", mailAddress, groupId, guestId);
+                throw GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_ERROR.create(mailAddress, Long.toString(guestId));
+            }
+        } finally {
+            connectionHelper.finish();
+        }
+
+        return guestAssignments;
     }
 }

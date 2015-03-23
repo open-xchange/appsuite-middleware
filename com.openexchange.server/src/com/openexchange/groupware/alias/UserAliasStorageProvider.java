@@ -47,102 +47,25 @@
  *
  */
 
-package com.openexchange.guest;
+package com.openexchange.groupware.alias;
 
-import java.io.Serializable;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
+
 
 /**
- * This class handles an assignment of a guest (identified by the mail address) to a context and user.
+ * {@link UserAliasStorageProvider}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.8.0
  */
-public class GuestAssignment implements Serializable {
 
-    private static final long serialVersionUID = 622650365568736720L;
-
+@SingletonService
+public interface UserAliasStorageProvider {
     /**
-     * The context the guest is assigned to.
-     */
-    private final int contextId;
-
-    /**
-     * The user id within the given context;
-     */
-    private final int userId;
-
-    /**
-     * The mail address the user is registered with
-     */
-    private final long guestId;
-
-    /**
-     * The password of the user
-     */
-    private final String password;
-
-    /**
-     * The mechanism the password is encrypted with
-     */
-    private final String passwordMech;
-
-    /**
-     * Initializes a new {@link GuestAssignment}.
+     * Returns a UserAliasStorage instance
      *
-     * @param guestId - internal guest id of the user
-     * @param contextId - context id the user is in
-     * @param userId - user id in the context
+     * @throws OXException
      */
-    public GuestAssignment(long guestId, int contextId, int userId, String password, String passwordMech) {
-        this.guestId = guestId;
-        this.contextId = contextId;
-        this.userId = userId;
-        this.password = password;
-        this.passwordMech = passwordMech;
-    }
-
-    /**
-     * Gets the contextId
-     *
-     * @return The contextId
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the userId
-     *
-     * @return The userId
-     */
-    public int getUserId() {
-        return userId;
-    }
-
-    /**
-     * Gets the guestId
-     *
-     * @return The guestId
-     */
-    public long getGuestId() {
-        return guestId;
-    }
-
-    /**
-     * Gets the password
-     *
-     * @return The password
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Gets the passwordMech
-     *
-     * @return The passwordMech
-     */
-    public String getPasswordMech() {
-        return passwordMech;
-    }
+    UserAliasStorage getUserAliasStorage() throws OXException;
 }
