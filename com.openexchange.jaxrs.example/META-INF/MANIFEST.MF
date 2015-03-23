@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
-Bundle-SymbolicName: com.openexchange.jaxrs.example
+Bundle-SymbolicName: com.openexchange.rest.services.example
 Bundle-Version: 7.6.0
-Bundle-Activator: com.openexchange.jaxrs.example.osgi.Activator
+Bundle-Activator: com.openexchange.rest.services.example.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: 
@@ -15,8 +15,8 @@ Import-Package:
  com.openexchange.groupware.ldap,
  com.openexchange.html,
  com.openexchange.java.util,
- com.openexchange.jaxrs,
  com.openexchange.osgi,
+ com.openexchange.rest.services,
  com.openexchange.server,
  com.openexchange.sessiond,
  com.openexchange.tools.servlet,

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>com.openexchange.jaxrs.users.mailmapping</name>
+	<name>com.openexchange.rest.services.users.mailMapping</name>
 	<comment></comment>
 	<projects>
 	</projects>

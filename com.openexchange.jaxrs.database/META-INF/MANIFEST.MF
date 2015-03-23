@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Database REST Service
-Bundle-SymbolicName: com.openexchange.jaxrs.database
+Bundle-SymbolicName: com.openexchange.rest.services.database
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -12,8 +12,8 @@ Import-Package: com.google.common.cache,
  com.openexchange.exception,
  com.openexchange.groupware.update,
  com.openexchange.java.util,
- com.openexchange.jaxrs,
  com.openexchange.osgi,
+ com.openexchange.rest.services,
  com.openexchange.server,
  com.openexchange.timer,
  com.openexchange.tools.servlet,
@@ -30,4 +30,4 @@ Import-Package: com.google.common.cache,
  org.jvnet.hk2.external.generator,
  org.osgi.framework,
  org.slf4j;version="1.7.5"
-Bundle-Activator: com.openexchange.jaxrs.database.osgi.DatabaseRESTActivator
+Bundle-Activator: com.openexchange.rest.services.database.osgi.DatabaseRESTActivator

@@ -54,8 +54,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import java.sql.SQLException;
 import org.junit.Test;
-import com.openexchange.jaxrs.database.transactions.Transaction;
-import com.openexchange.jaxrs.database.transactions.TransactionKeeper;
+import com.openexchange.rest.services.database.transactions.Transaction;
+import com.openexchange.rest.services.database.transactions.TransactionKeeper;
 
 /**
  * {@link TransactionTest}
