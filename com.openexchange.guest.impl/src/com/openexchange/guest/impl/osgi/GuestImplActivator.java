@@ -49,13 +49,14 @@
 
 package com.openexchange.guest.impl.osgi;
 
-import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
-import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.guest.GuestService;
 import com.openexchange.guest.impl.internal.DefaultGuestService;
+import com.openexchange.guest.impl.internal.DelegateGuestService;
 import com.openexchange.guest.impl.internal.GuestDeleteListenerImpl;
 import com.openexchange.guest.impl.internal.GuestStorageServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,7 +76,7 @@ public class GuestImplActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            UserService.class, ContextService.class, DatabaseService.class, CacheService.class, ContactUserStorage.class
+            UserService.class, DatabaseService.class, ConfigViewFactory.class, ContactUserStorage.class, ConfigurationService.class
         };
     }
 
@@ -89,8 +90,11 @@ public class GuestImplActivator extends HousekeepingActivator {
 
         GuestStorageServiceLookup.set(this);
 
-        DefaultGuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContextService.class), getService(ContactUserStorage.class));
-        registerService(GuestService.class, guestService);
+        GuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContactUserStorage.class), getService(ConfigViewFactory.class));
+        registerService(GuestService.class, guestService, 2);
+
+        GuestService delegateGuestService = new DelegateGuestService(guestService, getService(ConfigurationService.class));
+        registerService(GuestService.class, delegateGuestService, 5);
 
         registerService(DeleteListener.class, new GuestDeleteListenerImpl(guestService));
     }

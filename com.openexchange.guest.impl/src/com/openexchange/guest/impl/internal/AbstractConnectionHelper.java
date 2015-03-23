@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,49 +51,29 @@ package com.openexchange.guest.impl.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.guest.GuestExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 
+
 /**
- *
- * Used to handle connections transactionally.
+ * {@link AbstractConnectionHelper}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class ConnectionHelper {
+public abstract class AbstractConnectionHelper {
 
-    private final ServiceLookup services;
-    private final Connection connection;
-    private boolean committed;
-    private final boolean writableConnection;
-    private int contextId = -1;
+    protected final ServiceLookup services;
+    protected Connection connection;
+    protected boolean committed;
+    protected final boolean writableConnection;
 
-    /**
-     * Initializes a new {@link ConnectionHelper}.
-     *
-     * @param services The service lookup
-     * @param needsWritable <code>true</code> if a writable connection is required, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    public ConnectionHelper(ServiceLookup services, boolean needsWritable) throws OXException {
-        super();
+    public AbstractConnectionHelper(ServiceLookup services, boolean needsWritable) {
         this.services = services;
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        this.connection = needsWritable ? dbService.getWritable() : dbService.getReadOnly();
         this.writableConnection = needsWritable;
-    }
-
-    public ConnectionHelper(ServiceLookup services, boolean needsWritable, int contextId) throws OXException {
-        super();
-        this.services = services;
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        this.connection = needsWritable ? dbService.getWritable(contextId) : dbService.getReadOnly(contextId);
-        this.writableConnection = needsWritable;
-        this.contextId = contextId;
+        this.committed = false;
     }
 
     /**
@@ -111,6 +91,8 @@ public class ConnectionHelper {
      * @throws OXException
      */
     public void start() throws OXException {
+        acquireConnection();
+
         try {
             Databases.startTransaction(connection);
         } catch (SQLException e) {
@@ -133,27 +115,13 @@ public class ConnectionHelper {
     }
 
     /**
-     * Backs the underlying connection in case the connection is owned by this instance, rolling back automatically if not yet committed.
+     * Handles finishing the transaction and returning connections for the given implementation
+     */
+    public abstract void finish();
+
+    /**
      *
      * @throws OXException
      */
-    public void finish() {
-        if (false == committed) {
-            Databases.rollback(connection);
-        }
-        Databases.autocommit(connection);
-        if (writableConnection) {
-            if (contextId != -1) {
-                services.getService(DatabaseService.class).backWritable(contextId, connection);
-            } else {
-                services.getService(DatabaseService.class).backWritable(connection);
-            }
-        } else {
-            if (contextId != -1) {
-                services.getService(DatabaseService.class).backReadOnly(contextId, connection);
-            } else {
-                services.getService(DatabaseService.class).backReadOnly(connection);
-            }
-        }
-    }
+    public abstract void acquireConnection() throws OXException;
 }

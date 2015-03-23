@@ -1,4 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+#<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- *************************************************************************************
+    Hints:
+       - changeSet id has to be unique as it is used as primary key for DATABASECHANGELOG table
+ ************************************************************************************* -->
 
 <databaseChangeLog xmlns="urn:liquibase"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -30,6 +35,57 @@
             <dropTable tableName="replicationMonitor" />
         </rollback>
     </changeSet>
+
+    <changeSet id="7.8.0:guest:create" author="martin.schneider@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="guest" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'guest' to save known login addresses and associated groups (brandings) of guest users.
+        </comment>
+        <sql>
+            CREATE TABLE guest (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                gid VARCHAR(255) NOT NULL,
+                mail_address VARCHAR(255) NOT NULL,
+                PRIMARY KEY (id),
+                INDEX (mail_address),
+                UNIQUE (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="guest" />
+        </rollback>
+    </changeSet>
+
+    <changeSet id="7.8.0:guest2context:create" author="martin.schneider@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="guest2context" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'guest2context' to save mappings from guests to context and users.
+        </comment>
+        <sql>
+            CREATE TABLE guest2context (
+                guest_id BIGINT UNSIGNED NOT NULL,
+                cid INT4 UNSIGNED NOT NULL,
+                uid INT4 UNSIGNED NOT NULL,
+                password VARCHAR(128) DEFAULT NULL,
+                passwordMech VARCHAR(32) NOT NULL,
+                PRIMARY KEY(`guest_id`, `cid`,`uid`),
+                FOREIGN KEY(`guest_id`) REFERENCES guest (`id`),
+                INDEX(guest_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="guest2context" />
+        </rollback>
+    </changeSet>
+
 
     <changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
         <tagDatabase tag="7.8.0-milestone" />

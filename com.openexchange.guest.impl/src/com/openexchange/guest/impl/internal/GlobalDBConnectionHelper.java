@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,102 +47,70 @@
  *
  */
 
-package com.openexchange.guest;
+package com.openexchange.guest.impl.internal;
 
-import java.io.Serializable;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * This class handles an assignment of a guest (identified by the mail address) to a context and user.
+ *
+ * Used to handle connections to the global database transactionally.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class GuestAssignment implements Serializable {
+public class GlobalDBConnectionHelper extends AbstractConnectionHelper {
 
-    private static final long serialVersionUID = 622650365568736720L;
-
-    /**
-     * The context the guest is assigned to.
-     */
     private final int contextId;
+    private final String groupId;
 
-    /**
-     * The user id within the given context;
-     */
-    private final int userId;
-
-    /**
-     * The mail address the user is registered with
-     */
-    private final long guestId;
-
-    /**
-     * The password of the user
-     */
-    private final String password;
-
-    /**
-     * The mechanism the password is encrypted with
-     */
-    private final String passwordMech;
-
-    /**
-     * Initializes a new {@link GuestAssignment}.
-     *
-     * @param guestId - internal guest id of the user
-     * @param contextId - context id the user is in
-     * @param userId - user id in the context
-     */
-    public GuestAssignment(long guestId, int contextId, int userId, String password, String passwordMech) {
-        this.guestId = guestId;
+    public GlobalDBConnectionHelper(ServiceLookup services, boolean needsWritable, int contextId) {
+        super(services, needsWritable);
         this.contextId = contextId;
-        this.userId = userId;
-        this.password = password;
-        this.passwordMech = passwordMech;
+        this.groupId = null;
+    }
+
+    public GlobalDBConnectionHelper(ServiceLookup services, boolean needsWritable, String groupId) {
+        super(services, needsWritable);
+        this.contextId = -1;
+        this.groupId = groupId;
     }
 
     /**
-     * Gets the contextId
+     * Backs the underlying connection in case the connection is owned by this instance, rolling back automatically if not yet committed.
      *
-     * @return The contextId
+     * @throws OXException
      */
-    public int getContextId() {
-        return contextId;
+    @Override
+    public void finish() {
+        if (false == committed) {
+            Databases.rollback(connection);
+        }
+        Databases.autocommit(connection);
+        if (writableConnection) {
+            if (contextId != -1) {
+                services.getService(DatabaseService.class).backWritableForGlobal(contextId, connection);
+            } else {
+                services.getService(DatabaseService.class).backWritableForGlobal(groupId, connection);
+            }
+        } else {
+            if (contextId != -1) {
+                services.getService(DatabaseService.class).backReadOnlyForGlobal(contextId, connection);
+            } else {
+                services.getService(DatabaseService.class).backReadOnlyForGlobal(groupId, connection);
+            }
+        }
     }
 
-    /**
-     * Gets the userId
-     *
-     * @return The userId
-     */
-    public int getUserId() {
-        return userId;
-    }
-
-    /**
-     * Gets the guestId
-     *
-     * @return The guestId
-     */
-    public long getGuestId() {
-        return guestId;
-    }
-
-    /**
-     * Gets the password
-     *
-     * @return The password
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Gets the passwordMech
-     *
-     * @return The passwordMech
-     */
-    public String getPasswordMech() {
-        return passwordMech;
+    @Override
+    public void acquireConnection() throws OXException {
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        if (contextId != -1) {
+            this.connection = this.writableConnection ? dbService.getWritableForGlobal(contextId) : dbService.getReadOnlyForGlobal(contextId);
+        } else {
+            this.connection = this.writableConnection ? dbService.getWritableForGlobal(groupId) : dbService.getReadOnlyForGlobal(groupId);
+        }
     }
 }

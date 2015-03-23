@@ -76,12 +76,7 @@ public class RdbGuestStorage extends GuestStorage {
     /**
      * SQL statement for resolving the internal unique id based on the mail address
      */
-    protected static final String RESOLVE_GUEST_ID_BY_MAIL = "SELECT id FROM guest WHERE mail_address=?";
-
-    /**
-     * SQL statement for resolving the internal unique id based on context and user id
-     */
-    protected static final String RESOLVE_GUEST_ID_BY_CONTEXT_AND_USER = "SELECT guest_id FROM guest2context WHERE cid=? AND uid=?";
+    protected static final String RESOLVE_GUEST_ID_BY_MAIL = "SELECT id FROM guest WHERE mail_address=? AND gid=?";
 
     /**
      * SQL statement for resolving the internal unique id based on context
@@ -100,7 +95,7 @@ public class RdbGuestStorage extends GuestStorage {
      * <br>
      * Checks if the given user has assignments.
      */
-    protected static final String RESOLVE_GUEST_ASSIGNMENTS = "SELECT cid,uid FROM guest2context WHERE guest_id=?";
+    protected static final String RESOLVE_GUEST_ASSIGNMENTS = "SELECT cid,uid,password,passwordMech FROM guest2context WHERE guest_id=?";
 
     /**
      * SQL statement to count assignments that currently exist.
@@ -108,14 +103,19 @@ public class RdbGuestStorage extends GuestStorage {
     protected static final String RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID = "SELECT COUNT(*) FROM guest2context WHERE guest_id=?";
 
     /**
+     * SQL statement to update password and passwordMech for the given user
+     */
+    protected static final String UPDATE_GUEST_PASSWORD = "UPDATE guest2context SET password=?, passwordMech=? WHERE cid=? AND uid=? AND guest_id=?";
+
+    /**
      * SQL statement to insert a new assignment for an existing guest
      */
-    protected static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid) VALUES (?, ?, ?)";
+    protected static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid, password, passwordMech) VALUES (?, ?, ?, ?, ?)";
 
     /**
      * SQL statement to insert a new guest for an unknown mail address
      */
-    protected static final String INSERT_GUEST = "INSERT INTO guest (mail_address) VALUES (?)";
+    protected static final String INSERT_GUEST = "INSERT INTO guest (mail_address, gid) VALUES (?, ?)";
 
     /**
      * SQL statement for deleting a guest assignment based on the context and user id.
@@ -136,7 +136,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public long addGuest(String mailAddress, Connection connection) throws OXException {
+    public long addGuest(String mailAddress, String groupId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
@@ -145,17 +145,18 @@ public class RdbGuestStorage extends GuestStorage {
         long guestId = NOT_FOUND;
         try {
             statement = connection.prepareStatement(INSERT_GUEST, Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, mailAddress);
+            statement.setString(1, mailAddress.toLowerCase());
+            statement.setString(2, groupId);
             long affectedRows = statement.executeUpdate();
 
             if (affectedRows == 0) {
-                throw GuestExceptionCodes.SQL_ERROR.create("Not able to create guest with mail address '" + mailAddress + "' as desired!");
+                throw GuestExceptionCodes.SQL_ERROR.create("Not able to create guest with mail address '" + mailAddress + "' and group '" + groupId + "' as desired!");
             }
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     guestId = generatedKeys.getLong(1);
                 } else {
-                    throw GuestExceptionCodes.SQL_ERROR.create("Creating guest with mail address '" + mailAddress + "' failed, no ID obtained!");
+                    throw GuestExceptionCodes.SQL_ERROR.create("Creating guest with mail address '" + mailAddress + "' and group '" + groupId + "' failed, no ID obtained!");
                 }
             }
         } catch (final SQLException e) {
@@ -171,7 +172,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public void addGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException {
+    public void addGuestAssignment(GuestAssignment assignment, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
@@ -179,9 +180,11 @@ public class RdbGuestStorage extends GuestStorage {
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(INSERT_GUEST_ASSIGNMENT);
-            statement.setLong(1, guestId);
-            statement.setInt(2, contextId);
-            statement.setInt(3, userId);
+            statement.setLong(1, assignment.getGuestId());
+            statement.setInt(2, assignment.getContextId());
+            statement.setInt(3, assignment.getUserId());
+            statement.setString(4, assignment.getPassword());
+            statement.setString(5, assignment.getPasswordMech());
 
             long affectedRows = statement.executeUpdate();
 
@@ -199,7 +202,7 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
-    public long getGuestId(String mailAddress, Connection connection) throws OXException {
+    public long getGuestId(String mailAddress, String groupId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
         }
@@ -209,36 +212,8 @@ public class RdbGuestStorage extends GuestStorage {
         long guestId = NOT_FOUND;
         try {
             statement = connection.prepareStatement(RESOLVE_GUEST_ID_BY_MAIL);
-            statement.setString(1, mailAddress);
-            result = statement.executeQuery();
-            if (result.next()) {
-                guestId = result.getLong(1);
-            }
-        } catch (final SQLException e) {
-            throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, statement);
-        }
-
-        return guestId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getGuestId(int contextId, int userId, Connection connection) throws OXException {
-        if (connection == null) {
-            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
-        }
-
-        PreparedStatement statement = null;
-        ResultSet result = null;
-        long guestId = NOT_FOUND;
-        try {
-            statement = connection.prepareStatement(RESOLVE_GUEST_ID_BY_CONTEXT_AND_USER);
-            statement.setInt(1, contextId);
-            statement.setInt(2, userId);
+            statement.setString(1, mailAddress.toLowerCase());
+            statement.setString(2, groupId);
             result = statement.executeQuery();
             if (result.next()) {
                 guestId = result.getLong(1);
@@ -437,7 +412,9 @@ public class RdbGuestStorage extends GuestStorage {
             while (result.next()) {
                 int cid = result.getInt(1);
                 int uid = result.getInt(2);
-                guestAssignments.add(new GuestAssignment(guestId, cid, uid));
+                String password = result.getString(3);
+                String passwordMech = result.getString(3);
+                guestAssignments.add(new GuestAssignment(guestId, cid, uid, password, passwordMech));
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -445,6 +422,38 @@ public class RdbGuestStorage extends GuestStorage {
             closeSQLStuff(result, statement);
         }
         return guestAssignments;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateGuestAssignment(GuestAssignment assignment, Connection connection) throws OXException {
+        if (connection == null) {
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
+        }
+
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement(UPDATE_GUEST_PASSWORD);
+            statement.setString(1, assignment.getPassword());
+            statement.setString(2, assignment.getPasswordMech());
+            statement.setInt(3, assignment.getContextId());
+            statement.setInt(4, assignment.getUserId());
+            statement.setLong(5, assignment.getGuestId());
+
+            final int affectedRows = statement.executeUpdate();
+
+            if (affectedRows != 1) {
+                LOG.error("There have been " + affectedRows + " changes for updating the guest user. Executed SQL: " + statement.toString());
+                throw GuestExceptionCodes.SQL_ERROR.create("There have been " + affectedRows + " changes for updating the guest user. Executed SQL: " + statement.toString());
+            }
+        } catch (final SQLException e) {
+            throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(statement);
+        }
+
     }
 
     /**
@@ -462,4 +471,5 @@ public class RdbGuestStorage extends GuestStorage {
     protected void startUp() {
         // Nothing to do.
     }
+
 }

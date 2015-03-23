@@ -69,16 +69,18 @@ public interface GuestService {
      * Adds a new guest or creates a new assignment for the guest if the provided mail address is already registered because the user was added from another context.
      *
      * @param mailAddress - mail address of the guest to add
+     * @param groupId - id of the group the guest is assigned to
      * @param contextId - context id the guest should be assigned to
      * @param userId - user id of the guest to add in the given context
+     * @param password - password of the user to handle as guest
+     * @param passwordMech - mechanism the password has been encrypted with
      * @throws OXException
      */
-    void addGuest(String mailAddress, int contextId, int userId) throws OXException;
+    void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech) throws OXException;
 
     /**
      * Remove an existing guest. If the last assignment for a guest was removed even the complete guest will be removed.
      *
-     * @param mailAddress - mail address of the guest to remove
      * @param contextId - context id the guest is assigned to
      * @param userId - user id in the given context the guest is assigned to
      * @throws OXException
@@ -112,32 +114,34 @@ public interface GuestService {
     void updateGuestUser(User user, int contextId) throws OXException;
 
     /**
-     * Returns the {@link GuestAssignment}s the given mail address is registered for as a guest which means that the new guest is already known.
-     *
-     * @param mailAddress - the mail address to get the {@link GuestAssignment}s from different contexts
-     * @return List with all assignments the user is currently known as a guest
-     * @throws OXException
-     */
-    List<GuestAssignment> getExistingAssignments(String mailAddress) throws OXException;
-
-    /**
      * Tries to create a copy of a user if there is an existing user for the given mail address within a different context. Returns the user is there is at least one within a different context or null if there is no existing one.
      *
-     * @param userToUpdate - the {@link User} to enrich with existing information from users in other contexts that are registered for the given mail address
-     * @param mailAddress - the mail address to verify if there is already a user in a different context existing
+     * @param mailAddress - the mail address to verify if there is already a contact in a different context existing
+     * @param groupId - the id of the group the guest is assigned to
+     * @param contextId - the context id the new contact should be in
      * @return UserImpl copy if there is an existing one that could be copied based on the given mail address or <code>null</code>
      * @throws OXException
      */
-    UserImpl createUserCopy(String mailAddress) throws OXException;
+    UserImpl createUserCopy(String mailAddress, String groupId, int contextId) throws OXException;
 
     /**
      * Tries to create a copy of a contact if there is an existing contact for the given mail address within a different context. Returns the contact is there is at least one within a different context or null if there is no existing one.
      *
      * @param mailAddress - the mail address to verify if there is already a contact in a different context existing
+     * @param groupId - the id of the group the guest is assigned to
      * @param contextId - the context id the new contact should be in
      * @param createdById - the user id of the share creator
      * @return {@link Contact} copy created based on the given mail address or null if no contact could be found
      * @throws OXException
      */
-    Contact createContactCopy(String mailAddress, int contextId, int createdById) throws OXException;
-}
+    Contact createContactCopy(String mailAddress, String groupId, int contextId, int createdById) throws OXException;
+
+    /**
+     * Returns the {@link GuestAssignment}s the given mail address is registered for as a guest which means that the new guest is already known.
+     *
+     * @param mailAddress - the mail address to get the {@link GuestAssignment}s from different contexts
+     * @param groupId - the id of the group the guest is assigned to
+     * @return List with all assignments the user is currently known as a guest
+     * @throws OXException
+     */
+    List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) throws OXException;}
