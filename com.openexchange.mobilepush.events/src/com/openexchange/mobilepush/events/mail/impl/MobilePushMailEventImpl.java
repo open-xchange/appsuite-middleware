@@ -170,11 +170,17 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
      * @param props - A map
      */
     private List<Map<String, Object>> handleEvents(Event event, Session session) {
-        if (!event.containsProperty(PushEventConstants.PROPERTY_DELETED) ||
-            (event.containsProperty(PushEventConstants.PROPERTY_DELETED) && !(boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED))) {
-            return getNewMailProperties(event, session);
-        } else {
+        boolean containsDeletedProperty = event.containsProperty(PushEventConstants.PROPERTY_DELETED);
+        Boolean isDeleted = null;
+
+        if(containsDeletedProperty) {
+            isDeleted = (Boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED);
+        }
+
+        if (isDeleted != null && isDeleted) {
             return getDeleteMailPayload(event);
+        } else {
+            return getNewMailProperties(event, session);
         }
     }
 
