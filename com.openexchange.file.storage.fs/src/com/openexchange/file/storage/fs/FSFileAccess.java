@@ -84,6 +84,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * {@link FSFileAccess}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficientRetrieval {
 
@@ -94,7 +95,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     private final FileStorageAccountAccess accountAccess;
 
     /**
-     * Initializes a new {@link FSFileAccess}.
+     * Initialises a new {@link FSFileAccess}.
      *
      * @param file
      * @param session
@@ -118,7 +119,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
         }
         java.io.File dir = new java.io.File(directory, folderId);
         if (!dir.getParentFile().equals(directory)) {
-            throw OXException.general(("No directory traversal, please"));
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("No directory traversal, please");
         }
 
         return dir;
@@ -134,7 +135,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
                 out.write(data);
             }
         } catch (IOException e) {
-            throw OXException.general(e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e.getMessage());
         } finally {
             if (out != null) {
                 try {
@@ -244,7 +245,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     @Override
     public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
-            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("No versioning support");
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create("File System");
         }
 
         java.io.File file = toFile(source.getFolder(), source.getId());
@@ -262,7 +263,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
             try {
                 newFile = new BufferedInputStream(new FileInputStream(file), 65536);
             } catch (FileNotFoundException e) {
-                throw OXException.general(e.getMessage());
+                throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(source.getId(), source.getFolder());
             }
         }
 
@@ -294,14 +295,13 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
         try {
             return new FileInputStream(toFile(folderId, id));
         } catch (FileNotFoundException e) {
-            throw OXException.general(e.getMessage());
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
         }
     }
 
     @Override
     public Document getDocumentAndMetadata(String folderId, String fileId, String version) throws OXException {
         java.io.File fsFile = toFile(folderId, fileId);
-
 
         return toDocument(fsFile);
     }
@@ -317,11 +317,11 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
                 try {
                     return new FileInputStream(fsFile);
                 } catch (FileNotFoundException e) {
-                    throw OXException.general("File not found: " + fsFile);
+                    throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fsFile.getAbsolutePath(), "");
                 }
             }
 
-        }.setSize(fsFile.length()).setMimeType(UNKNOWN_CS.equals(contentType) ? null : contentType).setEtag("fs://" + fsFile.getAbsolutePath() +"/" + fsFile.lastModified()).setLastModified(fsFile.lastModified());
+        }.setSize(fsFile.length()).setMimeType(UNKNOWN_CS.equals(contentType) ? null : contentType).setEtag("fs://" + fsFile.getAbsolutePath() + "/" + fsFile.lastModified()).setLastModified(fsFile.lastModified());
     }
 
     @Override
@@ -477,6 +477,5 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
     }
-
 
 }
