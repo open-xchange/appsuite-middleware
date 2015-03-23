@@ -50,10 +50,6 @@
 package com.openexchange.saml.http;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -67,85 +63,45 @@ import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
- * {@link MetadataService}
+ * {@link InitAuthService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class MetadataService extends SAMLServlet {
+public class InitAuthService extends SAMLServlet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MetadataService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InitAuthService.class);
 
-    private static final long serialVersionUID = -2932533507293972575L;
+    private static final long serialVersionUID = -4022982444417155759L;
+
 
     /**
-     * Initializes a new {@link MetadataService}.
+     * Initializes a new {@link InitAuthService}.
      * @param provider
      * @param exceptionHandler
      */
-    public MetadataService(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
+    public InitAuthService(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
         super(provider, exceptionHandler);
     }
 
     @Override
     protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        Tools.disableCaching(httpResponse);
-        httpResponse.setCharacterEncoding(Charsets.UTF_8_NAME);
+        Tools.removeCachingHeader(httpResponse);
         try {
-            String metadataXML = provider.getMetadataXML();
-            httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            httpResponse.setContentType("application/xml");
-            httpResponse.setContentLength(metadataXML.getBytes().length);
-            httpResponse.getWriter().write(metadataXML);
-        } catch (OXException e) {
-            LOG.error("Error while generating SAML metadata", e);
-            String message = e.getDisplayMessage(Locale.US);
-            if (message == null) {
-                message = e.getMessage();
-                if (message == null) {
-                    message = "An internal error occurred, please try again later.";
-                }
+            String redirectURI = provider.buildAuthnRequest(httpRequest, httpResponse);
+            String respondWithRedirect = httpRequest.getParameter("redirect");
+            if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
+                httpResponse.sendRedirect(redirectURI);
+                return;
             }
 
-            StringWriter stWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stWriter) {
-                @Override
-                public void println() {
-                    try {
-                        synchronized (lock) {
-                            out.write("<br>");
-                        }
-                    }
-                    catch (InterruptedIOException x) {
-                        Thread.currentThread().interrupt();
-                    }
-                    catch (IOException x) {
-                        setError();
-                    }
-                }
-            });
-
-            String stacktrace = stWriter.toString();
-
-            String response =
-                "<!DOCTYPE html>\n" +
-                "<html lang=\"en\">\n" +
-                "  <head>\n" +
-                "    <meta charset=\"utf-8\">\n" +
-                "    <title>500 - Internal Server Error</title>\n" +
-                "  </head>\n" +
-                "  <body>\n" +
-                "    <h1>500 - Internal Server Error</h1>" +
-                "    <p>" + message + "</p>" +
-                "    <p>" + stacktrace + "</p>" +
-                "  </body>\n" +
-                "</html>";
-            byte[] responseBytes = response.getBytes();
-
-            httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            httpResponse.setContentType("text/html");
-            httpResponse.setContentLength(responseBytes.length);
-            httpResponse.getWriter().write(response);
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
+            httpResponse.setCharacterEncoding(Charsets.UTF_8_NAME);
+            httpResponse.setContentType("application/json");
+            httpResponse.getWriter().write("{\"redirect_uri\":\"" + redirectURI + "\"}");
+        } catch (OXException e) {
+            LOG.error("Could not build AuthnRequest", e);
+            httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 

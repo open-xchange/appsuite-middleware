@@ -66,14 +66,13 @@ import com.openexchange.session.Session;
 public interface WebSSOProvider {
 
     /**
-     * Responds with an authentication request.
+     * Builds an authentication request and compiles a redirect URI compliant to the HTTP-Redirect binding.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
-     * @throws OXException To force a client redirect (via {@link LoginExceptionCodes#REDIRECT} or if preparing the AuthnRequest fails
-     * @throws IOException If writing to the servlet response fails
+     * @throws OXException If building the AuthnRequest fails
      */
-    void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException, IOException;
+    String buildAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException;
 
     /**
      * Handles an authentication response.
@@ -108,7 +107,7 @@ public interface WebSSOProvider {
     void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding httpRedirect) throws IOException, OXException;
 
     /**
-     * Handles a single logout request.
+     * Handles a logout request.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response

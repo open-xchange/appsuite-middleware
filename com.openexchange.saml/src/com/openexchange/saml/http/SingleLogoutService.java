@@ -52,7 +52,6 @@ package com.openexchange.saml.http;
 import java.io.IOException;
 import java.util.Enumeration;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -69,20 +68,19 @@ import com.openexchange.saml.spi.ExceptionHandler;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SingleLogoutService extends HttpServlet {
+public class SingleLogoutService extends SAMLServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(SingleLogoutService.class);
 
     private static final long serialVersionUID = 8167911323803230663L;
 
-    private final WebSSOProvider provider;
-
-    private final ExceptionHandler exceptionHandler;
-
+    /**
+     * Initializes a new {@link SingleLogoutService}.
+     * @param provider
+     * @param exceptionHandler
+     */
     public SingleLogoutService(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
-        super();
-        this.provider = provider;
-        this.exceptionHandler = exceptionHandler;
+        super(provider, exceptionHandler);
     }
 
     @Override

@@ -187,7 +187,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     @Override
-    public void respondWithAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+    public String buildAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         final AuthnRequest authnRequest = customizeAuthnRequest(prepareAuthnRequest(), httpRequest, httpResponse);
         String domainName = getDomainName(httpRequest);
         DefaultAuthnRequestInfo requestInfo = new DefaultAuthnRequestInfo();
@@ -196,13 +196,13 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         String relayState = stateManagement.addAuthnRequestInfo(requestInfo, AUTHN_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
         try {
             String authnRequestXML = openSAML.marshall(authnRequest);
-            LOG.debug("Responding with AuthnRequest:\n{}", new Object() {
+            LOG.debug("Prepared AuthnRequest:\n{}", new Object() {
                 @Override
                 public String toString() {
                     return XMLHelper.prettyPrintXML(authnRequest.getDOM());
                 }
             });
-            sendAuthnRequestRedirect(authnRequestXML, relayState, httpRequest, httpResponse);
+            return compileAuthnRequestRedirectURI(authnRequestXML, relayState, httpRequest, httpResponse);
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
         }
@@ -660,14 +660,14 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
     }
 
-    private void sendAuthnRequestRedirect(String authnRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+    private String compileAuthnRequestRedirectURI(String authnRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         String encoded = deflateAndEncode(authnRequestXML);
         try {
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderAuthnURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
             trySignRedirectHeader(redirectLocationBuilder);
             String redirectLocation = redirectLocationBuilder.build().toString();
-            LOG.debug("Sending AuthnRequest via redirect: {}", redirectLocation );
-            throw LoginExceptionCodes.REDIRECT.create(redirectLocation);
+            LOG.debug("Redirect URI for AuthnRequest: {}", redirectLocation );
+            return redirectLocation;
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.ENCODING_ERROR.create(e, "Could not construct redirect location");
         }

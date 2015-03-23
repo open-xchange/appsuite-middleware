@@ -78,6 +78,7 @@ import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLProperties;
 import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.http.AssertionConsumerService;
+import com.openexchange.saml.http.InitAuthService;
 import com.openexchange.saml.http.MetadataService;
 import com.openexchange.saml.http.SingleLogoutService;
 import com.openexchange.saml.impl.HzStateManagement;
@@ -135,16 +136,20 @@ public class SAMLFeature extends DependentServiceStarter {
 
             HzStateManagement hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
             WebSSOProvider serviceProvider = new SAMLWebSSOProviderImpl(config, openSAML, hzStateManagement, services);
-            SAMLBackend samlBackend = services.getService(SAMLBackend.class);
-            ExceptionHandler exceptionHandler = samlBackend.getExceptionHandler();
-
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
 
+            SAMLBackend samlBackend = services.getService(SAMLBackend.class);
+            ExceptionHandler exceptionHandler = samlBackend.getExceptionHandler();
             HttpService httpService = services.getService(HttpService.class);
             String prefix = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/";
+
             String acsServletAlias = prefix + "acs";
             httpService.registerServlet(acsServletAlias, new AssertionConsumerService(serviceProvider, exceptionHandler), null, null);
             servlets.push(acsServletAlias);
+
+            String initAuthServletAlias = prefix + "initauth";
+            httpService.registerServlet(initAuthServletAlias, new InitAuthService(serviceProvider, exceptionHandler), null, null);
+            servlets.push(initAuthServletAlias);
 
             if (config.singleLogoutEnabled()) {
                 Dictionary<String, Object> lrhProperties = new Hashtable<String, Object>();
@@ -158,7 +163,7 @@ public class SAMLFeature extends DependentServiceStarter {
 
             if (config.enableMetadataService()) {
                 String metadataServletAlias = prefix + "metadata";
-                httpService.registerServlet(metadataServletAlias, new MetadataService(serviceProvider), null, null);
+                httpService.registerServlet(metadataServletAlias, new MetadataService(serviceProvider, exceptionHandler), null, null);
                 servlets.push(metadataServletAlias);
             }
         } else {

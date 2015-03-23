@@ -49,47 +49,29 @@
 
 package com.openexchange.saml.http;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.saml.SAMLConfig.Binding;
+import javax.servlet.http.HttpServlet;
 import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.spi.ExceptionHandler;
 
 
 /**
- * {@link AssertionConsumerService}
+ * {@link SAMLServlet}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class AssertionConsumerService extends SAMLServlet {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AssertionConsumerService.class);
+public abstract class SAMLServlet extends HttpServlet {
 
     private static final long serialVersionUID = -8019507819002031614L;
 
-    /**
-     * Initializes a new {@link AssertionConsumerService}.
-     * @param provider
-     * @param exceptionHandler
-     */
-    public AssertionConsumerService(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
-        super(provider, exceptionHandler);
-    }
+    protected final WebSSOProvider provider;
 
-    @Override
-    protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        try {
-            provider.handleAuthnResponse(httpRequest, httpResponse, Binding.HTTP_POST);
-        } catch (OXException e) {
-            LOG.error("Error while handling SAML authentication response", e);
-            exceptionHandler.handleAuthnResponseFailed(httpRequest, httpResponse, e);
-        }
+    protected final ExceptionHandler exceptionHandler;
+
+    protected SAMLServlet(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
+        super();
+        this.provider = provider;
+        this.exceptionHandler = exceptionHandler;
     }
 
 }

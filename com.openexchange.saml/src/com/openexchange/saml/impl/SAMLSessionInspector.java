@@ -49,11 +49,11 @@
 
 package com.openexchange.saml.impl;
 
-import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.saml.SessionProperties;
@@ -110,13 +110,8 @@ public class SAMLSessionInspector implements SessionInspectorService {
     }
 
     private Reply respondWithAuthnRequest(HttpServletRequest request, HttpServletResponse response) throws OXException {
-        try {
-            provider.respondWithAuthnRequest(request, response);
-        } catch (IOException e) {
-            LOG.error("", e);
-        }
-
-        return Reply.STOP;
+        String redirectURI = provider.buildAuthnRequest(request, response);
+        throw LoginExceptionCodes.REDIRECT.create(redirectURI);
     }
 
 }
