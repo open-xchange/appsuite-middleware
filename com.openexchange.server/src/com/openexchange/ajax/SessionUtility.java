@@ -271,7 +271,7 @@ public final class SessionUtility {
             }
 
             // No such "public_session" parameter
-            if (mayUseFallbackSession && (isChangeableClient(null == session ? null : session.getClient()) || isChangeableUserAgent(req.getHeader(USER_AGENT)))) {
+            if (mayUseFallbackSession && isChangeable(session, req)) {
                 for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
                     if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
                         return handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
@@ -641,7 +641,7 @@ public final class SessionUtility {
                 }
 
                 // Check for special User-Agent to allow look-up by remembered cookie name
-                if (isChangeableUserAgent(req.getHeader(USER_AGENT))) {
+                if (isChangeable(null, req)) {
                     tmp.setLength(0);
                     cookie = cookies.get(tmp.append(secretPrefix).append(hash).toString());
                     if (null != cookie) {
@@ -670,10 +670,20 @@ public final class SessionUtility {
         return null;
     }
 
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    private static boolean isChangeable(Session session, HttpServletRequest req) {
+        return (isChangeableClient(detectClientId(session, req)) || isChangeableUserAgent(req.getHeader(USER_AGENT)));
+    }
+
+    private static String detectClientId(Session session, HttpServletRequest req) {
+        return null == session ? (null == req ? null : req.getParameter("client")) : session.getClient();
+    }
+
     private static final Set<String> CHANGEABLE_CLIENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange-mailapp")));
 
     private static boolean isChangeableClient(String client) {
-        return !Strings.isEmpty(client) && CHANGEABLE_CLIENTS.contains(client);
+        return (null != client) && CHANGEABLE_CLIENTS.contains(client);
     }
 
     private static boolean isChangeableUserAgent(String userAgent) {
@@ -702,6 +712,8 @@ public final class SessionUtility {
         BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
         return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
     }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Gets the appropriate hash for specified request.
