@@ -97,51 +97,56 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
         if (folder.containsFolderName()) {
             jsonFolder.put(FolderFields.TITLE, folder.getFolderName());
         }
-        final JSONArray jsonPerms = new JSONArray();
-        for (final OCLPermission perm : folder.getPermissions()) {
-            final JSONObject jsonPermission = new JSONObject();
-            if (OCLGuestPermission.class.isInstance(perm)) {
-                OCLGuestPermission guestPerm = (OCLGuestPermission) perm;
-                ShareRecipient recipient = guestPerm.getRecipient();
-                jsonPermission.put("type", recipient.getType());
-                switch (recipient.getType()) {
-                case ANONYMOUS:
-                    AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
-                    jsonPermission.putOpt(FolderField.PASSWORD.getName(), anonymousRecipient.getPassword());
-                    break;
-                case GUEST:
-                    GuestRecipient guestRecipient = (GuestRecipient) recipient;
-                    jsonPermission.putOpt(FolderField.EMAIL_ADDRESS.getName(), guestRecipient.getEmailAddress());
-                    jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestRecipient.getPassword());
-                    jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestRecipient.getDisplayName());
-                    jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestRecipient.getContactFolder());
-                    jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestRecipient.getContactID());
-                    break;
-                default:
-                    Assert.fail("Unsupported recipient: " + recipient.getType());
-                    break;
+        if (folder.containsPermissions()) {
+            final JSONArray jsonPerms = new JSONArray();
+            for (final OCLPermission perm : folder.getPermissions()) {
+                final JSONObject jsonPermission = new JSONObject();
+                if (OCLGuestPermission.class.isInstance(perm)) {
+                    OCLGuestPermission guestPerm = (OCLGuestPermission) perm;
+                    ShareRecipient recipient = guestPerm.getRecipient();
+                    jsonPermission.put("type", recipient.getType());
+                    switch (recipient.getType()) {
+                    case ANONYMOUS:
+                        AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
+                        jsonPermission.putOpt(FolderField.PASSWORD.getName(), anonymousRecipient.getPassword());
+                        break;
+                    case GUEST:
+                        GuestRecipient guestRecipient = (GuestRecipient) recipient;
+                        jsonPermission.putOpt(FolderField.EMAIL_ADDRESS.getName(), guestRecipient.getEmailAddress());
+                        jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestRecipient.getPassword());
+                        jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestRecipient.getDisplayName());
+                        jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestRecipient.getContactFolder());
+                        jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestRecipient.getContactID());
+                        break;
+                    default:
+                        Assert.fail("Unsupported recipient: " + recipient.getType());
+                        break;
+                    }
+                    if (null != guestPerm.getExpiryDate()) {
+                        jsonPermission.put(FolderField.EXPIRY_DATE.getName(), guestPerm.getExpiryDate().getTime());
+                    }
+                } else {
+                    jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
+                    jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
                 }
-                if (null != guestPerm.getExpiryDate()) {
-                    jsonPermission.put(FolderField.EXPIRY_DATE.getName(), guestPerm.getExpiryDate().getTime());
-                }
-            } else {
-                jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
-                jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
+                jsonPermission.put(FolderFields.BITS, Permissions.createPermissionBits(
+                    perm.getFolderPermission(),
+                    perm.getReadPermission(),
+                    perm.getWritePermission(),
+                    perm.getDeletePermission(),
+                    perm.isFolderAdmin()));
+                jsonPerms.put(jsonPermission);
             }
-            jsonPermission.put(FolderFields.BITS, Permissions.createPermissionBits(
-                perm.getFolderPermission(),
-                perm.getReadPermission(),
-                perm.getWritePermission(),
-                perm.getDeletePermission(),
-                perm.isFolderAdmin()));
-            jsonPerms.put(jsonPermission);
+            jsonFolder.put(FolderFields.PERMISSIONS, jsonPerms);
         }
-        jsonFolder.put(FolderFields.PERMISSIONS, jsonPerms);
         if (folder.containsModule()) {
             jsonFolder.put(FolderFields.MODULE, convertModule(folder.getModule()));
         }
         if (folder.containsType()) {
             jsonFolder.put(FolderFields.TYPE, folder.getType());
+        }
+        if (folder.containsParentFolderID()) {
+            jsonFolder.put(FolderFields.FOLDER_ID, folder.getParentFolderID());
         }
 
         return jsonFolder;
