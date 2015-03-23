@@ -62,51 +62,29 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum SubscriptionJSONErrorMessages implements DisplayableOXExceptionCode {
 
-    MISSING_PARAMETER(101, SubscriptionJSONErrorMessages.MISSING_PARAMETER_MSG, CATEGORY_ERROR),
-    UNKNOWN_ACTION(102, SubscriptionJSONErrorMessages.UNKNOWN_ACTION_MSG, CATEGORY_ERROR),
-    UNKNOWN_SUBSCRIPTION(102, SubscriptionJSONErrorMessages.UNKNOWN_SUBSCRIPTION_MSG, CATEGORY_USER_INPUT, SubscriptionJSONExceptionMessage.UNKNOWN_SUBSCRIPTION_DISPLAY),
+    MISSING_PARAMETER(101, "Missing parameter %s", CATEGORY_ERROR),
+    UNKNOWN_ACTION(102, "The requested action %s is not known.", CATEGORY_ERROR),
+    UNKNOWN_SUBSCRIPTION(102, "The requested subscription is not known", CATEGORY_USER_INPUT, SubscriptionJSONExceptionMessage.UNKNOWN_SUBSCRIPTION_DISPLAY),
 
-    JSONEXCEPTION(201, SubscriptionJSONErrorMessages.JSONEXCEPTION_MSG, CATEGORY_ERROR),
-    MISSING_FIELD(202, SubscriptionJSONErrorMessages.MISSING_FIELD_MSG, CATEGORY_ERROR),
-    MISSING_FORM_FIELD(203, SubscriptionJSONErrorMessages.MISSING_FORM_FIELD_MSG, CATEGORY_ERROR),
+    JSONEXCEPTION(201, "A JSON error occurred", CATEGORY_ERROR),
+    MISSING_FIELD(202, "Missing field(s): %s", CATEGORY_ERROR),
+    MISSING_FORM_FIELD(203, "Missing form field(s): %s", CATEGORY_ERROR),
 
-    THROWABLE(103, SubscriptionJSONErrorMessages.THROWABLE_MSG, CATEGORY_ERROR),
-    UNKNOWN_COLUMN(201, SubscriptionJSONErrorMessages.UNKNOWN_COLUMN_MSG, CATEGORY_USER_INPUT),
+    THROWABLE(103, "An unexpected error occurred: %s", CATEGORY_ERROR),
+    UNKNOWN_COLUMN(201, "Unknown column: %s", CATEGORY_USER_INPUT),
+    /**
+     * The operation is forbidden according to configuration.
+     */
+    FORBIDDEN_CREATE_MODIFY(104, "The operation is forbidden according to configuration.", CATEGORY_USER_INPUT, SubscriptionJSONExceptionMessage.FORBIDDEN_CREATE_MODIFY_MESSAGE),
     ;
 
-    private Category category;
-
-    private String message;
-
-    private int errorCode;
-
-    /**
-     * Message displayed to the user
-     */
-    private String displayMessage;
-
-    private final static String MISSING_PARAMETER_MSG = "Missing parameter %s";
-
-    private final static String UNKNOWN_ACTION_MSG = "The requested action %s is not known.";
-
-    private static final String UNKNOWN_SUBSCRIPTION_MSG = "The requested subscription is not known";
-
-    private final static String JSONEXCEPTION_MSG = "A JSON error occurred";
-
-    private final static String MISSING_FIELD_MSG = "Missing field(s): %s";
-
-    private final static String MISSING_FORM_FIELD_MSG = "Missing form field(s): %s";
-
-    private final static String THROWABLE_MSG = "An unexpected error occurred: %s";
-
-    private final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
+    private final Category category;
+    private final String message;
+    private final int errorCode;
+    private final String displayMessage;
 
     /**
      * Initializes a new {@link SubscriptionJSONErrorMessages}.
-     * 
-     * @param errorCode
-     * @param message
-     * @param category
      */
     private SubscriptionJSONErrorMessages(final int errorCode, final String message, final Category category) {
         this(errorCode, message, category, null);
@@ -114,11 +92,6 @@ public enum SubscriptionJSONErrorMessages implements DisplayableOXExceptionCode 
 
     /**
      * Initializes a new {@link SubscriptionJSONErrorMessages}.
-     * 
-     * @param errorCode
-     * @param message
-     * @param category
-     * @param displayMessage
      */
     private SubscriptionJSONErrorMessages(final int errorCode, final String message, final Category category, final String displayMessage) {
         this.category = category;

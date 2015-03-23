@@ -58,11 +58,13 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
+import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
 
 /**
  * {@link RefreshSubscriptionAction}
@@ -82,6 +84,10 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 
     @Override
     public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
+        if (!services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.subscribe.createModifyEnabled", false)) {
+            throw SubscriptionJSONErrorMessages.FORBIDDEN_CREATE_MODIFY.create();
+        }
+
         final List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
         final TIntSet ids = new TIntHashSet();
         JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());

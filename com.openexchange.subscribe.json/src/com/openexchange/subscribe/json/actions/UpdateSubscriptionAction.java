@@ -51,11 +51,13 @@ package com.openexchange.subscribe.json.actions;
 
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -75,6 +77,10 @@ public class UpdateSubscriptionAction extends AbstractSubscribeAction {
 
 	@Override
 	public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
+	    if (!services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.subscribe.createModifyEnabled", false)) {
+            throw SubscriptionJSONErrorMessages.FORBIDDEN_CREATE_MODIFY.create();
+        }
+
 		final ServerSession session = subscribeRequest.getServerSession();
         Subscription subscription = getSubscription(subscribeRequest.getRequestData(), session, services.getService(SecretService.class).getSecret(session));
 		final SubscribeService subscribeService = subscription.getSource().getSubscribeService();

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,27 @@
  *
  */
 
-package com.openexchange.subscribe.json.actions;
+package com.openexchange.publish.json;
 
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.secret.SecretService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * {@link PublicationJSONErrorDisplayMessage}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class NewSubscriptionAction extends AbstractSubscribeAction {
+public final class PublicationJSONErrorDisplayMessage implements LocalizableStrings {
 
-    public NewSubscriptionAction(ServiceLookup services) {
-        super(services);
+    /**
+     * Initializes a new {@link PublicationJSONErrorDisplayMessage}.
+     */
+    private PublicationJSONErrorDisplayMessage() {
+        super();
     }
 
-    @Override
-    public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
-        if (!services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.subscribe.createModifyEnabled", false)) {
-            throw SubscriptionJSONErrorMessages.FORBIDDEN_CREATE_MODIFY.create();
-        }
-
-        Subscription subscription = getSubscription(
-            subscribeRequest.getRequestData(),
-            subscribeRequest.getServerSession(),
-            services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
-        subscription.setId(-1);
-        final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
-        subscribeService.subscribe(subscription);
-        String urlPrefix = "";
-        {
-            String serverUrl = subscribeRequest.getRequestData().getParameter("__serverURL");
-            if (serverUrl != null) {
-                urlPrefix = serverUrl;
-            }
-        }
-        // JSONObject jsonTemp = new SubscriptionJSONWriter().write(
-        // subscription,
-        // subscription.getSource().getFormDescription(),
-        // urlPrefix,
-        // subscribeRequest.getTimeZone());
-        return new AJAXRequestResult(Integer.valueOf(subscription.getId()), "json");
-    }
+    // The operation is forbidden
+    public static final String FORBIDDEN_CREATE_MODIFY_MESSAGE = "The operation is forbidden";
 
 }
