@@ -77,6 +77,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.FileStorageCapability;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.OrTerm;
@@ -330,7 +331,7 @@ public class UploadHelper {
              * write initial file data, setting the first version number
              */
             checksum = saveDocumentAndChecksum(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false);
-        } else if (session.getStorage().supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
+        } else if (session.getStorage().supports(new FolderID(uploadFile.getFolderId()), FileStorageCapability.RANDOM_FILE_ACCESS)) {
             /*
              * append file data via random file access (not incrementing the version number)
              */
@@ -370,7 +371,7 @@ public class UploadHelper {
         try {
             digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
             IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
-            if (ignoreVersion && session.getStorage().supports(FileStorageCapability.IGNORABLE_VERSION)) {
+            if (ignoreVersion && session.getStorage().supports(new FolderID(file.getFolderId()), FileStorageCapability.IGNORABLE_VERSION)) {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
             } else {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields);
@@ -473,7 +474,7 @@ public class UploadHelper {
 
                 @Override
                 public SearchIterator<File> call() throws OXException {
-                    if (session.getStorage().supports(FileStorageCapability.SEARCH_BY_TERM)) {
+                    if (session.getStorage().supports(new FolderID(folderID), FileStorageCapability.SEARCH_BY_TERM)) {
                         return session.getStorage().getFileAccess().search(Collections.singletonList(folderID),
                             getSearchTermForUploadFiles(fileVersions), fields, null,
                             SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);

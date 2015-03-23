@@ -143,25 +143,46 @@ public class ChecksumProvider {
      */
     public static List<DirectoryChecksum> getChecksums(SyncSession session, List<String> folderIDs) throws OXException {
         StringBuilder trace = session.isTraceEnabled() ? new StringBuilder("Directory checksums:\n") : null;
-        List<FolderID> fids = new ArrayList<FolderID>(folderIDs.size());
-        for (String folderID : folderIDs) {
-            fids.add(new FolderID(folderID));
-        }
-        int userID = session.getServerSession().getUserId();
+        /*
+         * probe for optimized checksum retrieval
+         */
         List<DirectoryChecksum> checksums;
-        if (false == session.getStorage().supports(FileStorageCapability.SEQUENCE_NUMBERS)) {
+        List<String> foldersSupportingSequenceNumbers = DriveUtils.filterByCapabilities(session, folderIDs, FileStorageCapability.SEQUENCE_NUMBERS);
+        if (0 == foldersSupportingSequenceNumbers.size()) {
+            /*
+             * no sequence numbers supported at all, fallback to manual calculation
+             */
             if (null != trace) {
                 trace.append(" No folder sequence numbers supported.\n");
             }
-            checksums = calculateDirectoryChecksums(session, fids);
+            checksums = calculateDirectoryChecksums(session, DriveUtils.getFolderIDs(folderIDs));
         } else {
+            /*
+             * sequence numbers (at least partially) supported
+             */
+            List<FolderID> folderIDsSupportingSequenceNumbers = DriveUtils.getFolderIDs(foldersSupportingSequenceNumbers);
+            int userID = session.getServerSession().getUserId();
             int view = session.getExclusionFilterHash();
             checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
-            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(userID, fids, view);
+            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(userID, folderIDsSupportingSequenceNumbers, view);
             List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
             List<DirectoryChecksum> newChecksums = new ArrayList<DirectoryChecksum>();
-            Map<String, Long> sequenceNumbers = session.getStorage().getSequenceNumbers(folderIDs);
-            for (FolderID folderID : fids) {
+            Map<String, Long> sequenceNumbers = session.getStorage().getSequenceNumbers(foldersSupportingSequenceNumbers);
+            for (FolderID folderID : DriveUtils.getFolderIDs(folderIDs)) {
+                if (false == folderIDsSupportingSequenceNumbers.contains(folderID)) {
+                    /*
+                     * calculate checksum as fallback
+                     */
+                    DirectoryChecksum directoryChecksum = new DirectoryChecksum(session.getServerSession().getUserId(), folderID, -1, calculateMD5(session, folderID), view);
+                    if (null != trace) {
+                        trace.append(" Calculated: ").append(directoryChecksum).append('\n');
+                    }
+                    checksums.add(directoryChecksum);
+                    continue;
+                }
+                /*
+                 * use stored checksum if available
+                 */
                 DirectoryChecksum directoryChecksum = find(storedChecksums, folderID, view);
                 Long value = sequenceNumbers.get(folderID.toUniqueID());
                 long sequenceNumber = null != value ? value.longValue() : 0;

@@ -59,10 +59,10 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.FilePattern;
-import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.FilePattern;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.ChecksumStore;
@@ -342,7 +342,7 @@ public class SyncSession {
         List<String> folderIDs = new ArrayList<String>(folders.size());
         for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
             String path = entry.getKey();
-            if (DriveUtils.isInvalidPath(path)) {
+            if (DriveUtils.isInvalidPath(path) || DriveUtils.isInvalidFolderName(entry.getValue().getName())) {
                 trace("Skipping invalid server directory: " + entry.getKey());
             } else if (DriveUtils.isIgnoredPath(this, path)) {
                 trace("Skipping ignored server directory: " + entry.getKey());

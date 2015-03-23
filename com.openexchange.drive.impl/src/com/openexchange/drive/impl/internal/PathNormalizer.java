@@ -68,7 +68,7 @@ public class PathNormalizer {
      * @return The normalized form
      */
     public static String normalize(String path) {
-        return Normalizer.normalize(path, Form.NFC);
+        return null != path ? Normalizer.normalize(path, Form.NFC) : null;
     }
 
     /**
@@ -79,7 +79,7 @@ public class PathNormalizer {
      * @return <code>true</code> if the path is normalized, <code>false</code>, otherwise
      */
     public static boolean isNormalized(String path) {
-        return Normalizer.isNormalized(path, Form.NFC);
+        return null != path ? Normalizer.isNormalized(path, Form.NFC) : true;
     }
 
     /**

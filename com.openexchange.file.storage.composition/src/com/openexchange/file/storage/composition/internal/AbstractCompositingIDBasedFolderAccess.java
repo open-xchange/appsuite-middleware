@@ -49,9 +49,9 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
 import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withRelativeID;
 import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withUniqueID;
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,17 +63,23 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.DefaultTypeAwareFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageFolderType;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.ServiceAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.java.Collators;
 import com.openexchange.session.Session;
 
@@ -85,6 +91,7 @@ import com.openexchange.session.Session;
 public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCompositingIDBasedAccess implements IDBasedFolderAccess {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFolderAccess.class);
+    private static final String INFOSTORE_FOLDER_ID = "9"; // FolderObject.SYSTEM_INFOSTORE_FOLDER_ID
 
     /**
      * Initializes a new {@link AbstractCompositingIDBasedFolderAccess}.
@@ -115,6 +122,9 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
     @Override
     public FileStorageFolder getFolder(FolderID folderID) throws OXException {
+        if (FileStorageFolder.ROOT_FULLNAME.equals(folderID.getFolderId())) {
+            return getRootFolder(folderID.getService(), folderID.getAccountId());
+        }
         FileStorageFolder folder = getFolderAccess(folderID).getFolder(folderID.getFolderId());
         return withUniqueID(folder, folderID.getService(), folderID.getAccountId());
     }
@@ -123,6 +133,13 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
         FolderID folderID = new FolderID(parentIdentifier);
         FileStorageFolder[] folders = getFolderAccess(folderID).getSubfolders(folderID.getFolderId(), all);
+        if (null != folders && 0 < folders.length && INFOSTORE_FOLDER_ID.equals(parentIdentifier)) {
+            /*
+             * file storage root folders below folder 9 already contain unique identifiers as fetched from
+             * com.openexchange.folderstorage.filestorage.FileStorageFolderStorage.getFolder
+             */
+            return folders;
+        }
         return withUniqueID(folders, folderID.getService(), folderID.getAccountId());
     }
 
@@ -322,18 +339,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
         for (AccessWrapper accessWrapper : accessWrappers) {
             FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
-            FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-            try {
-                FileStorageFolder rootFolder = folderAccess.getRootFolder();
-                if (null != rootFolder) {
-                    folders.add(IDManglingFolder.withUniqueID(rootFolder, accountAccess.getService().getId(), accountAccess.getAccountId()));
-                }
-            } catch (OXException e) {
-                // Check for com.openexchange.folderstorage.FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE -- 'FLD-0003'
-                if (false == e.equalsCode(3, "FLD")) {
-                    LOG.warn("Could not load root folder for account {}", accessWrapper.displayName, e);
-                }
-            }
+            folders.add(getRootFolder(session.getUserId(), accountAccess.getService().getId(), accountAccess.getAccountId(), accessWrapper.displayName));
         }
 
         return folders.toArray(new FileStorageFolder[folders.size()]);
@@ -366,6 +372,64 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         } else {
             LOG.warn("Unable to access event admin, unable to publish event {}", dump(event));
         }
+    }
+
+    /**
+     * Creates a file storage root folder for a specific file storage account.
+     *
+     * @param serviceID The account's service identifier
+     * @param accountID The account identifier
+     * @return The root folder, already with an unique identifier and the parent set to {@link #INFOSTORE_FOLDER_ID}
+     */
+    private FileStorageFolder getRootFolder(String serviceID, String accountID) throws OXException {
+        FileStorageServiceRegistry serviceRegistry = Services.getService(FileStorageServiceRegistry.class);
+        FileStorageAccount account = serviceRegistry.getFileStorageService(serviceID).getAccountManager().getAccount(accountID, session);
+        return getRootFolder(session.getUserId(), serviceID, accountID, account.getDisplayName());
+    }
+
+    /**
+     * Creates a file storage root folder for a specific file storage account.
+     *
+     * @param account The account to get the root folder for
+     * @return The root folder, already with an unique identifier and the parent set to {@link #INFOSTORE_FOLDER_ID}
+     */
+    private FileStorageFolder getRootFolder(FileStorageAccount account) throws OXException {
+        String serviceID;
+        if (ServiceAware.class.isInstance(account)) {
+            serviceID = ((ServiceAware) account).getServiceId();
+        } else {
+            serviceID = account.getFileStorageService().getId();
+        }
+        return getRootFolder(session.getUserId(), serviceID, account.getId(), account.getDisplayName());
+    }
+
+    /**
+     * Creates a file storage root folder for a specific file storage account.
+     *
+     * @param userID The user identifier to construct the root folder for
+     * @param serviceID The account's service identifier
+     * @param accountID The account identifier
+     * @param displayName The folder name to use, usually the account's display name
+     * @return The root folder, already with an unique identifier and the parent set to {@link #INFOSTORE_FOLDER_ID}
+     */
+    private static FileStorageFolder getRootFolder(int userID, String serviceID, String accountID, String displayName) throws OXException {
+        DefaultTypeAwareFileStorageFolder rootFolder = new DefaultTypeAwareFileStorageFolder();
+        rootFolder.setParentId(INFOSTORE_FOLDER_ID);
+        rootFolder.setId(new FolderID(serviceID, accountID, FileStorageFolder.ROOT_FULLNAME).toUniqueID());
+        rootFolder.setName(displayName);
+        rootFolder.setType(FileStorageFolderType.NONE);
+        rootFolder.setSubscribed(true);
+        rootFolder.setSubfolders(true);
+        rootFolder.setSubscribedSubfolders(true);
+        rootFolder.setRootFolder(true);
+        rootFolder.setHoldsFiles(true);
+        rootFolder.setHoldsFolders(true);
+        rootFolder.setExists(true);
+        DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
+        permission.setEntity(userID);
+        rootFolder.setPermissions(Collections.<FileStoragePermission>singletonList(permission));
+        rootFolder.setOwnPermission(permission);
+        return rootFolder;
     }
 
     static String dump(Event event) {
