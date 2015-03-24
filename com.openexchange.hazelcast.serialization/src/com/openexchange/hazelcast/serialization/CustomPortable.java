@@ -113,7 +113,7 @@ public interface CustomPortable extends Portable {
      * <li><code>  19</code>: com.openexchange.sessiond.serialization.PortableContextSessionsCleaner</li>
      * <li><code>  20</code>: com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo</li>
      * <li><code>  21</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntry</li>
-     * <li><code>  22</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToRealtimeExceptionMap</li>
+     * <li><code>  22</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMap</li>
      * </ul>
      *
      * @return The class ID
