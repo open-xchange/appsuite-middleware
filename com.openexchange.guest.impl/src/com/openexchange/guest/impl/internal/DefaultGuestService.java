@@ -82,7 +82,6 @@ public class DefaultGuestService implements GuestService {
 
     private final UserService userService;
 
-
     private final ContactUserStorage contactUserStorage;
 
     private final ConfigViewFactory configViewFactory;
@@ -236,8 +235,7 @@ public class DefaultGuestService implements GuestService {
                     GuestStorage.getInstance().updateGuestAssignment(newAssignment, connectionHelper.getConnection());
                 }
                 connectionHelper.commit();
-            }
-            finally {
+            } finally {
                 connectionHelper.finish();
             }
         }
@@ -334,17 +332,22 @@ public class DefaultGuestService implements GuestService {
         GuestAssignment existingAssignment = existingAssignments.get(0);
         User existingUser = userService.getUser(existingAssignment.getUserId(), existingAssignment.getContextId());
 
-        UserImpl user = new UserImpl(existingUser);
-        user.setDisplayName(existingUser.getDisplayName());
-        user.setMail(existingUser.getMail());
-        user.setLoginInfo(existingUser.getMail());
-        user.setPasswordMech(existingUser.getPasswordMech());
-        user.setUserPassword(existingUser.getUserPassword());
-        user.setTimeZone(existingUser.getTimeZone());
-        user.setAliases(existingUser.getAliases());
-        user.setPreferredLanguage(existingUser.getPreferredLanguage());
+        if (existingUser != null) {
+            UserImpl user = new UserImpl(existingUser);
+            user.setDisplayName(existingUser.getDisplayName());
+            user.setMail(existingUser.getMail());
+            user.setLoginInfo(existingUser.getMail());
+            user.setPasswordMech(existingUser.getPasswordMech());
+            user.setUserPassword(existingUser.getUserPassword());
+            user.setTimeZone(existingUser.getTimeZone());
+            user.setAliases(existingUser.getAliases());
+            user.setPreferredLanguage(existingUser.getPreferredLanguage());
 
-        return user;
+            return user;
+        }
+
+        LOG.warn("Unable to find guest user with context id {} and user id {} in storage. Cannot create copy.", existingAssignment.getContextId(), existingAssignment.getUserId());
+        return null;
     }
 
     /**
@@ -363,13 +366,18 @@ public class DefaultGuestService implements GuestService {
         ContactField[] contactFields = ContactField.values();
         Contact existingContact = contactUserStorage.getGuestContact(existingAssignment.getContextId(), existingAssignment.getUserId(), contactFields);
 
-        Contact contactCopy = existingContact.clone();
-        contactCopy.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
-        contactCopy.setCreatedBy(createdById);
-        contactCopy.setContextId(contextId);
-        contactCopy.setEmail1(mailAddress);
+        if (existingContact != null) {
+            Contact contactCopy = existingContact.clone();
+            contactCopy.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+            contactCopy.setCreatedBy(createdById);
+            contactCopy.setContextId(contextId);
+            contactCopy.setEmail1(mailAddress);
 
-        return contactCopy;
+            return contactCopy;
+        }
+
+        LOG.warn("Unable to find guest contact with context id {} and user id {} in storage. Cannot create copy.", existingAssignment.getContextId(), existingAssignment.getUserId());
+        return null;
     }
 
     /**
@@ -379,7 +387,7 @@ public class DefaultGuestService implements GuestService {
     @Override
     public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) throws OXException {
         if (Strings.isEmpty(mailAddress)) {
-            LOG.warn("Provided mail address to get assignments for is empty. Return empty list.");
+            LOG.warn("Provided mail address {} to get assignments for is empty. Return empty list.", mailAddress);
             return Collections.emptyList();
         }
 
