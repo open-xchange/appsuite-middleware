@@ -277,9 +277,9 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_TYPE_PROPERTY("Invalid \"%1$s\" property \"%2$s\".", CATEGORY_ERROR, 53, null),
     /**
-     * Missing configuration for account "%1$s".
+     * Missing configuration for %1$s account "%2$s".
      */
-    MISSING_CONFIG("Missing configuration for account \"%1$s\".", Category.CATEGORY_CONFIGURATION, 54, FileStorageExceptionMessages.MISSING_CONFIG_MSG),
+    MISSING_CONFIG("Missing configuration for %1$s account \"%2$s\".", Category.CATEGORY_CONFIGURATION, 54, FileStorageExceptionMessages.MISSING_CONFIG_MSG),
     /**
      * "The %1$s resource does not exist: %2$s"
      */
