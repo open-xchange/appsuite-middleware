@@ -67,4 +67,7 @@ public class SubscriptionJSONExceptionMessage implements LocalizableStrings {
 
     // The message displayed if the requested subscription cannot be found from the server.
     public static final String UNKNOWN_SUBSCRIPTION_DISPLAY = "The subscription you requested is unkonwn!";
+
+    // The operation is forbidden
+    public static final String FORBIDDEN_CREATE_MODIFY_MESSAGE = "The operation is forbidden";
 }

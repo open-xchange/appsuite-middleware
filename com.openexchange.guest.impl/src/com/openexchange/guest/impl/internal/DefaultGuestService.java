@@ -53,7 +53,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.validator.routines.EmailValidator;
+import javax.mail.internet.AddressException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.exception.OXException;
@@ -67,6 +67,7 @@ import com.openexchange.guest.GuestExceptionCodes;
 import com.openexchange.guest.GuestService;
 import com.openexchange.guest.impl.storage.GuestStorage;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.user.UserService;
 
 /**
@@ -105,11 +106,6 @@ public class DefaultGuestService implements GuestService {
      */
     @Override
     public void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech) throws OXException {
-        if (Strings.isEmpty(mailAddress)) {
-            LOG.info("Cannot add user with id {} in context {} as a guest as the provided mail address is empty.", userId, contextId);
-            throw GuestExceptionCodes.EMTPY_EMAIL_ADDRESS.create();
-        }
-
         check(mailAddress);
 
         GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, contextId);
@@ -208,9 +204,11 @@ public class DefaultGuestService implements GuestService {
      * @param mailAddress - address to validate
      * @throws OXException thrown if mail address is not valid
      */
-    private void check(String mailAddress) throws OXException {
-        if ((mailAddress == null) || (!EmailValidator.getInstance().isValid(mailAddress))) {
-            throw GuestExceptionCodes.INVALID_EMAIL_ADDRESS.create(mailAddress);
+    protected void check(String mailAddress) throws OXException {
+        try {
+            new QuotedInternetAddress(mailAddress, true);
+        } catch (final AddressException e) {
+            throw GuestExceptionCodes.INVALID_EMAIL_ADDRESS.create(mailAddress, e);
         }
     }
 
@@ -227,7 +225,7 @@ public class DefaultGuestService implements GuestService {
         String groupId = configViewFactory.getView(userId, contextId).opt("com.openexchange.context.group", String.class, "default");
         List<GuestAssignment> guestAssignments = retrieveGuestAssignments(user.getMail(), groupId);
 
-        if (guestAssignments != null) {
+        if ((guestAssignments != null) && (!guestAssignments.isEmpty())) {
             GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, groupId);
             try {
                 connectionHelper.start();
@@ -258,7 +256,7 @@ public class DefaultGuestService implements GuestService {
         String groupId = configViewFactory.getView(userId, contextId).opt("com.openexchange.context.group", String.class, "default");
         List<GuestAssignment> guestAssignments = retrieveGuestAssignments(contact.getEmail1(), groupId);
 
-        if (guestAssignments != null) {
+        if ((guestAssignments != null) && (!guestAssignments.isEmpty())) {
             for (GuestAssignment guestAssignment : guestAssignments) {
 
                 ContextConnectionHelper contextConnectionHelper = new ContextConnectionHelper(GuestStorageServiceLookup.get(), true, guestAssignment.getContextId());
@@ -283,7 +281,7 @@ public class DefaultGuestService implements GuestService {
      * @return List with {@link GuestAssignment}s
      * @throws OXException
      */
-    private List<GuestAssignment> retrieveGuestAssignments(String mailAddress, String groupId) throws OXException {
+    protected List<GuestAssignment> retrieveGuestAssignments(String mailAddress, String groupId) throws OXException {
         List<GuestAssignment> guestAssignments = new ArrayList<GuestAssignment>();
         GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), false, groupId);
         try {
@@ -307,7 +305,7 @@ public class DefaultGuestService implements GuestService {
      * @param assignment - the assignment that should be updated
      * @throws OXException
      */
-    private void updateContact(Contact contact, Connection contextConnection, GuestAssignment assignment) throws OXException {
+    protected void updateContact(Contact contact, Connection contextConnection, GuestAssignment assignment) throws OXException {
         ContactField[] contactFields = ContactField.values();
         Contact storageContact = contactUserStorage.getGuestContact(assignment.getContextId(), assignment.getUserId(), contactFields);
 

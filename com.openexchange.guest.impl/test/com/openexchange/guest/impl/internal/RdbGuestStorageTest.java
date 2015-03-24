@@ -102,9 +102,6 @@ public class RdbGuestStorageTest {
     private static final String GUEST_PASSWORD = "myToppiPasswordi";
     private static final String GUEST_PASSWORD_MECH = "{BCRYPT}";
 
-    /**
-     * @throws java.lang.Exception
-     */
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -212,6 +209,14 @@ public class RdbGuestStorageTest {
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_GUEST_ID_BY_MAIL);
     }
 
+    @Test(expected = OXException.class)
+    public void testGetNumberOfAssignments_conntectionsNull_throwExcpetion() throws OXException, SQLException {
+        Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        Mockito.when(resultSet.next()).thenReturn(false);
+
+        rdbGuestStorage.getNumberOfAssignments(GUEST_ID, null);
+    }
+
     @Test
     public void testGetNumberOfAssignments_noAssignmentFound_returnZero() throws OXException, SQLException {
         Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
@@ -238,6 +243,14 @@ public class RdbGuestStorageTest {
         Mockito.verify(preparedStatement, Mockito.times(1)).setLong(1, GUEST_ID);
         Mockito.verify(resultSet, Mockito.times(1)).getInt(1);
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.RESOLVE_NUMBER_OF_GUEST_ASSIGNMENTS_BY_GUESTID);
+    }
+
+    @Test (expected=OXException.class)
+    public void testIsAssignmentExisting_connectionNull_throwException() throws OXException, SQLException {
+        Mockito.when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        Mockito.when(resultSet.next()).thenReturn(false);
+
+        rdbGuestStorage.isAssignmentExisting(GUEST_ID, CONTEXT_ID, USER_ID, null);
     }
 
     @Test
@@ -336,5 +349,26 @@ public class RdbGuestStorageTest {
         List<Long> resolveGuestAssignments = rdbGuestStorage.resolveGuestAssignments(CONTEXT_ID, connection);
 
         Assert.assertEquals(GUEST_ID, resolveGuestAssignments.get(0).intValue());
+    }
+
+    @Test (expected=OXException.class)
+    public void testUpdateGuestAssignment_connectionNull_throwException() throws OXException, SQLException {
+        Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
+        Mockito.when(resultSet.next()).thenReturn(true, false);
+        Mockito.when(resultSet.getLong(Matchers.anyInt())).thenReturn(GUEST_ID);
+
+        rdbGuestStorage.updateGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH), null);
+    }
+
+    @Test
+    public void testUpdateGuestAssignment_updateGuest_fine() throws OXException, SQLException {
+        Mockito.when(preparedStatement.executeUpdate()).thenReturn(1);
+        Mockito.when(resultSet.next()).thenReturn(true, false);
+        Mockito.when(resultSet.getLong(Matchers.anyInt())).thenReturn(GUEST_ID);
+
+        rdbGuestStorage.updateGuestAssignment(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH), connection);
+
+        Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
+        Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.UPDATE_GUEST_PASSWORD);
     }
 }
