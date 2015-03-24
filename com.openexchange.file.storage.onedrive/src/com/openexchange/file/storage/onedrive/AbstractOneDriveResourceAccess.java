@@ -129,16 +129,12 @@ public abstract class AbstractOneDriveResourceAccess {
             JsonFactory jsonFactory = new JsonFactory();
             JsonParser jp = jsonFactory.createParser(inputStream);
             return getObjectMapper().readValue(jp, clazz);
-        } catch (JsonGenerationException e) {
-            throw OneDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (JsonMappingException e) {
-            throw OneDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (JsonParseException e) {
-            throw OneDriveExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (JsonGenerationException | JsonMappingException | JsonParseException e) {
+            throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
-            throw OneDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -166,7 +162,7 @@ public abstract class AbstractOneDriveResourceAccess {
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
                 if (404 == statusCode) {
-                    throw OneDriveExceptionCodes.NOT_FOUND_SIMPLE.create();
+                    throw FileStorageExceptionCodes.NOT_FOUND.create(OneDriveConstants.ID, statusCode);
                 }
                 String reason;
                 try {
@@ -269,7 +265,7 @@ public abstract class AbstractOneDriveResourceAccess {
                         HttpResponse httpResponse = httpClient.execute(method);
                         if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
                             if (keepOn > 1) {
-                                throw OneDriveExceptionCodes.UNLINKED_ERROR.create();
+                                throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), OneDriveConstants.ID, httpResponse.getStatusLine());
                             }
 
                             reset(request);
@@ -452,7 +448,7 @@ public abstract class AbstractOneDriveResourceAccess {
             Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractOneDriveResourceAccess.class);
             logger.warn("Could not re-initialize Microsoft OneDrive access", oxe);
 
-            throw OneDriveExceptionCodes.ONE_DRIVE_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, OneDriveConstants.ID, e.getMessage());
         }
     }
 
@@ -467,7 +463,7 @@ public abstract class AbstractOneDriveResourceAccess {
         if (cause instanceof AuthenticationException) {
             // TODO:
         }
-        return OneDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        return FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
     }
 
     /** Status code (401) indicating that the request requires HTTP authentication. */
@@ -485,12 +481,12 @@ public abstract class AbstractOneDriveResourceAccess {
      */
     protected OXException handleHttpResponseError(String identifier, HttpResponseException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
-            return OneDriveExceptionCodes.NOT_FOUND.create(e, identifier);
+            return FileStorageExceptionCodes.NOT_FOUND.create(e, OneDriveConstants.ID, identifier);
         }
         if (SC_UNAUTHORIZED == e.getStatusCode()) {
-            return OneDriveExceptionCodes.UNLINKED_ERROR.create();
+            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), OneDriveConstants.ID, SC_UNAUTHORIZED);
         }
-        return OneDriveExceptionCodes.ONE_DRIVE_SERVER_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getMessage());
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
     }
 
     /**
