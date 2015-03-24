@@ -61,7 +61,7 @@ public class Range {
     /**
      * Initializes a new {@link Range}.
      *
-     * @param indexes The <i>"from"</i> and <i>"to"</i> positions
+     * @param indexes The <i>"from"</i> (inclusive) and <i>"to"</i> (exclusive) positions
      * @throws IllegalArgumentException If passed <i>"from"</i>/<i>"to"</i> positions are invalid
      */
     public static Range valueOf(int[] indexes) {
