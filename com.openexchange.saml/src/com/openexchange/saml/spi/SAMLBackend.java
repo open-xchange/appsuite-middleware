@@ -67,11 +67,15 @@ import com.openexchange.saml.validation.ValidationStrategy;
 
 /**
  * A {@link SAMLBackend} must be implemented and registered as OSGi service to enable
- * SAML-based SSO. It provides the necessary deployment-specific objects that are needed
- * to create SP requests and process IDP responses.
+ * SAML-based SSO. It provides the necessary deployment-specific objects and operations
+ * that are needed to create SP requests and process IDP responses.
+ *
+ * It's considered best practice to not implement this interface directly but to inherit
+ * from {@link AbstractSAMLBackend}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
+ * @see AbstractSAMLBackend
  */
 public interface SAMLBackend {
 
