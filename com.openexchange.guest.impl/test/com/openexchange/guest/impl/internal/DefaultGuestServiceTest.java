@@ -297,17 +297,17 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testCheck5() throws OXException {
-        defaultGuestService.check("this-Is@vä-lid");
+        defaultGuestService.check("this-Is@v\u00e4-lid");
     }
 
     @Test(expected = OXException.class)
     public void testCheck6() throws OXException {
-        defaultGuestService.check("thüs-Is@vä-lid");
+        defaultGuestService.check("th\u00fcs-Is@v\u00e4-lid");
     }
 
     @Test(expected = OXException.class)
     public void testCheck7() throws OXException {
-        defaultGuestService.check("this- Is@vä-lid");
+        defaultGuestService.check("this- Is@v\u00e4-lid");
     }
 
     @Test
