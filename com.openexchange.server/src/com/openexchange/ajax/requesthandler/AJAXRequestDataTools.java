@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -324,6 +325,48 @@ public class AJAXRequestDataTools {
         } catch (final NumberFormatException e) {
             return defaultInt;
         }
+    }
+
+    /**
+     * Parses the "from"/"to" indexes from specified {@code AJAXRequestData} instance
+     *
+     * @param requestData The request data
+     * @return The parsed "from"/"to" indexes or <code>null</code>
+     * @throws OXException If parsing fails; e.g. NaN
+     */
+    public static int[] parseFromToIndexes(AJAXRequestData requestData) throws OXException {
+        String sLimit = requestData.getParameter(AJAXServlet.PARAMETER_LIMIT);
+        if (null == sLimit) {
+            int from = parseIntParameter(requestData.getParameter(AJAXServlet.LEFT_HAND_LIMIT), -1);
+            if (from < 0) {
+                return null;
+            }
+            int to = parseIntParameter(requestData.getParameter(AJAXServlet.RIGHT_HAND_LIMIT), -1);
+            if (to < 0) {
+                return null;
+            }
+
+            return new int[] { from < 0 ? 0 : from, to < 0 ? 0 : to};
+        }
+
+        int start;
+        int end;
+        try {
+            int pos = sLimit.indexOf(',');
+            if (pos < 0) {
+                start = 0;
+                int i = Integer.parseInt(sLimit.trim());
+                end = i < 0 ? 0 : i;
+            } else {
+                int i = Integer.parseInt(sLimit.substring(0, pos).trim());
+                start = i < 0 ? 0 : i;
+                i = Integer.parseInt(sLimit.substring(pos+1).trim());
+                end = i < 0 ? 0 : i;
+            }
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "limit", sLimit);
+        }
+        return new int[] {start, end};
     }
 
     /**
