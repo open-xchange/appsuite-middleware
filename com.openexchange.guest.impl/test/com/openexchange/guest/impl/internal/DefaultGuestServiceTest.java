@@ -51,7 +51,10 @@ package com.openexchange.guest.impl.internal;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,6 +73,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.impl.storage.GuestStorage;
@@ -125,6 +129,9 @@ public class DefaultGuestServiceTest {
 
     private Contact contact;
 
+    private final List<GuestAssignment> assignments = new ArrayList<GuestAssignment>();
+
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -160,6 +167,10 @@ public class DefaultGuestServiceTest {
 
         contact = new Contact();
         contact.setInternalUserId((int) GUEST_ID);
+
+        assignments.add(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH));
+        assignments.add(new GuestAssignment(111, 11, 1, "pwd", "pwdMech"));
+
 
         this.defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory);
     }
@@ -328,9 +339,6 @@ public class DefaultGuestServiceTest {
 
             @Override
             protected List<GuestAssignment> retrieveGuestAssignments(String mailAddress, String groupId) {
-                List<GuestAssignment> assignments = new ArrayList<GuestAssignment>();
-                assignments.add(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH));
-                assignments.add(new GuestAssignment(111, 11, 1, "pwd", "pwdMech"));
                 return assignments;
             }
         };
@@ -360,9 +368,6 @@ public class DefaultGuestServiceTest {
 
             @Override
             protected List<GuestAssignment> retrieveGuestAssignments(String mailAddress, String groupId) {
-                List<GuestAssignment> assignments = new ArrayList<GuestAssignment>();
-                assignments.add(new GuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, GUEST_PASSWORD, GUEST_PASSWORD_MECH));
-                assignments.add(new GuestAssignment(111, 11, 1, "pwd", "pwdMech"));
                 return assignments;
             }
         };
@@ -370,5 +375,189 @@ public class DefaultGuestServiceTest {
         defaultGuestService.updateGuestContact(contact, CONTEXT_ID);
 
         Mockito.verify(contactUserStorage, Mockito.times(2)).updateGuestContact(Mockito.anyInt(), Mockito.anyInt(), (Contact) Mockito.any(), (Connection) Mockito.any());
+    }
+
+    @Test
+    public void testCreateContactCopy_noAssignmentsAvailable_returnNullAsCopy() throws OXException {
+        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+
+            @Override
+            public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
+                return null;
+            }
+        };
+
+        Contact contactCopy = defaultGuestService.createContactCopy(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID, USER_ID);
+
+        Assert.assertNull(contactCopy);
+    }
+
+    @Test
+    public void testCreateContactCopy_storageContactNotAvailable_returnNullAsCopy() throws OXException {
+        Mockito.when(contactUserStorage.getGuestContact(Matchers.anyInt(), Mockito.anyInt(), (ContactField[]) Mockito.any())).thenReturn(null);
+
+        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+
+            @Override
+            public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
+                return assignments;
+            }
+        };
+
+        Contact contactCopy = defaultGuestService.createContactCopy(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID, USER_ID);
+
+        Assert.assertNull(contactCopy);
+    }
+
+    @Test
+    public void testCreateContactCopy_assignmentsAvailable_returnCopy() throws OXException {
+        Contact storageContact = new Contact();
+        String homeAddress = "this is my home";
+        storageContact.setAddressHome(homeAddress);
+        java.util.Date birthday = Calendar.getInstance().getTime();
+        storageContact.setBirthday(birthday);
+
+        Mockito.when(contactUserStorage.getGuestContact(Matchers.anyInt(), Mockito.anyInt(), (ContactField[]) Mockito.any())).thenReturn(storageContact);
+
+        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+
+            @Override
+            public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
+                return assignments;
+            }
+        };
+
+        Contact contactCopy = defaultGuestService.createContactCopy(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID, USER_ID);
+
+        Assert.assertNotNull(contactCopy);
+        // asserts for updated fields
+        Assert.assertEquals(GUEST_MAIL_ADDRESS, contactCopy.getEmail1());
+        Assert.assertEquals(USER_ID, contactCopy.getCreatedBy());
+        Assert.assertEquals(CONTEXT_ID, contactCopy.getContextId());
+        Assert.assertEquals(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID, contactCopy.getParentFolderID());
+        // asserts for existing fields
+        Assert.assertEquals(homeAddress, contactCopy.getAddressHome());
+        Assert.assertEquals(GUEST_MAIL_ADDRESS, contactCopy.getEmail1());
+        Assert.assertEquals(birthday, contactCopy.getBirthday());
+    }
+
+    @Test
+    public void testCreateUserCopy_noAssignmentsAvailable_returnNullAsCopy() throws OXException {
+        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+
+            @Override
+            public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
+                return null;
+            }
+        };
+
+        UserImpl userCopy = defaultGuestService.createUserCopy(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID);
+
+        Assert.assertNull(userCopy);
+    }
+
+    @Test
+    public void testCreateUserCopy_storageContactNotAvailable_returnNullAsCopy() throws OXException {
+        Mockito.when(userService.getUser(Matchers.anyInt(), Mockito.anyInt())).thenReturn(null);
+
+        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+
+            @Override
+            public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
+                return assignments;
+            }
+        };
+
+        UserImpl userCopy = defaultGuestService.createUserCopy(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID);
+
+        Assert.assertNull(userCopy);
+    }
+
+    @Test
+    public void testCreateUserCopy_assignmentsAvailable_returnCopy() throws OXException {
+        user = new UserImpl();
+        String displayName = "that's my display name";
+        user.setDisplayName(displayName);
+        user.setMail(GUEST_MAIL_ADDRESS);
+        user.setLoginInfo(GUEST_MAIL_ADDRESS);
+        user.setPasswordMech(GUEST_PASSWORD_MECH);
+        user.setUserPassword(GUEST_PASSWORD);
+        String timeZone = "Europe/Belgrade";
+        user.setTimeZone(timeZone);
+        String language = "de_DE";
+        user.setPreferredLanguage(language);
+
+        String givenName = "Horsti";
+        user.setGivenName(givenName);
+        String smtpServer = "aValueForTheServer";
+        user.setSmtpServer(smtpServer);
+
+        Mockito.when(userService.getUser(Matchers.anyInt(), Mockito.anyInt())).thenReturn(user);
+
+        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+
+            @Override
+            public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
+                return assignments;
+            }
+        };
+
+        UserImpl userCopy = defaultGuestService.createUserCopy(GUEST_MAIL_ADDRESS, GROUP_ID, CONTEXT_ID);
+
+        Assert.assertNotNull(userCopy);
+        // asserts for updated fields
+        Assert.assertEquals(GUEST_MAIL_ADDRESS, userCopy.getMail());
+        Assert.assertEquals(displayName, userCopy.getDisplayName());
+        Assert.assertEquals(GUEST_MAIL_ADDRESS, userCopy.getLoginInfo());
+        Assert.assertEquals(GUEST_PASSWORD_MECH, userCopy.getPasswordMech());
+        Assert.assertEquals(GUEST_PASSWORD, userCopy.getUserPassword());
+        Assert.assertEquals(timeZone, userCopy.getTimeZone());
+        Assert.assertEquals(language, userCopy.getPreferredLanguage());
+        // asserts for existing fields
+        Assert.assertEquals(givenName, userCopy.getGivenName());
+        Assert.assertEquals(smtpServer, userCopy.getSmtpServer());
+    }
+
+    @Test
+    public void testGetExistingAssignments_mailAddressNull_returnEmptyCollection() throws OXException {
+        List<GuestAssignment> existingAssignments = defaultGuestService.getExistingAssignments(null, GROUP_ID);
+
+        Assert.assertTrue(existingAssignments.isEmpty());
+    }
+
+    @Test
+    public void testGetExistingAssignments_mailAddressEmpty_returnEmptyCollection() throws OXException {
+        List<GuestAssignment> existingAssignments = defaultGuestService.getExistingAssignments("", GROUP_ID);
+
+        Assert.assertTrue(existingAssignments.isEmpty());
+    }
+
+    @Test
+    public void testGetExistingAssignments_guestIdNotFound_returnEmptyCollection() throws OXException {
+        Mockito.when(guestStorage.getGuestId(Matchers.anyString(), Matchers.anyString(), (Connection) Matchers.any())).thenReturn(GuestStorage.NOT_FOUND);
+
+        List<GuestAssignment> existingAssignments = defaultGuestService.getExistingAssignments(GUEST_MAIL_ADDRESS, GROUP_ID);
+
+        Assert.assertTrue(existingAssignments.isEmpty());
+    }
+
+    @Test (expected=OXException.class)
+    public void testGetExistingAssignments_noGuestAssignmentFound_throwException() throws OXException {
+        Mockito.when(guestStorage.getGuestAssignments(Mockito.anyLong(), (Connection) Matchers.any())).thenReturn(Collections.<GuestAssignment>emptyList());
+
+        defaultGuestService.getExistingAssignments(GUEST_MAIL_ADDRESS, GROUP_ID);
+    }
+
+    @Test
+    public void testGetExistingAssignmentstodo() throws OXException {
+        Mockito.when(guestStorage.getGuestAssignments(Mockito.anyLong(), (Connection) Matchers.any())).thenReturn(assignments);
+
+        List<GuestAssignment> existingAssignments = defaultGuestService.getExistingAssignments(GUEST_MAIL_ADDRESS, GROUP_ID);
+
+        Assert.assertEquals(assignments.size(), existingAssignments.size());
+        Assert.assertEquals(assignments.get(0).getGuestId(), existingAssignments.get(0).getGuestId());
+        Assert.assertEquals(assignments.get(0).getPassword(), existingAssignments.get(0).getPassword());
+        Assert.assertEquals(assignments.get(0).getPasswordMech(), existingAssignments.get(0).getPasswordMech());
+        Assert.assertEquals(assignments.get(0).getUserId(), existingAssignments.get(0).getUserId());
     }
 }
