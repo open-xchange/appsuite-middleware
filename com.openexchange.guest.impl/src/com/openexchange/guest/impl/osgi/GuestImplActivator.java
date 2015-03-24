@@ -96,7 +96,7 @@ public class GuestImplActivator extends HousekeepingActivator {
         GuestService delegateGuestService = new DelegateGuestService(guestService, getService(ConfigurationService.class));
         registerService(GuestService.class, delegateGuestService, 5);
 
-        registerService(DeleteListener.class, new GuestDeleteListenerImpl(guestService));
+        registerService(DeleteListener.class, new GuestDeleteListenerImpl(delegateGuestService));
     }
 
     @Override
