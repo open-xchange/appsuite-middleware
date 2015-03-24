@@ -119,7 +119,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
@@ -142,7 +142,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
@@ -165,7 +165,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
@@ -188,7 +188,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
@@ -211,7 +211,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
@@ -232,7 +232,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
         try {
             return new JDBC41ResultSetWrapper(delegate.executeQuery(sql), this);
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
@@ -255,7 +255,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
@@ -278,7 +278,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
@@ -301,7 +301,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
@@ -324,7 +324,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getSchema();
+            String schema = con.getCatalog();
             if (null == schema) {
                 LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
             } else {
