@@ -413,7 +413,7 @@ public final class SessionImpl implements PutIfAbsent {
 
     @Override
     public String getPassword() {
-        return password;
+        return true ? null : password;
     }
 
     /**
