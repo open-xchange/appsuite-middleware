@@ -831,9 +831,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     /**
      * Create a default request
      *
-     * @return
+     * @return The default request
      */
-    private static BoxDefaultRequestObject defaultBoxRequest() {
+    static BoxDefaultRequestObject defaultBoxRequest() {
         List<String> fields = new ArrayList<String>();
         fields.add(BoxFile.FIELD_MODIFIED_AT);
         fields.add(BoxFile.FIELD_MODIFIED_BY);
