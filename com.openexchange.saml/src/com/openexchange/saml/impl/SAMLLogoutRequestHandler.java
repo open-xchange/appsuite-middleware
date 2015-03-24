@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
  */
 public class SAMLLogoutRequestHandler implements LoginRequestHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SAMLLogoutHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SAMLLogoutRequestHandler.class);
 
     private final SAMLBackend backend;
 

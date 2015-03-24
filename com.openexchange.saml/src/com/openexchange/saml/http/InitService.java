@@ -59,36 +59,74 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.spi.ExceptionHandler;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
- * {@link InitAuthService}
+ * {@link InitService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class InitAuthService extends SAMLServlet {
+public class InitService extends SAMLServlet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(InitAuthService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InitService.class);
 
     private static final long serialVersionUID = -4022982444417155759L;
 
+    private final SessiondService sessiondService;
+
 
     /**
-     * Initializes a new {@link InitAuthService}.
+     * Initializes a new {@link InitService}.
      * @param provider
      * @param exceptionHandler
+     * @param sessiondService
      */
-    public InitAuthService(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
+    public InitService(WebSSOProvider provider, ExceptionHandler exceptionHandler, SessiondService sessiondService) {
         super(provider, exceptionHandler);
+        this.sessiondService = sessiondService;
     }
 
     @Override
     protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
         Tools.removeCachingHeader(httpResponse);
+
+        String flow = httpRequest.getParameter("flow");
+        if (flow == null) {
+            LOG.debug("Received SAML init request without flow parameter");
+            httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
         try {
-            String redirectURI = provider.buildAuthnRequest(httpRequest, httpResponse);
+            String redirectURI;
+            if (flow.equals("login") || flow.equals("relogin")) {
+                redirectURI = provider.buildAuthnRequest(httpRequest, httpResponse);
+            } else if (flow.equals("logout")) {
+                String sessionId = httpRequest.getParameter("session");
+                if (sessionId == null) {
+                    LOG.debug("Received SAML init request without session parameter");
+                    httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    return;
+                }
+
+                Session session = sessiondService.getSession(sessionId);
+                if (session == null) {
+                    LOG.debug("Received SAML init request without invalid session parameter '{}'", sessionId);
+                    httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    return;
+                }
+
+                redirectURI = provider.buildLogoutRequest(httpRequest, httpResponse, session);
+            } else {
+                LOG.debug("Received SAML init request with unknown flow parameter '{}'", flow);
+                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
             String respondWithRedirect = httpRequest.getParameter("redirect");
             if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
                 httpResponse.sendRedirect(redirectURI);
@@ -100,7 +138,7 @@ public class InitAuthService extends SAMLServlet {
             httpResponse.setContentType("application/json");
             httpResponse.getWriter().write("{\"redirect_uri\":\"" + redirectURI + "\"}");
         } catch (OXException e) {
-            LOG.error("Could not build AuthnRequest", e);
+            LOG.error("Could not init SAML flow {}", flow, e);
             httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

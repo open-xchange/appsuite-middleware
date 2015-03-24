@@ -53,7 +53,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.saml.SessionProperties;
@@ -62,6 +61,7 @@ import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.inspector.Reason;
 import com.openexchange.session.inspector.SessionInspectorService;
+import com.openexchange.sessiond.SessionExceptionCodes;
 
 
 /**
@@ -89,7 +89,7 @@ public class SAMLSessionInspector implements SessionInspectorService {
                 long notOnOrAfter = Long.parseLong((String) parameter);
                 if (System.currentTimeMillis() >= notOnOrAfter) {
                     LoginPerformer.getInstance().doLogout(session.getSessionID());
-                    return respondWithAuthnRequest(request, response);
+                    throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
                 }
             } catch (NumberFormatException e) {
                 LOG.warn("Session contained parameter '{}' but its value was not a valid timestamp: {}", SessionProperties.SESSION_NOT_ON_OR_AFTER, parameter);
@@ -101,17 +101,12 @@ public class SAMLSessionInspector implements SessionInspectorService {
 
     @Override
     public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return respondWithAuthnRequest(request, response);
+        return Reply.CONTINUE;
     }
 
     @Override
     public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return respondWithAuthnRequest(request, response);
-    }
-
-    private Reply respondWithAuthnRequest(HttpServletRequest request, HttpServletResponse response) throws OXException {
-        String redirectURI = provider.buildAuthnRequest(request, response);
-        throw LoginExceptionCodes.REDIRECT.create(redirectURI);
+        return Reply.CONTINUE;
     }
 
 }

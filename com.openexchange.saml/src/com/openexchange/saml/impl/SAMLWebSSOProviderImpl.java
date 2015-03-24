@@ -110,7 +110,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -266,7 +265,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     @Override
-    public void respondWithLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Session session) throws OXException, IOException {
+    public String buildLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Session session) throws OXException {
         final LogoutRequest logoutRequest = customizeLogoutRequest(prepareLogoutRequest(session), httpRequest, httpResponse);
         String domainName = getDomainName(httpRequest);
         DefaultLogoutRequestInfo requestInfo = new DefaultLogoutRequestInfo();
@@ -277,13 +276,13 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
         try {
             String logoutRequestXML = openSAML.marshall(logoutRequest);
-            LOG.debug("Responding with LogoutRequest:\n{}", new Object() {
+            LOG.debug("Prepared LogoutRequest:\n{}", new Object() {
                 @Override
                 public String toString() {
                     return XMLHelper.prettyPrintXML(logoutRequest.getDOM());
                 }
             });
-            sendLogoutRequestRedirect(logoutRequestXML, relayState, httpRequest, httpResponse);
+            return compileLogoutRequestRedirectURI(logoutRequestXML, relayState, httpRequest, httpResponse);
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
         }
@@ -439,14 +438,14 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         }
     }
 
-    private void sendLogoutRequestRedirect(String logoutRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+    private String compileLogoutRequestRedirectURI(String logoutRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         String encoded = deflateAndEncode(logoutRequestXML);
         try {
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderLogoutURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
             trySignRedirectHeader(redirectLocationBuilder);
             String redirectLocation = redirectLocationBuilder.build().toString();
-            LOG.debug("Sending LogoutRequest via redirect: {}", redirectLocation);
-            throw LoginExceptionCodes.REDIRECT.create(redirectLocation);
+            LOG.debug("Redirect URI for LogoutRequest: {}", redirectLocation );
+            return redirectLocation;
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.ENCODING_ERROR.create(e, "Could not construct redirect location");
         }

@@ -51,16 +51,19 @@ package com.openexchange.session.reservation;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
- * {@link SessionReservationService} - Used to reserve a session while obtaining a token and to redeem that token against a valid session
- * later on.
+ * {@link SessionReservationService} - Used to reserve a session by obtaining a token and redeeming that token against a valid session
+ * later on. The according login action is <code>redeemReservation</code>. The {@link Authenticated} instance that is created by this
+ * action and used to create a session can be further enhanced via {@link Enhancer}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
+ * @see com.openexchange.ajax.login.RedeemReservationLogin
  */
 @SingletonService
 public interface SessionReservationService {

@@ -54,19 +54,16 @@ import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.Cookie;
-import com.openexchange.authentication.Header;
-import com.openexchange.authentication.ResponseEnhancement;
-import com.openexchange.authentication.ResultCode;
-import com.openexchange.authentication.SessionEnhancement;
-import com.openexchange.authentication.service.Authentication;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -79,27 +76,29 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.reservation.Enhancer;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link RedeemReservationLogin} - A login handler that redeems a token for a session reservation.
+ * {@link RedeemReservationLogin} - A login handler that redeems a token for a session reservation, that
+ * was previously obtained via {@link SessionReservationService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
+ * @see SessionReservationService
  */
 public class RedeemReservationLogin implements LoginRequestHandler {
 
-    private final LoginConfiguration conf;
+    private final List<Enhancer> enhancers = Collections.synchronizedList(new LinkedList<Enhancer>());
 
     /**
      * Initializes a new {@link RedeemReservationLogin}.
      */
-    public RedeemReservationLogin(LoginConfiguration conf) {
+    public RedeemReservationLogin() {
         super();
-        this.conf = conf;
     }
 
     @Override
@@ -107,13 +106,22 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         try {
             doSsoLogin(req, resp);
         } catch (OXException e) {
-            String errorPage = conf.getErrorPageTemplate().replace("ERROR_MESSAGE", e.getMessage());
+            String errorPage = getConf().getErrorPageTemplate().replace("ERROR_MESSAGE", e.getMessage());
             resp.setContentType(CONTENTTYPE_HTML);
             resp.getWriter().write(errorPage);
         }
     }
 
+    public void addEnhancer(Enhancer enhancer) {
+        enhancers.add(enhancer);
+    }
+
+    public void removeEnhancer(Enhancer enhancer) {
+        enhancers.remove(enhancer);
+    }
+
     private void doSsoLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
+        LoginConfiguration conf = getConf();
         String token = LoginTools.parseToken(req);
         if (null == token) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -159,21 +167,24 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         resp.sendRedirect(generateRedirectURL(session, user.getPreferredLanguage(), conf.getUiWebPath(), conf.getHttpAuthAutoLogin()));
     }
 
-    private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, Map<String, String> optState, LoginConfiguration loginConfiguration) throws OXException {
+    private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration) throws OXException {
         // The properties derived from optional state
         final Map<String, Object> props = optState == null ? new HashMap<String, Object>(4) : new HashMap<String, Object>(optState);
 
         // The login request
         String login = user.getLoginInfo() + '@' + context.getLoginInfo()[0];
         String defaultClient = loginConfiguration.getDefaultClient();
-        final LoginRequestImpl loginRequest = LoginTools.parseLogin(httpRequest, login, null, false, defaultClient, conf.isCookieForceHTTPS(), false);
+        final LoginRequestImpl loginRequest = LoginTools.parseLogin(httpRequest, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
 
         // Do the login
         return LoginPerformer.getInstance().doLogin(loginRequest, props, new LoginMethodClosure() {
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
-                Authenticated prototype = Authentication.login(loginRequest.getLogin(), loginRequest.getPassword(), props);
-                return new AuthenticatedImpl(prototype, props);
+                Authenticated authenticated = new AuthenticatedImpl(context.getLoginInfo()[0], user.getLoginInfo());
+                for (Enhancer enhancer : enhancers) {
+                    authenticated = enhancer.enhance(authenticated, optState);
+                }
+                return authenticated;
             }
         });
     }
@@ -195,87 +206,44 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         return retval;
     }
 
+    private LoginConfiguration getConf() {
+        LoginConfiguration conf = LoginServlet.getLoginConfiguration();
+        if (conf == null) {
+            throw new IllegalStateException("Login action 'redeemReservation' was called but LoginServlet was not fully initialized!");
+        }
+        return conf;
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------
 
-    private static final class AuthenticatedImpl implements Authenticated, ResponseEnhancement, SessionEnhancement {
+    private static final class AuthenticatedImpl implements Authenticated {
 
-        private final Authenticated prototype;
-        private final Map<String, Object> properties;
-        private final Header[] headers;
-        private final Cookie[] cookies;
-        private final ResultCode resultCode;
-        private final String redirect;
+        private final String contextInfo;
+
+        private final String userInfo;
 
         /**
          * Initializes a new {@link AuthenticatedImpl}.
          *
-         * @param prototype The prototype
-         * @param properties The associated properties
+         * @param contextInfo
+         * @param userInfo
          */
-        AuthenticatedImpl(Authenticated prototype, Map<String, Object> properties) {
+        AuthenticatedImpl(String contextInfo, String userInfo) {
             super();
-            this.prototype = prototype;
-            this.properties = properties;
-            if (prototype instanceof ResponseEnhancement) {
-                ResponseEnhancement re = (ResponseEnhancement) prototype;
-                headers = re.getHeaders();
-                cookies = re.getCookies();
-                resultCode = re.getCode();
-                redirect = re.getRedirect();
-            } else {
-                headers = new Header[0];
-                cookies = new Cookie[0];
-                resultCode = ResultCode.SUCCEEDED;
-                redirect = null;
-            }
-        }
-
-        @Override
-        public void enhanceSession(Session session) {
-            if (prototype instanceof SessionEnhancement) {
-                ((SessionEnhancement) prototype).enhanceSession(session);
-            }
-
-            for (String key : properties.keySet()) {
-                Object value = properties.get(key);
-                if (value != null && value instanceof String) {
-                    if (!session.containsParameter(key)) {
-                        session.setParameter(key, value);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public ResultCode getCode() {
-            return resultCode;
-        }
-
-        @Override
-        public Header[] getHeaders() {
-            return headers;
-        }
-
-        @Override
-        public Cookie[] getCookies() {
-            return cookies;
-        }
-
-        @Override
-        public String getRedirect() {
-            return redirect;
+            this.contextInfo = contextInfo;
+            this.userInfo = userInfo;
         }
 
         @Override
         public String getContextInfo() {
-            return prototype.getContextInfo();
+            return contextInfo;
         }
 
         @Override
         public String getUserInfo() {
-            return prototype.getUserInfo();
+            return userInfo;
         }
 
-    } // End of class AuthenticatedImpl
+    }
 
 }

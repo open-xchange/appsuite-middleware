@@ -66,7 +66,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.ajax.login.SSOLogoutHandler;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -94,7 +93,6 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
     private DispatcherPrefixService prefixService;
 
     private LoginServlet login;
-    private SSOLogoutHandler ssoLogoutHandler;
 
     public LoginServletRegisterer(final BundleContext context, final ServiceSet<LoginRampUpService> rampUp) {
         super();
@@ -130,24 +128,12 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             if (null != tmp && tmp instanceof String) {
                 String action = (String) tmp;
                 LoginRequestHandler handler = (LoginRequestHandler) obj;
-                handlers.put(action, handler);
-                if (null != login) {
-                    login.addRequestHandler(action, handler);
-                }
-            }
-        }
-        if (obj instanceof SSOLogoutHandler) {
-            ssoLogoutHandler = (SSOLogoutHandler) obj;
-            if (null != login) {
-                login.setSSOLogoutHandler(ssoLogoutHandler);
+                addLoginRequestHandler(action, handler);
             }
         }
         if (needsRegistration) {
             for (Entry<String, LoginRequestHandler> entry : handlers.entrySet()) {
                 login.addRequestHandler(entry.getKey(), entry.getValue());
-            }
-            if (ssoLogoutHandler != null) {
-                login.setSSOLogoutHandler(ssoLogoutHandler);
             }
             final Dictionary<String, String> params = new Hashtable<String, String>(32);
             addProperty(params, Property.UI_WEB_PATH);
@@ -227,27 +213,35 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
                 httpService = null;
             }
             if (service instanceof LoginRequestHandler) {
-                ssoLogoutHandler = null;
-                if (null != login) {
-                    login.setSSOLogoutHandler(null);
+                Object tmp = reference.getProperty(PARAMETER_ACTION);
+                if (null != tmp && tmp instanceof String) {
+                    removeAction = (String) tmp;
                 }
-            }
-            if (service instanceof SSOLogoutHandler) {
-                removeAction = LoginServlet.ACTION_SSO_LOGOUT;
             }
         } finally {
             lock.unlock();
         }
         if (null != removeAction) {
-            handlers.remove(removeAction);
-            if (null != login) {
-                login.removeRequestHandler(removeAction);
-            }
+            removeLoginRequestHandler(removeAction);
         }
         if (null != unregister) {
             LOG.info("Unregistering login servlet.");
             unregister.unregister(DefaultDispatcherPrefixService.getInstance().getPrefix() + SERVLET_PATH_APPENDIX);
         }
         context.ungetService(reference);
+    }
+
+    public void addLoginRequestHandler(String action, LoginRequestHandler handler) {
+        handlers.put(action, handler);
+        if (null != login) {
+            login.addRequestHandler(action, handler);
+        }
+    }
+
+    public void removeLoginRequestHandler(String action) {
+        handlers.remove(action);
+        if (null != login) {
+            login.removeRequestHandler(action);
+        }
     }
 }

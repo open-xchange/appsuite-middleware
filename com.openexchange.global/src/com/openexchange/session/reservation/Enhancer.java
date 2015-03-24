@@ -47,56 +47,37 @@
  *
  */
 
-package com.openexchange.saml.impl;
+package com.openexchange.session.reservation;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.login.LoginConfiguration;
-import com.openexchange.ajax.login.SSOLogoutHandler;
-import com.openexchange.exception.OXException;
-import com.openexchange.saml.WebSSOProvider;
-import com.openexchange.session.Session;
+import java.util.Map;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.ResponseEnhancement;
+import com.openexchange.authentication.SessionEnhancement;
 
 
 /**
- * {@link SAMLLogoutHandler}
+ * An enhancer is used to enhance the {@link Authenticated} instance that is created by the <code>redeemReservation</code> login action
+ * to create a new session. Every user of the {@link SessionReservationService} may register his own enhancer as OSGi service. When
+ * the logout is performed then, all enhancers are called. You should mark your reservations via a property in the state map to recognize
+ * them later on.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SAMLLogoutHandler implements SSOLogoutHandler {
-
-    private final WebSSOProvider provider;
+public interface Enhancer {
 
     /**
-     * Initializes a new {@link SAMLLogoutHandler}.
-     * @param provider
+     * Allows customization of the {@link Authenticated} instance created by the <code>redeemReservation</code> login action.
+     * Probably you want to return a copy of the passed authenticated here, which additionally extends {@link ResponseEnhancement}
+     * and/or {@link SessionEnhancement} to set cookies/headers/session parameters.
+     *
+     * @param authenticated The authenticated based on the user and context of the according reservation
+     * @param reservationState The state map that was passed when the reservation was attempted via
+     *        {@link SessionReservationService#reserveSessionFor(int, int, long, java.util.concurrent.TimeUnit, Map)}
+     * @return The enhanced authenticated. Never return <code>null</code> here!
+     * @see SessionReservationService#reserveSessionFor(int, int, long, java.util.concurrent.TimeUnit, Map)
+     *
      */
-    public SAMLLogoutHandler(WebSSOProvider provider) {
-        super();
-        this.provider = provider;
-    }
-
-    @Override
-    public Result handle(HttpServletRequest req, HttpServletResponse resp, Session session, LoginConfiguration loginConfiguration) throws IOException {
-        Result result = new Result();
-        if (session == null) {
-            result.continueWithLogout = true;
-            return result;
-        }
-
-        try {
-            provider.respondWithLogoutRequest(req, resp, session);
-        } catch (OXException e) {
-            /*
-             * TODO: make pretty
-             */
-            result.error = e;
-            result.respondWithError = true;
-        }
-        return result;
-    }
-
+    Authenticated enhance(Authenticated authenticated, Map<String, String> reservationState);
 
 }

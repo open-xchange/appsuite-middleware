@@ -68,7 +68,6 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.ajax.login.SSOLogoutHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -78,11 +77,10 @@ import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLProperties;
 import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.saml.http.AssertionConsumerService;
-import com.openexchange.saml.http.InitAuthService;
+import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.http.MetadataService;
 import com.openexchange.saml.http.SingleLogoutService;
 import com.openexchange.saml.impl.HzStateManagement;
-import com.openexchange.saml.impl.SAMLLogoutHandler;
 import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
 import com.openexchange.saml.impl.SAMLSessionInspector;
 import com.openexchange.saml.impl.SAMLWebSSOProviderImpl;
@@ -148,14 +146,13 @@ public class SAMLFeature extends DependentServiceStarter {
             servlets.push(acsServletAlias);
 
             String initAuthServletAlias = prefix + "initauth";
-            httpService.registerServlet(initAuthServletAlias, new InitAuthService(serviceProvider, exceptionHandler), null, null);
+            httpService.registerServlet(initAuthServletAlias, new InitService(serviceProvider, exceptionHandler, services.getService(SessiondService.class)), null, null);
             servlets.push(initAuthServletAlias);
 
             if (config.singleLogoutEnabled()) {
                 Dictionary<String, Object> lrhProperties = new Hashtable<String, Object>();
                 lrhProperties.put(AJAXServlet.PARAMETER_ACTION, "samlLogout");
                 serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(samlBackend), lrhProperties));
-                serviceRegistrations.push(context.registerService(SSOLogoutHandler.class, new SAMLLogoutHandler(serviceProvider), null));
                 String slsServletAlias = prefix + "sls";
                 httpService.registerServlet(slsServletAlias, new SingleLogoutService(serviceProvider, exceptionHandler), null, null);
                 servlets.push(slsServletAlias);

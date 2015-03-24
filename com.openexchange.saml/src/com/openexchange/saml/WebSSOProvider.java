@@ -52,7 +52,6 @@ package com.openexchange.saml;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.session.Session;
@@ -70,6 +69,7 @@ public interface WebSSOProvider {
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
+     * @return The redirect URI
      * @throws OXException If building the AuthnRequest fails
      */
     String buildAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException;
@@ -86,14 +86,15 @@ public interface WebSSOProvider {
     void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException;
 
     /**
-     * Responds with a logout request based on the configured binding.
+     * Builds with a logout request and compiles a redirect URI compliant to the HTTP-Redirect binding.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
-     * @throws OXException To force a client redirect (via {@link LoginExceptionCodes#REDIRECT} or if preparing the AuthnRequest fails
-     * @throws IOException If writing to the servlet response fails
+     * @param session The session
+     * @return The redirect URI
+     * @throws OXException If preparing the LogoutRequest fails
      */
-    void respondWithLogoutRequest(HttpServletRequest req, HttpServletResponse resp, Session session) throws OXException, IOException;
+    String buildLogoutRequest(HttpServletRequest req, HttpServletResponse resp, Session session) throws OXException;
 
     /**
      * Handles a logout response.
