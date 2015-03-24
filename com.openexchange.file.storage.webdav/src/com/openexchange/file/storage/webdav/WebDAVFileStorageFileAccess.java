@@ -118,6 +118,7 @@ import com.openexchange.tx.TransactionException;
  * {@link WebDAVFileStorageFileAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> - Exceptions
  */
 public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageIgnorableVersionFileAccess, FileStorageLockedFileAccess, FileStorageAdvancedSearchFileAccess {
 
@@ -195,7 +196,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         this.accountAccess = accountAccess;
         lockTokenMap = new ConcurrentHashMap<LockTokenKey, String>();
     }
-
 
     /**
      * Gets the root URI.
@@ -296,11 +296,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(lockMethod);
             }
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         }
     }
 
@@ -327,11 +327,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(method);
             }
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         }
     }
 
@@ -358,11 +358,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(method);
             }
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         }
     }
 
@@ -393,7 +393,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     @Override
     public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFile, final List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
-            throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(WebDAVConstants.ID);
         }
         try {
             final String fid = checkFolderId(source.getFolder(), rootUri);
@@ -428,11 +428,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -461,11 +461,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
              */
             return new IDTuple(dfid, did);
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -507,7 +507,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                             /*
                              * Not a file
                              */
-                            throw WebDAVFileStorageExceptionCodes.NOT_A_FILE.create(id);
+                            throw FileStorageExceptionCodes.NOT_A_FILE.create(WebDAVConstants.ID, id);
                         }
                         return true;
                     }
@@ -519,11 +519,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -532,7 +532,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     @Override
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         if (version != CURRENT_VERSION) {
-            throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(WebDAVConstants.ID);
         }
         try {
             final String fid = checkFolderId(folderId, rootUri);
@@ -568,7 +568,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                             /*
                              * Not a file
                              */
-                            throw WebDAVFileStorageExceptionCodes.NOT_A_FILE.create(id);
+                            throw FileStorageExceptionCodes.NOT_A_FILE.create(WebDAVConstants.ID, id);
                         }
                         /*
                          * Found file
@@ -586,11 +586,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -615,7 +615,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 if (null == fid) {
                     final String name = file.getFileName();
                     if (null == name) {
-                        throw WebDAVFileStorageExceptionCodes.MISSING_FILE_NAME.create();
+                        throw FileStorageExceptionCodes.MISSING_FILE_NAME.create();
                     }
                     id = name;
                     file.setId(id);
@@ -668,11 +668,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             }
             return new IDTuple(folderId, id);
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             if (e instanceof OXException) {
                 throw (OXException) e;
@@ -688,7 +688,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         try {
             uri = new URI(fid + id, true);
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -703,7 +703,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fid, id);
             }
             if (HttpServletResponse.SC_OK != getMethod.getStatusCode()) {
-                throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(getMethod.getStatusText());
+                throw FileStorageExceptionCodes.PROTOCOL_ERROR.create("HTTP", getMethod.getStatusText());
             }
             /*
              * Return as stream
@@ -714,7 +714,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             throw e;
         } catch (final HttpException e) {
             closeHttpMethod(getMethod);
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             closeHttpMethod(getMethod);
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -776,11 +776,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -816,7 +816,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                         /*
                          * No-op for us...
                          */
-                    } else if (HttpServletResponse.SC_OK != statusCode && HttpServletResponse.SC_NO_CONTENT != statusCode ) {
+                    } else if (HttpServletResponse.SC_OK != statusCode && HttpServletResponse.SC_NO_CONTENT != statusCode) {
                         ret.add(idTuple);
                     }
                 } finally {
@@ -825,7 +825,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             }
             return ret;
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
@@ -859,11 +859,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(unlockMethod);
             }
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         }
     }
 
@@ -896,11 +896,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(lockMethod);
             }
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         }
     }
 
@@ -929,11 +929,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                 closeHttpMethod(davMethod);
             }
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             if (e instanceof OXException) {
                 throw (OXException) e;
@@ -1009,7 +1009,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                             /*
                              * Not a collection
                              */
-                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(fid);
+                            throw FileStorageExceptionCodes.NOT_A_FOLDER.create(WebDAVConstants.ID, fid);
                         }
                     } else {
                         /*
@@ -1030,11 +1030,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -1059,7 +1059,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         for (final IDTuple idTuple : ids) {
             list.add(getFileMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION));
         }
-        return  new FileTimedResult(list);
+        return new FileTimedResult(list);
     }
 
     private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
@@ -1146,7 +1146,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                             /*
                              * Not a collection
                              */
-                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(folderId);
+                            throw FileStorageExceptionCodes.NOT_A_FOLDER.create(WebDAVConstants.ID, folderId);
                         }
                     } else {
                         /*
@@ -1174,11 +1174,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            if (HttpServletResponse.SC_NOT_FOUND ==  e.getErrorCode()) {
+            if (HttpServletResponse.SC_NOT_FOUND == e.getErrorCode()) {
                 throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                     folderId,
                     account.getId(),
@@ -1186,7 +1186,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -1218,7 +1218,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         }
         return getSortedRangeFrom(results, sort, order, start, end);
     }
-
 
     private SearchIterator<File> getSortedRangeFrom(final List<File> results, final Field sort, final SortDirection order, final int start, final int end) {
         /*
@@ -1307,7 +1306,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                             /*
                              * Not a collection
                              */
-                            throw WebDAVFileStorageExceptionCodes.NOT_A_FOLDER.create(folderId);
+                            throw FileStorageExceptionCodes.NOT_A_FOLDER.create(WebDAVConstants.ID, folderId);
                         }
                     } else {
                         /*
@@ -1335,11 +1334,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final OXException e) {
             throw e;
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
-            if (HttpServletResponse.SC_NOT_FOUND ==  e.getErrorCode()) {
+            if (HttpServletResponse.SC_NOT_FOUND == e.getErrorCode()) {
                 throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                     folderId,
                     account.getId(),
@@ -1347,7 +1346,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
             }
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
