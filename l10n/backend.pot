@@ -1584,93 +1584,6 @@ msgid ""
 "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
 msgstr ""
 
-#. A Box error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:62
-msgid "A Box error occurred: %1$s"
-msgstr ""
-
-#. A Box error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:65
-msgid ""
-"A Box server error occurred with HTTP status code %1$s. Error message: %2$s"
-msgstr ""
-
-#. Invalid Box URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:68
-msgid "The provided Box URL: %1$s is invalid"
-msgstr ""
-
-#. Box URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:71
-msgid "The provided Box URL does not denote a directory: %1$s"
-msgstr ""
-
-#. The Box resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:74
-msgid "The provided Box resource does not exist: %1$s"
-msgstr ""
-
-#. Update denied for Box resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:77
-msgid "Update denied for the provided Box resource: %1$s"
-msgstr ""
-
-#. Delete denied for Box resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:80
-msgid "Delete denied for the provided Box resource: %1$s"
-msgstr ""
-
-#. Box URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:83
-msgid "The provided Box URL does not denote a file: %1$s"
-msgstr ""
-
-#. Missing file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:83
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:86
-msgid "Missing file name. Please provide one and try again."
-msgstr ""
-
-#. Versioning not supported by Box file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:89
-msgid "Versioning not supported by Box file storage."
-msgstr ""
-
-#. Missing configuration for account "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:77
-msgid "Missing configuration for account \"%1$s\"."
-msgstr ""
-
-#. Bad or expired access token. Need to re-authenticate user.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
-msgid "Bad or expired access token. Need to re-authenticate user."
-msgstr ""
-
-#. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:98
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:98
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:74
-msgid "An I/O error occurred: %1$s"
-msgstr ""
-
-#. Authentication failed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:101
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:101
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:77
-msgid "Authentication failed: %1$s"
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1990,152 +1903,6 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#. A Dropbox error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:62
-msgid "A Dropbox error occurred: %1$s"
-msgstr ""
-
-#. A Dropbox error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:65
-msgid ""
-"A Dropbox server error occurred with HTTP status code %1$s. Error message: "
-"%2$s"
-msgstr ""
-
-#. Invalid Dropbox URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:68
-msgid "The provided Dropbox URL: %1$s is invalid"
-msgstr ""
-
-#. Dropbox URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:71
-msgid "The provided Dropbox URL does not denote a directory: %1$s"
-msgstr ""
-
-#. The Dropbox resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:74
-msgid "The provided Dropbox resource does not exist: %1$s"
-msgstr ""
-
-#. Update denied for Dropbox resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:77
-msgid "Update denied for the provided Dropbox resource: %1$s"
-msgstr ""
-
-#. Delete denied for Dropbox resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:80
-msgid "Delete denied for the provided Dropbox resource: %1$s"
-msgstr ""
-
-#. Dropbox URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:83
-msgid "The provided Dropbox URL does not denote a file: %1$s"
-msgstr ""
-
-#. Versioning not supported by Dropbox file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:89
-msgid "Versioning not supported by Dropbox file storage."
-msgstr ""
-
-#. A Google Drive error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:62
-msgid "A Google Drive error occurred: %1$s"
-msgstr ""
-
-#. A Google Drive error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:65
-msgid ""
-"A Google Drive server error occurred with HTTP status code %1$s. Error "
-"message: %2$s"
-msgstr ""
-
-#. Google Drive URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:68
-msgid "The provided Google Drive URL does not denote a directory: %1$s"
-msgstr ""
-
-#. The Google Drive resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:71
-msgid "The provided Google Drive resource does not exist: %1$s"
-msgstr ""
-
-#. Update denied for Google Drive resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:74
-msgid "Update denied for the provided Google Drive resource: %1$s"
-msgstr ""
-
-#. Delete denied for Google Drive resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:77
-msgid "Delete denied for the provided Google Drive resource: %1$s"
-msgstr ""
-
-#. Google Drive URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:80
-msgid "The provided Google Drive URL does not denote a file: %1$s"
-msgstr ""
-
-#. Versioning not supported by Google Drive file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:86
-msgid "Versioning not supported by Google Drive file storage."
-msgstr ""
-
-#. The file %1$s doesn't have any content stored on Drive
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:98
-msgid "The file %1$s doesn't have any content stored on Drive"
-msgstr ""
-
-#. A OneDrive error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:62
-msgid "A OneDrive error occurred: %1$s"
-msgstr ""
-
-#. A OneDrive error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:65
-msgid ""
-"A OneDrive server error occurred with HTTP status code %1$s. Error message: "
-"%2$s"
-msgstr ""
-
-#. Invalid OneDrive URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:68
-msgid "The provided OneDrive URL: %1$s is invalid"
-msgstr ""
-
-#. OneDrive URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:71
-msgid "The provided OneDrive URL does not denote a directory: %1$s"
-msgstr ""
-
-#. The OneDrive resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:74
-msgid "The provided OneDrive resource does not exist: %1$s"
-msgstr ""
-
-#. Update denied for OneDrive resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:77
-msgid "Update denied for the provided OneDrive resource: %1$s"
-msgstr ""
-
-#. Delete denied for OneDrive resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:80
-msgid "Delete denied for the provided OneDrive resource: %1$s"
-msgstr ""
-
-#. OneDrive URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:83
-msgid "The provided OneDrive URL does not denote a file: %1$s"
-msgstr ""
-
-#. Versioning not supported by OneDrive file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:89
-msgid "Versioning not supported by OneDrive file storage."
-msgstr ""
-
-#. The OneDrive resource does not exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:104
-msgid "The OneDrive resource does not exist"
-msgstr ""
-
 #. The folder you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
@@ -2270,6 +2037,21 @@ msgstr ""
 #. Delete denied for \"%1$s\" resource: %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:131
 msgid "Delete denied for \"%1$s\" resource: %2$s"
+msgstr ""
+
+#. Missing configuration for %1$s account "%2$s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
+msgid "Missing configuration for %1$s account \"%2$s\"."
+msgstr ""
+
+#. The provided %1$s resource does not exist: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:137
+msgid "The provided %1$s resource does not exist: %2$s"
+msgstr ""
+
+#. The file %1$s doesn't have any content.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:140
+msgid "The file %1$s doesn't have any content."
 msgstr ""
 
 #. Access denied.
@@ -3090,6 +2872,16 @@ msgstr ""
 #. The Guard resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:71
 msgid "The provided Guard resource does not exist: %1$s"
+msgstr ""
+
+#. An I/O error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:74
+msgid "An I/O error occurred: %1$s"
+msgstr ""
+
+#. Authentication failed: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:77
+msgid "Authentication failed: %1$s"
 msgstr ""
 
 #. The Guard resource does not exist
@@ -8442,6 +8234,16 @@ msgstr ""
 #. Delete denied for XING resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:71
 msgid "Delete denied for XING resource: %1$s"
+msgstr ""
+
+#. Missing configuration for account "%1$s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:77
+msgid "Missing configuration for account \"%1$s\"."
+msgstr ""
+
+#. Bad or expired access token. Need to re-authenticate user.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
+msgid "Bad or expired access token. Need to re-authenticate user."
 msgstr ""
 
 #. E-Mail address is invalid
