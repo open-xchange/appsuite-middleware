@@ -60,27 +60,27 @@ public enum MobilePushProviders {
     /**
      * Enum field for mail provider
      */
-    MAIL("mail", "io.ox/mail", "Mail", "Mail.tmpl", 1),
+    MAIL("mail", "io.ox/mail", "Mail" , 1),
 
     /**
      * Enum field for appointment provider
      */
-    APPOINTMENT("appointment", "io.ox/calendar", "Calendar", "Appointment.tmpl", 2),
+    APPOINTMENT("appointment", "io.ox/calendar", "Calendar" , 2),
 
     /**
      * Enum field for task provider
      */
-    TASKS("tasks", "io.ox/tasks", "Tasks", "Task.tmpl", 3),
+    TASKS("tasks", "io.ox/tasks", "Tasks", 3),
 
     /**
      * Enum field for reminder provider
      */
-    REMINDER("reminder", "io.ox/reminder", "Reminder", "Reminder.tmpl", 4),
+    REMINDER("reminder", "io.ox/reminder", "Reminder", 4),
 
     /**
      * Enum field for drive provider
      */
-    DRIVE("drive", "io.ox/drive", "Drive", "Drive.tmpl", 5);
+    DRIVE("drive", "io.ox/drive", "Drive", 5);
 
     private final String providerName;
 
@@ -88,15 +88,12 @@ public enum MobilePushProviders {
 
     private final String title;
 
-    private final String templateFileName;
-
     private final int index;
 
-    private MobilePushProviders(final String providerName, final String frontendName, final String title, final String templateFileName, final int index) {
+    private MobilePushProviders(final String providerName, final String frontendName, final String title, final int index) {
         this.providerName = providerName;
         this.frontendName = frontendName;
         this.title = title;
-        this.templateFileName = templateFileName;
         this.index = index;
     }
 
@@ -106,10 +103,6 @@ public enum MobilePushProviders {
 
     public String getFrontendName() {
         return frontendName;
-    }
-
-    public String getTemplateFileName() {
-        return templateFileName;
     }
 
     public String getTitle() {
