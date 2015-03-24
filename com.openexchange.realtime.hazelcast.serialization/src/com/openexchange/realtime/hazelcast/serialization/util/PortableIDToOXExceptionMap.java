@@ -71,7 +71,7 @@ import com.openexchange.realtime.util.IDMap;
  */
 public class PortableIDToOXExceptionMap extends IDMap<OXException> implements CustomPortable {
 
-    public static final int CLASS_ID = 21;
+    public static final int CLASS_ID = 22;
 
     private static final String MAP_ENTRIES = "map_entries";
 
