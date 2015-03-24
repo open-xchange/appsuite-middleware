@@ -62,8 +62,6 @@ import com.openexchange.session.Session;
  */
 public abstract class AbstractCMISAccess {
     
-    protected static final String SERVICE_ID = "CMIS";
-
     /**
      * The string constant for <code>'/'</code> character.
      */

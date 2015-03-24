@@ -138,10 +138,10 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 object = cmisSession.getObject(folderObjectId);
             }
             if (null == object) {
-                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), SERVICE_ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
+                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), CMISConstants.ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
             }
             if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CMISConstants.ID, folderId);
             }
             if (!root) {
                 return convertFolder(folderObjectId, (Folder) object);
@@ -227,10 +227,10 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 object = cmisSession.getObject(folderObjectId);
             }
             if (null == object) {
-                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(parentId, accountAccess.getAccountId(), SERVICE_ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
+                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(parentId, accountAccess.getAccountId(), CMISConstants.ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
             }
             if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(SERVICE_ID, parentId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CMISConstants.ID, parentId);
             }
             final Folder folder = (Folder) object;
             /*
@@ -317,7 +317,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
     public String updateFolder(final String folderId, final FileStorageFolder toUpdate) throws OXException {
         try {
             if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
-                throw FileStorageExceptionCodes.UPDATE_DENIED.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.UPDATE_DENIED.create(CMISConstants.ID, folderId);
             }
             final ObjectId folderObjectId;
             final CmisObject object;
@@ -329,10 +329,10 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 object = cmisSession.getObject(folderObjectId);
             }
             if (null == object) {
-                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), SERVICE_ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
+                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), CMISConstants.ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
             }
             if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CMISConstants.ID, folderId);
             }
             final Folder folder = (Folder) object;
             // Update properties
@@ -391,7 +391,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
         try {
             if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
-                throw FileStorageExceptionCodes.UPDATE_DENIED.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.UPDATE_DENIED.create(CMISConstants.ID, folderId);
             }
             final ObjectId folderObjectId;
             final CmisObject object;
@@ -403,10 +403,10 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 object = cmisSession.getObject(folderObjectId);
             }
             if (null == object) {
-                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), SERVICE_ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
+                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), CMISConstants.ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
             }
             if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CMISConstants.ID, folderId);
             }
             final ObjectId newParentObjectId;
             if (FileStorageFolder.ROOT_FULLNAME.equals(newParentId) || rootUrl.equals(newParentId)) {
@@ -429,7 +429,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
     public String renameFolder(final String folderId, final String newName) throws OXException {
         try {
             if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
-                throw FileStorageExceptionCodes.UPDATE_DENIED.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.UPDATE_DENIED.create(CMISConstants.ID, folderId);
             }
             final ObjectId folderObjectId;
             final CmisObject object;
@@ -441,10 +441,10 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 object = cmisSession.getObject(folderObjectId);
             }
             if (null == object) {
-                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), SERVICE_ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
+                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), CMISConstants.ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
             }
             if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CMISConstants.ID, folderId);
             }
             final Folder folder = (Folder) object;
             // rename folder
@@ -468,7 +468,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
         try {
             if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
-                throw FileStorageExceptionCodes.UPDATE_DENIED.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.UPDATE_DENIED.create(CMISConstants.ID, folderId);
             }
             final ObjectId folderObjectId;
             final CmisObject object;
@@ -483,7 +483,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 return folderId;
             }
             if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CMISConstants.ID, folderId);
             }
             final Folder folder = (Folder) object;
             /*
@@ -514,7 +514,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
     private void clearFolder0(final String folderId) throws OXException {
         try {
             if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {
-                throw FileStorageExceptionCodes.UPDATE_DENIED.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.UPDATE_DENIED.create(CMISConstants.ID, folderId);
             }
             final ObjectId folderObjectId;
             final CmisObject object;
@@ -526,10 +526,10 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 object = cmisSession.getObject(folderObjectId);
             }
             if (null == object) {
-                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), SERVICE_ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
+                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), CMISConstants.ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
             }
             if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CMISConstants.ID, folderId);
             }
             final Folder folder = (Folder) object;
             final ItemIterable<CmisObject> children = folder.getChildren();
@@ -561,10 +561,10 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 object = cmisSession.getObject(folderObjectId);
             }
             if (null == object) {
-                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), SERVICE_ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
+                throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, accountAccess.getAccountId(), CMISConstants.ID, accountAccess.getUser(), accountAccess.getSession().getContextId());
             }
             if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(SERVICE_ID, folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CMISConstants.ID, folderId);
             }
             final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
             FileStorageFolder f = convertFolder(folderObjectId, (Folder) object);
