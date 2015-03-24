@@ -50,6 +50,7 @@
 package com.openexchange.saml.http;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -136,7 +137,9 @@ public class InitService extends SAMLServlet {
             httpResponse.setStatus(HttpServletResponse.SC_OK);
             httpResponse.setCharacterEncoding(Charsets.UTF_8_NAME);
             httpResponse.setContentType("application/json");
-            httpResponse.getWriter().write("{\"redirect_uri\":\"" + redirectURI + "\"}");
+            PrintWriter writer = httpResponse.getWriter();
+            writer.write("{\"redirect_uri\":\"" + redirectURI + "\"}");
+            writer.flush();
         } catch (OXException e) {
             LOG.error("Could not init SAML flow {}", flow, e);
             httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
