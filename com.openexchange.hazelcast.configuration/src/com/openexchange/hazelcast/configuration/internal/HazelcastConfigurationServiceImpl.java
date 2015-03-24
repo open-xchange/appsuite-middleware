@@ -144,7 +144,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     }
 
     @Override
-    public String dicoverMapName(String namePrefix) throws OXException {
+    public String discoverMapName(String namePrefix) throws OXException {
         Map<String, MapConfig> mapConfigs = getConfig().getMapConfigs();
         if (null != mapConfigs && 0 < mapConfigs.size()) {
             for (String mapName : mapConfigs.keySet()) {
