@@ -1720,7 +1720,6 @@ msgstr ""
 
 #. Missing file name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:84
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:125
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:74
 msgid "Missing file name."
@@ -2137,26 +2136,6 @@ msgstr ""
 msgid "The OneDrive resource does not exist"
 msgstr ""
 
-#. Directory "%1$s" must not be deleted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:64
-msgid "Directory \"%1$s\" must not be deleted."
-msgstr ""
-
-#. Directory "%1$s" must not be updated.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:67
-msgid "Directory \"%1$s\" must not be updated."
-msgstr ""
-
-#. Invalid or missing credentials to access WebDAV server "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:70
-msgid "Invalid or missing credentials to access WebDAV server \"%1$s\"."
-msgstr ""
-
-#. The resource is not a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:73
-msgid "The resource is not a file: %1$s"
-msgstr ""
-
 #. The folder you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
@@ -2285,7 +2264,12 @@ msgstr ""
 
 #. Update denied for %1$s resource: %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:128
-msgid "Update denied for %1$s resource: %2$s"
+msgid "Update denied for \"%1$s\" resource: %2$s"
+msgstr ""
+
+#. Delete denied for \"%1$s\" resource: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:131
+msgid "Delete denied for \"%1$s\" resource: %2$s"
 msgstr ""
 
 #. Access denied.
