@@ -148,16 +148,15 @@ public abstract class AbstractOneDriveResourceAccess {
          *
          * @param httpResponse The HTTP response
          * @throws OXException If an Open-Xchange error is yielded from status
-         * @throws HttpResponseException If status is interpreted as an error
          */
-        void handleStatusCode(HttpResponse httpResponse) throws OXException, HttpResponseException;
+        void handleStatusCode(HttpResponse httpResponse) throws OXException;
     }
 
     /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
     public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws OXException, HttpResponseException {
+        public void handleStatusCode(HttpResponse httpResponse) throws OXException {
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
@@ -171,7 +170,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
-                throw new HttpResponseException(statusCode, reason);
+                throw FileStorageExceptionCodes.PROTOCOL_ERROR.create("HTTP", statusCode + " " + reason);
             }
         }
     };
@@ -180,7 +179,7 @@ public abstract class AbstractOneDriveResourceAccess {
     public static final StatusCodePolicy STATUS_CODE_POLICY_IGNORE_NOT_FOUND = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws HttpResponseException {
+        public void handleStatusCode(HttpResponse httpResponse) throws OXException {
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if ((statusCode < 200 || statusCode >= 300) && statusCode != 404) {
@@ -191,7 +190,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
-                throw new HttpResponseException(statusCode, reason);
+                throw FileStorageExceptionCodes.PROTOCOL_ERROR.create("HTTP", statusCode + " " + reason);
             }
         }
     };
