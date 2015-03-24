@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,33 @@
  *
  */
 
-package com.openexchange.crypto;
+package com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.box.boxjavalibv2.dao.BoxFile;
+import com.box.boxjavalibv2.jsonentities.MapJSONStringEntity;
+import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 
 /**
- * {@link CryptoExceptionMessage}
+ * {@link LockRequestObject}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CryptoExceptionMessage implements LocalizableStrings {
+public class LockRequestObject extends BoxDefaultRequestObject {
 
     /**
-     * Initializes a new {@link CryptoExceptionMessage}.
+     * Initializes a new {@link LockRequestObject}.
+     * 
+     * @param lock true to lock the object, false to unlock
      */
-    private CryptoExceptionMessage() {
-        super();
+    public LockRequestObject(boolean lock) {
+        final MapJSONStringEntity entity;
+        if (lock) {
+            entity = new MapJSONStringEntity();
+            entity.put(BoxFile.FIELD_TYPE, "lock");
+            entity.put("is_download_prevented", true);
+        } else {
+            entity = null;
+        }
+        put(BoxFile.FIELD_LOCK, entity);
     }
-
-    // The provided password seems to be wrong or something bad happened.
-    public final static String BAD_PASSWORD_DISPLAY = "The provided password seems to be wrong or something bad happened.";
-
 }

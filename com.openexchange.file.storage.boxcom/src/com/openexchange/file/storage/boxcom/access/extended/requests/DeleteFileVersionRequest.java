@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,35 @@
  *
  */
 
-package com.openexchange.crypto;
+package com.openexchange.file.storage.boxcom.access.extended.requests;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.apache.http.HttpStatus;
+import com.box.boxjavalibv2.IBoxConfig;
+import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
+import com.box.restclientv2.RestMethod;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.requestsbase.DefaultBoxRequest;
 
 /**
- * {@link CryptoExceptionMessage}
+ * {@link DeleteFileVersionRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CryptoExceptionMessage implements LocalizableStrings {
+public class DeleteFileVersionRequest extends DefaultBoxRequest {
+
+    public static final String URI = "/files/%s/versions/%s";
 
     /**
-     * Initializes a new {@link CryptoExceptionMessage}.
+     * Initializes a new {@link DeleteFileVersionRequest}.
+     * 
+     * @param config The IBoxConfig
+     * @param parser The parser
+     * @param fileId the file identifier
+     * @param version the version identifier
+     * @throws BoxRestException
      */
-    private CryptoExceptionMessage() {
-        super();
+    public DeleteFileVersionRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, String version) throws BoxRestException {
+        super(config, parser, String.format(URI, fileId, version), RestMethod.DELETE, null);
+        setExpectedResponseCode(HttpStatus.SC_NO_CONTENT);
     }
-
-    // The provided password seems to be wrong or something bad happened.
-    public final static String BAD_PASSWORD_DISPLAY = "The provided password seems to be wrong or something bad happened.";
-
 }
