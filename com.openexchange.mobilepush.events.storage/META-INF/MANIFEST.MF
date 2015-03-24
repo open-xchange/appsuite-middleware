@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Name: Open-Xchange Mobile Push Event Storage RDB Bundle
 Bundle-SymbolicName: com.openexchange.mobilepush.events.storage
-Bundle-Version: 7.8.0
+Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.mobilepush.events.storage.osgi.MobilePushStorageActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: 

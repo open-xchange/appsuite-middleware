@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Name: Open-Xchange Mobilenotifier Event GCM Bundle
 Bundle-SymbolicName: com.openexchange.mobilenotifier.events.gcm
-Bundle-Version: 7.8.0
+Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.mobilenotifier.events.gcm.osgi.MobileNotifierEventsGCMActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: 

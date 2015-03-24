@@ -2,16 +2,8 @@
 Name:           open-xchange-mobile-push
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires:  java7-devel
-%else
-BuildRequires:  java-devel >= 1.7.0
-%endif
-%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires:  ant
-%else
+BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  ant-nodeps
-%endif
 BuildRequires:  open-xchange-core
 Version:        @OXVERSION@
 %define         ox_release 0
@@ -43,7 +35,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}
