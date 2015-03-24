@@ -69,7 +69,6 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import com.openexchange.database.Databases;
 import com.openexchange.database.IncorrectStringSQLException;
 
 /**
@@ -114,12 +113,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getCatalog();
-            if (null == schema) {
-                LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
-            } else {
-                LOG.error("Error in SQL syntax in the following statement on schema {}: {}", schema, Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
-            }
+            logSyntaxError(syntaxError, delegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
@@ -136,12 +130,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
             LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
             return new JDBC41ResultSetWrapper(delegate.executeQuery(), this);
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getCatalog();
-            if (null == schema) {
-                LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
-            } else {
-                LOG.error("Error in SQL syntax in the following statement on schema {}: {}", schema, Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
-            }
+            logSyntaxError(syntaxError, delegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
@@ -160,12 +149,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            String schema = con.getCatalog();
-            if (null == schema) {
-                LOG.error("Error in SQL syntax in the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
-            } else {
-                LOG.error("Error in SQL syntax in the following statement on schema {}: {}", schema, Databases.getSqlStatement(delegate, "<unknown>"), syntaxError);
-            }
+            logSyntaxError(syntaxError, delegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
