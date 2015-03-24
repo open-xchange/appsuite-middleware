@@ -1,5 +1,5 @@
-open-xchange-mobile-push (7.8.0-0) unstable; urgency=low
+open-xchange-mobile-push (7.6.2-0) unstable; urgency=low
 
-  * Initial 1.1 release.
+  * Initial mobile push release.
 
  -- Lars Hoogestraat <lars.hoogestraat@open-xchange.com>  Fri, 05 Dec 2014 11:20:50 +0100
