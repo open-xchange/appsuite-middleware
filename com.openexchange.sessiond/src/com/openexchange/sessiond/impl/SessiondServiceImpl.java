@@ -72,14 +72,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondServiceImpl.class);
 
-    private final long defaultIdleTime;
-
     /**
      * Initializes a new {@link SessiondServiceImpl}.
      */
     public SessiondServiceImpl() {
         super();
-        defaultIdleTime = SessionHandler.getConfig().getLifeTime();
     }
 
     @Override
