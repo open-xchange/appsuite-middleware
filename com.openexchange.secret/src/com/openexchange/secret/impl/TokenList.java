@@ -135,19 +135,18 @@ public final class TokenList {
      */
 
     private final List<SecretService> queue;
-
     private final boolean usesPassword;
 
     /**
      * Initializes a new {@link TokenList}.
      */
-    private TokenList(final Collection<List<Token>> collection) {
+    private TokenList(Collection<List<Token>> collection) {
         super();
         queue = new ArrayList<SecretService>(collection.size());
         List<Token> last = null;
-        for (final List<Token> list : collection) {
+        for (List<Token> list : collection) {
             last = list;
-            queue.add(new TokenBasedSecretService(list));
+            queue.add(new TokenBasedSecretService(new TokenRow(list)));
         }
         usesPassword = null == last ? false : last.contains(ReservedToken.PASSWORD);
     }

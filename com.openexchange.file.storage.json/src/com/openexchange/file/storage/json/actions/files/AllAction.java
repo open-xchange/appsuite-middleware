@@ -110,7 +110,9 @@ public class AllAction extends AbstractFileAction {
                 documents = new DelegatingTimedResult(iter, documents.sequenceNumber());
             }
 
-            documents = slice(documents, indexes);
+            if (null != indexes) {
+                documents = slice(documents, indexes);
+            }
         } else {
             // TODO: Add pagination to IDBasedFileAccess
             documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder);
