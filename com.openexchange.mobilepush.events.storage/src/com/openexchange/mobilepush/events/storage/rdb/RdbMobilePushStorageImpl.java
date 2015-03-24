@@ -196,27 +196,31 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
         Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
         List<ContextUsers> contextUser = new LinkedList<ContextUsers>();
         if (false == allContextIDs.isEmpty()) {
+            Set<Integer> alreadyProcessed = new HashSet<Integer>();
             for (Iterator<Integer> iter = allContextIDs.iterator(); iter.hasNext();) {
-                int contextId = iter.next().intValue();
-                Connection connection = databaseService.getReadOnly(contextId);
-                try {
-                    selectAllSubscription(connection, provider, contextId, contextUser, isLoginPush);
-                } catch (SQLException e) {
-                    if ("42S02".equals(e.getSQLState())) {
-                        // "Table 'mobileEventSubscriptions' doesn't exist" => no update task for tables in this schema yet, so ignore
-                    } else {
-                        throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                Integer iContextId = iter.next();
+                if (!alreadyProcessed.contains(iContextId)) {
+                    int contextId = iContextId.intValue();
+                    Connection connection = databaseService.getReadOnly(contextId);
+                    try {
+                        selectAllSubscription(connection, provider, contextId, contextUser, isLoginPush);
+                    } catch (SQLException e) {
+                        if ("42S02".equals(e.getSQLState())) {
+                            // "Table 'mobileEventSubscriptions' doesn't exist" => no update task for tables in this schema yet, so ignore
+                        } else {
+                            throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                        }
+                    } finally {
+                        databaseService.backReadOnly(contextId, connection);
                     }
-                } finally {
-                    databaseService.backReadOnly(contextId, connection);
-                }
 
-                /*
-                 * Remember processed contexts
-                 */
-                int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId);
-                for (int cid : contextsInSameSchema) {
-                    allContextIDs.remove(Integer.valueOf(cid));
+                    /*
+                     * Remember processed contexts
+                     */
+                    int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId);
+                    for (int cid : contextsInSameSchema) {
+                        alreadyProcessed.add(Integer.valueOf(cid));
+                    }
                 }
             }
         }
