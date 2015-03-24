@@ -461,7 +461,7 @@ public abstract class AbstractOneDriveResourceAccess {
     protected OXException handleIOError(IOException e) {
         Throwable cause = e.getCause();
         if (cause instanceof AuthenticationException) {
-            // TODO:
+            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), OneDriveConstants.ID, SC_UNAUTHORIZED);
         }
         return FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
     }
