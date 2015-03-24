@@ -94,6 +94,8 @@ public class InfostoreQueryCatalog {
 
     private static final String STR_ORDER_BY = " ORDER BY ";
 
+    private static final String STR_LIMIT = " LIMIT ";
+
     private static final String STR_CID = "cid";
 
     public static final Metadata[] INFOSTORE_FIELDS = new Metadata[] {
@@ -586,22 +588,41 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
-    public String getDocumentsQuery(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
+    public String getDocumentsQuery(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, int start, int end, final FieldChooser wins, final int contextId) {
+        StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId);
+
         if (sort != null) {
             builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+
+        if (start >= 0 && end > 0) {
+            builder.append(STR_LIMIT);
+            if (start > 0) {
+                builder.append(start).append(',');
+            }
+            builder.append(end - start);
         }
 
         return builder.toString();
     }
 
-    public String getDocumentsQuery(final long folderId, final int userId, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
+    public String getDocumentsQuery(final long folderId, final int userId, final Metadata[] metadata, final Metadata sort, final int order, int start, int end, final FieldChooser wins, final int contextId) {
+        StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(SQL_CHUNK02).append(userId);
+
         if (sort != null) {
             builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
         }
+
+        if (start >= 0 && end > 0) {
+            builder.append(STR_LIMIT);
+            if (start > 0) {
+                builder.append(start).append(',');
+            }
+            builder.append(end - start);
+        }
+
         return builder.toString();
     }
 
@@ -714,7 +735,7 @@ public class InfostoreQueryCatalog {
         return allocator.toString();
     }
 
-    public String getSharedDocumentsForUserQuery(final int contextId, final int userId, final int[] groups, int leastPermission, final Metadata[] metadata, final DocumentWins wins) {
+    public String getSharedDocumentsForUserQuery(final int contextId, final int userId, final int[] groups, int leastPermission, final Metadata[] metadata, int start, int end, final DocumentWins wins) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
         builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
         builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
@@ -722,6 +743,15 @@ public class InfostoreQueryCatalog {
         appendEntityConstraint(builder, "object_permission", userId, groups);
 
         builder.append(" AND object_permission.bits >=").append(leastPermission);
+
+        if (start >= 0 && end > 0) {
+            builder.append(STR_LIMIT);
+            if (start > 0) {
+                builder.append(start).append(',');
+            }
+            builder.append(end - start);
+        }
+
         return builder.toString();
     }
 

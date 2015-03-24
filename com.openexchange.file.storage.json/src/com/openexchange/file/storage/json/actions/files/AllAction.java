@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import static com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param.FOLDER_ID;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -63,7 +62,9 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -114,9 +115,7 @@ public class AllAction extends AbstractFileAction {
                 documents = slice(documents, indexes);
             }
         } else {
-            // TODO: Add pagination to IDBasedFileAccess
-            documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder);
-            documents = slice(documents, indexes);
+            documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder, Range.valueOf(indexes));
         }
 
         return result( documents, request );
@@ -130,7 +129,7 @@ public class AllAction extends AbstractFileAction {
         int from = indexes[0];
         int to = indexes[1];
         if (from >= to) {
-            return new EmptyTimedResult(documents.sequenceNumber());
+            return Results.emptyTimedResult();
         }
 
         SearchIterator<File> iter = documents.results();
@@ -138,7 +137,7 @@ public class AllAction extends AbstractFileAction {
             int index = 0;
             while (index < from) {
                 if (false == iter.hasNext()) {
-                    return new EmptyTimedResult(documents.sequenceNumber());
+                    return Results.emptyTimedResult();
                 }
                 iter.next();
                 index++;
@@ -157,32 +156,6 @@ public class AllAction extends AbstractFileAction {
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
-
-    /** The empty <code>SearchIterator</code> */
-    static final SearchIteratorDelegator<File> EMPTY = new SearchIteratorDelegator<File>(Collections.<File>emptyList());
-
-    private final class EmptyTimedResult implements TimedResult<File> {
-
-        private final long sequenceNumber;
-
-        /**
-         * Initializes a new {@link TimedResultImplementation}.
-         */
-        EmptyTimedResult(long sequenceNumber) {
-            super();
-            this.sequenceNumber = sequenceNumber;
-        }
-
-        @Override
-        public long sequenceNumber() throws OXException {
-            return sequenceNumber;
-        }
-
-        @Override
-        public SearchIterator<File> results() throws OXException {
-            return EMPTY;
-        }
-    }
 
     private final class ListBasedTimedResult implements TimedResult<File> {
 

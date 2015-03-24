@@ -99,8 +99,10 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
+import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
+import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStorageCapability;
@@ -125,6 +127,8 @@ import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.MergingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tx.TransactionAwares;
 
 /**
@@ -421,17 +425,46 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         FolderID folderID = new FolderID(folderId);
         String service = folderID.getService();
         String accountId = folderID.getAccountId();
-        TimedResult<File> result;
+
         try {
-            result = getFileAccess(service, accountId).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
+            TimedResult<File> result = getFileAccess(service, accountId).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
             return fixIDs(result, service, accountId);
         } catch (final OXException e) {
             if (!FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e) || !INFOSTORE_SERVICE_ID.equals(service)) {
                 throw e;
             }
-            result = EMPTY_TIMED_RESULT;
+            return EMPTY_TIMED_RESULT;
         }
-        return fixIDs(result, service, accountId);
+    }
+
+    @Override
+    public TimedResult<File> getDocuments(String folderId, List<Field> columns, Field sort, SortDirection order, Range range) throws OXException {
+        if (null != range && range.to <= range.from) {
+            return EMPTY_TIMED_RESULT;
+        }
+
+        FolderID folderID = new FolderID(folderId);
+        String service = folderID.getService();
+        String accountId = folderID.getAccountId();
+
+        try {
+            TimedResult<File> result;
+
+            FileStorageFileAccess fileAccess = getFileAccess(service, accountId);
+            if (FileStorageTools.supports(fileAccess, FileStorageCapability.RANGES)) {
+                result = ((FileStorageRangeFileAccess) fileAccess).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order, range);
+            } else {
+                result = fileAccess.getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
+                result = slice(result, range);
+            }
+
+            return fixIDs(result, service, accountId);
+        } catch (final OXException e) {
+            if (!FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e) || !INFOSTORE_SERVICE_ID.equals(service)) {
+                throw e;
+            }
+            return EMPTY_TIMED_RESULT;
+        }
     }
 
     @Override
@@ -1660,6 +1693,67 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             }
         }
         return null;
+    }
+
+    private TimedResult<File> slice(TimedResult<File> documents, Range range) throws OXException {
+        if (null == range) {
+            return documents;
+        }
+
+        int from = range.from;
+        int to = range.to;
+        if (from >= to) {
+            return EMPTY_TIMED_RESULT;
+        }
+
+        SearchIterator<File> iter = documents.results();
+        try {
+            int index = 0;
+            while (index < from) {
+                if (false == iter.hasNext()) {
+                    return EMPTY_TIMED_RESULT;
+                }
+                iter.next();
+                index++;
+            }
+
+            List<File> files = new LinkedList<File>();
+            while (index < to && iter.hasNext()) {
+                files.add(iter.next());
+                index++;
+            }
+
+            return new ListBasedTimedResult(files, documents.sequenceNumber());
+        } finally {
+            SearchIterators.close(iter);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private final class ListBasedTimedResult implements TimedResult<File> {
+
+        private final long sequenceNumber;
+        private final SearchIterator<File> results;
+
+        /**
+         * Initializes a new {@link TimedResultImplementation}.
+         */
+        ListBasedTimedResult(List<File> files, long sequenceNumber) {
+            super();
+            this.results = new SearchIteratorDelegator<>(files);
+            this.sequenceNumber = sequenceNumber;
+        }
+
+        @Override
+        public long sequenceNumber() throws OXException {
+            return sequenceNumber;
+        }
+
+        @Override
+        public SearchIterator<File> results() throws OXException {
+            return results;
+        }
     }
 
 }

@@ -110,10 +110,16 @@ public enum FileStorageCapability {
      * Support for locking/unlocking files.
      */
     LOCKS,
+
     /**
      * Support for individual permissions per file.
      */
     OBJECT_PERMISSIONS,
+
+    /**
+     * Support for pagination/ranges.
+     */
+    RANGES,
 
     ;
 }
