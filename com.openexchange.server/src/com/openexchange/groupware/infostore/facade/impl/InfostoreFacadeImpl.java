@@ -365,21 +365,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException {
+        Context context = session.getContext();
         /*
          * get needed metadata (including object permissions) & check read permissions
          */
-        DocumentMetadata metadata = objectPermissionLoader.add(load(id, version, session.getContext()), session.getContext(), null);
-        EffectiveInfostorePermission permission = security.getInfostorePermission(
-            metadata, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        DocumentMetadata metadata = objectPermissionLoader.add(load(id, version, context), context, null);
+        EffectiveInfostorePermission permission = security.getInfostorePermission(metadata, context, session.getUser(), session.getUserPermissionBits());
         if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         /*
-         * adjust parent folder if required
+         * adjust parent folder if required, add further metadata
          */
         if (false == permission.canReadObjectInFolder()) {
             metadata.setFolderId(getSharedFilesFolderID(session));
         }
+        metadata = numberOfVersionsLoader.add(lockedUntilLoader.add(metadata, context, null), context, null);
         /*
          * check client E-Tag if supplied
          */
