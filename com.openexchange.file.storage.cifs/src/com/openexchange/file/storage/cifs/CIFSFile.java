@@ -57,6 +57,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.mime.MimeTypeMap;
@@ -163,7 +164,7 @@ public final class CIFSFile extends DefaultFile {
                     setVersionComment(null);
                 }
             } catch (final SmbException e) {
-                throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
             }
         }
         return this;
