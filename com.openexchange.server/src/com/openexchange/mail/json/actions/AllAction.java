@@ -226,7 +226,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             }
             final int[] fromToIndices;
             {
-                final String s = req.getParameter("limit");
+                final String s = req.getParameter(AJAXServlet.PARAMETER_LIMIT);
                 if (null == s) {
                     final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
                     final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
