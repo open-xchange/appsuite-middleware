@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,59 @@
  *
  */
 
-package com.openexchange.crypto;
+package com.openexchange.file.storage.boxcom.access.extended.requests;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.apache.http.HttpStatus;
+import com.box.boxjavalibv2.IBoxConfig;
+import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
+import com.box.restclientv2.RestMethod;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.requestsbase.DefaultBoxRequest;
+import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.PreflightCheckRequestObject;
 
 /**
- * {@link CryptoExceptionMessage}
+ * {@link PreflightCheckRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CryptoExceptionMessage implements LocalizableStrings {
+public class PreflightCheckRequest extends DefaultBoxRequest {
+
+    private static final String NEW_UPLOAD_URI = "/files/content";
+
+    private static final String UPDATE_UPLOAD_URI = "/files/%s/content";
 
     /**
-     * Initializes a new {@link CryptoExceptionMessage}.
+     * 
+     * Initializes a new {@link PreflightCheckRequest}.
+     * 
+     * @param config
+     * @param parser
+     * @param filename
+     * @param filesize
+     * @param fileId
+     * @param requestObject
+     * @throws BoxRestException
      */
-    private CryptoExceptionMessage() {
-        super();
+    public PreflightCheckRequest(IBoxConfig config, IBoxJSONParser parser, PreflightCheckRequestObject requestObject) throws BoxRestException {
+        super(config, parser, NEW_UPLOAD_URI, RestMethod.OPTIONS, requestObject);
+        setExpectedResponseCode(HttpStatus.SC_OK);
     }
 
-    // The provided password seems to be wrong or something bad happened.
-    public final static String BAD_PASSWORD_DISPLAY = "The provided password seems to be wrong or something bad happened.";
-
+    /**
+     * 
+     * Initializes a new {@link PreflightCheckRequest}.
+     * 
+     * @param config
+     * @param parser
+     * @param filename
+     * @param filesize
+     * @param fileId
+     * @param parentId
+     * @param requestObject
+     * @throws BoxRestException
+     */
+    public PreflightCheckRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, PreflightCheckRequestObject requestObject) throws BoxRestException {
+        super(config, parser, String.format(UPDATE_UPLOAD_URI, fileId), RestMethod.OPTIONS, requestObject);
+        setExpectedResponseCode(HttpStatus.SC_OK);
+    }
 }

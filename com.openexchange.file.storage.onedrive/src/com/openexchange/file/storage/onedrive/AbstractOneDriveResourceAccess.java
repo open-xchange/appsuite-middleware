@@ -322,7 +322,7 @@ public abstract class AbstractOneDriveResourceAccess {
      *
      * @param request The HTTP request
      */
-    protected void reset(HttpRequestBase request) {
+    public static void reset(HttpRequestBase request) {
         if (null != request) {
             try {
                 request.reset();
@@ -371,7 +371,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @return The built URI string
      * @throws IllegalArgumentException If the given string violates RFC 2396
      */
-    protected URI buildUri(String resourceId, List<NameValuePair> queryString) {
+    public static URI buildUri(String resourceId, List<NameValuePair> queryString) {
         try {
             return new URI("https", null, "apis.live.net", -1, "/v5.0/" + resourceId, null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"), null);
         } catch (URISyntaxException x) {
@@ -391,7 +391,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws ClientProtocolException If a client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected <R> R handleHttpResponse(HttpResponse httpResponse, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
+    public static <R> R handleHttpResponse(HttpResponse httpResponse, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
         return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, clazz);
     }
 
@@ -407,7 +407,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws IOException If an I/O error occurs
      * @throws IllegalStateException If content stream cannot be created
      */
-    protected <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
+    protected static <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
         policy.handleStatusCode(httpResponse);
 
         // OK, continue
@@ -462,7 +462,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @param e The I/O error
      * @return The resulting exception
      */
-    protected OXException handleIOError(IOException e) {
+    protected static OXException handleIOError(IOException e) {
         Throwable cause = e.getCause();
         if (cause instanceof AuthenticationException) {
             // TODO:
@@ -483,7 +483,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @param e The HTTP error
      * @return The resulting exception
      */
-    protected OXException handleHttpResponseError(String identifier, HttpResponseException e) {
+    protected static OXException handleHttpResponseError(String identifier, HttpResponseException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
             return OneDriveExceptionCodes.NOT_FOUND.create(e, identifier);
         }

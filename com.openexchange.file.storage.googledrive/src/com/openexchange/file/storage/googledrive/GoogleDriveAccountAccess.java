@@ -52,6 +52,7 @@ package com.openexchange.file.storage.googledrive;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -69,7 +70,7 @@ public final class GoogleDriveAccountAccess implements FileStorageAccountAccess 
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private final GoogleDriveAccess googleDriveAccess;
+    private GoogleDriveAccess googleDriveAccess;
 
     /**
      * Initializes a new {@link GoogleDriveAccountAccess}.
@@ -81,7 +82,6 @@ public final class GoogleDriveAccountAccess implements FileStorageAccountAccess 
         this.service = service;
         this.account = account;
         this.session = session;
-        googleDriveAccess = GoogleDriveAccess.accessFor(account, session);
     }
 
     /**
@@ -95,22 +95,22 @@ public final class GoogleDriveAccountAccess implements FileStorageAccountAccess 
 
     @Override
     public void connect() throws OXException {
-        // Nope
+        googleDriveAccess = GoogleDriveAccess.accessFor(account, session);
     }
 
     @Override
     public boolean isConnected() {
-        return true;
+        return null != googleDriveAccess;
     }
 
     @Override
     public void close() {
-        // Nope
+        googleDriveAccess = null;
     }
 
     @Override
     public boolean ping() throws OXException {
-        return true;
+        return GoogleDriveAccess.pingFor(account, session);
     }
 
     @Override
@@ -125,11 +125,19 @@ public final class GoogleDriveAccountAccess implements FileStorageAccountAccess 
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
+        GoogleDriveAccess googleDriveAccess = this.googleDriveAccess;
+        if (null == googleDriveAccess) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
         return new GoogleDriveFileAccess(googleDriveAccess, account, session, this);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
+        GoogleDriveAccess googleDriveAccess = this.googleDriveAccess;
+        if (null == googleDriveAccess) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
         return new GoogleDriveFolderAccess(googleDriveAccess, account, session, this);
     }
 

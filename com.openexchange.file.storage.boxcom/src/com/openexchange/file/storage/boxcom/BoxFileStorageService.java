@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.boxcom;
 
+import static com.openexchange.file.storage.SecretAwareFileStorageAccountManager.newInstanceFor;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -73,6 +74,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
@@ -116,6 +118,8 @@ public final class BoxFileStorageService implements AccountAware, OAuthUtilizerC
      */
     public static final int DEFAULT_ATTR_EXPIRATION_PERIOD = 300000;
 
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
     private final DynamicFormDescription formDescription;
     private volatile FileStorageAccountManager accountManager;
     private volatile CompositeFileStorageAccountManagerProvider compositeAccountManager;
@@ -141,8 +145,8 @@ public final class BoxFileStorageService implements AccountAware, OAuthUtilizerC
             synchronized (this) {
                 m = accountManager;
                 if (null == m) {
-                    final FileStorageAccountManagerLookupService lookupService = Services.getService(FileStorageAccountManagerLookupService.class);
-                    m = lookupService.getAccountManagerFor(SERVICE_ID);
+                    FileStorageAccountManagerLookupService lookupService = Services.getService(FileStorageAccountManagerLookupService.class);
+                    m = newInstanceFor(lookupService.getAccountManagerFor(SERVICE_ID));
                     accountManager = m;
                 }
             }
@@ -272,25 +276,28 @@ public final class BoxFileStorageService implements AccountAware, OAuthUtilizerC
      */
     @Override
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
-        final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+        CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
         if (null == compositeAccountManager) {
             return getAccountManager0().getAccounts(session);
         }
-        final Map<String, FileStorageAccountInfo> accountsMap = new LinkedHashMap<String, FileStorageAccountInfo>(8);
-        for (final FileStorageAccountManagerProvider provider : compositeAccountManager.providers()) {
-            for (final FileStorageAccount account : provider.getAccountManagerFor(SERVICE_ID).getAccounts(session)) {
-                final FileStorageAccountInfo info = new FileStorageAccountInfo(account, provider.getRanking());
-                final FileStorageAccountInfo prev = accountsMap.get(account.getId());
+
+        Map<String, FileStorageAccountInfo> accountsMap = new LinkedHashMap<String, FileStorageAccountInfo>(8);
+        for (FileStorageAccountManagerProvider provider : compositeAccountManager.providers()) {
+            for (FileStorageAccount account : newInstanceFor(provider.getAccountManagerFor(SERVICE_ID)).getAccounts(session)) {
+                FileStorageAccountInfo info = new FileStorageAccountInfo(account, provider.getRanking());
+                FileStorageAccountInfo prev = accountsMap.get(account.getId());
                 if (null == prev || prev.ranking < info.ranking) {
                     // Replace with current
                     accountsMap.put(account.getId(), info);
                 }
             }
         }
-        final List<FileStorageAccount> ret = new ArrayList<FileStorageAccount>(accountsMap.size());
-        for (final FileStorageAccountInfo info : accountsMap.values()) {
+
+        List<FileStorageAccount> ret = new ArrayList<FileStorageAccount>(accountsMap.size());
+        for (FileStorageAccountInfo info : accountsMap.values()) {
             ret.add(info.account);
         }
+
         return ret;
     }
 
@@ -301,7 +308,7 @@ public final class BoxFileStorageService implements AccountAware, OAuthUtilizerC
             return getAccountManager0();
         }
         try {
-            return compositeAccountManager.getAccountManagerFor(SERVICE_ID);
+            return newInstanceFor(compositeAccountManager.getAccountManagerFor(SERVICE_ID));
         } catch (final OXException e) {
             LOG.warn("", e);
             return getAccountManager0();

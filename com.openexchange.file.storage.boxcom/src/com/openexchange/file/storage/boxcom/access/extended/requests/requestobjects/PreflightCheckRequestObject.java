@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,63 @@
  *
  */
 
-package com.openexchange.crypto;
+package com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.box.boxjavalibv2.dao.BoxFile;
+import com.box.boxjavalibv2.dao.BoxFolder;
+import com.box.boxjavalibv2.dao.BoxItem;
+import com.box.boxjavalibv2.jsonentities.MapJSONStringEntity;
+import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 
 /**
- * {@link CryptoExceptionMessage}
+ * {@link PreflightCheckRequestObject}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CryptoExceptionMessage implements LocalizableStrings {
+public class PreflightCheckRequestObject extends BoxDefaultRequestObject {
 
     /**
-     * Initializes a new {@link CryptoExceptionMessage}.
+     * Initializes a new {@link PreflightCheckRequestObject}.
      */
-    private CryptoExceptionMessage() {
+    public PreflightCheckRequestObject(String name, String parentId, long size) {
         super();
+        setName(name);
+        setParent(parentId);
+        setSize(size);
     }
 
-    // The provided password seems to be wrong or something bad happened.
-    public final static String BAD_PASSWORD_DISPLAY = "The provided password seems to be wrong or something bad happened.";
+    /**
+     * Set the name of the file
+     * 
+     * @param name the name of the file
+     * @return
+     */
+    private PreflightCheckRequestObject setName(String name) {
+        put(BoxFile.FIELD_NAME, name);
+        return this;
+    }
 
+    /**
+     * Set the parent folder of the file.
+     * 
+     * @param parentId the identifier of the parent folder
+     * @return
+     */
+    private PreflightCheckRequestObject setParent(String parentId) {
+        MapJSONStringEntity entity = new MapJSONStringEntity();
+        entity.put(BoxFolder.FIELD_ID, parentId);
+        put(BoxItem.FIELD_PARENT, entity);
+        return this;
+    }
+
+    /**
+     * Set the size of the file in bytes
+     * 
+     * @param size the size of the file in bytes
+     * @return
+     */
+    private PreflightCheckRequestObject setSize(long size) {
+        put(BoxFile.FIELD_SIZE, size);
+        return this;
+    }
 }

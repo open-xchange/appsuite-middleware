@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,35 @@
  *
  */
 
-package com.openexchange.crypto;
+package com.openexchange.file.storage.boxcom.access.extended.requests;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.apache.http.HttpStatus;
+import com.box.boxjavalibv2.IBoxConfig;
+import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
+import com.box.restclientv2.RestMethod;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.requestsbase.DefaultBoxRequest;
+import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.LockRequestObject;
 
 /**
- * {@link CryptoExceptionMessage}
+ * {@link LockRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CryptoExceptionMessage implements LocalizableStrings {
+public class LockRequest extends DefaultBoxRequest {
+
+    private static final String URI = "/files/%s";
 
     /**
-     * Initializes a new {@link CryptoExceptionMessage}.
+     * Initializes a new {@link LockRequest}.
+     * 
+     * @param config
+     * @param parser
+     * @param fileId
+     * @throws BoxRestException
      */
-    private CryptoExceptionMessage() {
-        super();
+    public LockRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, boolean lock) throws BoxRestException {
+        super(config, parser, String.format(URI, fileId), RestMethod.PUT, new LockRequestObject(lock));
+        setExpectedResponseCode(HttpStatus.SC_OK);
     }
-
-    // The provided password seems to be wrong or something bad happened.
-    public final static String BAD_PASSWORD_DISPLAY = "The provided password seems to be wrong or something bad happened.";
-
 }

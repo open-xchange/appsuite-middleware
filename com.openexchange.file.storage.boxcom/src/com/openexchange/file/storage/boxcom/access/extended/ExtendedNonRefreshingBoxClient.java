@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,43 @@
  *
  */
 
-package com.openexchange.crypto;
+package com.openexchange.file.storage.boxcom.access.extended;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.box.boxjavalibv2.BoxConfigBuilder;
+import com.box.boxjavalibv2.IBoxConfig;
+import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
+import com.box.boxjavalibv2.jsonparsing.IBoxResourceHub;
+import com.box.boxjavalibv2.resourcemanagers.BoxFilesManagerImpl;
+import com.openexchange.file.storage.boxcom.access.NonRefreshingBoxClient;
 
 /**
- * {@link CryptoExceptionMessage}
+ * {@link ExtendedNonRefreshingBoxClient References the {@link BoxExtendedFilesManager} instead of the {@link BoxFilesManagerImpl} which includes the missing deleteFileVersion method.
+ * The next <a link="https://github.com/box/box-java-sdk">major</a> release of the Box.com Java SDK will
+ * include that functionality, though it is still in beta right now. So, we have to live with this ugly hack.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CryptoExceptionMessage implements LocalizableStrings {
+public class ExtendedNonRefreshingBoxClient extends NonRefreshingBoxClient {
+
+    private final BoxExtendedFilesManager filesManager;
 
     /**
-     * Initializes a new {@link CryptoExceptionMessage}.
+     * Initializes a new {@link NonRefreshingBoxClient}.
+     *
+     * @param clientId The client id
+     * @param clientSecret The client secret
+     * @param hub The resource hub, use <code>null</code> for default resource hub
+     * @param parser The JSON parser, use <code>null</code> for default parser
+     * @param config The Box configuration. Use {@link BoxConfigBuilder} to build. Normally you only need default configuration: <code>(new BoxConfigBuilder()).build()</code>
      */
-    private CryptoExceptionMessage() {
-        super();
+    public ExtendedNonRefreshingBoxClient(String clientId, String clientSecret, IBoxResourceHub hub, IBoxJSONParser parser, IBoxConfig config) {
+        super(clientId, clientSecret, hub, parser, config);
+        filesManager = new BoxExtendedFilesManager(getConfig(), getResourceHub(), getJSONParser(), getAuth(), getRestClient());
     }
 
-    // The provided password seems to be wrong or something bad happened.
-    public final static String BAD_PASSWORD_DISPLAY = "The provided password seems to be wrong or something bad happened.";
+    @Override
+    public BoxExtendedFilesManager getFilesManager() {
+        return filesManager;
+    }
 
 }

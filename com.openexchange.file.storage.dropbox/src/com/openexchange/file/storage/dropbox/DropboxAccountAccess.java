@@ -52,6 +52,7 @@ package com.openexchange.file.storage.dropbox;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -69,19 +70,16 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private final DropboxOAuthAccess dropboxOAuthAccess;
+    private DropboxOAuthAccess dropboxOAuthAccess;
 
     /**
      * Initializes a new {@link DropboxAccountAccess}.
-     *
-     * @throws OXException If initialization fails
      */
-    public DropboxAccountAccess(final FileStorageService service, final FileStorageAccount account, final Session session) throws OXException {
+    public DropboxAccountAccess(final FileStorageService service, final FileStorageAccount account, final Session session) {
         super();
         this.service = service;
         this.account = account;
         this.session = session;
-        dropboxOAuthAccess = DropboxOAuthAccess.accessFor(account, session);
     }
 
     /**
@@ -95,22 +93,22 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
 
     @Override
     public void connect() throws OXException {
-        // Nope
+        dropboxOAuthAccess = DropboxOAuthAccess.accessFor(account, session);
     }
 
     @Override
     public boolean isConnected() {
-        return true;
+        return null != dropboxOAuthAccess;
     }
 
     @Override
     public void close() {
-        // Nope
+        dropboxOAuthAccess = null;
     }
 
     @Override
     public boolean ping() throws OXException {
-        return true;
+        return DropboxOAuthAccess.pingFor(account, session);
     }
 
     @Override
@@ -125,11 +123,19 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
+        DropboxOAuthAccess dropboxOAuthAccess = this.dropboxOAuthAccess;
+        if (null == dropboxOAuthAccess) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
         return new DropboxFileAccess(dropboxOAuthAccess, account, session, this);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
+        DropboxOAuthAccess dropboxOAuthAccess = this.dropboxOAuthAccess;
+        if (null == dropboxOAuthAccess) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
         return new DropboxFolderAccess(dropboxOAuthAccess, account, session);
     }
 
