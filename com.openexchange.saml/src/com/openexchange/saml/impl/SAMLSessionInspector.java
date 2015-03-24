@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.saml.SessionProperties;
-import com.openexchange.saml.WebSSOProvider;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.inspector.Reason;
@@ -74,11 +73,8 @@ public class SAMLSessionInspector implements SessionInspectorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SAMLSessionInspector.class);
 
-    private final WebSSOProvider provider;
-
-    public SAMLSessionInspector(WebSSOProvider provider) {
+    public SAMLSessionInspector() {
         super();
-        this.provider = provider;
     }
 
     @Override

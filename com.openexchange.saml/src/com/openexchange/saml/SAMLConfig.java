@@ -89,7 +89,7 @@ public interface SAMLConfig {
      * @return The URL or <code>null</code> if single logout is not enabled.
      */
     String getSingleLogoutServiceURL();
-//
+
     /**
      * Gets the binding via which LogoutResponse messages shall be delivered.
      *

@@ -136,7 +136,7 @@ public class SAMLFeature extends DependentServiceStarter {
 
             HzStateManagement hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
             WebSSOProvider serviceProvider = new SAMLWebSSOProviderImpl(config, openSAML, hzStateManagement, services);
-            serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
+            serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(), null));
 
             SAMLBackend samlBackend = services.getService(SAMLBackend.class);
             serviceRegistrations.push(context.registerService(Enhancer.class, new SAMLLoginEnhancer(samlBackend), null));
