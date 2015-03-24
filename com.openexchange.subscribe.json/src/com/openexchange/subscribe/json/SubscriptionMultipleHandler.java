@@ -111,7 +111,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
 
     @Override
     public void close() {
-
+        // Nothing to do
     }
 
     @Override
