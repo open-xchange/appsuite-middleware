@@ -118,7 +118,7 @@ public abstract class AbstractCMISAccess {
         if (null == errorContent) {
             return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage() + " - " + errorContent);
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CMISConstants.ID, e.getMessage() + " - " + errorContent);
     }
 
 }
