@@ -136,6 +136,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The provided %1$s resource does not exist: %2$s
     public static final String NOT_FOUND_MSG = "The provided %1$s resource does not exist: %2$s";
 
+    // The file %1$s doesn't have any content.
+    public static final String NO_CONTENT_MSG = "The file %1$s doesn't have any content.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

@@ -49,6 +49,9 @@
 
 package com.openexchange.file.storage.googledrive;
 
+import static com.openexchange.file.storage.googledrive.GoogleDriveConstants.FIELDS_DEFAULT;
+import static com.openexchange.file.storage.googledrive.GoogleDriveConstants.QUERY_STRING_FILES_ONLY;
+import static com.openexchange.file.storage.googledrive.GoogleDriveConstants.QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,7 +100,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import static com.openexchange.file.storage.googledrive.GoogleDriveConstants.*;
 
 /**
  * {@link GoogleDriveFileAccess}
@@ -228,9 +230,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             } catch (final HttpResponseException e) {
                 throw handleHttpResponseError(file.getId(), e);
             } catch (final IOException e) {
-                throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
-                throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return new IDTuple(file.getFolderId(), file.getId());
@@ -240,7 +242,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
             // can only copy the current revision
-            throw GoogleDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(GoogleDriveConstants.ID);
         }
         String id = source.getId();
         try {
@@ -301,9 +303,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -346,9 +348,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -370,7 +372,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             }
             if (Strings.isEmpty(downloadUrl)) {
                 // The file doesn't have any content stored on Drive.
-                throw GoogleDriveExceptionCodes.NO_CONTENT.create(id);
+                throw FileStorageExceptionCodes.NO_CONTENT.create(id);
             }
             /*
              * get content stream
@@ -380,9 +382,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -417,9 +419,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -434,7 +436,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
          * prepare Google Drive file
          */
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
-        fileMetadata.setParents(Collections.<ParentReference>singletonList(new ParentReference().setId(toGoogleDriveFolderId(file.getFolderId()))));
+        fileMetadata.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(toGoogleDriveFolderId(file.getFolderId()))));
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             if (FileStorageFileAccess.NEW == file.getId()) {
@@ -462,9 +464,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(file.getId(), e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -513,9 +515,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -558,9 +560,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(null, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -617,9 +619,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -696,9 +698,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -729,7 +731,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
             return new SearchIteratorAdapter<File>(files.iterator(), files.size());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -743,9 +745,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (HttpResponseException e) {
             throw handleHttpResponseError(null, e);
         } catch (IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
         for (String folderId : folderIds) {
@@ -810,9 +812,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -832,9 +834,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (HttpResponseException e) {
             throw handleHttpResponseError(id, e);
         } catch (IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -873,9 +875,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (HttpResponseException e) {
             throw handleHttpResponseError(id, e);
         } catch (IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -926,9 +928,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -965,7 +967,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private void checkFileValidity(com.google.api.services.drive.model.File file) throws OXException {
         if (isDir(file)) {
-            throw GoogleDriveExceptionCodes.NOT_A_FILE.create(file.getId());
+            throw FileStorageExceptionCodes.NOT_A_FILE.create(GoogleDriveConstants.ID, file.getId());
         }
         checkIfTrashed(file);
     }
@@ -984,14 +986,13 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     /**
-     * Gets the Google Drive fields to query from the service corresponding to the supplied {@link Field} collection. The mandatory
-     * {@link GoogleDriveConstants#FIELDS_DEFAULT} are always included.
+     * Gets the Google Drive fields to query from the service corresponding to the supplied {@link Field} collection. The mandatory {@link GoogleDriveConstants#FIELDS_DEFAULT} are always included.
      *
      * @param requestedFields The fields as requested by the client, or {@link FileStorageFileAccess#ALL_FIELDS} to query all known fields
      * @param additionalFields Additional fields to include
      * @return The Google Drive fields as comma-separated string
      */
-    private static String getFields(List<Field> requestedFields, Field...additionalFields) {
+    private static String getFields(List<Field> requestedFields, Field... additionalFields) {
         StringBuilder stringBuilder = new StringBuilder(FIELDS_DEFAULT);
         for (Field field : getUniqueFields(requestedFields, additionalFields)) {
             switch (field) {
@@ -1029,7 +1030,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param additionalFields Additional fields to include
      * @return The unique fields
      */
-    private static Collection<Field> getUniqueFields(List<Field> requestedFields, Field...additionalFields) {
+    private static Collection<Field> getUniqueFields(List<Field> requestedFields, Field... additionalFields) {
         if (ALL_FIELDS == requestedFields) {
             return Arrays.asList(Field.values());
         } else {

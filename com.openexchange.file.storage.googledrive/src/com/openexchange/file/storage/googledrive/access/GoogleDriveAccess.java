@@ -56,7 +56,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.drive.Drive;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.googledrive.GoogleDriveExceptionCodes;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.session.Session;
@@ -107,7 +108,7 @@ public final class GoogleDriveAccess {
     private volatile long lastAccessed;
 
     /**
-     * Initializes a new {@link FacebookMessagingResource}.
+     * Initialises a new {@link FacebookMessagingResource}.
      *
      * @param fsAccount The Google Drive account providing credentials and settings
      * @param session The session
@@ -121,11 +122,11 @@ public final class GoogleDriveAccess {
         {
             final Map<String, Object> configuration = fsAccount.getConfiguration();
             if (null == configuration) {
-                throw GoogleDriveExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(GoogleDriveConstants.ID, fsAccount.getId());
             }
             final Object accountId = configuration.get("account");
             if (null == accountId) {
-                throw GoogleDriveExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(GoogleDriveConstants.ID, fsAccount.getId());
             }
             if (accountId instanceof Integer) {
                 oauthAccountId = ((Integer) accountId).intValue();
@@ -133,7 +134,7 @@ public final class GoogleDriveAccess {
                 try {
                     oauthAccountId = Integer.parseInt(accountId.toString());
                 } catch (final NumberFormatException e) {
-                    throw GoogleDriveExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, GoogleDriveConstants.ID, fsAccount.getId());
                 }
             }
         }

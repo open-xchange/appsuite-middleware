@@ -288,6 +288,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Authentication failed for the file storage account with identifier %1$s (service: %2$s): %3$s
      */
     AUTHENTICATION_FAILED("Authentication failed for the file storage account with identifier %1$s (service: %2$s): %3$s", Category.CATEGORY_CONFIGURATION, 56),
+    /**
+     * The file %1$s doesn't have any content.
+     */
+    NO_CONTENT("The file %1$s doesn't have any content.", Category.CATEGORY_ERROR, 57, FileStorageExceptionMessages.NO_CONTENT_MSG),
 
     ;
 

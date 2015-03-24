@@ -96,7 +96,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     private void checkDirValidity(com.google.api.services.drive.model.File file) throws OXException {
         if (!isDir(file)) {
-            throw GoogleDriveExceptionCodes.NOT_A_FOLDER.create(file.getId());
+            throw FileStorageExceptionCodes.NOT_A_FOLDER.create(GoogleDriveConstants.ID, file.getId());
         }
         checkIfTrashed(file);
     }
@@ -118,9 +118,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             }
             throw handleHttpResponseError(null, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -134,9 +134,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -190,9 +190,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(parentIdentifier, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -232,9 +232,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(toCreate.getParentId(), e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -278,9 +278,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -316,9 +316,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -346,9 +346,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             }
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -386,9 +386,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -416,9 +416,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -434,9 +434,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         } catch (HttpResponseException e) {
             throw handleHttpResponseError(folderId, e);
         } catch (IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
