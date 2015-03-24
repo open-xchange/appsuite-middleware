@@ -68,6 +68,7 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -110,7 +111,8 @@ public class SAMLFeature extends DependentServiceStarter {
         SessionReservationService.class,
         SAMLBackend.class,
         HazelcastInstance.class,
-        SessiondService.class
+        SessiondService.class,
+        CapabilityService.class
     };
 
     private final static Class<?>[] OPTIONAL_SERVICES = new Class[] {
@@ -160,6 +162,7 @@ public class SAMLFeature extends DependentServiceStarter {
                 String slsServletAlias = prefix + "sls";
                 httpService.registerServlet(slsServletAlias, new SingleLogoutService(serviceProvider, exceptionHandler), null, null);
                 servlets.push(slsServletAlias);
+                services.getService(CapabilityService.class).declareCapability("saml-single-logout");
             }
 
             if (config.enableMetadataService()) {
