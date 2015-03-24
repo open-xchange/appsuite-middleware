@@ -72,7 +72,7 @@ import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.generic.Utility;
 import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 import com.openexchange.messaging.generic.internet.MimeContentType;
-import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
+import com.openexchange.messaging.twitter.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Status;
 
@@ -149,13 +149,13 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
                 htmlContent = m.replaceAll(MessageFormat.format("$1\r\n    <img src=\"{0}\" />", status.getUser().getProfileImageURL()));
             }
 
-            final HtmlService htmlService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(HtmlService.class);
+            final HtmlService htmlService = Services.optService(HtmlService.class);
             if (null != htmlService) {
                 htmlContent = htmlService.sanitize(htmlContent, null, false, null, null);
                 htmlContent = htmlService.replaceHTMLEntities(htmlContent);
             }
             content = new StringContent(htmlContent);
-            
+
             sectionId = "2";
             size = htmlContent.length();
         } else {

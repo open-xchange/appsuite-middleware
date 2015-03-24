@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,73 @@
  *
  */
 
-package com.openexchange.messaging.facebook;
+package com.openexchange.file.storage.osgi;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.facebook.services.Services;
-import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
-import com.openexchange.secret.SecretService;
-import com.openexchange.session.Session;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link FacebookMessagingAccountManager}
+ * {@link Services} - Provides static access to {@link ServiceLookup} reference.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FacebookMessagingAccountManager extends DefaultMessagingAccountManager {
+public final class Services {
+
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     /**
-     * Initializes a new {@link FacebookMessagingAccountManager}.
-     * @param service
+     * Initializes a new {@link Services}.
      */
-    public FacebookMessagingAccountManager(final MessagingService service) {
-        super(service);
+    private Services() {
+        super();
     }
 
-    @Override
-    public List<MessagingAccount> getAccounts(Session session) throws OXException {
-        SecretService secretService = Services.optService(SecretService.class);
-        if (null != secretService && Strings.isEmpty(secretService.getSecret(session))) {
-            // The OAuth-based file storage needs a valid secret string for operation
-            return Collections.emptyList();
-        }
-
-        return super.getAccounts(session);
+    /**
+     * Sets the {@link ServiceLookup} reference.
+     *
+     * @param services The reference
+     */
+    public static void setServices(final ServiceLookup services) {
+        SERVICES.set(services);
     }
 
-    @Override
-    protected MessagingAccount modifyIncoming(final MessagingAccount account) throws OXException {
-        final Map<String, Object> configuration = account.getConfiguration();
-        if (null != configuration) {
-            final Object id = configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
-            if (null != id) {
-                configuration.put(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT, id.toString());
-            }
-        }
-        return account;
+    /**
+     * Gets the {@link ServiceLookup} reference.
+     *
+     * @return The reference
+     */
+    public static ServiceLookup getServices() {
+        return SERVICES.get();
     }
 
-    @Override
-    protected MessagingAccount modifyOutgoing(final MessagingAccount account) throws OXException {
-        final Map<String, Object> configuration = account.getConfiguration();
-        if (null != configuration) {
-            final String id = (String) configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
-            if (null != id) {
-                configuration.put(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT, Integer.valueOf(id.trim()));
-            }
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
         }
-        return account;
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * Gets the optional service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
     }
 
 }

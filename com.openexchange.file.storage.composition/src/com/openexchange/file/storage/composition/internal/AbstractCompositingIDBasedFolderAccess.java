@@ -76,7 +76,6 @@ import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
-import com.openexchange.file.storage.ServiceAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -390,29 +389,13 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     /**
      * Creates a file storage root folder for a specific file storage account.
      *
-     * @param account The account to get the root folder for
-     * @return The root folder, already with an unique identifier and the parent set to {@link #INFOSTORE_FOLDER_ID}
-     */
-    private FileStorageFolder getRootFolder(FileStorageAccount account) throws OXException {
-        String serviceID;
-        if (ServiceAware.class.isInstance(account)) {
-            serviceID = ((ServiceAware) account).getServiceId();
-        } else {
-            serviceID = account.getFileStorageService().getId();
-        }
-        return getRootFolder(session.getUserId(), serviceID, account.getId(), account.getDisplayName());
-    }
-
-    /**
-     * Creates a file storage root folder for a specific file storage account.
-     *
      * @param userID The user identifier to construct the root folder for
      * @param serviceID The account's service identifier
      * @param accountID The account identifier
      * @param displayName The folder name to use, usually the account's display name
      * @return The root folder, already with an unique identifier and the parent set to {@link #INFOSTORE_FOLDER_ID}
      */
-    private static FileStorageFolder getRootFolder(int userID, String serviceID, String accountID, String displayName) throws OXException {
+    private static FileStorageFolder getRootFolder(int userID, String serviceID, String accountID, String displayName) {
         DefaultTypeAwareFileStorageFolder rootFolder = new DefaultTypeAwareFileStorageFolder();
         rootFolder.setParentId(INFOSTORE_FOLDER_ID);
         rootFolder.setId(new FolderID(serviceID, accountID, FileStorageFolder.ROOT_FULLNAME).toUniqueID());

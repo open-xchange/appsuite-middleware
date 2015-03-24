@@ -49,11 +49,17 @@
 
 package com.openexchange.messaging.twitter;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
+import com.openexchange.messaging.twitter.osgi.Services;
+import com.openexchange.secret.SecretService;
+import com.openexchange.session.Session;
 
 
 /**
@@ -69,6 +75,17 @@ public final class TwitterMessagingAccountManager extends DefaultMessagingAccoun
      */
     public TwitterMessagingAccountManager(final MessagingService service) {
         super(service);
+    }
+
+    @Override
+    public List<MessagingAccount> getAccounts(Session session) throws OXException {
+        SecretService secretService = Services.optService(SecretService.class);
+        if (null != secretService && Strings.isEmpty(secretService.getSecret(session))) {
+            // The OAuth-based file storage needs a valid secret string for operation
+            return Collections.emptyList();
+        }
+
+        return super.getAccounts(session);
     }
 
     @Override

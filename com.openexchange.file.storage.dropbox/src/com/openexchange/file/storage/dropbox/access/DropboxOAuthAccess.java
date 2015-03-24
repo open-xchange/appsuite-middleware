@@ -51,6 +51,8 @@ package com.openexchange.file.storage.dropbox.access;
 
 import java.util.Map;
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
@@ -61,6 +63,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.file.storage.dropbox.Utils;
 import com.openexchange.file.storage.dropbox.auth.TrustAllWebAuthSession;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
@@ -94,6 +97,33 @@ public final class DropboxOAuthAccess {
         }
         return dropboxOAuthAccess;
     }
+
+    /**
+     * Pings the Dropbox account.
+     *
+     * @param fsAccount The Dropbox account providing credentials and settings
+     * @param session The user session
+     * @return <code>true</code> for successful ping attempt; otherwise <code>false</code>
+     * @throws OXException If a Dropbox account could not be pinged
+     */
+    public static boolean pingFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
+        DropboxOAuthAccess access = accessFor(fsAccount, session);
+        try {
+            access.dropboxApi.accountInfo();
+            return true;
+        } catch (DropboxException e) {
+            if (DropboxServerException.class.isInstance(e)) {
+                DropboxServerException serverException = (DropboxServerException) e;
+                int error = serverException.error;
+                if (DropboxServerException._401_UNAUTHORIZED == error || DropboxServerException._403_FORBIDDEN == error) {
+                    return false;
+                }
+            }
+            throw Utils.handle(e, null);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * The Web-authenticating session.
