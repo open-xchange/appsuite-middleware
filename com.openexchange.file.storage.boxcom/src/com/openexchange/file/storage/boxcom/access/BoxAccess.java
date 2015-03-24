@@ -66,6 +66,7 @@ import com.box.boxjavalibv2.jsonparsing.BoxResourceHub;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.boxcom.access.extended.ExtendedNonRefreshingBoxClient;
 import com.openexchange.java.Strings;
@@ -152,11 +153,11 @@ public class BoxAccess {
         {
             Map<String, Object> configuration = fsAccount.getConfiguration();
             if (null == configuration) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(BoxConstants.ID, fsAccount.getId());
             }
             Object accountId = configuration.get("account");
             if (null == accountId) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(BoxConstants.ID, fsAccount.getId());
             }
             if (accountId instanceof Integer) {
                 oauthAccountId = ((Integer) accountId).intValue();
@@ -164,7 +165,7 @@ public class BoxAccess {
                 try {
                     oauthAccountId = Strings.parseInt(accountId.toString());
                 } catch (NumberFormatException e) {
-                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, BoxConstants.ID, fsAccount.getId());
                 }
             }
         }
