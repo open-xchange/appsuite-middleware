@@ -133,7 +133,7 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
             /*
              * Get pattern from configuration
              */
-            String pattern = configurationService.getProperty("com.openexchange.secret.secretSource", "\"<list>\"");
+            String pattern = configurationService.getProperty("com.openexchange.secret.secretSource", "\"<password>\"");
             if (pattern.charAt(0) == '"') {
                 pattern = pattern.substring(1);
             }
