@@ -585,7 +585,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
-            List<File> files = new ArrayList<File>();
+            List<File> files = new LinkedList<File>();
             /*
              * build request to list all files in a folder
              */
@@ -643,9 +643,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
-            List<File> updatedFiles = new ArrayList<File>();
-            List<File> deletedFiles = new ArrayList<File>();
-            List<File> newFiles = new ArrayList<File>();
+            List<File> updatedFiles = new LinkedList<File>();
+            List<File> deletedFiles = new LinkedList<File>();
+            List<File> newFiles = new LinkedList<File>();
             long sequenceNumber = updateSince;
             /*
              * build request to list all files in a folder, changed since the supplied timestamp
