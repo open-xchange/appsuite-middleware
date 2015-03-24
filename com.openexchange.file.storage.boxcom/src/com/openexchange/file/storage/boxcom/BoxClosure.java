@@ -54,9 +54,9 @@ import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link BoxClosure}
@@ -115,14 +115,12 @@ public abstract class BoxClosure<R> {
             throw resourceAccess.handleHttpResponseError(null, e);
         } catch (AuthFatalFailureException e) {
             if (!handleAuthError) {
-                throw BoxExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), BoxConstants.ID, e.getMessage());
             }
             BoxAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
             return innerPerform(false, resourceAccess, newBoxAccess, session);
-        } catch (final UnsupportedEncodingException e) {
-            throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final UnsupportedEncodingException | RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

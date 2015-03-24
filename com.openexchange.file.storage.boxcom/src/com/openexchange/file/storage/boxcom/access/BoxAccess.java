@@ -65,7 +65,7 @@ import com.box.boxjavalibv2.jsonparsing.BoxJSONParser;
 import com.box.boxjavalibv2.jsonparsing.BoxResourceHub;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.boxcom.BoxExceptionCodes;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.boxcom.access.extended.ExtendedNonRefreshingBoxClient;
 import com.openexchange.java.Strings;
@@ -80,6 +80,7 @@ import com.openexchange.session.Session;
  * {@link BoxAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.6.1
  */
 public class BoxAccess {
@@ -151,11 +152,11 @@ public class BoxAccess {
         {
             Map<String, Object> configuration = fsAccount.getConfiguration();
             if (null == configuration) {
-                throw BoxExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
             }
             Object accountId = configuration.get("account");
             if (null == accountId) {
-                throw BoxExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
             }
             if (accountId instanceof Integer) {
                 oauthAccountId = ((Integer) accountId).intValue();
@@ -163,7 +164,7 @@ public class BoxAccess {
                 try {
                     oauthAccountId = Strings.parseInt(accountId.toString());
                 } catch (NumberFormatException e) {
-                    throw BoxExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
                 }
             }
         }
@@ -265,7 +266,7 @@ public class BoxAccess {
     }
 
     /**
-     * Re-initializes this Box access
+     * Re-initialises this Box access
      *
      * @param session The session
      * @throws OXException If operation fails

@@ -59,6 +59,7 @@ import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.exceptions.BoxSDKException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
 import com.openexchange.session.Session;
@@ -212,7 +213,7 @@ public abstract class AbstractBoxResourceAccess {
             Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractBoxResourceAccess.class);
             logger.warn("Could not re-initialize Box.com access", oxe);
 
-            throw BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
         }
     }
 
@@ -230,10 +231,10 @@ public abstract class AbstractBoxResourceAccess {
         }
 
         if (cause instanceof IOException) {
-            return BoxExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
+            return FileStorageExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
         }
 
-        return BoxExceptionCodes.BOX_ERROR.create(e, e.getMessage());
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
     }
 
     /** Status code (401) indicating that the request requires HTTP authentication. */
@@ -251,12 +252,12 @@ public abstract class AbstractBoxResourceAccess {
      */
     protected OXException handleHttpResponseError(String identifier, BoxServerException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
-            return BoxExceptionCodes.NOT_FOUND.create(e, identifier);
+            return FileStorageExceptionCodes.NOT_FOUND.create(e, "Box", identifier);
         }
         if (SC_UNAUTHORIZED == e.getStatusCode()) {
-            return BoxExceptionCodes.UNLINKED_ERROR.create();
+            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, account.getId(), BoxConstants.ID);
         }
-        return BoxExceptionCodes.BOX_SERVER_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getCustomMessage());
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getCustomMessage());
     }
 
     /**

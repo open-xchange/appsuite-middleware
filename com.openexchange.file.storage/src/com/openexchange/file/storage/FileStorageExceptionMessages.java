@@ -130,6 +130,12 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Delete denied for \"%1$s\" resource: %2$s
     public static final String DELETE_DENIED_MSG = "Delete denied for \"%1$s\" resource: %2$s";
 
+    // Missing configuration for account "%1$s".
+    public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";
+
+    // The provided %1$s resource does not exist: %2$s
+    public static final String NOT_FOUND_MSG = "The provided %1$s resource does not exist: %2$s";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

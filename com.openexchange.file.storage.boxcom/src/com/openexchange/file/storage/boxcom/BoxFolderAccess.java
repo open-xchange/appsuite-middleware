@@ -97,13 +97,13 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     protected void checkFolderValidity(BoxTypedObject typedObject) throws OXException {
         if (isFolder(typedObject) || isTrashed(typedObject)) {
-            throw BoxExceptionCodes.NOT_A_FILE.create(typedObject.getId());
+            throw FileStorageExceptionCodes.NOT_A_FILE.create(BoxConstants.ID, typedObject.getId());
         }
     }
 
     protected void checkFolderValidity(BoxFolder folder) throws OXException {
         if (isTrashed(folder)) {
-            throw BoxExceptionCodes.NOT_A_FILE.create(toFileStorageFolderId(folder.getId()));
+            throw FileStorageExceptionCodes.NOT_A_FILE.create(BoxConstants.ID, toFileStorageFolderId(folder.getId()));
         }
     }
 
