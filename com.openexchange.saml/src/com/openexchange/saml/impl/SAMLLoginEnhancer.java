@@ -47,39 +47,71 @@
  *
  */
 
-package com.openexchange.session.reservation;
+package com.openexchange.saml.impl;
 
 import java.util.Map;
 import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.ResponseEnhancement;
-import com.openexchange.authentication.SessionEnhancement;
+import com.openexchange.saml.SessionProperties;
+import com.openexchange.saml.spi.SAMLBackend;
+import com.openexchange.session.Session;
+import com.openexchange.session.reservation.EnhancedAuthenticated;
+import com.openexchange.session.reservation.Enhancer;
 
 
 /**
- * An enhancer is used to enhance the {@link Authenticated} instance that is created by the <code>redeemReservation</code> login action
- * to create a new session. Every user of the {@link SessionReservationService} may register his own enhancer as OSGi service. When
- * the logout is performed then, all enhancers are called. You should mark your reservations via a property in the state map to recognize
- * them later on.
+ * {@link SAMLLoginEnhancer}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
- * @see EnhancedAuthenticated
  */
-public interface Enhancer {
+public class SAMLLoginEnhancer implements Enhancer {
+
+    private final SAMLBackend backend;
 
     /**
-     * Allows customization of the {@link Authenticated} instance created by the <code>redeemReservation</code> login action.
-     * Probably you want to return a copy of the passed authenticated here, which additionally extends {@link ResponseEnhancement}
-     * and/or {@link SessionEnhancement} to set cookies/headers/session parameters. Multiple enhancers are called subsequently, so
-     * you need to preserve already made enhancements. Best practice is to use {@link EnhancedAuthenticated}, which will do all the
-     * magic for you.
-     *
-     * @param authenticated The authenticated based on the user and context of the according reservation
-     * @param reservationState The state map that was passed when the reservation was attempted via
-     *        {@link SessionReservationService#reserveSessionFor(int, int, long, java.util.concurrent.TimeUnit, Map)}
-     * @return The enhanced authenticated. Never return <code>null</code> here!
-     * @see SessionReservationService#reserveSessionFor(int, int, long, java.util.concurrent.TimeUnit, Map)
+     * Initializes a new {@link SAMLLoginEnhancer}.
+     * @param backend
      */
-    Authenticated enhance(Authenticated authenticated, Map<String, String> reservationState);
+    public SAMLLoginEnhancer(SAMLBackend backend) {
+        super();
+        this.backend = backend;
+    }
+
+    @Override
+    public Authenticated enhance(Authenticated authenticated, final Map<String, String> reservationState) {
+        if (reservationState != null) {
+            String samlAuthenticated = reservationState.get(SessionProperties.AUTHENTICATED);
+            if (samlAuthenticated != null && Boolean.parseBoolean(samlAuthenticated)) {
+                Authenticated enhanced = backend.enhanceAuthenticated(authenticated, reservationState);
+                if (enhanced == null) {
+                    enhanced = authenticated;
+                }
+
+                enhanced = new EnhancedAuthenticated(enhanced) {
+                    @Override
+                    protected void doEnhanceSession(Session session) {
+                        session.setParameter(SessionProperties.AUTHENTICATED, Boolean.TRUE.toString());
+                        String subjectID = reservationState.get(SessionProperties.SUBJECT_ID);
+                        if (subjectID != null) {
+                            session.setParameter(SessionProperties.SUBJECT_ID, subjectID);
+                        }
+                        String sessionIndex = reservationState.get(SessionProperties.SESSION_INDEX);
+                        if (sessionIndex != null) {
+                            session.setParameter(SessionProperties.SESSION_INDEX, sessionIndex);
+                        }
+                        String sessionNotOnOrAfter = reservationState.get(SessionProperties.SESSION_NOT_ON_OR_AFTER);
+                        if (sessionNotOnOrAfter != null) {
+                            session.setParameter(SessionProperties.SESSION_NOT_ON_OR_AFTER, sessionNotOnOrAfter);
+                        }
+                    }
+                };
+
+                return enhanced;
+            }
+        }
+
+        // definitely no SAML session
+        return authenticated;
+    }
 
 }

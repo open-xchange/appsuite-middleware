@@ -81,6 +81,7 @@ import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.http.MetadataService;
 import com.openexchange.saml.http.SingleLogoutService;
 import com.openexchange.saml.impl.HzStateManagement;
+import com.openexchange.saml.impl.SAMLLoginEnhancer;
 import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
 import com.openexchange.saml.impl.SAMLSessionInspector;
 import com.openexchange.saml.impl.SAMLWebSSOProviderImpl;
@@ -88,6 +89,7 @@ import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.inspector.SessionInspectorService;
+import com.openexchange.session.reservation.Enhancer;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
 
@@ -137,6 +139,8 @@ public class SAMLFeature extends DependentServiceStarter {
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(serviceProvider), null));
 
             SAMLBackend samlBackend = services.getService(SAMLBackend.class);
+            serviceRegistrations.push(context.registerService(Enhancer.class, new SAMLLoginEnhancer(samlBackend), null));
+
             ExceptionHandler exceptionHandler = samlBackend.getExceptionHandler();
             HttpService httpService = services.getService(HttpService.class);
             String prefix = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/";

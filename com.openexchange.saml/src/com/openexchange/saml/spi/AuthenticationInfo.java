@@ -51,13 +51,11 @@ package com.openexchange.saml.spi;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginInfo;
 
 /**
  * Encapsulates the necessary information to authenticate a certain user. The IDs of the according
  * user and his context must be provided. Additionally some properties can be defined. Those are later
- * on passed into the {@link AuthenticationService} as part of the {@link LoginInfo} parameter.
+ * on passed into {@link SAMLBackend#enhanceAuthenticated(com.openexchange.authentication.Authenticated, Map)}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -110,7 +108,7 @@ public class AuthenticationInfo {
     }
 
     /**
-     * Sets a property. Please note that internally some attributes may be contributed to this
+     * Sets a property. Please note that internally some attributes are contributed to this
      * map. They will always be prefixed with <code>com.openexchange.saml</code>. You should
      * either use your own namespace for those properties or use un-qualified keys. A property
      * will be overridden if it is set more than once.

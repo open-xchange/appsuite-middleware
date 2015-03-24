@@ -50,11 +50,13 @@
 package com.openexchange.saml.spi;
 
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.state.StateManagement;
@@ -153,5 +155,15 @@ public interface SAMLBackend {
      * @throws IOException If writing to to servlet output stream fails
      */
     void finishLogout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException;
+
+    /**
+     * Allows to enhance the {@link Authenticated} that is used to create the session based on an authentication
+     * response.
+     *
+     * @param authenticated The authenticated prepared by the 'redeemReservation' login action
+     * @param properties The properties that were returned as part of {@link AuthenticationInfo} from {@link #resolveAuthnResponse(Response, Assertion)}
+     * @return The enhanced {@link Authenticated}. If you don't need to adjust anything, simply return <code>null</code> here
+     */
+    Authenticated enhanceAuthenticated(Authenticated authenticated, Map<String, String> properties);
 
 }
