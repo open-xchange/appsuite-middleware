@@ -49,5 +49,5 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Tue March 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
+* Tue Mar 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
 initial packaging for SAML core package
