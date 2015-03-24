@@ -61,7 +61,9 @@ import com.openexchange.mobilepush.events.storage.UserToken;
  */
 public class MailPushUtility {
 
-    public static final String KEY_MESSAGE = "message";
+    public static final String KEY_SUBJECT = "subject";
+
+    public static final String KEY_SENDER = "sender";
 
     public static final String KEY_UNREAD = "unread";
 
@@ -120,9 +122,9 @@ public class MailPushUtility {
      * @param subjectMin
      */
     public static void cutMessage(Map<String, Object> messageData, int bytesToCut, int fromMin, int subjectMin) {
-        if (messageData.containsKey("subject") && messageData.containsKey("sender")) {
-            String subject = (String) messageData.get("subject");
-            String from = (String) messageData.get("sender");
+        if (messageData.containsKey(KEY_SUBJECT) && messageData.containsKey(KEY_SENDER)) {
+            String subject = (String) messageData.get(KEY_SUBJECT);
+            String from = (String) messageData.get(KEY_SENDER);
 
             if (bytesToCut > 0) {
                 int lengthSubject = subject.length();
@@ -150,8 +152,8 @@ public class MailPushUtility {
                     }
                 }
             }
-            messageData.put("subject", subject);
-            messageData.put("sender", from);
+            messageData.put(KEY_SUBJECT, subject);
+            messageData.put(KEY_SENDER, from);
         }
     }
 
@@ -174,14 +176,28 @@ public class MailPushUtility {
      * @param messageData
      * @return
      */
-    public static String getMessage(Map<String, Object> messageData) {
-        if (messageData.containsKey(KEY_MESSAGE)) {
-            if (messageData.get(KEY_MESSAGE) instanceof String) {
-                return (String) messageData.get(KEY_MESSAGE);
+    public static String getSubject(Map<String, Object> messageData) {
+        if (messageData.containsKey(KEY_SUBJECT)) {
+            if (messageData.get(KEY_SUBJECT) instanceof String) {
+                return (String) messageData.get(KEY_SUBJECT);
             }
         }
         return "";
     }
+
+    /**
+    *
+    * @param messageData
+    * @return
+    */
+   public static String getSender(Map<String, Object> messageData) {
+       if (messageData.containsKey(KEY_SENDER)) {
+           if (messageData.get(KEY_SENDER) instanceof String) {
+               return (String) messageData.get(KEY_SENDER);
+           }
+       }
+       return "";
+   }
 
     /**
      *
