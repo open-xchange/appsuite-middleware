@@ -149,7 +149,7 @@ public class SAMLFeature extends DependentServiceStarter {
             httpService.registerServlet(acsServletAlias, new AssertionConsumerService(serviceProvider, exceptionHandler), null, null);
             servlets.push(acsServletAlias);
 
-            String initAuthServletAlias = prefix + "initauth";
+            String initAuthServletAlias = prefix + "init";
             httpService.registerServlet(initAuthServletAlias, new InitService(serviceProvider, exceptionHandler, services.getService(SessiondService.class)), null, null);
             servlets.push(initAuthServletAlias);
 
