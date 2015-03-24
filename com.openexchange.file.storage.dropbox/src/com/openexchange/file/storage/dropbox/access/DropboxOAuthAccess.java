@@ -57,8 +57,9 @@ import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
-import com.openexchange.file.storage.dropbox.DropboxExceptionCodes;
+import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.file.storage.dropbox.auth.TrustAllWebAuthSession;
 import com.openexchange.oauth.OAuthAccount;
@@ -119,11 +120,11 @@ public final class DropboxOAuthAccess {
         {
             final Map<String, Object> configuration = fsAccount.getConfiguration();
             if (null == configuration) {
-                throw DropboxExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
             }
             final Object accountId = configuration.get("account");
             if (null == accountId) {
-                throw DropboxExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
             }
             if (accountId instanceof Integer) {
                 oauthAccountId = ((Integer) accountId).intValue();
@@ -131,7 +132,7 @@ public final class DropboxOAuthAccess {
                 try {
                     oauthAccountId = Integer.parseInt(accountId.toString());
                 } catch (final NumberFormatException e) {
-                    throw DropboxExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, DropboxConstants.ID, fsAccount.getId());
                 }
             }
         }
@@ -151,10 +152,8 @@ public final class DropboxOAuthAccess {
             dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
         } catch (OXException e) {
             throw e;
-        } catch (org.scribe.exceptions.OAuthException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

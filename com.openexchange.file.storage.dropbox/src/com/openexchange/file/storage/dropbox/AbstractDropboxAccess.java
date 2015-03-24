@@ -56,6 +56,7 @@ import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.session.Session;
@@ -93,11 +94,11 @@ public abstract class AbstractDropboxAccess {
      */
     protected OXException handleServerError(final String id, final DropboxServerException e) {
         if (null != id && 404 == e.error) {
-            return DropboxExceptionCodes.NOT_FOUND.create(e, id);
+            return FileStorageExceptionCodes.NOT_FOUND.create(e, DropboxConstants.ID, id);
         }
         com.dropbox.client2.exception.DropboxServerException.Error body = e.body;
         int error = e.error;
-        return DropboxExceptionCodes.DROPBOX_SERVER_ERROR.create(e, Integer.valueOf(error), null == body.userError ? body.error : body.userError);
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(error), null == body.userError ? body.error : body.userError);
     }
 
     /**
