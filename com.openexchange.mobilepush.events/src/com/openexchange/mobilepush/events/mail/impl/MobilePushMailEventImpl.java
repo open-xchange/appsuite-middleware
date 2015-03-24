@@ -84,6 +84,8 @@ import com.openexchange.session.Session;
  */
 public class MobilePushMailEventImpl implements org.osgi.service.event.EventHandler, MobilePushEventService {
 
+    private static final String OX_EVENT = "OX_EVENT";
+
     private static final String INBOX = "INBOX";
 
     private final List<MobilePushPublisher> publishers;
@@ -141,8 +143,8 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     }
 
     private boolean isRemoteEvent(Event event) {
-        if (event != null && event.containsProperty("OX_EVENT")) {
-            Object commonEvent = event.getProperty("OX_EVENT");
+        if (event != null && event.containsProperty(OX_EVENT)) {
+            Object commonEvent = event.getProperty(OX_EVENT);
             if (commonEvent instanceof CommonEvent) {
                 return true;
             }
@@ -187,7 +189,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     private List<Map<String, Object>> getNewMailProperties(Event event, Session session) {
         List<Map<String, Object>> props = new ArrayList<Map<String, Object>>(3);
 
-        if (event != null && event.containsProperty("OX_EVENT") && event.containsProperty(PushEventConstants.PROPERTY_IDS)) {
+        if (event != null && event.containsProperty(OX_EVENT) && event.containsProperty(PushEventConstants.PROPERTY_IDS)) {
             // check if its a new mail event
             String mailIds = (String) event.getProperty(PushEventConstants.PROPERTY_IDS);
             if (mailIds != null) {
@@ -211,17 +213,14 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                             String folder = mm.getFolder();
 
 
-                            String strSubject = subject == null ? "(no subject)" : subject;
+                            String strSubject = Strings.isEmpty(subject) ? "(no subject)" : subject;
                             String strSender = personalFrom == null ? receivedFrom : personalFrom;
-
-                            StringBuffer sb = new StringBuffer(strSender);
-                            sb.append("\n");
-                            sb.append(strSubject);
 
                             String cid = generateCid(rootFolder, folder, accountId, mailId);
 
                             map.put(MailPushUtility.KEY_CID, cid);
-                            map.put(MailPushUtility.KEY_MESSAGE, sb.toString());
+                            map.put(MailPushUtility.KEY_SUBJECT, strSubject);
+                            map.put(MailPushUtility.KEY_SENDER, strSender);
                             map.put(MailPushUtility.KEY_UNREAD, unread);
                             props.add(map);
                         }
