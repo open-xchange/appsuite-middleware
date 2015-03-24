@@ -77,6 +77,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 3),
     /**
+     * %1$s protocol error occurred: %2$s
+     */
+    PROTOCOL_ERROR("%1$s protocol error occurred: %2$s", Category.CATEGORY_ERROR, 5),
+    /**
      * A JSON occurred: %1$s
      */
     JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 14),
@@ -249,7 +253,7 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     NOT_A_FILE("The %1$s URL does not denote a file: %2$s", CATEGORY_USER_INPUT, 47, FileStorageExceptionMessages.NOT_A_FILE_MSG),
     /**
-     * The %1$s CMIS URL does not denote a directory: %2$s
+     * The %1$s URL does not denote a directory: %2$s
      */
     NOT_A_FOLDER("The %1$s URL does not denote a directory: %2$s", CATEGORY_USER_INPUT, 48, FileStorageExceptionMessages.NOT_A_FOLDER_MSG),
     /**
@@ -259,7 +263,19 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Update denied for %1$s resource: %2$s
      */
-    UPDATE_DENIED("Update denied for %1$s resource: %2$s", CATEGORY_USER_INPUT, 50, FileStorageExceptionMessages.UPDATE_DENIED_MSG),
+    UPDATE_DENIED("Update denied for \"%1$s\" resource: %2$s", CATEGORY_USER_INPUT, 50, FileStorageExceptionMessages.UPDATE_DENIED_MSG),
+    /**
+     * Delete denied for \"%1$s\" resource: %2$s
+     */
+    DELETE_DENIED("Delete denied for \"%1$s\" resource: %2$s", CATEGORY_PERMISSION_DENIED, 51, FileStorageExceptionMessages.DELETE_DENIED_MSG),
+    /**
+     * Invalid property "%1$s". Should be "%2$s".
+     */
+    INVALID_PROPERTY("Invalid property \"%1$s\". Should be \"%2$s\".", CATEGORY_ERROR, 52, null),
+    /**
+     * Invalid \"%1$s\" property \"%2$s\".
+     */
+    INVALID_TYPE_PROPERTY("Invalid \"%1$s\" property \"%2$s\".", CATEGORY_ERROR, 53, null),
 
     ;
 

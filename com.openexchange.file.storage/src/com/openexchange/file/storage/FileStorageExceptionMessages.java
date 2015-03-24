@@ -123,9 +123,12 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // Missing file name.
     public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
-    
+
     // Update denied for %1$s resource: %2$s
-    public static final String UPDATE_DENIED_MSG = "Update denied for %1$s resource: %2$s";
+    public static final String UPDATE_DENIED_MSG = "Update denied for \"%1$s\" resource: %2$s";
+
+    // Delete denied for \"%1$s\" resource: %2$s
+    public static final String DELETE_DENIED_MSG = "Delete denied for \"%1$s\" resource: %2$s";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.
