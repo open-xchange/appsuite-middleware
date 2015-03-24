@@ -65,10 +65,31 @@ public class ServletActivator extends AbstractSessionServletActivator {
     private static final String TARGET_ALIAS_APPENDIX = "publicationTargets";
     private static final String PUB_ALIAS_APPENDIX = "publications";
 
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        register();
+    /**
+     * Initializes a new {@link ServletActivator}.
+     */
+    public ServletActivator() {
+        super();
+    }
 
+    @Override
+    protected Class<?>[] getAdditionalNeededServices() {
+        return new Class<?>[] { PublicationTargetDiscoveryService.class, ConfigurationService.class, DispatcherPrefixService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        register();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        unregister();
     }
 
     private void register() {
@@ -96,11 +117,6 @@ public class ServletActivator extends AbstractSessionServletActivator {
         registerSessionServlet(prefix + PUB_ALIAS_APPENDIX, new PublicationServlet());
     }
 
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        unregister();
-    }
-
     private void unregister() {
         PublicationServlet.setFactory(null);
         PublicationTargetServlet.setFactory(null);
@@ -108,18 +124,4 @@ public class ServletActivator extends AbstractSessionServletActivator {
         cleanUp();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        register();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregister();
-    }
-
-    @Override
-    protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { PublicationTargetDiscoveryService.class, ConfigurationService.class, DispatcherPrefixService.class };
-    }
 }

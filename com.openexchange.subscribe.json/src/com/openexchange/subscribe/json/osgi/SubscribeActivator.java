@@ -51,6 +51,7 @@ package com.openexchange.subscribe.json.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -66,11 +67,10 @@ import com.openexchange.subscribe.json.actions.SubscriptionSourcesActionFactory;
  */
 public class SubscribeActivator extends AJAXModuleActivator {
 
-	private static final Class<?>[] NEEDED = { HttpService.class, SubscriptionExecutionService.class, PreferencesItemService.class, SubscriptionSourceDiscoveryService.class };
-
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return NEEDED;
+		return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, PreferencesItemService.class,
+		    SubscriptionSourceDiscoveryService.class, ConfigurationService.class };
 	}
 
 	@Override

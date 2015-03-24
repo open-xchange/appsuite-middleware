@@ -51,6 +51,7 @@ package com.openexchange.subscribe.json.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -78,12 +79,12 @@ public class ServletActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, DispatcherPrefixService.class, ConfigurationService.class };
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Ignore
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     private void registerServlets() {
@@ -98,11 +99,6 @@ public class ServletActivator extends AbstractSessionServletActivator {
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Ignore
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         discoverer = new WhiteboardSubscriptionSourceDiscoveryService(context);
 
@@ -111,12 +107,13 @@ public class ServletActivator extends AbstractSessionServletActivator {
     }
 
     private void createMultipleHandler() {
-        final SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
+        SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
+        ConfigurationService config = getService(ConfigurationService.class);
 
-        final SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(
+        SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(
             discoverer,
             subscriptionExecutionService,
-            secretService = new WhiteboardSecretService(context));
+            secretService = new WhiteboardSecretService(context), config);
         secretService.open();
         final SubscriptionSourceMultipleFactory subscriptionSourcesFactory = new SubscriptionSourceMultipleFactory(discoverer);
 

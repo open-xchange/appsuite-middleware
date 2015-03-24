@@ -50,6 +50,10 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import static com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param.FOLDER_ID;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -63,6 +67,8 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -83,37 +89,147 @@ public class AllAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(FOLDER_ID);
-
         IDBasedFileAccess fileAccess = request.getFileAccess();
-
         String folderId = request.getFolderId();
         if (Strings.isEmpty(folderId)) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(Param.FOLDER_ID.getName());
         }
         Field sortingField = request.getSortingField();
         SortDirection sortingOrder = request.getSortingOrder();
-        TimedResult<File> documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder);
 
-        if (Field.CREATED_BY.equals(sortingField)) {
-            final ServerSession serverSession = request.getSession();
-            final CreatedByComparator comparator = new CreatedByComparator(serverSession.getUser().getLocale(), serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
-            final SearchIterator<File> iter = CreatedByComparator.resort(documents.results(), comparator);
-            final TimedResult<File> delegate = documents;
-            documents = new TimedResult<File>() {
+        int[] indexes = AJAXRequestDataTools.parseFromToIndexes(request.getRequestData());
 
-                @Override
-                public long sequenceNumber() throws OXException {
-                    return delegate.sequenceNumber();
-                }
+        TimedResult<File> documents;
+        if ((null == indexes) || Field.CREATED_BY.equals(sortingField)) {
+            documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder);
 
-                @Override
-                public SearchIterator<File> results() throws OXException {
-                    return iter;
-                }
-            };
+            if (Field.CREATED_BY.equals(sortingField)) {
+                ServerSession serverSession = request.getSession();
+                CreatedByComparator comparator = new CreatedByComparator(serverSession.getUser().getLocale(), serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
+                SearchIterator<File> iter = CreatedByComparator.resort(documents.results(), comparator);
+                documents = new DelegatingTimedResult(iter, documents.sequenceNumber());
+            }
+
+            documents = slice(documents, indexes);
+        } else {
+            // TODO: Add pagination to IDBasedFileAccess
+            documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder);
+            documents = slice(documents, indexes);
         }
 
         return result( documents, request );
+    }
+
+    private TimedResult<File> slice(TimedResult<File> documents, int[] indexes) throws OXException {
+        if (null == indexes) {
+            return documents;
+        }
+
+        int from = indexes[0];
+        int to = indexes[1];
+        if (from >= to) {
+            return new EmptyTimedResult(documents.sequenceNumber());
+        }
+
+        SearchIterator<File> iter = documents.results();
+        try {
+            int index = 0;
+            while (index < from) {
+                if (false == iter.hasNext()) {
+                    return new EmptyTimedResult(documents.sequenceNumber());
+                }
+                iter.next();
+                index++;
+            }
+
+            List<File> files = new LinkedList<File>();
+            while (index < to && iter.hasNext()) {
+                files.add(iter.next());
+                index++;
+            }
+
+            return new ListBasedTimedResult(files, documents.sequenceNumber());
+        } finally {
+            SearchIterators.close(iter);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    /** The empty <code>SearchIterator</code> */
+    static final SearchIteratorDelegator<File> EMPTY = new SearchIteratorDelegator<File>(Collections.<File>emptyList());
+
+    private final class EmptyTimedResult implements TimedResult<File> {
+
+        private final long sequenceNumber;
+
+        /**
+         * Initializes a new {@link TimedResultImplementation}.
+         */
+        EmptyTimedResult(long sequenceNumber) {
+            super();
+            this.sequenceNumber = sequenceNumber;
+        }
+
+        @Override
+        public long sequenceNumber() throws OXException {
+            return sequenceNumber;
+        }
+
+        @Override
+        public SearchIterator<File> results() throws OXException {
+            return EMPTY;
+        }
+    }
+
+    private final class ListBasedTimedResult implements TimedResult<File> {
+
+        private final long sequenceNumber;
+        private final SearchIterator<File> results;
+
+        /**
+         * Initializes a new {@link TimedResultImplementation}.
+         */
+        ListBasedTimedResult(List<File> files, long sequenceNumber) {
+            super();
+            this.results = new SearchIteratorDelegator<>(files);
+            this.sequenceNumber = sequenceNumber;
+        }
+
+        @Override
+        public long sequenceNumber() throws OXException {
+            return sequenceNumber;
+        }
+
+        @Override
+        public SearchIterator<File> results() throws OXException {
+            return results;
+        }
+    }
+
+    private final class DelegatingTimedResult implements TimedResult<File> {
+
+        private final long sequenceNumber;
+        private final SearchIterator<File> results;
+
+        /**
+         * Initializes a new {@link TimedResultImplementation}.
+         */
+        DelegatingTimedResult(SearchIterator<File> results, long sequenceNumber) {
+            super();
+            this.results = results;
+            this.sequenceNumber = sequenceNumber;
+        }
+
+        @Override
+        public long sequenceNumber() throws OXException {
+            return sequenceNumber;
+        }
+
+        @Override
+        public SearchIterator<File> results() throws OXException {
+            return results;
+        }
     }
 
 }
