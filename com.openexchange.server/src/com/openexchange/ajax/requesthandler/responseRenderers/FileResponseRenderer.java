@@ -65,7 +65,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -144,8 +143,6 @@ public class FileResponseRenderer implements ResponseRenderer {
     private static final String VIEW = "view";
 
     private static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
-
-    private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
 
     private final AtomicReference<File> tmpDirReference;
 

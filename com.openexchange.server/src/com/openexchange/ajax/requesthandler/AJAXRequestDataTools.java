@@ -63,7 +63,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.osgi.BodyParserRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -159,7 +158,9 @@ public class AJAXRequestDataTools {
         /*
          * Set the module
          */
-        retval.setModule(getModule(prefix, req));
+        if (null != prefix) {
+            retval.setModule(getModule(prefix, req));
+        }
         /*
          * Set request URI
          */
@@ -376,39 +377,31 @@ public class AJAXRequestDataTools {
      * @param req The HTTP Servlet request
      * @param session The associated session
      */
-    public static void parseHostName(final AJAXRequestData request, final HttpServletRequest req, final ServerSession session) {
+    public static void parseHostName(AJAXRequestData request, HttpServletRequest req, ServerSession session) {
+        parseHostName(request, req, null == session ? -1 : session.getUserId(), null == session ? -1 : session.getContextId());
+    }
+
+    /**
+     * Parses host name, secure and route.
+     *
+     * @param request The AJAX request data
+     * @param req The HTTP Servlet request
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void parseHostName(AJAXRequestData request, HttpServletRequest req, int userId, int contextId) {
         request.setSecure(Tools.considerSecure(req));
         {
             final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
             if (null == hostnameService) {
                 request.setHostname(req.getServerName());
             } else {
-                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                final String hn = hostnameService.getHostname(userId, contextId);
                 request.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
         request.setRemoteAddress(req.getRemoteAddr());
         request.setRoute(Tools.getRoute(req.getSession(true).getId()));
-    }
-
-    private static boolean startsWith(final char startingChar, final String toCheck) {
-        if (null == toCheck) {
-            return false;
-        }
-        final int len = toCheck.length();
-        if (len <= 0) {
-            return false;
-        }
-        int i = 0;
-        if (Strings.isWhitespace(toCheck.charAt(i))) {
-            do {
-                i++;
-            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
-        }
-        if (i >= len) {
-            return false;
-        }
-        return startingChar == toCheck.charAt(i);
     }
 
     /**
