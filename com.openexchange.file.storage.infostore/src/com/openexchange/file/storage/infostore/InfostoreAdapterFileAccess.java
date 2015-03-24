@@ -513,7 +513,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
             documents = getInfostore(null).getDocuments(ids, FieldMapping.getMatching(fields), sessionObj);
             return new InfostoreTimedResult(documents);
         } catch (final IllegalAccessException e) {
-            throw new OXException(e);
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
