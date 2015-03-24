@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.boxcom.access;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -61,10 +62,15 @@ import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.BoxConfigBuilder;
 import com.box.boxjavalibv2.authorization.OAuthAuthorization;
 import com.box.boxjavalibv2.dao.BoxOAuthToken;
+import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
+import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.boxjavalibv2.jsonparsing.BoxJSONParser;
 import com.box.boxjavalibv2.jsonparsing.BoxResourceHub;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.boxcom.BoxClosure;
 import com.openexchange.file.storage.boxcom.BoxExceptionCodes;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.boxcom.access.extended.ExtendedNonRefreshingBoxClient;
@@ -111,6 +117,41 @@ public class BoxAccess {
             boxAccess.ensureNotExpired(session);
         }
         return boxAccess;
+    }
+
+    /**
+     * Pings the Box account.
+     *
+     * @param fsAccount The Box account providing credentials and settings
+     * @param session The user session
+     * @return <code>true</code> for successful ping attempt; otherwise <code>false</code>
+     * @throws OXException If a Box account could not be pinged
+     */
+    public static boolean pingFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
+        final BoxAccess access = accessFor(fsAccount, session);
+        BoxClosure<Boolean> closure = new BoxClosure<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                try {
+                    access.getBoxClient().getUsersManager().getCurrentUser(new BoxDefaultRequestObject());
+                    return Boolean.TRUE;
+                } catch (final BoxRestException e) {
+                    if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
+                        return Boolean.FALSE;
+                    }
+                    throw e;
+                } catch (final BoxServerException e) {
+                    if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
+                        return Boolean.FALSE;
+                    }
+                    throw e;
+                } catch (AuthFatalFailureException e) {
+                    return Boolean.FALSE;
+                }
+            }
+        };
+        return closure.perform(null, access, session).booleanValue();
     }
 
     // ------------------------------------------------------------------------------------------------------------------------ //
@@ -194,7 +235,7 @@ public class BoxAccess {
 
     /**
      * Apply access token and refresh token from OAuth account
-     * 
+     *
      * @param boxOAuthInfo
      */
     private void applyOAuthToken(BoxOAuthInfo boxOAuthInfo, BoxClient boxClient) {
@@ -291,7 +332,7 @@ public class BoxAccess {
 
     /**
      * Gets the extended box client
-     * 
+     *
      * @return The extended box client
      */
     public ExtendedNonRefreshingBoxClient getExtendedBoxClient() {

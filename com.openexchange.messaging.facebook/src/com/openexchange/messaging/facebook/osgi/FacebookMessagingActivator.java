@@ -69,7 +69,6 @@ import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretService;
-import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
@@ -81,8 +80,6 @@ import com.openexchange.user.UserService;
  */
 public final class FacebookMessagingActivator extends HousekeepingActivator {
 
-    private WhiteboardSecretService secretService;
-
     /**
      * Initializes a new {@link FacebookMessagingActivator}.
      */
@@ -93,7 +90,8 @@ public final class FacebookMessagingActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, HtmlService.class, OAuthService.class, SecretService.class};
+            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, HtmlService.class,
+            OAuthService.class, SecretService.class };
     }
 
     @Override

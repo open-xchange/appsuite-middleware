@@ -49,13 +49,16 @@
 
 package com.openexchange.file.storage.googledrive.access;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.drive.Drive;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.googledrive.AbstractGoogleDriveAccess;
 import com.openexchange.file.storage.googledrive.GoogleDriveExceptionCodes;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthAccount;
@@ -93,6 +96,32 @@ public final class GoogleDriveAccess {
             googleDriveAccess.ensureNotExpired(session);
         }
         return googleDriveAccess;
+    }
+
+    /**
+     * Pings the Google Drive account.
+     *
+     * @param fsAccount The Google Drive account providing credentials and settings
+     * @param session The user session
+     * @return <code>true</code> on successful ping attempt; otherwise <code>false</code>
+     * @throws OXException If Google Drive account could not be pinged
+     */
+    public static boolean pingFor(FileStorageAccount fsAccount, Session session) throws OXException {
+        GoogleDriveAccess googleDriveAccess = accessFor(fsAccount, session);
+        try {
+            Drive drive = googleDriveAccess.getDrive(session);
+            drive.about().get().execute();
+            return true;
+        } catch (final HttpResponseException e) {
+            if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
+                return false;
+            }
+            throw AbstractGoogleDriveAccess.handleHttpResponseError(null, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     // -------------------------------------------------------------------------------------------------------------------- //

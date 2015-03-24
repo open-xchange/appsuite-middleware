@@ -54,7 +54,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -340,26 +339,22 @@ public final class CalculatePermission {
     }
 
     private static Permission getMaxPermission(final Permission[] permissions, final UserPermissionBits userPermissionBits) {
-        final DummyPermission p = new DummyPermission();
+        DummyPermission p = new DummyPermission();
         p.setNoPermissions();
         p.setEntity(userPermissionBits.getUserId());
 
-        final int[] idArr;
-        {
-            final int[] groups = userPermissionBits.getGroups();
-            idArr = new int[groups.length + 1];
-            idArr[0] = userPermissionBits.getUserId();
-            System.arraycopy(groups, 0, idArr, 1, groups.length);
-            Arrays.sort(idArr);
+        if (null == permissions || 0 == permissions.length) {
+            return p;
         }
 
+        TIntSet ids = getEntityIdsFor(userPermissionBits);
         int fp = 0;
         int rp = 0;
         int wp = 0;
         int dp = 0;
         boolean admin = false;
-        for (final Permission cur : permissions) {
-            if (Arrays.binarySearch(idArr, cur.getEntity()) >= 0) {
+        for (Permission cur : permissions) {
+            if (ids.contains(cur.getEntity())) {
                 // Folder permission
                 int tmp = cur.getFolderPermission();
                 if (tmp > fp) {
@@ -381,31 +376,44 @@ public final class CalculatePermission {
                     dp = tmp;
                 }
                 // Admin flag
-                admin |= cur.isAdmin();
+                if (!admin) {
+                    admin = cur.isAdmin();
+                }
+
             }
         }
+        if (admin) {
+            p.setAdmin(admin);
+        }
         p.setAllPermissions(fp, rp, wp, dp);
-        p.setAdmin(admin);
 
         return p;
     }
 
+    private static TIntSet getEntityIdsFor(final UserPermissionBits userPermissionBits) {
+        int[] groups = userPermissionBits.getGroups();
+        TIntSet ids = new TIntHashSet(groups.length + 1);
+        ids.add(userPermissionBits.getUserId());
+        ids.addAll(groups);
+        return ids;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * A {@link Permission} implementation.
+     */
     public static final class DummyPermission implements Permission {
 
+        private static final long serialVersionUID = 5488824197214654462L;
+
         private int system;
-
         private int deletePermission;
-
         private int folderPermission;
-
         private int readPermission;
-
         private int writePermission;
-
         private boolean admin;
-
         private int entity;
-
         private boolean group;
 
         /**
@@ -439,9 +447,6 @@ public final class CalculatePermission {
         public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
-            }
-            if (obj == null) {
-                return false;
             }
             if (!(obj instanceof Permission)) {
                 return false;
