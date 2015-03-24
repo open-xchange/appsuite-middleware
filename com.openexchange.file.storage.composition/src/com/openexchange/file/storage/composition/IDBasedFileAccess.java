@@ -55,6 +55,7 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -374,6 +375,19 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @throws OXException If operation fails
      */
     TimedResult<File> getDocuments(String folderId, List<File.Field> columns, File.Field sort, SortDirection order) throws OXException;
+
+    /**
+     * Lists a folders content loading only the fields given and sorting by a certain field either ascending or descending.
+     *
+     * @param folderId The folder whose contents to list
+     * @param fields The fields to load
+     * @param sort The field to sort by
+     * @param order The sorting direction
+     * @param range The optional range
+     * @return The documents
+     * @throws OXException If operation fails
+     */
+    TimedResult<File> getDocuments(String folderId, List<File.Field> fields, File.Field sort, SortDirection order, Range range) throws OXException;
 
     /**
      * List all versions of a document

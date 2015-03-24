@@ -1120,6 +1120,8 @@ public class DatabaseImpl extends DBService {
             Metadata.VALUES_ARRAY,
             Metadata.ID_LITERAL,
             InfostoreFacade.ASC,
+            -1,
+            -1,
             this,
             session.getContext());
         final List<DocumentMetadata> parents = new ArrayList<DocumentMetadata>();

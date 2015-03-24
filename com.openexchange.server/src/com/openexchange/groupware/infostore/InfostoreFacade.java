@@ -165,9 +165,7 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param id The identifier
      * @param version The version
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The document's binary content
      * @throws OXException If retrieving binary content fails
      * @see #CURRENT_VERSION
@@ -294,9 +292,7 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param folderId The folder identifier
      * @param columns The columns to set in returned documents
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
@@ -309,21 +305,32 @@ public interface InfostoreFacade extends TransactionAware {
      * @param columns The columns to set in returned documents
      * @param sort The sort-by field
      * @param order The order; see {@link #ASC} or {@link #DESC}
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
     TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException;
 
     /**
+     * Gets the sorted folder's documents.
+     *
+     * @param folderId The folder identifier
+     * @param columns The columns to set in returned documents
+     * @param sort The sort-by field
+     * @param order The order; see {@link #ASC} or {@link #DESC}
+     * @param start The start index (inclusive)
+     * @param end The end index (exclusive)
+     * @param session The associated session
+     * @return The folder's documents
+     * @throws OXException If retrieval fails
+     */
+    TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException;
+
+    /**
      * Gets the document's versions.
      *
      * @param id The document identifier
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The document's version
      * @throws OXException If retrieval fails
      */
@@ -334,9 +341,7 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param id The document identifier
      * @param columns The columns to set in returned documents
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
@@ -349,9 +354,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param columns The columns to set in returned documents
      * @param sort The sort-by field
      * @param order The order; see {@link #ASC} or {@link #DESC}
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
@@ -362,9 +365,7 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param ids The identifiers
      * @param columns The columns to set in returned documents
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The documents
      * @throws OXException If retrieval fails
      */
@@ -377,9 +378,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param updateSince The time stamp to consider
      * @param columns The columns to set in returned documents
      * @param ignoreDeleted Whether to ignore deleted ones
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The matching changed/deleted documents
      * @throws OXException If retrieval fails
      */
@@ -394,9 +393,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param sort The sort-by field
      * @param order The order; see {@link #ASC} or {@link #DESC}
      * @param ignoreDeleted Whether to ignore deleted ones
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The matching changed/deleted documents
      * @throws OXException If retrieval fails
      */
@@ -408,9 +405,7 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param folderIds A list of folder IDs to get the sequence numbers for
      * @param versionsOnly <code>true</code> to only take documents with at least one version into account, <code>false</code>, otherwise
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return A map holding the resulting sequence numbers to each requested folder ID
      * @throws OXException
      */
@@ -420,9 +415,7 @@ public interface InfostoreFacade extends TransactionAware {
      * Gets the number of documents in given folder.
      *
      * @param folderId The folder identifier
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The number of documents
      * @throws OXException If operation fails
      */
@@ -432,9 +425,7 @@ public interface InfostoreFacade extends TransactionAware {
      * Signals if denoted folder contains documents not owned by specified user.
      *
      * @param folderId The folder identifier
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return <code>true</code> if folder contains documents not owned by specified user; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
@@ -519,9 +510,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param version The version of the document. Pass {@link FileStorageFileAccess#CURRENT_VERSION} for the current version.
      * @param offset The start offset in bytes to read from the document, or <code>0</code> to start from the beginning
      * @param length The number of bytes to read from the document, or <code>-1</code> to read the stream until the end
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return An input stream for the content
      * @throws OXException
      */

@@ -1706,9 +1706,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException {
+        return getDocuments(folderId, columns, sort, order, -1, -1, session);
+    }
+
+    @Override
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
         if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-            return getReadableSharedDocuments(columns, sort, order, session);
+            return getReadableSharedDocuments(columns, sort, order, start, end, session);
         }
 
         Metadata[] cols = addLastModifiedIfNeeded(columns);
@@ -1725,9 +1730,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         InfostoreIterator iter;
         if (onlyOwn) {
-            iter = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, this, context);
+            iter = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, start, end, this, context);
         } else {
-            iter = InfostoreIterator.documents(folderId, cols, sort, order, this, context);
+            iter = InfostoreIterator.documents(folderId, cols, sort, order, start, end, this, context);
         }
         /*
          * fast-forward results to get the object IDs and sequence number in case additional metadata is required
@@ -1780,8 +1785,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return new InfostoreTimedResult(iter);
     }
 
-    private TimedResult<DocumentMetadata> getReadableSharedDocuments(Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
-        InfostoreIterator iterator = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, columns, db);
+    private TimedResult<DocumentMetadata> getReadableSharedDocuments(Metadata[] columns, final Metadata sort, final int order, int start, int end, final ServerSession session) throws OXException {
+        InfostoreIterator iterator = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, columns, start, end, db);
         iterator.setCustomizer(new DocumentCustomizer() {
             @Override
             public DocumentMetadata handle(DocumentMetadata document) {
@@ -2083,6 +2088,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             new Metadata[] { Metadata.ID_LITERAL },
             null,
             -1,
+            -1,
+            -1,
             this,
             session.getContext());
         try {
@@ -2099,7 +2106,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public int countDocuments(final long folderId, final ServerSession session) throws OXException {
         if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, this);
+            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, -1, -1, this);
             return it.asList().size();
         }
 
