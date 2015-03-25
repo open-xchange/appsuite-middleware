@@ -108,9 +108,9 @@ public abstract class OneDriveClosure<R> {
                 resourceAccess.handleAuthError(e, session);
                 return innerPerform(false, resourceAccess, httpClient, session);
             }
-            throw AbstractOneDriveResourceAccess.handleHttpResponseError(null, e);
+            throw resourceAccess.handleHttpResponseError(null, e);
         } catch (IOException e) {
-            throw AbstractOneDriveResourceAccess.handleIOError(e);
+            throw resourceAccess.handleIOError(e);
         } catch (JSONException e) {
             throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

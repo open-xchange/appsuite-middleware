@@ -223,7 +223,7 @@ public abstract class AbstractBoxResourceAccess {
      * @param e The REST error
      * @return The resulting exception
      */
-    protected static OXException handleRestError(BoxRestException e) {
+    protected OXException handleRestError(BoxRestException e) {
         Throwable cause = e.getCause();
 
         if (cause instanceof BoxServerException) {
@@ -250,7 +250,7 @@ public abstract class AbstractBoxResourceAccess {
      * @param e The HTTP error
      * @return The resulting exception
      */
-    protected static OXException handleHttpResponseError(String identifier, BoxServerException e) {
+    protected OXException handleHttpResponseError(String identifier, BoxServerException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
             return FileStorageExceptionCodes.NOT_FOUND.create(e, "Box", identifier);
         }

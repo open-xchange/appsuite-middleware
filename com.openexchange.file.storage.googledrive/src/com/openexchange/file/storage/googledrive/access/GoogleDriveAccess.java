@@ -59,7 +59,6 @@ import com.google.api.services.drive.Drive;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.googledrive.AbstractGoogleDriveAccess;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthAccount;
@@ -117,7 +116,7 @@ public final class GoogleDriveAccess {
             if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
                 return false;
             }
-            throw AbstractGoogleDriveAccess.handleHttpResponseError(null, e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
