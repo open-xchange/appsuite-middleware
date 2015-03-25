@@ -2314,6 +2314,11 @@ msgid ""
 "the warnings for details."
 msgstr ""
 
+#. The associated %2$s account does no more exist
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:118
+msgid "The associated %2$s account does no more exist"
+msgstr ""
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -3771,9 +3776,9 @@ msgid ""
 "applications. Please revoke access for the ones you don't longer need."
 msgstr ""
 
-#. Account not found with identifier %1$s for user %2$s in context %3$s.
+#. There is no associated OAuth account for identifier %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
-msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
+msgid "There is no associated OAuth account for identifier %1$s."
 msgstr ""
 
 #. Missing argument: %1$s
