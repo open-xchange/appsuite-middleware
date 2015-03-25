@@ -49,8 +49,10 @@
 
 package com.openexchange.share.servlet.internal;
 
+import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
+import static com.openexchange.share.servlet.utils.ShareRedirectUtils.urlEncode;
 import java.io.IOException;
-import javax.servlet.ServletException;
+import java.util.Locale;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,10 +62,11 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandlerReply;
+import com.openexchange.share.servlet.utils.ShareRedirectUtils;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
@@ -95,7 +98,7 @@ public class ShareServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             // Create a new HttpSession if it is missing
             request.getSession(true);
@@ -106,16 +109,21 @@ public class ShareServlet extends HttpServlet {
             {
                 String pathInfo = request.getPathInfo();
                 String[] paths = ShareServletUtils.splitPath(pathInfo);
+                Locale locale = request.getLocale();
                 if (paths == null || paths.length == 0) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    Tools.sendErrorPage(response, HttpServletResponse.SC_NOT_FOUND, "The share you are looking for does not exist.");
+                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "error");
+                    response.setStatus(HttpServletResponse.SC_FOUND);
+                    response.sendRedirect(redirectUrl);
                     return;
                 }
 
                 share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
                 if (null == share) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    Tools.sendErrorPage(response, HttpServletResponse.SC_NOT_FOUND, "The share you are looking for does not exist.");
+                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "error");
+                    response.setStatus(HttpServletResponse.SC_FOUND);
+                    response.sendRedirect(redirectUrl);
                     return;
                 }
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
@@ -124,7 +132,9 @@ public class ShareServlet extends HttpServlet {
                     if (null == target) {
                         //TODO: fallback to share without target?
                         LOG.debug("No share target found at '{}'", pathInfo);
-                        Tools.sendErrorPage(response, HttpServletResponse.SC_NOT_FOUND, "The share you are looking for does not exist.");
+                        String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "error");
+                        response.setStatus(HttpServletResponse.SC_FOUND);
+                        response.sendRedirect(redirectUrl);
                         return;
                     }
                 } else {

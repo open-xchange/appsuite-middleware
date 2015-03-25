@@ -49,15 +49,21 @@
 
 package com.openexchange.share.servlet.handler;
 
+import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
+import static com.openexchange.share.servlet.utils.ShareRedirectUtils.urlEncode;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.servlet.ShareServletStrings;
+import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
+import com.openexchange.user.UserService;
 
 /**
  * {@link LoginShareHandler} - The share handler that redirects to standard login page.
@@ -89,7 +95,21 @@ public class LoginShareHandler extends AbstractShareHandler {
         }
 
         try {
-            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share.getGuest(), target, getShareLoginConfiguration().getLoginConfig());
+            String message = null;
+            String messageType = null;
+            String action = null;
+            String replacement = target.isFolder() ? target.getFolder() : target.getFolder() + "/" + target.getItem();
+            if (!share.getGuest().isPasswordSet()) {
+                message = urlEncode(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, share.getGuest().getLocale()), replacement));
+                messageType = "WARN";
+                action = "setPassword";
+            } else {
+                User user = ShareServiceLookup.getService(UserService.class).getUser(target.getOwnedBy(), share.getGuest().getContextID());
+                message = urlEncode(String.format(translate(ShareServletStrings.NEW_SHARE, share.getGuest().getLocale()), user.getDisplayName(), replacement));
+                messageType = "INFO";
+                action = "login";
+            }
+            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share.getGuest(), target, getShareLoginConfiguration().getLoginConfig(), message, messageType, action);
 
             // Do the redirect
             response.sendRedirect(redirectUrl);

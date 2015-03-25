@@ -51,11 +51,16 @@ package com.openexchange.share.servlet.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
@@ -77,21 +82,39 @@ public class ShareRedirectUtils {
      * @return String with a redirect url
      * @throws OXException
      */
-    public static String getRedirectUrl(final GuestInfo guestInfo, final ShareTarget target, final LoginConfiguration loginConfiguration) throws OXException {
+    public static String getRedirectUrl(final GuestInfo guestInfo, final ShareTarget target, final LoginConfiguration loginConfiguration, String message, String messageType,
+        String action) throws OXException {
         String loginPageLink = getLoginPageUrl(loginConfiguration);
 
         // Build URL
         StringBuilder url = new StringBuilder(loginPageLink);
 
         // Start fragment portion
-        url.append('#').append("share=").append(urlEncode(guestInfo.getBaseToken()));
+        url.append('#');
+        if (null != guestInfo) {
+            url.append("share=").append(urlEncode(guestInfo.getBaseToken()));
+            if (AuthenticationMode.ANONYMOUS_PASSWORD == guestInfo.getAuthentication()) {
+                url.append('&').append("login_type=anonymous");
+            } else {
+                url.append('&').append("login_type=guest").append('&').append("login_name=").append(urlEncode(guestInfo.getEmailAddress()));
+            }
+        }
         if (null != target) {
             url.append('&').append("target=").append(urlEncode(target.getPath()));
         }
-        if (AuthenticationMode.ANONYMOUS_PASSWORD == guestInfo.getAuthentication()) {
-            url.append('&').append("login_type=anonymous");
-        } else {
-            url.append('&').append("login_type=guest").append('&').append("login_name=").append(urlEncode(guestInfo.getEmailAddress()));
+        if (!Strings.isEmpty(message) && !Strings.isEmpty(messageType) && !Strings.isEmpty(action)) {
+            url.append("&message=").append(message).append("&message_type=").append(messageType).append("&action=").append(action);
+        }
+        return url.toString();
+    }
+
+    public static String getErrorRedirectUrl(String message, String action) {
+        ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
+        String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite");
+        StringBuilder url = new StringBuilder(getLoginPageUrl(uiWebPath));
+        url.append("#");
+        if (!Strings.isEmpty(message) && !Strings.isEmpty(action)) {
+            url.append("&message=").append(message).append("&message_type=").append("ERROR").append("&action=").append(action);
         }
         return url.toString();
     }
@@ -105,6 +128,17 @@ public class ShareRedirectUtils {
      * @return String with the url to login
      */
     public static String getLoginPageUrl(final LoginConfiguration loginConfiguration) {
+        String uiWebPath = loginConfiguration.getUiWebPath();
+        return getLoginPageUrl(uiWebPath);
+    }
+
+    /**
+     * Returns the url to the login page based on the given information.
+     *
+     * @param uiWebPath - Path to ui
+     * @return String with the url to login
+     */
+    public static String getLoginPageUrl(String uiWebPath) {
         /*
          * get configured login link
          */
@@ -116,7 +150,6 @@ public class ShareRedirectUtils {
         /*
          * replace templates
          */
-        String uiWebPath = loginConfiguration.getUiWebPath();
         loginLink = P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
         return loginLink;
     }
@@ -153,4 +186,14 @@ public class ShareRedirectUtils {
         }
         return pazz;
     }
+
+    public static String translate(String toTranslate, Locale locale) throws OXException {
+        TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class);
+        if (null == factory) {
+            throw ServiceExceptionCode.absentService(TranslatorFactory.class);
+        }
+        Translator translator = factory.translatorFor(locale);
+        return translator.translate(toTranslate);
+    }
+
 }

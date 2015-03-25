@@ -66,7 +66,7 @@ public class ShareServletStrings implements LocalizableStrings {
 
     public static final String RESET_PASSWORD = "Email sent to %1$s with further instructions on how to reset your password.";
 
-    public static final String FORGOT_PASSWORD = "Enter your username and we'll send you a new password.";
+    public static final String RESET_PASSWORD_DONE = "Your password has been reset.";
 
     public static final String SHARE_NOT_FOUND = "The share you are looking for does not exist.";
 
