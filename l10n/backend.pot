@@ -1598,8 +1598,6 @@ msgid "Select an existing account"
 msgstr ""
 
 #. label of login form
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
@@ -1608,8 +1606,6 @@ msgstr ""
 
 #. label of username input field
 #. Password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:91
@@ -1772,9 +1768,10 @@ msgstr ""
 #. The file %1$s doesn't have any content.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:140
 msgid "The file %1$s doesn't have any content."
+msgstr ""
 
 #. The associated %2$s account does no more exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:118
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:143
 msgid "The associated %2$s account does no more exist"
 msgstr ""
 
