@@ -730,6 +730,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             } else {
                                 attrBuilder.append(' ').append(attr).append("=\"\"");
                                 imageURLFound = true;
+                                // return;
                             }
                         } else {
                             if (replaceUrls && uriAttributes.contains(attribute)) {
@@ -757,6 +758,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                         } else {
                                             attrBuilder.append(' ').append(attr).append("=\"\"");
                                             imageURLFound = true;
+                                            // return;
                                         }
                                     } else {
                                         if (replaceUrls && uriAttributes.contains(attribute)) {
