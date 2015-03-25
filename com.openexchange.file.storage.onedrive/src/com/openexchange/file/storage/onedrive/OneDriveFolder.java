@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -121,7 +122,7 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
      * @param rootFolderId The identifier of the root folder
      * @param accountDisplayName The account's display name
      * @param hasSubfolders Whether this folder has subfolders;<br>
-     *                      e.g. <tt>"GET https://apis.live.net/v5.0/&lt;folder-id&gt;/files?access_token=&lt;access-token&gt;"</tt>
+     *            e.g. <tt>"GET https://apis.live.net/v5.0/&lt;folder-id&gt;/files?access_token=&lt;access-token&gt;"</tt>
      * @throws OXException If parsing Microsoft OneDrive directory fails
      */
     public OneDriveFolder parseDirEntry(RestFolder dir, String rootFolderId, String accountDisplayName, boolean hasSubfolders) throws OXException {
@@ -167,7 +168,7 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
                 setSubfolders(hasSubfolders);
                 setSubscribedSubfolders(hasSubfolders);
             } catch (final RuntimeException e) {
-                throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;
@@ -180,7 +181,7 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
      * @param rootFolderId The identifier of the root folder
      * @param accountDisplayName The account's display name
      * @param hasSubfolders Whether this folder has subfolders;<br>
-     *                      e.g. <tt>"GET https://apis.live.net/v5.0/&lt;folder-id&gt;/files?access_token=&lt;access-token&gt;"</tt>
+     *            e.g. <tt>"GET https://apis.live.net/v5.0/&lt;folder-id&gt;/files?access_token=&lt;access-token&gt;"</tt>
      * @throws OXException If parsing Microsoft OneDrive directory fails
      */
     public OneDriveFolder parseDirEntry(JSONObject dir, String rootFolderId, String accountDisplayName, boolean hasSubfolders) throws OXException {
@@ -226,7 +227,7 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
                 setSubfolders(hasSubfolders);
                 setSubscribedSubfolders(hasSubfolders);
             } catch (final RuntimeException e) {
-                throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;

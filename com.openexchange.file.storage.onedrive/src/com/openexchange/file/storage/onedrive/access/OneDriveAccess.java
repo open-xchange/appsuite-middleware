@@ -70,9 +70,10 @@ import org.scribe.model.Token;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.onedrive.AbstractOneDriveResourceAccess;
 import com.openexchange.file.storage.onedrive.OneDriveClosure;
-import com.openexchange.file.storage.onedrive.OneDriveExceptionCodes;
+import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.DefaultOAuthToken;
@@ -198,11 +199,11 @@ public class OneDriveAccess {
         {
             Map<String, Object> configuration = fsAccount.getConfiguration();
             if (null == configuration) {
-                throw OneDriveExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(OneDriveConstants.ID, fsAccount.getId());
             }
             Object accountId = configuration.get("account");
             if (null == accountId) {
-                throw OneDriveExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(OneDriveConstants.ID, fsAccount.getId());
             }
             if (accountId instanceof Integer) {
                 oauthAccountId = ((Integer) accountId).intValue();
@@ -210,7 +211,7 @@ public class OneDriveAccess {
                 try {
                     oauthAccountId = Integer.parseInt(accountId.toString());
                 } catch (NumberFormatException e) {
-                    throw OneDriveExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, OneDriveConstants.ID, fsAccount.getId());
                 }
             }
         }

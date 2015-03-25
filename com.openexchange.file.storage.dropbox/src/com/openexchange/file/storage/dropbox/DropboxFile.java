@@ -54,8 +54,9 @@ import java.util.Date;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.mime.MimeTypeMap;
 
@@ -78,7 +79,7 @@ public final class DropboxFile extends DefaultFile {
     public DropboxFile(Entry entry, int userID) throws OXException {
         super();
         if (entry.isDir) {
-            throw DropboxExceptionCodes.NOT_A_FILE.create(entry.path);
+            throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, entry.path);
         }
         String parentPath = entry.parentPath();
         setId(entry.fileName());

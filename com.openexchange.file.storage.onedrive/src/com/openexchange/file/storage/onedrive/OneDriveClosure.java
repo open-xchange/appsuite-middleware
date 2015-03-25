@@ -57,7 +57,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link OneDriveClosure}
  *
@@ -104,18 +103,18 @@ public abstract class OneDriveClosure<R> {
             if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
                 // Authentication failed -- recreate token
                 if (!handleAuthError) {
-                    throw OneDriveExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+                    throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), OneDriveConstants.ID, e.getMessage());
                 }
                 resourceAccess.handleAuthError(e, session);
                 return innerPerform(false, resourceAccess, httpClient, session);
             }
-            throw AbstractOneDriveResourceAccess.handleHttpResponseError(null, e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
         } catch (IOException e) {
-            throw AbstractOneDriveResourceAccess.handleIOError(e);
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (JSONException e) {
             throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

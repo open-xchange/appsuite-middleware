@@ -59,6 +59,7 @@ import com.box.boxjavalibv2.dao.BoxSharedLink;
 import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Strings;
@@ -181,7 +182,7 @@ public final class BoxFile extends DefaultFile {
                     }
                 }
             } catch (final RuntimeException e) {
-                throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;

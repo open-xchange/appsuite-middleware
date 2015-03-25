@@ -266,6 +266,7 @@ public final class BoxFileStorageService implements AccountAware, OAuthUtilizerC
     }
 
     private static final class FileStorageAccountInfo {
+
         protected final FileStorageAccount account;
         protected final int ranking;
 

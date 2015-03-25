@@ -260,6 +260,7 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
     }
 
     private static final class FileStorageAccountInfo {
+
         protected final FileStorageAccount account;
         protected final int ranking;
 

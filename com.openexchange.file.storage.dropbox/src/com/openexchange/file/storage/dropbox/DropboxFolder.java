@@ -57,6 +57,7 @@ import com.dropbox.client2.RESTUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -167,7 +168,7 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
                     setSubscribedSubfolders(hasSubfolders);
                 }
             } catch (final RuntimeException e) {
-                throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;

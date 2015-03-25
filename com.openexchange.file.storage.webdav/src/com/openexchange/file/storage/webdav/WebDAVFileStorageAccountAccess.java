@@ -88,6 +88,7 @@ import com.openexchange.session.Session;
  * {@link WebDAVFileStorageAccountAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> - Exceptions
  */
 public final class WebDAVFileStorageAccountAccess implements FileStorageAccountAccess {
 
@@ -285,7 +286,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
     /**
      * Gets the HttpClient for given WebDAV account.
      *
-     * @param account The facebook messaging account providing credentials and settings
+     * @param account The WebDAV messaging account providing credentials and settings
      * @param session The user session
      * @return The HttpClient; either newly created or fetched from underlying registry
      * @throws OXException If a HttpClient could not be created
@@ -385,7 +386,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         final String login = (String) configuration.get(WebDAVConstants.WEBDAV_LOGIN);
         final String password = (String) configuration.get(WebDAVConstants.WEBDAV_PASSWORD);
         if (null != login && null != password) {
-            final Credentials creds = new UsernamePasswordCredentials("thorben", "netline");
+            final Credentials creds = new UsernamePasswordCredentials(login, password);
             newClient.getParams().setAuthenticationPreemptive(true);
             newClient.getState().setCredentials(AuthScope.ANY, creds);
         }
@@ -418,14 +419,24 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
                 AbstractWebDAVAccess.closeHttpMethod(method);
             }
         } catch (final HttpException e) {
-            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final DavException e) {
             if (HttpServletResponse.SC_UNAUTHORIZED == e.getErrorCode()) {
-                throw WebDAVFileStorageExceptionCodes.INVALID_CREDS.create(e, url);
+                String username;
+                {
+                    Credentials creds = client.getState().getCredentials(AuthScope.ANY);
+                    if (creds != null && creds instanceof UsernamePasswordCredentials) {
+                        UsernamePasswordCredentials c = (UsernamePasswordCredentials) creds;
+                        username = c.getUserName();
+                    } else {
+                        username = "";
+                    }
+                }
+                throw FileStorageExceptionCodes.LOGIN_FAILED.create(username, url, WebDAVConstants.ID);
             }
-            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

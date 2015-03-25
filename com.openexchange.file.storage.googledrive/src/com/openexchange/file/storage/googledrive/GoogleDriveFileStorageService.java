@@ -265,6 +265,7 @@ public final class GoogleDriveFileStorageService implements AccountAware, OAuthU
     }
 
     private static final class FileStorageAccountInfo {
+
         protected final FileStorageAccount account;
         protected final int ranking;
 

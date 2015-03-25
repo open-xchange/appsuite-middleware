@@ -87,6 +87,7 @@ import com.openexchange.session.Session;
 public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess {
 
     private static volatile Boolean optimisticSubfolderCheck;
+
     private static boolean optimisticSubfolderCheck() {
         Boolean tmp = optimisticSubfolderCheck;
         if (null == tmp) {
@@ -133,7 +134,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         try {
             List<NameValuePair> qparams = initiateQueryString();
             //qparams.add(new BasicNameValuePair(QUERY_PARAM_FILTER, FILTER_FOLDERS));
-            HttpGet method = new HttpGet(buildUri(oneDriveFolderId+"/files", qparams));
+            HttpGet method = new HttpGet(buildUri(oneDriveFolderId + "/files", qparams));
             request = method;
 
             JSONArray jData = handleHttpResponse(execute(method, httpClient), JSONObject.class).getJSONArray("data");
@@ -246,7 +247,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
                         //qparams.add(new BasicNameValuePair(QUERY_PARAM_FILTER, FILTER_FOLDERS));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
                         request = method;
 
                         httpResponse = execute(method, httpClient);
@@ -300,7 +301,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                     JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     return jResponse.getString("id");
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(toCreate.getParentId(), e);
+                    throw handleHttpResponseError(toCreate.getParentId(), account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -333,7 +334,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                     JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     return jResponse.getString("id");
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(folderId, e);
+                    throw handleHttpResponseError(folderId, account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -356,7 +357,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                     JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     return jResponse.getString("id");
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(folderId, e);
+                    throw handleHttpResponseError(folderId, account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -386,7 +387,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
                     return folderId;
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(folderId, e);
+                    throw handleHttpResponseError(folderId, account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -418,7 +419,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                         List<NameValuePair> qparams = initiateQueryString();
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
                         request = method;
 
                         JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
@@ -511,14 +512,14 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         Quota[] quotas = new Quota[types.length];
         for (int i = 0; i < types.length; i++) {
             switch (types[i]) {
-            case FILE:
-                quotas[i] = getFileQuota(folder);
-                break;
-            case STORAGE:
-                quotas[i] = getStorageQuota(folder);
-                break;
-            default:
-                throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Quota " + types[i]);
+                case FILE:
+                    quotas[i] = getFileQuota(folder);
+                    break;
+                case STORAGE:
+                    quotas[i] = getStorageQuota(folder);
+                    break;
+                default:
+                    throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Quota " + types[i]);
             }
         }
         return quotas;

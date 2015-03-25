@@ -105,7 +105,7 @@ public abstract class AbstractGoogleDriveAccess {
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(null, e);
                 } catch (IOException e) {
-                    throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
             }
             rootFolderIdentifier = rootFolderId;
@@ -126,16 +126,16 @@ public abstract class AbstractGoogleDriveAccess {
      * @param e The HTTP error
      * @return The resulting exception
      */
-    public static OXException handleHttpResponseError(String identifier, HttpResponseException e) {
+    public OXException handleHttpResponseError(String identifier, HttpResponseException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
             return FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, identifier, "");
         }
 
         if (SC_UNAUTHORIZED == e.getStatusCode()) {
-            return GoogleDriveExceptionCodes.UNLINKED_ERROR.create();
+            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), GoogleDriveConstants.ID, e.getMessage());
         }
 
-        return GoogleDriveExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getStatusMessage());
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
     }
 
     /**

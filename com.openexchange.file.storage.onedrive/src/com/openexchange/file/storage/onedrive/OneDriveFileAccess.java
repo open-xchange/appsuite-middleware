@@ -80,9 +80,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -182,7 +182,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     @Override
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         if (CURRENT_VERSION != version) {
-            throw OneDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(OneDriveConstants.ID);
         }
         return perform(new OneDriveClosure<File>() {
 
@@ -244,7 +244,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         return new IDTuple(file.getFolderId(), file.getId());
                     }
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(file.getId(), e);
+                    throw handleHttpResponseError(file.getId(), account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -256,7 +256,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFile, final List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
             // can only copy the current revision
-            throw OneDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(OneDriveConstants.ID);
         }
         if (destFolder.equals(source.getFolder()) && null != update && null != update.getFileName()) {
             /*
@@ -287,7 +287,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     return new IDTuple(destFolder, jResponse.getString("id"));
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(source.getId(), e);
+                    throw handleHttpResponseError(source.getId(), account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -321,7 +321,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     return new IDTuple(destFolder, jResponse.getString("id"));
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(source.getId(), e);
+                    throw handleHttpResponseError(source.getId(), account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -500,7 +500,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         List<NameValuePair> qparams = initiateQueryString();
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
                         request = method;
 
                         JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
@@ -592,7 +592,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         List<NameValuePair> qparams = initiateQueryString();
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
                         request = method;
 
                         JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
@@ -643,7 +643,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         List<NameValuePair> qparams = initiateQueryString();
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
                         request = method;
 
                         JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
