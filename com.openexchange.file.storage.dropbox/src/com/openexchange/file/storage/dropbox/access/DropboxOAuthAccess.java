@@ -76,6 +76,18 @@ import com.openexchange.session.Session;
 public final class DropboxOAuthAccess {
 
     /**
+     * Drops the Dropbox OAuth access for given Dropbox account.
+     *
+     * @param fsAccount The Dropbox account providing credentials and settings
+     * @param session The user session
+     */
+    public static void dropFor(final FileStorageAccount fsAccount, final Session session) {
+        DropboxOAuthAccessRegistry registry = DropboxOAuthAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
+        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
+    }
+
+    /**
      * Gets the Dropbox OAuth access for given Dropbox account.
      *
      * @param fsAccount The Dropbox account providing credentials and settings
@@ -84,8 +96,8 @@ public final class DropboxOAuthAccess {
      * @throws OXException If a Dropbox session could not be created
      */
     public static DropboxOAuthAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        final DropboxOAuthAccessRegistry registry = DropboxOAuthAccessRegistry.getInstance();
-        final String accountId = fsAccount.getId();
+        DropboxOAuthAccessRegistry registry = DropboxOAuthAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
         DropboxOAuthAccess dropboxOAuthAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
         if (null == dropboxOAuthAccess) {
             final DropboxOAuthAccess newInstance = new DropboxOAuthAccess(fsAccount, session, session.getUserId(), session.getContextId());
