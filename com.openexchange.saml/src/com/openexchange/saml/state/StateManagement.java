@@ -49,7 +49,6 @@
 
 package com.openexchange.saml.state;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 
@@ -122,10 +121,5 @@ public interface StateManagement {
      * @throws OXException If removing the request info fails
      */
     LogoutRequestInfo removeLogoutRequestInfo(String id) throws OXException;
-
-    /**
-     * TODO
-     */
-    List<String> removeSessionIds(List<String> keys);
 
 }

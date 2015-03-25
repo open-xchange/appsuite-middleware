@@ -56,7 +56,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +142,7 @@ import com.openexchange.saml.validation.ValidationStrategy;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -597,17 +598,25 @@ public class WebSSOProviderImpl implements WebSSOProvider {
         SessiondService sessiondService = services.getService(SessiondService.class);
         List<SessionIndex> sessionIndexes = logoutRequest.getSessionIndexes();
         boolean removedAnySession = false;
-        if (sessionIndexes.size() > 0) {
-            List<String> keys = new ArrayList<String>(sessionIndexes.size());
-            for (SessionIndex sessionIndex : sessionIndexes) {
-                keys.add(sessionIndex.getSessionIndex());
+        int numIndexes = sessionIndexes.size();
+        if (numIndexes > 0) {
+            String filterString;
+            if (numIndexes == 1) {
+                filterString = "(" + SessionProperties.SESSION_INDEX + "=" + sessionIndexes.get(0) + ")";
+            } else {
+                StringBuilder fsBuilder = new StringBuilder(128).append("(&");
+                for (SessionIndex sessionIndex : sessionIndexes) {
+                    fsBuilder.append("(" + SessionProperties.SESSION_INDEX + "=" + sessionIndex + ")");
+                }
+                fsBuilder.append(')');
+                filterString = fsBuilder.toString();
             }
 
-            // FIXME
-            List<String> sessionIds = stateManagement.removeSessionIds(keys);
-            LOG.debug("Found {} session IDs for {} indexes", sessionIds.size(), keys.size());
+            Collection<Session> sessions = sessiondService.filterSessions(SessionFilter.create(filterString), true);
+            LOG.debug("Found {} session IDs for {} indexes", sessions.size(), numIndexes);
 
-            for (String sessionId : sessionIds) {
+            for (Session session : sessions) {
+                String sessionId = session.getSessionID();
                 if (sessiondService.removeSession(sessionId)) {
                     removedAnySession = true;
                     LOG.debug("Session {} was terminated", sessionId);
@@ -628,7 +637,7 @@ public class WebSSOProviderImpl implements WebSSOProvider {
         }
 
         if (!removedAnySession) {
-            LOG.warn("Received LogoutRequest but no session was removed");
+            LOG.info("Received LogoutRequest but no session was removed");
         }
     }
 
