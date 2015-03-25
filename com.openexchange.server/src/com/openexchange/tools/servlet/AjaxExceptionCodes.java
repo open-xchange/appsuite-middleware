@@ -175,6 +175,10 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * The HTML content is too big and therefore cannot be safely displayed. Please select to download its content if you want to see it.
      */
     HTML_TOO_BIG("The HTML content is too big and therefore cannot be safely displayed. Please select to download its content if you want to see it.", AjaxExceptionMessages.HTML_TOO_BIG_MSG, Category.CATEGORY_USER_INPUT, 27),
+    /**
+     * Invalid request body. Expect to be of type "%1$s", but is "%2$s".
+     */
+    INVALID_REQUEST_BODY("Invalid request body. Expect to be of type \"%1$s\", but is \"%2$s\".", MESSAGE, Category.CATEGORY_ERROR, 28),
 
     ;
 
