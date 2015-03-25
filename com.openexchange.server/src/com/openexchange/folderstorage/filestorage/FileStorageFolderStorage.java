@@ -112,6 +112,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FileStorageFolderStorage implements FolderStorage {
 
+    /**
+     * <code>"infostore"</code>
+     */
+    private static final String INFOSTORE_ACCOUNT_ID = com.openexchange.file.storage.composition.FileID.INFOSTORE_ACCOUNT_ID;
+
     private static final String PARAM = FileStorageParameterConstants.PARAM_ID_BASED_FOLDER_ACCESS;
 
     /**
@@ -425,7 +430,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 int index = 0;
                 for (int j = 0; j < size; j++) {
                     String id = rootFolders[j].getId();
-                    if (!INFOSTORE.equals(id)) {
+                    if ((id.length() != 0) && !INFOSTORE_ACCOUNT_ID.equals(new FolderID(id).getAccountId())) {
                         list.add(new FileStorageId(id, index++, null));
                     }
                 }
