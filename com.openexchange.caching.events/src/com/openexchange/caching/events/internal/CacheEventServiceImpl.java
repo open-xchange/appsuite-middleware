@@ -50,7 +50,6 @@
 package com.openexchange.caching.events.internal;
 
 import static com.openexchange.caching.events.internal.StampedCacheEvent.POISON;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +96,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
     public CacheEventServiceImpl(CacheEventConfiguration initialConfiguration) {
         super();
         cacheRegionListeners = new ConcurrentHashMap<String, List<CacheListener>>();
-        cacheListeners = new ArrayList<CacheListener>();
+        cacheListeners = new CopyOnWriteArrayList<CacheListener>();
         offeredEvents = new AtomicLong();
         deliveredEvents = new AtomicLong();
         configurationRef = new AtomicReference<CacheEventConfiguration>(initialConfiguration);
@@ -203,7 +202,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
         /*
          * determine which listeners to notify
          */
-        final List<CacheListener> listenersToNotify = new ArrayList<CacheListener>();
+        final List<CacheListener> listenersToNotify = new LinkedList<CacheListener>();
         if (null != event.getRegion()) {
             listenersToNotify.addAll(getListeners(event.getRegion()));
         }
