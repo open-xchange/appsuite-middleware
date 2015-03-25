@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,12 +63,14 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
+* Wed Mar 25 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 7.6.3
 * Fri Mar 13 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Twelfth candidate for 7.6.2 release
 * Fri Mar 06 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Eleventh candidate for 7.6.2 release
-* Fri Mar 06 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2015-03-16
+* Fri Mar 06 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Eleventh candidate for 7.6.2 release
 * Wed Mar 04 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Tenth candidate for 7.6.2 release
 * Tue Mar 03 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
