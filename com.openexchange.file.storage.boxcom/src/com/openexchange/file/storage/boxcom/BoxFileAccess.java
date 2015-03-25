@@ -204,7 +204,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     boxFile.setNumberOfVersions(versions);
                     return boxFile;
                 } catch (final BoxServerException e) {
-                    throw handleHttpResponseError(id, e);
+                    throw handleHttpResponseError(id, account.getId(), e);
                 }
             }
         });
@@ -235,7 +235,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                         return new IDTuple(file.getFolderId(), boxfile.getId());
                     } catch (final BoxServerException e) {
-                        throw handleHttpResponseError(file.getId(), e);
+                        throw handleHttpResponseError(file.getId(), account.getId(), e);
                     }
                 }
             });
@@ -297,7 +297,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     return new IDTuple(destFolder, copiedFile.getId());
                 } catch (final BoxServerException e) {
-                    throw handleHttpResponseError(source.getId(), e);
+                    throw handleHttpResponseError(source.getId(), account.getId(), e);
                 }
             }
         });
@@ -353,7 +353,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     return new IDTuple(destFolder, movedFile.getId());
                 } catch (final BoxServerException e) {
-                    throw handleHttpResponseError(source.getId(), e);
+                    throw handleHttpResponseError(source.getId(), account.getId(), e);
                 }
             }
         });
@@ -375,7 +375,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     versionRequest.getRequestExtras().addQueryParam("version", version);
                     return boxClient.getFilesManager().downloadFile(id, versionRequest);
                 } catch (final BoxServerException e) {
-                    throw handleHttpResponseError(id, e);
+                    throw handleHttpResponseError(id, account.getId(), e);
                 }
             }
         });
@@ -395,7 +395,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     return thumbnail.getContent();
                 } catch (final BoxServerException e) {
-                    throw handleHttpResponseError(id, e);
+                    throw handleHttpResponseError(id, account.getId(), e);
                 }
             }
 

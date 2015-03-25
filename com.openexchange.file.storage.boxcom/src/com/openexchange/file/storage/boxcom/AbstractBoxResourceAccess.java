@@ -227,7 +227,8 @@ public abstract class AbstractBoxResourceAccess {
         Throwable cause = e.getCause();
 
         if (cause instanceof BoxServerException) {
-            return handleHttpResponseError(null, (BoxServerException) cause);
+            BoxServerException bx = (BoxServerException) cause;
+            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + bx.getCustomMessage());
         }
 
         if (cause instanceof IOException) {
@@ -250,12 +251,12 @@ public abstract class AbstractBoxResourceAccess {
      * @param e The HTTP error
      * @return The resulting exception
      */
-    protected static OXException handleHttpResponseError(String identifier, BoxServerException e) {
+    protected OXException handleHttpResponseError(String identifier, String accountId, BoxServerException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
             return FileStorageExceptionCodes.NOT_FOUND.create(e, "Box", identifier);
         }
-        if (SC_UNAUTHORIZED == e.getStatusCode()) {
-            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, account.getId(), BoxConstants.ID);
+        if (null != accountId && SC_UNAUTHORIZED == e.getStatusCode()) {
+            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, accountId, BoxConstants.ID);
         }
         return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getCustomMessage());
     }

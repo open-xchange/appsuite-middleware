@@ -244,7 +244,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         return new IDTuple(file.getFolderId(), file.getId());
                     }
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(file.getId(), e);
+                    throw handleHttpResponseError(file.getId(), account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -287,7 +287,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     return new IDTuple(destFolder, jResponse.getString("id"));
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(source.getId(), e);
+                    throw handleHttpResponseError(source.getId(), account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -321,7 +321,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                     JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     return new IDTuple(destFolder, jResponse.getString("id"));
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(source.getId(), e);
+                    throw handleHttpResponseError(source.getId(), account.getId(), e);
                 } finally {
                     reset(request);
                 }

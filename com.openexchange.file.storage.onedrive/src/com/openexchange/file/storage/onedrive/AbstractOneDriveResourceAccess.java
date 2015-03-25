@@ -279,9 +279,9 @@ public abstract class AbstractOneDriveResourceAccess {
                         }
                     }
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(null, e);
+                    throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
                 } catch (IOException e) {
-                    throw handleIOError(e);
+                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 } finally {
                     reset(request);
                 }
@@ -451,20 +451,6 @@ public abstract class AbstractOneDriveResourceAccess {
         }
     }
 
-    /**
-     * Handles given I/O error.
-     *
-     * @param e The I/O error
-     * @return The resulting exception
-     */
-    protected static OXException handleIOError(IOException e) {
-        Throwable cause = e.getCause();
-        if (cause instanceof AuthenticationException) {
-            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), OneDriveConstants.ID, SC_UNAUTHORIZED);
-        }
-        return FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-    }
-
     /** Status code (401) indicating that the request requires HTTP authentication. */
     private static final int SC_UNAUTHORIZED = 401;
 
@@ -478,12 +464,12 @@ public abstract class AbstractOneDriveResourceAccess {
      * @param e The HTTP error
      * @return The resulting exception
      */
-    protected static OXException handleHttpResponseError(String identifier, HttpResponseException e) {
+    protected OXException handleHttpResponseError(String identifier, String accountId, HttpResponseException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
             return FileStorageExceptionCodes.NOT_FOUND.create(e, OneDriveConstants.ID, identifier);
         }
-        if (SC_UNAUTHORIZED == e.getStatusCode()) {
-            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), OneDriveConstants.ID, SC_UNAUTHORIZED);
+        if (null != accountId && SC_UNAUTHORIZED == e.getStatusCode()) {
+            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(accountId, OneDriveConstants.ID, SC_UNAUTHORIZED);
         }
         return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
     }

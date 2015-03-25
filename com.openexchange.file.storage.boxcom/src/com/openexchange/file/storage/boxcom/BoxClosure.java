@@ -112,7 +112,7 @@ public abstract class BoxClosure<R> {
                 BoxAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
                 return innerPerform(false, resourceAccess, newBoxAccess, session);
             }
-            throw AbstractBoxResourceAccess.handleHttpResponseError(null, e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getCustomMessage());
         } catch (AuthFatalFailureException e) {
             if (!handleAuthError) {
                 throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), BoxConstants.ID, e.getMessage());
