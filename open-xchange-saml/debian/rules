@@ -10,5 +10,6 @@ JAVA_HOME = /usr/lib/jvm/default-java
 DEB_ANT_ARGS := -DdestDir=$(DEB_DESTDIR) -DpackageName=$(DEB_SOURCE_PACKAGE)
 DEB_ANT_BUILDFILE = build/build.xml
 DEB_ANT_INSTALL_TARGET = build
+# Only required for Debian Squeeze where Ant does not include JARs in its lib folder
 DEB_JARS := $(ANT_HOME)/lib/ant-nodeps.jar
 
