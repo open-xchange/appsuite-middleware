@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
@@ -231,6 +232,12 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         }
         final Set<SessionMatcher.Flag> flags = matcher.flags();
         return SessionHandler.findFirstSessionForUser(userId, contextId, matcher, flags.contains(SessionMatcher.Flag.IGNORE_LONG_TERM), flags.contains(SessionMatcher.Flag.IGNORE_SESSION_STORAGE));
+    }
+
+    @Override
+    public Collection<Session> filterSessions(SessionFilter filter, boolean filterGlobally) throws OXException {
+        // TODO implement me
+        return Collections.emptyList();
     }
 
 }

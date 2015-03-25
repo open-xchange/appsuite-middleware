@@ -199,6 +199,19 @@ public interface SessiondService {
     Session getSessionWithTokens(String clientToken, String serverToken) throws OXException;
 
     /**
+     * Returns all sessions that match the given {@link SessionFilter}. Sessions can be filtered locally (this node) or globally (all
+     * nodes via central session storage). Please note that the latter is probably orders of magnitudes slower than the former. Also
+     * note that if you filter globally for session properties, those must be configured to be distributed. This configuration takes
+     * place in <code>sessiond.properties</code> via <code>com.openexchange.sessiond.remoteParameterNames</code>.
+     *
+     * @param filter The filter
+     * @param filterGlobally Whether the sessions shall be filtered globally (<code>true</code>) or not (<code>false</code>)
+     * @return The found sessions, possibly empty but never <code>null</code>
+     * @throws OXException If an error occurs while filtering (probably an error with the central session storage)
+     */
+    Collection<Session> filterSessions(SessionFilter filter, boolean filterGlobally) throws OXException;
+
+    /**
      * Gets the number of active sessions.
      *
      * @return The number of active sessions

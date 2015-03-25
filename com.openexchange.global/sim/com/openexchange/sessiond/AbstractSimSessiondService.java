@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
+import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -158,5 +159,10 @@ public class AbstractSimSessiondService implements SessiondService {
     public void removeContextSessions(final int contextId) {
         // Nothing to do
 
+    }
+
+    @Override
+    public Collection<Session> filterSessions(SessionFilter filter, boolean filterGlobally) throws OXException {
+        return Collections.emptyList();
     }
 }
