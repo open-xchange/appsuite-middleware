@@ -49,11 +49,9 @@
 package com.openexchange.rss;
 
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -62,6 +60,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * {@link RssJsonConverter} - Converts <code>"rss"</code> to <code>"json"</code>.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class RssJsonConverter implements ResultConverter {
 
 	@Override
@@ -82,19 +85,23 @@ public class RssJsonConverter implements ResultConverter {
 	@Override
 	public void convert(AJAXRequestData requestData, AJAXRequestResult result,
 			ServerSession session, Converter converter) throws OXException {
-		JSONArray jArr = new JSONArray();
+		JSONArray jArr;
+
 		Object resultObject = result.getResultObject();
 		if (resultObject instanceof List) {
-			for(RssResult rss: (List<RssResult>) resultObject) {
+		    @SuppressWarnings("unchecked") List<RssResult> list = (List<RssResult>) resultObject;
+		    jArr = new JSONArray(list.size());
+            for(RssResult rss: list) {
 				jArr.put(conv(rss));
 			}
-		} else if (resultObject instanceof List) {
+		} else if (resultObject instanceof RssResult) {
+		    jArr = new JSONArray(1);
 			jArr.put(conv((RssResult) resultObject));
 		} else {
-			//TODO: be unhappy
+			throw AjaxExceptionCodes.UNSUPPORTED_FORMAT.create(resultObject == null ? "null" : resultObject.getClass().getSimpleName());
 		}
-		result.setResultObject(jArr, "json");
 
+		result.setResultObject(jArr, "json");
 	}
 
 	private JSONObject conv(RssResult result) throws OXException{
@@ -108,7 +115,8 @@ public class RssJsonConverter implements ResultConverter {
 				.put("feedTitle", result.getFeedTitle())
 				.put("subject", result.getSubject())
 				.put("image", result.getImageUrl())
-				.put("date", result.getDate().getTime());
+				.put("date", result.getDate().getTime())
+			    .put("droppedImages", result.hasDroppedExternalImages());
 		} catch (JSONException e) {
 			throw AjaxExceptionCodes.JSON_ERROR.create(e);
 		}

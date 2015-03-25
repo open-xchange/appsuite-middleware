@@ -67,6 +67,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -119,6 +120,8 @@ public class RssAction implements AJAXActionService {
         if (order == null) {
             order = "DESC";
         }
+
+        boolean dropExternalImages = AJAXRequestDataTools.parseBoolParameter("drop_images", request, true);
 
         List<OXException> warnings = new LinkedList<OXException>();
         List<SyndFeed> feeds = new LinkedList<SyndFeed>();
@@ -197,11 +200,13 @@ public class RssAction implements AJAXActionService {
         }
 
         List<RssResult> results = new ArrayList<RssResult>(feeds.size());
+        RssPreprocessor preprocessor = new SanitizingPreprocessor(dropExternalImages);
+
         for (SyndFeed feed : feeds) {
             for (Object obj : feed.getEntries()) {
                 SyndEntry entry = (SyndEntry) obj;
-                RssResult result = new RssResult().setAuthor(entry.getAuthor()).setSubject(getTitle(entry)).setUrl(entry.getLink()).setFeedUrl(
-                    feed.getLink()).setFeedTitle(feed.getTitle()).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
+                RssResult result = new RssResult().setAuthor(entry.getAuthor()).setSubject(getTitle(entry)).setUrl(entry.getLink()).
+                    setFeedUrl(feed.getLink()).setFeedTitle(feed.getTitle()).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
 
                 if (feed.getImage() != null) {
                     result.setImageUrl(feed.getImage().getLink());
@@ -209,13 +214,12 @@ public class RssAction implements AJAXActionService {
 
                 results.add(result);
 
-                RssPreprocessor preprocessor = new SanitizingPreprocessor();
                 @SuppressWarnings("unchecked") List<SyndContent> contents = entry.getContents();
                 boolean foundHtml = false;
                 for (SyndContent content : contents) {
                     if ("html".equals(content.getType())) {
                         foundHtml = true;
-                        String htmlContent = preprocessor.process(content.getValue());
+                        String htmlContent = preprocessor.process(content.getValue(), result);
                         result.setBody(htmlContent).setFormat("text/html");
                         break;
                     }

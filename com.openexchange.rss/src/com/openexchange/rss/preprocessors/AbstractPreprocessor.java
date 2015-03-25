@@ -49,9 +49,11 @@
 
 package com.openexchange.rss.preprocessors;
 
+import com.openexchange.rss.RssResult;
+
 /**
  * {@link AbstractPreprocessor} - The abstract pre-processor for RSS payload.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractPreprocessor implements RssPreprocessor {
@@ -59,10 +61,10 @@ public abstract class AbstractPreprocessor implements RssPreprocessor {
     private RssPreprocessor nextProcessor;
 
     @Override
-    public String process(final String payload) {
-        String retval = innerProcess(payload);
+    public String process(final String payload, RssResult rssResult) {
+        String retval = innerProcess(payload, rssResult);
         if (nextProcessor != null) {
-            retval = nextProcessor.process(retval);
+            retval = nextProcessor.process(retval, rssResult);
         }
         return retval;
     }
@@ -76,6 +78,6 @@ public abstract class AbstractPreprocessor implements RssPreprocessor {
     /**
      * Processes given payload.
      */
-    protected abstract String innerProcess(String payload);
+    protected abstract String innerProcess(String payload, RssResult rssResult);
 
 }
