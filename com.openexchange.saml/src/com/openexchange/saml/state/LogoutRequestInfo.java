@@ -75,7 +75,7 @@ public interface LogoutRequestInfo {
      String getSessionId();
 
     /**
-     * Gets the domain name via which the HTTP request initiating the AuthnRequest was
+     * Gets the domain name via which the HTTP request initiating the logout request was
      * received.
      *
      * @return The domain name

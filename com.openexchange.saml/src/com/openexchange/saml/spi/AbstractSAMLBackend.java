@@ -67,8 +67,8 @@ import com.openexchange.saml.validation.ValidationStrategy;
 /**
  * It's considered best practice to inherit from this class when implementing a {@link SAMLBackend}.
  * That allows you to start with the minimal set of necessary methods to implement. Additionally it
- * helps to not break any custom implementations while the {@link SAMLBackend} interface evolves. Minor
- * changes/extensions will simply be handled by default implementations within this class.
+ * will try to retain compile-time compatibility while the {@link SAMLBackend} interface evolves. Minor
+ * changes/extensions will then simply be handled by default implementations within this class.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -105,7 +105,7 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
     /**
      * @see SAMLBackend#getWebSSOCustomizer()
      */
-    protected SAMLWebSSOCustomizer doGetWebSSOCustomizer() {
+    protected WebSSOCustomizer doGetWebSSOCustomizer() {
         return null;
     }
 
@@ -136,7 +136,7 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
     }
 
     @Override
-    public SAMLWebSSOCustomizer getWebSSOCustomizer() {
+    public WebSSOCustomizer getWebSSOCustomizer() {
         return doGetWebSSOCustomizer();
     }
 

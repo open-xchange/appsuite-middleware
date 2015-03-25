@@ -98,6 +98,10 @@ public enum SAMLExceptionCode implements DisplayableOXExceptionCode {
      * An internal error occurred: %1$s
      */
     INTERNAL_ERROR("An internal error occurred: %1$s", Category.CATEGORY_ERROR, 9),
+    /**
+     * No user could be determined for the assertions subject: %1$s
+     */
+    UNKNOWN_USER("No user could be determined for the assertions subject: %1$s", Category.CATEGORY_ERROR, 10)
     ;
 
     private final Category category;

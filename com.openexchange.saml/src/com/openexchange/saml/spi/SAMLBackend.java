@@ -59,16 +59,19 @@ import org.opensaml.saml2.core.Response;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.SAMLExceptionCode;
 import com.openexchange.saml.state.StateManagement;
 import com.openexchange.saml.validation.AssertionValidator;
 import com.openexchange.saml.validation.ResponseValidator;
 import com.openexchange.saml.validation.StrictValidationStrategy;
 import com.openexchange.saml.validation.ValidationStrategy;
+import com.openexchange.session.reservation.EnhancedAuthenticated;
+import com.openexchange.session.reservation.Enhancer;
 
 /**
  * A {@link SAMLBackend} must be implemented and registered as OSGi service to enable
  * SAML-based SSO. It provides the necessary deployment-specific objects and operations
- * that are needed to create SP requests and process IDP responses.
+ * that are needed to create SP requests and process IdP responses.
  *
  * It's considered best practice to not implement this interface directly but to inherit
  * from {@link AbstractSAMLBackend}.
@@ -95,10 +98,10 @@ public interface SAMLBackend {
      *
      * @return The customizer or <code>null</code> if customization is not necessary.
      */
-    SAMLWebSSOCustomizer getWebSSOCustomizer();
+    WebSSOCustomizer getWebSSOCustomizer();
 
     /**
-     * An exception handler that resolves exceptions thrown by e.g. {@link SAMLWebSSOCustomizer}.
+     * Gets the exception handler that deals with exceptions thrown by e.g. {@link WebSSOCustomizer}.
      * You can simply return an instance of {@link DefaultExceptionHandler} here, but probably you
      * want to customize a few things (like HTML error pages). Its considered best practice to inherit
      * from {@link DefaultExceptionHandler} and return your custom version.
@@ -108,40 +111,37 @@ public interface SAMLBackend {
     ExceptionHandler getExceptionHandler();
 
     /**
-     * Gets the validation strategy that will be used to validate authentication responses.
-     * Most likely you want return an instance of {@link StrictValidationStrategy} here.
-     *
-     * Unfortunately it might be that the actual IDPs responses are not conform to the SAML spec,
-     * as it is quite complex and hard to implement. In such cases you need to implement your own
-     * validation strategy. To avoid that malicious responses are accepted as valid you should not
-     * start with implementing your own validation mechanisms from scratch, but inherit from
-     * {@link AbstractChainBasedValidationStrategy}. You can then simply leave single validators
-     * out to work around the validation problems.
+     * Gets the validation strategy that will be used to validate SAML responses from the IdP.
+     * You should start with returning {@link StrictValidationStrategy} here. If the actual responses
+     * are considered invalid, but they must be processed anyway (e.g. because the IdP does not behave
+     * compliant to the standard) you need to implement your own strategy. You'll probably want to
+     * inherit from {@link StrictValidationStrategy} then and adjust only the validation steps that fail.
+     * Implementing the interface from scratch on your own should be last resort.
      *
      * @param config The SAML configuration
      * @param stateManagement The SAML state management
      * @return The validation strategy
      * @see StrictValidationStrategy
-     * @see AbstractChainBasedValidationStrategy
-     * @see ValidatorChain
      * @see ResponseValidator
      * @see AssertionValidator
      */
     ValidationStrategy getValidationStrategy(SAMLConfig config, StateManagement stateManagement);
 
     /**
-     * Resolves an authentication response based on the determined bearer assertion.
+     * Resolves an authentication response based on the bearer assertion that was determined and validated
+     * by the validation strategy.
      *
      * @param response The SAML response
-     * @param assertion A valid bearer assertion whose subject shall be mapped to a principal
+     * @param assertion The bearer assertion whose subject shall be mapped to a principal
      * @return The authentication information
      * @throws OXException If the principal cannot be resolved
+     * @see SAMLExceptionCode#UNKNOWN_USER
      */
     AuthenticationInfo resolveAuthnResponse(Response response, Assertion assertion) throws OXException;
 
     /**
      * Resolves a logout request and determines which sessions are to be terminated. This method is only
-     * called if single logout is activated.
+     * called if single logout is activated. Otherwise you can simply return <code>null</code>.
      *
      * @param request The logout request
      * @return The logout info
@@ -150,9 +150,10 @@ public interface SAMLBackend {
     LogoutInfo resolveLogoutRequest(LogoutRequest request) throws OXException;
 
     /**
-     * If the single logout profile is enabled, this method is called after the IDP sent his LogoutResponse
-     * and the logout was performed on our side. The SAML backend is then responsible to finish the request,
-     * most likely by returning a special HTML page or redirecting the user agent to a certain website.
+     * If the single logout profile is enabled, this method is called at the end of a SP-initiated logout,
+     * i.e. it is called after the IdP sent his LogoutResponse and the logout was performed on our side.
+     * The SAML backend is then responsible to finish the request, most likely by returning a special HTML
+     * page or redirecting the user agent to a certain website.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
@@ -162,11 +163,14 @@ public interface SAMLBackend {
 
     /**
      * Allows to enhance the {@link Authenticated} that is used to create the session based on an authentication
-     * response.
+     * response. Use {@link EnhancedAuthenticated} to wrap the given {@link Authenticated} instance and add your
+     * customizations.
      *
      * @param authenticated The authenticated prepared by the 'redeemReservation' login action
      * @param properties The properties that were returned as part of {@link AuthenticationInfo} from {@link #resolveAuthnResponse(Response, Assertion)}
      * @return The enhanced {@link Authenticated}. If you don't need to adjust anything, simply return <code>null</code> here
+     * @see EnhancedAuthenticated
+     * @see Enhancer
      */
     Authenticated enhanceAuthenticated(Authenticated authenticated, Map<String, String> properties);
 

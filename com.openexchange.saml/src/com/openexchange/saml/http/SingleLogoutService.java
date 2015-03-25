@@ -63,7 +63,7 @@ import com.openexchange.saml.spi.ExceptionHandler;
 
 
 /**
- * {@link SingleLogoutService}
+ * Handles requests and responses of the single logout profile.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

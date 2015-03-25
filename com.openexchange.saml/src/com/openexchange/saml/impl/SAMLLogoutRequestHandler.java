@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link SAMLLogoutRequestHandler}
+ * Handles the logout of a user after the response for a SP-initiated single logout has been received.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

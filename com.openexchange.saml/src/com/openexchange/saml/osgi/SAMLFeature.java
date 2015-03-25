@@ -85,7 +85,7 @@ import com.openexchange.saml.impl.HzStateManagement;
 import com.openexchange.saml.impl.SAMLLoginEnhancer;
 import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
 import com.openexchange.saml.impl.SAMLSessionInspector;
-import com.openexchange.saml.impl.SAMLWebSSOProviderImpl;
+import com.openexchange.saml.impl.WebSSOProviderImpl;
 import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.server.ServiceLookup;
@@ -95,7 +95,8 @@ import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link SAMLFeature}
+ * Tracks service dependencies, initializes the SAML core and registers all SAML-specific
+ * services and servlets.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
@@ -137,7 +138,7 @@ public class SAMLFeature extends DependentServiceStarter {
             DefaultConfig config = DefaultConfig.init(configService);
 
             HzStateManagement hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
-            WebSSOProvider serviceProvider = new SAMLWebSSOProviderImpl(config, openSAML, hzStateManagement, services);
+            WebSSOProvider serviceProvider = new WebSSOProviderImpl(config, openSAML, hzStateManagement, services);
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(), null));
 
             SAMLBackend samlBackend = services.getService(SAMLBackend.class);

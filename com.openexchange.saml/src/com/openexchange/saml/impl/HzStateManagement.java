@@ -67,7 +67,7 @@ import com.openexchange.saml.state.StateManagement;
 
 
 /**
- * {@link HzStateManagement}
+ * Hazelcast-based implementation of {@link StateManagement}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

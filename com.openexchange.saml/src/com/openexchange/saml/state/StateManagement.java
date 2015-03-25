@@ -70,22 +70,38 @@ public interface StateManagement {
      * @param ttl The time to live
      * @param timeUnit The time unit of <code>ttl</code>
      * @return The ID via which the stored request can be retrieved later on
+     * @throws OXException If storing the request info fails
      */
     String addAuthnRequestInfo(AuthnRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException;
 
     /**
-     * Gets an {@link AuthnRequestInfo} by its ID and removes it from the state management.
+     * Removes an {@link AuthnRequestInfo} by its ID and returns it.
      *
      * @param id The ID
      * @return The request info or <code>null</code> if the ID is invalid or the time to live is already expired
+     * @throws OXException If removing the request info fails
      */
     AuthnRequestInfo removeAuthnRequestInfo(String id) throws OXException;
 
-    void addAuthnResponse(String responseID, long timeout, TimeUnit timeUnit) throws OXException;
+    /**
+     * Adds the ID of an authentication response that will be remembered for the given time to live.
+     *
+     * @param responseID The ID of the response
+     * @param ttl The time to live
+     * @param timeUnit The time unit of <code>ttl</code>
+     * @throws OXException If storing the response ID fails
+     */
+    void addAuthnResponse(String responseID, long ttl, TimeUnit timeUnit) throws OXException;
 
+    /**
+     * Checks if a given response ID was remembered.
+     *
+     * @param responseID The ID of the response
+     * @return <code>true</code> if the response ID was remembered before or <code>false</code> if not or if its time
+     * to live is already exceeded.
+     * @throws OXException If looking up the response ID fails
+     */
     boolean hasAuthnResponse(String responseID) throws OXException;
-
-    List<String> removeSessionIds(List<String> keys);
 
     /**
      * Adds a {@link LogoutRequestInfo} to the distributed state management.
@@ -94,15 +110,22 @@ public interface StateManagement {
      * @param ttl The time to live
      * @param timeUnit The time unit of <code>ttl</code>
      * @return The ID via which the stored request can be retrieved later on
+     * @throws OXException If storing the request info fails
      */
     String addLogoutRequestInfo(LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException;
 
     /**
-     * Gets a {@link LogoutRequestInfo} by its ID and removes it from the state management.
+     * Removes a {@link LogoutRequestInfo} by its ID and returns it.
      *
      * @param id The ID
      * @return The request info or <code>null</code> if the ID is invalid or the time to live is already expired
+     * @throws OXException If removing the request info fails
      */
     LogoutRequestInfo removeLogoutRequestInfo(String id) throws OXException;
+
+    /**
+     * TODO
+     */
+    List<String> removeSessionIds(List<String> keys);
 
 }

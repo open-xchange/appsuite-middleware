@@ -52,9 +52,12 @@ package com.openexchange.saml;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.login.RedeemReservationLogin;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
 import com.openexchange.session.Session;
+import com.openexchange.session.reservation.SessionReservationService;
 
 /**
  * The interface for SAML 2.0 Web SSO support.
@@ -75,13 +78,17 @@ public interface WebSSOProvider {
     String buildAuthnRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException;
 
     /**
-     * Handles an authentication response.
+     * Handles an authentication response from the IdP. After successful validation of the response and determining
+     * the principal, the user agent is redirected to the 'redeemReservation' login action, where his session is created
+     * and the session cookies are set.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
      * @param binding The binding used to call the assertion consumer service
      * @throws OXException If an error occurs while processing the response
      * @throws IOException If writing to the servlet response fails
+     * @see SessionReservationService
+     * @see RedeemReservationLogin
      */
     void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException;
 
@@ -97,22 +104,26 @@ public interface WebSSOProvider {
     String buildLogoutRequest(HttpServletRequest req, HttpServletResponse resp, Session session) throws OXException;
 
     /**
-     * Handles a logout response.
+     * Handles a logout response. After successful validation of the response the user agent is redirected to the 'samlLogout'
+     * login action, where the principals session is terminated and cookies are removed.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
      * @param binding The binding used to call the assertion consumer service
      * @throws OXException If an error occurs while processing the response
      * @throws IOException If writing to the servlet response fails
+     * @see SAMLLogoutRequestHandler
      */
     void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding httpRedirect) throws IOException, OXException;
 
     /**
-     * Handles a logout request.
+     * Handles a logout request from the IdP. After successful validation of the response the sessions to terminate are determined
+     * (by <code>SessionIndex</code> elements or all sessions for a denoted principal). After termination the response is compiled
+     * and sent to the IdP via the configured binding.
      *
      * @param httpRequest The servlet request
      * @param httpResponse The servlet response
-     * @param binding The binding used to call the single logout service
+     * @param binding The binding via which this request was received
      * @throws IOException If writing to the servlet response fails
      */
     void handleLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws IOException;
@@ -124,6 +135,5 @@ public interface WebSSOProvider {
      * @return The XML as string
      */
     String getMetadataXML() throws OXException;
-
 
 }

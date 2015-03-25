@@ -56,17 +56,19 @@ import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.session.Session;
 
 
 /**
- * A convenience class that allows implementors of {@link SAMLWebSSOCustomizer} to only
+ * A convenience class that allows implementors of {@link WebSSOCustomizer} to only
  * implement the methods that are really needed. All methods of the interface are pre-
  * implemented with default implementations, i.e. no customization takes place.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
+ * @see WebSSOCustomizer
  */
-public abstract class AbstractWebSSOCustomizer implements SAMLWebSSOCustomizer {
+public abstract class AbstractWebSSOCustomizer implements WebSSOCustomizer {
 
     @Override
     public AuthnRequest customizeAuthnRequest(AuthnRequest authnRequest, RequestContext requestContext) throws OXException {
@@ -79,7 +81,7 @@ public abstract class AbstractWebSSOCustomizer implements SAMLWebSSOCustomizer {
     }
 
     @Override
-    public LogoutRequest customizeLogoutRequest(LogoutRequest logoutRequest, RequestContext requestContext) {
+    public LogoutRequest customizeLogoutRequest(LogoutRequest logoutRequest, Session session, RequestContext requestContext) {
         return logoutRequest;
     }
 

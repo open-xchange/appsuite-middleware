@@ -79,7 +79,7 @@ public class DefaultExceptionHandler implements ExceptionHandler {
         sendErrorPage(httpRequest, httpResponse, exception);
     }
 
-    private static void sendErrorPage(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
+    protected static void sendErrorPage(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
         String message = exception.getDisplayMessage(Locale.US);
         if (message == null) {
             message = exception.getMessage();

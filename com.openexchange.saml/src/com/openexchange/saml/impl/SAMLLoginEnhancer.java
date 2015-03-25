@@ -59,7 +59,7 @@ import com.openexchange.session.reservation.Enhancer;
 
 
 /**
- * {@link SAMLLoginEnhancer}
+ * The callback to customize the login procedure of SAML-based sessions.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

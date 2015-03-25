@@ -62,7 +62,7 @@ import com.openexchange.saml.spi.ExceptionHandler;
 
 
 /**
- * {@link AssertionConsumerService}
+ * The HTTP endpoint that receives authentication responses via POST.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

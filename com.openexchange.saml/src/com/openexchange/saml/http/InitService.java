@@ -66,7 +66,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
- * {@link InitService}
+ * The service to initiate SAML flows.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

@@ -51,7 +51,9 @@ package com.openexchange.saml.state;
 
 
 /**
- * {@link DefaultLogoutRequestInfo}
+ * Contains the available information about an already sent logout request. This
+ * is for example used to assign responses to their according requests, i.e. to
+ * validate InResponseTo attributes of response objects.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

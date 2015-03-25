@@ -53,7 +53,11 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
- * {@link SAMLActivator} - The activator for <i>com.openexchange.saml</i> bundle.
+ * OSGi activator for com.openexchange.saml.
+ *
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
 public class SAMLActivator implements BundleActivator {
 

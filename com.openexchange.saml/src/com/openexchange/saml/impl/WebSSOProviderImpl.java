@@ -80,7 +80,6 @@ import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
 import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.SessionIndex;
 import org.opensaml.saml2.core.Status;
@@ -116,7 +115,6 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.CryptoHelper;
 import com.openexchange.saml.OpenSAML;
@@ -129,8 +127,8 @@ import com.openexchange.saml.spi.AuthenticationInfo;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.LogoutInfo;
 import com.openexchange.saml.spi.SAMLBackend;
-import com.openexchange.saml.spi.SAMLWebSSOCustomizer;
-import com.openexchange.saml.spi.SAMLWebSSOCustomizer.RequestContext;
+import com.openexchange.saml.spi.WebSSOCustomizer;
+import com.openexchange.saml.spi.WebSSOCustomizer.RequestContext;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.DefaultLogoutRequestInfo;
@@ -146,12 +144,14 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
+ * Provides the functionality for supported SAML profiles.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SAMLWebSSOProviderImpl implements WebSSOProvider {
+public class WebSSOProviderImpl implements WebSSOProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SAMLWebSSOProviderImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WebSSOProviderImpl.class);
 
     /**
      * The number of milliseconds for which a LogoutRequest sent by us is considered valid.
@@ -175,7 +175,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
     private final ServiceLookup services;
 
-    public SAMLWebSSOProviderImpl(SAMLConfig config, OpenSAML openSAML, StateManagement stateManagement, ServiceLookup services) {
+    public WebSSOProviderImpl(SAMLConfig config, OpenSAML openSAML, StateManagement stateManagement, ServiceLookup services) {
         super();
         this.config = config;
         this.openSAML = openSAML;
@@ -266,7 +266,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
 
     @Override
     public String buildLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Session session) throws OXException {
-        final LogoutRequest logoutRequest = customizeLogoutRequest(prepareLogoutRequest(session), httpRequest, httpResponse);
+        final LogoutRequest logoutRequest = customizeLogoutRequest(prepareLogoutRequest(session), session, httpRequest, httpResponse);
         String domainName = getDomainName(httpRequest);
         DefaultLogoutRequestInfo requestInfo = new DefaultLogoutRequestInfo();
         requestInfo.setRequestId(logoutRequest.getID());
@@ -474,10 +474,6 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         if (subjectID != null) {
             try {
                 SAMLObject subjectIDElement = openSAML.unmarshall(SAMLObject.class, subjectID);
-                /*
-                 * TODO: implement subject ID encryption. Needs the CredentialProvider to be extended by an
-                 * encryption credential first.
-                 */
                 if (subjectIDElement instanceof BaseID) {
                     logoutRequest.setBaseID((BaseID) subjectIDElement);
                 } else if (subjectIDElement instanceof NameID) {
@@ -497,15 +493,15 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
         return logoutRequest;
     }
 
-    private LogoutRequest customizeLogoutRequest(LogoutRequest logoutRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
-        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+    private LogoutRequest customizeLogoutRequest(LogoutRequest logoutRequest, Session session, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+        WebSSOCustomizer customizer = backend.getWebSSOCustomizer();
         if (customizer != null) {
             RequestContext requestContext = new RequestContext();
             requestContext.config = config;
             requestContext.openSAML = openSAML;
             requestContext.httpRequest = httpRequest;
             requestContext.httpResponse = httpResponse;
-            return customizer.customizeLogoutRequest(logoutRequest, requestContext);
+            return customizer.customizeLogoutRequest(logoutRequest, session, requestContext);
         }
 
         return logoutRequest;
@@ -530,7 +526,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     private LogoutResponse customizeLogoutResponse(LogoutResponse logoutResponse, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
-        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        WebSSOCustomizer customizer = backend.getWebSSOCustomizer();
         if (customizer != null) {
             RequestContext requestContext = new RequestContext();
             requestContext.config = config;
@@ -727,9 +723,9 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     private AuthnRequest customizeAuthnRequest(AuthnRequest authnRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
-        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        WebSSOCustomizer customizer = backend.getWebSSOCustomizer();
         if (customizer != null) {
-            RequestContext requestContext = new SAMLWebSSOCustomizer.RequestContext();
+            RequestContext requestContext = new WebSSOCustomizer.RequestContext();
             requestContext.config = config;
             requestContext.openSAML = openSAML;
             requestContext.httpRequest = httpRequest;
@@ -747,15 +743,11 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
          * attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity. [profiles 06 - 4.1.4.1p19]
          */
         Issuer issuer = openSAML.buildSAMLObject(Issuer.class);
-        issuer.setFormat(NameIDType.ENTITY);
         issuer.setValue(config.getEntityID());
         authnRequest.setIssuer(issuer);
 
+        authnRequest.setProviderName(config.getProviderName());
         authnRequest.setVersion(SAMLVersion.VERSION_20);
-        String providerName = config.getProviderName();
-        if (!Strings.isEmpty(providerName)) {
-            authnRequest.setProviderName(providerName);
-        }
         authnRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
         authnRequest.setAssertionConsumerServiceURL(config.getAssertionConsumerServiceURL());
         authnRequest.setDestination(config.getIdentityProviderAuthnURL());
@@ -767,7 +759,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     private SPSSODescriptor customizeDescriptor(SPSSODescriptor spssoDescriptor) throws OXException {
-        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        WebSSOCustomizer customizer = backend.getWebSSOCustomizer();
         if (customizer != null) {
             return customizer.customizeSPSSODescriptor(spssoDescriptor);
         }
@@ -880,7 +872,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     private String customDecodeLogoutRequest(HttpServletRequest httpRequest, Binding binding) throws OXException {
-        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        WebSSOCustomizer customizer = backend.getWebSSOCustomizer();
         if (customizer != null) {
             return customizer.decodeLogoutRequest(httpRequest, binding);
         }
@@ -889,7 +881,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     private String customDecodeLogoutResponse(HttpServletRequest httpRequest, Binding binding) throws OXException {
-        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        WebSSOCustomizer customizer = backend.getWebSSOCustomizer();
         if (customizer != null) {
             return customizer.decodeLogoutResponse(httpRequest, binding);
         }
@@ -931,7 +923,7 @@ public class SAMLWebSSOProviderImpl implements WebSSOProvider {
     }
 
     private String customDecodeAuthnResponse(HttpServletRequest httpRequest) throws OXException {
-        SAMLWebSSOCustomizer customizer = backend.getWebSSOCustomizer();
+        WebSSOCustomizer customizer = backend.getWebSSOCustomizer();
         if (customizer != null) {
             return customizer.decodeAuthnResponse(httpRequest);
         }

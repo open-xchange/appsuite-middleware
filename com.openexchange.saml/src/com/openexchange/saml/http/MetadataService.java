@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
- * {@link MetadataService}
+ * Makes the service providers metadata XML available via HTTP if configured to do so.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

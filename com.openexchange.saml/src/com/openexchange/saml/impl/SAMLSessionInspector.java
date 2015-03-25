@@ -64,7 +64,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 
 
 /**
- * {@link SAMLSessionInspector}
+ * Terminates SAML sessions that exceed a timeout defined by the IdP.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
