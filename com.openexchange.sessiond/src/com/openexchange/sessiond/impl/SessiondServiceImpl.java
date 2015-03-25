@@ -236,8 +236,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public Collection<Session> filterSessions(SessionFilter filter, boolean filterGlobally) throws OXException {
-        // TODO implement me
-        return Collections.emptyList();
+        return SessionHandler.filterSessions(filter, filterGlobally);
     }
 
 }

@@ -84,6 +84,7 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.serialization.PortableUserSessionsCleaner;
@@ -1312,6 +1313,80 @@ public final class SessionHandler {
             }
         }
         return retval;
+    }
+
+    public static Collection<Session> filterSessions(final SessionFilter filter, boolean filterGlobally) {
+        LOG.debug("filterSessions <{}> <{}>", filter, filterGlobally);
+        if (filterGlobally) {
+            return filterSessionsGlobally(filter);
+        }
+
+        return filterSessionsLocally(filter);
+    }
+
+    private static List<Session> filterSessionsLocally(SessionFilter filter) {
+        final SessionData sessionData = sessionDataRef.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return Collections.emptyList();
+        }
+
+        return sessionData.filterSessions(filter);
+    }
+
+    private static List<Session> filterSessionsGlobally(final SessionFilter filter) {
+        HazelcastInstance hazelcastInstance = SessiondServiceRegistry.getServiceRegistry().getService(HazelcastInstance.class);
+        if (hazelcastInstance == null) {
+            LOG.warn("Cannot find HazelcastInstance to filter sessions globally. Filtering locally only...");
+            return filterSessionsLocally(filter);
+        } else {
+            return filterSessionsLocally(filter);
+//            List<Session> allSessions = new LinkedList<Session>();
+//            Member localMember = hazelcastInstance.getCluster().getLocalMember();
+//            Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
+//            if (!clusterMembers.remove(localMember)) {
+//                LOG.warn("Couldn't remove local member from cluster members.");
+//            }
+//            if (!clusterMembers.isEmpty()) {
+//                // TODO: own timeout
+//                int hzExecutionTimeout = getRemoteUserSessionsExecutionTimeout();
+//                // Der logout muss dann hinterher auch noch klappen, also auch wieder distributieren?
+//                Map<Member, Future<List<PortableSession>>> submitToMembers = hazelcastInstance.getExecutorService("default").submitToMembers(null /* FIXME */, clusterMembers);
+//                allSessions.addAll(filterSessionsLocally(filter));
+//                for (Member member : submitToMembers.keySet()) {
+//                    Future<Integer> future = submitToMembers.get(member);
+//                    try {
+//                        Integer numOfRemovedSessions = null;
+//                        if (hzExecutionTimeout > 0) {
+//                            numOfRemovedSessions = future.get(hzExecutionTimeout, TimeUnit.SECONDS);
+//                        } else {
+//                            numOfRemovedSessions = future.get();
+//                        }
+//                        if ((numOfRemovedSessions != null) && (future.isDone())) {
+//                            LOG.info("Removed {} sessions for user {} in context {} on remote node {}", numOfRemovedSessions, userId, contextId, member.getSocketAddress().toString());
+//                        } else {
+//                            LOG.warn("No sessions removed for user {} in context {} on remote node {}.", userId, contextId, member.getSocketAddress().toString());
+//                        }
+//                    } catch (TimeoutException e) {
+//                        // Wait time elapsed; enforce cancelation
+//                        future.cancel(true);
+//                        LOG.error("Removing sessions for user {} in context {} on remote node {} took to longer than {} seconds and was aborted!", userId, contextId, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e);
+//                    } catch (InterruptedException e) {
+//                        future.cancel(true);
+//                        LOG.error("Removing sessions for user {} in context {} on remote node {} took to longer than {} seconds and was aborted!", userId, contextId, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e);
+//                    } catch (ExecutionException e) {
+//                        future.cancel(true);
+//                        LOG.error("Removing sessions for user {} in context {} on remote node {} took to longer than {} seconds and was aborted!", userId, contextId, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e.getCause());
+//                    } catch (Exception e) {
+//                        LOG.error("Failed to issue remote session removal for user {} in context {} on remote node {}.", userId, contextId, member.getSocketAddress().toString(), e.getCause());
+//                        throw SessionExceptionCodes.REMOTE_SESSION_REMOVAL_FAILED.create(userId, contextId, member.getSocketAddress().toString(), e.getCause());
+//                    }
+//                }
+//            } else {
+//                LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
+//            }
+//            return allSessions;
+        }
     }
 
     protected static void cleanUp() {
