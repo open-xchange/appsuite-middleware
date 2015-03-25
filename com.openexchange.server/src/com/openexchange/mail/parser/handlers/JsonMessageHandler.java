@@ -687,15 +687,17 @@ public final class JsonMessageHandler implements MailMessageHandler {
             final MultipartInfo mpInfo = multiparts.peek();
             if (null != mpInfo && textAppended && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                 try {
-                    final JSONArray attachments = getAttachmentsArr();
-                    final int len = attachments.length();
-                    final String keyContentType = CONTENT_TYPE;
-                    final String keyContent = CONTENT;
-                    final String keySize = SIZE;
+                    JSONArray attachments = getAttachmentsArr();
+                    int len = attachments.length();
+                    String keyContentType = CONTENT_TYPE;
+                    String keyContent = CONTENT;
+                    String keySize = SIZE;
+                    MailPath mailPath = this.mailPath;
+
                     boolean b = true;
                     for (int i = len; b && i-- > 0;) {
                         final JSONObject jAttachment = attachments.getJSONObject(i);
-                        if (jAttachment.getString(keyContentType).startsWith("text/plain")) {
+                        if (jAttachment.getString(keyContentType).startsWith("text/plain") && null != mailPath) {
                             try {
                                 final String imageURL;
                                 {
@@ -714,6 +716,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             }
                         }
                     }
+
                     if (b) { // No suitable text/plain
                         try {
                             for (int i = len; b && i-- > 0;) {
@@ -721,7 +724,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 // Is HTML and in same multipart
                                 if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
                                     String content = jAttachment.optString(CONTENT, "null");
-                                    if (!"null".equals(content)) {
+                                    if (!"null".equals(content) && null != mailPath) {
                                         try {
                                             // Append to first one
                                             final String imageURL;
@@ -744,6 +747,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                         }
                     }
+
                     return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -760,6 +764,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * A text part has already been detected as message's body
              */
+            MailPath mailPath = this.mailPath;
             if (isAlternative) {
                 if (DisplayMode.DISPLAY.isIncluded(displayMode)) {
                     /*
@@ -797,7 +802,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             // Is HTML and in same multipart
                             if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && null != mpInfo && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null)) && mpInfo.isSubType("mixed")) {
                                 String content = jAttachment.optString(CONTENT, "null");
-                                if (!"null".equals(content)) {
+                                if (!"null".equals(content) && null != mailPath) {
                                     // Append to first one
                                     HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded, maxContentSize);
                                     content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
@@ -841,7 +846,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         // Is HTML and in same multipart
                         if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && null != mpInfo && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null)) && mpInfo.isSubType("mixed")) {
                             String content = jAttachment.optString(CONTENT, "null");
-                            if (!"null".equals(content)) {
+                            if (!"null".equals(content) && null != mailPath) {
                                 // Append to first one
                                 HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded, maxContentSize);
                                 content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
