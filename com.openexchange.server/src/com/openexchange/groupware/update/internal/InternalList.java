@@ -93,7 +93,6 @@ import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTables;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
-import com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTask;
@@ -779,7 +778,8 @@ public final class InternalList {
         // Drop redundant indices
         list.add(new DropRendundantIndicesUpdateTask());
 
-        list.add(new MigrateAliasUpdateTask());
+        // Migrates the user aliases from the user_attribute table to the user_alias table; but does not delete the entries in the user_attribute table.
+        list.add(new com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
