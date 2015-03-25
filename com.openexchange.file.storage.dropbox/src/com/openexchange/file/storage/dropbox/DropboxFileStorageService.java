@@ -73,6 +73,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
@@ -152,6 +153,14 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
         return m;
     }
 
+    private FileStorageAccountManager getAccountManager0(boolean secretAware) throws OXException {
+        if (secretAware) {
+            return getAccountManager0();
+        }
+        FileStorageAccountManagerLookupService lookupService = DropboxServices.getService(FileStorageAccountManagerLookupService.class);
+        return lookupService.getAccountManagerFor(SERVICE_ID);
+    }
+
     private void applyCompositeAccountManager(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
         this.compositeAccountManager = compositeAccountManager;
     }
@@ -175,20 +184,21 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
     @Override
     public void onAfterOAuthAccountDeletion(int oauthAccountId, Map<String, Object> eventProps, int user, int cid, Connection con) {
         try {
-            // Acquire account manager
-            FileStorageAccountManager accountManager = getAccountManager();
-
             List<FileStorageAccount> toDelete = new LinkedList<FileStorageAccount>();
             FakeSession session = new FakeSession(null, user, cid);
-            for (FileStorageAccount account : accountManager.getAccounts(session)) {
+            for (FileStorageAccount account : getAccounts0(session, false)) {
                 Object obj = account.getConfiguration().get("account");
                 if (null != obj && Integer.toString(oauthAccountId).equals(obj.toString())) {
                     toDelete.add(account);
                 }
             }
 
+            // Acquire account manager
+            FileStorageAccountManager accountManager = getAccountManager();
+
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
+                DropboxOAuthAccess.dropFor(deleteMe, session);
                 LOG.info("Deleted Dropbox account with ID {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), oauthAccountId, user, cid);
             }
 
@@ -208,7 +218,7 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
             return null;
         }
 
-        if (false == getAccounts(session).isEmpty()) {
+        if (false == getAccounts0(session, false).isEmpty()) {
             return null;
         }
 
@@ -273,10 +283,14 @@ public final class DropboxFileStorageService implements AccountAware, OAuthUtili
      * @throws OXException If listing fails
      */
     @Override
-    public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException {
+        return getAccounts0(session, true);
+    }
+
+    private List<FileStorageAccount> getAccounts0(Session session, boolean secretAware) throws OXException {
         CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
         if (null == compositeAccountManager) {
-            return getAccountManager0().getAccounts(session);
+            return getAccountManager0(secretAware).getAccounts(session);
         }
 
         Map<String, FileStorageAccountInfo> accountsMap = new LinkedHashMap<String, FileStorageAccountInfo>(8);

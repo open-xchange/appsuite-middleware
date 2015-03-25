@@ -139,6 +139,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The file %1$s doesn't have any content.
     public static final String NO_CONTENT_MSG = "The file %1$s doesn't have any content.";
 
+    // The associated %2$s account does no more exist
+    public static final String ACCOUNT_NOT_FOUND_MSG = "The associated %2$s account does no more exist";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

@@ -457,7 +457,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @param e The I/O error
      * @return The resulting exception
      */
-    protected OXException handleIOError(IOException e) {
+    protected static OXException handleIOError(IOException e) {
         Throwable cause = e.getCause();
         if (cause instanceof AuthenticationException) {
             return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), OneDriveConstants.ID, SC_UNAUTHORIZED);
@@ -478,7 +478,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @param e The HTTP error
      * @return The resulting exception
      */
-    protected OXException handleHttpResponseError(String identifier, HttpResponseException e) {
+    protected static OXException handleHttpResponseError(String identifier, HttpResponseException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
             return FileStorageExceptionCodes.NOT_FOUND.create(e, OneDriveConstants.ID, identifier);
         }

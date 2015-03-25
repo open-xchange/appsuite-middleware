@@ -98,6 +98,18 @@ public class OneDriveAccess {
     private static final long RECHECK_THRESHOLD = 2700;
 
     /**
+     * Drops the Microsoft OneDrive access for given Microsoft OneDrive account.
+     *
+     * @param fsAccount The Microsoft OneDrive account providing credentials and settings
+     * @param session The user session
+     */
+    public static void dropFor(final FileStorageAccount fsAccount, final Session session) {
+        OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
+        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
+    }
+
+    /**
      * Gets the Microsoft OneDrive access for given Microsoft OneDrive account.
      *
      * @param fsAccount The Microsoft OneDrive account providing credentials and settings
@@ -106,8 +118,8 @@ public class OneDriveAccess {
      * @throws OXException If a Microsoft OneDrive access could not be created
      */
     public static OneDriveAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        final OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
-        final String accountId = fsAccount.getId();
+        OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
         OneDriveAccess oneDriveAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
         if (null == oneDriveAccess) {
             final OneDriveAccess newInstance = new OneDriveAccess(fsAccount, session, session.getUserId(), session.getContextId());
