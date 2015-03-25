@@ -1,3 +1,7 @@
+* 2015-03-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37324: Removed inappropriate naming from "mpasswd" file
+
 * 2015-01-30 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35430: Do not query by 'cid' if the sqlPattern is not a number.
