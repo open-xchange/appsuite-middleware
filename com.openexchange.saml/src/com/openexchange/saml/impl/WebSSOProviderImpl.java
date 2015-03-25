@@ -52,10 +52,12 @@ package com.openexchange.saml.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -141,6 +143,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -361,14 +365,18 @@ public class WebSSOProviderImpl implements WebSSOProvider {
             LogoutResponse logoutResponse = customizeLogoutResponse(prepareLogoutResponse(status, logoutRequest == null ? null : logoutRequest.getID()), httpRequest, httpResponse);
             String responseXML = openSAML.marshall(logoutResponse);
             LOG.debug("Marshalled LogoutResponse: {}", responseXML);
-            switch (config.getLogoutResponseBinding()) {
+            Binding responseBinding = config.getLogoutResponseBinding();
+            switch (responseBinding) {
                 case HTTP_REDIRECT:
                     sendLogoutResponseViaRedirect(responseXML, httpRequest, httpResponse);
                     break;
 
                 case HTTP_POST:
-                    // sendLogoutResponseViaPOST(responseXML, httpRequest, httpResponse); // TODO
+                    sendLogoutResponseViaPOST(responseXML, httpRequest, httpResponse);
                     break;
+
+                default:
+                    throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(responseBinding.name());
             }
         } catch (MarshallingException e) {
             LOG.error("Could not marshall LogoutResponse", e);
@@ -556,6 +564,31 @@ public class WebSSOProviderImpl implements WebSSOProvider {
             httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (OXException e) {
             LOG.error("Could not send LogoutResponse via redirect", e);
+            httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private void sendLogoutResponseViaPOST(String responseXML, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+        try {
+            String encoded = Base64.encodeBase64String(responseXML.getBytes());
+            TemplateService templateService = services.getService(TemplateService.class);
+            OXTemplate template = templateService.loadTemplate(config.getLogoutResponseTemplate());
+            Map<String, String> vars = new HashMap<String, String>(5);
+            vars.put("action", config.getIdentityProviderLogoutURL());
+            vars.put("SAMLResponse", encoded);
+            String relayState = httpRequest.getParameter("RelayState");
+            if (relayState != null) {
+                vars.put("RelayState", relayState);
+            }
+
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
+            httpResponse.setContentType("text/html");
+            httpResponse.setCharacterEncoding(Charsets.UTF_8_NAME);
+            PrintWriter writer = httpResponse.getWriter();
+            template.process(vars, writer);
+            writer.flush();
+        } catch (OXException e) {
+            LOG.error("Could not send LogoutResponse via POST", e);
             httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

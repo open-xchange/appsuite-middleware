@@ -133,4 +133,11 @@ public interface SAMLConfig {
      */
     boolean enableMetadataService();
 
+    /**
+     * The HTML template to use when logout responses are sent to the IdP via HTTP POST.
+     *
+     * @return The file name of the template which is located in the default template folder.
+     */
+    String getLogoutResponseTemplate();
+
 }

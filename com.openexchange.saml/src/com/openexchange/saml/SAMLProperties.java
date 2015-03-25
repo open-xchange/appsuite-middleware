@@ -113,5 +113,10 @@ public class SAMLProperties {
      */
     public static final String ENABLE_METADATA_SERVICE = "com.openexchange.saml.enableMetadataService";
 
+    /**
+     * The HTML template to use when logout responses are sent to the IdP via HTTP POST.
+     */
+    public static final String LOGOUT_RESPONSE_POST_TEMPLATE = "com.openexchange.saml.logoutResponseTemplate";
+
 
 }

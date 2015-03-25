@@ -93,6 +93,7 @@ import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.reservation.Enhancer;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.templating.TemplateService;
 
 /**
  * Tracks service dependencies, initializes the SAML core and registers all SAML-specific
@@ -113,7 +114,8 @@ public class SAMLFeature extends DependentServiceStarter {
         SAMLBackend.class,
         HazelcastInstance.class,
         SessiondService.class,
-        CapabilityService.class
+        CapabilityService.class,
+        TemplateService.class
     };
 
     private final static Class<?>[] OPTIONAL_SERVICES = new Class[] {

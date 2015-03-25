@@ -57,6 +57,7 @@ import static com.openexchange.saml.SAMLProperties.IDP_ENTITY_ID;
 import static com.openexchange.saml.SAMLProperties.IDP_LOGIN_URL;
 import static com.openexchange.saml.SAMLProperties.IDP_LOGOUT_URL;
 import static com.openexchange.saml.SAMLProperties.LOGOUT_RESPONSE_BINDING;
+import static com.openexchange.saml.SAMLProperties.LOGOUT_RESPONSE_POST_TEMPLATE;
 import static com.openexchange.saml.SAMLProperties.PROVIDER_NAME;
 import static com.openexchange.saml.SAMLProperties.SLS_URL;
 import com.openexchange.config.ConfigurationService;
@@ -92,6 +93,8 @@ public class DefaultConfig implements SAMLConfig {
 
     private boolean enableMetadataService;
 
+    private String logoutResponseTemplate;
+
 
     private DefaultConfig() {
         super();
@@ -109,7 +112,11 @@ public class DefaultConfig implements SAMLConfig {
             config.setSupportSingleLogout(supportSingleLogout);
             config.setSingleLogoutServiceURL(checkProperty(configService, SLS_URL));
             config.setIdentityProviderLogoutURL(checkProperty(configService, IDP_LOGOUT_URL));
-            config.setLogoutResponseBinding(checkBinding(configService, LOGOUT_RESPONSE_BINDING));
+            Binding logoutResponseBinding = checkBinding(configService, LOGOUT_RESPONSE_BINDING);
+            config.setLogoutResponseBinding(logoutResponseBinding);
+            if (logoutResponseBinding == Binding.HTTP_POST) {
+                config.setLogoutResponseTemplate(checkProperty(configService, LOGOUT_RESPONSE_POST_TEMPLATE));
+            }
         }
 
         config.setEnableMetadataService(configService.getBoolProperty(ENABLE_METADATA_SERVICE, false));
@@ -186,6 +193,11 @@ public class DefaultConfig implements SAMLConfig {
         return enableMetadataService;
     }
 
+    @Override
+    public String getLogoutResponseTemplate() {
+        return logoutResponseTemplate;
+    }
+
     private void setProviderName(String providerName) {
         this.providerName = providerName;
     }
@@ -224,6 +236,10 @@ public class DefaultConfig implements SAMLConfig {
 
     private void setEnableMetadataService(boolean enableMetadataService) {
         this.enableMetadataService = enableMetadataService;
+    }
+
+    private void setLogoutResponseTemplate(String logoutResponseTemplate) {
+        this.logoutResponseTemplate = logoutResponseTemplate;
     }
 
 }
