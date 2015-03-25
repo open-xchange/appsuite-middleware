@@ -75,6 +75,18 @@ public final class GoogleDriveAccess {
     private static final long RECHECK_THRESHOLD = 2700;
 
     /**
+     * Drops the Google Drive access for given Google Drive account.
+     *
+     * @param fsAccount The Google Drive account providing credentials and settings
+     * @param session The user session
+     */
+    public static void dropFor(FileStorageAccount fsAccount, Session session) {
+        GoogleDriveAccessRegistry registry = GoogleDriveAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
+        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
+    }
+
+    /**
      * Gets the Google Drive access for given Google Drive account.
      *
      * @param fsAccount The Google Drive account providing credentials and settings
@@ -83,8 +95,8 @@ public final class GoogleDriveAccess {
      * @throws OXException If a Google Drive access could not be created
      */
     public static GoogleDriveAccess accessFor(FileStorageAccount fsAccount, Session session) throws OXException {
-        final GoogleDriveAccessRegistry registry = GoogleDriveAccessRegistry.getInstance();
-        final String accountId = fsAccount.getId();
+        GoogleDriveAccessRegistry registry = GoogleDriveAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
         GoogleDriveAccess googleDriveAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
         if (null == googleDriveAccess) {
             final GoogleDriveAccess newInstance = new GoogleDriveAccess(fsAccount, session);

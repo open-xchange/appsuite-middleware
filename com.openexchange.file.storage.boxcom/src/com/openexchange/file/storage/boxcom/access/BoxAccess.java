@@ -96,6 +96,18 @@ public class BoxAccess {
     private static final long RECHECK_THRESHOLD = 2700;
 
     /**
+     * Drops the Box access for given Box account.
+     *
+     * @param fsAccount The Box account providing credentials and settings
+     * @param session The user session
+     */
+    public static void dropFor(final FileStorageAccount fsAccount, final Session session) {
+        BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
+        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
+    }
+
+    /**
      * Gets the Box access for given Box account.
      *
      * @param fsAccount The Box account providing credentials and settings
@@ -104,8 +116,8 @@ public class BoxAccess {
      * @throws OXException If a Box access could not be created
      */
     public static BoxAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        final BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
-        final String accountId = fsAccount.getId();
+        BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
         BoxAccess boxAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
         if (null == boxAccess) {
             final BoxAccess newInstance = new BoxAccess(fsAccount, session, session.getUserId(), session.getContextId());

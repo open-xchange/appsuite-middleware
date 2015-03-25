@@ -114,6 +114,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
     public static final String FILE_UPDATE_ABORTED_MSG = "The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.";
 
+    // The associated %2$s account does no more exist
+    public static final String ACCOUNT_NOT_FOUND_MSG = "The associated %2$s account does no more exist";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

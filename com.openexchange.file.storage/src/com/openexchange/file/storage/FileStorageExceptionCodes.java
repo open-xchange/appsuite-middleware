@@ -82,7 +82,7 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
      */
-    ACCOUNT_NOT_FOUND("File storage account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.", Category.CATEGORY_ERROR, 4),
+    ACCOUNT_NOT_FOUND("File storage account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.", Category.CATEGORY_USER_INPUT, 4, FileStorageExceptionMessages.ACCOUNT_NOT_FOUND_MSG),
     /**
      * The operation is not supported by service %1$s.
      */
