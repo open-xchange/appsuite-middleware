@@ -62,6 +62,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
@@ -206,7 +207,9 @@ public final class MailPasswordUtil {
                 throw e;
             }
             // Apparently empty password
-            throw MailExceptionCode.CONFIG_ERROR.create(e, "The mail configuration is invalid. Please check \"com.openexchange.mail.passwordSource\" property or set a valid secret source in file 'secret.properties'.");
+            OXException oxe = MailExceptionCode.CONFIG_ERROR.create(e, "The mail configuration is invalid. Please check \"com.openexchange.mail.passwordSource\" property or set a valid secret source in file 'secret.properties'.");
+            oxe.setCategory(Category.CATEGORY_CONFIGURATION);
+            throw oxe;
         }
     }
 
