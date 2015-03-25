@@ -2511,17 +2511,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             try {
                 if (!holdsMessages()) {
-                    throw IMAPException.create(
-                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
-                        imapConfig,
-                        session,
-                        imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
                 }
-                if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(
-                    imapFolder,
-                    true,
-                    session,
-                    accountId))) {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights( imapFolder, true, session, accountId))) {
                     throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {
