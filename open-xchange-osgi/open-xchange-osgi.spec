@@ -26,7 +26,11 @@ Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-activation = %{version}
 Obsoletes:     open-xchange-activation < %{version}
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+Requires:      java7
+%else
 Requires:      java >= 1.7.0
+%endif
 %if 0%{?rhel_version}
 # ibm java only on SLE, please
 Conflicts:     java-ibm
