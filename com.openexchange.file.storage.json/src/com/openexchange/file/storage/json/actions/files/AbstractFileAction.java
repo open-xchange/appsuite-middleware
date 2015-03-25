@@ -247,13 +247,40 @@ public abstract class AbstractFileAction implements AJAXActionService {
         // Nothing to do
     }
 
+    private static volatile Long threshold;
+
+    /**
+     * Gets the size threshold for ZIP archives
+     *
+     * @return The size threshold
+     */
+    protected static long threshold() {
+        Long tmp = threshold;
+        if (null == tmp) {
+            synchronized (ZipFolderAction.class) {
+                tmp = threshold;
+                if (null == tmp) {
+                    long defaultThreshold = 1073741824;
+                    ConfigurationService service = Services.getConfigurationService();
+                    if (null == service) {
+                        return defaultThreshold;
+                    }
+                    String property = service.getProperty("com.openexchange.file.storage.zipFolderThreshold");
+                    tmp = null == property ? Long.valueOf(defaultThreshold) : Long.valueOf(property.trim());
+                    threshold = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
     /**
      * Gets the configured value for "com.openexchange.infostore.zipDocumentsCompressionLevel".
      *
      * @return The configured compression level
      * @throws OXException
      */
-    protected static int getZipDocumentsCompressionLevel() throws OXException {
+    public static int getZipDocumentsCompressionLevel() throws OXException {
         ConfigurationService configService = Services.getConfigurationService();
         if (null == configService) {
             return Deflater.DEFAULT_COMPRESSION;
