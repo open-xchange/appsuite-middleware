@@ -391,28 +391,30 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == fullName) {
             throw MailExceptionCode.MISSING_FULLNAME.create();
         }
+
         checkFailFast(imapStore, fullName);
-        if (imapFolder == this.imapFolder) {
+
+        if ((null != imapFolder) && (imapFolder == this.imapFolder)) {
             closeOtherFolders();
         }
-        final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
-        final boolean isIdenticalFolder;
-        if (isDefaultFolder) {
-            isIdenticalFolder = (imapFolder == null ? false : 0 == imapFolder.getFullName().length());
-        } else {
-            isIdenticalFolder = (imapFolder == null ? false : fullName.equals(imapFolder.getFullName()));
-        }
-        if (imapFolder != null) {
-            final String imapFolderFullname = imapFolder.getFullName();
 
-            // Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+        // Check for default folder
+        boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
+
+        if (imapFolder != null) {
+            // Obtain folder lock once to avoid repetitive acquires/releases when invoking folder's getXXX() methods
             synchronized (imapFolder) {
+                String imapFolderFullname = imapFolder.getFullName();
+
+                // Check for equal folder
+                boolean isEqualFolder = isDefaultFolder ? ( 0 == imapFolder.getFullName().length()) : fullName.equals(imapFolder.getFullName());
+
                 IMAPCommandsCollection.forceNoopCommand(imapFolder);
                 clearCache(imapFolder);
                 try {
                     // This call also checks if folder is opened
                     final int mode = imapFolder.getMode();
-                    if (isIdenticalFolder && (mode >= desiredMode)) {
+                    if (isEqualFolder && (mode >= desiredMode)) {
                         // Identical folder is already opened in an appropriate mode.
                         return imapFolder;
                     }
@@ -431,7 +433,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 }
 
                 // Folder is closed here
-                if (isIdenticalFolder) {
+                if (isEqualFolder) {
                     try {
                         if ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
                             throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolderFullname);
@@ -456,31 +458,35 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 }
             } // End of synchronized
         }
-        final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
+
+        // Get IMAP folder for full name
+        IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
         if (imapAccess.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
             IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session, true);
         }
 
-        // Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+        // Obtain folder lock once to avoid repetitive acquires/releases when invoking folder's getXXX() methods
         synchronized (retval) {
-            if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
-                throw IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, imapConfig, session, Integer.valueOf(desiredMode));
-            }
             boolean openIt = true;
-            boolean ignoreSubscription = this.ignoreSubscriptions;
-            ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, retval, session, ignoreSubscription);
+
+            // Get associated LIST entry and verify existence
+            ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, retval, session, ignoreSubscriptions);
             if (!isDefaultFolder && !STR_INBOX.equals(fullName) && (!listEntry.exists())) {
                 // Try to open the folder although not LISTed to check existence
                 if (!tryOpen(retval, desiredMode)) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
                 openIt = false;
-                listEntry = ListLsubCache.addSingleByFolder(accountId, retval, session, ignoreSubscription);
+                listEntry = ListLsubCache.addSingleByFolder(accountId, retval, session, ignoreSubscriptions);
             }
+
+            // Check if selectable aka. does hold messages
             boolean selectable = listEntry.canOpen();
             if (!selectable) { // NoSelect
                 throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
+
+            // Check ACLs
             try {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session, accountId))) {
                     throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
@@ -488,6 +494,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             } catch (final MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
+
+            // Finally open it in desired mode
             if (openIt) {
                 openFolder(desiredMode, retval);
             }
