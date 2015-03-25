@@ -50,11 +50,15 @@
 package com.openexchange.drive.impl.internal;
 
 import static com.openexchange.drive.impl.DriveConstants.TEMP_PATH;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import jonelo.jacksum.algorithm.MD;
+
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.DirectoryPattern;
@@ -337,7 +341,6 @@ public class SyncSession {
      * @return The server directory versions
      */
     private List<ServerDirectoryVersion> getServerDirectoryVersions() throws OXException {
-        StringBuilder stringBuilder = isTraceEnabled() ? new StringBuilder("Server directories:\n") : null;
         Map<String, FileStorageFolder> folders = getStorage().getFolders();
         List<String> folderIDs = new ArrayList<String>(folders.size());
         for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
@@ -350,6 +353,11 @@ public class SyncSession {
                 folderIDs.add(entry.getValue().getId());
             }
         }
+        if (0 == folderIDs.size()) {
+            trace("All server directories skipped.");
+            return Collections.emptyList();
+        }        
+        StringBuilder stringBuilder = isTraceEnabled() ? new StringBuilder("Server directories:\n") : null;
         List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(this, folderIDs);
         List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
         for (int i = 0; i < folderIDs.size(); i++) {

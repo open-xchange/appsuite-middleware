@@ -1,3 +1,7 @@
+* 2015-03-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37359: Skip further processing if all directories are excluded from synchrnoization
+
 * 2015-03-23 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 37211: Ensure correct folder type when moving below public infostore folder 15
