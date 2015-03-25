@@ -90,6 +90,8 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
         for (final int[] data : dataList) {
             if (checkData(id, data, con)) {
                 dropAccountByData(data, con);
+                int accountId = data[0];
+                FacebookOAuthAccessRegistry.getInstance().purgeUserAccess(cid, user, accountId);
             }
         }
     }
