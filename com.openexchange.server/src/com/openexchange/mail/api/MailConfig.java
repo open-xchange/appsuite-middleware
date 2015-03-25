@@ -696,6 +696,9 @@ public abstract class MailConfig {
             } else {
                 mailConfig.password = session.getPassword();
             }
+            if (null == mailConfig.password) {
+                throw MailExceptionCode.MISSING_CONNECT_PARAM.create("password");
+            }
         } else {
             final String mailAccountPassword = mailAccount.getPassword();
             if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
