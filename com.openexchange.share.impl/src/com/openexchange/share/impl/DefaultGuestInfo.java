@@ -196,4 +196,10 @@ public class DefaultGuestInfo implements GuestInfo {
             + ", contextID=" + contextID + "]";
     }
 
+    @Override
+    public boolean isPasswordSet() {
+        String userPassword = guestUser.getUserPassword();
+        return (AuthenticationMode.GUEST_PASSWORD == getAuthentication() && !ShareTool.INITIAL_GUEST_PASSWORD.equals(userPassword));
+    }
+
 }

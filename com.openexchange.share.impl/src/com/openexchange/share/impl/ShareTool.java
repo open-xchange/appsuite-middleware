@@ -51,8 +51,6 @@ package com.openexchange.share.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,7 +87,6 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -103,6 +100,7 @@ import com.openexchange.userconf.UserPermissionService;
 public class ShareTool {
 
     public static final String SHARE_SERVLET = "share";
+    public static final String INITIAL_GUEST_PASSWORD = " ";
 
     /**
      * Extracts the first value of a specific attribute from a user.
@@ -302,15 +300,7 @@ public class ShareTool {
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-        String password = Strings.isEmpty(recipient.getPassword()) ? PasswordUtility.generate() : recipient.getPassword();
-        try {
-            recipient.setPassword(password);
-            guestUser.setUserPassword(PasswordMech.BCRYPT.encode(password));
-        } catch (UnsupportedEncodingException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        guestUser.setUserPassword(ShareTool.INITIAL_GUEST_PASSWORD);
         return guestUser;
     }
 
