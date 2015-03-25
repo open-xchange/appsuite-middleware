@@ -58,6 +58,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.Revision;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.googledrive.osgi.Services;
@@ -171,7 +172,7 @@ public final class GoogleDriveFile extends DefaultFile {
                     setFileMD5Sum(file.getMd5Checksum());
                 }
             } catch (final RuntimeException e) {
-                throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;
@@ -222,7 +223,7 @@ public final class GoogleDriveFile extends DefaultFile {
                     setFileMD5Sum(revision.getMd5Checksum());
                 }
             } catch (final RuntimeException e) {
-                throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;

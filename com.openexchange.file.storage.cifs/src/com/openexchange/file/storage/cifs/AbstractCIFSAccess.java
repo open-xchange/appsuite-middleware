@@ -55,6 +55,7 @@ import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.cifs.cache.SmbFileMap;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
@@ -159,7 +160,7 @@ public abstract class AbstractCIFSAccess {
             final int status = e.getNtStatus();
             if (SmbException.NT_STATUS_BAD_NETWORK_NAME == status || SmbException.NT_STATUS_ACCESS_DENIED == status) {
                 // This means that the named share was not found.
-                warningsAware.addWarning(CIFSExceptionCodes.forSmbException(e));
+                warningsAware.addWarning(FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage()));
                 return false;
             }
             throw e;

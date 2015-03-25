@@ -70,8 +70,9 @@ import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.BoxClosure;
-import com.openexchange.file.storage.boxcom.BoxExceptionCodes;
+import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.boxcom.access.extended.ExtendedNonRefreshingBoxClient;
 import com.openexchange.java.Strings;
@@ -86,6 +87,7 @@ import com.openexchange.session.Session;
  * {@link BoxAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.6.1
  */
 public class BoxAccess {
@@ -96,6 +98,18 @@ public class BoxAccess {
     private static final long RECHECK_THRESHOLD = 2700;
 
     /**
+     * Drops the Box access for given Box account.
+     *
+     * @param fsAccount The Box account providing credentials and settings
+     * @param session The user session
+     */
+    public static void dropFor(final FileStorageAccount fsAccount, final Session session) {
+        BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
+        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
+    }
+
+    /**
      * Gets the Box access for given Box account.
      *
      * @param fsAccount The Box account providing credentials and settings
@@ -104,8 +118,8 @@ public class BoxAccess {
      * @throws OXException If a Box access could not be created
      */
     public static BoxAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        final BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
-        final String accountId = fsAccount.getId();
+        BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
         BoxAccess boxAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
         if (null == boxAccess) {
             final BoxAccess newInstance = new BoxAccess(fsAccount, session, session.getUserId(), session.getContextId());
@@ -192,11 +206,11 @@ public class BoxAccess {
         {
             Map<String, Object> configuration = fsAccount.getConfiguration();
             if (null == configuration) {
-                throw BoxExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(BoxConstants.ID, fsAccount.getId());
             }
             Object accountId = configuration.get("account");
             if (null == accountId) {
-                throw BoxExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(BoxConstants.ID, fsAccount.getId());
             }
             if (accountId instanceof Integer) {
                 oauthAccountId = ((Integer) accountId).intValue();
@@ -204,7 +218,7 @@ public class BoxAccess {
                 try {
                     oauthAccountId = Strings.parseInt(accountId.toString());
                 } catch (NumberFormatException e) {
-                    throw BoxExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, BoxConstants.ID, fsAccount.getId());
                 }
             }
         }
@@ -306,7 +320,7 @@ public class BoxAccess {
     }
 
     /**
-     * Re-initializes this Box access
+     * Re-initialises this Box access
      *
      * @param session The session
      * @throws OXException If operation fails

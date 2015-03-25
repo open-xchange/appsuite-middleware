@@ -69,6 +69,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -146,7 +147,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             return !entry.isDir && !entry.isDeleted;
         } catch (Exception e) {
             OXException x = handle(e, path);
-            if (DropboxExceptionCodes.NOT_FOUND.equals(x)) {
+            if (FileStorageExceptionCodes.NOT_FOUND.equals(x)) {
                 return false;
             }
             throw x;
@@ -159,10 +160,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final Entry entry = dropboxAPI.metadata(path, 1, null, false, version);
             if (entry.isDir) {
-                throw DropboxExceptionCodes.NOT_A_FILE.create(path);
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, path);
             }
             if (entry.isDeleted) {
-                throw DropboxExceptionCodes.NOT_FOUND.create(path);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, path);
             }
             DropboxFile file = new DropboxFile(entry, userId);
             //TODO fetching all revisions just to get the number of versions is quite expensive;
@@ -243,7 +244,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
             // can only copy the current revision
-            throw DropboxExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(DropboxConstants.ID);
         }
         String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
@@ -302,7 +303,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             return dropboxAPI.getThumbnailStream(path, ThumbSize.ICON_128x128, ThumbFormat.JPEG);
         } catch (Exception e) {
             OXException x = handle(e, path);
-            if (DropboxExceptionCodes.NOT_FOUND.equals(x)) {
+            if (FileStorageExceptionCodes.NOT_FOUND.equals(x)) {
                 return null;
             }
             throw x;
@@ -350,7 +351,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final Entry directoryEntry = dropboxAPI.metadata(path, 0, null, true, null);
             if (!directoryEntry.isDir) {
-                throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
             }
             for (final Entry childEntry : directoryEntry.contents) {
                 if (!childEntry.isDir && !childEntry.isDeleted) {
@@ -394,7 +395,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
          */
         for (final String version : versions) {
             if (version != CURRENT_VERSION) {
-                throw DropboxExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+                throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(DropboxConstants.ID);
             }
         }
         String path = toPath(folderId, id);
@@ -407,9 +408,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             throw handleServerError(path, e);
         } catch (final DropboxException e) {
-            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());
         } catch (final RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -424,7 +425,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final Entry directoryEntry = dropboxAPI.metadata(path, 0, null, true, null);
             if (!directoryEntry.isDir) {
-                throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
             }
             final List<Entry> contents = directoryEntry.contents;
             final List<File> files = new ArrayList<File>(contents.size());
@@ -450,7 +451,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final Entry directoryEntry = dropboxAPI.metadata(path, 0, null, true, null);
             if (!directoryEntry.isDir) {
-                throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
             }
             final List<Entry> contents = directoryEntry.contents;
             final List<File> files = new ArrayList<File>(contents.size());
@@ -506,11 +507,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 /*
                  * seems like a "list" request for multiple items from one folder, get metadata via common folder
                  */
-                String folderID  = filesPerFolder.keySet().iterator().next();
+                String folderID = filesPerFolder.keySet().iterator().next();
                 String path = toPath(folderID);
                 Entry directoryEntry = dropboxAPI.metadata(path, 0, null, true, null);
                 if (false == directoryEntry.isDir) {
-                    throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderID);
+                    throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderID);
                 }
                 for (IDTuple id : ids) {
                     for (Entry entry : directoryEntry.contents) {
@@ -535,7 +536,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     } catch (Exception e) {
                         // skip non-existing file in result
                         OXException x = handle(e, path);
-                        if (false == DropboxExceptionCodes.NOT_FOUND.equals(x)) {
+                        if (false == FileStorageExceptionCodes.NOT_FOUND.equals(x)) {
                             throw x;
                         }
                     }
@@ -592,7 +593,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             try {
                 Entry entry = dropboxAPI.metadata(toPath(folderId), 0, null, true, null);
                 if (false == entry.isDir || entry.isDeleted) {
-                    throw DropboxExceptionCodes.NOT_FOUND.create(folderId);
+                    throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
                 }
                 sequenceNumbers.put(folderId, getSequenceNumber(entry));
             } catch (Exception e) {
@@ -636,7 +637,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @param folderPath The dropbox folder path
      * @param pattern The pattern
      * @param recursive <code>true</code> to search in the supplied folder and all subfolders recursively, <code>false</code>, to include
-     *                  matches in the supplied folder only
+     *            matches in the supplied folder only
      * @return The found files
      * @throws OXException
      * @throws DropboxException
@@ -745,4 +746,3 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
 }
-

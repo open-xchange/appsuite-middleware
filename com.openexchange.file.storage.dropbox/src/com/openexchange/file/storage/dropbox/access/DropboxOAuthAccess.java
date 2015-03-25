@@ -59,8 +59,9 @@ import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
-import com.openexchange.file.storage.dropbox.DropboxExceptionCodes;
+import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.file.storage.dropbox.Utils;
 import com.openexchange.file.storage.dropbox.auth.TrustAllWebAuthSession;
@@ -76,6 +77,18 @@ import com.openexchange.session.Session;
 public final class DropboxOAuthAccess {
 
     /**
+     * Drops the Dropbox OAuth access for given Dropbox account.
+     *
+     * @param fsAccount The Dropbox account providing credentials and settings
+     * @param session The user session
+     */
+    public static void dropFor(final FileStorageAccount fsAccount, final Session session) {
+        DropboxOAuthAccessRegistry registry = DropboxOAuthAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
+        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
+    }
+
+    /**
      * Gets the Dropbox OAuth access for given Dropbox account.
      *
      * @param fsAccount The Dropbox account providing credentials and settings
@@ -84,8 +97,8 @@ public final class DropboxOAuthAccess {
      * @throws OXException If a Dropbox session could not be created
      */
     public static DropboxOAuthAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        final DropboxOAuthAccessRegistry registry = DropboxOAuthAccessRegistry.getInstance();
-        final String accountId = fsAccount.getId();
+        DropboxOAuthAccessRegistry registry = DropboxOAuthAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
         DropboxOAuthAccess dropboxOAuthAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
         if (null == dropboxOAuthAccess) {
             final DropboxOAuthAccess newInstance = new DropboxOAuthAccess(fsAccount, session, session.getUserId(), session.getContextId());
@@ -149,11 +162,11 @@ public final class DropboxOAuthAccess {
         {
             final Map<String, Object> configuration = fsAccount.getConfiguration();
             if (null == configuration) {
-                throw DropboxExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
             }
             final Object accountId = configuration.get("account");
             if (null == accountId) {
-                throw DropboxExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
             }
             if (accountId instanceof Integer) {
                 oauthAccountId = ((Integer) accountId).intValue();
@@ -161,7 +174,7 @@ public final class DropboxOAuthAccess {
                 try {
                     oauthAccountId = Integer.parseInt(accountId.toString());
                 } catch (final NumberFormatException e) {
-                    throw DropboxExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, DropboxConstants.ID, fsAccount.getId());
                 }
             }
         }
@@ -181,10 +194,8 @@ public final class DropboxOAuthAccess {
             dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
         } catch (OXException e) {
             throw e;
-        } catch (org.scribe.exceptions.OAuthException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

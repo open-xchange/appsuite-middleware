@@ -59,6 +59,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link FileStorageExceptionCodes} - Enumeration of all {@link OXException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since Open-Xchange v6.18.2
  */
 public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
@@ -76,13 +77,17 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 3),
     /**
+     * %1$s protocol error occurred: %2$s
+     */
+    PROTOCOL_ERROR("%1$s protocol error occurred: %2$s", Category.CATEGORY_ERROR, 5),
+    /**
      * A JSON occurred: %1$s
      */
     JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 14),
     /**
      * File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
      */
-    ACCOUNT_NOT_FOUND("File storage account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.", Category.CATEGORY_ERROR, 4),
+    ACCOUNT_NOT_FOUND("File storage account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.", Category.CATEGORY_USER_INPUT, 4, FileStorageExceptionMessages.ACCOUNT_NOT_FOUND_MSG),
     /**
      * The operation is not supported by service %1$s.
      */
@@ -239,6 +244,54 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * File update aborted: %2$s
      */
     FILE_UPDATE_ABORTED("File update aborted: %2$s", Category.CATEGORY_CONFLICT, 45, FileStorageExceptionMessages.FILE_UPDATE_ABORTED_MSG),
+    /**
+     * Versioning not supported by '%1$s' file storage.
+     */
+    VERSIONING_NOT_SUPPORTED("Versioning not supported by '%1$s%' file storage.", Category.CATEGORY_ERROR, 46, null),
+    /**
+     * The %1$s URL does not denote a file: %2$s
+     */
+    NOT_A_FILE("The %1$s URL does not denote a file: %2$s", CATEGORY_USER_INPUT, 47, FileStorageExceptionMessages.NOT_A_FILE_MSG),
+    /**
+     * The %1$s URL does not denote a directory: %2$s
+     */
+    NOT_A_FOLDER("The %1$s URL does not denote a directory: %2$s", CATEGORY_USER_INPUT, 48, FileStorageExceptionMessages.NOT_A_FOLDER_MSG),
+    /**
+     * Missing file name.
+     */
+    MISSING_FILE_NAME("Missing file name.", CATEGORY_USER_INPUT, 49, FileStorageExceptionMessages.MISSING_FILE_NAME_MSG),
+    /**
+     * Update denied for %1$s resource: %2$s
+     */
+    UPDATE_DENIED("Update denied for \"%1$s\" resource: %2$s", CATEGORY_USER_INPUT, 50, FileStorageExceptionMessages.UPDATE_DENIED_MSG),
+    /**
+     * Delete denied for \"%1$s\" resource: %2$s
+     */
+    DELETE_DENIED("Delete denied for \"%1$s\" resource: %2$s", CATEGORY_PERMISSION_DENIED, 51, FileStorageExceptionMessages.DELETE_DENIED_MSG),
+    /**
+     * Invalid property "%1$s". Should be "%2$s".
+     */
+    INVALID_PROPERTY("Invalid property \"%1$s\". Should be \"%2$s\".", CATEGORY_ERROR, 52, null),
+    /**
+     * Invalid \"%1$s\" property \"%2$s\".
+     */
+    INVALID_TYPE_PROPERTY("Invalid \"%1$s\" property \"%2$s\".", CATEGORY_ERROR, 53, null),
+    /**
+     * Missing configuration for %1$s account "%2$s".
+     */
+    MISSING_CONFIG("Missing configuration for %1$s account \"%2$s\".", Category.CATEGORY_CONFIGURATION, 54, FileStorageExceptionMessages.MISSING_CONFIG_MSG),
+    /**
+     * "The %1$s resource does not exist: %2$s"
+     */
+    NOT_FOUND("The %1$s resource does not exist: %2$s", Category.CATEGORY_ERROR, 55, FileStorageExceptionMessages.NOT_FOUND_MSG),
+    /**
+     * Authentication failed for the file storage account with identifier %1$s (service: %2$s): %3$s
+     */
+    AUTHENTICATION_FAILED("Authentication failed for the file storage account with identifier %1$s (service: %2$s): %3$s", Category.CATEGORY_CONFIGURATION, 56),
+    /**
+     * The file %1$s doesn't have any content.
+     */
+    NO_CONTENT("The file %1$s doesn't have any content.", Category.CATEGORY_ERROR, 57, FileStorageExceptionMessages.NO_CONTENT_MSG),
 
     ;
 

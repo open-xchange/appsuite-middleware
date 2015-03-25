@@ -97,13 +97,13 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     protected void checkFolderValidity(BoxTypedObject typedObject) throws OXException {
         if (isFolder(typedObject) || isTrashed(typedObject)) {
-            throw BoxExceptionCodes.NOT_A_FILE.create(typedObject.getId());
+            throw FileStorageExceptionCodes.NOT_A_FILE.create(BoxConstants.ID, typedObject.getId());
         }
     }
 
     protected void checkFolderValidity(BoxFolder folder) throws OXException {
         if (isTrashed(folder)) {
-            throw BoxExceptionCodes.NOT_A_FILE.create(toFileStorageFolderId(folder.getId()));
+            throw FileStorageExceptionCodes.NOT_A_FILE.create(BoxConstants.ID, toFileStorageFolderId(folder.getId()));
         }
     }
 
@@ -150,7 +150,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
                     return parseBoxFolder(folder);
                 } catch (final BoxServerException e) {
-                    throw handleHttpResponseError(folderId, e);
+                    throw handleHttpResponseError(folderId, account.getId(), e);
                 }
             }
         });
@@ -214,7 +214,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
                     return folders.toArray(new FileStorageFolder[folders.size()]);
                 } catch (final BoxServerException e) {
-                    throw handleHttpResponseError(parentIdentifier, e);
+                    throw handleHttpResponseError(parentIdentifier, account.getId(), e);
                 }
             }
         });

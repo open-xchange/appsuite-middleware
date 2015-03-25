@@ -59,8 +59,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class OAuthExceptionMessages implements LocalizableStrings {
 
-    // Account not found with identifier %1$s for user %2$s in context %3$s.
-    public static final String ACCOUNT_NOT_FOUND_MSG = "Account not found with identifier %1$s for user %2$s in context %3$s.";
+    // There is no associated OAuth account for identifier %1$s.
+    public static final String ACCOUNT_NOT_FOUND_MSG = "There is no associated OAuth account for identifier %1$s.";
 
     // Missing argument: %1$s
     public static final String MISSING_ARGUMENT_MSG = "Missing argument: %1$s";

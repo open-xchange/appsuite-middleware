@@ -95,7 +95,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageAdvancedSearchFileAccess/*, FileStorageSequenceNumberProvider*/ {
+public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageAdvancedSearchFileAccess/* , FileStorageSequenceNumberProvider */{
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class);
 
@@ -159,11 +159,11 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 /*
                  * Not a directory
                  */
-                throw CIFSExceptionCodes.NOT_A_FILE.create(folderId);
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(CIFSConstants.ID, folderId);
             }
             return true;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -174,7 +174,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     @Override
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         if (version != CURRENT_VERSION) {
-            throw CIFSExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(CIFSConstants.ID);
         }
         try {
             /*
@@ -185,20 +185,20 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             //final URI uri = new URI(fid + id, false);
             final SmbFile smbFile = getSmbFile(url);
             if (!exists(smbFile)) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(url);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, url);
             }
             if (!smbFile.isFile()) {
                 /*
                  * Not a directory
                  */
-                throw CIFSExceptionCodes.NOT_A_FILE.create(url);
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(CIFSConstants.ID, url);
             }
             /*
              * Start conversion
              */
             return new CIFSFile(fid, id, session.getUserId()).parseSmbFile(smbFile, rootUrl);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -241,7 +241,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 if (isEmpty(name)) {
                     name = file.getTitle();
                     if (isEmpty(name)) {
-                        throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
+                        throw FileStorageExceptionCodes.MISSING_FILE_NAME.create();
                     }
                 }
                 smbFile = getSmbFile(folderId + name);
@@ -305,7 +305,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             SmbFileMapManagement.getInstance().dropFor(session);
             return smbFile;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -316,7 +316,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     @Override
     public IDTuple copy(final IDTuple source, final String version, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
-            throw CIFSExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(CIFSConstants.ID);
         }
         try {
             final String fid = checkFolderId(source.getFolder(), rootUrl);
@@ -326,15 +326,15 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             final SmbFile copyMe = getSmbFile(url);
             if (!copyMe.exists()) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(url);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, url);
             }
             if (!copyMe.isFile()) {
-                throw CIFSExceptionCodes.NOT_A_FILE.create(url);
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(CIFSConstants.ID, url);
             }
 
             final String targetFileName = null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
             if (isEmpty(targetFileName)) {
-                throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
+                throw FileStorageExceptionCodes.MISSING_FILE_NAME.create();
             }
             /*
              * create target SMB file
@@ -367,7 +367,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             return new IDTuple(destFolder, dest.getName());
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -385,11 +385,11 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String sourceFileURL = sourceFolderURL + source.getId();
             final SmbFile sourceFile = getSmbFile(sourceFileURL);
             if (false == sourceFile.exists()) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(sourceFileURL);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, sourceFileURL);
             } else if (false == sourceFile.isFile()) {
-                throw CIFSExceptionCodes.NOT_A_FILE.create(sourceFileURL);
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(CIFSConstants.ID, sourceFileURL);
             } else if (sequenceNumber < sourceFile.getLastModified()) {
-                throw CIFSExceptionCodes.UPDATE_DENIED.create(sourceFileURL);
+                throw FileStorageExceptionCodes.UPDATE_DENIED.create(CIFSConstants.ID, sourceFileURL);
             }
             /*
              * check destination folder
@@ -397,16 +397,16 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String targetFolderURL = checkFolderId(destFolder, rootUrl);
             final SmbFile targetFolder = getSmbFile(targetFolderURL);
             if (false == exists(targetFolder)) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(targetFolderURL);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, targetFolderURL);
             }
             final String targetFileName = null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
             if (isEmpty(targetFileName)) {
-                throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
+                throw FileStorageExceptionCodes.MISSING_FILE_NAME.create();
             }
             final String targetFileURL = targetFolderURL + targetFileName;
             final SmbFile targetFile = getSmbFile(targetFileURL);
             if (exists(targetFile)) {
-                throw CIFSExceptionCodes.UPDATE_DENIED.create(targetFileURL);
+                throw FileStorageExceptionCodes.UPDATE_DENIED.create(CIFSConstants.ID, targetFileURL);
             }
             /*
              * perform move operation
@@ -414,7 +414,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             sourceFile.renameTo(targetFile);
             final long now = System.currentTimeMillis();
             targetFile.setLastModified(now);
-            if (false == modifiedFields.contains(Field.CREATED) || null == update.getCreated()) {
+            if ((null != modifiedFields && false == modifiedFields.contains(Field.CREATED)) || null == update.getCreated()) {
                 targetFile.setCreateTime(now);
             } else {
                 targetFile.setCreateTime(update.getLastModified().getTime());
@@ -434,7 +434,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             return new IDTuple(targetFolderURL, targetFileName);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -449,20 +449,20 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String url = (fid + id);
             final SmbFile smbFile = getSmbFile(url);
             if (!exists(smbFile)) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(url);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, url);
             }
             if (!smbFile.isFile()) {
                 /*
                  * Not a directory
                  */
-                throw CIFSExceptionCodes.NOT_A_FILE.create(url);
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(CIFSConstants.ID, url);
             }
             /*
              * Get SMB file's input stream
              */
             return new SmbFileInputStream(smbFile);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -511,7 +511,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             SmbFileMapManagement.getInstance().dropFor(session);
             return new IDTuple(file.getFolderId(), file.getId());
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -542,10 +542,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String fid = checkFolderId(folderId, rootUrl);
             final SmbFile smbFolder = getSmbFile(fid);
             if (!smbFolder.exists()) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, folderId);
             }
             if (!smbFolder.isDirectory()) {
-                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CIFSConstants.ID, folderId);
             }
             /*
              * List its sub-resources
@@ -559,7 +559,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             SmbFileMapManagement.getInstance().dropFor(session);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -588,7 +588,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                      * Check for file
                      */
                     if (!smbFile.isFile()) {
-                        throw CIFSExceptionCodes.NOT_A_FILE.create(url);
+                        throw FileStorageExceptionCodes.NOT_A_FILE.create(CIFSConstants.ID, url);
                     }
                     /*
                      * Delete
@@ -612,7 +612,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             return ret;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -633,17 +633,17 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             final SmbFile smbFile = getSmbFile(url);
             if (!exists(smbFile)) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(url);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, url);
             }
             if (!smbFile.isFile()) {
-                throw CIFSExceptionCodes.NOT_A_FILE.create(url);
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(CIFSConstants.ID, url);
             }
             /*
              * Update
              */
             smbFile.setLastModified(System.currentTimeMillis());
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -677,10 +677,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String fid = checkFolderId(folderId, rootUrl);
             final SmbFile smbFolder = getSmbFile(fid);
             if (!smbFolder.exists()) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, folderId);
             }
             if (!smbFolder.isDirectory()) {
-                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CIFSConstants.ID, folderId);
             }
             /*
              * List its sub-resources
@@ -703,7 +703,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             return files;
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -738,13 +738,13 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 final String uri = (fid + id.getId());
                 final SmbFile smbFile = getSmbFile(uri);
                 if (!exists(smbFile)) {
-                    throw CIFSExceptionCodes.NOT_FOUND.create(uri);
+                    throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, uri);
                 }
                 if (!smbFile.isFile()) {
                     /*
                      * Not a directory
                      */
-                    throw CIFSExceptionCodes.NOT_A_FILE.create(uri);
+                    throw FileStorageExceptionCodes.NOT_A_FILE.create(CIFSConstants.ID, uri);
                 }
                 files.add(new CIFSFile(fid, id.getId(), session.getUserId()).parseSmbFile(smbFile, fields, rootUrl));
             }
@@ -753,7 +753,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             return new FileTimedResult(files);
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -795,7 +795,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
      *
      * @param searchTerm The search term
      * @param folderId The folder identifier
-     * @param fields The fields  to fill
+     * @param fields The fields to fill
      * @param results The result
      * @throws OXException If search fails
      */
@@ -807,10 +807,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String fid = checkFolderId(folderId, rootUrl);
             final SmbFile smbFolder = getSmbFile(fid);
             if (!smbFolder.exists()) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, folderId);
             }
             if (!smbFolder.isDirectory()) {
-                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CIFSConstants.ID, folderId);
             }
             SmbFile[] subFiles;
             try {
@@ -832,7 +832,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 }
             }
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -911,7 +911,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         return new SearchIteratorAdapter<File>(results.iterator(), results.size());
     }
 
-//    @Override
+    // @Override
     public Map<String, Long> getSequenceNumbers(final List<String> folderIds) throws OXException {
         if (null == folderIds || 0 == folderIds.size()) {
             return Collections.emptyMap();
@@ -922,13 +922,13 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 final String fid = checkFolderId(folderId, rootUrl);
                 final SmbFile smbFolder = getSmbFile(fid);
                 if (false == smbFolder.exists()) {
-                    throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+                    throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, folderId);
                 } else if (false == smbFolder.isDirectory()) {
-                    throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+                    throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CIFSConstants.ID, folderId);
                 }
                 sequenceNumbers.put(folderId, Long.valueOf(smbFolder.getLastModified()));
             } catch (final SmbException e) {
-                throw CIFSExceptionCodes.forSmbException(e);
+                throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
             } catch (final IOException e) {
                 throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
@@ -946,10 +946,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             final String fid = checkFolderId(folderId, rootUrl);
             final SmbFile smbFolder = getSmbFile(fid);
             if (!smbFolder.exists()) {
-                throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+                throw FileStorageExceptionCodes.NOT_FOUND.create(CIFSConstants.ID, folderId);
             }
             if (!smbFolder.isDirectory()) {
-                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(CIFSConstants.ID, folderId);
             }
             SmbFile[] subFiles;
             try {
@@ -971,7 +971,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 }
             }
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.forSmbException(e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

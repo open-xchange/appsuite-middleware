@@ -62,6 +62,7 @@ import org.apache.chemistry.opencmis.commons.data.Acl;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 
@@ -172,7 +173,7 @@ public final class CMISFolder extends DefaultFileStorageFolder {
                     }
                 }
             } catch (final RuntimeException e) {
-                throw CMISExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
     }

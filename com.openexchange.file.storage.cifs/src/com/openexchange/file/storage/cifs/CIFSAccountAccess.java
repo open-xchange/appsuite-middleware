@@ -215,9 +215,9 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess, Warnin
                     (String) configuration.get(CIFSConstants.CIFS_PASSWORD));
             return new SmbFile(url, auth).exists();
         } catch (final MalformedURLException e) {
-            throw CIFSExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.INVALID_URL.create(e, url, e.getMessage());
         } catch (final SmbException e) {
-            throw CIFSExceptionCodes.SMB_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, CIFSConstants.ID, e.getNtStatus() + " " + e.getMessage());
         }
     }
 

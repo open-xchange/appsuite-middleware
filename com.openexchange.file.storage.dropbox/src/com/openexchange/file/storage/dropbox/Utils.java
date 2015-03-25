@@ -54,6 +54,7 @@ import com.dropbox.client2.RESTUtility;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.exception.DropboxServerException;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Strings;
 
@@ -172,15 +173,15 @@ public final class Utils {
         if (DropboxServerException.class.isInstance(e)) {
             DropboxServerException serverException = (DropboxServerException) e;
             if (null != path && DropboxServerException._404_NOT_FOUND == serverException.error) {
-                return DropboxExceptionCodes.NOT_FOUND.create(e, path);
+                return FileStorageExceptionCodes.NOT_FOUND.create(e, DropboxConstants.ID, path);
             }
-            return DropboxExceptionCodes.DROPBOX_SERVER_ERROR.create(serverException, Integer.valueOf(serverException.error),
+            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, "HTTP", Integer.valueOf(serverException.error),
                 null == serverException.body.userError ? serverException.body.error : serverException.body.userError);
         }
         if (DropboxException.class.isInstance(e)) {
-            return DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());
         }
-        return DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
     }
 
 }

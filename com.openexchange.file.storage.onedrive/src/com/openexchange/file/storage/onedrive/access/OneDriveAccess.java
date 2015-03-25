@@ -70,9 +70,10 @@ import org.scribe.model.Token;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.onedrive.AbstractOneDriveResourceAccess;
 import com.openexchange.file.storage.onedrive.OneDriveClosure;
-import com.openexchange.file.storage.onedrive.OneDriveExceptionCodes;
+import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.DefaultOAuthToken;
@@ -97,6 +98,18 @@ public class OneDriveAccess {
     private static final long RECHECK_THRESHOLD = 2700;
 
     /**
+     * Drops the Microsoft OneDrive access for given Microsoft OneDrive account.
+     *
+     * @param fsAccount The Microsoft OneDrive account providing credentials and settings
+     * @param session The user session
+     */
+    public static void dropFor(final FileStorageAccount fsAccount, final Session session) {
+        OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
+        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
+    }
+
+    /**
      * Gets the Microsoft OneDrive access for given Microsoft OneDrive account.
      *
      * @param fsAccount The Microsoft OneDrive account providing credentials and settings
@@ -105,8 +118,8 @@ public class OneDriveAccess {
      * @throws OXException If a Microsoft OneDrive access could not be created
      */
     public static OneDriveAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        final OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
-        final String accountId = fsAccount.getId();
+        OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
         OneDriveAccess oneDriveAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
         if (null == oneDriveAccess) {
             final OneDriveAccess newInstance = new OneDriveAccess(fsAccount, session, session.getUserId(), session.getContextId());
@@ -186,11 +199,11 @@ public class OneDriveAccess {
         {
             Map<String, Object> configuration = fsAccount.getConfiguration();
             if (null == configuration) {
-                throw OneDriveExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(OneDriveConstants.ID, fsAccount.getId());
             }
             Object accountId = configuration.get("account");
             if (null == accountId) {
-                throw OneDriveExceptionCodes.MISSING_CONFIG.create(fsAccount.getId());
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(OneDriveConstants.ID, fsAccount.getId());
             }
             if (accountId instanceof Integer) {
                 oauthAccountId = ((Integer) accountId).intValue();
@@ -198,7 +211,7 @@ public class OneDriveAccess {
                 try {
                     oauthAccountId = Integer.parseInt(accountId.toString());
                 } catch (NumberFormatException e) {
-                    throw OneDriveExceptionCodes.MISSING_CONFIG.create(e, fsAccount.getId());
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, OneDriveConstants.ID, fsAccount.getId());
                 }
             }
         }
