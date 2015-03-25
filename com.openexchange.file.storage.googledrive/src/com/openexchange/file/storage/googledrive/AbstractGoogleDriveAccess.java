@@ -126,7 +126,7 @@ public abstract class AbstractGoogleDriveAccess {
      * @param e The HTTP error
      * @return The resulting exception
      */
-    protected OXException handleHttpResponseError(String identifier, HttpResponseException e) {
+    public static OXException handleHttpResponseError(String identifier, HttpResponseException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
             return FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, identifier, "");
         }

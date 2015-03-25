@@ -70,9 +70,11 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
+import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
+import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
@@ -93,7 +95,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider,
     FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess,
-    FileStorageEfficientRetrieval, ObjectPermissionAware {
+    FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess {
 
     private final InfostoreSearchEngine search;
     private final Context ctx;
@@ -502,6 +504,24 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
                 FieldMapping.getMatching(fields),
                 FieldMapping.getMatching(sort),
                 FieldMapping.getSortDirection(order),
+                sessionObj);
+        return new InfostoreTimedResult(documents);
+    }
+
+    @Override
+    public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
+        if (null == range) {
+            return getDocuments(folderId, fields, sort, order);
+        }
+
+        TimedResult<DocumentMetadata> documents =
+            getInfostore(folderId).getDocuments(
+                FOLDERID(folderId),
+                FieldMapping.getMatching(fields),
+                FieldMapping.getMatching(sort),
+                FieldMapping.getSortDirection(order),
+                range.from,
+                range.to,
                 sessionObj);
         return new InfostoreTimedResult(documents);
     }

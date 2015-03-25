@@ -64,6 +64,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -71,6 +72,7 @@ import com.openexchange.mailaccount.internal.GenericProperty;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.secret.SecretExceptionCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
@@ -196,8 +198,16 @@ public final class MailPasswordUtil {
      * @throws OXException
      */
     public static String decrypt(final String encryptedPassword, final Session session, final int accountId, final String login, final String server) throws OXException {
-        final SecretEncryptionService<GenericProperty> encryptionService = ServerServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(STRATEGY);
-        return encryptionService.decrypt(session, encryptedPassword, new GenericProperty(accountId, session, login, server));
+        try {
+            SecretEncryptionService<GenericProperty> encryptionService = ServerServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(STRATEGY);
+            return encryptionService.decrypt(session, encryptedPassword, new GenericProperty(accountId, session, login, server));
+        } catch (OXException e) {
+            if (!SecretExceptionCodes.EMPTY_SECRET.equals(e)) {
+                throw e;
+            }
+            // Apparently empty password
+            throw MailExceptionCode.CONFIG_ERROR.create(e, "The mail configuration is invalid. Please check \"com.openexchange.mail.passwordSource\" property or set a valid secret source in file 'secret.properties'.");
+        }
     }
 
     /**

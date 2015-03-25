@@ -142,7 +142,7 @@ public class FolderID {
     /**
      * Gets the folder identifier
      *
-     * @return The fodler identifier
+     * @return The folder identifier
      */
     public String getFolderId() {
         return folderId;

@@ -75,6 +75,7 @@ import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
+import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
@@ -124,6 +125,8 @@ public class FileStorageTools {
             return FileStorageLockedFileAccess.class.isInstance(fileAccess);
         case OBJECT_PERMISSIONS:
             return ObjectPermissionAware.class.isInstance(fileAccess);
+        case RANGES:
+            return FileStorageRangeFileAccess.class.isInstance(fileAccess);
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageTools.class).warn("Unknown capability: {}", capability);
             return false;

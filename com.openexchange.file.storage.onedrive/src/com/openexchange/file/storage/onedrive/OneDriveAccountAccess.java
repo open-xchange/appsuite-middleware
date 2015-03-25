@@ -52,6 +52,7 @@ package com.openexchange.file.storage.onedrive;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -69,7 +70,7 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess {
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private final OneDriveAccess oneDriveAccess;
+    private OneDriveAccess oneDriveAccess;
 
     /**
      * Initializes a new {@link OneDriveAccountAccess}.
@@ -81,7 +82,6 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess {
         this.service = service;
         this.account = account;
         this.session = session;
-        oneDriveAccess = OneDriveAccess.accessFor(account, session);
     }
 
     /**
@@ -95,22 +95,22 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess {
 
     @Override
     public void connect() throws OXException {
-        // Nope
+        oneDriveAccess = OneDriveAccess.accessFor(account, session);
     }
 
     @Override
     public boolean isConnected() {
-        return true;
+        return null != oneDriveAccess;
     }
 
     @Override
     public void close() {
-        // Nope
+        oneDriveAccess = null;
     }
 
     @Override
     public boolean ping() throws OXException {
-        return true;
+        return OneDriveAccess.pingFor(account, session);
     }
 
     @Override
@@ -125,11 +125,19 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess {
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
+        OneDriveAccess oneDriveAccess = this.oneDriveAccess;
+        if (null == oneDriveAccess) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
         return new OneDriveFileAccess(oneDriveAccess, account, session, this);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
+        OneDriveAccess oneDriveAccess = this.oneDriveAccess;
+        if (null == oneDriveAccess) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
         return new OneDriveFolderAccess(oneDriveAccess, account, session, this);
     }
 

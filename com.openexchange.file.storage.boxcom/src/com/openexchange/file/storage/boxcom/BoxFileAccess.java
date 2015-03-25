@@ -719,7 +719,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#removeVersion(java.lang.String, java.lang.String, java.lang.String[])
      */
     @Override
@@ -756,7 +756,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#getVersions(java.lang.String, java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
      */
     @Override
@@ -794,7 +794,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageLockedFileAccess#unlock(java.lang.String, java.lang.String)
      */
     @Override
@@ -812,7 +812,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageLockedFileAccess#lock(java.lang.String, java.lang.String, long)
      */
     @Override
@@ -830,10 +830,10 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     /**
      * Create a default request
-     * 
-     * @return
+     *
+     * @return The default request
      */
-    private static BoxDefaultRequestObject defaultBoxRequest() {
+    static BoxDefaultRequestObject defaultBoxRequest() {
         List<String> fields = new ArrayList<String>();
         fields.add(BoxFile.FIELD_MODIFIED_AT);
         fields.add(BoxFile.FIELD_MODIFIED_BY);
@@ -863,7 +863,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     /**
      * request version
-     * 
+     *
      * @return
      */
     private static BoxDefaultRequestObject versionsRequestObject() {
@@ -874,11 +874,11 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     /**
      * Create a custom request object with the specified fields
-     * 
+     *
      * @param fields The fields to request
      * @return A request object with the specified fields
      */
-    private static BoxDefaultRequestObject customRequestObject(List<String> fields) {
+    static BoxDefaultRequestObject customRequestObject(List<String> fields) {
         BoxDefaultRequestObject customRequestObject = new BoxDefaultRequestObject();
         for (String field : fields) {
             customRequestObject.getRequestExtras().addField(field);

@@ -581,7 +581,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 if (OXExceptions.isUserInput(e)) {
                     LOG.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName(), e);
                 } else {
-                    LOG.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName(), e);
+                    LOG.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName());
                 }
                 addWarning(e);
             }

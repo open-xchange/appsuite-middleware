@@ -94,7 +94,7 @@ public abstract class OneDriveClosure<R> {
      * @throws OXException If operation fails
      */
     public R perform(AbstractOneDriveResourceAccess resourceAccess, DefaultHttpClient httpClient, Session session) throws OXException {
-        return innerPerform(true, resourceAccess, httpClient, session);
+        return null == resourceAccess ? innerPerform(false, null, httpClient, session) : innerPerform(true, resourceAccess, httpClient, session);
     }
 
     private R innerPerform(boolean handleAuthError, AbstractOneDriveResourceAccess resourceAccess, DefaultHttpClient httpClient, Session session) throws OXException {
@@ -109,9 +109,9 @@ public abstract class OneDriveClosure<R> {
                 resourceAccess.handleAuthError(e, session);
                 return innerPerform(false, resourceAccess, httpClient, session);
             }
-            throw resourceAccess.handleHttpResponseError(null, e);
+            throw AbstractOneDriveResourceAccess.handleHttpResponseError(null, e);
         } catch (IOException e) {
-            throw resourceAccess.handleIOError(e);
+            throw AbstractOneDriveResourceAccess.handleIOError(e);
         } catch (JSONException e) {
             throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

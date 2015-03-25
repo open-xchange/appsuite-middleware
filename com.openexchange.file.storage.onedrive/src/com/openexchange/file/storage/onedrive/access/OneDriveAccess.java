@@ -49,18 +49,29 @@
 
 package com.openexchange.file.storage.onedrive.access;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.MsLiveConnectApi;
 import org.scribe.model.Token;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.onedrive.AbstractOneDriveResourceAccess;
+import com.openexchange.file.storage.onedrive.OneDriveClosure;
 import com.openexchange.file.storage.onedrive.OneDriveExceptionCodes;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
@@ -107,6 +118,41 @@ public class OneDriveAccess {
             oneDriveAccess.ensureNotExpired(session);
         }
         return oneDriveAccess;
+    }
+
+    /**
+     * Pings the Microsoft OneDrive account.
+     *
+     * @param fsAccount The Microsoft OneDrive account providing credentials and settings
+     * @param session The user session
+     * @return <code>true</code> on successful ping attempt; otherwise <code>false</code>
+     * @throws OXException If a Microsoft OneDrive account could not be pinged
+     */
+    public static boolean pingFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
+        final OneDriveAccess oneDriveAccess = accessFor(fsAccount, session);
+        OneDriveClosure<Boolean> closure = new OneDriveClosure<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                HttpGet request = null;
+                try {
+                    List<NameValuePair> qparams = new LinkedList<NameValuePair>();
+                    qparams.add(new BasicNameValuePair("access_token", oneDriveAccess.getAccessToken()));
+                    request = new HttpGet(AbstractOneDriveResourceAccess.buildUri("/me/skydrive", qparams));
+                    HttpResponse httpResponse = httpClient.execute(request);
+                    int statusCode = httpResponse.getStatusLine().getStatusCode();
+                    if (401 == statusCode || 403 == statusCode) {
+                        return Boolean.FALSE;
+                    }
+
+                    AbstractOneDriveResourceAccess.handleHttpResponse(httpResponse, JSONObject.class);
+                    return Boolean.TRUE;
+                } finally {
+                    AbstractOneDriveResourceAccess.reset(request);
+                }
+            }
+        };
+        return closure.perform(null, oneDriveAccess.httpClient, session).booleanValue();
     }
 
     // ------------------------------------------------------------------------------------------------------------------------ //

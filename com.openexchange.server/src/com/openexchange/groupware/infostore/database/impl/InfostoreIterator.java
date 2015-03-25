@@ -94,12 +94,22 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
     public static InfostoreIterator documents(final long folderId, final Metadata[] metadata,final Metadata sort, final int order, final DBProvider provider, final Context ctx){
-        final String query = QUERIES.getDocumentsQuery(folderId, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        final String query = QUERIES.getDocumentsQuery(folderId, metadata, sort, order, -1, -1, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
+
+    public static InfostoreIterator documents(final long folderId, final Metadata[] metadata,final Metadata sort, final int order, int start, int end, final DBProvider provider, final Context ctx){
+        final String query = QUERIES.getDocumentsQuery(folderId, metadata, sort, order, start, end, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
     }
 
     public static InfostoreIterator documentsByCreator(final long folderId,final int userId, final Metadata[] metadata,final Metadata sort, final int order, final DBProvider provider, final Context ctx){
-        final String query = QUERIES.getDocumentsQuery(folderId,userId, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        final String query = QUERIES.getDocumentsQuery(folderId,userId, metadata, sort, order, -1, -1, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
+
+    public static InfostoreIterator documentsByCreator(final long folderId,final int userId, final Metadata[] metadata,final Metadata sort, final int order, int start, int end, final DBProvider provider, final Context ctx){
+        final String query = QUERIES.getDocumentsQuery(folderId,userId, metadata, sort, order, start, end, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
     }
 
@@ -154,7 +164,12 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
     public static InfostoreIterator sharedDocumentsForUser(final Context ctx, final User user, final int leastPermission, final Metadata[] metadata, final DBProvider provider) {
-        final String query = QUERIES.getSharedDocumentsForUserQuery(ctx.getContextId(), user.getId(), user.getGroups(), leastPermission, metadata, new InfostoreQueryCatalog.DocumentWins());
+        final String query = QUERIES.getSharedDocumentsForUserQuery(ctx.getContextId(), user.getId(), user.getGroups(), leastPermission, metadata, -1, -1, new InfostoreQueryCatalog.DocumentWins());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
+
+    public static InfostoreIterator sharedDocumentsForUser(final Context ctx, final User user, final int leastPermission, final Metadata[] metadata, int start, int end, final DBProvider provider) {
+        final String query = QUERIES.getSharedDocumentsForUserQuery(ctx.getContextId(), user.getId(), user.getGroups(), leastPermission, metadata, start, end, new InfostoreQueryCatalog.DocumentWins());
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
     }
 
