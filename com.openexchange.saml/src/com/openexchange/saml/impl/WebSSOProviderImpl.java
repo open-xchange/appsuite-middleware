@@ -363,9 +363,14 @@ public class WebSSOProviderImpl implements WebSSOProvider {
 
         Tools.disableCaching(httpResponse);
         try {
-            LogoutResponse logoutResponse = customizeLogoutResponse(prepareLogoutResponse(status, logoutRequest == null ? null : logoutRequest.getID()), httpRequest, httpResponse);
+            final LogoutResponse logoutResponse = customizeLogoutResponse(prepareLogoutResponse(status, logoutRequest == null ? null : logoutRequest.getID()), httpRequest, httpResponse);
             String responseXML = openSAML.marshall(logoutResponse);
-            LOG.debug("Marshalled LogoutResponse: {}", responseXML);
+            LOG.debug("Marshalled LogoutResponse:\n{}", new Object() {
+                @Override
+                public String toString() {
+                    return XMLHelper.prettyPrintXML(logoutResponse.getDOM());
+                }
+            });
             Binding responseBinding = config.getLogoutResponseBinding();
             switch (responseBinding) {
                 case HTTP_REDIRECT:
@@ -602,11 +607,11 @@ public class WebSSOProviderImpl implements WebSSOProvider {
         if (numIndexes > 0) {
             String filterString;
             if (numIndexes == 1) {
-                filterString = "(" + SessionProperties.SESSION_INDEX + "=" + sessionIndexes.get(0) + ")";
+                filterString = "(" + SessionProperties.SESSION_INDEX + "=" + sessionIndexes.get(0).getSessionIndex() + ")";
             } else {
-                StringBuilder fsBuilder = new StringBuilder(128).append("(&");
+                StringBuilder fsBuilder = new StringBuilder(128).append("(|");
                 for (SessionIndex sessionIndex : sessionIndexes) {
-                    fsBuilder.append("(" + SessionProperties.SESSION_INDEX + "=" + sessionIndex + ")");
+                    fsBuilder.append("(" + SessionProperties.SESSION_INDEX + "=" + sessionIndex.getSessionIndex() + ")");
                 }
                 fsBuilder.append(')');
                 filterString = fsBuilder.toString();
