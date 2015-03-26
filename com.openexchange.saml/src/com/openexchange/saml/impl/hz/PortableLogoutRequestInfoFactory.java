@@ -47,32 +47,29 @@
  *
  */
 
-package com.openexchange.saml.state;
+package com.openexchange.saml.impl.hz;
+
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+
 
 /**
- * Contains the available information about an already sent authentication request.
- * This is for example used to assign responses to their according requests, i.e.
- * to validate InResponseTo attributes of response objects.
+ * {@link PortableLogoutRequestInfoFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
- * @see DefaultAuthnRequestInfo
  */
-public interface AuthnRequestInfo {
+public class PortableLogoutRequestInfoFactory extends AbstractCustomPortableFactory {
 
-    /**
-     * Gets the unique ID of the AuthnRequest
-     *
-     * @return The ID
-     */
-    String getRequestId();
+    @Override
+    public int getClassId() {
+        return CustomPortable.PORTABLE_SAML_LOGOUT_REQUEST_INFO;
+    }
 
-    /**
-     * Gets the domain name via which the HTTP request initiating the AuthnRequest was
-     * received.
-     *
-     * @return The domain name
-     */
-    String getDomainName();
+    @Override
+    public Portable create() {
+        return new PortableLogoutRequestInfo();
+    }
 
 }

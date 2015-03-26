@@ -90,7 +90,7 @@ public interface StateManagement {
      * @param timeUnit The time unit of <code>ttl</code>
      * @throws OXException If storing the response ID fails
      */
-    void addAuthnResponse(String responseID, long ttl, TimeUnit timeUnit) throws OXException;
+    void addAuthnResponseID(String responseID, long ttl, TimeUnit timeUnit) throws OXException;
 
     /**
      * Checks if a given response ID was remembered.
@@ -100,7 +100,7 @@ public interface StateManagement {
      * to live is already exceeded.
      * @throws OXException If looking up the response ID fails
      */
-    boolean hasAuthnResponse(String responseID) throws OXException;
+    boolean hasAuthnResponseID(String responseID) throws OXException;
 
     /**
      * Adds a {@link LogoutRequestInfo} to the distributed state management.

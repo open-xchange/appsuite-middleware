@@ -72,6 +72,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.DependentServiceStarter;
 import com.openexchange.saml.DefaultConfig;
 import com.openexchange.saml.OpenSAML;
@@ -81,11 +82,13 @@ import com.openexchange.saml.http.AssertionConsumerService;
 import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.http.MetadataService;
 import com.openexchange.saml.http.SingleLogoutService;
-import com.openexchange.saml.impl.HzStateManagement;
 import com.openexchange.saml.impl.SAMLLoginEnhancer;
 import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
 import com.openexchange.saml.impl.SAMLSessionInspector;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
+import com.openexchange.saml.impl.hz.HzStateManagement;
+import com.openexchange.saml.impl.hz.PortableAuthnRequestInfoFactory;
+import com.openexchange.saml.impl.hz.PortableLogoutRequestInfoFactory;
 import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.server.ServiceLookup;
@@ -146,6 +149,9 @@ public class SAMLFeature extends DependentServiceStarter {
 
             SAMLBackend samlBackend = services.getService(SAMLBackend.class);
             serviceRegistrations.push(context.registerService(Enhancer.class, new SAMLLoginEnhancer(samlBackend), null));
+
+            serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthnRequestInfoFactory(), null));
+            serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableLogoutRequestInfoFactory(), null));
 
             ExceptionHandler exceptionHandler = samlBackend.getExceptionHandler();
             HttpService httpService = services.getService(HttpService.class);

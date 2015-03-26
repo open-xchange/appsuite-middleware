@@ -596,7 +596,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
      */
     protected void checkForReplayAttack(Response response) throws ValidationException {
         try {
-            if (stateManagement.hasAuthnResponse(response.getID())) {
+            if (stateManagement.hasAuthnResponseID(response.getID())) {
                 throw new ValidationException(ValidationFailedReason.RESPONSE_REPLAY, response.getID());
             }
         } catch (OXException e) {

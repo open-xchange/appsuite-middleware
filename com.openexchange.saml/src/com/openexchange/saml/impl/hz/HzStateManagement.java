@@ -47,10 +47,8 @@
  *
  */
 
-package com.openexchange.saml.impl;
+package com.openexchange.saml.impl.hz;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
@@ -58,8 +56,6 @@ import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.state.AuthnRequestInfo;
-import com.openexchange.saml.state.DefaultAuthnRequestInfo;
-import com.openexchange.saml.state.DefaultLogoutRequestInfo;
 import com.openexchange.saml.state.LogoutRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 
@@ -85,89 +81,63 @@ public class HzStateManagement implements StateManagement {
 
     @Override
     public String addAuthnRequestInfo(AuthnRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException {
-        Map<String, String> infoMap = new HashMap<String, String>(2);
-        infoMap.put("requestId", requestInfo.getRequestId());
-        String domainName = requestInfo.getDomainName();
-        if (domainName != null) {
-            infoMap.put("domainName", domainName);
-        }
-
         String id = generateID();
-        getRequestInfoMap().put(id, infoMap, ttl, timeUnit);
+        getAuthnRequestInfoMap().put(id, new PortableAuthnRequestInfo(requestInfo), ttl, timeUnit);
         return id;
     }
 
     @Override
     public AuthnRequestInfo removeAuthnRequestInfo(String id) throws OXException {
-        Map<String, String> infoMap = getRequestInfoMap().remove(id);
-        if (infoMap == null) {
+        PortableAuthnRequestInfo portable = getAuthnRequestInfoMap().remove(id);
+        if (portable == null) {
             return null;
         }
 
-        DefaultAuthnRequestInfo requestInfo = new DefaultAuthnRequestInfo();
-        requestInfo.setRequestId(infoMap.get("requestId"));
-        requestInfo.setDomainName(infoMap.get("domainName"));
-        return requestInfo;
+        return portable.getDelegate();
     }
 
     @Override
-    public void addAuthnResponse(String responseID, long ttl, TimeUnit timeUnit) throws OXException {
-        Object value = new Object();
-        getResponseInfoMap().put(responseID, value, ttl, timeUnit);
+    public void addAuthnResponseID(String responseID, long ttl, TimeUnit timeUnit) throws OXException {
+        /*
+         * We use a map here because of several limitations of ISet
+         */
+        getAuthnResponseIDMap().put(responseID, responseID, ttl, timeUnit);
     }
 
     @Override
-    public boolean hasAuthnResponse(String responseID) throws OXException {
-        Object value = getResponseInfoMap().get(responseID);
-        return value != null;
+    public boolean hasAuthnResponseID(String responseID) throws OXException {
+        return getAuthnResponseIDMap().containsKey(responseID);
     }
 
     @Override
     public String addLogoutRequestInfo(LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException {
-        Map<String, String> infoMap = new HashMap<String, String>(5);
-        infoMap.put("requestId", requestInfo.getRequestId());
-        String domainName = requestInfo.getDomainName();
-        if (domainName != null) {
-            infoMap.put("domainName", domainName);
-        }
-        String sessionId = requestInfo.getSessionId();
-        if (sessionId != null) {
-            infoMap.put("sessionId", sessionId);
-        }
-
         String id = generateID();
-        getRequestInfoMap().put(id, infoMap, ttl, timeUnit);
+        getLogoutRequestInfoMap().put(id, new PortableLogoutRequestInfo(requestInfo), ttl, timeUnit);
         return id;
     }
 
     @Override
     public LogoutRequestInfo removeLogoutRequestInfo(String id) throws OXException {
-        Map<String, String> infoMap = getRequestInfoMap().remove(id);
-        if (infoMap == null) {
+        PortableLogoutRequestInfo portable = getLogoutRequestInfoMap().remove(id);
+        if (portable == null) {
             return null;
         }
 
-        DefaultLogoutRequestInfo requestInfo = new DefaultLogoutRequestInfo();
-        requestInfo.setRequestId(infoMap.get("requestId"));
-        String domainName = infoMap.get("domainName");
-        if (domainName != null) {
-            requestInfo.setDomainName(domainName);
-        }
-        String sessionId = infoMap.get("sessionId");
-        if (sessionId != null) {
-            requestInfo.setSessionId(sessionId);
-        }
-
-        return requestInfo;
+        return portable.getDelegate();
     }
 
-    private IMap<String, Map<String, String>> getRequestInfoMap() {
-        IMap<String, Map<String, String>> hzMap = hazelcast.getMap("com.openexchange.saml.impl.HzStateManagement.RequestInfos");
+    private IMap<String, PortableAuthnRequestInfo> getAuthnRequestInfoMap() {
+        IMap<String, PortableAuthnRequestInfo> hzMap = hazelcast.getMap("samlAuthnRequestInfos-1");
         return hzMap;
     }
 
-    private IMap<String, Object> getResponseInfoMap() {
-        IMap<String, Object> hzMap = hazelcast.getMap("com.openexchange.saml.impl.HzStateManagement.ResponseInfos");
+    private IMap<String, PortableLogoutRequestInfo> getLogoutRequestInfoMap() {
+        IMap<String, PortableLogoutRequestInfo> hzMap = hazelcast.getMap("samlLogoutRequestInfos-1");
+        return hzMap;
+    }
+
+    private IMap<String, String> getAuthnResponseIDMap() {
+        IMap<String, String> hzMap = hazelcast.getMap("samlAuthnResponseIDs-1");
         return hzMap;
     }
 

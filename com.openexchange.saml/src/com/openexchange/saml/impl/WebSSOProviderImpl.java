@@ -248,7 +248,7 @@ public class WebSSOProviderImpl implements WebSSOProvider {
             // Response is valid, remember its ID to detect replay attacks
             String responseId = response.getID();
             if (responseId != null) {
-                stateManagement.addAuthnResponse(responseId, AUTHN_RESPONSE_TIMEOUT, TimeUnit.MILLISECONDS);
+                stateManagement.addAuthnResponseID(responseId, AUTHN_RESPONSE_TIMEOUT, TimeUnit.MILLISECONDS);
             }
 
             Assertion bearerAssertion = validationResult.getBearerAssertion();

@@ -47,32 +47,64 @@
  *
  */
 
-package com.openexchange.saml.state;
+package com.openexchange.saml.impl.hz;
+
+import java.io.IOException;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.saml.state.AuthnRequestInfo;
+import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 
 /**
- * Contains the available information about an already sent authentication request.
- * This is for example used to assign responses to their according requests, i.e.
- * to validate InResponseTo attributes of response objects.
+ * {@link PortableAuthnRequestInfo}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
- * @see DefaultAuthnRequestInfo
  */
-public interface AuthnRequestInfo {
+public class PortableAuthnRequestInfo extends AbstractCustomPortable {
 
-    /**
-     * Gets the unique ID of the AuthnRequest
-     *
-     * @return The ID
-     */
-    String getRequestId();
+    private static final String REQUEST_ID = "requestId";
 
-    /**
-     * Gets the domain name via which the HTTP request initiating the AuthnRequest was
-     * received.
-     *
-     * @return The domain name
-     */
-    String getDomainName();
+    private static final String DOMAIN_NAME = "domainName";
+
+    private AuthnRequestInfo delegate;
+
+    public PortableAuthnRequestInfo() {
+        super();
+    }
+
+    PortableAuthnRequestInfo(AuthnRequestInfo delegate) {
+        super();
+        setDelegate(delegate);
+    }
+
+    void setDelegate(AuthnRequestInfo delegate) {
+        this.delegate = delegate;
+    }
+
+    AuthnRequestInfo getDelegate() {
+        return delegate;
+    }
+
+    @Override
+    public int getClassId() {
+        return CustomPortable.PORTABLE_SAML_AUTHN_REQUEST_INFO;
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeUTF(REQUEST_ID, delegate.getRequestId());
+        writer.writeUTF(DOMAIN_NAME, delegate.getDomainName());
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        DefaultAuthnRequestInfo dari = new DefaultAuthnRequestInfo();
+        dari.setDomainName(reader.readUTF(DOMAIN_NAME));
+        dari.setRequestId(reader.readUTF(REQUEST_ID));
+        setDelegate(dari);
+    }
 
 }
