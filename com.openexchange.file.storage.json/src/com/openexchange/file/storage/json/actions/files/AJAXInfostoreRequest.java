@@ -296,17 +296,27 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     @Override
     public List<IdVersionPair> getIdVersionPairs() throws OXException {
         parseIDList();
-        final List<IdVersionPair> retval = new ArrayList<IdVersionPair>(ids.size());
-        for (final String id : ids) {
-            final Set<String> versions = versionMapping.get(id);
-            if (null == versions) {
-                retval.add(new IdVersionPair(id, FileStorageFileAccess.CURRENT_VERSION, folderMapping.get(id)));
+
+        int size = ids.size();
+        List<IdVersionPair> retval = new ArrayList<IdVersionPair>(size);
+
+        for (int i = size, pos = 0; i-- > 0; pos++) {
+            String id = ids.get(pos);
+            if (null == id) {
+                retval.add(new IdVersionPair(null, null, folders.get(pos)));
             } else {
-                for (final String version : versions) {
-                    retval.add(new IdVersionPair(id, version, folderMapping.get(id)));
+                Set<String> versions = versionMapping.get(id);
+                if (null == versions) {
+                    retval.add(new IdVersionPair(id, FileStorageFileAccess.CURRENT_VERSION, folderMapping.get(id)));
+                } else {
+                    for (String version : versions) {
+                        retval.add(new IdVersionPair(id, version, folderMapping.get(id)));
+                    }
                 }
             }
+
         }
+
         return retval;
     }
 
@@ -546,32 +556,45 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
             // Iterate JSON array
             for (int i = length, pos = 0; i-- > 0; pos++) {
+                /*-
+                 * A JSON identifier tuple; either
+                 *
+                 * - For a folder:  {"folder": <folder-id>}
+                 * - For a file:    {"folder": <optional-folder-id>, "id": <document-id>, "version": <optional-version-number>}
+                 */
                 JSONObject tuple = array.getJSONObject(pos);
-                String folderId = tuple.optString(PARAM_FOLDER_ID);
+
+                // Check folder identifier
+                String folderId = tuple.optString(PARAM_FOLDER_ID, null);
                 folders.add(folderId);
 
-                // Identifier
-                String id = tuple.getString(PARAM_ID);
-                FileID fileID = new FileID(id);
-                if (fileID.getFolderId() == null) {
-                    fileID.setFolderId(folderId);
-                    ids.add(fileID.toUniqueID());
-                } else {
+                // Check file identifier
+                String id = tuple.optString(PARAM_ID, null);
+                if (null == id) {
                     ids.add(id);
-                }
+                } else {
+                    // Ensure folder identifier is "encoded" in the file identifier
+                    FileID fileID = new FileID(id);
+                    if (fileID.getFolderId() == null) {
+                        fileID.setFolderId(folderId);
+                        ids.add(fileID.toUniqueID());
+                    } else {
+                        ids.add(id);
+                    }
 
-                // Folder
-                folderMapping.put(id, folderId);
+                    // Add to id-to-folder mapping
+                    folderMapping.put(id, folderId);
 
-                // Version
-                final String version = tuple.optString(PARAM_VERSION, FileStorageFileAccess.CURRENT_VERSION);
-                idVersions.add(version);
-                Set<String> list = versionMapping.get(id);
-                if (null == list) {
-                    list = new LinkedHashSet<String>(2);
-                    versionMapping.put(id, list);
+                    // Add to id-to-versions mapping
+                    final String version = tuple.optString(PARAM_VERSION, FileStorageFileAccess.CURRENT_VERSION);
+                    idVersions.add(version);
+                    Set<String> list = versionMapping.get(id);
+                    if (null == list) {
+                        list = new LinkedHashSet<String>(2);
+                        versionMapping.put(id, list);
+                    }
+                    list.add(version);
                 }
-                list.add(version);
             }
 
             // Assign to members

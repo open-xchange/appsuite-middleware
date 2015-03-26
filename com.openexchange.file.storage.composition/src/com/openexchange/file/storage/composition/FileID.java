@@ -65,6 +65,8 @@ public class FileID {
     /** The account identifier of the default "infostore" file storage */
     public static final String INFOSTORE_ACCOUNT_ID = "infostore";
 
+    // ------------------------------------------------------------------------------------------------------------------------------
+
     private String serviceId;
     private String accountId;
     private String folderId;
@@ -90,26 +92,35 @@ public class FileID {
      * Initializes a new {@link FileID}.
      *
      * @param uniqueID The unified identifier
+     * @throws IllegalArgumentException If passed <code>uniqueID</code> argument is <code>null</code>
      */
     public FileID(String uniqueID) {
-        List<String> unmangled = IDMangler.unmangle(uniqueID);
+        super();
+        if (null == uniqueID) {
+            throw new IllegalArgumentException("Unique ID is null.");
+        }
 
+        List<String> unmangled = IDMangler.unmangle(uniqueID);
         int size = unmangled.size();
-        if (size == 1) {
-            serviceId = INFOSTORE_SERVICE_ID;
-            accountId = INFOSTORE_ACCOUNT_ID;
-            folderId = null;
-            fileId = uniqueID;
-        } else if (size == 2) {
-            serviceId = INFOSTORE_SERVICE_ID;
-            accountId = INFOSTORE_ACCOUNT_ID;
-            folderId = unmangled.get(0);
-            fileId = unmangled.get(1);
-        } else {
-            serviceId = unmangled.get(0);
-            accountId = unmangled.get(1);
-            folderId = unmangled.get(2);
-            fileId = unmangled.get(3);
+        switch (size) {
+            case 1:
+                serviceId = INFOSTORE_SERVICE_ID;
+                accountId = INFOSTORE_ACCOUNT_ID;
+                folderId = null;
+                fileId = uniqueID;
+                break;
+            case 2:
+                serviceId = INFOSTORE_SERVICE_ID;
+                accountId = INFOSTORE_ACCOUNT_ID;
+                folderId = unmangled.get(0);
+                fileId = unmangled.get(1);
+                break;
+            default:
+                serviceId = unmangled.get(0);
+                accountId = unmangled.get(1);
+                folderId = unmangled.get(2);
+                fileId = unmangled.get(3);
+                break;
         }
     }
 
