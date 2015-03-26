@@ -49,6 +49,7 @@
 package com.openexchange.rss.preprocessors;
 
 import com.openexchange.html.HtmlService;
+import com.openexchange.rss.RssResult;
 import com.openexchange.rss.RssServices;
 
 /**
@@ -58,10 +59,32 @@ import com.openexchange.rss.RssServices;
  */
 public class SanitizingPreprocessor extends AbstractPreprocessor {
 
+    private final boolean dropExternalImages;
+
+    /**
+     * Initializes a new {@link SanitizingPreprocessor}.
+     */
+    public SanitizingPreprocessor(boolean dropExternalImages) {
+        super();
+        this.dropExternalImages = dropExternalImages;
+    }
+
 	@Override
-	protected String innerProcess(String payload) {
+	protected String innerProcess(String payload, RssResult rssResult) {
 	    final HtmlService htmlService = RssServices.getHtmlService();
-        return null == htmlService ? payload : htmlService.sanitize(payload, null, true, null, null);
+        if (null == htmlService) {
+            return payload;
+        }
+
+        boolean[] modified = new boolean[1];
+        modified[0] = false;
+        String sanitized = htmlService.sanitize(payload, null, dropExternalImages, modified, null);
+
+        if (modified[0]) {
+            rssResult.markExternalImagesDropped();
+        }
+
+        return sanitized;
 	}
 
 }

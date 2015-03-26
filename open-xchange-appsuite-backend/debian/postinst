@@ -33,7 +33,7 @@ postFix() {
 
     # SoftwareChange_Request-2436
     if dpkg --compare-versions "7.6.2-0" gt-nl "$1"; then
-        sed -ie 's/2014 Open-Xchange/2015 Open-Xchange/' /opt/open-xchange/etc/as-config-defaults.yml
+        sed -i 's/2014 Open-Xchange/2015 Open-Xchange/' /opt/open-xchange/etc/as-config-defaults.yml
     fi
 }
 

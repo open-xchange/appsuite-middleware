@@ -143,32 +143,33 @@ public abstract class PasswordChangeService {
      * @throws OXException If old password is invalid
      */
     protected void check(final PasswordChangeEvent event) throws OXException {
-        /*
-         * verify mandatory parameters
-         */
-        if (Strings.isEmpty(event.getOldPassword())) {
-            throw UserExceptionCode.MISSING_CURRENT_PASSWORD.create();
-        }
-        if (Strings.isEmpty(event.getNewPassword())) {
-            throw UserExceptionCode.MISSING_NEW_PASSWORD.create();
-        }
-        /*
-         * Verify old password prior to applying new one
-         */
-        final AuthenticationService authenticationService = Authentication.getService();
-        if (authenticationService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());
-        }
-        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-        if (null == userService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
-        }
         try {
+            /*
+             * Verify old password prior to applying new one
+             */
+            final AuthenticationService authenticationService = Authentication.getService();
+            if (authenticationService == null) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthenticationService.class.getName());
+            }
+            UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+            if (null == userService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+            }
             /*
              * Loading user also verifies its existence
              */
             final Session session = event.getSession();
             User user = userService.getUser(session.getUserId(), session.getContextId());
+            /*
+             * verify mandatory parameters
+             */
+            if (Strings.isEmpty(event.getOldPassword()) && !user.isGuest()) {
+                throw UserExceptionCode.MISSING_CURRENT_PASSWORD.create();
+            }
+            if (Strings.isEmpty(event.getNewPassword())) {
+                throw UserExceptionCode.MISSING_NEW_PASSWORD.create();
+            }
+
             if (false == user.isGuest()) {
                 authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword()));
             }
@@ -252,7 +253,7 @@ public abstract class PasswordChangeService {
          */
         final SessiondService sessiondService = serviceRegistry.getService(SessiondService.class);
         if (sessiondService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
         try {
             sessiondService.changeSessionPassword(session.getSessionID(), event.getNewPassword());

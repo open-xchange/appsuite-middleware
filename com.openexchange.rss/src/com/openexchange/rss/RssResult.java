@@ -51,8 +51,18 @@ package com.openexchange.rss;
 import java.util.Date;
 
 public class RssResult {
+
 	private String url, author, format, body, subject, feedUrl, feedTitle, imageUrl;
 	private Date date;
+    private boolean externalImagesDropped;
+
+    /**
+     * Initializes a new {@link RssResult}.
+     */
+    public RssResult() {
+        super();
+        externalImagesDropped = false;
+    }
 
 	public String getUrl() {
 		return url;
@@ -139,4 +149,20 @@ public class RssResult {
 		}
 		return this;
 	}
+
+    /**
+     * Checks if this RSS result has dropped external images
+     *
+     * @return <code>true</code> if this RSS result has dropped external images; otherwise <code>false</code>
+     */
+    public boolean hasDroppedExternalImages() {
+        return externalImagesDropped;
+    }
+
+    /**
+     * Marks this RSS result to have external images dropped.
+     */
+    public void markExternalImagesDropped() {
+        externalImagesDropped = true;
+    }
 }

@@ -78,39 +78,60 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractFileAction implements AJAXActionService {
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFileAction.class);
 
-
-    private static final FileMetadataWriter fileWriter = new FileMetadataWriter();
-
+    /**
+     * The parameter enumeration.
+     */
     public static enum Param {
+        /** The <code>"id"</code> parameter */
         ID("id"),
+        /** The <code>"folder"</code> parameter */
         FOLDER_ID("folder"),
+        /** The <code>"version"</code> parameter */
         VERSION("version"),
+        /** The <code>"columns"</code> parameter */
         COLUMNS("columns"),
+        /** The <code>"sort"</code> parameter */
         SORT("sort"),
+        /** The <code>"order"</code> parameter */
         ORDER("order"),
+        /** The <code>"timezone"</code> parameter */
         TIMEZONE("timezone"),
+        /** The <code>"timestamp"</code> parameter */
         TIMESTAMP("timestamp"),
+        /** The <code>"ignore"</code> parameter */
         IGNORE("ignore"),
+        /** The <code>"diff"</code> parameter */
         DIFF("diff"),
+        /** The <code>"attached"</code> parameter */
         ATTACHED_ID("attached"),
+        /** The <code>"module"</code> parameter */
         MODULE("module"),
+        /** The <code>"attachment"</code> parameter */
         ATTACHMENT("attachment");
 
-        String name;
+        private final String name;
 
         private Param(final String name) {
             this.name = name;
         }
 
+        /**
+         * Gets the parameter name
+         *
+         * @return The name
+         */
         public String getName() {
             return name;
         }
-    }
+    } // End of enum Param
+
+    private static final FileMetadataWriter FILE_WRITER = new FileMetadataWriter();
 
     protected FileMetadataWriter getWriter() {
-        return fileWriter;
+        return FILE_WRITER;
     }
 
     public abstract AJAXRequestResult handle(InfostoreRequest request) throws OXException;

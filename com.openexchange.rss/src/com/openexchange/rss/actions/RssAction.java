@@ -56,22 +56,21 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
-import com.openexchange.rss.FeedByDateSorter;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
 import com.openexchange.rss.RssServices;
@@ -83,6 +82,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.feed.synd.SyndImage;
 import com.sun.syndication.fetcher.FetcherException;
 import com.sun.syndication.fetcher.impl.HashMapFeedInfoCache;
 import com.sun.syndication.io.FeedException;
@@ -97,6 +97,24 @@ public class RssAction implements AJAXActionService {
 
     private static final int NOT_FOUND = 404;
     private static final int FORBIDDEN = 403;
+
+    private static final Comparator<RssResult> ASC = new Comparator<RssResult>() {
+
+        @Override
+        public int compare(RssResult r1, RssResult r2) {
+            return r1.getDate().compareTo(r2.getDate());
+        }
+    };
+
+    private static final Comparator<RssResult> DESC = new Comparator<RssResult>() {
+
+        @Override
+        public int compare(RssResult r1, RssResult r2) {
+            return r2.getDate().compareTo(r1.getDate());
+        }
+    };
+
+    // ------------------------------------------------------------------------------------------------------------------------------
 
     private final TimoutHttpURLFeedFetcher fetcher;
     private final HashMapFeedInfoCache feedCache;
@@ -119,6 +137,8 @@ public class RssAction implements AJAXActionService {
         if (order == null) {
             order = "DESC";
         }
+
+        boolean dropExternalImages = AJAXRequestDataTools.parseBoolParameter("drop_images", request, true);
 
         List<OXException> warnings = new LinkedList<OXException>();
         List<SyndFeed> feeds = new LinkedList<SyndFeed>();
@@ -197,25 +217,34 @@ public class RssAction implements AJAXActionService {
         }
 
         List<RssResult> results = new ArrayList<RssResult>(feeds.size());
+        RssPreprocessor preprocessor = new SanitizingPreprocessor(dropExternalImages);
+
+        // Iterate feeds
         for (SyndFeed feed : feeds) {
+
+            // Iterate feed's entries
             for (Object obj : feed.getEntries()) {
                 SyndEntry entry = (SyndEntry) obj;
-                RssResult result = new RssResult().setAuthor(entry.getAuthor()).setSubject(getTitle(entry)).setUrl(entry.getLink()).setFeedUrl(
-                    feed.getLink()).setFeedTitle(feed.getTitle()).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
 
-                if (feed.getImage() != null) {
-                    result.setImageUrl(feed.getImage().getLink());
+                // Create appropriate RssResult instance
+                RssResult result = new RssResult().setAuthor(entry.getAuthor()).setSubject(getTitle(entry)).setUrl(entry.getLink());
+                result.setFeedUrl(feed.getLink()).setFeedTitle(feed.getTitle()).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
+
+                // Check possible image
+                SyndImage image = feed.getImage();
+                if (image != null) {
+                    result.setImageUrl(image.getLink());
                 }
 
+                // Add to results list
                 results.add(result);
 
-                RssPreprocessor preprocessor = new SanitizingPreprocessor();
                 @SuppressWarnings("unchecked") List<SyndContent> contents = entry.getContents();
                 boolean foundHtml = false;
                 for (SyndContent content : contents) {
                     if ("html".equals(content.getType())) {
                         foundHtml = true;
-                        String htmlContent = preprocessor.process(content.getValue());
+                        String htmlContent = preprocessor.process(content.getValue(), result);
                         result.setBody(htmlContent).setFormat("text/html");
                         break;
                     }
@@ -223,65 +252,19 @@ public class RssAction implements AJAXActionService {
                         result.setBody(content.getValue()).setFormat(content.getType());
                     }
                 }
-            }
-        }
+            } // End of entries iteration
+
+        } // End of feeds iteration
 
         if (sort.equalsIgnoreCase("DATE")) {
-            Collections.sort(results, new FeedByDateSorter(order));
+            Collections.sort(results, "DESC".equalsIgnoreCase(order) ? DESC : ASC);
         }
         return new AJAXRequestResult(results, "rss").addWarnings(warnings);
     }
 
     private static String getTitle(SyndEntry entry) {
         final HtmlService htmlService = RssServices.getHtmlService();
-        return null == htmlService ? entry.getTitle() : replaceBody(htmlService.sanitize(entry.getTitle(), null, true, null, null));
-    }
-
-    private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_HEAD = Pattern.compile("<head.*?>(.*?)</head>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_BODY = Pattern.compile("<body(.*?)>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_STYLE = Pattern.compile("<style.*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-
-    /**
-     * Replaces body tag with an appropriate &lt;div&gt; tag.
-     *
-     * @param htmlContent The HTML content
-     * @return The HTML content with replaced body tag
-     */
-    private static String replaceBody(final String htmlContent) {
-        if (isEmpty(htmlContent)) {
-            return htmlContent;
-        }
-        final Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
-        if (!htmlMatcher.find()) {
-            return replaceBodyPlain(htmlContent);
-        }
-        final Matcher headMatcher = PATTERN_HEAD.matcher(htmlMatcher.group(1));
-        if (!headMatcher.find()) {
-            return replaceBodyPlain(htmlContent);
-        }
-        final Matcher bodyMatcher = PATTERN_BODY.matcher(htmlContent);
-        if (!bodyMatcher.find()) {
-            return replaceBodyPlain(htmlContent);
-        }
-        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
-        sb.append(bodyMatcher.group(2));
-        // Is there more behind closing <body> tag?
-        final int end = bodyMatcher.end();
-        if (end < htmlContent.length()) {
-            sb.append(htmlContent.substring(end));
-        }
-        return sb.toString();
-    }
-
-    private static String replaceBodyPlain(final String htmlContent) {
-        final Matcher m = PATTERN_BODY.matcher(htmlContent);
-        StringBuffer sb = new StringBuffer();
-        if (m.find()) {
-            m.appendReplacement(sb, Matcher.quoteReplacement(m.group(2)));
-        }
-        m.appendTail(sb);
-        return sb.toString();
+        return null == htmlService ? entry.getTitle() : htmlService.sanitize(entry.getTitle(), null, true, null, null);
     }
 
     private static String urlDecodeSafe(final String urlString) throws MalformedURLException {

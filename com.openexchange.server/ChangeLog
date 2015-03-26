@@ -1,6 +1,7 @@
-* 2015-03-26 - marcus.klein@open-xchange.com
+* 2015-03-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 37311: Changed Java dependency on RHEL6 based distros to java7 instead of java >= 1.7.0.
+ - Fix for bug 37372: post installation script now correctly upgrades the copyright year to 2015.
 
 * 2015-03-25 - tobias.friedrich@open-xchange.com
 

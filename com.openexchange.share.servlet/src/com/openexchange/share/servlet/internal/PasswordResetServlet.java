@@ -49,6 +49,8 @@
 
 package com.openexchange.share.servlet.internal;
 
+import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
+import static com.openexchange.share.servlet.utils.ShareRedirectUtils.urlEncode;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -72,12 +74,12 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.DefaultLinkProvider;
 import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotifications;
+import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
 import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.tools.servlet.http.Tools;
@@ -160,9 +162,11 @@ public class PasswordResetServlet extends HttpServlet {
                     .setConfirm(hash)
                     .build();
                 notificationService.send(notification);
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().write("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Confirmation needed</title></head><body><h1>Confirmation needed</h1><p>You must confirm the reset of your password. We sent an email to " + mailAddress + ". Please click the link provided in this email.</p></body></html>");
-                response.flushBuffer();
+                String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
+                    urlEncode(String.format(translate(ShareServletStrings.RESET_PASSWORD, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
+                    "resetPassword");
+                response.setStatus(HttpServletResponse.SC_FOUND);
+                response.sendRedirect(redirectUrl);
             } else {
                 // Try to set new password
                 if (confirm.equals(hash)) {
@@ -188,9 +192,11 @@ public class PasswordResetServlet extends HttpServlet {
                     user.setPasswordMech(guest.getPasswordMech());
                     user.setUserPassword(PasswordMech.BCRYPT.encode(password));
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
-
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().write("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Your password has been reset</title></head><body><h1>Your password has been reset</h1><p>Your new password has been sent to " + guestInfo.getEmailAddress() + ". Click <a href=\"" +  ShareRedirectUtils.getRedirectUrl(guestInfo, null, this.loginConfig.getLoginConfig()) + "\">here</a> to log in with your new credentials.</p></body></html>");
+                    String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
+                        urlEncode(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
+                        "resetPassword");
+                    response.setStatus(HttpServletResponse.SC_FOUND);
+                    response.sendRedirect(redirectUrl);
                 } else {
                     LOG.debug("Bad attempt to reset password for share '{}'", token);
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -216,25 +222,25 @@ public class PasswordResetServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Adds the redirect to the given response
-     *
-     * @param guest - the guest info
-     * @param target - target to get the redirect to
-     * @param serverName - server name to redirect to
-     * @param response - response that should be enriched by the redirect
-     * @throws OXException
-     */
-    private void setRedirect(GuestShare share, ShareTarget target, HttpServletResponse response) throws OXException {
-        try {
-            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share.getGuest(), target, this.loginConfig.getLoginConfig());
-            response.sendRedirect(redirectUrl);
-        } catch (IOException e) {
-            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
+    //    /**
+    //     * Adds the redirect to the given response
+    //     *
+    //     * @param guest - the guest info
+    //     * @param target - target to get the redirect to
+    //     * @param serverName - server name to redirect to
+    //     * @param response - response that should be enriched by the redirect
+    //     * @throws OXException
+    //     */
+    //    private void setRedirect(GuestShare share, ShareTarget target, HttpServletResponse response) throws OXException {
+    //        try {
+    //            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share.getGuest(), target, this.loginConfig.getLoginConfig());
+    //            response.sendRedirect(redirectUrl);
+    //        } catch (IOException e) {
+    //            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
+    //        } catch (RuntimeException e) {
+    //            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+    //        }
+    //    }
 
     private String getHash(String toHash) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest md = MessageDigest.getInstance("SHA-1");

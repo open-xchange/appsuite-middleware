@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
@@ -114,6 +113,8 @@ public class DispatcherServlet extends SessionServlet {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DispatcherServlet.class);
 
     private static final @NonNull Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
+
+    private static final @NonNull String RETRY_AFTER = "Retry-After";
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
@@ -525,15 +526,17 @@ public class DispatcherServlet extends SessionServlet {
     protected void handleError(AJAXRequestResult result, HttpServletResponse httpServletResponse) throws IOException {
         int httpStatusCode = result.getHttpStatusCode();
         switch (httpStatusCode) {
-        case 202: {
-            httpServletResponse.setContentType(null);
-            String retry_after = result.getHeader(RETRY_AFTER);
-            if (!Strings.isEmpty(retry_after)) {
-                httpServletResponse.addHeader(RETRY_AFTER, retry_after);
+            case HttpServletResponse.SC_ACCEPTED: {
+                // Status code (202) indicating that a request was accepted for processing, but was not completed.
+                httpServletResponse.setContentType(null);
+                String retryAfter = result.getHeader(RETRY_AFTER);
+                if (!Strings.isEmpty(retryAfter)) {
+                    httpServletResponse.addHeader(RETRY_AFTER, retryAfter);
+                }
+                break;
             }
-        }
-        default:
-            break;
+            default:
+                break;
         }
         httpServletResponse.sendError(result.getHttpStatusCode());
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,27 @@
  *
  */
 
-package com.openexchange.rss;
+package com.openexchange.share.servlet;
 
-import java.util.Comparator;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link FeedByDateSorter} - The comparator for {@code RssResult}s.
+ * {@link ShareServletStrings}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.0
  */
-public class FeedByDateSorter implements Comparator<RssResult> {
+public class ShareServletStrings implements LocalizableStrings {
 
-    private final String order;
+    public static final String NEW_SHARE = "%1$s would like you to view %2$s";
 
-    public FeedByDateSorter(String order) {
-        this.order = order;
-    }
+    public static final String SET_NEW_PASSWORD = "To access %1$s you have to set a password.";
 
-    @Override
-    public int compare(RssResult r1, RssResult r2) {
-        int res = r1.getDate().compareTo(r2.getDate());
-        if (order.equalsIgnoreCase("DESC")) {
-            res *= -1;
-        }
-        return res;
-    }
+    public static final String RESET_PASSWORD = "Email sent to %1$s with further instructions on how to reset your password.";
+
+    public static final String RESET_PASSWORD_DONE = "Your password has been reset.";
+
+    public static final String SHARE_NOT_FOUND = "The share you are looking for does not exist.";
 
 }

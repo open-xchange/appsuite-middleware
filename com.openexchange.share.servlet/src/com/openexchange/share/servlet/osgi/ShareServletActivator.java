@@ -58,8 +58,10 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.guest.GuestService;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
@@ -85,7 +87,7 @@ public class ShareServletActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ShareService.class, UserService.class, ContextService.class, SessiondService.class, ShareCryptoService.class,
-            ConfigurationService.class, ModuleSupport.class, GuestService.class };
+            ConfigurationService.class, ModuleSupport.class, GuestService.class, TranslatorFactory.class, PasswordChangeService.class };
     }
 
     @Override
@@ -112,6 +114,11 @@ public class ShareServletActivator extends HousekeepingActivator {
         {
             Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
             PasswordResetServletRegisterer registerer = new PasswordResetServletRegisterer(context, loginConfig);
+            track(filter, registerer);
+        }
+        {
+            Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
+            InitGuestPasswordServletRegisterer registerer = new InitGuestPasswordServletRegisterer(context, loginConfig);
             track(filter, registerer);
         }
 
