@@ -121,7 +121,17 @@ public interface SessiondService {
      * @param contextId The context identifier
      * @throws OXException If removing session fails on one of the remote nodes
      */
-    public void removeUserSessionsGlobal(int userId, int contextId) throws OXException;
+    public void removeUserSessionsGlobally(int userId, int contextId) throws OXException;
+
+    /**
+     * Removes all sessions which match the given {@link SessionFilter}. The filter is matched against all sessions in the
+     * (hazelcast-)cluster.
+     *
+     * @param filter The filter
+     * @return The IDs of the removed sessions, possibly empty but never <code>null</code>
+     * @throws OXException If an error occurs while removing
+     */
+    Collection<String> removeSessionsGlobally(SessionFilter filter) throws OXException;
 
     /**
      * Gets the number of active sessions belonging to given user in specified context.
@@ -199,17 +209,14 @@ public interface SessiondService {
     Session getSessionWithTokens(String clientToken, String serverToken) throws OXException;
 
     /**
-     * Returns all sessions that match the given {@link SessionFilter}. Sessions can be filtered locally (this node) or globally (all
-     * nodes via central session storage). Please note that the latter is probably orders of magnitudes slower than the former. Also
-     * note that if you filter globally for session properties, those must be configured to be distributed. This configuration takes
-     * place in <code>sessiond.properties</code> via <code>com.openexchange.sessiond.remoteParameterNames</code>.
+     * Returns all session IDs whose sessions match the given {@link SessionFilter}. The filter is matched against all sessions in the
+     * (hazelcast-)cluster.
      *
      * @param filter The filter
-     * @param filterGlobally Whether the sessions shall be filtered globally (<code>true</code>) or not (<code>false</code>)
-     * @return The found sessions, possibly empty but never <code>null</code>
-     * @throws OXException If an error occurs while filtering (probably an error with the central session storage)
+     * @return The IDs of the found sessions, possibly empty but never <code>null</code>
+     * @throws OXException If an error occurs while filtering
      */
-    Collection<Session> filterSessions(SessionFilter filter, boolean filterGlobally) throws OXException;
+    Collection<String> findSessionsGlobally(SessionFilter filter) throws OXException;
 
     /**
      * Gets the number of active sessions.

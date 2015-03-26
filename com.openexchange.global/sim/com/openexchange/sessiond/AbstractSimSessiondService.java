@@ -133,7 +133,7 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
-    public void removeUserSessionsGlobal(int userId, int contextId) throws OXException {
+    public void removeUserSessionsGlobally(int userId, int contextId) throws OXException {
         // Nope
     }
 
@@ -162,7 +162,13 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
-    public Collection<Session> filterSessions(SessionFilter filter, boolean filterGlobally) throws OXException {
+    public Collection<String> findSessionsGlobally(SessionFilter filter) throws OXException {
         return Collections.emptyList();
     }
+
+    @Override
+    public Collection<String> removeSessionsGlobally(SessionFilter filter) throws OXException {
+        return Collections.emptyList();
+    }
+
 }

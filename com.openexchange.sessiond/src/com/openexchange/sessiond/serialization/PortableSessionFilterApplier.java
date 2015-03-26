@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,81 +50,102 @@
 package com.openexchange.sessiond.serialization;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
-import com.openexchange.session.Session;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.impl.SessionHandler;
 
+
 /**
- * {@link PortableUserSessionsCleaner}
+ * {@link PortableSessionFilterApplier}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.1
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public class PortableUserSessionsCleaner extends AbstractCustomPortable implements Callable<Integer> {
+public class PortableSessionFilterApplier extends AbstractCustomPortable implements Callable<Collection<String>> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PortableUserSessionsCleaner.class);
+    public static enum Action {
+        GET(1),
+        REMOVE(2);
 
-    private static final String FIELD_CONTEXT_ID = "contextId";
-    private static final String FIELD_USER_ID = "userId";
+        private static final Map<Integer, Action> actionsByID = new TreeMap<Integer, Action>();
+        static {
+            for (Action action : Action.values()) {
+                actionsByID.put(action.getID(), action);
+            }
+        }
 
-    // ----------------------------------------------------------------------------------------------------------
+        private final int id;
 
-    private int contextId;
-    private int userId;
+        private Action(int id) {
+            this.id = id;
+        }
 
-    /**
-     * Initializes a new {@link PortableUserSessionsCleaner}.
-     */
-    public PortableUserSessionsCleaner() {
+        private int getID() {
+            return id;
+        }
+
+        private static Action byID(int id) {
+            return actionsByID.get(id);
+        }
+    }
+
+    private static final String FIELD_FILTER_STRING = "FILTER_STRING";
+
+    private static final String FIELD_ACTION = "ACTION";
+
+    private SessionFilter filter;
+
+    private Action action;
+
+    public PortableSessionFilterApplier() {
         super();
     }
 
-    /**
-     * Initializes a new {@link PortableUserSessionsCleaner}.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     */
-    public PortableUserSessionsCleaner(int userId, int contextId) {
-        this();
-        this.userId = userId;
-        this.contextId = contextId;
-    }
-
-    @Override
-    public Integer call() throws Exception {
-        try {
-            Session[] removedSessions = SessionHandler.removeUserSessions(userId, contextId);
-            return Integer.valueOf(null == removedSessions ? 0 : removedSessions.length);
-        } catch (Exception exception) {
-            LOG.error("Unable to remove sessions for user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
-            throw exception;
-        }
+    public PortableSessionFilterApplier(SessionFilter filter, Action action) {
+        super();
+        this.filter = filter;
+        this.action = action;
     }
 
     @Override
     public int getClassId() {
-        return PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID;
+        return CustomPortable.PORTABLE_SESSIONS_FILTER_APPLIER_CLASS_ID;
     }
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeInt(FIELD_CONTEXT_ID, contextId);
-        writer.writeInt(FIELD_USER_ID, userId);
+        writer.writeUTF(FIELD_FILTER_STRING, filter.toString());
+        writer.writeInt(FIELD_ACTION, action.getID());
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        this.contextId = reader.readInt(FIELD_CONTEXT_ID);
-        this.userId = reader.readInt(FIELD_USER_ID);
+        action = Action.byID(reader.readInt(FIELD_ACTION));
+        filter = SessionFilter.create(reader.readUTF(FIELD_FILTER_STRING));
+    }
+
+    @Override
+    public Collection<String> call() throws Exception {
+        switch (action) {
+            case GET:
+                return SessionHandler.findLocalSessions(filter);
+            case REMOVE:
+                return SessionHandler.removeLocalSessions(filter);
+            default:
+                throw new UnsupportedOperationException("Action " + action.name() + " is not implemented!");
+        }
     }
 
     @Override
     public String toString() {
-        return "PortableUserSessionsCleaner for user " + userId + " in context " + contextId;
+        return "PortableSessionFilterApplier with filter '" + filter.toString() + "' and action '" + action.name() + "'";
     }
 
 }

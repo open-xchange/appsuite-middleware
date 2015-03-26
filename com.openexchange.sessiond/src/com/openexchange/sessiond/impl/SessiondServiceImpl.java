@@ -138,8 +138,18 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public void removeUserSessionsGlobal(int userId, int contextId) throws OXException {
+    public void removeUserSessionsGlobally(int userId, int contextId) throws OXException {
         SessionHandler.removeUserSessionsGlobal(userId, contextId);
+    }
+
+    @Override
+    public Collection<String> removeSessionsGlobally(SessionFilter filter) throws OXException {
+        List<String> local = SessionHandler.removeLocalSessions(filter);
+        List<String> remote = SessionHandler.removeRemoteSessions(filter);
+        List<String> all = new ArrayList<String>(local.size() + remote.size());
+        all.addAll(local);
+        all.addAll(remote);
+        return all;
     }
 
     @Override
@@ -235,8 +245,13 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public Collection<Session> filterSessions(SessionFilter filter, boolean filterGlobally) throws OXException {
-        return SessionHandler.filterSessions(filter, filterGlobally);
+    public Collection<String> findSessionsGlobally(SessionFilter filter) throws OXException {
+        List<String> local = SessionHandler.findLocalSessions(filter);
+        List<String> remote = SessionHandler.findRemoteSessions(filter);
+        List<String> all = new ArrayList<String>(local.size() + remote.size());
+        all.addAll(local);
+        all.addAll(remote);
+        return all;
     }
 
 }
