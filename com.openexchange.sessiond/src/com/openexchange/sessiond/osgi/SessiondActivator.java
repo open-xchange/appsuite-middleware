@@ -115,6 +115,7 @@ public final class SessiondActivator extends HousekeepingActivator {
             HazelcastInstance hzInstance = context.getService(reference);
             try {
                 activator.addService(HazelcastInstance.class, hzInstance);
+                getServiceRegistry().addService(HazelcastInstance.class, hzInstance);
                 return hzInstance;
             } catch (RuntimeException e) {
                 LOG.warn("Couldn't initialize distributed token-session map.", e);
@@ -131,6 +132,7 @@ public final class SessiondActivator extends HousekeepingActivator {
         @Override
         public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
             activator.removeService(HazelcastInstance.class);
+            getServiceRegistry().removeService(HazelcastInstance.class);
             context.ungetService(reference);
         }
     }

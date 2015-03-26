@@ -420,7 +420,7 @@ public final class SessionHandler {
      * @return timeout (in seconds) or 0 for no timeout
      */
     private static int getRemoteSessionTaskTimeout() {
-        int defaultValue = 0;
+        int defaultValue = 300;
         ConfigurationService configurationService = getServiceRegistry().getService(ConfigurationService.class);
         if (configurationService == null) {
             LOG.info("ConfigurationService not available. No execution timeout for remote processing of session tasks available. Fallback to no timeout.");
