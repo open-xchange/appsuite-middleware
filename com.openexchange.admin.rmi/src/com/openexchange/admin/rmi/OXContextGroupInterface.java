@@ -47,84 +47,27 @@
  *
  */
 
-package com.openexchange.admin.console.context.group;
+package com.openexchange.admin.rmi;
 
 import java.rmi.RemoteException;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import com.openexchange.admin.rmi.OXContextGroupInterface;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.cli.AbstractRmiCLI;
-import com.openexchange.java.Strings;
 
 /**
- * {@link DeleteContextGroup}
+ * {@link OXContextGroupInterface}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DeleteContextGroup extends AbstractRmiCLI<Void> {
+public interface OXContextGroupInterface {
 
     /**
-     * Entry point
-     * 
-     * @param args Command line arguments
+     * RMI name to be used in the naming lookup.
      */
-    public static void main(String[] args) {
-        new DeleteContextGroup().execute(args);
-    }
+    public static final String RMI_NAME = "OXContextGroup";
 
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        try {
-            authenticator.doAuthentication(login, password);
-        } catch (RemoteException e) {
-            System.err.print(e.getMessage());
-            System.exit(-1);
-        }
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-        Option option = new Option("g", "context-group-id", true, "The context group identifier");
-        option.setRequired(true);
-        options.addOption(option);
-    }
-
-    @Override
-    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        OXContextGroupInterface oxContexGroup = getRmiStub(OXContextGroupInterface.RMI_NAME);
-        oxContexGroup.deleteContextGroup(cmd.getOptionValue('g'));
-        return null;
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        checkOptions(cmd, null);
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd, Options options) {
-        String value = cmd.getOptionValue('g');
-        if (Strings.isEmpty(value)) {
-            printHelp(options);
-            System.exit(1);
-        }
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
-    protected String getFooter() {
-        return "Command line tool for deleting context groups and all data associated to them";
-    }
-
-    @Override
-    protected String getName() {
-        return "deletecontextgroup";
-    }
-
+    /**
+     * Deletes all data from the globaldb that is associated to the specified context group.
+     * 
+     * @param contextGroupId The context group identifier
+     * @throws RemoteException
+     */
+    void deleteContextGroup(String contextGroupId) throws RemoteException;
 }
