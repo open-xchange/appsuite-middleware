@@ -54,13 +54,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.saml.SessionProperties;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.inspector.Reason;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessiondService;
 
 
 /**
@@ -73,8 +73,11 @@ public class SAMLSessionInspector implements SessionInspectorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SAMLSessionInspector.class);
 
-    public SAMLSessionInspector() {
+    private final SessiondService sessiondService;
+
+    public SAMLSessionInspector(SessiondService sessiondService) {
         super();
+        this.sessiondService = sessiondService;
     }
 
     @Override
@@ -84,7 +87,7 @@ public class SAMLSessionInspector implements SessionInspectorService {
             try {
                 long notOnOrAfter = Long.parseLong((String) parameter);
                 if (System.currentTimeMillis() >= notOnOrAfter) {
-                    LoginPerformer.getInstance().doLogout(session.getSessionID());
+                    sessiondService.removeSession(session.getSessionID());
                     throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
                 }
             } catch (NumberFormatException e) {

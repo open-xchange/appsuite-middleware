@@ -612,23 +612,14 @@ public class WebSSOProviderImpl implements WebSSOProvider {
                 filterString = fsBuilder.toString();
             }
 
-            Collection<Session> sessions = sessiondService.filterSessions(SessionFilter.create(filterString), true);
-            LOG.debug("Found {} session IDs for {} indexes", sessions.size(), numIndexes);
-
-            for (Session session : sessions) {
-                String sessionId = session.getSessionID();
-                if (sessiondService.removeSession(sessionId)) {
-                    removedAnySession = true;
-                    LOG.debug("Session {} was terminated", sessionId);
-                } else {
-                    LOG.debug("Session {} did not exist anymore", sessionId);
-                }
-            }
+            Collection<String> sessionIds = sessiondService.removeSessionsGlobally(SessionFilter.create(filterString));
+            LOG.debug("Removed {} sessions for {} indexes", sessionIds.size(), numIndexes);
+            removedAnySession = sessionIds.size() > 0;
         } else {
             int contextId = logoutInfo.getContextId();
             int userId = logoutInfo.getUserId();
             if (contextId > 0 && userId > 0) {
-                sessiondService.removeUserSessionsGlobal(userId, contextId);
+                sessiondService.removeUserSessionsGlobally(userId, contextId);
                 removedAnySession = true;
                 LOG.debug("Removed sessions globally for user {} in context {}", userId, contextId);
             } else {

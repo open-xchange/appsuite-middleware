@@ -141,7 +141,8 @@ public class SAMLFeature extends DependentServiceStarter {
 
             HzStateManagement hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
             WebSSOProvider serviceProvider = new WebSSOProviderImpl(config, openSAML, hzStateManagement, services);
-            serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(), null));
+            SessiondService sessiondService = services.getService(SessiondService.class);
+            serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(sessiondService), null));
 
             SAMLBackend samlBackend = services.getService(SAMLBackend.class);
             serviceRegistrations.push(context.registerService(Enhancer.class, new SAMLLoginEnhancer(samlBackend), null));
@@ -155,7 +156,7 @@ public class SAMLFeature extends DependentServiceStarter {
             servlets.push(acsServletAlias);
 
             String initAuthServletAlias = prefix + "init";
-            httpService.registerServlet(initAuthServletAlias, new InitService(serviceProvider, exceptionHandler, services.getService(SessiondService.class)), null, null);
+            httpService.registerServlet(initAuthServletAlias, new InitService(serviceProvider, exceptionHandler, sessiondService), null, null);
             servlets.push(initAuthServletAlias);
 
             if (config.singleLogoutEnabled()) {
