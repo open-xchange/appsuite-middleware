@@ -159,14 +159,19 @@ public class WebSSOProviderImpl implements WebSSOProvider {
     private static final Logger LOG = LoggerFactory.getLogger(WebSSOProviderImpl.class);
 
     /**
-     * The number of milliseconds for which a LogoutRequest sent by us is considered valid.
+     * The number of milliseconds for which a LogoutRequest sent by us is considered valid (5 minutes).
      */
     private static final long LOGOUT_REQUEST_TIMEOUT = 5 * 60 * 1000l;
 
     /**
-     * The number of milliseconds for which an AuthnRequestInfo is remembered.
+     * The number of milliseconds for which an AuthnRequestInfo is remembered (5 minutes).
      */
     private static final long AUTHN_REQUEST_TIMEOUT = 5 * 60 * 1000l;
+
+    /**
+     * The number of milliseconds for which an authentication response ID is remembered (2 hours).
+     */
+    private static final long AUTHN_RESPONSE_TIMEOUT = 120 * 60 *1000l;
 
     private final SAMLConfig config;
 
@@ -239,6 +244,13 @@ public class WebSSOProviderImpl implements WebSSOProvider {
         try {
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
             AuthnResponseValidationResult validationResult = validationStrategy.validateAuthnResponse(response, requestInfo, binding);
+
+            // Response is valid, remember its ID to detect replay attacks
+            String responseId = response.getID();
+            if (responseId != null) {
+                stateManagement.addAuthnResponse(responseId, AUTHN_RESPONSE_TIMEOUT, TimeUnit.MILLISECONDS);
+            }
+
             Assertion bearerAssertion = validationResult.getBearerAssertion();
             AuthenticationInfo authInfo = backend.resolveAuthnResponse(response, bearerAssertion);
             LOG.debug("User {} in context {} is considered authenticated", authInfo.getUserId(), authInfo.getContextId());
