@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.share.core.performer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -92,14 +92,14 @@ public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<
      * @param session The session of the sharing user
      * @param services A service lookup reference
      */
-    protected CreatePerformer(List<ShareRecipient> recipients, List<ShareTarget> targets, ServerSession session, ServiceLookup services) {
+    public CreatePerformer(List<ShareRecipient> recipients, List<ShareTarget> targets, ServerSession session, ServiceLookup services) {
         super(session, services);
         this.recipients = recipients;
         this.targets = targets;
     }
 
     @Override
-    protected Map<ShareRecipient, List<ShareInfo>> perform() throws OXException {
+    public Map<ShareRecipient, List<ShareInfo>> perform() throws OXException {
         /*
          * distinguish between internal and external recipients
          */

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.share.core.performer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -102,7 +102,7 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
      * @param session The session
      * @param services A service lookup reference
      */
-    protected UpdatePerformer(String token, Date clientLastModified, ServerSession session, ServiceLookup services) {
+    public UpdatePerformer(String token, Date clientLastModified, ServerSession session, ServiceLookup services) {
         super(session, services);
         this.token = token;
         this.clientLastModified = clientLastModified;
@@ -138,7 +138,7 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
     }
 
     @Override
-    protected Void perform() throws OXException {
+    public Void perform() throws OXException {
         if (false == needsGuestUpdate() && false == needsTargetUpdate() && false == needsPermissionUpdate()) {
             return null;
         }

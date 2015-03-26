@@ -47,67 +47,69 @@
  *
  */
 
-package com.openexchange.ajax.drive.action;
+package com.openexchange.drive.json.action.share;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.Date;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.drive.DriveService;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.Services;
+import com.openexchange.exception.OXException;
+import com.openexchange.share.json.actions.ShareJSONParser;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link InviteRequest}
+ * {@link UpdateLinkAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
-    
-    private List<ShareTarget> targets;
-    private List<ShareRecipient> recipients;
-    private String message;
-    private boolean failOnError;
-
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(root, targets, recipients, null, true);
-    }
-
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
-        super(root);
-        this.targets = targets;
-        this.recipients = recipients;
-        this.message = message;
-        this.failOnError = failOnError;
-    }
+public class UpdateLinkAction extends AbstractDriveShareAction {
 
     @Override
-    public Method getMethod() {
-        return Method.PUT;
-    }
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        try {
+            Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
 
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "invite"),
-            new Parameter("root", root)
-        };
-    }
+            JSONObject json = (JSONObject) requestData.requireData();
 
-    @Override
-    public InviteParser getParser() {
-        return new InviteParser(failOnError);
-    }
+            String token = json.getString("token");
 
-    @Override
-    public JSONObject getBody() throws IOException, JSONException {
-        JSONObject retval = new JSONObject();
-        retval.put("targets", ShareWriter.writeTargets(targets));
-        retval.put("recipients", ShareWriter.writeRecipients(recipients));
-        retval.putOpt("message", message);
-        return retval;
+            Date expiry = null;
+            if (json.has("expiry_date")) {
+                String exp = json.getString("expiry_date");
+                try {
+                    expiry = exp == null ? null : new Date(ShareJSONParser.removeTimeZoneOffset(Long.valueOf(exp), getTimeZone(requestData, session.getServerSession())));
+                } catch (NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", expiry, e);
+                }
+            }
+
+            Map<String, Object> meta = null;
+            if (json.has("meta")) {
+                meta = (Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta"));
+            }
+
+            String password = json.optString("password", null);
+            int bits = json.optInt("bits", -1);
+
+            DriveService driveService = Services.getService(DriveService.class, true);
+            driveService.updateShare(session, clientTimestamp, token, expiry, meta, password, bits);
+
+            /*
+             * return empty result in case of success
+             */
+            AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
+            result.setTimestamp(new Date());
+            return result;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
     }
 
 }

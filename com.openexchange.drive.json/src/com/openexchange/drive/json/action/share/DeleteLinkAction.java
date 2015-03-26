@@ -47,67 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.drive.action;
+package com.openexchange.drive.json.action.share;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
+import java.util.Collections;
+import java.util.Date;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveService;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.Services;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link InviteRequest}
+ * {@link DeleteLinkAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
-    
-    private List<ShareTarget> targets;
-    private List<ShareRecipient> recipients;
-    private String message;
-    private boolean failOnError;
-
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(root, targets, recipients, null, true);
-    }
-
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
-        super(root);
-        this.targets = targets;
-        this.recipients = recipients;
-        this.message = message;
-        this.failOnError = failOnError;
-    }
+public class DeleteLinkAction extends AbstractDriveShareAction {
 
     @Override
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "invite"),
-            new Parameter("root", root)
-        };
-    }
-
-    @Override
-    public InviteParser getParser() {
-        return new InviteParser(failOnError);
-    }
-
-    @Override
-    public JSONObject getBody() throws IOException, JSONException {
-        JSONObject retval = new JSONObject();
-        retval.put("targets", ShareWriter.writeTargets(targets));
-        retval.put("recipients", ShareWriter.writeRecipients(recipients));
-        retval.putOpt("message", message);
-        return retval;
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        String token = requestData.requireParameter("token");
+        DriveService driveService = Services.getService(DriveService.class, true);
+        driveService.deleteLinks(session, Collections.<String> singletonList(token));
+        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
+        result.setTimestamp(new Date());
+        return result;
     }
 
 }

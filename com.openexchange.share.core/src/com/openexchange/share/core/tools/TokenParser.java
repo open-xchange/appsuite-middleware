@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.share.core.tools;
 
 import java.util.Collections;
 import java.util.List;

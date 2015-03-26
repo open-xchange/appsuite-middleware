@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.share.core.performer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -68,6 +68,7 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.TokenParser;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;

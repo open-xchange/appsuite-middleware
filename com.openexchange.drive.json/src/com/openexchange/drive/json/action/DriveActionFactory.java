@@ -54,6 +54,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.drive.json.action.share.AllAction;
+import com.openexchange.drive.json.action.share.DeleteLinkAction;
+import com.openexchange.drive.json.action.share.GetLinkAction;
+import com.openexchange.drive.json.action.share.InviteAction;
+import com.openexchange.drive.json.action.share.UpdateLinkAction;
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,7 +72,8 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
 
     public DriveActionFactory() {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(13);
+        // Core Actions
+        actions = new ConcurrentHashMap<String, AJAXActionService>(19);
         actions.put("syncfolders", new SyncFoldersAction());
         actions.put("syncfiles", new SyncFilesAction());
         actions.put("upload", new UploadAction());
@@ -82,6 +88,13 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("directoryMetadata", new DirectoryMetadataAction());
         actions.put("jump", new JumpAction());
         actions.put("subfolders", new SubfoldersAction());
+        
+        // Share Actions
+        actions.put("getLink", new GetLinkAction());
+        actions.put("invite", new InviteAction());
+        actions.put("updateLink", new UpdateLinkAction());
+        actions.put("deleteLink", new DeleteLinkAction());
+        actions.put("all", new AllAction());
     }
 
     @Override

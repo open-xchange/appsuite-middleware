@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.share.core.performer;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.HashMap;

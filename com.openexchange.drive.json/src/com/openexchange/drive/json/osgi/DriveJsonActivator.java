@@ -62,6 +62,7 @@ import com.openexchange.drive.json.action.DriveActionFactory;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.listener.BlockingListenerFactory;
+import com.openexchange.share.groupware.ModuleSupport;
 
 /**
  * {@link DriveJsonActivator}
@@ -82,7 +83,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DriveService.class, DriveEventService.class,
-            ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class
+            ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class, ModuleSupport.class
         };
     }
 

@@ -70,11 +70,12 @@ public class DeleteLinkRequest extends AbstractDriveRequest<DeleteLinkResponse> 
      * 
      * @param token
      */
-    public DeleteLinkRequest(String token) {
-        this(token, true);
+    public DeleteLinkRequest(Integer root, String token) {
+        this(root, token, true);
     }
 
-    public DeleteLinkRequest(String token, boolean failOnError) {
+    public DeleteLinkRequest(Integer root, String token, boolean failOnError) {
+        super(root);
         this.token = token;
         this.failOnError = failOnError;
     }
@@ -86,7 +87,11 @@ public class DeleteLinkRequest extends AbstractDriveRequest<DeleteLinkResponse> 
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "deleteLink") };
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, "deleteLink"),
+            new Parameter("root", root),
+            new Parameter("token", token)
+        };
     }
 
     @Override
@@ -96,9 +101,7 @@ public class DeleteLinkRequest extends AbstractDriveRequest<DeleteLinkResponse> 
 
     @Override
     public JSONObject getBody() throws IOException, JSONException {
-        JSONObject retval = new JSONObject();
-        retval.putOpt("token", token);
-        return retval;
+        return null;
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,50 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.drive.json.action.share;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveService;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.json.actions.ShareJSONParser;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link GetLinkAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class GetLinkAction extends AbstractShareAction {
+public class GetLinkAction extends AbstractDriveShareAction {
 
-    /** The default permission bits to use if not supplied by the client */
     private static final int DEFAULT_PERMISSION_BITS = Permissions.createPermissionBits(
-        Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
-
-    /**
-     * Initializes a new {@link GetLinkAction}.
-     *
-     * @param services A service lookup reference
-     */
-    public GetLinkAction(ServiceLookup services) {
-        super(services);
-    }
+        Permission.READ_FOLDER,
+        Permission.READ_ALL_OBJECTS,
+        Permission.NO_PERMISSIONS,
+        Permission.NO_PERMISSIONS,
+        false);
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(json.getJSONArray("targets"), getTimeZone(requestData, session),
-                services.getService(ModuleSupport.class));
+            List<ShareTarget> targets = ShareJSONParser.parseTargets(json.getJSONArray("targets"), getTimeZone(requestData, session.getServerSession()), Services.getService(ModuleSupport.class));
             int permissionBits = json.hasAndNotNull("bits") ? json.getInt("bits") : DEFAULT_PERMISSION_BITS;
             String password = json.hasAndNotNull("password") ? json.getString("password") : null;
             /*
@@ -108,8 +102,9 @@ public class GetLinkAction extends AbstractShareAction {
             /*
              * create share
              */
-            CreatePerformer createPerformer = new CreatePerformer(Collections.<ShareRecipient>singletonList(recipient), targets, session, services);
-            ShareInfo share = createPerformer.perform().get(recipient).get(0);
+            DriveService driveService = Services.getService(DriveService.class, true);
+            Map<ShareRecipient, List<ShareInfo>> shares = driveService.createShare(session, Collections.<ShareRecipient> singletonList(recipient), targets);
+            ShareInfo share = shares.get(recipient).get(0);
             /*
              * wrap share token & url into JSON result & return
              */

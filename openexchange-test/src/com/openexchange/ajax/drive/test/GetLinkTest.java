@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.drive.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -71,6 +72,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.test.TestInit;
 
 /**
  * {@link GetLinkTest}
@@ -81,7 +83,7 @@ import com.openexchange.share.ShareTarget;
 public class GetLinkTest extends ShareTest {
 
     private InfostoreTestManager itm;
-    private FolderObject infostore;
+    private FolderObject rootFolder, folder;
     private DefaultFile file;
 
     /**
@@ -99,31 +101,39 @@ public class GetLinkTest extends ShareTest {
         itm = new InfostoreTestManager(client);
 
         UserValues values = client.getValues();
-        infostore = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
+        rootFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
+        System.out.println("\n\n");
+        System.out.println(rootFolder.getFolderName());
+        System.out.println(rootFolder.getObjectID());
+        System.out.println(client.getValues().getPrivateInfostoreFolder());
+        folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), rootFolder.getObjectID());
+        System.out.println(folder.getFolderName());
 
         long now = System.currentTimeMillis();
-        FolderObject parent = infostore;
         file = new DefaultFile();
-        file.setFolderId(String.valueOf(parent.getObjectID()));
+        file.setFolderId(String.valueOf(folder.getObjectID()));
         file.setTitle("GetLinkTest_" + now);
+        file.setFileName(file.getTitle());
         file.setDescription(file.getTitle());
-        itm.newAction(file);
+        itm.newAction(file, new File(TestInit.getTestProperty("ajaxPropertiesFile")));
+        System.out.println(file.getId());
+        System.out.println("\n\n");
     }
 
     public void testGetFileLink() throws Exception {
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
+        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName(), file.getFileName());
         performTest(target);
     }
     
     public void testGetFolderLink() throws Exception {
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()));
+        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName());
         performTest(target);
     }
 
     private void performTest(ShareTarget target) throws OXException, IOException, JSONException, Exception {
         int bits = createAnonymousGuestPermission().getPermissionBits();
         String password = UUIDs.getUnformattedString(UUID.randomUUID());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(Collections.singletonList(target), bits, password, true);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, true);
         GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
         String token = getLinkResponse.getToken();
         String url = getLinkResponse.getUrl();
@@ -131,10 +141,10 @@ public class GetLinkTest extends ShareTest {
         GuestClient guestClient = resolveShare(url, null, password);
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
         expectedPermission.setEntity(guestClient.getValues().getUserId());
-        guestClient.checkFileAccessible(file.getId(), expectedPermission);
+        guestClient.checkShareAccessible(expectedPermission);
 
-        client.execute(new DeleteLinkRequest(token));
-        assertNull("Share was not deleted", discoverShare(guestClient.getValues().getUserId(), infostore.getObjectID(), file.getId()));
+        client.execute(new DeleteLinkRequest(rootFolder.getObjectID(), token));
+        assertNull("Share was not deleted", discoverShare(guestClient.getValues().getUserId(), rootFolder.getObjectID(), file.getId()));
         List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
         assertNull("Permission was not deleted", objectPermissions);
     }

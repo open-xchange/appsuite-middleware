@@ -47,67 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.drive.action;
+package com.openexchange.drive.json.action.share;
 
-import java.io.IOException;
+import java.util.Date;
 import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
+import org.json.JSONArray;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveService;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.Services;
+import com.openexchange.exception.OXException;
+import com.openexchange.share.ShareInfo;
 
 /**
- * {@link InviteRequest}
+ * {@link AllAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
-    
-    private List<ShareTarget> targets;
-    private List<ShareRecipient> recipients;
-    private String message;
-    private boolean failOnError;
-
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(root, targets, recipients, null, true);
-    }
-
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
-        super(root);
-        this.targets = targets;
-        this.recipients = recipients;
-        this.message = message;
-        this.failOnError = failOnError;
-    }
+public class AllAction extends AbstractDriveShareAction {
 
     @Override
-    public Method getMethod() {
-        return Method.PUT;
-    }
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        DriveService driveService = Services.getService(DriveService.class, true);
+        List<ShareInfo> shares = driveService.getAllLinks(session);
 
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "invite"),
-            new Parameter("root", root)
-        };
-    }
+        if (null == shares || 0 == shares.size()) {
+            return new AJAXRequestResult(new JSONArray());
+        }
 
-    @Override
-    public InviteParser getParser() {
-        return new InviteParser(failOnError);
-    }
+        Date lastModified = null;
+        for (ShareInfo shareInfo : shares) {
+            Date shareLastModified = shareInfo.getShare().getModified();
+            if (lastModified == null || shareLastModified != null && shareLastModified.after(lastModified)) {
+                lastModified = shareLastModified;
+            }
+        }
 
-    @Override
-    public JSONObject getBody() throws IOException, JSONException {
-        JSONObject retval = new JSONObject();
-        retval.put("targets", ShareWriter.writeTargets(targets));
-        retval.put("recipients", ShareWriter.writeRecipients(recipients));
-        retval.putOpt("message", message);
-        return retval;
+        return new AJAXRequestResult(shares, lastModified);
     }
 
 }

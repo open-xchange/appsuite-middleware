@@ -47,67 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.drive.action;
+package com.openexchange.drive.json.action.share;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
+import java.util.TimeZone;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.drive.json.action.AbstractDriveAction;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link InviteRequest}
+ * {@link AbstractDriveShareAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
-    
-    private List<ShareTarget> targets;
-    private List<ShareRecipient> recipients;
-    private String message;
-    private boolean failOnError;
+public abstract class AbstractDriveShareAction extends AbstractDriveAction {
 
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(root, targets, recipients, null, true);
+    protected TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
+        String timeZoneID = requestData.getParameter("timezone");
+        if (null == timeZoneID) {
+            timeZoneID = session.getUser().getTimeZone();
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
+        return timeZone;
     }
 
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
-        super(root);
-        this.targets = targets;
-        this.recipients = recipients;
-        this.message = message;
-        this.failOnError = failOnError;
+    protected String determineProtocol(AJAXRequestData requestData) {
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        if (null != servletRequest) {
+            return com.openexchange.tools.servlet.http.Tools.getProtocol(servletRequest);
+        } else {
+            return requestData.isSecure() ? "https://" : "http://";
+        }
     }
 
-    @Override
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "invite"),
-            new Parameter("root", root)
-        };
-    }
-
-    @Override
-    public InviteParser getParser() {
-        return new InviteParser(failOnError);
-    }
-
-    @Override
-    public JSONObject getBody() throws IOException, JSONException {
-        JSONObject retval = new JSONObject();
-        retval.put("targets", ShareWriter.writeTargets(targets));
-        retval.put("recipients", ShareWriter.writeRecipients(recipients));
-        retval.putOpt("message", message);
-        return retval;
+    protected String determineHostname(AJAXRequestData requestData) {
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        if (null != servletRequest) {
+            return servletRequest.getServerName();
+        } else {
+            return requestData.getHostname();
+        }
     }
 
 }

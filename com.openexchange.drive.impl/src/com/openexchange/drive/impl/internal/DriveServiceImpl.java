@@ -54,7 +54,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
@@ -106,6 +109,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.java.Strings;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.performer.CreatePerformer;
+import com.openexchange.share.core.performer.UpdatePerformer;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link DriveServiceImpl}
@@ -286,7 +297,7 @@ public class DriveServiceImpl implements DriveService {
         action.getParameters().put(DriveAction.PARAMETER_OFFSET, Long.valueOf(offset));
         action.getParameters().put(DriveAction.PARAMETER_LENGTH, Long.valueOf(length));
         new SyncTracker(syncSession).track(new IntermediateSyncResult<FileVersion>(
-            Collections.<AbstractAction<FileVersion>>emptyList(), Collections.<AbstractAction<FileVersion>>singletonList(action)), path);
+            Collections.<AbstractAction<FileVersion>> emptyList(), Collections.<AbstractAction<FileVersion>> singletonList(action)), path);
         /*
          * return file holder for download
          */
@@ -468,8 +479,7 @@ public class DriveServiceImpl implements DriveService {
         if (null == e) {
             return false;
         }
-        return
-            Category.CATEGORY_TRY_AGAIN.equals(e.getCategory()) ||
+        return Category.CATEGORY_TRY_AGAIN.equals(e.getCategory()) ||
             Category.CATEGORY_CONFLICT.equals(e.getCategory()) ||
             "FLD-0008".equals(e.getErrorCode()) || // 'Folder 123 does not exist in context 1'
             "DRV-0007".equals(e.getErrorCode()) // The file "123.txt" with checksum "8fc1a2f5e9a2dbd1d5f4f9e330bd1563" was not found at "/"
@@ -509,6 +519,68 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public DriveUtility getUtility() {
         return DriveUtilityImpl.getInstance();
+    }
+
+    @Override
+    public Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<ShareTarget> targets) throws OXException {
+        DriveStorage storage = new SyncSession(session).getStorage();
+        Map<String, String> folderIds = new HashMap<String, String>();
+        for (ShareTarget target : targets) {
+            String path = target.getFolder();
+            if (target.getItem() != null && !Strings.isEmpty(target.getItem())) {
+                String name = target.getItem();
+                File file = storage.getFileByName(path, name);
+                target.setFolder(file.getFolderId());
+                target.setItem(file.getId());
+            } else {
+                if (!folderIds.containsKey(path)) {
+                    String folderID = storage.getFolderID(path);
+                    folderIds.put(path, folderID);
+                }
+                target.setFolder(folderIds.get(path));
+            }
+        }
+
+        CreatePerformer cp = new CreatePerformer(recipients, targets, session.getServerSession(), DriveServiceLookup.get());
+        return cp.perform();
+    }
+
+    @Override
+    public void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException {
+        UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session.getServerSession(), DriveServiceLookup.get());
+        updatePerformer.setExpiry(expiry);
+        updatePerformer.setMeta(meta);
+        if (password != null || bits != -1) {
+            AnonymousRecipient recipient = new AnonymousRecipient();
+            recipient.setPassword(password);
+            recipient.setBits(bits);
+            updatePerformer.setRecipient(recipient);
+        }
+        updatePerformer.perform();
+    }
+
+    @Override
+    public void deleteLinks(DriveSession session, List<String> tokens) throws OXException {
+        ShareService shareService = DriveServiceLookup.getService(ShareService.class);
+        shareService.deleteShares(session.getServerSession(), tokens);
+    }
+
+    @Override
+    public List<ShareInfo> getAllLinks(DriveSession session) throws OXException {
+        DriveStorage storage = new SyncSession(session).getStorage();
+        ShareService shareService = DriveServiceLookup.getService(ShareService.class);
+
+        storage.getFolderID(session.getRootFolderID());
+        List<ShareInfo> allShares = shareService.getAllShares(session.getServerSession(), "infostore");
+
+        for (Iterator<ShareInfo> shareInfoIterator = allShares.iterator(); shareInfoIterator.hasNext();) {
+            ShareInfo shareInfo = shareInfoIterator.next();
+            if (!shareInfo.getShare().getTarget().getPath().startsWith(session.getRootFolderID())) {
+                shareInfoIterator.remove();
+            }
+        }
+
+        return allShares;
     }
 
 }

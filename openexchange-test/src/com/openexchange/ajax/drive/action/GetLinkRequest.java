@@ -70,11 +70,12 @@ public class GetLinkRequest extends AbstractDriveRequest<GetLinkResponse> {
     private Integer bits;
     private String password;
 
-    public GetLinkRequest(List<ShareTarget> targets) {
-        this(targets, null, null, true);
+    public GetLinkRequest(Integer root, List<ShareTarget> targets) {
+        this(root, targets, null, null, true);
     }
 
-    public GetLinkRequest(List<ShareTarget> targets, Integer bits, String password, boolean failOnError) {
+    public GetLinkRequest(Integer root, List<ShareTarget> targets, Integer bits, String password, boolean failOnError) {
+        super(root);
         this.targets = targets;
         this.bits = bits;
         this.password = password;
@@ -88,7 +89,10 @@ public class GetLinkRequest extends AbstractDriveRequest<GetLinkResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "getLink") };
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, "getLink"),
+            new Parameter("root", root)
+        };
     }
 
     @Override
