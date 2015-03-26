@@ -84,6 +84,7 @@ import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
+import com.openexchange.sessiond.serialization.PortableSessionFilterApplierFactory;
 import com.openexchange.sessiond.serialization.PortableUserSessionsCleanerFactory;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -188,6 +189,7 @@ public final class SessiondActivator extends HousekeepingActivator {
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
 
             registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
+            registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());
 
             track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
             track(ManagementService.class, new ManagementRegisterer(context));
