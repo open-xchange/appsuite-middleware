@@ -79,6 +79,8 @@ public enum PasswordChangeServletExceptionCode implements DisplayableOXException
     PW_CHANGE_SUCCEEDED("Password changed successfully. Please logout and login back again.", CATEGORY_WARNING,
         PasswordChangeServletExceptionMessage.PW_CHANGE_SUCCEEDED_MSG),
 
+    PW_DO_NOT_MATCH("The passwords do not match.", CATEGORY_USER_INPUT, PasswordChangeServletExceptionMessage.PW_DO_NOT_MATCH_MSG)
+
     ;
 
     private final String message;
@@ -112,7 +114,7 @@ public enum PasswordChangeServletExceptionCode implements DisplayableOXException
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

@@ -68,4 +68,6 @@ public class PasswordChangeServletExceptionMessage implements LocalizableStrings
     public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
 
     public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
+
+    public static final String PW_DO_NOT_MATCH_MSG = "The passwords do not match.";
 }
