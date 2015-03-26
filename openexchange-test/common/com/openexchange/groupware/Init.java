@@ -129,6 +129,9 @@ import com.openexchange.folder.internal.FolderServiceImpl;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
+import com.openexchange.groupware.alias.UserAliasStorage;
+import com.openexchange.groupware.alias.UserAliasStorageProvider;
+import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -379,6 +382,7 @@ public final class Init {
         startAndInjectCapabilitiesServices();
         startAndInjectClusterTimerService();
         startAndInjectDefaultShareService();
+        startAndInjectAliasService();
     }
 
     /**
@@ -922,6 +926,17 @@ public final class Init {
             ClusterTimerService clusterTimerService = new ClusterTimerServiceImpl(LOOKUP, null);
             services.put(ClusterTimerService.class, clusterTimerService);
             TestServiceRegistry.getInstance().addService(ClusterTimerService.class, clusterTimerService);
+        }
+    }
+
+    public static void startAndInjectAliasService() {
+        if (null == TestServiceRegistry.getInstance().getService(UserAliasStorageProvider.class)) {
+            TestServiceRegistry.getInstance().addService(UserAliasStorageProvider.class, new UserAliasStorageProvider() {
+                @Override
+                public UserAliasStorage getUserAliasStorage() throws OXException {
+                    return new RdbAliasStorage();
+                }
+            });
         }
     }
 
