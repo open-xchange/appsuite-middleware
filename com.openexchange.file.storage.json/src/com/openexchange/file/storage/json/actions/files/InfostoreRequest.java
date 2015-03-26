@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -78,7 +79,7 @@ public interface InfostoreRequest {
      * @return The value mapped to given parameter name or <code>null</code> if not present
      * @throws NullPointerException If name is <code>null</code>
      */
-    public String getParameter(final String name);
+    String getParameter(final String name);
 
     /**
      * Gets the boolean value mapped to given parameter name.
@@ -87,7 +88,7 @@ public interface InfostoreRequest {
      * @return The boolean value mapped to given parameter name or <code>false</code> if not present
      * @throws NullPointerException If name is <code>null</code>
      */
-    public boolean getBoolParameter(final String name);
+    boolean getBoolParameter(final String name);
 
     /**
      * Gets the request data if available.
@@ -96,38 +97,148 @@ public interface InfostoreRequest {
      */
     AJAXRequestData getRequestData();
 
+    /**
+     * Checks if specified mandatory parameters are present.
+     *
+     * @return This request instance
+     * @throws OXException If any of the specified parameters is missing
+     */
     InfostoreRequest require(AbstractFileAction.Param... params) throws OXException;
 
+    /**
+     * Checks if mandatory body is present.
+     *
+     * @return This request instance
+     * @throws OXException If body is missing
+     */
     InfostoreRequest requireBody() throws OXException;
 
+    /**
+     * Checks if mandatory file metadata is present.
+     *
+     * @return This request instance
+     * @throws OXException If file metadata is missing
+     */
     InfostoreRequest requireFileMetadata() throws OXException;
 
+    /**
+     * Requires the file access
+     *
+     * @return The file access
+     * @throws OXException If file access cannot be returned
+     */
     IDBasedFileAccess getFileAccess() throws OXException;
+
+    /**
+     * Optionally gets the file access
+     *
+     * @return The file access or <code>null</code>
+     */
     IDBasedFileAccess optFileAccess();
 
+    /**
+     * Requires the folder access
+     *
+     * @return The folder access
+     * @throws OXException If folder access cannot be returned
+     */
     IDBasedFolderAccess getFolderAccess() throws OXException;
+
+    /**
+     * Optionally gets the folder access
+     *
+     * @return The folder access or <code>null</code>
+     */
     IDBasedFolderAccess optFolderAccess();
 
+    /**
+     * Gets the file identifier
+     *
+     * @return The file identifier or <code>null</code>
+     * @throws OXException If any error occurs while returning the file identifier
+     */
     String getId() throws OXException;
 
+    /**
+     * Gets the version identifier or {@link FileStorageFileAccess#CURRENT_VERSION} if absent
+     *
+     * @return The version identifier or <code>FileStorageFileAccess.CURRENT_VERSION</code>
+     * @throws OXException If any error occurs while returning the version identifier
+     */
     String getVersion() throws OXException;
 
+    /**
+     * Gets the folder identifier or {@link FileStorageFileAccess#ALL_FOLDERS} if absent
+     *
+     * @return The folder identifier or <code>FileStorageFileAccess.ALL_FOLDERS</code>
+     * @throws OXException If any error occurs while returning the folder identifier
+     */
     String getFolderId() throws OXException;
 
+    /**
+     * Gets the available columns
+     *
+     * @return The available columns or an empty list
+     * @throws OXException If request specifies an unknown column
+     */
     List<Field> getColumns() throws OXException;
 
+    /**
+     * Gets the field to sort by
+     *
+     * @return The sort field or <code>null</code>
+     * @throws OXException If sort field is unknown
+     */
     Field getSortingField() throws OXException;
 
+    /**
+     * Gets the sort direction or {@link SortDirection#ASC} if absent.
+     *
+     * @return The sort direction or <code>SortDirection.ASC</code>
+     * @throws OXException If given sort direction parameter is unknown
+     */
     SortDirection getSortingOrder() throws OXException;
 
+    /**
+     * Gets the time zone associated with this request.
+     * <p>
+     * Either parsed from <code>"timezone"</code> parameter or the time zone of the associated user
+     *
+     * @return The time zone associated with this request
+     * @throws OXException If any error occurs while returning the time zone
+     */
     TimeZone getTimezone() throws OXException;
 
+    /**
+     * Gets the associated session
+     *
+     * @return The session
+     * @throws OXException If any error occurs while returning the session
+     */
     ServerSession getSession() throws OXException;
 
+    /**
+     * Gets the specified time stamp or {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} if absent
+     *
+     * @return The specified time stamp or <code>FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER</code>
+     * @throws OXException If any error occurs while returning the time stamp
+     */
     long getTimestamp() throws OXException;
 
+    /**
+     * Gets the set of certain markers. Matching files are supposed to be ignored in the response. E.g. <code>"deleted"</code>.
+     *
+     * @return The set of markers or an empty set
+     * @throws OXException If any error occurs while returning the set of markers
+     */
     Set<String> getIgnore() throws OXException;
 
+    /**
+     * Gets the list of identifiers associated with this request.
+     *
+     * @return The identifiers
+     * @throws OXException If this request does not specify an identifier list
+     */
     List<String> getIds() throws OXException;
 
     /**

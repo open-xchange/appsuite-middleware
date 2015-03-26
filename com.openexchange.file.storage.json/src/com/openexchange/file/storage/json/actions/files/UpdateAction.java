@@ -90,46 +90,43 @@ public class UpdateAction extends AbstractWriteAction {
 
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
+        // Some checks and useful variables
         request.requireFileMetadata().require(Param.TIMESTAMP);
-        final File file = request.getFile();
+        File file = request.getFile();
         if (file.getId() == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
         FileID id = new FileID(file.getId());
-
         IDBasedFileAccess fileAccess = request.getFileAccess();
-        String fileId = file.getId();
+
         if (request.hasUploads()) {
+            // Save file metadata with binary payload
             String result;
-            if (request.getBoolParameter("ignoreVersion") &&
-                fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION)) {
+            if (request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION)) {
                 result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
             } else {
                 result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
             }
             return request.extendedResponse() ? result(fileAccess.getFileMetadata(result, FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
-        } else {
-            /*
-             * save file metadata without binary payload
-             */
-            boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
-            String newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns(), ignoreWarnings);
-            /*
-             * construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
-             */
-            AJAXRequestResult result;
-            if (null != newId && request.extendedResponse()) {
-                 result = result(fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION), request);
-            } else {
-                result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
-            }
-            Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
-            result.addWarnings(warnings);
-            if (null == newId && null != warnings && 0 < warnings.size() && false == ignoreWarnings) {
-                result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(file, id, fileAccess), id.toUniqueID()));
-            }
-            return result;
         }
+
+        // Save file metadata without binary payload
+        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
+        String newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns(), ignoreWarnings);
+
+        // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
+        AJAXRequestResult result;
+        if (null != newId && request.extendedResponse()) {
+            result = result(fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION), request);
+        } else {
+            result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
+        }
+        Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
+        result.addWarnings(warnings);
+        if ((null == newId) && (null != warnings) && (false == warnings.isEmpty()) && (false == ignoreWarnings)) {
+            result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(file, id, fileAccess), id.toUniqueID()));
+        }
+        return result;
     }
 
     private static String getFilenameSave(File file, FileID id, IDBasedFileAccess fileAccess) {

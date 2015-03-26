@@ -622,17 +622,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     protected void parseFile() throws OXException {
-        if(file != null) {
+        if (file != null) {
             return;
         }
         requireFileMetadata();
 
         JSONObject object = (JSONObject) data.getData();
-        if(object == null) {
+        if (object == null) {
             try {
                 object = new JSONObject(data.getParameter(JSON));
             } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create( e.getMessage());
+                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
             }
         }
 
@@ -653,13 +653,13 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
         file = PARSER.parse(object);
         fields = PARSER.getFields(object);
-        if(uploadFile != null) {
-            if(!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
+        if (uploadFile != null) {
+            if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
                 file.setFileName(uploadFile.getPreparedFileName());
                 fields.add(File.Field.FILENAME);
             }
 
-            if(!fields.contains(File.Field.FILE_MIMETYPE)) {
+            if (!fields.contains(File.Field.FILE_MIMETYPE)) {
                 file.setFileMIMEType(uploadFile.getContentType());
                 fields.add(File.Field.FILE_MIMETYPE);
             }
@@ -670,25 +670,25 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         final String fileDisplay = data.getParameter("filedisplay");
-        if(fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
+        if (fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
             file.setFileName(fileDisplay);
             fields.add(File.Field.FILENAME);
         }
 
-        if(has("id") && ! fields.contains(File.Field.ID)) {
+        if (has("id") && !fields.contains(File.Field.ID)) {
             file.setId(getId());
             fields.add(File.Field.ID);
         }
 
         if (object.has("content")) {
-        	try {
-				contentData = object.opt("content").toString().getBytes("UTF-8");
+            try {
+                contentData = object.opt("content").toString().getBytes("UTF-8");
 
                 file.setFileSize(contentData.length);
                 fields.add(File.Field.FILE_SIZE);
-			} catch (UnsupportedEncodingException e) {
-				// IGNORE;
-			}
+            } catch (UnsupportedEncodingException e) {
+                // IGNORE;
+            }
         }
     }
 
