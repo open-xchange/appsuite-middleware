@@ -114,7 +114,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final @NonNull Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
-    private static final @NonNull String RETRY_AFTER = com.google.common.net.HttpHeaders.RETRY_AFTER;
+    private static final @NonNull String RETRY_AFTER = "Retry-After";
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
