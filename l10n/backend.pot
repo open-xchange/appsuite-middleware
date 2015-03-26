@@ -3349,6 +3349,10 @@ msgstr ""
 msgid "Password was not changed."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:72
+msgid "The passwords do not match."
+msgstr ""
+
 #. *
 #. * User %1$s has no mail module access due to user configuration
 #.
