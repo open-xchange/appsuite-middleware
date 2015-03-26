@@ -52,8 +52,8 @@ package com.openexchange.saml.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -590,9 +590,11 @@ public class WebSSOProviderImpl implements WebSSOProvider {
             httpResponse.setStatus(HttpServletResponse.SC_OK);
             httpResponse.setContentType("text/html");
             httpResponse.setCharacterEncoding(Charsets.UTF_8_NAME);
-            PrintWriter writer = httpResponse.getWriter();
+            StringWriter writer = new StringWriter();
             template.process(vars, writer);
-            writer.flush();
+            String html = writer.toString();
+            LOG.debug("Sending LogoutResponse via POST:\n{}", html);
+            httpResponse.getWriter().write(html);
         } catch (OXException e) {
             LOG.error("Could not send LogoutResponse via POST", e);
             httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
