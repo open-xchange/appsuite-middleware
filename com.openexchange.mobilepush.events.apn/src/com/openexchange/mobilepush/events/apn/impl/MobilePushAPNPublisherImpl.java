@@ -258,11 +258,16 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         payload.addSound("beep.wav");
         Map<String, Object> messageData = event.getMessageData();
 
-        String message = MailPushUtility.getMessage(messageData);
+        String subject = MailPushUtility.getSubject(messageData);
+        String sender = MailPushUtility.getSender(messageData);
         String path = MailPushUtility.getPath(messageData);
         int unread = MailPushUtility.getUnread(messageData);
 
-        payload.addAlert(message);
+        StringBuffer sb = new StringBuffer(sender);
+        sb.append("\n");
+        sb.append(subject);
+
+        payload.addAlert(sb.toString());
         payload.addBadge(unread);
         payload.addCustomDictionary("cid", path);
         return payload;
