@@ -115,7 +115,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
     /**
      * <code>"infostore"</code>
      */
-    private static final String INFOSTORE_ACCOUNT_ID = com.openexchange.file.storage.composition.FileID.INFOSTORE_ACCOUNT_ID;
+    private static final String INFOSTORE_ACCOUNT_ID = "infostore";
 
     private static final String PARAM = FileStorageParameterConstants.PARAM_ID_BASED_FOLDER_ACCESS;
 
