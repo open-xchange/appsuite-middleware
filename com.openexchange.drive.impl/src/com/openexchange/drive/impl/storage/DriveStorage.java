@@ -51,7 +51,6 @@ package com.openexchange.drive.impl.storage;
 
 import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
 import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
-import static com.openexchange.drive.impl.DriveConstants.TEMP_PATH;
 import static com.openexchange.drive.impl.DriveUtils.combine;
 import static com.openexchange.drive.impl.DriveUtils.split;
 import java.io.InputStream;
@@ -129,6 +128,12 @@ public class DriveStorage {
         this.knownFolders = new FolderCache();
     }
 
+    /**
+     * Gets the user's permission for a specific folder. 
+     * 
+     * @param path The path to the folder to get the own permissions for
+     * @return The permissions
+     */
     public FileStoragePermission getOwnPermission(String path) throws OXException {
         return getFolder(path).getOwnPermission();
     }
@@ -899,10 +904,10 @@ public class DriveStorage {
      * @throws OXException
      */
     private boolean isExcludedSubfolder(FileStorageFolder folder, String path) throws OXException {
-        if (TEMP_PATH.equals(path)) {
+        if (DriveUtils.isInvalidPath(path) || DriveUtils.isInvalidFolderName(folder.getName())) {
             return true;
         }
-        if (DriveUtils.isInvalidPath(path) || DriveUtils.isInvalidFolderName(folder.getName())) {
+        if (session.getTemp().supported() && path.equals(session.getTemp().getPath(false))) {
             return true;
         }
         if (TypeAware.class.isInstance(folder) && FileStorageFolderType.TRASH_FOLDER.equals(((TypeAware)folder).getType())) {

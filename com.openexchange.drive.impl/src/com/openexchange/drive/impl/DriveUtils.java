@@ -160,7 +160,7 @@ public class DriveUtils {
      * @throws OXException
      */
     public static boolean isIgnoredPath(SyncSession session, String path) throws OXException {
-        if (DriveConstants.TEMP_PATH.equalsIgnoreCase(path)) {
+        if (session.getTemp().supported() && session.getTemp().getPath(false).equals(path)) {
             return true; // no temp path
         }
         if (DriveConfig.getInstance().getExcludedDirectoriesPattern().matcher(path).matches()) {
@@ -370,7 +370,7 @@ public class DriveUtils {
     public static String determineMimeType(File file) {
         String mimeType = null;
         if (false == Strings.isEmpty(file.getFileName())) {
-            mimeType = MimeType2ExtMap.getContentType(file.getFileMIMEType(), null);
+            mimeType = MimeType2ExtMap.getContentType(file.getFileName(), null);
         }
         if (null == mimeType) {
             mimeType = file.getFileMIMEType();

@@ -311,7 +311,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
              */
             session.getStorage().deleteFile(versionToRemove.getFile(), false);
             session.getChecksumStore().removeFileChecksum(fileChecksum);
-        } else if (false == session.hasTempFolder() || DriveConstants.EMPTY_MD5.equals(fileChecksum.getChecksum())) {
+        } else if (false == session.getTemp().supported() || DriveConstants.EMPTY_MD5.equals(fileChecksum.getChecksum())) {
             /*
              * hard delete file if applicable
              */
@@ -323,7 +323,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
              */
             try {
                 File removedFile = session.getStorage().moveFile(
-                    versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
+                    versionToRemove.getFile(), versionToRemove.getChecksum(), session.getTemp().getPath(true));
                 if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
                     // moved successfully, update checksum
                     fileChecksum.setFileID(DriveUtils.getFileID(removedFile));
@@ -381,7 +381,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                 /*
                  * hard-delete if no temp folder available, file is empty, identical file already marked for removal, or hard limit reached
                  */
-                if (false == session.hasTempFolder() || DriveConstants.EMPTY_MD5.equals(fileVersion.getChecksum()) ||
+                if (false == session.getTemp().supported() || DriveConstants.EMPTY_MD5.equals(fileVersion.getChecksum()) ||
                     MOVE_TO_TEMP_LIMIT <= versionsToRemove.size() || checksumsToBeRemoved.contains(fileVersion.getChecksum())) {
                     versionsToDelete.add(fileVersion);
                 } else {
@@ -392,8 +392,8 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             /*
              * check if versions already known in trash if applicable
              */
-            if (OPTIMISTIC_MOVE_TO_TEMP_THRESHOLD < versionsToRemove.size()) {
-                FileStorageFolder tempFolder = session.getStorage().optFolder(DriveConstants.TEMP_PATH, false);
+            if (OPTIMISTIC_MOVE_TO_TEMP_THRESHOLD < versionsToRemove.size() && session.getTemp().exists()) {
+                FileStorageFolder tempFolder = session.getStorage().optFolder(session.getTemp().getPath(false), false);
                 if (null != tempFolder) {
                     List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(new FolderID(tempFolder.getId()));
                     if (null != knownChecksums && 0 < knownChecksums.size()) {
@@ -427,7 +427,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                     FileChecksum fileChecksum = versionToRemove.getFileChecksum();
                     try {
                         File removedFile = session.getStorage().moveFile(
-                            versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
+                            versionToRemove.getFile(), versionToRemove.getChecksum(), session.getTemp().getPath(true));
                         if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
                             // moved successfully, update checksum
                             fileChecksum.setFileID(DriveUtils.getFileID(removedFile));
@@ -477,8 +477,8 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
     }
 
     private static boolean isFromTemp(SyncSession session, File file) throws OXException {
-        if (session.hasTempFolder()) {
-            String tempFolderID = session.getStorage().getFolderID(DriveConstants.TEMP_PATH);
+        if (session.getTemp().exists()) {
+            String tempFolderID = session.getStorage().getFolderID(session.getTemp().getPath(true));
             if (tempFolderID.equals(file.getFolderId())) {
                 return true;
             }
