@@ -1,3 +1,7 @@
+* 2015-03-26 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 37395: Check if new password match & added error message
+
 * 2015-03-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 37311: Changed Java dependency on RHEL6 based distros to java7 instead of java >= 1.7.0.
