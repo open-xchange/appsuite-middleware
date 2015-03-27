@@ -1,3 +1,7 @@
+* 2015-03-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37424: Treat columns 316 ("end_time") and 317 ("start_time") as virtual for tasks
+
 * 2015-03-26 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 37395: Check if new password match & added error message
