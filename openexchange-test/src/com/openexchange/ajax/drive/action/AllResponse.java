@@ -47,34 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.drive;
+package com.openexchange.ajax.drive.action;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.drive.test.AllTest;
-import com.openexchange.ajax.drive.test.DeleteLinkTest;
-import com.openexchange.ajax.drive.test.GetLinkTest;
-import com.openexchange.ajax.drive.test.InviteTest;
-import com.openexchange.ajax.drive.test.UpdateLinkTest;
+import java.util.List;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.share.actions.ParsedShare;
+
 
 /**
- * {@link DriveAJAXSuite}
+ * {@link AllResponse}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class DriveAJAXSuite extends TestSuite {
+public class AllResponse extends AbstractAJAXResponse {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite(DriveAJAXSuite.class.getName());
+    private List<ParsedShare> parsedShares;
 
-        tests.addTestSuite(GetLinkTest.class);
-        tests.addTestSuite(UpdateLinkTest.class);
-        tests.addTestSuite(InviteTest.class);
-        tests.addTestSuite(DeleteLinkTest.class);
-        tests.addTestSuite(AllTest.class);
 
-        return tests;
+    protected AllResponse(Response response) {
+        super(response);
+    }
+    
+    public void setParsedShares(List<ParsedShare> parsedShares) {
+        this.parsedShares = parsedShares;
+    }
+    
+    public List<ParsedShare> getParsedShares() {
+        return parsedShares;
     }
 
 }

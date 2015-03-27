@@ -50,11 +50,9 @@
 package com.openexchange.ajax.drive.test;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import org.json.JSONException;
 import com.openexchange.ajax.drive.action.DeleteLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkResponse;
@@ -64,7 +62,6 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
@@ -74,23 +71,19 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.test.TestInit;
 
 /**
- * {@link GetLinkTest}
+ * {@link DeleteLinkTest}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class GetLinkTest extends AbstractDriveShareTest {
+public class DeleteLinkTest extends AbstractDriveShareTest {
 
     private InfostoreTestManager itm;
-    private FolderObject rootFolder, folder;
+    private FolderObject rootFolder;
+    private FolderObject folder;
     private DefaultFile file;
 
-    /**
-     * Initializes a new {@link GetLinkTest}.
-     * 
-     * @param name
-     */
-    public GetLinkTest(String name) {
+    public DeleteLinkTest(String name) {
         super(name);
     }
 
@@ -112,17 +105,8 @@ public class GetLinkTest extends AbstractDriveShareTest {
         itm.newAction(file, new File(TestInit.getTestProperty("ajaxPropertiesFile")));
     }
 
-    public void testGetFileLink() throws Exception {
+    public void testDelete() throws Exception {
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName(), file.getFileName());
-        performTest(target);
-    }
-    
-    public void testGetFolderLink() throws Exception {
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName());
-        performTest(target);
-    }
-
-    private void performTest(ShareTarget target) throws OXException, IOException, JSONException, Exception {
         int bits = createAnonymousGuestPermission().getPermissionBits();
         String password = UUIDs.getUnformattedString(UUID.randomUUID());
         GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, true);

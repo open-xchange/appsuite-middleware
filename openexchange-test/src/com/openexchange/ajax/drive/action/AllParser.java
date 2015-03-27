@@ -47,34 +47,41 @@
  *
  */
 
-package com.openexchange.ajax.drive;
+package com.openexchange.ajax.drive.action;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.drive.test.AllTest;
-import com.openexchange.ajax.drive.test.DeleteLinkTest;
-import com.openexchange.ajax.drive.test.GetLinkTest;
-import com.openexchange.ajax.drive.test.InviteTest;
-import com.openexchange.ajax.drive.test.UpdateLinkTest;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.share.actions.ParsedShare;
 
 /**
- * {@link DriveAJAXSuite}
+ * {@link AllParser}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class DriveAJAXSuite extends TestSuite {
+public class AllParser extends AbstractAJAXParser<AllResponse> {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite(DriveAJAXSuite.class.getName());
+    protected AllParser(boolean failOnError) {
+        super(failOnError);
+    }
 
-        tests.addTestSuite(GetLinkTest.class);
-        tests.addTestSuite(UpdateLinkTest.class);
-        tests.addTestSuite(InviteTest.class);
-        tests.addTestSuite(DeleteLinkTest.class);
-        tests.addTestSuite(AllTest.class);
+    @Override
+    protected AllResponse createResponse(Response response) throws JSONException {
+        AllResponse retval = new AllResponse(response);
 
-        return tests;
+        JSONArray jsonArray = (JSONArray) response.getData();
+        List<ParsedShare> parsedShares = new ArrayList<ParsedShare>(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            parsedShares.add(new ParsedShare(jsonArray.getJSONObject(i)));
+        }
+
+        retval.setParsedShares(parsedShares);
+
+        return retval;
     }
 
 }

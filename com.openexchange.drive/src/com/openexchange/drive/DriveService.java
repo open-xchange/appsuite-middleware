@@ -189,30 +189,47 @@ public interface DriveService {
      * @throws OXException
      */
     DriveUtility getUtility();
-    
+
+    /**
+     * Creates shares of the given targets for the given recipients.
+     * 
+     * @param session The session
+     * @param recipients The recipients
+     * @param targets The targets
+     * @return A map, with all recipients and their shares
+     * @throws OXException
+     */
     Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<ShareTarget> targets) throws OXException;
 
     /**
-     * @param clientTimestamp
-     * @param token
-     * @param expiry
-     * @param meta
-     * @param password
-     * @param bits
-     * @throws OXException 
+     * Updates a single share.
+     * 
+     * @param session The session
+     * @param clientTimestamp The client timnestamp
+     * @param token The share token to be updated
+     * @param expiry The expiration date of the share
+     * @param meta Optional meta data
+     * @param password The password
+     * @param bits Th permission bits for the share
+     * @throws OXException
      */
     void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException;
 
     /**
-     * @param singletonList
-     * @throws OXException 
+     * Removes share links
+     * 
+     * @param session The session
+     * @param links The links to be removed
+     * @throws OXException
      */
-    void deleteLinks(DriveSession session, List<String> singletonList) throws OXException;
+    void deleteLinks(DriveSession session, List<String> links) throws OXException;
 
     /**
-     * @param session
-     * @return
-     * @throws OXException 
+     * Gets all currently active shares of the user
+     * 
+     * @param session The session
+     * @return A list of all shares
+     * @throws OXException
      */
     List<ShareInfo> getAllLinks(DriveSession session) throws OXException;
 

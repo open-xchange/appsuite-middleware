@@ -47,34 +47,68 @@
  *
  */
 
-package com.openexchange.ajax.drive;
+package com.openexchange.drive.impl.internal;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.drive.test.AllTest;
-import com.openexchange.ajax.drive.test.DeleteLinkTest;
-import com.openexchange.ajax.drive.test.GetLinkTest;
-import com.openexchange.ajax.drive.test.InviteTest;
-import com.openexchange.ajax.drive.test.UpdateLinkTest;
+import java.util.Date;
+import java.util.Map;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.share.ShareTarget;
 
 /**
- * {@link DriveAJAXSuite}
+ * {@link DriveShareTarget}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class DriveAJAXSuite extends TestSuite {
+public class DriveShareTarget extends ShareTarget {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite(DriveAJAXSuite.class.getName());
+    private static final long serialVersionUID = -2374348001683276913L;
 
-        tests.addTestSuite(GetLinkTest.class);
-        tests.addTestSuite(UpdateLinkTest.class);
-        tests.addTestSuite(InviteTest.class);
-        tests.addTestSuite(DeleteLinkTest.class);
-        tests.addTestSuite(AllTest.class);
+    private String item;
 
-        return tests;
+    private String folder;
+
+    public DriveShareTarget(ShareTarget shareTarget) {
+        super(shareTarget);
     }
 
+    @Override
+    public void setItem(String item) {
+        this.item = item;
+    }
+
+    @Override
+    public String getItem() {
+        return item;
+    }
+
+    @Override
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+
+    @Override
+    public String getFolder() {
+        return folder;
+    }
+
+    @Override
+    public int getModule() {
+        return FolderObject.INFOSTORE;
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return null;
+    }
+
+    @Override
+    public Date getExpiryDate() {
+        return null;
+    }
+
+    @Override
+    public String getPath() {
+        return super.getPath();
+    }
 }

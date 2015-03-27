@@ -70,20 +70,18 @@ public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> 
     private Long expiry;
     private String password;
     private Integer bits;
-    private Map<String, Object> meta;
 
     public UpdateLinkRequest(Integer root, String token, Long timestamp) {
-        this(root, token, timestamp, null, null, null, null, true);
+        this(root, token, timestamp, null, null, null, true);
     }
 
-    public UpdateLinkRequest(Integer root, String token, Long timestamp, Long expiry, String password, Integer bits, Map<String, Object> meta, boolean failOnError) {
+    public UpdateLinkRequest(Integer root, String token, Long timestamp, Long expiry, String password, Integer bits, boolean failOnError) {
         super(root);
         this.token = token;
         this.timestamp = timestamp;
         this.expiry = expiry;
         this.password = password;
         this.bits = bits;
-        this.meta = meta;
         this.failOnError = failOnError;
     }
 
@@ -96,7 +94,7 @@ public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> 
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "updateLink"),
-            new Parameter(AJAXServlet.PARAMETER_ACTION, timestamp.toString()),
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, timestamp.toString()),
             new Parameter("root", root)
         };
     }
@@ -113,7 +111,6 @@ public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> 
         retval.putOpt("expiry_date", expiry);
         retval.putOpt("bits", bits);
         retval.putOpt("password", password);
-        retval.putOpt("meta", JSONCoercion.coerceToJSON(meta));
         return retval;
     }
 

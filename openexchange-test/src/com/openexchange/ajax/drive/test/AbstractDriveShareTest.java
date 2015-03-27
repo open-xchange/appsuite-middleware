@@ -47,34 +47,64 @@
  *
  */
 
-package com.openexchange.ajax.drive;
+package com.openexchange.ajax.drive.test;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.drive.test.AllTest;
-import com.openexchange.ajax.drive.test.DeleteLinkTest;
-import com.openexchange.ajax.drive.test.GetLinkTest;
-import com.openexchange.ajax.drive.test.InviteTest;
-import com.openexchange.ajax.drive.test.UpdateLinkTest;
+import java.util.List;
+import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.folderstorage.Permissions;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link DriveAJAXSuite}
+ * {@link AbstractDriveShareTest}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class DriveAJAXSuite extends TestSuite {
+public abstract class AbstractDriveShareTest extends ShareTest {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite(DriveAJAXSuite.class.getName());
+    protected AbstractDriveShareTest(String name) {
+        // TODO Auto-generated constructor stub
+        super(name);
+    }
 
-        tests.addTestSuite(GetLinkTest.class);
-        tests.addTestSuite(UpdateLinkTest.class);
-        tests.addTestSuite(InviteTest.class);
-        tests.addTestSuite(DeleteLinkTest.class);
-        tests.addTestSuite(AllTest.class);
+    protected void checkFilePermission(int entity, int expectedBits, File file) {
+        List<FileStorageObjectPermission> objectPermissions = file.getObjectPermissions();
+        if (objectPermissions != null) {
+            for (FileStorageObjectPermission permission : objectPermissions) {
+                if (permission.getEntity() == entity) {
+                    assertEquals(expectedBits, permission.getPermissions());
+                    return;
+                }
+            }
+        }
+        fail("Did not find permission for entity " + entity);
+    }
 
-        return tests;
+    protected void checkFolderPermission(int entity, int expectedBits, FolderObject folder) {
+        for (OCLPermission permission : folder.getPermissions()) {
+            if (permission.getEntity() == entity) {
+                assertEquals(expectedBits, Permissions.createPermissionBits(
+                    permission.getFolderPermission(),
+                    permission.getReadPermission(),
+                    permission.getWritePermission(),
+                    permission.getDeletePermission(),
+                    permission.isFolderAdmin()));
+                return;
+            }
+        }
+
+        fail("Did not find permission for entity " + entity);
+    }
+
+    protected String getId(DefaultFile file) {
+        FileID fileID = new FileID(file.getId());
+        fileID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        return fileID.toUniqueID();
     }
 
 }
