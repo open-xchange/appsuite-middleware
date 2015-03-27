@@ -222,7 +222,7 @@ public final class HttpClients {
 
     private static class ClientConnectionManager extends PoolingClientConnectionManager {
 
-        private IdleConnectionCloser idleConnectionCloser;
+        private volatile IdleConnectionCloser idleConnectionCloser;
 
         ClientConnectionManager(SchemeRegistry registry, int maxPerRoute, int maxTotal) {
             super(registry);
