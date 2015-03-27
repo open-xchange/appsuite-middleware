@@ -49,14 +49,17 @@
 
 package com.openexchange.admin.rmi;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link OXContextGroupInterface}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface OXContextGroupInterface {
+public interface OXContextGroupInterface extends Remote {
 
     /**
      * RMI name to be used in the naming lookup.
@@ -69,5 +72,5 @@ public interface OXContextGroupInterface {
      * @param contextGroupId The context group identifier
      * @throws RemoteException
      */
-    void deleteContextGroup(String contextGroupId) throws RemoteException;
+    void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException, OXException;
 }
