@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.sessiond
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.hazelcast.core,
+Import-Package: com.hazelcast.config,
+ com.hazelcast.core,
  com.hazelcast.nio.serialization,
  com.openexchange.authentication,
  com.openexchange.config,

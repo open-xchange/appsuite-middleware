@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,29 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.threadpool;
 
-import junit.framework.TestCase;
-import com.openexchange.config.SimConfigurationService;
-import com.openexchange.session.Session;
+import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
+import com.openexchange.timer.TimerService;
+import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
+
 
 /**
- * {@link Bug22838Test}
+ * {@link SimFactory}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
  */
-public class Bug22838Test extends TestCase {
+public class SimFactory {
 
-    private SessiondConfigInterface config;
+    private static final ThreadPoolServiceImpl POOL = ThreadPoolServiceImpl.newInstance(-1, 100, 1000l, "synchronous", 10, true, "abort");
 
-    /**
-     * Initializes a new {@link Bug22838Test}.
-     *
-     * @param name
-     */
-    public Bug22838Test(String name) {
-        super(name);
+    public static ThreadPoolService newThreadPoolService() {
+        return POOL;
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        config = new SessiondConfigImpl(new SimConfigurationService());
-        SessionHandler.init(config);
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        SessionHandler.close();
-        super.tearDown();
-    }
-
-    public void testMergeEmptyArrayWithNull() throws Exception {
-        Session[] retval = SessionHandler.removeUserSessions(0, 0);
-        assertEquals("Array length not 0", 0, retval.length);
+    public static TimerService newTimerService() {
+        return new CustomThreadPoolExecutorTimerService(POOL.getThreadPoolExecutor());
     }
 
 }
