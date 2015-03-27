@@ -690,7 +690,7 @@ public abstract class MailConfig {
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
                 if (masterPw == null) {
-                    throw MailConfigException.create(new StringBuilder().append("Property \"masterPassword\" not set").toString());
+                    throw MailConfigException.create("Property \"masterPassword\" not set");
                 }
                 mailConfig.password = masterPw;
             } else {
