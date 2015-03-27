@@ -1,12 +1,12 @@
 
-Name:          open-xchange-saml
+Name:          open-xchange-saml-core
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 19
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -25,6 +25,15 @@ performs several deployment-specific tasks.
 Authors:
 --------
     Open-Xchange
+
+%package -n open-xchange-saml
+Group:         Applications/Productivity
+Summary:       Meta package to install necessary components to support SAML authentication
+Requires:      open-xchange-saml-core >= @OXVERSION@
+Requires:      open-xchange-saml-backend
+
+%description -n open-xchange-saml
+Install this package and its dependencies will install the necessary components to support SAML authentication.
 
 %prep
 
@@ -49,6 +58,11 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 %dir /opt/open-xchange/etc/hazelcast
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
+%dir /opt/open-xchange/templates
+/opt/open-xchange/templates/*
+
+%files -n open-xchange-saml
+%defattr(-,root,root)
 
 %changelog
 * Tue Mar 24 2015 Steffen Templin <steffen.templin@open-xchange.com>

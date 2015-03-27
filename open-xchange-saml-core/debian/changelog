@@ -1,4 +1,4 @@
-open-xchange-saml (7.6.1-0) stable; urgency=low
+open-xchange-saml-core (7.6.1-0) stable; urgency=low
 
   * initial packaging for SAML core package
 
