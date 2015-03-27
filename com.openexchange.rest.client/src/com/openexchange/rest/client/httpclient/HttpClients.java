@@ -61,6 +61,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionRequest;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
@@ -86,6 +87,8 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link HttpClients} - Utility class for HTTP client.
+ * <p>
+ * See <a href="http://svn.apache.org/repos/asf/httpcomponents/httpclient/branches/4.0.x/httpclient/src/examples/org/apache/http/examples/client/">here</a> for several examples.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
@@ -198,6 +201,20 @@ public final class HttpClients {
         final HttpParams reqParams = request.getParams();
         HttpConnectionParams.setSoTimeout(reqParams, timeoutMillis);
         HttpConnectionParams.setConnectionTimeout(reqParams, timeoutMillis);
+    }
+
+    /**
+     * Shuts-down given <code>HttpClient</code> instance
+     *
+     * @param httpclient The <code>HttpClient</code> instance to shut-down
+     */
+    public static void shutDown(HttpClient httpclient) {
+        if (null != httpclient) {
+            // When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+            httpclient.getConnectionManager().shutdown();
+        }
     }
 
     /*------------------------------------------------------ CLASSES ------------------------------------------------------*/

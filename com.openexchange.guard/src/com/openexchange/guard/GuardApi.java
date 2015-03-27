@@ -233,6 +233,17 @@ public class GuardApi {
     }
 
     /**
+     * Shuts-down this Guard API instance.
+     */
+    public void shutDown() {
+        DefaultHttpClient tmp = httpClient;
+        if (null != tmp) {
+            HttpClients.shutDown(tmp);
+            httpClient = null;
+        }
+    }
+
+    /**
      * Performs the GET using given parameters.
      *
      * @param parameters

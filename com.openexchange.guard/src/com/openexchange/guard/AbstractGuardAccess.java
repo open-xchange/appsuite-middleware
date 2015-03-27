@@ -72,6 +72,22 @@ public abstract class AbstractGuardAccess {
     }
 
     /**
+     * Sets the {@link GuardApi} reference
+     *
+     * @param guardApi The instance to set
+     */
+    public static GuardApi unsetGuardApi() {
+        GuardApi guardApi;
+        do {
+            guardApi = API_REF.get();
+            if (null == guardApi) {
+                return null;
+            }
+        } while (!API_REF.compareAndSet(guardApi, null));
+        return guardApi;
+    }
+
+    /**
      * Initializes a new {@link AbstractGuardAccess}.
      */
     protected AbstractGuardAccess() {
