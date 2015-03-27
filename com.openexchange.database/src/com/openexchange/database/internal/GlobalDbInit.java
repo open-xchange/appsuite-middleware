@@ -356,7 +356,7 @@ public class GlobalDbInit {
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         try {
-            statement = connection.prepareStatement("CREATE DATABASE IF NOT EXISTS " + name + " DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
+            statement = connection.prepareStatement("CREATE DATABASE IF NOT EXISTS `" + name + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
             return statement.executeUpdate();
         } finally {
             DBUtils.closeSQLStuff(resultSet, statement);
@@ -370,7 +370,7 @@ public class GlobalDbInit {
      * @return The schema name
      */
     private static String getSchemaName(String dbPoolName) {
-        return dbPoolName + "_global";
+        return (dbPoolName + "_global").replace('`', '_');
     }
 
     /**
