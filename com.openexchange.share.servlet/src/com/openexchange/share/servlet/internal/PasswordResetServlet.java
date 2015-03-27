@@ -228,26 +228,6 @@ public class PasswordResetServlet extends HttpServlet {
         }
     }
 
-    //    /**
-    //     * Adds the redirect to the given response
-    //     *
-    //     * @param guest - the guest info
-    //     * @param target - target to get the redirect to
-    //     * @param serverName - server name to redirect to
-    //     * @param response - response that should be enriched by the redirect
-    //     * @throws OXException
-    //     */
-    //    private void setRedirect(GuestShare share, ShareTarget target, HttpServletResponse response) throws OXException {
-    //        try {
-    //            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share.getGuest(), target, this.loginConfig.getLoginConfig());
-    //            response.sendRedirect(redirectUrl);
-    //        } catch (IOException e) {
-    //            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
-    //        } catch (RuntimeException e) {
-    //            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-    //        }
-    //    }
-
     private String getHash(String toHash) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         md.reset();
