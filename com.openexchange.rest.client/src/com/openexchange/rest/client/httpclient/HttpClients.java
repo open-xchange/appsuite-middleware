@@ -128,9 +128,10 @@ public final class HttpClients {
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
         schemeRegistry.register(new Scheme("https", 443, EasySSLSocketFactory.getInstance()));
 
-        final ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, MAX_CONNECTIONS_PER_ROUTE, MAX_TOTAL_CONNECTIONS);
+        ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, MAX_CONNECTIONS_PER_ROUTE, MAX_TOTAL_CONNECTIONS);
+        ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, KEEP_ALIVE_DURATION_SECS));
 
-        final HttpParams httpParams = new BasicHttpParams();
+        HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
         HttpConnectionParams.setSoTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
         HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
@@ -221,48 +222,68 @@ public final class HttpClients {
 
     private static class ClientConnectionManager extends PoolingClientConnectionManager {
 
-        public ClientConnectionManager(final SchemeRegistry registry, final int maxPerRoute, final int maxTotal) {
+        private IdleConnectionCloser idleConnectionCloser;
+
+        ClientConnectionManager(SchemeRegistry registry, int maxPerRoute, int maxTotal) {
             super(registry);
             setMaxTotal(maxTotal);
             setDefaultMaxPerRoute(maxPerRoute);
         }
 
+        /**
+         * Sets the associated {@link IdleConnectionCloser} instance
+         *
+         * @param idleConnectionCloser The instance to set
+         */
+        void setIdleConnectionCloser(IdleConnectionCloser idleConnectionCloser) {
+            this.idleConnectionCloser = idleConnectionCloser;
+        }
+
         @Override
         public ClientConnectionRequest requestConnection(final HttpRoute route, final Object state) {
-            IdleConnectionCloser.ensureRunning(this, KEEP_ALIVE_DURATION_SECS, KEEP_ALIVE_MONITOR_INTERVAL_SECS);
+            IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
+            if (null != idleConnectionClose) {
+                idleConnectionClose.ensureRunning(KEEP_ALIVE_MONITOR_INTERVAL_SECS);
+            }
             return super.requestConnection(route, state);
+        }
+
+        @Override
+        public void shutdown() {
+            IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
+            if (null != idleConnectionClose) {
+                idleConnectionClose.stop();
+            }
+            super.shutdown();
         }
     }
 
     private static class IdleConnectionCloser implements Runnable {
 
         private final ClientConnectionManager manager;
-
         private final int idleTimeoutSeconds;
+        private volatile ScheduledTimerTask timerTask;
 
-        private volatile static ScheduledTimerTask timerTask;
-
-        public IdleConnectionCloser(final ClientConnectionManager manager, final int idleTimeoutSeconds) {
+        IdleConnectionCloser(final ClientConnectionManager manager, final int idleTimeoutSeconds) {
             super();
             this.manager = manager;
             this.idleTimeoutSeconds = idleTimeoutSeconds;
         }
 
-        public static void ensureRunning(final ClientConnectionManager manager, final int idleTimeoutSeconds, final int checkIntervalSeconds) {
+        void ensureRunning(int checkIntervalSeconds) {
             ScheduledTimerTask tmp = timerTask;
             if (null == tmp) {
                 synchronized (IdleConnectionCloser.class) {
                     tmp = timerTask;
                     if (null == tmp) {
-                        final IdleConnectionCloser task = new IdleConnectionCloser(manager, idleTimeoutSeconds);
-                        tmp = ServerServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(task, checkIntervalSeconds, checkIntervalSeconds, TimeUnit.SECONDS);
+                        tmp = ServerServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(this, checkIntervalSeconds, checkIntervalSeconds, TimeUnit.SECONDS);
                         timerTask = tmp;
                     }
                 }
             }
         }
 
-        private static void stop() {
+        void stop() {
             ScheduledTimerTask tmp = timerTask;
             if (null != tmp) {
                 synchronized (IdleConnectionCloser.class) {
