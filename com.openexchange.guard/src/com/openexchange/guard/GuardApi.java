@@ -57,23 +57,35 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
+import org.apache.http.auth.AuthScheme;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthState;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.ExecutionContext;
+import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -87,7 +99,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.version.Version;
-
 
 /**
  * {@link GuardApi}
@@ -163,6 +174,8 @@ public class GuardApi {
     private final String authPassword;
     private final URI uri;
     private volatile DefaultHttpClient httpClient;
+    private volatile BasicHttpContext localcontext;
+    private volatile HttpHost targetHost;
 
     /**
      * Initializes a new {@link GuardApi}.
@@ -196,8 +209,22 @@ public class GuardApi {
                 tmp = httpClient;
                 if (null == tmp) {
                     tmp = HttpClients.getHttpClient("OX Guard Http Client v" + Version.getInstance().getVersionString());
+
                     Credentials credentials = new UsernamePasswordCredentials(authLogin, authPassword);
-                    tmp.getCredentialsProvider().setCredentials(new AuthScope(uri.getHost(), uri.getPort()), credentials);
+                    tmp.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
+
+                    // Generate BASIC scheme object and stick it to the local execution context
+                    BasicHttpContext context = new BasicHttpContext();
+                    BasicScheme basicAuth = new BasicScheme();
+                    context.setAttribute("preemptive-auth", basicAuth);
+                    this.localcontext = context;
+
+                    // Add as the first request interceptor
+                    tmp.addRequestInterceptor(new PreemptiveAuth(), 0);
+
+                    HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+                    this.targetHost = targetHost;
+
                     httpClient = tmp;
                 }
             }
@@ -344,7 +371,7 @@ public class GuardApi {
      * @throws IOException If an I/O error occurs
      */
     protected HttpResponse execute(HttpRequestBase method, DefaultHttpClient httpClient) throws ClientProtocolException, IOException {
-        return httpClient.execute(method);
+        return httpClient.execute(targetHost, method, localcontext);
     }
 
     /**
@@ -437,6 +464,37 @@ public class GuardApi {
             return GuardApiExceptionCodes.AUTH_ERROR.create();
         }
         return GuardApiExceptionCodes.GUARD_SERVER_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getMessage());
+    }
+
+    static class PreemptiveAuth implements HttpRequestInterceptor {
+
+        @Override
+        public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
+
+            AuthState authState = (AuthState) context.getAttribute(
+                ClientContext.TARGET_AUTH_STATE);
+
+            // If no auth scheme avaialble yet, try to initialize it preemptively
+            if (authState.getAuthScheme() == null) {
+                AuthScheme authScheme = (AuthScheme) context.getAttribute(
+                    "preemptive-auth");
+                CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(
+                    ClientContext.CREDS_PROVIDER);
+                HttpHost targetHost = (HttpHost) context.getAttribute(
+                    ExecutionContext.HTTP_TARGET_HOST);
+                if (authScheme != null) {
+                    Credentials creds = credsProvider.getCredentials(
+                        new AuthScope(
+                            targetHost.getHostName(),
+                            targetHost.getPort()));
+                    if (creds == null) {
+                        throw new HttpException("No credentials for preemptive authentication");
+                    }
+                    authState.setAuthScheme(authScheme);
+                    authState.setCredentials(creds);
+                }
+            }
+        }
     }
 
 }
