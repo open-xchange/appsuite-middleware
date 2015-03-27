@@ -183,29 +183,19 @@ public final class PasswordChangeServlet extends SessionServlet {
             // Construct JSON object from request's body data and check mandatory fields
             String oldPw;
             String newPw;
-            String newPw2;
             {
                 JSONObject jBody = new JSONObject(getBody(req));
                 String paramOldPw = "old_password";
                 String paramNewPw = "new_password";
-                String paramNewPw2 = "new_password2";
                 if (!jBody.has(paramNewPw) || jBody.isNull(paramNewPw)) {
                     throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramNewPw);
-                }
-                if (!jBody.has(paramNewPw2) || jBody.isNull(paramNewPw2)) {
-                    throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramNewPw2);
                 }
                 if (!jBody.has(paramOldPw) || jBody.isNull(paramOldPw)) {
                     throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramOldPw);
                 }
 
                 newPw = jBody.getString(paramNewPw);
-                newPw2 = jBody.getString(paramNewPw2);
                 oldPw = jBody.getString(paramOldPw);
-
-                if (!newPw2.equals(newPw)) {
-                    throw PasswordChangeServletExceptionCode.PW_DO_NOT_MATCH.create();
-                }
             }
 
             // Perform password change
