@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-03-24 09:58+0100\n"
+"PO-Revision-Date: 2015-03-26 13:50+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1363,7 +1363,8 @@ msgstr "Der Typ %1$s der angegebenen Datei wird nicht unterstützt."
 msgid "The following field(s) are too long: %1$s"
 msgstr "Folgende(s) Feld(er) sind zu lang: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:68
+#. The provided password seems to be wrong or something bad happened.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:69
 msgid "The provided password seems to be wrong or something bad happened."
 msgstr ""
 "Entweder ist das angegebene Passwort falsch oder es trat ein anderer, "
@@ -1660,99 +1661,6 @@ msgstr ""
 "Konflikt für den Pfad  \"%1$s\". Es gibt bereits eine gleichnamige Datei "
 "unter \"%2$s\"."
 
-#. A Box error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:62
-msgid "A Box error occurred: %1$s"
-msgstr "Es trat ein Box-Fehler auf: %1$s"
-
-#. A Box error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:65
-msgid ""
-"A Box server error occurred with HTTP status code %1$s. Error message: %2$s"
-msgstr ""
-"Es trat ein Box-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
-"Fehlermeldung: %2$s"
-
-#. Invalid Box URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:68
-msgid "The provided Box URL: %1$s is invalid"
-msgstr "Die angegebene Box-URL %1$s ist ungültig."
-
-#. Box URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:71
-msgid "The provided Box URL does not denote a directory: %1$s"
-msgstr "Die angegebene Box-URL bezeichnet kein Verzeichnis: %1$s"
-
-#. The Box resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:74
-msgid "The provided Box resource does not exist: %1$s"
-msgstr "Die angegebene Box-Ressource ist nicht vorhanden: %1$s"
-
-#. Update denied for Box resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:77
-msgid "Update denied for the provided Box resource: %1$s"
-msgstr "Aktualisierung für die angegebene Box-Ressource verweigert: %1$s"
-
-#. Delete denied for Box resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:80
-msgid "Delete denied for the provided Box resource: %1$s"
-msgstr "Löschvorgang für die angegebene Box-Ressource verweigert: %1$s"
-
-#. Box URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:83
-msgid "The provided Box URL does not denote a file: %1$s"
-msgstr "Die angegebene Box-URL bezeichnet keine Datei: %1$s"
-
-#. Missing file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:83
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:86
-msgid "Missing file name. Please provide one and try again."
-msgstr ""
-"Es wurde kein Dateiname angegeben. Bitte geben Sie einen an und versuchen "
-"Sie es erneut."
-
-#. Versioning not supported by Box file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:89
-msgid "Versioning not supported by Box file storage."
-msgstr "Versionierung wird nicht vom Box-Dateispeicher unterstützt."
-
-#. Missing configuration for account "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:77
-msgid "Missing configuration for account \"%1$s\"."
-msgstr "Fehlende Konfiguration für den Account \"%1$s\"."
-
-#. Bad or expired access token. Need to re-authenticate user.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
-msgid "Bad or expired access token. Need to re-authenticate user."
-msgstr ""
-"Zugriffs-Token ist fehlerhaft oder abgelaufen. Der Benutzer muss neu "
-"authentifiziert werden."
-
-#. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:98
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:98
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:74
-msgid "An I/O error occurred: %1$s"
-msgstr "Es trat ein E/A-Fehler auf: %1$s"
-
-#. Authentication failed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/BoxExceptionMessages.java:101
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:101
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:77
-msgid "Authentication failed: %1$s"
-msgstr "Authentifizierung fehlgeschlagen: %1$s"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1765,322 +1673,7 @@ msgstr "Authentifizierung fehlgeschlagen: %1$s"
 msgid "Select an existing account"
 msgstr "Zu verwendender OAuth-Account"
 
-#. A CIFS/SMB error occurred.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:63
-msgid "A CIFS/SMB error occurred."
-msgstr "Es trat ein CIFS/SMB-Fehler auf."
-
-#. Invalid CIFS/SMB URL.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:66
-msgid "Invalid CIFS/SMB URL."
-msgstr "Ungültige CIFS/SMB-URL."
-
-#. CIFS/SMB URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:69
-msgid "CIFS/SMB URL does not denote a directory: %1$s"
-msgstr "CIFS/SMB-URL ist kein Verzeichnis:  %1$s"
-
-#. The CIFS/SMB resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:72
-msgid "The CIFS/SMB resource does not exist: %1$s"
-msgstr "Die CIFS/SMB-Ressource ist nicht vorhanden: %1$s"
-
-#. Update denied for CIFS/SMB resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:75
-msgid "Update denied for CIFS/SMB resource: %1$s"
-msgstr "Aktualisierung verweigert für die CIFS/SMB-Ressource: %1$s"
-
-#. Delete denied for CIFS/SMB resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:78
-msgid "Delete denied for CIFS/SMB resource: %1$s"
-msgstr "Löschvorgang verweigert für die CIFS/SMB-Ressource: %1$s"
-
-#. CIFS/SMB URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:81
-msgid "CIFS/SMB URL does not denote a file: %1$s"
-msgstr "CIFS/SMB-URL ist keine Datei: %1$s"
-
-#. Missing file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:84
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:84
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:74
-msgid "Missing file name."
-msgstr "Fehlender Dateiname"
-
-#. Versioning not supported by CIFS/SMB file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:87
-msgid "Versioning not supported by CIFS/SMB file storage."
-msgstr "Versionierung wird nicht vom CIFS/SMB-Dateispeicher unterstützt."
-
-#. The operation completed successfully.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:90
-msgid "The operation completed successfully."
-msgstr "Der Vorgang wurde erfolgreich abgeschlossen."
-
-#. A device attached to the system is not functioning.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:93
-msgid "A device attached to the system is not functioning."
-msgstr "Ein an das System angeschlossenes Gerät funktioniert nicht."
-
-#. Incorrect function.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:96
-msgid "Incorrect function."
-msgstr "Falsche Funktion"
-
-#. The parameter is incorrect.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:99
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:108
-msgid "The parameter is incorrect."
-msgstr "Der Parameter ist fehlerhaft."
-
-#. Invalid access to memory location.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:102
-msgid "Invalid access to memory location."
-msgstr "Ungültiger Zugriff auf den Speicherort."
-
-#. The handle is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:105
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:135
-msgid "The handle is invalid."
-msgstr "Das Handle ist ungültig."
-
-#. The system cannot find the file specified.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:111
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:114
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:129
-msgid "The system cannot find the file specified."
-msgstr "Das System konnte die angegebene Datei nicht finden."
-
-#. More data is available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:117
-msgid "More data is available."
-msgstr "Es sind weitere Daten verfügbar."
-
-#. Access is denied.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:120
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:150
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:192
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:219
-msgid "Access is denied."
-msgstr "Der Zugriff wurde verweigert."
-
-#. The data area passed to a system call is too small.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:123
-msgid "The data area passed to a system call is too small."
-msgstr "Der an den Systemaufruf weitergereichte Datenbereich ist zu klein."
-
-#. The filename, directory name, or volume label syntax is incorrect.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:126
-msgid "The filename, directory name, or volume label syntax is incorrect."
-msgstr ""
-"Inkorrekte Syntax für den Datei- oder Verzeichnisnamen oder für die "
-"Bezeichnung des Datenträgers. "
-
-#. Cannot create a file when that file already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:132
-msgid "Cannot create a file when that file already exists."
-msgstr "Eine bereits vorhandene Datei kann nicht angelegt werden."
-
-#. The specified path is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:138
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:144
-msgid "The specified path is invalid."
-msgstr "Der angegebene Pfad ist ungültig."
-
-#. The system cannot find the path specified.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:141
-msgid "The system cannot find the path specified."
-msgstr "Das System kann den angegebenen Pfad nicht finden."
-
-#. The process cannot access the file because it is being used by another process.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:147
-msgid ""
-"The process cannot access the file because it is being used by another "
-"process."
-msgstr ""
-"Der Prozess kann nicht auf die Datei zugreifen, da diese bereits von einem "
-"anderen Prozess verwendet wird."
-
-#. There are currently no logon servers available to service the logon request.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:153
-msgid ""
-"There are currently no logon servers available to service the logon request."
-msgstr ""
-"Derzeit stehen keine Anmeldeserver zur Verarbeitung der Anmeldeanfrage zur "
-"Verfügung."
-
-#. The specified user already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:156
-msgid "The specified user already exists."
-msgstr "Der angegebene Benutzer ist bereits vorhanden."
-
-#. The specified user does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:159
-msgid "The specified user does not exist."
-msgstr "Der angegebene Benutzer ist nicht vorhanden."
-
-#. The specified network password is not correct.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:162
-msgid "The specified network password is not correct."
-msgstr "Das angegebene Netzwerkpasswort ist nicht korrekt."
-
-#. Logon failure: unknown user name or bad password.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:165
-msgid "Logon failure: unknown user name or bad password."
-msgstr "Anmeldefehler: unbekannter Benutzername oder ungültiges Passwort."
-
-#. Logon failure: user account restriction.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:168
-msgid "Logon failure: user account restriction."
-msgstr "Anmeldefehler: Beschränkung des Benutzer-Accounts"
-
-#. Logon failure: account logon time restriction violation.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:171
-msgid "Logon failure: account logon time restriction violation."
-msgstr "Anmeldefehler: Zeitüberschreitung für Anmeldung am Account"
-
-#. Logon failure: user not allowed to log on to this computer.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:174
-msgid "Logon failure: user not allowed to log on to this computer."
-msgstr ""
-"Anmeldefehler: Benutzer hat keine Berechtigung zum Anmelden auf diesem "
-"Rechner"
-
-#. Logon failure: the specified account password has expired.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:177
-msgid "Logon failure: the specified account password has expired."
-msgstr "Anmeldefehler: Das angegebene Account-Passwort ist abgelaufen."
-
-#. Logon failure: account currently disabled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:180
-msgid "Logon failure: account currently disabled."
-msgstr "Anmeldefehler: Account ist derzeit deaktiviert."
-
-#. No mapping between account names and security IDs was done.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:183
-msgid "No mapping between account names and security IDs was done."
-msgstr ""
-"Es wurde keine Zuordnung zwischen den Account-Namen und Sicherheits-IDs "
-"vorgenommen."
-
-#. All pipe instances are busy.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:186
-msgid "All pipe instances are busy."
-msgstr "Alle Pipe-Instanzen sind belegt."
-
-#. Waiting for a process to open the other end of the pipe.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:189
-msgid "Waiting for a process to open the other end of the pipe."
-msgstr ""
-"Es wird auf einen Prozess gewartet, der das andere Ende der Pipe öffnet."
-
-#. A duplicate name exists on the network.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:195
-msgid "A duplicate name exists on the network."
-msgstr "Namensduplikat im Netzwerk"
-
-#. The specified network name is no longer available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:198
-msgid "The specified network name is no longer available."
-msgstr "Der angegebene Netzwerkname ist nicht mehr verfügbar."
-
-#. Network access is denied.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:201
-msgid "Network access is denied."
-msgstr "Der Netzwerkzugriff wurde verweigert."
-
-#. The network name cannot be found.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:204
-msgid "The network name cannot be found."
-msgstr "Der Netzwerkname konnte nicht gefunden werden."
-
-#. No more connections can be made to this remote computer at this time because there are already as many connections as the computer can accept.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:207
-msgid ""
-"No more connections can be made to this remote computer at this time because "
-"there are already as many connections as the computer can accept."
-msgstr ""
-"Derzeit können keine weiteren Verbindungen zu diesem entfernten Rechner "
-"hergestellt werden, da die maximale Anzahl an Verbindungen für diesen "
-"Rechner erreicht ist."
-
-#. Indicates a Windows NT Server could not be contacted or that objects within the domain are protected such that necessary information could not be retrieved.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:210
-msgid ""
-"Indicates a Windows NT Server could not be contacted or that objects within "
-"the domain are protected such that necessary information could not be "
-"retrieved."
-msgstr ""
-"Wahrscheinlich konnte kein Zugriff auf einen Windows NT Server hergestellt "
-"werden oder die Objekte innerhalb der Domain sind derart geschützt, dass "
-"nötige Informationen nicht abgerufen werden konnten. "
-
-#. The specified domain did not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:213
-msgid "The specified domain did not exist."
-msgstr "Die angegebene Domain ist nicht vorhanden"
-
-#. The directory name is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:216
-msgid "The directory name is invalid."
-msgstr "Der Verzeichnisname ist ungültig."
-
-#. The format of the specified computer name is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:222
-msgid "The format of the specified computer name is invalid."
-msgstr "Das Format des angegebenen Rechnernamens ist ungültig."
-
-#. The specified local group does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:225
-msgid "The specified local group does not exist."
-msgstr "Die angegebene lokale Gruppe ist nicht vorhanden."
-
-#. Logon failure: the user has not been granted the requested logon type at this computer.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:228
-msgid ""
-"Logon failure: the user has not been granted the requested logon type at "
-"this computer."
-msgstr ""
-"Anmeldefehler: Der Benutzer hat auf diesem Rechner keine Berechtigung für "
-"den angeforderten Anmeldetyp."
-
-#. The account used is a Computer Account. Use your global user account or local user account to access this server.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:231
-msgid ""
-"The account used is a Computer Account. Use your global user account or "
-"local user account to access this server."
-msgstr ""
-"Der verwendete Account ist ein Computer-Account. Verwenden Sie Ihren "
-"globalen oder Ihren lokalen Benutzer-Account zum Zugriff auf diesen Server. "
-
-#. The user must change his password before he logs on the first time.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:234
-msgid "The user must change his password before he logs on the first time."
-msgstr "Der Benutzer muss vor dem erstmaligen Anmelden sein Passwort ändern."
-
-#. Please use a hostname instead of an IP address in the SMB URL.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:237
-msgid "Please use a hostname instead of an IP address in the SMB URL."
-msgstr "Bitte verwenden Sie für die SMB URL einen Hostnamen anstelle der IP. "
-
-#. Your account has been blocked. This can have various reasons like having mistyped the password several times.
-#. Please contact your system administrator or hoster in case you can no longer log in.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:241
-msgid ""
-"Your account has been blocked. This can have various reasons like having "
-"mistyped the password several times.\n"
-"Please contact your system administrator or hoster in case you can no longer "
-"log in."
-msgstr ""
-"Ihr Account wurde gesperrt. Dies kann mehrere Gründen haben, z.B. eine "
-"wiederholt falsche Passworteingabe.\n"
-"Sollten Sie sich weiterhin nicht anmelden können, wenden Sie sich bitte an "
-"Ihren Systemadmininstratoren oder Hoster."
-
 #. label of login form
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
@@ -2089,8 +1682,6 @@ msgstr "Login"
 
 #. label of username input field
 #. Password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:91
@@ -2098,240 +1689,24 @@ msgstr "Login"
 msgid "Password"
 msgstr "Passwort"
 
-#. A CMIS error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:63
-msgid "A CMIS error occurred: %1$s"
-msgstr "Es trat ein CMIS-Fehler auf: %1$s"
-
-#. Invalid CMIS URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:66
-msgid "Invalid CMIS URL: %1$s"
-msgstr "Ungültige CMIS-URL: %1$s"
-
-#. CMIS URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:69
-msgid "CMIS URL does not denote a directory: %1$s"
-msgstr "CMIS URL bezeichnet kein Verzeichnis: %1$s"
-
-#. The CMIS resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:72
-msgid "The CMIS resource does not exist: %1$s"
-msgstr "Die CMIS-Ressource ist nicht vorhanden: %1$s"
-
-#. Update denied for CMIS resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:75
-msgid "Update denied for CMIS resource: %1$s"
-msgstr "Aktualisierung verweigert für die CMIS-Ressource: %1$s"
-
-#. Delete denied for CMIS resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:78
-msgid "Delete denied for CMIS resource: %1$s"
-msgstr "Löschvorgang verweigert für die CMIS-Ressource: %1$s"
-
-#. CMIS URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:81
-msgid "CMIS URL does not denote a file: %1$s"
-msgstr "CMIS URL bezeichnet keine Datei: %1$s"
-
-#. Versioning not supported by CMIS file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:87
-msgid "Versioning not supported by CMIS file storage."
-msgstr "Versionierung wird nicht vom CMIS-Dateispeicher unterstützt."
-
-#. A Dropbox error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:62
-msgid "A Dropbox error occurred: %1$s"
-msgstr "Es trat ein Dropbox-Fehler auf: %1$s"
-
-#. A Dropbox error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:65
-msgid ""
-"A Dropbox server error occurred with HTTP status code %1$s. Error message: "
-"%2$s"
-msgstr ""
-"Es trat ein Dropbox-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
-"Fehlermeldung: %2$s"
-
-#. Invalid Dropbox URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:68
-msgid "The provided Dropbox URL: %1$s is invalid"
-msgstr "Die angegebene Dropbox-URL %1$s ist ungültig."
-
-#. Dropbox URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:71
-msgid "The provided Dropbox URL does not denote a directory: %1$s"
-msgstr "Die angegebene Dropbox-URL bezeichnet kein Verzeichnis: %1$s"
-
-#. The Dropbox resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:74
-msgid "The provided Dropbox resource does not exist: %1$s"
-msgstr "Die angegebene Dropbox-Ressource ist nicht vorhanden: %1$s"
-
-#. Update denied for Dropbox resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:77
-msgid "Update denied for the provided Dropbox resource: %1$s"
-msgstr "Aktualisierung für die angegebene Dropbox-Ressource verweigert: %1$s"
-
-#. Delete denied for Dropbox resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:80
-msgid "Delete denied for the provided Dropbox resource: %1$s"
-msgstr "Löschvorgang für die angegebene Dropbox-Ressource verweigert: %1$s"
-
-#. Dropbox URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:83
-msgid "The provided Dropbox URL does not denote a file: %1$s"
-msgstr "Die angegebene Dropbox-URL bezeichnet keine Datei: %1$s"
-
-#. Versioning not supported by Dropbox file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:89
-msgid "Versioning not supported by Dropbox file storage."
-msgstr "Versionierung wird nicht vom Dropbox-Dateispeicher unterstützt."
-
-#. A Google Drive error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:62
-msgid "A Google Drive error occurred: %1$s"
-msgstr "Es trat ein Google Drive-Fehler auf: %1$s"
-
-#. A Google Drive error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:65
-msgid ""
-"A Google Drive server error occurred with HTTP status code %1$s. Error "
-"message: %2$s"
-msgstr ""
-"Es trat ein Google Drive-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
-"Fehlermeldung: %2$s"
-
-#. Google Drive URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:68
-msgid "The provided Google Drive URL does not denote a directory: %1$s"
-msgstr "Die angegebene Google Drive-URL bezeichnet kein Verzeichnis: %1$s"
-
-#. The Google Drive resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:71
-msgid "The provided Google Drive resource does not exist: %1$s"
-msgstr "Die angegebene Google Drive-Ressource ist nicht vorhanden: %1$s"
-
-#. Update denied for Google Drive resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:74
-msgid "Update denied for the provided Google Drive resource: %1$s"
-msgstr ""
-"Aktualisierung für die angegebene Google Drive-Ressource verweigert: %1$s"
-
-#. Delete denied for Google Drive resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:77
-msgid "Delete denied for the provided Google Drive resource: %1$s"
-msgstr ""
-"Löschvorgang für die angegebene Google Drive-Ressource verweigert: %1$s"
-
-#. Google Drive URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:80
-msgid "The provided Google Drive URL does not denote a file: %1$s"
-msgstr "Die angegebene Google Drive-URL bezeichnet keine Datei: %1$s"
-
-#. Versioning not supported by Google Drive file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:86
-msgid "Versioning not supported by Google Drive file storage."
-msgstr "Versionierung wird nicht vom Google Drive-Dateispeicher unterstützt."
-
-#. The file %1$s doesn't have any content stored on Drive
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/GoogleDriveExceptionMessages.java:98
-msgid "The file %1$s doesn't have any content stored on Drive"
-msgstr "Für die Datei %1$s ist kein Inhalt auf Drive gespeichert"
-
-#. A OneDrive error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:62
-msgid "A OneDrive error occurred: %1$s"
-msgstr "Es trat ein OneDrive-Fehler auf: %1$s"
-
-#. A OneDrive error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:65
-msgid ""
-"A OneDrive server error occurred with HTTP status code %1$s. Error message: "
-"%2$s"
-msgstr ""
-"Es trat ein OneDrive-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
-"Fehlermeldung: %2$s"
-
-#. Invalid OneDrive URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:68
-msgid "The provided OneDrive URL: %1$s is invalid"
-msgstr "Die angegebene OneDrive-URL %1$s ist ungültig."
-
-#. OneDrive URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:71
-msgid "The provided OneDrive URL does not denote a directory: %1$s"
-msgstr "Die angegebene OneDrive-URL bezeichnet kein Verzeichnis: %1$s"
-
-#. The OneDrive resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:74
-msgid "The provided OneDrive resource does not exist: %1$s"
-msgstr "Die angegebene OneDrive-Ressource ist nicht vorhanden: %1$s"
-
-#. Update denied for OneDrive resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:77
-msgid "Update denied for the provided OneDrive resource: %1$s"
-msgstr "Aktualisierung für die angegebene OneDrive-Ressource verweigert: %1$s"
-
-#. Delete denied for OneDrive resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:80
-msgid "Delete denied for the provided OneDrive resource: %1$s"
-msgstr "Löschvorgang für die angegebene OneDrive-Ressource verweigert: %1$s"
-
-#. OneDrive URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:83
-msgid "The provided OneDrive URL does not denote a file: %1$s"
-msgstr "Die angegebene OneDrive-URL bezeichnet keine Datei: %1$s"
-
-#. Versioning not supported by OneDrive file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:89
-msgid "Versioning not supported by OneDrive file storage."
-msgstr "Versionierung wird nicht vom OneDrive-Dateispeicher unterstützt."
-
-#. The OneDrive resource does not exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/OneDriveExceptionMessages.java:104
-msgid "The OneDrive resource does not exist"
-msgstr "Die OneDrive-Ressource ist nicht vorhanden"
-
-#. Directory "%1$s" must not be deleted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:64
-msgid "Directory \"%1$s\" must not be deleted."
-msgstr "Das Verzeichnis \"%1$s\" darf nicht gelöscht werden."
-
-#. Directory "%1$s" must not be updated.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:67
-msgid "Directory \"%1$s\" must not be updated."
-msgstr "Das Verzeichnis \"%1$s\" darf nicht aktualisiert werden."
-
-#. Invalid or missing credentials to access WebDAV server "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:70
-msgid "Invalid or missing credentials to access WebDAV server \"%1$s\"."
-msgstr ""
-"Ungültige oder fehlende Zugangsdaten für den Zugriff auf den WebDAV-Server "
-"\"%1$s\"."
-
-#. The resource is not a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:73
-msgid "The resource is not a file: %1$s"
-msgstr "Die Ressource ist keine Datei: %1$s"
-
 #. The folder you requested does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
 msgid "The folder you requested does not exist."
 msgstr "Der von Ihnen angeforderte Ordner ist nicht vorhanden."
 
 #. The file you requested does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:68
 msgid "The file you requested does not exist."
 msgstr "Die von Ihnen angeforderte Datei ist nicht vorhanden."
 
 #. The file version you requested does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:71
 msgid "The file version you requested does not exist."
 msgstr "Die von Ihnen angeforderte Dateiversion ist nicht vorhanden."
 
 #. A folder named "%1$s" already exists below the parent folder "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:74
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
 msgid ""
 "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
@@ -2341,7 +1716,7 @@ msgstr ""
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
 #. You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:77
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:89
 msgid ""
 "You do not have the appropriate permissions to create a subfolder below the "
@@ -2351,7 +1726,7 @@ msgstr ""
 "Unterordners im Ordner \"%1$s\"."
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
@@ -2361,14 +1736,14 @@ msgid ""
 msgstr "Um die Suche durchzuführen, sind mindestens %1$d Zeichen erforderlich."
 
 #. Invalid URL \"%1$s\". Please correct the value and try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:83
 msgid "Invalid URL \"%1$s\". Please correct the value and try again."
 msgstr ""
 "Ungültige URL \"%1$s\". Bitte korrigieren Sie die Eingabe und versuchen Sie "
 "es erneut."
 
 #. The allowed quota is reached. Please delete some items in order to store new ones.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:86
 msgid ""
 "The allowed quota is reached. Please delete some items in order to store new "
 "ones."
@@ -2377,27 +1752,27 @@ msgstr ""
 "um neue speichern zu können."
 
 #. ZIP archive exceeds max. allowed size of %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:89
 msgid "ZIP archive exceeds max. allowed size of %1$s"
 msgstr "ZIP-Archiv übersteigt die maximal zulässige Größe von %1$s"
 
 #. The file storage account is currently not accessible.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:92
 msgid "The file storage account is currently not accessible."
 msgstr "Der Dateispeicher-Account ist derzeit nicht verfügbar."
 
 #. The folder \"%1$s\" cannot be moved to \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:95
 msgid "The folder \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Der Ordner \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
 
 #. The file \"%1$s\" cannot be moved to \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:98
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Die Datei \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
 
 #. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
 "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
 "into the account \"%3$s\"."
@@ -2406,7 +1781,7 @@ msgstr ""
 "Datei in den Account \"%3$s\" verschoben wird."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
 msgid ""
 "All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when "
 "moving it into the account \"%3$s\"."
@@ -2415,7 +1790,7 @@ msgstr ""
 "verloren, wenn die Datei in den Account \"%3$s\" verschoben wird."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:107
 msgid ""
 "The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost "
 "when moving it into the account \"%3$s\"."
@@ -2424,7 +1799,7 @@ msgstr ""
 "verloren, wenn die Datei in den Account \"%3$s\" verschoben wird."
 
 #. The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:110
 msgid ""
 "The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other "
 "users when moving it into the account \"%3$s\"."
@@ -2434,7 +1809,7 @@ msgstr ""
 "verschoben wird."
 
 #. The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:113
 msgid ""
 "The shared folder \"%1$s\" is no longer accessible by other users when "
 "moving it into the account \"%2$s\"."
@@ -2443,13 +1818,59 @@ msgstr ""
 "zugegriffen werden, wenn er in den Account \"%2$s\" verschoben wird."
 
 #. The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:116
 msgid ""
 "The file \"%1$s\" was not updated due to possible data loss. Please review "
 "the warnings for details."
 msgstr ""
 "Die Datei \"%1$s\" wurde aufgrund möglicher Datenverluste nicht "
 "aktualisiert. Bitte lesen Sie die Warnhinweise für weitere Informationen."
+
+#. The %1$s URL does not denote a file: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:119
+msgid "The %1$s URL does not denote a file: %1$s"
+msgstr "Die %1$s URL bezeichnet keine Datei: %1$s"
+
+#. The %1$s URL does not denote a directory: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:122
+msgid "The %1$s URL does not denote a directory: %2$s"
+msgstr "Die %1$s URL bezeichnet kein Verzeichnis: %2$s"
+
+#. Missing file name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:74
+msgid "Missing file name."
+msgstr "Fehlender Dateiname"
+
+#. Update denied for %1$s resource: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:128
+msgid "Update denied for \"%1$s\" resource: %2$s"
+msgstr "Aktualisierung verweigert für die \"%1$s\"-Ressource: %2$s"
+
+#. Delete denied for \"%1$s\" resource: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:131
+msgid "Delete denied for \"%1$s\" resource: %2$s"
+msgstr "Löschvorgang verweigert für die \"%1$s\"-Ressource: %2$s"
+
+#. Missing configuration for %1$s account "%2$s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
+msgid "Missing configuration for %1$s account \"%2$s\"."
+msgstr "Fehlende Konfiguration für den %1$s-Account \"%2$s\"."
+
+#. The provided %1$s resource does not exist: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:137
+msgid "The provided %1$s resource does not exist: %2$s"
+msgstr "Die angegebene %1$s-Ressource ist nicht vorhanden: %2$s"
+
+#. The file %1$s doesn't have any content.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:140
+msgid "The file %1$s doesn't have any content."
+msgstr "Die Datei %1$s hat keinen Inhalt."
+
+#. The associated %2$s account does no more exist
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:143
+msgid "The associated %2$s account does no more exist"
+msgstr "Der zugehörige %2$s-Account ist nicht mehr vorhanden."
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3327,6 +2748,16 @@ msgstr "Die angegebene Guard-URL: %1$s ist ungültig."
 msgid "The provided Guard resource does not exist: %1$s"
 msgstr "Die angegebene Guard-Ressource ist nicht vorhanden: %1$s"
 
+#. An I/O error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:74
+msgid "An I/O error occurred: %1$s"
+msgstr "Es trat ein E/A-Fehler auf: %1$s"
+
+#. Authentication failed: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:77
+msgid "Authentication failed: %1$s"
+msgstr "Authentifizierung fehlgeschlagen: %1$s"
+
 #. The Guard resource does not exist
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:80
 msgid "The Guard resource does not exist"
@@ -4049,11 +3480,10 @@ msgstr ""
 "Applikationen von Drittanbietern erreicht. Bitte setzen Sie die "
 "Zugriffsberechtigung für diejenigen zurück, die Sie nicht länger benötigen."
 
-#. Account not found with identifier %1$s for user %2$s in context %3$s.
+#. There is no associated OAuth account for identifier %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
-msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
-msgstr ""
-"Kein Account mit der ID %1$s für Benutzer %2$s im Kontext %3$s gefunden"
+msgid "There is no associated OAuth account for identifier %1$s."
+msgstr "Für die ID %1$s gibt es keinen zugehörigen OAuth-Account."
 
 #. Missing argument: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
@@ -5283,8 +4713,9 @@ msgid "Attachments"
 msgstr "Anlagen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:64
+#, fuzzy
 msgid "Label"
-msgstr ""
+msgstr "Bezeichner"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:65
 msgid "Note"
@@ -9369,6 +8800,29 @@ msgid "Click here to confirm to reset your password"
 msgstr ""
 "Bestätigen Sie das Zurücksetzen Ihres Passworts, indem Sie hier klicken"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:63
+msgid "%1$s would like you to view %2$s"
+msgstr "%1$s möchte, dass Sie %2$s ansehen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:65
+msgid "To access %1$s you have to set a password."
+msgstr "Zum Zugriff auf %1$s müssen Sie ein Passwort festlegen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:67
+msgid ""
+"Email sent to %1$s with further instructions on how to reset your password."
+msgstr ""
+"Eine E-Mail mit weiteren Anweisungen zum Zurücksetzen Ihres Passworts wurde "
+"an %1$s gesendet."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
+msgid "Your password has been reset."
+msgstr "Ihr Passwort wurde zurückgesetzt."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:71
+msgid "The share you are looking for does not exist."
+msgstr "Die von Ihnen gesuchte Freigabe ist nicht vorhanden."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:64
 msgid "The requested share does not exist."
 msgstr "Die angeforderte Freigabe ist nicht vorhanden."
@@ -9742,6 +9196,18 @@ msgstr "Aktualisierung verweigert für die XING-Ressource: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:71
 msgid "Delete denied for XING resource: %1$s"
 msgstr "Löschvorgang verweigert für die XING-Ressource: %1$s"
+
+#. Missing configuration for account "%1$s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:77
+msgid "Missing configuration for account \"%1$s\"."
+msgstr "Fehlende Konfiguration für den Account \"%1$s\"."
+
+#. Bad or expired access token. Need to re-authenticate user.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
+msgid "Bad or expired access token. Need to re-authenticate user."
+msgstr ""
+"Zugriffs-Token ist fehlerhaft oder abgelaufen. Der Benutzer muss neu "
+"authentifiziert werden."
 
 #. E-Mail address is invalid
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:83
@@ -11892,6 +11358,366 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "A Box error occurred: %1$s"
+#~ msgstr "Es trat ein Box-Fehler auf: %1$s"
+
+#~ msgid ""
+#~ "A Box server error occurred with HTTP status code %1$s. Error message: "
+#~ "%2$s"
+#~ msgstr ""
+#~ "Es trat ein Box-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
+#~ "Fehlermeldung: %2$s"
+
+#~ msgid "The provided Box URL: %1$s is invalid"
+#~ msgstr "Die angegebene Box-URL %1$s ist ungültig."
+
+#~ msgid "The provided Box URL does not denote a directory: %1$s"
+#~ msgstr "Die angegebene Box-URL bezeichnet kein Verzeichnis: %1$s"
+
+#~ msgid "Update denied for the provided Box resource: %1$s"
+#~ msgstr "Aktualisierung für die angegebene Box-Ressource verweigert: %1$s"
+
+#~ msgid "Delete denied for the provided Box resource: %1$s"
+#~ msgstr "Löschvorgang für die angegebene Box-Ressource verweigert: %1$s"
+
+#~ msgid "The provided Box URL does not denote a file: %1$s"
+#~ msgstr "Die angegebene Box-URL bezeichnet keine Datei: %1$s"
+
+#~ msgid "Missing file name. Please provide one and try again."
+#~ msgstr ""
+#~ "Es wurde kein Dateiname angegeben. Bitte geben Sie einen an und versuchen "
+#~ "Sie es erneut."
+
+#~ msgid "Versioning not supported by Box file storage."
+#~ msgstr "Versionierung wird nicht vom Box-Dateispeicher unterstützt."
+
+#~ msgid "A CIFS/SMB error occurred."
+#~ msgstr "Es trat ein CIFS/SMB-Fehler auf."
+
+#~ msgid "Invalid CIFS/SMB URL."
+#~ msgstr "Ungültige CIFS/SMB-URL."
+
+#~ msgid "CIFS/SMB URL does not denote a directory: %1$s"
+#~ msgstr "CIFS/SMB-URL ist kein Verzeichnis:  %1$s"
+
+#~ msgid "The CIFS/SMB resource does not exist: %1$s"
+#~ msgstr "Die CIFS/SMB-Ressource ist nicht vorhanden: %1$s"
+
+#~ msgid "Update denied for CIFS/SMB resource: %1$s"
+#~ msgstr "Aktualisierung verweigert für die CIFS/SMB-Ressource: %1$s"
+
+#~ msgid "Delete denied for CIFS/SMB resource: %1$s"
+#~ msgstr "Löschvorgang verweigert für die CIFS/SMB-Ressource: %1$s"
+
+#~ msgid "CIFS/SMB URL does not denote a file: %1$s"
+#~ msgstr "CIFS/SMB-URL ist keine Datei: %1$s"
+
+#~ msgid "Versioning not supported by CIFS/SMB file storage."
+#~ msgstr "Versionierung wird nicht vom CIFS/SMB-Dateispeicher unterstützt."
+
+#~ msgid "The operation completed successfully."
+#~ msgstr "Der Vorgang wurde erfolgreich abgeschlossen."
+
+#~ msgid "A device attached to the system is not functioning."
+#~ msgstr "Ein an das System angeschlossenes Gerät funktioniert nicht."
+
+#~ msgid "Incorrect function."
+#~ msgstr "Falsche Funktion"
+
+#~ msgid "The parameter is incorrect."
+#~ msgstr "Der Parameter ist fehlerhaft."
+
+#~ msgid "Invalid access to memory location."
+#~ msgstr "Ungültiger Zugriff auf den Speicherort."
+
+#~ msgid "The handle is invalid."
+#~ msgstr "Das Handle ist ungültig."
+
+#~ msgid "The system cannot find the file specified."
+#~ msgstr "Das System konnte die angegebene Datei nicht finden."
+
+#~ msgid "More data is available."
+#~ msgstr "Es sind weitere Daten verfügbar."
+
+#~ msgid "Access is denied."
+#~ msgstr "Der Zugriff wurde verweigert."
+
+#~ msgid "The data area passed to a system call is too small."
+#~ msgstr "Der an den Systemaufruf weitergereichte Datenbereich ist zu klein."
+
+#~ msgid "The filename, directory name, or volume label syntax is incorrect."
+#~ msgstr ""
+#~ "Inkorrekte Syntax für den Datei- oder Verzeichnisnamen oder für die "
+#~ "Bezeichnung des Datenträgers. "
+
+#~ msgid "Cannot create a file when that file already exists."
+#~ msgstr "Eine bereits vorhandene Datei kann nicht angelegt werden."
+
+#~ msgid "The specified path is invalid."
+#~ msgstr "Der angegebene Pfad ist ungültig."
+
+#~ msgid "The system cannot find the path specified."
+#~ msgstr "Das System kann den angegebenen Pfad nicht finden."
+
+#~ msgid ""
+#~ "The process cannot access the file because it is being used by another "
+#~ "process."
+#~ msgstr ""
+#~ "Der Prozess kann nicht auf die Datei zugreifen, da diese bereits von "
+#~ "einem anderen Prozess verwendet wird."
+
+#~ msgid ""
+#~ "There are currently no logon servers available to service the logon "
+#~ "request."
+#~ msgstr ""
+#~ "Derzeit stehen keine Anmeldeserver zur Verarbeitung der Anmeldeanfrage "
+#~ "zur Verfügung."
+
+#~ msgid "The specified user already exists."
+#~ msgstr "Der angegebene Benutzer ist bereits vorhanden."
+
+#~ msgid "The specified user does not exist."
+#~ msgstr "Der angegebene Benutzer ist nicht vorhanden."
+
+#~ msgid "The specified network password is not correct."
+#~ msgstr "Das angegebene Netzwerkpasswort ist nicht korrekt."
+
+#~ msgid "Logon failure: unknown user name or bad password."
+#~ msgstr "Anmeldefehler: unbekannter Benutzername oder ungültiges Passwort."
+
+#~ msgid "Logon failure: user account restriction."
+#~ msgstr "Anmeldefehler: Beschränkung des Benutzer-Accounts"
+
+#~ msgid "Logon failure: account logon time restriction violation."
+#~ msgstr "Anmeldefehler: Zeitüberschreitung für Anmeldung am Account"
+
+#~ msgid "Logon failure: user not allowed to log on to this computer."
+#~ msgstr ""
+#~ "Anmeldefehler: Benutzer hat keine Berechtigung zum Anmelden auf diesem "
+#~ "Rechner"
+
+#~ msgid "Logon failure: the specified account password has expired."
+#~ msgstr "Anmeldefehler: Das angegebene Account-Passwort ist abgelaufen."
+
+#~ msgid "Logon failure: account currently disabled."
+#~ msgstr "Anmeldefehler: Account ist derzeit deaktiviert."
+
+#~ msgid "No mapping between account names and security IDs was done."
+#~ msgstr ""
+#~ "Es wurde keine Zuordnung zwischen den Account-Namen und Sicherheits-IDs "
+#~ "vorgenommen."
+
+#~ msgid "All pipe instances are busy."
+#~ msgstr "Alle Pipe-Instanzen sind belegt."
+
+#~ msgid "Waiting for a process to open the other end of the pipe."
+#~ msgstr ""
+#~ "Es wird auf einen Prozess gewartet, der das andere Ende der Pipe öffnet."
+
+#~ msgid "A duplicate name exists on the network."
+#~ msgstr "Namensduplikat im Netzwerk"
+
+#~ msgid "The specified network name is no longer available."
+#~ msgstr "Der angegebene Netzwerkname ist nicht mehr verfügbar."
+
+#~ msgid "Network access is denied."
+#~ msgstr "Der Netzwerkzugriff wurde verweigert."
+
+#~ msgid "The network name cannot be found."
+#~ msgstr "Der Netzwerkname konnte nicht gefunden werden."
+
+#~ msgid ""
+#~ "No more connections can be made to this remote computer at this time "
+#~ "because there are already as many connections as the computer can accept."
+#~ msgstr ""
+#~ "Derzeit können keine weiteren Verbindungen zu diesem entfernten Rechner "
+#~ "hergestellt werden, da die maximale Anzahl an Verbindungen für diesen "
+#~ "Rechner erreicht ist."
+
+#~ msgid ""
+#~ "Indicates a Windows NT Server could not be contacted or that objects "
+#~ "within the domain are protected such that necessary information could not "
+#~ "be retrieved."
+#~ msgstr ""
+#~ "Wahrscheinlich konnte kein Zugriff auf einen Windows NT Server "
+#~ "hergestellt werden oder die Objekte innerhalb der Domain sind derart "
+#~ "geschützt, dass nötige Informationen nicht abgerufen werden konnten. "
+
+#~ msgid "The specified domain did not exist."
+#~ msgstr "Die angegebene Domain ist nicht vorhanden"
+
+#~ msgid "The directory name is invalid."
+#~ msgstr "Der Verzeichnisname ist ungültig."
+
+#~ msgid "The format of the specified computer name is invalid."
+#~ msgstr "Das Format des angegebenen Rechnernamens ist ungültig."
+
+#~ msgid "The specified local group does not exist."
+#~ msgstr "Die angegebene lokale Gruppe ist nicht vorhanden."
+
+#~ msgid ""
+#~ "Logon failure: the user has not been granted the requested logon type at "
+#~ "this computer."
+#~ msgstr ""
+#~ "Anmeldefehler: Der Benutzer hat auf diesem Rechner keine Berechtigung für "
+#~ "den angeforderten Anmeldetyp."
+
+#~ msgid ""
+#~ "The account used is a Computer Account. Use your global user account or "
+#~ "local user account to access this server."
+#~ msgstr ""
+#~ "Der verwendete Account ist ein Computer-Account. Verwenden Sie Ihren "
+#~ "globalen oder Ihren lokalen Benutzer-Account zum Zugriff auf diesen "
+#~ "Server. "
+
+#~ msgid "The user must change his password before he logs on the first time."
+#~ msgstr ""
+#~ "Der Benutzer muss vor dem erstmaligen Anmelden sein Passwort ändern."
+
+#~ msgid "Please use a hostname instead of an IP address in the SMB URL."
+#~ msgstr ""
+#~ "Bitte verwenden Sie für die SMB URL einen Hostnamen anstelle der IP. "
+
+#~ msgid ""
+#~ "Your account has been blocked. This can have various reasons like having "
+#~ "mistyped the password several times.\n"
+#~ "Please contact your system administrator or hoster in case you can no "
+#~ "longer log in."
+#~ msgstr ""
+#~ "Ihr Account wurde gesperrt. Dies kann mehrere Gründen haben, z.B. eine "
+#~ "wiederholt falsche Passworteingabe.\n"
+#~ "Sollten Sie sich weiterhin nicht anmelden können, wenden Sie sich bitte "
+#~ "an Ihren Systemadmininstratoren oder Hoster."
+
+#~ msgid "A CMIS error occurred: %1$s"
+#~ msgstr "Es trat ein CMIS-Fehler auf: %1$s"
+
+#~ msgid "Invalid CMIS URL: %1$s"
+#~ msgstr "Ungültige CMIS-URL: %1$s"
+
+#~ msgid "The CMIS resource does not exist: %1$s"
+#~ msgstr "Die CMIS-Ressource ist nicht vorhanden: %1$s"
+
+#~ msgid "Versioning not supported by CMIS file storage."
+#~ msgstr "Versionierung wird nicht vom CMIS-Dateispeicher unterstützt."
+
+#~ msgid "A Dropbox error occurred: %1$s"
+#~ msgstr "Es trat ein Dropbox-Fehler auf: %1$s"
+
+#~ msgid ""
+#~ "A Dropbox server error occurred with HTTP status code %1$s. Error "
+#~ "message: %2$s"
+#~ msgstr ""
+#~ "Es trat ein Dropbox-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
+#~ "Fehlermeldung: %2$s"
+
+#~ msgid "The provided Dropbox URL: %1$s is invalid"
+#~ msgstr "Die angegebene Dropbox-URL %1$s ist ungültig."
+
+#~ msgid "The provided Dropbox URL does not denote a directory: %1$s"
+#~ msgstr "Die angegebene Dropbox-URL bezeichnet kein Verzeichnis: %1$s"
+
+#~ msgid "The provided Dropbox resource does not exist: %1$s"
+#~ msgstr "Die angegebene Dropbox-Ressource ist nicht vorhanden: %1$s"
+
+#~ msgid "Update denied for the provided Dropbox resource: %1$s"
+#~ msgstr ""
+#~ "Aktualisierung für die angegebene Dropbox-Ressource verweigert: %1$s"
+
+#~ msgid "Delete denied for the provided Dropbox resource: %1$s"
+#~ msgstr "Löschvorgang für die angegebene Dropbox-Ressource verweigert: %1$s"
+
+#~ msgid "The provided Dropbox URL does not denote a file: %1$s"
+#~ msgstr "Die angegebene Dropbox-URL bezeichnet keine Datei: %1$s"
+
+#~ msgid "Versioning not supported by Dropbox file storage."
+#~ msgstr "Versionierung wird nicht vom Dropbox-Dateispeicher unterstützt."
+
+#~ msgid "A Google Drive error occurred: %1$s"
+#~ msgstr "Es trat ein Google Drive-Fehler auf: %1$s"
+
+#~ msgid ""
+#~ "A Google Drive server error occurred with HTTP status code %1$s. Error "
+#~ "message: %2$s"
+#~ msgstr ""
+#~ "Es trat ein Google Drive-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
+#~ "Fehlermeldung: %2$s"
+
+#~ msgid "The provided Google Drive URL does not denote a directory: %1$s"
+#~ msgstr "Die angegebene Google Drive-URL bezeichnet kein Verzeichnis: %1$s"
+
+#~ msgid "The provided Google Drive resource does not exist: %1$s"
+#~ msgstr "Die angegebene Google Drive-Ressource ist nicht vorhanden: %1$s"
+
+#~ msgid "Update denied for the provided Google Drive resource: %1$s"
+#~ msgstr ""
+#~ "Aktualisierung für die angegebene Google Drive-Ressource verweigert: %1$s"
+
+#~ msgid "Delete denied for the provided Google Drive resource: %1$s"
+#~ msgstr ""
+#~ "Löschvorgang für die angegebene Google Drive-Ressource verweigert: %1$s"
+
+#~ msgid "The provided Google Drive URL does not denote a file: %1$s"
+#~ msgstr "Die angegebene Google Drive-URL bezeichnet keine Datei: %1$s"
+
+#~ msgid "Versioning not supported by Google Drive file storage."
+#~ msgstr ""
+#~ "Versionierung wird nicht vom Google Drive-Dateispeicher unterstützt."
+
+#~ msgid "A OneDrive error occurred: %1$s"
+#~ msgstr "Es trat ein OneDrive-Fehler auf: %1$s"
+
+#~ msgid ""
+#~ "A OneDrive server error occurred with HTTP status code %1$s. Error "
+#~ "message: %2$s"
+#~ msgstr ""
+#~ "Es trat ein OneDrive-Serverfehler mit dem HTTP-Status-Code %1$s auf. "
+#~ "Fehlermeldung: %2$s"
+
+#~ msgid "The provided OneDrive URL: %1$s is invalid"
+#~ msgstr "Die angegebene OneDrive-URL %1$s ist ungültig."
+
+#~ msgid "The provided OneDrive URL does not denote a directory: %1$s"
+#~ msgstr "Die angegebene OneDrive-URL bezeichnet kein Verzeichnis: %1$s"
+
+#~ msgid "The provided OneDrive resource does not exist: %1$s"
+#~ msgstr "Die angegebene OneDrive-Ressource ist nicht vorhanden: %1$s"
+
+#~ msgid "Update denied for the provided OneDrive resource: %1$s"
+#~ msgstr ""
+#~ "Aktualisierung für die angegebene OneDrive-Ressource verweigert: %1$s"
+
+#~ msgid "Delete denied for the provided OneDrive resource: %1$s"
+#~ msgstr "Löschvorgang für die angegebene OneDrive-Ressource verweigert: %1$s"
+
+#~ msgid "The provided OneDrive URL does not denote a file: %1$s"
+#~ msgstr "Die angegebene OneDrive-URL bezeichnet keine Datei: %1$s"
+
+#~ msgid "Versioning not supported by OneDrive file storage."
+#~ msgstr "Versionierung wird nicht vom OneDrive-Dateispeicher unterstützt."
+
+#~ msgid "The OneDrive resource does not exist"
+#~ msgstr "Die OneDrive-Ressource ist nicht vorhanden"
+
+#~ msgid "Directory \"%1$s\" must not be deleted."
+#~ msgstr "Das Verzeichnis \"%1$s\" darf nicht gelöscht werden."
+
+#~ msgid "Directory \"%1$s\" must not be updated."
+#~ msgstr "Das Verzeichnis \"%1$s\" darf nicht aktualisiert werden."
+
+#~ msgid "Invalid or missing credentials to access WebDAV server \"%1$s\"."
+#~ msgstr ""
+#~ "Ungültige oder fehlende Zugangsdaten für den Zugriff auf den WebDAV-"
+#~ "Server \"%1$s\"."
+
+#~ msgid "The resource is not a file: %1$s"
+#~ msgstr "Die Ressource ist keine Datei: %1$s"
+
+#~ msgid ""
+#~ "Account not found with identifier %1$s for user %2$s in context %3$s."
+#~ msgstr ""
+#~ "Kein Account mit der ID %1$s für Benutzer %2$s im Kontext %3$s gefunden"
 
 #~ msgid "See all your contacts, create new ones and modify existing ones."
 #~ msgstr "Alle Ihre Kontakte sehen, neue anlegen und vorhandene ändern."

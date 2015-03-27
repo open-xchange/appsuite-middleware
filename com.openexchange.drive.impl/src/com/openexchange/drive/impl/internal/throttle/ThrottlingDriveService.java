@@ -52,6 +52,7 @@ package com.openexchange.drive.impl.internal.throttle;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.DirectoryMetadata;
@@ -68,6 +69,9 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link ThrottlingDriveService}
@@ -179,6 +183,26 @@ public class ThrottlingDriveService implements DriveService {
 
     private void leaveSyncOperation() {
         currentSyncOperations.decrementAndGet();
+    }
+
+    @Override
+    public Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<ShareTarget> targets) throws OXException {
+        return delegate.createShare(session, recipients, targets);
+    }
+
+    @Override
+    public void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException {
+        delegate.updateShare(session, clientTimestamp, token, expiry, meta, password, bits);
+    }
+
+    @Override
+    public void deleteLinks(DriveSession session, List<String> singletonList) throws OXException {
+        delegate.deleteLinks(session, singletonList);
+    }
+
+    @Override
+    public List<ShareInfo> getAllLinks(DriveSession session) throws OXException {
+        return delegate.getAllLinks(session);
     }
 
 }

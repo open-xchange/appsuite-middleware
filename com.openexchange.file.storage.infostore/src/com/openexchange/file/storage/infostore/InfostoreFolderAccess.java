@@ -263,7 +263,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
         Folder parsedFolder = FolderParser.parseFolder(toUpdate);
         parsedFolder.setID(identifier);
         getFolderService().updateFolder(parsedFolder, null, session, initDecorator()).getResponse();
-        return parsedFolder.getNewID();
+        return null != parsedFolder.getNewID() ? parsedFolder.getNewID() : identifier;
     }
 
     /**

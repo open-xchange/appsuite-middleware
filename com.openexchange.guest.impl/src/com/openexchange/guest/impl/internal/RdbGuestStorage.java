@@ -79,16 +79,31 @@ public class RdbGuestStorage extends GuestStorage {
     protected static final String RESOLVE_GUEST_ID_BY_MAIL = "SELECT id FROM guest WHERE mail_address=? AND gid=?";
 
     /**
+     * SQL statement for resolving the internal unique id based on the assigned group
+     */
+    protected static final String RESOLVE_GUEST_ID_BY_GROUP = "SELECT id FROM guest WHERE gid=?";
+
+    /**
      * SQL statement for resolving the internal unique id based on context
      */
     protected static final String RESOLVE_GUESTS_FOR_CONTEXT = "SELECT guest_id FROM guest2context WHERE cid=?";
 
     /**
-     * SQL statement for getting one assignment made for a user (resolved by mail address, context and user id)<br>
+     * SQL statement for resolving the internal unique id based on the groupId
+     */
+    protected static final String RESOLVE_GUESTS_FOR_GROUP = "SELECT id FROM guest WHERE gid=?";
+
+    /**
+     * SQL statement for getting one assignment made for a user (resolved by guest id, context and user id)<br>
      * <br>
      * Checks if exactly the same user is existing.
      */
     protected static final String RESOLVE_GUEST_ASSIGNMENT = "SELECT * FROM guest2context WHERE cid=? AND uid=? AND guest_id=?";
+
+    /**
+     * SQL statement for getting password and password mechanism for a user (resolved by guest id, context and user id)
+     */
+    protected static final String RESOLVE_GUEST_ASSIGNMENT_PASSWORD = "SELECT password, passwordMech FROM guest2context WHERE cid=? AND uid=? AND guest_id=?";
 
     /**
      * SQL statement for getting assignments made for a user based on the mail address<br>
@@ -128,9 +143,19 @@ public class RdbGuestStorage extends GuestStorage {
     protected static final String DELETE_GUEST = "DELETE FROM guest where id=?";
 
     /**
+     * SQL statement for deleting guests based on the assigned group id
+     */
+    protected static final String DELETE_GUESTS = "DELETE FROM guest where gid=?";
+
+    /**
      * SQL statement for deleting guests based on its context.
      */
     protected static final String DELETE_GUEST_ASSIGNMENTS = "DELETE FROM guest2context where cid=?";
+
+    /**
+     * SQL statement for deleting guests based on its groupId.
+     */
+    protected static final String DELETE_GUEST_ASSIGNMENTS_FOR_GROUP = "DELETE FROM guest2context where guest_id IN (?)";
 
     /**
      * {@inheritDoc}
@@ -231,6 +256,36 @@ public class RdbGuestStorage extends GuestStorage {
      * {@inheritDoc}
      */
     @Override
+    public List<Long> getGuestIds(String groupId, Connection connection) throws OXException {
+        if (connection == null) {
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
+        }
+
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        List<Long> guestIds = new ArrayList<Long>();
+        try {
+            statement = connection.prepareStatement(RESOLVE_GUEST_ID_BY_GROUP);
+            statement.setString(1, groupId);
+            result = statement.executeQuery();
+
+            while (result.next()) {
+                long guestId = result.getLong(1);
+                guestIds.add(guestId);
+            }
+        } catch (final SQLException e) {
+            throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, statement);
+        }
+
+        return guestIds;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void removeGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException {
         if (connection == null) {
             throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
@@ -282,34 +337,106 @@ public class RdbGuestStorage extends GuestStorage {
     }
 
     /**
-    *
-    * {@inheritDoc}
-    */
-   @Override
-   public List<Long> resolveGuestAssignments(int contextId, Connection connection) throws OXException {
-       if (connection == null) {
-           throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
-       }
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeGuests(String groupId, Connection connection) throws OXException {
+        if (connection == null) {
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
+        }
 
-       List<Long> guestIdsAssigmentsRemovedFor = new ArrayList<Long>();
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement(DELETE_GUESTS);
+            statement.setString(1, groupId);
+            statement.executeUpdate();
+        } catch (final SQLException e) {
+            throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(statement);
+        }
+    }
 
-       PreparedStatement statement = null;
-       try {
-           statement = connection.prepareStatement(RESOLVE_GUESTS_FOR_CONTEXT);
-           statement.setInt(1, contextId);
-           ResultSet result = statement.executeQuery();
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Long> resolveGuestAssignments(int contextId, Connection connection) throws OXException {
+        if (connection == null) {
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
+        }
 
-           while (result.next()) {
-               long guestId = result.getLong(1);
-               guestIdsAssigmentsRemovedFor.add(guestId);
-           }
-       } catch (final SQLException e) {
-           throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-       } finally {
-           closeSQLStuff(statement);
-       }
-       return guestIdsAssigmentsRemovedFor;
-   }
+        List<Long> guestIdsAssigmentsRemovedFor = new ArrayList<Long>();
+
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement(RESOLVE_GUESTS_FOR_CONTEXT);
+            statement.setInt(1, contextId);
+            ResultSet result = statement.executeQuery();
+
+            while (result.next()) {
+                long guestId = result.getLong(1);
+                guestIdsAssigmentsRemovedFor.add(guestId);
+            }
+        } catch (final SQLException e) {
+            throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(statement);
+        }
+        return guestIdsAssigmentsRemovedFor;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public long removeGuestAssignments(List<Long> groupIds, Connection connection) throws OXException {
+        if (connection == null) {
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
+        }
+        if (groupIds.isEmpty()) {
+            return 0L;
+        }
+
+        String groupIdsAsString = getIdsAsString(groupIds);
+
+        PreparedStatement statement = null;
+        long affectedRows = NOT_FOUND;
+        try {
+            statement = connection.prepareStatement(DELETE_GUEST_ASSIGNMENTS_FOR_GROUP);
+            statement.setString(1, groupIdsAsString);
+            affectedRows = statement.executeUpdate();
+        } catch (final SQLException e) {
+            throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(statement);
+        }
+
+        return affectedRows;
+    }
+
+    /**
+     * Converts the given list of group ids to a String
+     *
+     * @param groupIds
+     * @return
+     */
+    protected String getIdsAsString(List<Long> groupIds) {
+        StringBuilder commaSepValueBuilder = new StringBuilder();
+
+        for (int i = 0; i < groupIds.size(); i++) {
+            commaSepValueBuilder.append(groupIds.get(i));
+
+            if (i != groupIds.size() - 1) {
+                commaSepValueBuilder.append(", ");
+            }
+        }
+
+        return commaSepValueBuilder.toString();
+    }
 
     /**
      *
@@ -422,6 +549,37 @@ public class RdbGuestStorage extends GuestStorage {
             closeSQLStuff(result, statement);
         }
         return guestAssignments;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GuestAssignment getGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException {
+        if (connection == null) {
+            throw GuestExceptionCodes.NO_CONNECTION_PROVIDED.create();
+        }
+
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        try {
+            statement = connection.prepareStatement(RESOLVE_GUEST_ASSIGNMENT_PASSWORD);
+            statement.setInt(1, contextId);
+            statement.setInt(2, userId);
+            statement.setLong(3, guestId);
+            result = statement.executeQuery();
+            while (result.next()) {
+                String password = result.getString(1);
+                String passwordMech = result.getString(2);
+                return new GuestAssignment(guestId, contextId, userId, password, passwordMech);
+            }
+
+        } catch (final SQLException e) {
+            throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, statement);
+        }
+        return null;
     }
 
     /**

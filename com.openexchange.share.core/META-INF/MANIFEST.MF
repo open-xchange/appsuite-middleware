@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Core Bundle for Share
+Bundle-SymbolicName: com.openexchange.share.core
+Bundle-Version: 7.8.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.context,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.share,
+ com.openexchange.share.groupware,
+ com.openexchange.share.recipient,
+ com.openexchange.tools.session,
+ com.openexchange.user
+Export-Package: com.openexchange.share.core.performer,
+ com.openexchange.share.core.tools

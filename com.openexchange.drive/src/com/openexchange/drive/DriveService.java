@@ -52,10 +52,14 @@ package com.openexchange.drive;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
@@ -182,8 +186,35 @@ public interface DriveService {
      * Gets a reference providing additional utility methods.
      *
      * @return The drive utilities
+     * @throws OXException
      */
     DriveUtility getUtility();
+    
+    Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<ShareTarget> targets) throws OXException;
+
+    /**
+     * @param clientTimestamp
+     * @param token
+     * @param expiry
+     * @param meta
+     * @param password
+     * @param bits
+     * @throws OXException 
+     */
+    void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException;
+
+    /**
+     * @param singletonList
+     * @throws OXException 
+     */
+    void deleteLinks(DriveSession session, List<String> singletonList) throws OXException;
+
+    /**
+     * @param session
+     * @return
+     * @throws OXException 
+     */
+    List<ShareInfo> getAllLinks(DriveSession session) throws OXException;
 
 }
 

@@ -71,12 +71,12 @@ public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
     private String message;
     private boolean failOnError;
 
-    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(targets, recipients, null, true);
+    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients) {
+        this(root, targets, recipients, null, true);
     }
 
-    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
-        super();
+    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
+        super(root);
         this.targets = targets;
         this.recipients = recipients;
         this.message = message;
@@ -90,7 +90,10 @@ public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "invite") };
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, "invite"),
+            new Parameter("root", root)
+        };
     }
 
     @Override

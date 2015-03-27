@@ -133,6 +133,15 @@ public abstract class GuestStorage {
     public abstract void removeGuest(long guestId, Connection connection) throws OXException;
 
     /**
+     * Removes the guests with the given groupId
+     *
+     * @param groupId - the group the guests should be removed for
+     * @param Connection - existing connection that should be used to remove the guest.
+     * @throws OXException
+     */
+    public abstract void removeGuests(String groupId, Connection connection) throws OXException;
+
+    /**
      * Removes the guests assignments for the given context
      *
      * @param contextId - id of the context to get the guest ids for.
@@ -151,6 +160,18 @@ public abstract class GuestStorage {
      * @throws OXException
      */
     public abstract List<Long> resolveGuestAssignments(int contextId, Connection connection) throws OXException;
+
+    /**
+     * Returns the internal guest ids that currently have assignments for the given groupId.
+     *
+     * @param guestIds - List with the ids of the guest to remove assignments for
+     * @param Connection - existing connection that should be used to remove the guests.
+     * @return List with Long containing internal guest ids to be able to check if there still are assignments existing or if the guest should be removed.
+     * @throws OXException
+     *
+     * TODO remove this and all caller methods (as just designed to delete based on group) if the CLT removes all data
+     */
+    public abstract long removeGuestAssignments(List<Long> guestIds, Connection connection) throws OXException;
 
     /**
      * Removes the assignment of the guest based on the given internal guestId, context and user id
@@ -172,6 +193,17 @@ public abstract class GuestStorage {
      * @throws OXException
      */
     public abstract List<GuestAssignment> getGuestAssignments(final long guestId, Connection connection) throws OXException;
+
+    /**
+     * Returns the assignment of the guest based on the given internal guestId, context and user id
+     *
+     * @param guestId - the internal id of the guest to remove an assignment for (e. g. retrieved via com.openexchange.guest.impl.impl.storage.GuestStorage.getGuestId(String))
+     * @param contextId - the context the guest is assigned to
+     * @param userId - the id of the guest within the provided context
+     * @param Connection - existing connection that should be used to remove the guest assignment.
+     * @throws OXException
+     */
+    public abstract GuestAssignment getGuestAssignment(long guestId, int contextId, int userId, Connection connection) throws OXException;
 
     /**
      * Checks if exactly this mapping (user with mail address to context and user) is already existing
@@ -205,6 +237,16 @@ public abstract class GuestStorage {
      * @throws OXException
      */
     public abstract long getGuestId(String mailAddress, String groupId, Connection connection) throws OXException;
+
+    /**
+     * Returns the internal guest ids that are assigned to the given group id
+     *
+     * @param groupId - id of the context group to return guest ids for
+     * @param connection - the {@link Connection} to get ids with
+     * @return {@link List} of {@link Long} with the ids that are assigned to the given group
+     * @throws OXException
+     */
+    public abstract List<Long> getGuestIds(String groupId, Connection connection) throws OXException;
 
     /**
      * Updates password and password mechanism for the given assignment

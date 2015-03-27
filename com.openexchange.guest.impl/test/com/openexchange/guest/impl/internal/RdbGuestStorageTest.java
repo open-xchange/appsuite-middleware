@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -370,5 +371,13 @@ public class RdbGuestStorageTest {
 
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.UPDATE_GUEST_PASSWORD);
+    }
+
+    @Test
+    public void testGetIdsAsString() {
+        List<Long> groupIds = Arrays.asList(3L, 5L, 10L, 13L);
+        String commaSeperatedString = rdbGuestStorage.getIdsAsString(groupIds);
+
+        Assert.assertEquals("3, 5, 10, 13", commaSeperatedString);
     }
 }

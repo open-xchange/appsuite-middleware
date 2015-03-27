@@ -108,7 +108,7 @@ public class TempCleaner implements Runnable {
             LOG.debug("No previous cleaner run detected for session {}{}", session, '.');
         }
         try {
-            final FileStorageFolder tempFolder = session.getStorage().optFolder(DriveConstants.TEMP_PATH, false);
+            final FileStorageFolder tempFolder = session.getTemp().exists() ? session.getStorage().optFolder(session.getTemp().getPath(false), false) : null;
             if (null == tempFolder) {
                 LOG.debug("No '.drive' folder found, nothing to do.");
                 return;

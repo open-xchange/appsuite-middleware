@@ -49,16 +49,12 @@
 
 package com.openexchange.drive.impl.internal;
 
-import static com.openexchange.drive.impl.DriveConstants.TEMP_PATH;
-
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import jonelo.jacksum.algorithm.MD;
-
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.DirectoryPattern;
@@ -66,7 +62,6 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FilePattern;
-import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.ChecksumStore;
@@ -75,13 +70,12 @@ import com.openexchange.drive.impl.checksum.FileChecksum;
 import com.openexchange.drive.impl.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.impl.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.impl.comparison.ServerFileVersion;
-import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.storage.DriveStorage;
+import com.openexchange.drive.impl.storage.DriveTemp;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.tools.session.ServerSession;
 
@@ -97,8 +91,8 @@ public class SyncSession {
     private ChecksumStore checksumStore;
     private DriveStorage storage;
     private DirectLinkGenerator linkGenerator;
-    private Boolean hasTempFolder;
     private CapabilitySet capabilities;
+    private DriveTemp temp;
 
     /**
      * Initializes a new {@link SyncSession}.
@@ -250,55 +244,15 @@ public class SyncSession {
     }
 
     /**
-     * Gets a value indicating whether the TEMP folder is available for uploads or not. If possible and not yet exists, the folder is
-     * created dynamically.
+     * Gets a helper to access the special ".drive" folder for temporary uploads.
      *
-     * @return <code>true</code> if the folder is available, <code>false</code>, otherwise
-     * @throws OXException
+     * @return The drive temp helper
      */
-    public boolean hasTempFolder() throws OXException {
-        if (null == hasTempFolder) {
-            /*
-             * check configuration first
-             */
-            if (false == DriveConfig.getInstance().isUseTempFolder()) {
-                trace("Temporary folder for upload is disabled by configuration.");
-                hasTempFolder = Boolean.FALSE;
-            } else {
-                /*
-                 * check temp folder and permissions
-                 */
-                FileStorageFolder tempFolder = getStorage().optFolder(TEMP_PATH, false);
-                if (null == tempFolder) {
-                    FileStorageFolder rootFolder = getStorage().getFolder(DriveConstants.ROOT_PATH);
-                    if (null != rootFolder.getOwnPermission() &&
-                        FileStoragePermission.CREATE_SUB_FOLDERS <= rootFolder.getOwnPermission().getDeletePermission() &&
-                        FileStoragePermission.WRITE_ALL_OBJECTS <= rootFolder.getOwnPermission().getFolderPermission() &&
-                        FileStoragePermission.READ_ALL_OBJECTS <= rootFolder.getOwnPermission().getFolderPermission() &&
-                        FileStoragePermission.DELETE_ALL_OBJECTS <= rootFolder.getOwnPermission().getDeletePermission()) {
-                        try {
-                            tempFolder = getStorage().optFolder(TEMP_PATH, true);
-                        } catch (OXException e) {
-                            trace("Error creating temporary folder for uploads: " + e.getMessage());
-                        }
-                    }
-                }
-                if (null == tempFolder) {
-                    trace("No temporary folder available for uploads.");
-                    hasTempFolder = Boolean.FALSE;
-                } else if (null != tempFolder.getOwnPermission() &&
-                    FileStoragePermission.CREATE_OBJECTS_IN_FOLDER <= tempFolder.getOwnPermission().getFolderPermission() &&
-                    FileStoragePermission.WRITE_ALL_OBJECTS <= tempFolder.getOwnPermission().getFolderPermission() &&
-                    FileStoragePermission.DELETE_ALL_OBJECTS <= tempFolder.getOwnPermission().getDeletePermission()) {
-                    trace("Using folder '" + tempFolder + "' for temporary uploads.");
-                    hasTempFolder = Boolean.TRUE;
-                } else {
-                    trace("Temporary folder for uploads found, but not enough permissions for current user.");
-                    hasTempFolder = Boolean.FALSE;
-                }
-            }
+    public DriveTemp getTemp() throws OXException {
+        if (null == temp) {
+            temp = new DriveTemp(this);
         }
-        return hasTempFolder.booleanValue();
+        return temp;
     }
 
     /**

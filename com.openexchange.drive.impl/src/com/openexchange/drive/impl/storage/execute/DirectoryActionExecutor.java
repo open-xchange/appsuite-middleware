@@ -220,18 +220,18 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
              */
             String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), true);
             session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
-        } else if (session.hasTempFolder()) {
+        } else if (session.getTemp().supported()) {
             /*
              * move to temp
              */
             FileStoragePermission sourceFolderPermission = session.getStorage().getOwnPermission(action.getVersion().getPath());
-            FileStoragePermission targetFolderPermission = session.getStorage().getOwnPermission(DriveConstants.TEMP_PATH);
+            FileStoragePermission targetFolderPermission = session.getStorage().getOwnPermission(session.getTemp().getPath(true));
             if (FileStoragePermission.CREATE_SUB_FOLDERS <= targetFolderPermission.getFolderPermission() &&
                 FileStoragePermission.MAX_PERMISSION <= sourceFolderPermission.getFolderPermission()) {
                 /*
                  * try to move whole directory to temp folder
                  */
-                String targetPath = DriveConstants.TEMP_PATH + '/' + action.getVersion().getChecksum();
+                String targetPath = DriveUtils.combine(session.getTemp().getPath(true), action.getVersion().getChecksum());
                 FileStorageFolder targetFolder = session.getStorage().optFolder(targetPath, false);
                 if (null == targetFolder) {
                     String currentFolderID = session.getStorage().getFolderID(action.getVersion().getPath());
@@ -261,7 +261,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                 for (ServerFileVersion versionToRemove : session.getServerFiles(action.getVersion().getPath())) {
                     FileChecksum fileChecksum = versionToRemove.getFileChecksum();
                     File removedFile = session.getStorage().moveFile(
-                        versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
+                        versionToRemove.getFile(), versionToRemove.getChecksum(), session.getTemp().getPath(true));
                     if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
                         // moved successfully, update checksum
                         fileChecksum.setFileID(DriveUtils.getFileID(removedFile));
@@ -318,8 +318,8 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                  */
                 String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), false);
                 removedFolderIDs.add(new FolderID(folderID));
-            } else if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum()) || false == session.hasTempFolder() ||
-                false == mayMove(action.getVersion().getPath(), DriveConstants.TEMP_PATH)) {
+            } else if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum()) || false == session.getTemp().supported() ||
+                false == mayMove(action.getVersion().getPath(), session.getTemp().getPath(true))) {
                 /*
                  * just delete empty directory
                  */
@@ -329,7 +329,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                 /*
                  * try to move whole directory to temp folder
                  */
-                String targetPath = DriveConstants.TEMP_PATH + '/' + action.getVersion().getChecksum();
+                String targetPath = DriveUtils.combine(session.getTemp().getPath(true), action.getVersion().getChecksum());
                 FileStorageFolder targetFolder = session.getStorage().optFolder(targetPath, false);
                 if (null == targetFolder) {
                     String currentFolderID = session.getStorage().getFolderID(action.getVersion().getPath());

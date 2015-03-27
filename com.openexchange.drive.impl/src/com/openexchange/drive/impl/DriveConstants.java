@@ -75,9 +75,9 @@ public class DriveConstants {
     public static final char PATH_SEPARATOR = '/';
 
     /**
-     * The path to the drive temp folder
+     * The name of the drive temp folder
      */
-    public static final String TEMP_PATH = "/.drive";
+    public static final String TEMP_FOLDER_NAME = ".drive";
 
     /**
      * The file extension for partly uploaded files

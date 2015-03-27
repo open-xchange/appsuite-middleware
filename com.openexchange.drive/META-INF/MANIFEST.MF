@@ -15,5 +15,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.session,
+ com.openexchange.share,
+ com.openexchange.share.recipient,
  com.openexchange.tools.session,
  org.json

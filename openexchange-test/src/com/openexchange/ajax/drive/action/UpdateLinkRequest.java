@@ -72,12 +72,12 @@ public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> 
     private Integer bits;
     private Map<String, Object> meta;
 
-    public UpdateLinkRequest(String token, Long timestamp) {
-        this(token, timestamp, null, null, null, null, true);
+    public UpdateLinkRequest(Integer root, String token, Long timestamp) {
+        this(root, token, timestamp, null, null, null, null, true);
     }
 
-    public UpdateLinkRequest(String token, Long timestamp, Long expiry, String password, Integer bits, Map<String, Object> meta, boolean failOnError) {
-        super();
+    public UpdateLinkRequest(Integer root, String token, Long timestamp, Long expiry, String password, Integer bits, Map<String, Object> meta, boolean failOnError) {
+        super(root);
         this.token = token;
         this.timestamp = timestamp;
         this.expiry = expiry;
@@ -96,7 +96,8 @@ public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> 
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "updateLink"),
-            new Parameter(AJAXServlet.PARAMETER_ACTION, timestamp.toString())
+            new Parameter(AJAXServlet.PARAMETER_ACTION, timestamp.toString()),
+            new Parameter("root", root)
         };
     }
 

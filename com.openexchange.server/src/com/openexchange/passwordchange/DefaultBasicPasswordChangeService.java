@@ -49,17 +49,10 @@
 
 package com.openexchange.passwordchange;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -73,10 +66,9 @@ import com.openexchange.user.UserService;
  */
 public class DefaultBasicPasswordChangeService extends BasicPasswordChangeService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultBasicPasswordChangeService.class);
-
     /**
      * Initializes a new {@link DefaultBasicPasswordChangeService}.
+     *
      * @param services
      */
     public DefaultBasicPasswordChangeService() {
@@ -93,72 +85,19 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
         }
         User user = userService.getUser(event.getSession().getUserId(), ctx);
-
-        // Get encoded version of new password
+        UserImpl updatedUser = new UserImpl(user);
         String encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
+        updatedUser.setUserPassword(encodedPassword);
 
-        // Update database
-        Connection writeCon = Database.get(ctx, true);
-        boolean rollback = false;
-        try {
-            writeCon.setAutoCommit(false);
-            rollback = true;
-            update(writeCon, encodedPassword, event.getSession().getUserId(), ctx.getContextId());
-            deleteAttr(writeCon, event.getSession().getUserId(), ctx.getContextId());
-            writeCon.commit();
-            rollback = false;
-        } catch (final SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                rollback(writeCon);
-            }
-            autocommit(writeCon);
-            Database.back(ctx, true, writeCon);
-        }
+        userService.updateUser(updatedUser, ctx);
 
         userService.invalidateUser(ctx, event.getSession().getUserId());
-        User updatedUser = userService.getUser(event.getSession().getUserId(), ctx);
 
         if (updatedUser.isGuest()) {
-            GuestService guestService = ServerServiceRegistry.getServize(GuestService.class);
+            GuestService guestService = ServerServiceRegistry.getInstance().getService(GuestService.class);
             if (guestService != null) {
                 guestService.updateGuestUser(updatedUser, ctx.getContextId());
-            } else {
-                LOG.warn("GuestService absent: cannot reset password for all known guest user registered under mail address {}", updatedUser.getMail());
             }
         }
     }
-
-    private void update(Connection writeCon, String encodedPassword, int userId, int contextId) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = writeCon.prepareStatement("UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?");
-            int pos = 1;
-            stmt.setString(pos++, encodedPassword);
-            stmt.setInt(pos++, (int) (System.currentTimeMillis() / 1000));
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private void deleteAttr(Connection writeCon, int userId, int contextId) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = writeCon.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setString(pos++, "passcrypt");
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
 }

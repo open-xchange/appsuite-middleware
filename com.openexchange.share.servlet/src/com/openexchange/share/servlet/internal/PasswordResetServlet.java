@@ -145,6 +145,11 @@ public class PasswordResetServlet extends HttpServlet {
             int guestID = guestInfo.getGuestID();
             User storageUser = userService.getUser(guestID, context);
 
+            GuestService guestService = ShareServiceLookup.getService(GuestService.class);
+            if ((guestService != null) && (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) && (storageUser.isGuest()) && (guestService.isCrossContextGuestHandlingEnabled())) {
+                guestService.alignUserWithGuest(storageUser, context.getContextId());
+            }
+
             String hash = getHash(storageUser.getUserPassword());
             if (null == confirm) {
                 // Generate hash and send link to confirm
@@ -192,6 +197,7 @@ public class PasswordResetServlet extends HttpServlet {
                     user.setPasswordMech(guest.getPasswordMech());
                     user.setUserPassword(PasswordMech.BCRYPT.encode(password));
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
+
                     String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
                         urlEncode(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
                         "resetPassword");
@@ -221,26 +227,6 @@ public class PasswordResetServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, oxe.getMessage());
         }
     }
-
-    //    /**
-    //     * Adds the redirect to the given response
-    //     *
-    //     * @param guest - the guest info
-    //     * @param target - target to get the redirect to
-    //     * @param serverName - server name to redirect to
-    //     * @param response - response that should be enriched by the redirect
-    //     * @throws OXException
-    //     */
-    //    private void setRedirect(GuestShare share, ShareTarget target, HttpServletResponse response) throws OXException {
-    //        try {
-    //            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share.getGuest(), target, this.loginConfig.getLoginConfig());
-    //            response.sendRedirect(redirectUrl);
-    //        } catch (IOException e) {
-    //            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
-    //        } catch (RuntimeException e) {
-    //            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-    //        }
-    //    }
 
     private String getHash(String toHash) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest md = MessageDigest.getInstance("SHA-1");

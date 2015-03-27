@@ -231,6 +231,7 @@ public final class Quota {
 
     @Override
     public String toString() {
-        return new StringBuilder(32).append("Quota limit=").append(limit).append(" usage=").append(usage).toString();
+        return "Quota [limit=" + limit + ", usage=" + usage + ", type=" + type + "]";
     }
+
 }

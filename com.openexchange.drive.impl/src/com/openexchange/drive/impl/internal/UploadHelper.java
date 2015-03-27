@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.impl.internal;
 
-import static com.openexchange.drive.impl.DriveConstants.TEMP_PATH;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -301,7 +300,7 @@ public class UploadHelper {
         /*
          * get/create upload file
          */
-        File uploadFile = getUploadFile(path, newVersion.getChecksum(), true);
+        File uploadFile = getUploadFile(path, newVersion.getChecksum());
         /*
          * check current offset
          */
@@ -385,14 +384,26 @@ public class UploadHelper {
         }
     }
 
-    private File getUploadFile(String path, String checksum, boolean createIfAbsent) throws OXException {
+    private File getUploadFile(String path, String checksum) throws OXException {
         /*
          * check for existing partial upload
          */
         String uploadFileName = getUploadFilename(checksum);
-        String uploadPath = session.hasTempFolder() ? TEMP_PATH : path;
-        File uploadFile = session.getStorage().getFileByName(uploadPath, uploadFileName);;
-        if (null == uploadFile && createIfAbsent) {
+        String uploadPath;
+        File uploadFile;
+        if (session.getTemp().supported()) {
+            boolean existedBefore = session.getTemp().exists(); 
+            uploadPath = session.getTemp().getPath(true);
+            if (null == uploadPath) {
+                session.trace("Unable to get path to temp folder, falling back to direct upload.");
+                uploadPath = path;
+            }
+            uploadFile = existedBefore ? session.getStorage().getFileByName(uploadPath, uploadFileName) : null;
+        } else {
+            uploadPath = path;
+            uploadFile = session.getStorage().getFileByName(path, uploadFileName);
+        }       
+        if (null == uploadFile) {
             /*
              * create new upload file
              */
@@ -401,15 +412,15 @@ public class UploadHelper {
             }
             uploadFile = session.getStorage().createFile(uploadPath, uploadFileName);
             if (null != uploadFile && session.isTraceEnabled()) {
-                session.trace("Upload file created: [" + uploadFile.getFolderId() + '/' + uploadFile.getId() + ']');
+                session.trace("Upload file created: [" + uploadFile.getId() + ']');
             }
-        } else if (null != uploadFile && session.isTraceEnabled()) {
+        } else if (session.isTraceEnabled()) {
             session.trace("Using existing upload file at " + DriveUtils.combine(uploadPath, uploadFileName) +
-                " [" + uploadFile.getFolderId() + '/' + uploadFile.getId() + "], current size: " + uploadFile.getFileSize() +
+                " [" + uploadFile.getId() + "], current size: " + uploadFile.getFileSize() +
                 ", last modified: " + (null != uploadFile.getLastModified() ?
                     DriveConstants.LOG_DATE_FORMAT.get().format(uploadFile.getLastModified()) : "(unknown)"));
         }
-        return null == uploadFile ? null : new DefaultFile(uploadFile);
+        return new DefaultFile(uploadFile);
     }
 
     /**
@@ -439,8 +450,26 @@ public class UploadHelper {
         if (null == fileVersions || 0 == fileVersions.size()) {
             return Collections.emptyList();
         }
+        String uploadPath;
+        if (session.getTemp().supported()) {
+            /*
+             * partial uploads would be stored in temp folder, if it exists 
+             */
+            if (false == session.getTemp().exists()) {
+                return Collections.emptyList();
+            }
+            uploadPath = session.getTemp().getPath(true);
+            if (null == uploadPath) {
+                session.trace("Unable to get path to temp folder, falling back to direct upload.");
+                uploadPath = path;
+            }
+        } else {
+            /*
+             * partial uploads are placed inside the target path itself
+             */
+            uploadPath = path;
+        }
         List<Long> uploadOffsets = new ArrayList<Long>(fileVersions.size());
-        String uploadPath = session.hasTempFolder() ? TEMP_PATH : path;
         String folderID = session.getStorage().getFolderID(uploadPath, false);
         List<File> files = findUploadFiles(folderID, fileVersions);
         for (FileVersion fileVersion : fileVersions) {

@@ -64,6 +64,7 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.TokenParser;
 import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
