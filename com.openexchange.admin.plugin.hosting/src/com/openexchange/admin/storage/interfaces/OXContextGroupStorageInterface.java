@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.interfaces;
 
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,7 +63,8 @@ public interface OXContextGroupStorageInterface {
      * Deletes all data from the globaldb that is associated to the specified context group.
      * 
      * @param contextGroupId The context group identifier
-     * @throws OXException If an error occurs
+     * @throws StorageException If an error occurs
+     * @throws OXException
      */
-    void deleteContextGroup(String contextGroupId) throws OXException;
+    void deleteContextGroup(String contextGroupId) throws StorageException, OXException;
 }
