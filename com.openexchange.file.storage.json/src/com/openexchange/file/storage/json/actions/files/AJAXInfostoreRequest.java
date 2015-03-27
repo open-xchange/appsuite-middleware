@@ -309,7 +309,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public List<IdVersionPair> optIdVersionPairs() throws OXException {
-        return parseIDList(true) ? generateIdVersionPairs() : null;
+        return parseIDList(false) ? generateIdVersionPairs() : null;
     }
 
     /**
