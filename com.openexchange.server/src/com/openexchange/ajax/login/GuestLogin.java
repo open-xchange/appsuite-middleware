@@ -63,6 +63,7 @@ import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -150,7 +151,15 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
 
         // Authenticate the user
         if (!userService.authenticate(user, loginInfo.getPassword())) {
-            throw INVALID_CREDENTIALS.create();
+            GuestService guestService = ServerServiceRegistry.getInstance().getService(GuestService.class);
+            if (guestService != null) {
+                boolean authenticate = guestService.authenticate(user, context.getContextId(), loginInfo.getPassword());
+                if (authenticate == false) {
+                    throw INVALID_CREDENTIALS.create();
+                }
+            } else {
+                throw INVALID_CREDENTIALS.create();
+            }
         }
         if (!loginInfo.getUsername().equals(user.getMail())) {
             throw INVALID_CREDENTIALS.create();

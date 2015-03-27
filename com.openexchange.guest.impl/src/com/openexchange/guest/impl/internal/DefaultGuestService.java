@@ -56,12 +56,15 @@ import java.util.List;
 import javax.mail.internet.AddressException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.GuestExceptionCodes;
 import com.openexchange.guest.GuestService;
@@ -82,6 +85,8 @@ public class DefaultGuestService implements GuestService {
 
     private final UserService userService;
 
+    private final ContextService contextService;
+
     private final ContactUserStorage contactUserStorage;
 
     private final ConfigViewFactory configViewFactory;
@@ -94,10 +99,65 @@ public class DefaultGuestService implements GuestService {
      * @param contactUserStorage
      * @param configViewFactory
      */
-    public DefaultGuestService(UserService userService, ContactUserStorage contactUserStorage, ConfigViewFactory configViewFactory) {
+    public DefaultGuestService(UserService userService, ContextService contextService, ContactUserStorage contactUserStorage, ConfigViewFactory configViewFactory) {
         this.userService = userService;
+        this.contextService = contextService;
         this.contactUserStorage = contactUserStorage;
         this.configViewFactory = configViewFactory;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCrossContextGuestHandlingEnabled() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean authenticate(final User user, int contextId, final String password) throws OXException {
+        if (user.isGuest()) {
+
+            User alignedUser = alignUserWithGuest(user, contextId);
+
+            return UserStorage.authenticate(alignedUser, password);
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public User alignUserWithGuest(User user, int contextId) throws OXException {
+        UserImpl updatedUser = new UserImpl(user);
+
+        GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, contextId);
+        try {
+            connectionHelper.start();
+
+            String groupId = configViewFactory.getView(user.getId(), contextId).opt("com.openexchange.context.group", String.class, "default");
+            long guestId = GuestStorage.getInstance().getGuestId(user.getMail(), groupId, connectionHelper.getConnection());
+            if (guestId == GuestStorage.NOT_FOUND) {
+                return user;
+            }
+
+            GuestAssignment assignment = GuestStorage.getInstance().getGuestAssignment(guestId, contextId, user.getId(), connectionHelper.getConnection());
+            if (assignment == null) {
+                return user;
+            }
+
+            updatedUser.setUserPassword(assignment.getPassword());
+            updatedUser.setPasswordMech(assignment.getPasswordMech());
+
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+        return updatedUser;
     }
 
     /**
@@ -198,6 +258,27 @@ public class DefaultGuestService implements GuestService {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeGuests(String groupId) throws OXException {
+        GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, groupId);
+        try {
+            connectionHelper.start();
+
+            List<Long> guestIds = GuestStorage.getInstance().getGuestIds(groupId, connectionHelper.getConnection());
+
+            GuestStorage.getInstance().removeGuestAssignments(guestIds, connectionHelper.getConnection());
+
+            GuestStorage.getInstance().removeGuests(groupId, connectionHelper.getConnection());
+
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    /**
      * Checks if the provided mail address is valid.
      *
      * @param mailAddress - address to validate
@@ -225,19 +306,91 @@ public class DefaultGuestService implements GuestService {
         List<GuestAssignment> guestAssignments = retrieveGuestAssignments(user.getMail(), groupId);
 
         if ((guestAssignments != null) && (!guestAssignments.isEmpty())) {
-            GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, groupId);
+            updateUserInGlobalDB(user, groupId, guestAssignments);
+            // try to keep passwords consistent...
+            updateUserInContexts(user, guestAssignments);
+        }
+    }
+
+    /**
+     * Tries to update the user information within the context db to keep the information consistent.
+     *
+     * @param user - user to update
+     * @param guestAssignments - {@link GuestAssignment}s the user has got
+     * @throws OXException
+     */
+    private void updateUserInContexts(User user, List<GuestAssignment> guestAssignments) throws OXException {
+        for (GuestAssignment guestAssignment : guestAssignments) {
+            ContextConnectionHelper contextConnectionHelper = new ContextConnectionHelper(GuestStorageServiceLookup.get(), true, guestAssignment.getContextId());
+
+            Context context = contextService.getContext(guestAssignment.getContextId());
             try {
-                connectionHelper.start();
+                contextConnectionHelper.start();
 
-                for (GuestAssignment guestAssignment : guestAssignments) {
-                    GuestAssignment newAssignment = new GuestAssignment(guestAssignment.getGuestId(), guestAssignment.getContextId(), guestAssignment.getUserId(), user.getUserPassword(), user.getPasswordMech());
+                updateUser(user, contextConnectionHelper.getConnection(), guestAssignment.getUserId(), context);
 
-                    GuestStorage.getInstance().updateGuestAssignment(newAssignment, connectionHelper.getConnection());
-                }
-                connectionHelper.commit();
+                contextConnectionHelper.commit();
             } finally {
-                connectionHelper.finish();
+                contextConnectionHelper.finish();
             }
+            userService.invalidateUser(context, guestAssignment.getUserId());
+        }
+    }
+
+    /**
+     * Copies information from the given {@link User} to the {@link User} that is associated with the given {@link GuestAssignment}. To be able to update the user within the correct context the provided {@link Connection} should be valid for
+     * the context id provided within the {@link GuestAssignment}
+     *
+     * @param user - the {@link User} the information should be copied from
+     * @param contextConnection - the {@link Connection} with up to date information
+     * @param assignment - the assignment that should be updated
+     * @throws OXException
+     */
+    private void updateUser(User user, Connection contextConnection, int userId, Context context) throws OXException {
+        UserImpl userToUpdate = new UserImpl(user);
+        userToUpdate.setId(userId);
+
+        if (user.getUserPassword() != null) {
+            userToUpdate.setUserPassword(user.getUserPassword());
+        }
+        if (user.getPasswordMech() != null) {
+            userToUpdate.setPasswordMech(user.getPasswordMech());
+        }
+        if (user.getPreferredLanguage() != null) {
+            userToUpdate.setPreferredLanguage(user.getPreferredLanguage());
+        }
+        if (user.getTimeZone() != null) {
+            userToUpdate.setTimeZone(user.getTimeZone());
+        }
+        if (user.getMail() != null) {
+            userToUpdate.setMail(user.getMail());
+        }
+        User origUser = userService.getUser(userId, context);
+        // the following is required to identify the user as guest within com.openexchange.groupware.ldap.RdbUserStorage.updateUserPassword(Connection, User, Context)
+        userToUpdate.setCreatedBy(origUser.getCreatedBy());
+
+        userService.updateUser(contextConnection, userToUpdate, context);
+    }
+
+    /**
+     * @param user
+     * @param groupId
+     * @param guestAssignments
+     * @throws OXException
+     */
+    private void updateUserInGlobalDB(User user, String groupId, List<GuestAssignment> guestAssignments) throws OXException {
+        GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, groupId);
+        try {
+            connectionHelper.start();
+
+            for (GuestAssignment guestAssignment : guestAssignments) {
+                GuestAssignment newAssignment = new GuestAssignment(guestAssignment.getGuestId(), guestAssignment.getContextId(), guestAssignment.getUserId(), user.getUserPassword(), user.getPasswordMech());
+
+                GuestStorage.getInstance().updateGuestAssignment(newAssignment, connectionHelper.getConnection());
+            }
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
         }
     }
 

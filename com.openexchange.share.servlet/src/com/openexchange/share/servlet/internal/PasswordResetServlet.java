@@ -145,6 +145,11 @@ public class PasswordResetServlet extends HttpServlet {
             int guestID = guestInfo.getGuestID();
             User storageUser = userService.getUser(guestID, context);
 
+            GuestService guestService = ShareServiceLookup.getService(GuestService.class);
+            if ((guestService != null) && (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) && (storageUser.isGuest()) && (guestService.isCrossContextGuestHandlingEnabled())) {
+                guestService.alignUserWithGuest(storageUser, context.getContextId());
+            }
+
             String hash = getHash(storageUser.getUserPassword());
             if (null == confirm) {
                 // Generate hash and send link to confirm
@@ -192,6 +197,7 @@ public class PasswordResetServlet extends HttpServlet {
                     user.setPasswordMech(guest.getPasswordMech());
                     user.setUserPassword(PasswordMech.BCRYPT.encode(password));
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
+
                     String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
                         urlEncode(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
                         "resetPassword");

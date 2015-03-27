@@ -177,16 +177,15 @@ public class DefaultShareService implements ShareService {
              */
             return ShareTool.toShareInfos(services, contextID, shares, true);
 
-        } else {
-            /*
-             * filter share targets not accessible for the session's user before returning results
-             */
-            DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken);
-            if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
-                shares = removeInaccessible(session, shares);
-            }
-            return ShareTool.toShareInfos(services, contextID, shares, false);
         }
+        /*
+         * filter share targets not accessible for the session's user before returning results
+         */
+        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken);
+        if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
+            shares = removeInaccessible(session, shares);
+        }
+        return ShareTool.toShareInfos(services, contextID, shares, false);
     }
 
     @Override

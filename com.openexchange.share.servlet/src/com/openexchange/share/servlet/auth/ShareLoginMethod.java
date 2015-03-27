@@ -60,6 +60,7 @@ import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginResultImpl;
@@ -79,13 +80,13 @@ public class ShareLoginMethod implements LoginMethodClosure {
 
     private static interface CredentialsAuthenticator {
 
-        boolean authenticate(Credentials credentials, User user) throws OXException;
+        boolean authenticate(Credentials credentials, User user, int contextId) throws OXException;
     }
 
     private static final CredentialsAuthenticator ANONYMOUS_AUTHENTICATOR = new CredentialsAuthenticator() {
 
         @Override
-        public boolean authenticate(Credentials credentials, User user) throws OXException {
+        public boolean authenticate(Credentials credentials, User user, int contextId) throws OXException {
             // In case of anonymous guest user, only the password is relevant
             String password = credentials.getPassword();
             return (false == Strings.isEmpty(password) && password.equals(decrypt(user.getUserPassword())));
@@ -95,7 +96,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
     private static final CredentialsAuthenticator GUEST_AUTHENTICATOR = new CredentialsAuthenticator() {
 
         @Override
-        public boolean authenticate(Credentials credentials, User user) throws OXException {
+        public boolean authenticate(Credentials credentials, User user, int contextId) throws OXException {
             // In case of named guest user, both the password and name are relevant
             String password = credentials.getPassword();
             String login = credentials.getLogin();
@@ -106,6 +107,10 @@ public class ShareLoginMethod implements LoginMethodClosure {
             // Authenticate the user
             UserService userService = ShareServiceLookup.getService(UserService.class, true);
             if (!userService.authenticate(user, password)) {
+                GuestService guestService = ShareServiceLookup.getService(GuestService.class);
+                if (guestService != null) {
+                    return guestService.authenticate(user, contextId, password);
+                }
                 return false;
             }
 
@@ -203,7 +208,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
         }
 
         // Verify credentials
-        if (false == authenticator.authenticate(credentials, user)) {
+        if (false == authenticator.authenticate(credentials, user, context.getContextId())) {
             return null;
         }
 

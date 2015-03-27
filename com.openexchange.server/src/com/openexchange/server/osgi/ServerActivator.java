@@ -160,6 +160,7 @@ import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
+import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
@@ -560,6 +561,8 @@ public final class ServerActivator extends HousekeepingActivator {
         track(BlockingLoginHandlerService.class, new BlockingLoginHandlerCustomizer(context));
         // Multiple handler factory services
         track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
+
+        track(GuestService.class, new RegistryCustomizer<GuestService>(context, GuestService.class));
 
         // Attachment Plugins
         serviceTrackerList.add(new AttachmentAuthorizationTracker(context));

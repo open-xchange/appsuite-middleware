@@ -68,12 +68,14 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.impl.storage.GuestStorage;
@@ -103,6 +105,9 @@ public class DefaultGuestServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private ContextService contextService;
 
     @Mock
     private ConfigViewFactory configViewFactory;
@@ -155,6 +160,7 @@ public class DefaultGuestServiceTest {
         Mockito.when(configView.opt(Matchers.anyString(), Matchers.<Class<String>> any(), Matchers.<String> any())).thenReturn("default");
 
         Mockito.when(userService.getUser(Matchers.anyInt(), Matchers.anyInt())).thenReturn(new UserImpl());
+        Mockito.when(userService.getUser(Matchers.anyInt(), (Context)Matchers.any())).thenReturn(new UserImpl());
 
         PowerMockito.mockStatic(Databases.class);
         PowerMockito.doNothing().when(Databases.class, "startTransaction", (Connection) Matchers.any());
@@ -172,7 +178,7 @@ public class DefaultGuestServiceTest {
         assignments.add(new GuestAssignment(111, 11, 1, "pwd", "pwdMech"));
 
 
-        this.defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory);
+        this.defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory);
     }
 
     @Test
@@ -335,7 +341,7 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testUpdateGuestUser_foundTwoAssignments_updateBoth() throws OXException {
-        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+        defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory) {
 
             @Override
             protected List<GuestAssignment> retrieveGuestAssignments(String mailAddress, String groupId) {
@@ -364,7 +370,7 @@ public class DefaultGuestServiceTest {
     public void testUpdateGuestContact_foundTwoAssignments_updateBoth() throws OXException {
         Mockito.when(contactUserStorage.getGuestContact(Matchers.anyInt(), Mockito.anyInt(), (ContactField[]) Mockito.any())).thenReturn(Mockito.mock(Contact.class));
 
-        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+        defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory) {
 
             @Override
             protected List<GuestAssignment> retrieveGuestAssignments(String mailAddress, String groupId) {
@@ -379,7 +385,7 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testCreateContactCopy_noAssignmentsAvailable_returnNullAsCopy() throws OXException {
-        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+        defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory) {
 
             @Override
             public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
@@ -396,7 +402,7 @@ public class DefaultGuestServiceTest {
     public void testCreateContactCopy_storageContactNotAvailable_returnNullAsCopy() throws OXException {
         Mockito.when(contactUserStorage.getGuestContact(Matchers.anyInt(), Mockito.anyInt(), (ContactField[]) Mockito.any())).thenReturn(null);
 
-        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+        defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory) {
 
             @Override
             public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
@@ -419,7 +425,7 @@ public class DefaultGuestServiceTest {
 
         Mockito.when(contactUserStorage.getGuestContact(Matchers.anyInt(), Mockito.anyInt(), (ContactField[]) Mockito.any())).thenReturn(storageContact);
 
-        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+        defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory) {
 
             @Override
             public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
@@ -443,7 +449,7 @@ public class DefaultGuestServiceTest {
 
     @Test
     public void testCreateUserCopy_noAssignmentsAvailable_returnNullAsCopy() throws OXException {
-        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+        defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory) {
 
             @Override
             public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
@@ -460,7 +466,7 @@ public class DefaultGuestServiceTest {
     public void testCreateUserCopy_storageContactNotAvailable_returnNullAsCopy() throws OXException {
         Mockito.when(userService.getUser(Matchers.anyInt(), Mockito.anyInt())).thenReturn(null);
 
-        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+        defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory) {
 
             @Override
             public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {
@@ -494,7 +500,7 @@ public class DefaultGuestServiceTest {
 
         Mockito.when(userService.getUser(Matchers.anyInt(), Mockito.anyInt())).thenReturn(user);
 
-        defaultGuestService = new DefaultGuestService(userService, contactUserStorage, configViewFactory) {
+        defaultGuestService = new DefaultGuestService(userService, contextService, contactUserStorage, configViewFactory) {
 
             @Override
             public List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) {

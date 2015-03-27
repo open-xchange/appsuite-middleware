@@ -84,6 +84,30 @@ public class DelegateGuestService implements GuestService {
     }
 
     @Override
+    public boolean isCrossContextGuestHandlingEnabled() {
+        return configurationService.getBoolProperty(CROSS_CONTEXT_ENABLED, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean authenticate(final User user, int contextId, final String password) throws OXException {
+        if (configurationService.getBoolProperty(CROSS_CONTEXT_ENABLED, false) && user.isGuest()) {
+            return this.delegate.authenticate(user, contextId, password);
+        }
+        return false;
+    }
+
+    @Override
+    public User alignUserWithGuest(User user,  int contextId) throws OXException {
+        if (configurationService.getBoolProperty(CROSS_CONTEXT_ENABLED, false)) {
+            return this.delegate.alignUserWithGuest(user, contextId);
+        }
+        return user;
+    }
+
+    @Override
     public void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech) throws OXException {
         if (configurationService.getBoolProperty(CROSS_CONTEXT_ENABLED, false)) {
             this.delegate.addGuest(mailAddress, groupId, contextId, userId, password, passwordMech);
@@ -101,6 +125,13 @@ public class DelegateGuestService implements GuestService {
     public void removeGuests(int contextId) throws OXException {
         if (configurationService.getBoolProperty(CROSS_CONTEXT_ENABLED, false)) {
             this.delegate.removeGuests(contextId);
+        }
+    }
+
+    @Override
+    public void removeGuests(String groupId) throws OXException {
+        if (configurationService.getBoolProperty(CROSS_CONTEXT_ENABLED, false)) {
+            this.delegate.removeGuests(groupId);
         }
     }
 

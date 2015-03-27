@@ -66,6 +66,33 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface GuestService {
 
     /**
+     * Returns if the current configuration/implementation is configured to deal with cross context handling based on the global database.
+     *
+     * @return <code>true</code>, if cross context handling is enabled; otherwise <code>false</code>
+     */
+    boolean isCrossContextGuestHandlingEnabled();
+
+    /**
+     * Authenticates the given password against the given user object.
+     *
+     * @param user user that password is compared with given one.
+     * @param password password to check.
+     * @return <code>true</code> if the password matches.
+     * @throws OXException If password check mechanism has problems.
+     */
+    boolean authenticate(User user, int contextId, String password) throws OXException;
+
+    /**
+     * Adapts the given {@link User} based on the information stored within the global database (e. g. update user information for the password)
+     *
+     * @param user - user that should be aligned to cross context information
+     * @param contextId - context id the user is assigned to
+     * @return new {@link User} with the updated information
+     * @throws OXException
+     */
+    User alignUserWithGuest(User user, int contextId) throws OXException;
+
+    /**
      * Adds a new guest or creates a new assignment for the guest if the provided mail address is already registered because the user was added from another context.
      *
      * @param mailAddress - mail address of the guest to add
@@ -94,6 +121,14 @@ public interface GuestService {
      * @throws OXException
      */
     void removeGuests(int contextId) throws OXException;
+
+    /**
+     * Remove existing guests for the given group id. This should only be called in case the group id isn't used any more.
+     *
+     * @param groupId - group id the guest should be removed for
+     * @throws OXException
+     */
+    void removeGuests(String groupId) throws OXException;
 
     /**
      * Updates all existing contacts (over all contexts) that are available for the given contact.
@@ -144,4 +179,5 @@ public interface GuestService {
      * @return List with all assignments the user is currently known as a guest
      * @throws OXException
      */
-    List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) throws OXException;}
+    List<GuestAssignment> getExistingAssignments(String mailAddress, String groupId) throws OXException;
+}

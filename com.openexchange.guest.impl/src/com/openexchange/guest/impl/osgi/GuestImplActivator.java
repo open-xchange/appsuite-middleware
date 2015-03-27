@@ -52,6 +52,7 @@ package com.openexchange.guest.impl.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.guest.GuestService;
@@ -76,7 +77,7 @@ public class GuestImplActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            UserService.class, DatabaseService.class, ConfigViewFactory.class, ContactUserStorage.class, ConfigurationService.class
+            UserService.class, DatabaseService.class, ConfigViewFactory.class, ContactUserStorage.class, ConfigurationService.class, ContextService.class
         };
     }
 
@@ -90,7 +91,7 @@ public class GuestImplActivator extends HousekeepingActivator {
 
         GuestStorageServiceLookup.set(this);
 
-        GuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContactUserStorage.class), getService(ConfigViewFactory.class));
+        GuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContextService.class), getService(ContactUserStorage.class), getService(ConfigViewFactory.class));
         registerService(GuestService.class, guestService, 2);
 
         GuestService delegateGuestService = new DelegateGuestService(guestService, getService(ConfigurationService.class));
