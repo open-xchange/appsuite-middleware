@@ -132,8 +132,6 @@ public class MailNotifications {
 
         private String username;
 
-        private String password;
-
         protected PasswordResetBuilder() {
             super(NotificationType.PASSWORD_RESET);
         }
@@ -148,25 +146,13 @@ public class MailNotifications {
             return this;
         }
 
-        /**
-         * Sets the new password about that the recipient shall be notified.
-         *
-         * @param password The password
-         */
-        public PasswordResetBuilder setPassword(String password) {
-            this.password = password;
-            return this;
-        }
-
         @Override
         protected PasswordResetNotification<InternetAddress> doBuild() {
             checkNotNull(username, "username");
-            checkNotNull(password, "password");
 
             DefaultPasswordResetNotification<InternetAddress> notification = new DefaultPasswordResetNotification<InternetAddress>(Transport.MAIL);
             notification.apply(this);
             notification.setUsername(username);
-            notification.setPassword(password);
             return notification;
         }
 

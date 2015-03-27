@@ -81,7 +81,6 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
-import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
@@ -175,8 +174,6 @@ public class PasswordResetServlet extends HttpServlet {
             } else {
                 // Try to set new password
                 if (confirm.equals(hash)) {
-                    String password = PasswordUtility.generate();
-
                     GuestShare guestShare = shareService.resolveToken(token);
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
                     ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
@@ -188,14 +185,13 @@ public class PasswordResetServlet extends HttpServlet {
                         .setContext(guestInfo.getContextID())
                         .setLocale(guest.getLocale())
                         .setUsername(guestInfo.getEmailAddress())
-                        .setPassword(password)
                         .build();
                     notificationService.send(notification);
 
                     UserImpl user = new UserImpl();
                     user.setId(guestID);
                     user.setPasswordMech(guest.getPasswordMech());
-                    user.setUserPassword(PasswordMech.BCRYPT.encode(password));
+                    user.setUserPassword(PasswordMech.BCRYPT.encode(" "));
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
 
                     String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),

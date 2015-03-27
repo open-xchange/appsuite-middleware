@@ -186,7 +186,7 @@ public class MailComposer {
         MimeMessage mail = prepareEnvelope(subject, null, notification.getTransportInfo());
         mail.addHeader("X-Open-Xchange-Share-Type", "password-reset");
         mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
-        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(AuthenticationMode.GUEST_PASSWORD, notification.getUsername(), notification.getPassword()));
+        mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(AuthenticationMode.GUEST_PASSWORD, notification.getUsername(), null));
         mail.setContent(prepareContent(
             "notify.share.pwreset.mail.txt.tmpl",
             vars,
@@ -206,8 +206,6 @@ public class MailComposer {
         vars.put(FIELD_USERNAME_FIELD, translator.translate(NotificationStrings.USERNAME_FIELD));
         vars.put(FIELD_USERNAME, notification.getUsername());
         vars.put(FIELD_PASSWORD_FIELD, translator.translate(NotificationStrings.PASSWORD_FIELD));
-        vars.put(FIELD_PASSWORD, notification.getPassword());
-
         return vars;
     }
 
@@ -299,8 +297,8 @@ public class MailComposer {
 
     private static String buildAccessHeader(AuthenticationMode authMode, String username, String password) throws OXException {
         String accessHeader = null;
-        if (authMode == AuthenticationMode.GUEST_PASSWORD && !Strings.isEmpty(username) && !Strings.isEmpty(password)) {
-            accessHeader = com.openexchange.tools.encoding.Base64.encode(username + ':' + password);
+        if (authMode == AuthenticationMode.GUEST_PASSWORD && !Strings.isEmpty(username)) {
+            accessHeader = com.openexchange.tools.encoding.Base64.encode(username);
         } else if (authMode == AuthenticationMode.ANONYMOUS_PASSWORD && !Strings.isEmpty(password)) {
             accessHeader = com.openexchange.tools.encoding.Base64.encode(password);
         }
