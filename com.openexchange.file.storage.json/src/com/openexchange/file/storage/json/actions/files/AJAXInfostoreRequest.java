@@ -213,16 +213,24 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public int getEnd() {
+    public int getEnd() throws OXException {
         String parameter = data.getParameter("end");
         if (parameter == null) {
             parameter = data.getParameter("limit");
             if (parameter == null) {
                 return FileStorageFileAccess.NOT_SET;
             }
-            return Integer.parseInt(parameter) - 1;
+            try {
+                return Integer.parseInt(parameter) - 1;
+            } catch (NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "limit", parameter);
+            }
         }
-        return Integer.parseInt(parameter);
+        try {
+            return Integer.parseInt(parameter);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "end", parameter);
+        }
     }
 
     @Override
@@ -264,7 +272,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getFolderForID(final String id) throws OXException {
-        parseIDList();
+        parseIDList(true);
         return folderMapping.get(id);
     }
 
@@ -289,14 +297,27 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public List<String> getIds() throws OXException {
-        parseIDList();
+        parseIDList(true);
         return ids;
     }
 
     @Override
     public List<IdVersionPair> getIdVersionPairs() throws OXException {
-        parseIDList();
+        parseIDList(true);
+        return generateIdVersionPairs();
+    }
 
+    @Override
+    public List<IdVersionPair> optIdVersionPairs() throws OXException {
+        return parseIDList(true) ? generateIdVersionPairs() : null;
+    }
+
+    /**
+     * Generates the pairs of identifier and version from available request body data.
+     *
+     * @return The generated pairs of identifier and version
+     */
+    private List<IdVersionPair> generateIdVersionPairs() {
         int size = ids.size();
         List<IdVersionPair> retval = new ArrayList<IdVersionPair>(size);
 
@@ -322,7 +343,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public Set<String> getIgnore() {
-        final String parameter = data.getParameter(Param.IGNORE.getName());
+        String parameter = data.getParameter(Param.IGNORE.getName());
         if (parameter == null) {
             return Collections.emptySet();
         }
@@ -354,7 +375,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getSearchQuery() throws OXException {
-        final Object data2 = data.getData();
+        Object data2 = data.getData();
         if(data2 == null) {
             return "";
         }
@@ -383,20 +404,23 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (sortingField != null) {
             return sortingField;
         }
-        final String sort = data.getParameter(PARAM_SORT);
+
+        String sort = data.getParameter(PARAM_SORT);
         if (sort == null) {
             return null;
         }
-        final Field field = sortingField = Field.get(sort);
+
+        Field field = sortingField = Field.get(sort);
         if (field == null) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( PARAM_SORT, sort);
         }
+
         return field;
     }
 
     @Override
     public SortDirection getSortingOrder() throws OXException {
-        final SortDirection sortDirection = SortDirection.get(data.getParameter(PARAM_ORDER));
+        SortDirection sortDirection = SortDirection.get(data.getParameter(PARAM_ORDER));
         if (sortDirection == null) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( PARAM_ORDER, sortDirection);
         }
@@ -404,15 +428,19 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public int getStart() {
-        final String parameter = data.getParameter("start");
-        if(parameter == null ) {
-            if(data.getParameter("limit") != null){
+    public int getStart() throws OXException {
+        String parameter = data.getParameter("start");
+        if (parameter == null) {
+            if (data.getParameter("limit") != null) {
                 return 0;
             }
             return FileStorageFileAccess.NOT_SET;
         }
-        return Integer.valueOf(parameter);
+        try {
+            return Integer.parseInt(parameter);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "start", parameter);
+        }
     }
 
     @Override
@@ -537,14 +565,31 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return Integer.parseInt(data.getParameter(param.getName()));
     }
 
-    private void parseIDList() throws OXException {
+    /**
+     * Parses ID, folder and version information from request's JSON array
+     *
+     * @param required Whether the JSON array is required or not
+     * @return <code>true</code> if ID, folder and version information are successfully parsed; otherwise <code>false</code> if absent
+     * @throws OXException If parsing fails
+     */
+    private boolean parseIDList(boolean required) throws OXException {
         try {
             if (ids != null) {
-                return;
+                return true;
             }
 
-            // Require request body as a JSON array
-            JSONArray array = getBodyAsJsonArray();
+            // Check request body
+            JSONArray array;
+            if (required) {
+                // Require request body as a JSON array
+                array = getBodyAsJsonArray();
+            } else {
+                // Optional request body as a JSON array
+                array = optBodyAsJsonArray();
+                if (null == array) {
+                    return false;
+                }
+            }
             int length = array.length();
 
             // Initialize
@@ -603,6 +648,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             this.idVersions = idVersions;
             this.folderMapping = folderMapping;
             this.versionMapping = versionMapping;
+            return true;
         } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());
         }
@@ -616,6 +662,22 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 return new JSONArray(obj.toString());
             } catch (Exception e) {
                 throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create(JSONArray.class.getSimpleName(), obj.getClass().getSimpleName());
+            }
+        }
+        return (JSONArray) obj;
+    }
+
+    private JSONArray optBodyAsJsonArray() throws OXException {
+        Object obj = data.getData();
+        if (null == obj) {
+            return null;
+        }
+
+        if (!(obj instanceof JSONArray)) {
+            try {
+                return new JSONArray(obj.toString());
+            } catch (Exception e) {
+                return null;
             }
         }
         return (JSONArray) obj;

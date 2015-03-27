@@ -249,6 +249,14 @@ public interface InfostoreRequest {
      */
     List<IdVersionPair> getIdVersionPairs() throws OXException;
 
+    /**
+     * Optionally gets the pairs of identifier and version.
+     *
+     * @return The pairs of identifier and version or <code>null</code>
+     * @throws OXException If parse attempt fails
+     */
+    List<IdVersionPair> optIdVersionPairs() throws OXException;
+
     String getFolderForID(String id) throws OXException;
 
     String[] getVersions() throws OXException;
