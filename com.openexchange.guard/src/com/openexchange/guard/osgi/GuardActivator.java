@@ -123,7 +123,10 @@ public class GuardActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        AbstractGuardAccess.setGuardApi(null);
+        GuardApi guardApi = AbstractGuardAccess.unsetGuardApi();
+        if (null != guardApi) {
+            guardApi.shutDown();
+        }
         Services.setServiceLookup(null);
         super.stopBundle();
     }
