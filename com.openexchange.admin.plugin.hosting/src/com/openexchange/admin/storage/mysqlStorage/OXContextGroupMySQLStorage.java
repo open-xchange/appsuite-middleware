@@ -66,6 +66,8 @@ import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.database.GlobalDatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupEvent;
+import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -226,7 +228,12 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
         try {
             connection.setAutoCommit(false);
 
-            //TODO: Fire the context group delete event
+            try {
+                DeleteContextGroupEvent deleteEvent = new DeleteContextGroupEvent(this, contextGroupId);
+                DeleteContextGroupRegistry.getInstance().fireDeleteContextGroupEvent(deleteEvent, connection, connection);
+            } catch (OXException e) {
+                LOG.error("Some implementation deleting context group specific data failed. Continuing with hard delete from tables using the 'gid' column.", e);
+            }
 
             // Purge data
             for (TableObject tableObject : tables) {
