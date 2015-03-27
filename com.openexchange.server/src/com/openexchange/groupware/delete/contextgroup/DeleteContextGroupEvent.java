@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.delete;
+package com.openexchange.groupware.delete.contextgroup;
 
 import java.util.EventObject;
 
@@ -62,25 +62,6 @@ public class DeleteContextGroupEvent extends EventObject {
 
     private String contextGroupId;
 
-    private int contextId;
-
-    private int id;
-
-    /**
-     * Initialises a new {@link DeleteContextGroupEvent}.
-     * 
-     * @param source The object on which the Event initially occurred
-     * @param id The object's identifier
-     * @param contextGroupId The context group identifier
-     * @param contextId The context identifier
-     */
-    public DeleteContextGroupEvent(Object source, int id, String contextGroupId, int contextId) {
-        super(source);
-        this.id = id;
-        this.contextGroupId = contextGroupId;
-        this.contextId = contextId;
-    }
-
     /**
      * 
      * Initialises a new {@link DeleteContextGroupEvent}.
@@ -89,7 +70,9 @@ public class DeleteContextGroupEvent extends EventObject {
      * @param contextGroupId The context group identifier
      */
     public DeleteContextGroupEvent(Object source, String contextGroupId) {
-        this(source, -1, contextGroupId, -1);
+        super(source);
+        this.contextGroupId = contextGroupId;
+
     }
 
     /**
@@ -100,23 +83,4 @@ public class DeleteContextGroupEvent extends EventObject {
     public String getContextGroupId() {
         return contextGroupId;
     }
-
-    /**
-     * Returns the context identifier
-     * 
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Returns the object's identifier
-     * 
-     * @return The object's identifier
-     */
-    public int getId() {
-        return id;
-    }
-
 }
