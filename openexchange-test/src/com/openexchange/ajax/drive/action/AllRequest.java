@@ -47,30 +47,48 @@
  *
  */
 
-package com.openexchange.admin.rmi;
+package com.openexchange.ajax.drive.action;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.exception.OXException;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 
 /**
- * {@link OXContextGroupInterface}
+ * {@link AllRequest}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public interface OXContextGroupInterface extends Remote {
+public class AllRequest extends AbstractDriveRequest<AllResponse> {
 
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXContextGroup";
+    private boolean failOnError;
 
-    /**
-     * Deletes all data from the globaldb that is associated to the specified context group.
-     * 
-     * @param contextGroupId The context group identifier
-     * @throws RemoteException
-     */
-    void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException, OXException;
+    public AllRequest(Integer root) {
+        super(root);
+        failOnError = true;
+    }
+
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, "all"),
+            new Parameter("root", root)
+        };
+    }
+
+    @Override
+    public AllParser getParser() {
+        return new AllParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
 }

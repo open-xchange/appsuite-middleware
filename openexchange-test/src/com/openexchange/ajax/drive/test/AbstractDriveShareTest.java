@@ -47,30 +47,64 @@
  *
  */
 
-package com.openexchange.admin.rmi;
+package com.openexchange.ajax.drive.test;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.exception.OXException;
+import java.util.List;
+import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.folderstorage.Permissions;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link OXContextGroupInterface}
+ * {@link AbstractDriveShareTest}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public interface OXContextGroupInterface extends Remote {
+public abstract class AbstractDriveShareTest extends ShareTest {
 
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXContextGroup";
+    protected AbstractDriveShareTest(String name) {
+        // TODO Auto-generated constructor stub
+        super(name);
+    }
 
-    /**
-     * Deletes all data from the globaldb that is associated to the specified context group.
-     * 
-     * @param contextGroupId The context group identifier
-     * @throws RemoteException
-     */
-    void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException, OXException;
+    protected void checkFilePermission(int entity, int expectedBits, File file) {
+        List<FileStorageObjectPermission> objectPermissions = file.getObjectPermissions();
+        if (objectPermissions != null) {
+            for (FileStorageObjectPermission permission : objectPermissions) {
+                if (permission.getEntity() == entity) {
+                    assertEquals(expectedBits, permission.getPermissions());
+                    return;
+                }
+            }
+        }
+        fail("Did not find permission for entity " + entity);
+    }
+
+    protected void checkFolderPermission(int entity, int expectedBits, FolderObject folder) {
+        for (OCLPermission permission : folder.getPermissions()) {
+            if (permission.getEntity() == entity) {
+                assertEquals(expectedBits, Permissions.createPermissionBits(
+                    permission.getFolderPermission(),
+                    permission.getReadPermission(),
+                    permission.getWritePermission(),
+                    permission.getDeletePermission(),
+                    permission.isFolderAdmin()));
+                return;
+            }
+        }
+
+        fail("Did not find permission for entity " + entity);
+    }
+
+    protected String getId(DefaultFile file) {
+        FileID fileID = new FileID(file.getId());
+        fileID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        return fileID.toUniqueID();
+    }
+
 }

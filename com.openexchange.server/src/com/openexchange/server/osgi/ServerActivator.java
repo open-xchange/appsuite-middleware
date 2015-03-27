@@ -149,6 +149,7 @@ import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
@@ -464,6 +465,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Folder Delete Listener Service Tracker
         track(FolderDeleteListenerService.class, new FolderDeleteListenerServiceTrackerCustomizer(context));
+        
+        // Delete Context Group Listener Service Tracker
+        track(DeleteContextGroupListener.class, new DeleteContextGroupListenerServiceTracker(context));
 
         // Distributed files
         track(DistributedFileManagement.class, new DistributedFilesListener());

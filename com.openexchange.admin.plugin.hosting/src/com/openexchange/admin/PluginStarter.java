@@ -56,6 +56,8 @@ import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.admin.rmi.OXContextGroupInterface;
+import com.openexchange.admin.rmi.impl.OXContextGroup;
 
 public class PluginStarter {
 
@@ -80,7 +82,13 @@ public class PluginStarter {
             // bind all NEW Objects to registry
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXContextInterface.RMI_NAME);
-            services.add(context.registerService(Remote.class, oxctx_v2, properties));;
+            services.add(context.registerService(Remote.class, oxctx_v2, properties));
+            
+            // Register RMI interface for ContextGroup
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", OXContextGroupInterface.RMI_NAME);
+            OXContextGroupInterface oxContextGroup = new OXContextGroup();
+            services.add(context.registerService(Remote.class, oxContextGroup, properties));
         } catch (Exception e) {
             logger.error("Error while creating one instance for RMI interface", e);
             throw e;

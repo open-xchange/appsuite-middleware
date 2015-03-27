@@ -47,30 +47,73 @@
  *
  */
 
-package com.openexchange.admin.rmi;
+package com.openexchange.server.osgi;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.exception.OXException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
+import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupRegistry;
 
 /**
- * {@link OXContextGroupInterface}
+ * {@link DeleteContextGroupListenerServiceTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface OXContextGroupInterface extends Remote {
+public class DeleteContextGroupListenerServiceTracker implements ServiceTrackerCustomizer<DeleteContextGroupListener, DeleteContextGroupListener> {
+
+    private BundleContext context;
 
     /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXContextGroup";
-
-    /**
-     * Deletes all data from the globaldb that is associated to the specified context group.
+     * Initialises a new {@link DeleteContextGroupListenerServiceTracker}.
      * 
-     * @param contextGroupId The context group identifier
-     * @throws RemoteException
+     * @param context The bundle context instance
      */
-    void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException, OXException;
+    public DeleteContextGroupListenerServiceTracker(BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+     */
+    @Override
+    public DeleteContextGroupListener addingService(ServiceReference<DeleteContextGroupListener> reference) {
+        DeleteContextGroupListener listener = context.getService(reference);
+        if (DeleteContextGroupRegistry.getInstance().registerDeleteContextGroupListener(listener)) {
+            return listener;
+        } else {
+            context.ungetService(reference);
+            return null;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    @Override
+    public void modifiedService(ServiceReference<DeleteContextGroupListener> reference, DeleteContextGroupListener service) {
+        // no-op
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    @Override
+    public void removedService(ServiceReference<DeleteContextGroupListener> reference, DeleteContextGroupListener service) {
+        if (service != null) {
+            try {
+                DeleteContextGroupRegistry.getInstance().unregisterDeleteContextGroupListener(service);
+            } finally {
+                context.ungetService(reference);
+            }
+        }
+    }
+
 }

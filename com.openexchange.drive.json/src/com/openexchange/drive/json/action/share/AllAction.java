@@ -85,7 +85,7 @@ public class AllAction extends AbstractDriveShareAction {
             }
         }
 
-        return new AJAXRequestResult(shares, lastModified);
+        return new AJAXRequestResult(shares, lastModified, "shareinfo");
     }
 
 }

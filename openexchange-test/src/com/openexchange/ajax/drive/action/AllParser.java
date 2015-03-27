@@ -47,30 +47,41 @@
  *
  */
 
-package com.openexchange.admin.rmi;
+package com.openexchange.ajax.drive.action;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.exception.OXException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.share.actions.ParsedShare;
 
 /**
- * {@link OXContextGroupInterface}
+ * {@link AllParser}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public interface OXContextGroupInterface extends Remote {
+public class AllParser extends AbstractAJAXParser<AllResponse> {
 
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXContextGroup";
+    protected AllParser(boolean failOnError) {
+        super(failOnError);
+    }
 
-    /**
-     * Deletes all data from the globaldb that is associated to the specified context group.
-     * 
-     * @param contextGroupId The context group identifier
-     * @throws RemoteException
-     */
-    void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException, OXException;
+    @Override
+    protected AllResponse createResponse(Response response) throws JSONException {
+        AllResponse retval = new AllResponse(response);
+
+        JSONArray jsonArray = (JSONArray) response.getData();
+        List<ParsedShare> parsedShares = new ArrayList<ParsedShare>(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            parsedShares.add(new ParsedShare(jsonArray.getJSONObject(i)));
+        }
+
+        retval.setParsedShares(parsedShares);
+
+        return retval;
+    }
+
 }

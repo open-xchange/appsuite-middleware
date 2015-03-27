@@ -47,30 +47,68 @@
  *
  */
 
-package com.openexchange.admin.rmi;
+package com.openexchange.drive.impl.internal;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.exception.OXException;
+import java.util.Date;
+import java.util.Map;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.share.ShareTarget;
 
 /**
- * {@link OXContextGroupInterface}
+ * {@link DriveShareTarget}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public interface OXContextGroupInterface extends Remote {
+public class DriveShareTarget extends ShareTarget {
 
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXContextGroup";
+    private static final long serialVersionUID = -2374348001683276913L;
 
-    /**
-     * Deletes all data from the globaldb that is associated to the specified context group.
-     * 
-     * @param contextGroupId The context group identifier
-     * @throws RemoteException
-     */
-    void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException, OXException;
+    private String item;
+
+    private String folder;
+
+    public DriveShareTarget(ShareTarget shareTarget) {
+        super(shareTarget);
+    }
+
+    @Override
+    public void setItem(String item) {
+        this.item = item;
+    }
+
+    @Override
+    public String getItem() {
+        return item;
+    }
+
+    @Override
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+
+    @Override
+    public String getFolder() {
+        return folder;
+    }
+
+    @Override
+    public int getModule() {
+        return FolderObject.INFOSTORE;
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return null;
+    }
+
+    @Override
+    public Date getExpiryDate() {
+        return null;
+    }
+
+    @Override
+    public String getPath() {
+        return super.getPath();
+    }
 }
