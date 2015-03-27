@@ -240,7 +240,7 @@ public final class HttpClients {
         }
 
         @Override
-        public ClientConnectionRequest requestConnection(final HttpRoute route, final Object state) {
+        public ClientConnectionRequest requestConnection(HttpRoute route, Object state) {
             IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
             if (null != idleConnectionClose) {
                 idleConnectionClose.ensureRunning(KEEP_ALIVE_MONITOR_INTERVAL_SECS);
@@ -265,7 +265,7 @@ public final class HttpClients {
         private final int idleTimeoutSeconds;
         private volatile ScheduledTimerTask timerTask;
 
-        IdleConnectionCloser(final ClientConnectionManager manager, final int idleTimeoutSeconds) {
+        IdleConnectionCloser(ClientConnectionManager manager, int idleTimeoutSeconds) {
             super();
             this.manager = manager;
             this.idleTimeoutSeconds = idleTimeoutSeconds;
@@ -319,7 +319,7 @@ public final class HttpClients {
         }
 
         @Override
-        public long getKeepAliveDuration(final HttpResponse response, final HttpContext context) {
+        public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
             // Keep-alive for the shorter of 20 seconds or what the server specifies.
             long timeout = KEEP_ALIVE_DURATION_SECS * 1000;
 
@@ -358,7 +358,7 @@ public final class HttpClients {
          * <http://www.apache.org/>.
          */
 
-        public GzipDecompressingEntity(final HttpEntity entity) {
+        public GzipDecompressingEntity(HttpEntity entity) {
             super(entity);
         }
 
