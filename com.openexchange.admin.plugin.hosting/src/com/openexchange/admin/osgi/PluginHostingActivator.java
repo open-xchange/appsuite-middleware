@@ -57,10 +57,13 @@ import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
+import com.openexchange.admin.storage.interfaces.OXContextGroupStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.OXContextGroupMySQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -94,6 +97,11 @@ public class PluginHostingActivator extends HousekeepingActivator {
         track(ManagementService.class, new ManagementCustomizer(context));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
+        track(DatabaseService.class, new RegistryServiceTrackerCustomizer<DatabaseService>(context, AdminServiceRegistry.getInstance(), DatabaseService.class));
+
+        // Register and track
+        registerService(OXContextGroupStorageInterface.class, new OXContextGroupMySQLStorage());
+        track(OXContextGroupStorageInterface.class, new RegistryServiceTrackerCustomizer<OXContextGroupStorageInterface>(context, AdminServiceRegistry.getInstance(), OXContextGroupStorageInterface.class));
 
         // Plugin interfaces
         {

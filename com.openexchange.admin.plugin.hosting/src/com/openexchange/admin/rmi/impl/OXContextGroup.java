@@ -51,6 +51,10 @@ package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
 import com.openexchange.admin.rmi.OXContextGroupInterface;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.storage.interfaces.OXContextGroupStorageInterface;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link OXContextGroup}
@@ -59,15 +63,26 @@ import com.openexchange.admin.rmi.OXContextGroupInterface;
  */
 public class OXContextGroup implements OXContextGroupInterface {
 
+    /**
+     * Initialises a new {@link OXContextGroup}.
+     */
+    public OXContextGroup() {
+        super();
+    }
+
     /*
      * (non-Javadoc)
      * 
      * @see com.openexchange.admin.rmi.OXContextGroupInterface#deleteContextGroup(java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     @Override
-    public void deleteContextGroup(String contextGroupId) throws RemoteException {
-        // TODO Auto-generated method stub
+    public void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException, OXException {
+        OXContextGroupStorageInterface storage = AdminServiceRegistry.getInstance().getService(OXContextGroupStorageInterface.class);
 
+        if (contextGroupId == null) {
+            throw new IllegalArgumentException("The contextGroupId is null");
+        }
+
+        storage.deleteContextGroup(contextGroupId);
     }
-
 }

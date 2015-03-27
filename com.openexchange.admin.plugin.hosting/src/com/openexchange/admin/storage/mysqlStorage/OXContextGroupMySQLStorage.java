@@ -64,6 +64,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXContextGroupStorageInterface;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.GlobalDatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupEvent;
@@ -93,7 +94,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
      */
     @Override
     public void deleteContextGroup(String contextGroupId) throws StorageException, OXException {
-        GlobalDatabaseService globalDBService = AdminServiceRegistry.getInstance().getService(GlobalDatabaseService.class);
+        DatabaseService globalDBService = AdminServiceRegistry.getInstance().getService(DatabaseService.class);
 
         if (!globalDBService.isGlobalDatabaseAvailable(contextGroupId)) {
             throw new StorageException("The global database is not available for the context group with identifier '" + contextGroupId + "'");
@@ -121,6 +122,8 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
         } finally {
             globalDBService.backWritableForGlobal(contextGroupId, connection);
         }
+        
+        // TODO: Any caches to invalidate? Any post processing stuff?
     }
 
     /**
