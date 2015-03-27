@@ -58,6 +58,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
  * {@link OAuthProviderDeleteListener}
@@ -80,13 +81,20 @@ public class OAuthProviderDeleteListener implements DeleteListener {
         final int contextId = context.getContextId();
         PreparedStatement stmt = null;
         try {
-            stmt = writeCon.prepareStatement("DELETE FROM authCode WHERE cid=?");
-            stmt.setInt(1, contextId);
-            stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
-            stmt = writeCon.prepareStatement("DELETE FROM oauth_grant WHERE cid=?");
-            stmt.setInt(1, contextId);
-            stmt.executeUpdate();
+            if (Tools.tableExists(writeCon, "authCode")) {
+                stmt = writeCon.prepareStatement("DELETE FROM authCode WHERE cid=?");
+                stmt.setInt(1, contextId);
+                stmt.executeUpdate();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = null;
+            }
+            if (Tools.tableExists(writeCon, "oauth_grant")) {
+                stmt = writeCon.prepareStatement("DELETE FROM oauth_grant WHERE cid=?");
+                stmt.setInt(1, contextId);
+                stmt.executeUpdate();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = null;
+            }
         } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -100,7 +108,6 @@ public class OAuthProviderDeleteListener implements DeleteListener {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
-            int pos;
             int userId = event.getId();
             int admin = event.getContext().getMailadmin();
             /*
@@ -113,15 +120,22 @@ public class OAuthProviderDeleteListener implements DeleteListener {
             /*
              * Delete
              */
-            stmt = writeCon.prepareStatement("DELETE FROM authCode WHERE cid=? AND user=?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
-            stmt = writeCon.prepareStatement("DELETE FROM oauth_grant WHERE cid=? AND user=?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.executeUpdate();
+            if (Tools.tableExists(writeCon, "authCode")) {
+                stmt = writeCon.prepareStatement("DELETE FROM authCode WHERE cid=? AND user=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.executeUpdate();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = null;
+            }
+            if (Tools.tableExists(writeCon, "oauth_grant")) {
+                stmt = writeCon.prepareStatement("DELETE FROM oauth_grant WHERE cid=? AND user=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.executeUpdate();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = null;
+            }
         } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
