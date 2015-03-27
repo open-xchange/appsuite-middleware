@@ -253,6 +253,7 @@ public final class HttpClients {
             IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
             if (null != idleConnectionClose) {
                 idleConnectionClose.stop();
+                this.idleConnectionCloser = null;
             }
             super.shutdown();
         }
