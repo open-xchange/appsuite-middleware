@@ -79,6 +79,13 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
 
     private static final Logger LOG = LoggerFactory.getLogger(OXContextGroupMySQLStorage.class);
 
+    /**
+     * Initialises a new {@link OXContextGroupMySQLStorage}.
+     */
+    public OXContextGroupMySQLStorage() {
+        super();
+    }
+
     /*
      * (non-Javadoc)
      * 
