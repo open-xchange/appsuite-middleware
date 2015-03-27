@@ -98,6 +98,7 @@ public class GuardActivator extends HousekeepingActivator {
                     return;
                 }
                 // Ensure ending slash '/' character
+                endPoint = endPoint.trim();
                 if (!endPoint.endsWith("/")) {
                     endPoint = new StringBuilder(endPoint).append('/').toString();
                 }
