@@ -77,11 +77,11 @@ public interface PushListenerService {
     boolean stopListenerFor(Session session);
 
     /**
-     * Checks cluster-wide if the user has already a registered IMAP PUSH listener
+     * Checks cluster-wide if the user has already a registered listener
      *
      * @param cid - The context id
-     * @param userIds - The user ids
-     * @return An array of booleans which indicates if the user has an activated push listener.
+     * @param userIds - The user identifiers
+     * @return An array of <code>boolean</code>s which indicates if the user has an activated push listener.
      * The order of the booleans is arranged to the input of usersIds
      */
     boolean[] hasListenerFor(int cid, int[] userIds);
