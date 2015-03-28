@@ -78,12 +78,14 @@ public interface PushListenerService {
 
     /**
      * Checks cluster-wide if the user has already a registered listener
-     *
-     * @param cid - The context id
      * @param userIds - The user identifiers
+     * @param contextId - The context id
+     *
      * @return An array of <code>boolean</code>s which indicates if the user has an activated push listener.
      * The order of the booleans is arranged to the input of usersIds
      */
-    boolean[] hasListenerFor(int cid, int[] userIds);
+    boolean[] hasListenerFor(int[] userIds, int contextId);
+
+    //boolean registerPermanentListenerFor();
 
 }
