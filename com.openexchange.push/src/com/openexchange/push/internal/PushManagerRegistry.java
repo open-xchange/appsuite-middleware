@@ -57,8 +57,8 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
-import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushManagerExtendedService;
+import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUtility;
 import com.openexchange.session.Session;
 
@@ -128,8 +128,7 @@ public final class PushManagerRegistry implements PushListenerService {
         Arrays.fill(ret, false);
 
         // Iterate push managers
-        PushManagerRegistry registry = PushManagerRegistry.getInstance();
-        for (Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
+        for (Iterator<PushManagerService> pushManagersIterator = getPushManagers(); pushManagersIterator.hasNext();) {
             PushManagerService pushManager = pushManagersIterator.next();
             if (pushManager instanceof PushManagerExtendedService) {
                 PushManagerExtendedService serviceExtended = (PushManagerExtendedService) pushManager;
@@ -158,8 +157,7 @@ public final class PushManagerRegistry implements PushListenerService {
         /*
          * Iterate push managers
          */
-        PushManagerRegistry registry = PushManagerRegistry.getInstance();
-        for (Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
+        for (Iterator<PushManagerService> pushManagersIterator = getPushManagers(); pushManagersIterator.hasNext();) {
             try {
                 PushManagerService pushManager = pushManagersIterator.next();
                 // Initialize a new push listener for session
@@ -188,8 +186,7 @@ public final class PushManagerRegistry implements PushListenerService {
         /*
          * Iterate push managers
          */
-        PushManagerRegistry registry = PushManagerRegistry.getInstance();
-        for (Iterator<PushManagerService> pushManagersIterator = registry.getPushManagers(); pushManagersIterator.hasNext();) {
+        for (Iterator<PushManagerService> pushManagersIterator = getPushManagers(); pushManagersIterator.hasNext();) {
             try {
                 PushManagerService pushManager = pushManagersIterator.next();
                 // Stop listener for session
