@@ -82,7 +82,7 @@ public class Watchdog  {
             PushListenerService pls = Services.getService(PushListenerService.class);
             final List<ContextUsers> contextUsersWithoutPush = new LinkedList<ContextUsers>();
             for(ContextUsers cu : contextUsers) {
-                boolean[] hasListeners = pls.hasListenerFor(cu.getContextId(), Autoboxing.I2i(getUserIds(cu)));
+                boolean[] hasListeners = pls.hasListenerFor(Autoboxing.I2i(getUserIds(cu)), cu.getContextId());
                 cu = getUserIdsWithoutPushListener(cu, hasListeners);
                 if(cu != null) {
                     contextUsersWithoutPush.add(cu);

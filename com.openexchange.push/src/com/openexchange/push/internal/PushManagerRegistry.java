@@ -123,7 +123,7 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     @Override
-    public boolean[] hasListenerFor(int cid, int[] userIds) {
+    public boolean[] hasListenerFor(int[] userIds, int contextId) {
         boolean[] ret = new boolean[userIds.length];
         Arrays.fill(ret, false);
 
@@ -133,7 +133,7 @@ public final class PushManagerRegistry implements PushListenerService {
             if (pushManager instanceof PushManagerExtendedService) {
                 PushManagerExtendedService serviceExtended = (PushManagerExtendedService) pushManager;
 
-                boolean[] result = serviceExtended.hasListenerFor(cid, userIds);
+                boolean[] result = serviceExtended.hasListenerFor(contextId, userIds);
                 for (int i = 0; i < result.length; i++) {
                     ret[i] |= result[i];
                 }
