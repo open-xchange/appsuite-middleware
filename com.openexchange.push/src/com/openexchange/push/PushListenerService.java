@@ -53,7 +53,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
- * {@link PushListenerService} - The singleton push listener service to manually start/stop psuh listeners.
+ * {@link PushListenerService} - The singleton push listener service to manually start/stop push listeners.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
