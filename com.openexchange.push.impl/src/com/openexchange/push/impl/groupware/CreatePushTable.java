@@ -47,67 +47,43 @@
  *
  */
 
-package com.openexchange.push;
+package com.openexchange.push.impl.groupware;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link PushListenerService} - The singleton push listener service to manually start/stop push listeners.
+ * {@link CreatePushTable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@SingletonService
-public interface PushListenerService {
+public final class CreatePushTable extends AbstractCreateTableImpl {
 
-    /**
-     * Starts a new listener for specified session.
-     *
-     * @param session The session
-     * @return A newly started listener or <code>null</code> if a listener could not be started
-     * @throws OXException If operation fails
-     */
-    PushListener startListenerFor(Session session) throws OXException;
+    public static final String getCreateTableStatement() {
+        return ("CREATE TABLE registeredPush (" +
+        "cid INT4 UNSIGNED NOT NULL," +
+        "user INT4 UNSIGNED NOT NULL," +
+        "client VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
+        "PRIMARY KEY (cid, id)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=latin1");
+    }
 
-    /**
-     * Stops the listener for specified session.
-     *
-     * @param session The session
-     * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean stopListenerFor(Session session) throws OXException;
+    public CreatePushTable() {
+        super();
+    }
 
-    /**
-     * Checks cluster-wide if the user has already a registered listener
-     * @param userIds - The user identifiers
-     * @param contextId - The context id
-     *
-     * @return An array of <code>boolean</code>s which indicates if the user has an activated push listener.
-     * The order of the booleans is arranged to the input of usersIds
-     * @throws OXException If operation fails
-     */
-    boolean[] hasListenerFor(int[] userIds, int contextId) throws OXException;
+    @Override
+    public String[] getCreateStatements() {
+        return new String[] { getCreateTableStatement() };
+    }
 
-    /**
-     * Registers a permanent listener for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully registered; otherwise <code>false</code> if there is already such a listener
-     * @throws OXException If operation fails
-     */
-    boolean registerPermanentListenerFor(int userId, int contextId) throws OXException;
+    @Override
+    public String[] requiredTables() {
+        return new String[] { "user" };
+    }
 
-    /**
-     * Unregisters a permanent listener for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully unregistered; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean unregisterPermanentListenerFor(int userId, int contextId) throws OXException;
+    @Override
+    public String[] tablesToCreate() {
+        return new String[] { "registeredPush" };
+    }
 
 }

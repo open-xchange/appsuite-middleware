@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.internal;
+package com.openexchange.push.impl;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -60,6 +60,7 @@ import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUtility;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -71,32 +72,23 @@ public final class PushManagerRegistry implements PushListenerService {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushManagerRegistry.class);
 
+    /** The <code>PushManagerRegistry</code> instance */
     private static volatile PushManagerRegistry instance;
 
     /**
      * Initializes push manager registry.
      */
-    public static void init() {
+    public static synchronized void init(ServiceLookup services) {
         if (null == instance) {
-            synchronized (PushManagerRegistry.class) {
-                if (null == instance) {
-                    instance = new PushManagerRegistry();
-                }
-            }
+            instance = new PushManagerRegistry(services);
         }
     }
 
     /**
      * Shuts down push manager registry.
      */
-    public static void shutdown() {
-        if (null != instance) {
-            synchronized (PushManagerRegistry.class) {
-                if (null != instance) {
-                    instance = null;
-                }
-            }
-        }
+    public static synchronized void shutdown() {
+        instance = null;
     }
 
     /**
@@ -109,16 +101,20 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     /*-
-     * Member section
+     * --------------------------------------------------------- Member section ----------------------------------------------------------
      */
 
     private final ConcurrentMap<Class<? extends PushManagerService>, PushManagerService> map;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link PushManagerRegistry}.
+     *
+     * @param services
      */
-    private PushManagerRegistry() {
+    private PushManagerRegistry(ServiceLookup services) {
         super();
+        this.services = services;
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
     }
 
@@ -144,6 +140,16 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     @Override
+    public boolean registerPermanentListenerFor(int userId, int contextId) throws OXException {
+        return DbUtils.insertPushRegistration(userId, contextId);
+    }
+
+    @Override
+    public boolean unregisterPermanentListenerFor(int userId, int contextId) throws OXException {
+        return DbUtils.deletePushRegistration(userId, contextId);
+    }
+
+    @Override
     public PushListener startListenerFor(Session session) {
         /*
          * Check session's client identifier
@@ -157,7 +163,7 @@ public final class PushManagerRegistry implements PushListenerService {
         /*
          * Iterate push managers
          */
-        for (Iterator<PushManagerService> pushManagersIterator = getPushManagers(); pushManagersIterator.hasNext();) {
+        for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
             try {
                 PushManagerService pushManager = pushManagersIterator.next();
                 // Initialize a new push listener for session
@@ -186,7 +192,7 @@ public final class PushManagerRegistry implements PushListenerService {
         /*
          * Iterate push managers
          */
-        for (Iterator<PushManagerService> pushManagersIterator = getPushManagers(); pushManagersIterator.hasNext();) {
+        for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
             try {
                 PushManagerService pushManager = pushManagersIterator.next();
                 // Stop listener for session
@@ -211,12 +217,8 @@ public final class PushManagerRegistry implements PushListenerService {
      * @return <code>true</code> if push manager service could be successfully added; otherwise <code>false</code>
      */
     public boolean addPushManager(final PushManagerService pushManager) {
-        final Class<? extends PushManagerService> clazz = pushManager.getClass();
-        if (map.containsKey(clazz)) {
-            return false;
-        }
-        map.put(clazz, pushManager);
-        return true;
+        Class<? extends PushManagerService> clazz = pushManager.getClass();
+        return null == map.putIfAbsent(clazz, pushManager);
     }
 
     /**
@@ -238,6 +240,8 @@ public final class PushManagerRegistry implements PushListenerService {
     public Iterator<PushManagerService> getPushManagers() {
         return unmodifiableIterator(map.values().iterator());
     }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Strips the <tt>remove()</tt> functionality from an existing iterator.
@@ -273,6 +277,7 @@ public final class PushManagerRegistry implements PushListenerService {
         };
     }
 
+    @SuppressWarnings("rawtypes")
     private static final Iterator EMPTY_ITER = new Iterator() {
 
         @Override

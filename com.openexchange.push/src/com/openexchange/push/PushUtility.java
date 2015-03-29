@@ -60,7 +60,7 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.push.internal.ServiceRegistry;
+import com.openexchange.push.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
@@ -124,9 +124,9 @@ public final class PushUtility {
             return;
         }
         try {
-            final EventAdmin eventAdmin = ServiceRegistry.getInstance().getService(EventAdmin.class, true);
-            final int contextId = session.getContextId();
-            final int userId = session.getUserId();
+            EventAdmin eventAdmin = Services.requireService(EventAdmin.class);
+            int contextId = session.getContextId();
+            int userId = session.getUserId();
             /*
              * Create event's properties
              */
@@ -146,9 +146,8 @@ public final class PushUtility {
              *      com.openexchange.push.ms.PushMsHandler.handleEvent(Event) )
              */
             if (includeCommonEvent) {
-                final EventFactoryService eventFactoryService = ServiceRegistry.getInstance().getService(EventFactoryService.class, true);
-                final CommonEvent commonEvent =
-                    eventFactoryService.newCommonEvent(
+                EventFactoryService eventFactoryService = Services.requireService(EventFactoryService.class);
+                CommonEvent commonEvent = eventFactoryService.newCommonEvent(
                         contextId,
                         userId,
                         Collections.<Integer, Set<Integer>> emptyMap(),
@@ -167,7 +166,7 @@ public final class PushUtility {
             /*
              * Create event with push topic
              */
-            final Event event = new Event(PushEventConstants.TOPIC, properties);
+            Event event = new Event(PushEventConstants.TOPIC, properties);
             /*
              * Finally post it
              */

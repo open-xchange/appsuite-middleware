@@ -179,7 +179,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
             isDeleted = (Boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED);
         }
 
-        if (isDeleted != null && isDeleted) {
+        if (isDeleted != null && isDeleted.booleanValue()) {
             return getDeleteMailPayload(event);
         } else {
             return getNewMailProperties(event, session);

@@ -47,62 +47,32 @@
  *
  */
 
-package com.openexchange.push.osgi;
+package com.openexchange.push.impl;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.push.PushManagerService;
-import com.openexchange.push.internal.PushManagerRegistry;
+import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
- * {@link PushManagerServiceTracker} - The service tracker for push managers.
+ * {@link ServiceRegistry} - The service registry for user component.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushManagerServiceTracker implements ServiceTrackerCustomizer<PushManagerService,PushManagerService> {
+public class ServiceRegistry extends AbstractServiceRegistry {
 
-    private final BundleContext context;
+    private static final ServiceRegistry SINGLETON = new ServiceRegistry();
 
     /**
-     * Initializes a new {@link PushManagerServiceTracker}.
-     *
-     * @param context The bundle context
+     * Initializes a new {@link ServiceRegistry}.
      */
-    public PushManagerServiceTracker(final BundleContext context) {
+    private ServiceRegistry() {
         super();
-        this.context = context;
     }
 
-    @Override
-    public PushManagerService addingService(final ServiceReference<PushManagerService> reference) {
-        final PushManagerService service = context.getService(reference);
-        if (PushManagerRegistry.getInstance().addPushManager(service)) {
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushManagerServiceTracker.class);
-            log.info("Registered push manager: {}", service.getClass().getName());
-            return service;
-        }
-        /*
-         * Nothing to track
-         */
-        context.ungetService(reference);
-        return null;
+    /**
+     * Gets the service registry instance.
+     *
+     * @return The service registry instance
+     */
+    public static ServiceRegistry getInstance() {
+        return SINGLETON;
     }
-
-    @Override
-    public void modifiedService(final ServiceReference<PushManagerService> reference, final PushManagerService service) {
-        // NOP
-    }
-
-    @Override
-    public void removedService(final ServiceReference<PushManagerService> reference, final PushManagerService service) {
-        if (null != service) {
-            try {
-                PushManagerRegistry.getInstance().removePushManager(service);
-            } finally {
-                context.ungetService(reference);
-            }
-        }
-    }
-
 }
