@@ -47,67 +47,74 @@
  *
  */
 
-package com.openexchange.push;
+package com.openexchange.push.impl.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link PushListenerService} - The singleton push listener service to manually start/stop push listeners.
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@SingletonService
-public interface PushListenerService {
+public final class Services {
 
     /**
-     * Starts a new listener for specified session.
-     *
-     * @param session The session
-     * @return A newly started listener or <code>null</code> if a listener could not be started
-     * @throws OXException If operation fails
+     * Initializes a new {@link Services}.
      */
-    PushListener startListenerFor(Session session) throws OXException;
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Stops the listener for specified session.
+     * Sets the service lookup.
      *
-     * @param session The session
-     * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
-     * @throws OXException If operation fails
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    boolean stopListenerFor(Session session) throws OXException;
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Checks cluster-wide if the user has already a registered listener
-     * @param userIds - The user identifiers
-     * @param contextId - The context id
+     * Gets the service lookup.
      *
-     * @return An array of <code>boolean</code>s which indicates if the user has an activated push listener.
-     * The order of the booleans is arranged to the input of usersIds
-     * @throws OXException If operation fails
+     * @return The service lookup or <code>null</code>
      */
-    boolean[] hasListenerFor(int[] userIds, int contextId) throws OXException;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
 
     /**
-     * Registers a permanent listener for specified user.
+     * Gets the service of specified type
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully registered; otherwise <code>false</code> if there is already such a listener
-     * @throws OXException If operation fails
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException If an error occurs while returning the demanded service
      */
-    boolean registerPermanentListenerFor(int userId, int contextId) throws OXException;
+    public static <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
+        S service = optService(clazz);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(clazz);
+        }
+        return service;
+    }
 
     /**
-     * Unregisters a permanent listener for specified user.
+     * (Optionally) Gets the service of specified type
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully unregistered; otherwise <code>false</code>
-     * @throws OXException If operation fails
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
      */
-    boolean unregisterPermanentListenerFor(int userId, int contextId) throws OXException;
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
+    }
 
 }

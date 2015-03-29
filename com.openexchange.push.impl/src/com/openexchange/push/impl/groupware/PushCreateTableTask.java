@@ -47,67 +47,54 @@
  *
  */
 
-package com.openexchange.push;
+package com.openexchange.push.impl.groupware;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.tableExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.push.impl.osgi.Services;
 
 /**
- * {@link PushListenerService} - The singleton push listener service to manually start/stop push listeners.
+ * {@link PushCreateTableTask} - Inserts necessary tables.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@SingletonService
-public interface PushListenerService {
+public class PushCreateTableTask extends UpdateTaskAdapter {
 
-    /**
-     * Starts a new listener for specified session.
-     *
-     * @param session The session
-     * @return A newly started listener or <code>null</code> if a listener could not be started
-     * @throws OXException If operation fails
-     */
-    PushListener startListenerFor(Session session) throws OXException;
+    public PushCreateTableTask() {
+        super();
+    }
 
-    /**
-     * Stops the listener for specified session.
-     *
-     * @param session The session
-     * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean stopListenerFor(Session session) throws OXException;
+    @Override
+    public String[] getDependencies() {
+        return new String[] {};
+    }
 
-    /**
-     * Checks cluster-wide if the user has already a registered listener
-     * @param userIds - The user identifiers
-     * @param contextId - The context id
-     *
-     * @return An array of <code>boolean</code>s which indicates if the user has an activated push listener.
-     * The order of the booleans is arranged to the input of usersIds
-     * @throws OXException If operation fails
-     */
-    boolean[] hasListenerFor(int[] userIds, int contextId) throws OXException;
-
-    /**
-     * Registers a permanent listener for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully registered; otherwise <code>false</code> if there is already such a listener
-     * @throws OXException If operation fails
-     */
-    boolean registerPermanentListenerFor(int userId, int contextId) throws OXException;
-
-    /**
-     * Unregisters a permanent listener for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully unregistered; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean unregisterPermanentListenerFor(int userId, int contextId) throws OXException;
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        DatabaseService dbService = Services.requireService(DatabaseService.class);
+        int contextId = params.getContextId();
+        Connection writeCon = dbService.getForUpdateTask(contextId);
+        PreparedStatement stmt = null;
+        try {
+            if (tableExists(writeCon, "registeredPush")) {
+                return;
+            }
+            stmt = writeCon.prepareStatement(CreatePushTable.getCreateTableStatement());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            dbService.backForUpdateTask(contextId, writeCon);
+        }
+    }
 
 }

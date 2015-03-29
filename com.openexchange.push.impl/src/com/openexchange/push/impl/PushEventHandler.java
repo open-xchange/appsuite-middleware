@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.internal;
+package com.openexchange.push.impl;
 
 import java.util.Arrays;
 import java.util.Collection;

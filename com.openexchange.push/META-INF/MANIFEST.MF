@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.openexchange.push
 Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
- com.openexchange.event,
+Import-Package: com.openexchange.event,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,
@@ -16,9 +15,6 @@ Import-Package: com.openexchange.config,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.session,
- com.openexchange.sessiond,
- com.openexchange.threadpool,
- com.openexchange.threadpool.behavior,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,

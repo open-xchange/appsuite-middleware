@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.osgi;
+package com.openexchange.push.impl.osgi;
 
 import java.util.regex.Pattern;
 import org.osgi.framework.BundleContext;

@@ -47,67 +47,62 @@
  *
  */
 
-package com.openexchange.push;
+package com.openexchange.push.impl.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.push.PushManagerService;
+import com.openexchange.push.impl.PushManagerRegistry;
 
 /**
- * {@link PushListenerService} - The singleton push listener service to manually start/stop push listeners.
+ * {@link PushManagerServiceTracker} - The service tracker for push managers.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@SingletonService
-public interface PushListenerService {
+public final class PushManagerServiceTracker implements ServiceTrackerCustomizer<PushManagerService,PushManagerService> {
+
+    private final BundleContext context;
 
     /**
-     * Starts a new listener for specified session.
+     * Initializes a new {@link PushManagerServiceTracker}.
      *
-     * @param session The session
-     * @return A newly started listener or <code>null</code> if a listener could not be started
-     * @throws OXException If operation fails
+     * @param context The bundle context
      */
-    PushListener startListenerFor(Session session) throws OXException;
+    public PushManagerServiceTracker(final BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-    /**
-     * Stops the listener for specified session.
-     *
-     * @param session The session
-     * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean stopListenerFor(Session session) throws OXException;
+    @Override
+    public PushManagerService addingService(final ServiceReference<PushManagerService> reference) {
+        final PushManagerService service = context.getService(reference);
+        if (PushManagerRegistry.getInstance().addPushManager(service)) {
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushManagerServiceTracker.class);
+            log.info("Registered push manager: {}", service.getClass().getName());
+            return service;
+        }
+        /*
+         * Nothing to track
+         */
+        context.ungetService(reference);
+        return null;
+    }
 
-    /**
-     * Checks cluster-wide if the user has already a registered listener
-     * @param userIds - The user identifiers
-     * @param contextId - The context id
-     *
-     * @return An array of <code>boolean</code>s which indicates if the user has an activated push listener.
-     * The order of the booleans is arranged to the input of usersIds
-     * @throws OXException If operation fails
-     */
-    boolean[] hasListenerFor(int[] userIds, int contextId) throws OXException;
+    @Override
+    public void modifiedService(final ServiceReference<PushManagerService> reference, final PushManagerService service) {
+        // NOP
+    }
 
-    /**
-     * Registers a permanent listener for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully registered; otherwise <code>false</code> if there is already such a listener
-     * @throws OXException If operation fails
-     */
-    boolean registerPermanentListenerFor(int userId, int contextId) throws OXException;
-
-    /**
-     * Unregisters a permanent listener for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully unregistered; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean unregisterPermanentListenerFor(int userId, int contextId) throws OXException;
+    @Override
+    public void removedService(final ServiceReference<PushManagerService> reference, final PushManagerService service) {
+        if (null != service) {
+            try {
+                PushManagerRegistry.getInstance().removePushManager(service);
+            } finally {
+                context.ungetService(reference);
+            }
+        }
+    }
 
 }

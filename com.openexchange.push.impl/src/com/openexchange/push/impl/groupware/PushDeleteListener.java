@@ -47,67 +47,57 @@
  *
  */
 
-package com.openexchange.push;
+package com.openexchange.push.impl.groupware;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link PushListenerService} - The singleton push listener service to manually start/stop push listeners.
+ * {@link PushDeleteListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@SingletonService
-public interface PushListenerService {
+public final class PushDeleteListener implements DeleteListener {
 
     /**
-     * Starts a new listener for specified session.
-     *
-     * @param session The session
-     * @return A newly started listener or <code>null</code> if a listener could not be started
-     * @throws OXException If operation fails
+     * Initializes a new {@link PushDeleteListener}.
      */
-    PushListener startListenerFor(Session session) throws OXException;
+    public PushDeleteListener() {
+        super();
+    }
 
-    /**
-     * Stops the listener for specified session.
-     *
-     * @param session The session
-     * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean stopListenerFor(Session session) throws OXException;
-
-    /**
-     * Checks cluster-wide if the user has already a registered listener
-     * @param userIds - The user identifiers
-     * @param contextId - The context id
-     *
-     * @return An array of <code>boolean</code>s which indicates if the user has an activated push listener.
-     * The order of the booleans is arranged to the input of usersIds
-     * @throws OXException If operation fails
-     */
-    boolean[] hasListenerFor(int[] userIds, int contextId) throws OXException;
-
-    /**
-     * Registers a permanent listener for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully registered; otherwise <code>false</code> if there is already such a listener
-     * @throws OXException If operation fails
-     */
-    boolean registerPermanentListenerFor(int userId, int contextId) throws OXException;
-
-    /**
-     * Unregisters a permanent listener for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if a permanent listener is successfully unregistered; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    boolean unregisterPermanentListenerFor(int userId, int contextId) throws OXException;
+    @Override
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (DeleteEvent.TYPE_USER != event.getType()) {
+            return;
+        }
+        /*
+         * Writable connection
+         */
+        int contextId = event.getContext().getContextId();
+        PreparedStatement stmt = null;
+        try {
+            int userId = event.getId();
+            /*
+             * Delete account data
+             */
+            stmt = writeCon.prepareStatement("DELETE FROM registeredPush WHERE cid = ? AND user = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (Exception e) {
+            throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
 
 }

@@ -73,7 +73,13 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid property value in property "%1$s": %2$s
      */
-    INVALID_PROPERTY("Invalid property value in property \"%1$s\": %2$s", Category.CATEGORY_ERROR, 3, null);
+    INVALID_PROPERTY("Invalid property value in property \"%1$s\": %2$s", Category.CATEGORY_ERROR, 3, null),
+    /**
+     * An SQL error occurred: %1$s
+     */
+    SQL_ERROR("An SQL error occurred: %1$s", Category.CATEGORY_ERROR, 4, null)
+
+    ;
 
     /** The exception code prefix */
     public static final String PREFIX = "PUSH";
