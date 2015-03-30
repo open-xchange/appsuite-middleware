@@ -142,7 +142,7 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
             // Initialize and open service tracker for push manager services
             PushManagerRegistry.init(this);
             track(PushManagerService.class, new PushManagerServiceTracker(context));
-            track(ConfigurationService.class, new WhitelistServiceTracker(context));
+            track(ConfigurationService.class, new ConfigurationServiceTracker(context));
 
             // Thread pool service tracker
             trackService(EventFactoryService.class);

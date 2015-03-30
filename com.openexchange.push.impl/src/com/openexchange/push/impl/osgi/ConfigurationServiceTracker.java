@@ -57,20 +57,20 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.push.PushClientWhitelist;
 
 /**
- * {@link WhitelistServiceTracker} - The service tracker for push managers.
+ * {@link ConfigurationServiceTracker} - The service tracker for {@code ConfigurationService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WhitelistServiceTracker implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
+public final class ConfigurationServiceTracker implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
 
     private final BundleContext context;
 
     /**
-     * Initializes a new {@link WhitelistServiceTracker}.
+     * Initializes a new {@link ConfigurationServiceTracker}.
      *
      * @param context The bundle context
      */
-    public WhitelistServiceTracker(final BundleContext context) {
+    public ConfigurationServiceTracker(final BundleContext context) {
         super();
         this.context = context;
     }
@@ -82,7 +82,7 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer<C
         final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
         clientWhitelist.clear();
         if (null == property) {
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(WhitelistServiceTracker.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationServiceTracker.class);
             log.info("Cleared push client white-list from.");
         } else {
             final String[] wildcardPatterns = property.split(" *, *", 0);
@@ -91,7 +91,7 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer<C
                     clientWhitelist.add(Pattern.compile(wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
                 }
             }
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(WhitelistServiceTracker.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationServiceTracker.class);
             log.info("Built push client white-list from: {}", property);
         }
         return service;
