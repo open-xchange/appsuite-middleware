@@ -463,7 +463,38 @@ public class DriveUtils {
         }
         return fids;
     }
-
+    
+    /**
+     * Gets a value indicating whether a specific folder is synchronizable or not.  
+     * 
+     * @param folderID The folder identifier to check
+     * @return <code>true</code> if the folder is synchronizable, <code>false</code>, otherwise 
+     */
+    public static boolean isSynchronizable(String folderID) {
+        if (null != folderID) {
+            /*
+             * check for numerical folder identifier, only allowing specific system folders if smaller than 20 
+             * constants from com.openexchange.groupware.container.FolderObject
+             * MIN_FOLDER_ID = 20
+             * SYSTEM_USER_INFOSTORE_FOLDER_ID = 10
+             * SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID = 15 
+             */
+            try {
+                int numericalID = Integer.parseInt(folderID);
+                if (numericalID < 20 && numericalID != 10 && numericalID != 15) {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                // no numerical folder identifier
+            }
+            /*
+             * allow, otherwise
+             */
+            return true;
+        }
+        return false;
+    }
+    
     private DriveUtils() {
         super();
     }

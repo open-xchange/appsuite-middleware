@@ -58,6 +58,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -130,6 +131,9 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             }
             if (folder.hasSubfolders()) {
                 jsonObject.put("has_subfolders", true);
+            }
+            if (false == DriveUtils.isSynchronizable(folderID)) {
+                jsonObject.put("not_synchronizable", true);
             }
             if (TypeAware.class.isInstance(folder)) {
                 switch (((TypeAware) folder).getType()) {

@@ -160,6 +160,13 @@ public class DriveServiceImpl implements DriveService {
                 return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
             }
         }
+        if (false == DriveUtils.isSynchronizable(session.getRootFolderID())) {
+            OXException error = DriveExceptionCodes.NOT_SYNCHRONIZABLE_DIRECTORY.create(session.getRootFolderID());
+            LOG.debug("Client synchronization aborted for {}", session, error);
+            List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
+            actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
+            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
+        }
         /*
          * sync folders
          */

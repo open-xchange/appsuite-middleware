@@ -67,6 +67,7 @@ import static com.openexchange.drive.DriveExceptionMessages.INVALID_PATTERN_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.LEVEL_CONFLICTING_FILENAME_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.LEVEL_CONFLICTING_PATH_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.LONG_POLLING_NOT_AVAILABLE_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.NOT_SYNCHRONIZABLE_DIRECTORY_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.NO_CREATE_DIRECTORY_PERMISSION_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.NO_CREATE_FILE_PERMISSION_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.NO_DELETE_DIRECTORY_PERMISSION_MSG;
@@ -183,8 +184,11 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
     /** The file name \"%1$s\" is conflicting with an equally named directory at \"%2$s\". */
     LEVEL_CONFLICTING_FILENAME(LEVEL_CONFLICTING_FILENAME_MSG, LEVEL_CONFLICTING_FILENAME_MSG, Category.CATEGORY_CONFLICT, 31),
 
-    /** "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"." */
+    /** The path \"%1$s\" is conflicting with an equally named file at \"%2$s\". */
     LEVEL_CONFLICTING_PATH(LEVEL_CONFLICTING_PATH_MSG, LEVEL_CONFLICTING_PATH_MSG, Category.CATEGORY_CONFLICT, 32),
+
+    /** The directory \"%1$s\" is not synchronizable. Please select another directory. */
+    NOT_SYNCHRONIZABLE_DIRECTORY(NOT_SYNCHRONIZABLE_DIRECTORY_MSG, NOT_SYNCHRONIZABLE_DIRECTORY_MSG, Category.CATEGORY_USER_INPUT, 33),
 
     ;
 
