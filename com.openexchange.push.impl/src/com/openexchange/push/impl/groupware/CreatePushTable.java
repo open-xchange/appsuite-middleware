@@ -62,8 +62,8 @@ public final class CreatePushTable extends AbstractCreateTableImpl {
         return ("CREATE TABLE registeredPush (" +
         "cid INT4 UNSIGNED NOT NULL," +
         "user INT4 UNSIGNED NOT NULL," +
-        "client VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
-        "PRIMARY KEY (cid, id)" +
+        "client VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
+        "PRIMARY KEY (cid, id, client)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=latin1");
     }
 

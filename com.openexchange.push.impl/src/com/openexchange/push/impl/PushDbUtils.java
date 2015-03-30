@@ -166,14 +166,15 @@ public class PushDbUtils {
     // ----------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Inserts a push registration for specified user
+     * Inserts a push registration associated with the client of specified user
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param clientId The client identifier
      * @return <code>true</code> on successful registration; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
-    public static boolean insertPushRegistration(int userId, int contextId) throws OXException {
+    public static boolean insertPushRegistration(int userId, int contextId, String clientId) throws OXException {
         DatabaseService service = Services.requireService(DatabaseService.class);
         Connection con = service.getWritable(contextId);
         boolean rollback = false;
@@ -181,7 +182,7 @@ public class PushDbUtils {
             Databases.startTransaction(con);
             rollback = true;
 
-            boolean inserted = insertPushRegistration(userId, contextId, con);
+            boolean inserted = insertPushRegistration(userId, contextId, clientId, con);
             if (inserted) {
                 markContextForPush(contextId, service);
             }
@@ -203,22 +204,14 @@ public class PushDbUtils {
         }
     }
 
-    /**
-     * Inserts a push registration for specified user
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param con The connection to use
-     * @return <code>true</code> on successful registration; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    private static boolean insertPushRegistration(int userId, int contextId, Connection con) throws OXException {
+    private static boolean insertPushRegistration(int userId, int contextId, String clientId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? AND user=?");
+            stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? AND user=? AND client=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
+            stmt.setString(3, clientId);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return false;
@@ -227,9 +220,10 @@ public class PushDbUtils {
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
 
-            stmt = con.prepareStatement("INSERT INTO registeredPush (cid,user) VALUES (?,?)");
+            stmt = con.prepareStatement("INSERT INTO registeredPush (cid,user,client) VALUES (?,?,?)");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
+            stmt.setString(3, clientId);
             try {
                 stmt.executeUpdate();
                 return true;
@@ -270,14 +264,15 @@ public class PushDbUtils {
     // ----------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Deletes a push registration for specified user
+     * Deletes a push registration associated with the client of specified user
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param clientId The client identifier
      * @return <code>true</code> on successful deletion; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
-    public static boolean deletePushRegistration(int userId, int contextId) throws OXException {
+    public static boolean deletePushRegistration(int userId, int contextId, String clientId) throws OXException {
         DatabaseService service = Services.requireService(DatabaseService.class);
         Connection con = service.getWritable(contextId);
         boolean rollback = false;
@@ -288,7 +283,7 @@ public class PushDbUtils {
             boolean[] unmark = new boolean[1];
             unmark[0] = false;
 
-            boolean deleted = deletePushRegistration(userId, contextId, unmark, con);
+            boolean deleted = deletePushRegistration(userId, contextId, clientId, unmark, con);
 
             if (unmark[0]) {
                 unmarkContextForPush(contextId, service);
@@ -310,16 +305,7 @@ public class PushDbUtils {
         }
     }
 
-    /**
-     * Deletes a push registration for specified user
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param con The connection to use
-     * @return <code>true</code> on successful deletion; otherwise <code>false</code>
-     * @throws OXException If operation fails
-     */
-    private static boolean deletePushRegistration(int userId, int contextId, boolean[] unmark, Connection con) throws OXException {
+    private static boolean deletePushRegistration(int userId, int contextId, String clientId, boolean[] unmark, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -328,9 +314,10 @@ public class PushDbUtils {
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
 
-            stmt = con.prepareStatement("DELETE FROM registeredPush WHERE cid=? AND user=?");
+            stmt = con.prepareStatement("DELETE FROM registeredPush WHERE cid=? AND user=? AND client=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
+            stmt.setString(3, clientId);
             boolean deleted = stmt.executeUpdate() > 0;
             Databases.closeSQLStuff(stmt);
 

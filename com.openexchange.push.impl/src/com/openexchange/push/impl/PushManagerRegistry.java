@@ -119,13 +119,25 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     @Override
-    public boolean registerPermanentListenerFor(int userId, int contextId) throws OXException {
-        return PushDbUtils.insertPushRegistration(userId, contextId);
+    public boolean registerPermanentListenerFor(int userId, int contextId, String clientId) throws OXException {
+        if (!PushUtility.allowedClient(clientId)) {
+            /*
+             * No permanent push listener for the client.
+             */
+            return false;
+        }
+        return PushDbUtils.insertPushRegistration(userId, contextId, clientId);
     }
 
     @Override
-    public boolean unregisterPermanentListenerFor(int userId, int contextId) throws OXException {
-        return PushDbUtils.deletePushRegistration(userId, contextId);
+    public boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws OXException {
+        if (!PushUtility.allowedClient(clientId)) {
+            /*
+             * No permanent push listener for the client.
+             */
+            return false;
+        }
+        return PushDbUtils.deletePushRegistration(userId, contextId, clientId);
     }
 
     @Override

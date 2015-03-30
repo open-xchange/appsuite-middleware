@@ -57,8 +57,10 @@ import com.openexchange.java.Strings;
 import com.openexchange.mobilepush.MobilePushProviders;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.mobilepush.json.MobilePushRequest;
+import com.openexchange.push.PushListenerService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -67,6 +69,9 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class SubscribeAction extends AbstractMobilePushAction {
+
+    private static final String CLIENT_ID = com.openexchange.mobilepush.Constants.CLIENT_ID;
+
     /**
      * Initializes a new {@link SubscribeAction}.
      * @param services
@@ -101,7 +106,11 @@ public class SubscribeAction extends AbstractMobilePushAction {
         }
 
         MobilePushStorageService mnss = getService(MobilePushStorageService.class);
-        mnss.createSubscription(req.getSession(), token, serviceId, provider);
+        PushListenerService pls = getService(PushListenerService.class);
+
+        ServerSession session = req.getSession();
+        mnss.createSubscription(session, token, serviceId, provider);
+        pls.registerPermanentListenerFor(session.getUserId(), session.getContextId(), CLIENT_ID);
 
         /*
          * return empty json object to indicate success
