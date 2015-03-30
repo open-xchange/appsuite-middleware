@@ -125,6 +125,7 @@ public final class PushUtility {
         }
         try {
             EventAdmin eventAdmin = Services.requireService(EventAdmin.class);
+            EventFactoryService eventFactoryService = includeCommonEvent ? Services.requireService(EventFactoryService.class) : null;
             int contextId = session.getContextId();
             int userId = session.getUserId();
             /*
@@ -145,19 +146,9 @@ public final class PushUtility {
              * (see com.openexchange.push.ms.osgi.PushMsActivator.startBundle() /
              *      com.openexchange.push.ms.PushMsHandler.handleEvent(Event) )
              */
-            if (includeCommonEvent) {
-                EventFactoryService eventFactoryService = Services.requireService(EventFactoryService.class);
-                CommonEvent commonEvent = eventFactoryService.newCommonEvent(
-                        contextId,
-                        userId,
-                        Collections.<Integer, Set<Integer>> emptyMap(),
-                        CommonEvent.INSERT,
-                        Types.EMAIL,
-                        null,
-                        null,
-                        null,
-                        null,
-                        session);
+            if (null != eventFactoryService) {
+                Map<Integer, Set<Integer>> emptyMap = Collections.<Integer, Set<Integer>> emptyMap();
+                CommonEvent commonEvent = eventFactoryService.newCommonEvent(contextId, userId, emptyMap, CommonEvent.INSERT, Types.EMAIL, null, null, null, null, session);
                 properties.put(CommonEvent.EVENT_KEY, commonEvent);
             }
             if (remoteMarker) {
