@@ -51,6 +51,7 @@ package com.openexchange.push.impl;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
@@ -59,6 +60,7 @@ import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -147,6 +149,11 @@ public final class PushManagerRegistry implements PushListenerService {
     @Override
     public boolean unregisterPermanentListenerFor(int userId, int contextId) throws OXException {
         return PushDbUtils.deletePushRegistration(userId, contextId);
+    }
+
+    @Override
+    public List<PushUser> getUsersWithPermanentListeners() throws OXException {
+        return PushDbUtils.getPushRegistrations();
     }
 
     @Override
