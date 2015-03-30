@@ -155,7 +155,32 @@ public final class PushManagerRegistry implements PushListenerService {
             storage.storeCredentials(credentials);
         }
 
-        return PushDbUtils.insertPushRegistration(session.getUserId(), session.getContextId(), clientId);
+        boolean inserted = PushDbUtils.insertPushRegistration(session.getUserId(), session.getContextId(), clientId);
+
+        if (inserted) {
+            for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+                try {
+                    PushManagerService pushManager = pushManagersIterator.next();
+                    // Initialize a new push listener for session
+                    Session ses;
+                    try {
+                        ses = generateSessionFor(new PushUser(session.getUserId(), session.getContextId()));
+                    } catch (Exception e) {
+                        ses = session;
+                    }
+                    PushListener pl = pushManager.startListener(ses);
+                    if (null != pl) {
+                        LOG.debug("Started push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                    }
+                } catch (OXException e) {
+                    LOG.error("Push error while starting push listener.", e);
+                } catch (RuntimeException e) {
+                    LOG.error("Runtime error while starting push listener.", e);
+                }
+            }
+        }
+
+        return inserted;
     }
 
     @Override
@@ -166,7 +191,26 @@ public final class PushManagerRegistry implements PushListenerService {
              */
             return false;
         }
-        return PushDbUtils.deletePushRegistration(session.getUserId(), session.getContextId(), clientId);
+        boolean deleted = PushDbUtils.deletePushRegistration(session.getUserId(), session.getContextId(), clientId);
+
+        if (deleted) {
+            for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+                try {
+                    PushManagerService pushManager = pushManagersIterator.next();
+                    // Stop listener for session
+                    boolean stopped = pushManager.stopListener(session);
+                    if (stopped) {
+                        LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                    }
+                } catch (OXException e) {
+                    LOG.error("Push error while stopping push listener.", e);
+                } catch (RuntimeException e) {
+                    LOG.error("Runtime error while stopping push listener.", e);
+                }
+            }
+        }
+
+        return deleted;
     }
 
     @Override
