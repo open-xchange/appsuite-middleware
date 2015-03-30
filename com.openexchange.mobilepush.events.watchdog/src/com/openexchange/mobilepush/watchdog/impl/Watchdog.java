@@ -54,7 +54,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.mobilepush.MobilePushProviders;
 import com.openexchange.mobilepush.events.MobilePushEventService;
 import com.openexchange.mobilepush.events.storage.ContextUsers;
@@ -82,7 +81,7 @@ public class Watchdog  {
             PushListenerService pls = Services.getService(PushListenerService.class);
             final List<ContextUsers> contextUsersWithoutPush = new LinkedList<ContextUsers>();
             for(ContextUsers cu : contextUsers) {
-                boolean[] hasListeners = pls.hasListenerFor(Autoboxing.I2i(getUserIds(cu)), cu.getContextId());
+                boolean[] hasListeners = new boolean[0]; // pls.hasListenerFor(Autoboxing.I2i(getUserIds(cu)), cu.getContextId());
                 cu = getUserIdsWithoutPushListener(cu, hasListeners);
                 if(cu != null) {
                     contextUsersWithoutPush.add(cu);

@@ -49,7 +49,6 @@
 
 package com.openexchange.push.impl;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,7 +57,6 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
-import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
@@ -118,27 +116,6 @@ public final class PushManagerRegistry implements PushListenerService {
         super();
         this.services = services;
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
-    }
-
-    @Override
-    public boolean[] hasListenerFor(int[] userIds, int contextId) {
-        boolean[] ret = new boolean[userIds.length];
-        Arrays.fill(ret, false);
-
-        // Iterate push managers
-        for (Iterator<PushManagerService> pushManagersIterator = getPushManagers(); pushManagersIterator.hasNext();) {
-            PushManagerService pushManager = pushManagersIterator.next();
-            if (pushManager instanceof PushManagerExtendedService) {
-                PushManagerExtendedService serviceExtended = (PushManagerExtendedService) pushManager;
-
-                boolean[] result = serviceExtended.hasListenerFor(contextId, userIds);
-                for (int i = 0; i < result.length; i++) {
-                    ret[i] |= result[i];
-                }
-            }
-        }
-
-        return ret;
     }
 
     @Override
