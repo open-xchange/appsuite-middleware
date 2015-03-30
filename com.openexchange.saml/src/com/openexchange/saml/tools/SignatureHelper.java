@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.saml.validation;
+package com.openexchange.saml.tools;
 
 import java.io.UnsupportedEncodingException;
 import javax.servlet.http.HttpServletRequest;
@@ -60,6 +60,8 @@ import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.signature.SignableXMLObject;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureValidator;
+import com.openexchange.saml.validation.ValidationError;
+import com.openexchange.saml.validation.ValidationFailedReason;
 
 
 /**
@@ -75,7 +77,7 @@ public class SignatureHelper {
      *
      * @param object The signed object
      * @param credential The credential
-     * @return A {@link ValidationError} if signature validation fails or <code>null</code> if thesignature is valid
+     * @return A {@link ValidationError} if signature validation fails or <code>null</code> if the signature is valid
      */
     public static ValidationError validateSignature(SignableXMLObject object, Credential credential) {
         try {

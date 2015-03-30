@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.impl;
 
 import static com.openexchange.saml.SAMLProperties.ACS_URL;
 import static com.openexchange.saml.SAMLProperties.ENABLE_METADATA_SERVICE;
@@ -63,6 +63,7 @@ import static com.openexchange.saml.SAMLProperties.SLS_URL;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.saml.SAMLConfig;
 
 /**
  * Default implementation of {@link SAMLConfig} based on {@link ConfigurationService} and

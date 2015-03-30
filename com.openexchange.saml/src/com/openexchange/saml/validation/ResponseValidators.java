@@ -58,6 +58,7 @@ import org.opensaml.saml2.core.StatusResponseType;
 import org.opensaml.xml.security.credential.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.saml.tools.SignatureHelper;
 
 
 /**

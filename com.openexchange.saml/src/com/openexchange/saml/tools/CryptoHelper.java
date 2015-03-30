@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.tools;
 
 import java.util.ArrayList;
 import java.util.List;

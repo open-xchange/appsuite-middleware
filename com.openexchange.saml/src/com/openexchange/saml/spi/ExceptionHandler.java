@@ -52,7 +52,7 @@ package com.openexchange.saml.spi;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.WebSSOProvider;
+import com.openexchange.saml.SAMLWebSSOProvider;
 
 
 /**
@@ -64,7 +64,7 @@ import com.openexchange.saml.WebSSOProvider;
 public interface ExceptionHandler {
 
     /**
-     * This method is called when {@link WebSSOProvider#handleAuthnResponse(HttpServletRequest, HttpServletResponse, com.openexchange.saml.SAMLConfig.Binding)}
+     * This method is called when {@link SAMLWebSSOProvider#handleAuthnResponse(HttpServletRequest, HttpServletResponse, com.openexchange.saml.SAMLConfig.Binding)}
      * failed with an exception. An exception handler is responsible for answering the HTTP request then. Normally the request is a redirect, triggered by the
      * IdP and the result is directly visible to the user. I.e. this method is responsible to help the user out of this messed up situation.
      *
@@ -75,7 +75,7 @@ public interface ExceptionHandler {
     void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception);
 
     /**
-     * This method is called when {@link WebSSOProvider#handleLogoutRequest(HttpServletRequest, HttpServletResponse, com.openexchange.saml.SAMLConfig.Binding)}
+     * This method is called when {@link SAMLWebSSOProvider#handleLogoutRequest(HttpServletRequest, HttpServletResponse, com.openexchange.saml.SAMLConfig.Binding)}
      * failed with an exception. An exception handler is responsible for answering the HTTP request then. Normally the request is a redirect, triggered by the
      * IdP and the result is directly visible to the user. I.e. this method is responsible to help the user out of this messed up situation.
      *

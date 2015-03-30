@@ -47,35 +47,32 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.spi;
+
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.LoginInfo;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link SessionProperties}
+ * An {@link AuthenticationService} that disables non-SAML authentication by throwing
+ * exceptions of type {@link LoginExceptionCodes#AUTHENTICATION_DISABLED}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SessionProperties {
+public class DisabledAuthenticationService implements AuthenticationService {
 
-    /**
-     * com.openexchange.saml.Authenticated
-     */
-    public static final String AUTHENTICATED = "com.openexchange.saml.Authenticated";
+    @Override
+    public Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException {
+        throw LoginExceptionCodes.AUTHENTICATION_DISABLED.create(DisabledAuthenticationService.class);
+    }
 
-    /**
-     * com.openexchange.saml.SubjectID
-     */
-    public static final String SUBJECT_ID = "com.openexchange.saml.SubjectID";
-
-    /**
-     * com.openexchange.saml.SessionNotOnOrAfter
-     */
-    public static final String SESSION_NOT_ON_OR_AFTER = "com.openexchange.saml.SessionNotOnOrAfter";
-
-    /**
-     * com.openexchange.saml.SessionIndex
-     */
-    public static final String SESSION_INDEX = "com.openexchange.saml.SessionIndex";
+    @Override
+    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
+        throw LoginExceptionCodes.AUTHENTICATION_DISABLED.create(DisabledAuthenticationService.class);
+    }
 
 }

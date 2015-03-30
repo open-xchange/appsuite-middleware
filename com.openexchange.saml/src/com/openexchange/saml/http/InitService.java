@@ -58,7 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
-import com.openexchange.saml.WebSSOProvider;
+import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -86,7 +86,7 @@ public class InitService extends SAMLServlet {
      * @param exceptionHandler
      * @param sessiondService
      */
-    public InitService(WebSSOProvider provider, ExceptionHandler exceptionHandler, SessiondService sessiondService) {
+    public InitService(SAMLWebSSOProvider provider, ExceptionHandler exceptionHandler, SessiondService sessiondService) {
         super(provider, exceptionHandler);
         this.sessiondService = sessiondService;
     }

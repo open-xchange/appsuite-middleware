@@ -74,14 +74,14 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.DependentServiceStarter;
-import com.openexchange.saml.DefaultConfig;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLProperties;
-import com.openexchange.saml.WebSSOProvider;
+import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.http.AssertionConsumerService;
 import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.http.MetadataService;
 import com.openexchange.saml.http.SingleLogoutService;
+import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.impl.SAMLLoginEnhancer;
 import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
 import com.openexchange.saml.impl.SAMLSessionInspector;
@@ -143,7 +143,7 @@ public class SAMLFeature extends DependentServiceStarter {
             DefaultConfig config = DefaultConfig.init(configService);
 
             HzStateManagement hzStateManagement = new HzStateManagement(services.getService(HazelcastInstance.class));
-            WebSSOProvider serviceProvider = new WebSSOProviderImpl(config, openSAML, hzStateManagement, services);
+            SAMLWebSSOProvider serviceProvider = new WebSSOProviderImpl(config, openSAML, hzStateManagement, services);
             SessiondService sessiondService = services.getService(SessiondService.class);
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(sessiondService), null));
 

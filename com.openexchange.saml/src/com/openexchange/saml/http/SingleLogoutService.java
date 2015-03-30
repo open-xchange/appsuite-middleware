@@ -58,7 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
-import com.openexchange.saml.WebSSOProvider;
+import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.spi.ExceptionHandler;
 
 
@@ -79,7 +79,7 @@ public class SingleLogoutService extends SAMLServlet {
      * @param provider
      * @param exceptionHandler
      */
-    public SingleLogoutService(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
+    public SingleLogoutService(SAMLWebSSOProvider provider, ExceptionHandler exceptionHandler) {
         super(provider, exceptionHandler);
     }
 

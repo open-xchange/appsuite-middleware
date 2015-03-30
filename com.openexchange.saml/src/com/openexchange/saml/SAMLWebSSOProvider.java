@@ -65,7 +65,7 @@ import com.openexchange.session.reservation.SessionReservationService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public interface WebSSOProvider {
+public interface SAMLWebSSOProvider {
 
     /**
      * Builds an authentication request and compiles a redirect URI compliant to the HTTP-Redirect binding.

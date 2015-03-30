@@ -51,7 +51,7 @@ package com.openexchange.saml.impl;
 
 import java.util.Map;
 import com.openexchange.authentication.Authenticated;
-import com.openexchange.saml.SessionProperties;
+import com.openexchange.saml.SAMLSessionProperties;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
@@ -80,7 +80,7 @@ public class SAMLLoginEnhancer implements Enhancer {
     @Override
     public Authenticated enhance(Authenticated authenticated, final Map<String, String> reservationState) {
         if (reservationState != null) {
-            String samlAuthenticated = reservationState.get(SessionProperties.AUTHENTICATED);
+            String samlAuthenticated = reservationState.get(SAMLSessionProperties.AUTHENTICATED);
             if (samlAuthenticated != null && Boolean.parseBoolean(samlAuthenticated)) {
                 Authenticated enhanced = backend.enhanceAuthenticated(authenticated, reservationState);
                 if (enhanced == null) {
@@ -90,18 +90,18 @@ public class SAMLLoginEnhancer implements Enhancer {
                 enhanced = new EnhancedAuthenticated(enhanced) {
                     @Override
                     protected void doEnhanceSession(Session session) {
-                        session.setParameter(SessionProperties.AUTHENTICATED, Boolean.TRUE.toString());
-                        String subjectID = reservationState.get(SessionProperties.SUBJECT_ID);
+                        session.setParameter(SAMLSessionProperties.AUTHENTICATED, Boolean.TRUE.toString());
+                        String subjectID = reservationState.get(SAMLSessionProperties.SUBJECT_ID);
                         if (subjectID != null) {
-                            session.setParameter(SessionProperties.SUBJECT_ID, subjectID);
+                            session.setParameter(SAMLSessionProperties.SUBJECT_ID, subjectID);
                         }
-                        String sessionIndex = reservationState.get(SessionProperties.SESSION_INDEX);
+                        String sessionIndex = reservationState.get(SAMLSessionProperties.SESSION_INDEX);
                         if (sessionIndex != null) {
-                            session.setParameter(SessionProperties.SESSION_INDEX, sessionIndex);
+                            session.setParameter(SAMLSessionProperties.SESSION_INDEX, sessionIndex);
                         }
-                        String sessionNotOnOrAfter = reservationState.get(SessionProperties.SESSION_NOT_ON_OR_AFTER);
+                        String sessionNotOnOrAfter = reservationState.get(SAMLSessionProperties.SESSION_NOT_ON_OR_AFTER);
                         if (sessionNotOnOrAfter != null) {
-                            session.setParameter(SessionProperties.SESSION_NOT_ON_OR_AFTER, sessionNotOnOrAfter);
+                            session.setParameter(SAMLSessionProperties.SESSION_NOT_ON_OR_AFTER, sessionNotOnOrAfter);
                         }
                     }
                 };

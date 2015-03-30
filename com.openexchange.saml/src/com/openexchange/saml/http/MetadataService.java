@@ -61,7 +61,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
-import com.openexchange.saml.WebSSOProvider;
+import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -83,7 +83,7 @@ public class MetadataService extends SAMLServlet {
      * @param provider
      * @param exceptionHandler
      */
-    public MetadataService(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
+    public MetadataService(SAMLWebSSOProvider provider, ExceptionHandler exceptionHandler) {
         super(provider, exceptionHandler);
     }
 

@@ -50,7 +50,7 @@
 package com.openexchange.saml.http;
 
 import javax.servlet.http.HttpServlet;
-import com.openexchange.saml.WebSSOProvider;
+import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.spi.ExceptionHandler;
 
 
@@ -64,11 +64,11 @@ public abstract class SAMLServlet extends HttpServlet {
 
     private static final long serialVersionUID = -8019507819002031614L;
 
-    protected final WebSSOProvider provider;
+    protected final SAMLWebSSOProvider provider;
 
     protected final ExceptionHandler exceptionHandler;
 
-    protected SAMLServlet(WebSSOProvider provider, ExceptionHandler exceptionHandler) {
+    protected SAMLServlet(SAMLWebSSOProvider provider, ExceptionHandler exceptionHandler) {
         super();
         this.provider = provider;
         this.exceptionHandler = exceptionHandler;

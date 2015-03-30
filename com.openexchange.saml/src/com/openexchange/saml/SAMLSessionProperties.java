@@ -49,97 +49,33 @@
 
 package com.openexchange.saml;
 
-import com.openexchange.saml.impl.DefaultConfig;
 
 /**
- * Contains configuration settings of the SAML feature.
+ * SAML specific keys of session properties.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
- * @see DefaultConfig
  */
-public interface SAMLConfig {
-
-    public enum Binding {
-        HTTP_REDIRECT, HTTP_POST;
-    }
+public class SAMLSessionProperties {
 
     /**
-     * Gets the human-readable name of the service provider.
-     *
-     * @return The provider name. Never <code>null</code>.
+     * com.openexchange.saml.Authenticated
      */
-    String getProviderName();
+    public static final String AUTHENTICATED = "com.openexchange.saml.Authenticated";
 
     /**
-     * Gets the entity ID of the service provider.
-     *
-     * @return The entity ID. Never <code>null</code>.
+     * com.openexchange.saml.SubjectID
      */
-    String getEntityID();
+    public static final String SUBJECT_ID = "com.openexchange.saml.SubjectID";
 
     /**
-     * Gets the URL of the assertion consumer service (ACS).
-     *
-     * @return The ACS URL. Never <code>null</code>.
+     * com.openexchange.saml.SessionNotOnOrAfter
      */
-    String getAssertionConsumerServiceURL();
+    public static final String SESSION_NOT_ON_OR_AFTER = "com.openexchange.saml.SessionNotOnOrAfter";
 
     /**
-     * Gets the URL of the single logout service.
-     *
-     * @return The URL or <code>null</code> if single logout is not enabled.
+     * com.openexchange.saml.SessionIndex
      */
-    String getSingleLogoutServiceURL();
-
-    /**
-     * Gets the binding via which LogoutResponse messages shall be delivered.
-     *
-     * @return The binding or <code>null</code> if single logout is not configured.
-     */
-    Binding getLogoutResponseBinding();
-
-    /**
-     * Gets the entity ID of the identity provider.
-     *
-     * @return The ID. Never <code>null</code>.
-     */
-    String getIdentityProviderEntityID();
-
-    /**
-     * Gets the URL of the identity provider (IDP).
-     *
-     * @return The URL. Never <code>null</code>.
-     */
-    String getIdentityProviderAuthnURL();
-
-    /**
-     * Whether the single logout profile is enabled.
-     *
-     * @return <code>true</code> if the profile is enabled, otherwise false.
-     */
-    boolean singleLogoutEnabled();
-
-    /**
-     * The URL of the single logout service.
-     *
-     * @return The URL or <code>null</code>, if the profile is not supported.
-     */
-    String getIdentityProviderLogoutURL();
-
-    /**
-     * Whether the SPs metadata XML shall be made available via HTTP. The according
-     * servlet will then be available under <code>http(s)://{hostname}/{prefix}/saml/metadata</code>.
-     *
-     * @return <code>true</code> if the servlet shall be registered, otherwise <code>false</code>.
-     */
-    boolean enableMetadataService();
-
-    /**
-     * The HTML template to use when logout responses are sent to the IdP via HTTP POST.
-     *
-     * @return The file name of the template which is located in the default template folder.
-     */
-    String getLogoutResponseTemplate();
+    public static final String SESSION_INDEX = "com.openexchange.saml.SessionIndex";
 
 }
