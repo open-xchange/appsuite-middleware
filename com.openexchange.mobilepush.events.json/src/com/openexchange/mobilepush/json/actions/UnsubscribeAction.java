@@ -111,7 +111,7 @@ public class UnsubscribeAction extends AbstractMobilePushAction {
         Session session = req.getSession();
         mnss.deleteSubscription(session.getContextId(), token, serviceId, provider);
 
-        pls.unregisterPermanentListenerFor(session.getUserId(), session.getContextId(), CLIENT_ID);
+        pls.unregisterPermanentListenerFor(session, CLIENT_ID);
 
         /*
          * return empty json object to indicate success
