@@ -65,7 +65,6 @@ import com.openexchange.admin.storage.interfaces.OXContextGroupStorageInterface;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.GlobalDatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupEvent;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupRegistry;
@@ -113,6 +112,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
             {
                 List<TableObject> tables = getTables(connection);
                 findReferences(tables, connection);
+                retainRelevantTables(tables);
                 tableObjects = sortTables(tables);
             }
             purgeData(contextGroupId, tableObjects, connection);
@@ -122,12 +122,12 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
         } finally {
             globalDBService.backWritableForGlobal(contextGroupId, connection);
         }
-        
+
         // TODO: Any caches to invalidate? Any post processing stuff?
     }
 
     /**
-     * Get a list of all tables that have a 'gid' column, which denotes that are used as global tables in the globaldb.
+     * Get a list of all tables in the globaldb.
      * 
      * @param connection The connection to the globaldb
      * @return A list with tables
@@ -136,59 +136,41 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
     private List<TableObject> getTables(Connection connection) throws SQLException {
         List<TableObject> tableObjects = new ArrayList<TableObject>();
 
-        DatabaseMetaData metaData = connection.getMetaData();
-        ResultSet rs = metaData.getTables(null, null, null, null);
-        while (rs.next()) {
-            String tableName = rs.getString("TABLE_NAME");
-            TableObject tableObject = new TableObject();
-            tableObject.setName(tableName);
-            ResultSet rsColumns = metaData.getColumns(connection.getCatalog(), null, tableName, null);
+        LOG.debug("Fetching table metadata");
+        ResultSet rs = null;
+        ResultSet rsColumns = null;
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+            rs = metaData.getTables(null, null, null, null);
+            while (rs.next()) {
+                String tableName = rs.getString("TABLE_NAME");
+                TableObject tableObject = new TableObject();
+                tableObject.setName(tableName);
 
-            while (rsColumns.next()) {
-                String columnName = rs.getString("COLUMN_NAME");
-                TableColumnObject tableColumnObject = new TableColumnObject();
-                tableColumnObject.setName(columnName);
-                tableColumnObject.setType(rs.getInt("DATA_TYPE"));
-                tableColumnObject.setColumnSize(rs.getInt("COLUMN_SIZE"));
+                LOG.debug("Fetching metadata for {}", tableName);
+                rsColumns = metaData.getColumns(connection.getCatalog(), null, tableName, null);
 
-                tableObject.addColumn(tableColumnObject);
+                while (rsColumns.next()) {
+                    String columnName = rsColumns.getString("COLUMN_NAME");
+                    TableColumnObject tableColumnObject = new TableColumnObject();
+                    tableColumnObject.setName(columnName);
+                    tableColumnObject.setType(rsColumns.getInt("DATA_TYPE"));
+                    tableColumnObject.setColumnSize(rsColumns.getInt("COLUMN_SIZE"));
 
-                if (columnName.equals("gid")) {
-                    tableObjects.add(tableObject);
+                    tableObject.addColumn(tableColumnObject);
                 }
+                tableObjects.add(tableObject);
+                LOG.debug("Table {} has following columns: {}", tableObject.getColumns());
+                rsColumns.close();
             }
-            rsColumns.close();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            DBUtils.closeSQLStuff(rs);
+            DBUtils.closeSQLStuff(rsColumns);
         }
 
         return tableObjects;
-    }
-
-    /**
-     * Sort the specified tables according to their foreign key references.
-     * The <a href="http://en.wikipedia.org/wiki/Topological_sorting">topological sorting</a> algorithm is used.
-     * 
-     * @param tableObjects The list with the table objects to sort
-     * @return A sorted list with table objects
-     */
-    private List<TableObject> sortTables(List<TableObject> tableObjects) {
-        List<TableObject> sorted = new ArrayList<TableObject>(tableObjects.size());
-
-        int index = 0;
-        while (!tableObjects.isEmpty()) {
-            TableObject tableObject = tableObjects.get(index);
-            if (!tableObject.hasCrossReferences()) {
-                sorted.add(tableObject);
-                tableObjects.remove(tableObject);
-                for (TableObject to : tableObjects) {
-                    to.removeCrossReferenceTable(tableObject.getName());
-                }
-                index--;
-            } else {
-                index++;
-            }
-        }
-
-        return sorted;
     }
 
     /**
@@ -208,9 +190,8 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
             try {
                 while (rsImportedKeys.next()) {
                     String primaryKeyTableName = rsImportedKeys.getString("PKTABLE_NAME");
-                    String primaryKeyColumnName = rsImportedKeys.getString("PKCOLUMN_NAME");
                     tableObject.addCrossReferenceTable(primaryKeyTableName);
-                    int position = Collections.binarySearch(tableObjects, primaryKeyColumnName);
+                    int position = Collections.binarySearch(tableObjects, primaryKeyTableName);
                     if (position >= 0) {
                         tableObjects.get(position).addReferencedBy(tableName);
                     }
@@ -223,6 +204,54 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
                 }
             }
         }
+    }
+
+    /**
+     * that have a 'gid' column, which denotes that are used as global tables
+     * 
+     * @param tableObjects
+     */
+    private void retainRelevantTables(List<TableObject> tableObjects) {
+        List<TableObject> tmp = new ArrayList<TableObject>(tableObjects);
+        boolean hasGidColumn = false;
+        for (TableObject tableObject : tmp) {
+            for (TableColumnObject column : tableObject.getColumns()) {
+                if (column.getName().equals("gid")) {
+                    hasGidColumn = true;
+                    break;
+                }
+            }
+            if (!hasGidColumn && !tableObject.hasCrossReferences()) {
+                tableObjects.remove(tableObject);
+            }
+            hasGidColumn = false;
+        }
+    }
+
+    /**
+     * Sort the specified tables according to their foreign key references.
+     * The <a href="http://en.wikipedia.org/wiki/Topological_sorting">topological sorting</a> algorithm is used.
+     * 
+     * @param tableObjects The list with the table objects to sort
+     * @return A sorted list with table objects
+     */
+    private List<TableObject> sortTables(List<TableObject> tableObjects) {
+        List<TableObject> sorted = new ArrayList<TableObject>(tableObjects.size());
+
+        int index = 0;
+        while (!tableObjects.isEmpty()) {
+            TableObject tableObject = tableObjects.get(index++);
+            if (!tableObject.hasCrossReferences()) {
+                sorted.add(tableObject);
+                tableObjects.remove(tableObject);
+                for (TableObject to : tableObjects) {
+                    to.removeCrossReferenceTable(tableObject.getName());
+                }
+                index--;
+            }
+        }
+
+        return sorted;
     }
 
     /**
