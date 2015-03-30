@@ -141,12 +141,12 @@ public final class PushManagerRegistry implements PushListenerService {
 
     @Override
     public boolean registerPermanentListenerFor(int userId, int contextId) throws OXException {
-        return DbUtils.insertPushRegistration(userId, contextId);
+        return PushDbUtils.insertPushRegistration(userId, contextId);
     }
 
     @Override
     public boolean unregisterPermanentListenerFor(int userId, int contextId) throws OXException {
-        return DbUtils.deletePushRegistration(userId, contextId);
+        return PushDbUtils.deletePushRegistration(userId, contextId);
     }
 
     @Override

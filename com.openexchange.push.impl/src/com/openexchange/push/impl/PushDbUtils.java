@@ -60,17 +60,17 @@ import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.impl.osgi.Services;
 
 /**
- * {@link DbUtils}
+ * {@link PushDbUtils}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DbUtils {
+public class PushDbUtils {
 
     /**
-     * Initializes a new {@link DbUtils}.
+     * Initializes a new {@link PushDbUtils}.
      */
-    private DbUtils() {
+    private PushDbUtils() {
         super();
     }
 
