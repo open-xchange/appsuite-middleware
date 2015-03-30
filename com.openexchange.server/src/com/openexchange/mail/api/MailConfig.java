@@ -690,14 +690,15 @@ public abstract class MailConfig {
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
                 if (masterPw == null) {
-                    throw MailConfigException.create("Property \"masterPassword\" not set");
+                    throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
                 }
                 mailConfig.password = masterPw;
             } else {
-                mailConfig.password = session.getPassword();
-            }
-            if (null == mailConfig.password) {
-                throw MailExceptionCode.MISSING_CONNECT_PARAM.create("password");
+                String sessionPassword = session.getPassword();
+                if (null == sessionPassword) {
+                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                }
+                mailConfig.password = sessionPassword;
             }
         } else {
             final String mailAccountPassword = mailAccount.getPassword();
