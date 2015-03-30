@@ -49,11 +49,15 @@
 
 package com.openexchange.file.storage.infostore.folder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link FolderWriter}
@@ -95,14 +99,58 @@ public final class FolderWriter {
      * @return The file storage folders
      */
     public static FileStorageFolder[] writeFolders(UserizedFolder[] folders, Locale locale) throws OXException {
+        return writeFolders(folders, locale, true);
+    }
+    
+    /**
+     * Converts an array of userized folders into their file storage folder equivalents.
+     *
+     * @param folders The userized folders to convert
+     * @param locale The locale to use, or <code>null</code> if not available
+     * @param infostoreOnly <code>true</code> to exclude folders from other modules, <code>false</code>, otherwise 
+     * @return The file storage folders
+     */
+    public static FileStorageFolder[] writeFolders(UserizedFolder[] folders, Locale locale, boolean infostoreOnly) throws OXException {
         if (null == folders) {
             return null;
         }
-        FileStorageFolder[] fileStorageFolders = new FileStorageFolder[folders.length];
-        for (int i = 0; i < folders.length; i++) {
-            fileStorageFolders[i] = writeFolder(folders[i], locale);
+        List<FileStorageFolder> fileStorageFolders = new ArrayList<FileStorageFolder>(folders.length);
+        for (UserizedFolder folder : folders) {
+            if (false == infostoreOnly || false == isNotInfostore(folder)) {
+                fileStorageFolders.add(writeFolder(folder, locale));
+            }
         }
-        return fileStorageFolders;
+        return fileStorageFolders.toArray(new FileStorageFolder[fileStorageFolders.size()]);
+    }
+
+    /**
+     * Gets a value indicating whether the supplied folder is no infostore or system folder. 
+     * 
+     * @param folder The folder to check
+     * @return <code>true</code> if the folder is no infostore-, file- or system-folder, <code>false</code>, otherwise
+     */
+    private static boolean isNotInfostore(UserizedFolder folder) {
+        if (null != folder) {
+            ContentType contentType = folder.getContentType();
+            if (null != contentType) {
+                int module = contentType.getModule();
+                if (FolderObject.INFOSTORE == module || FolderObject.FILE == module) {
+                    return false;
+                }
+                if (FolderObject.SYSTEM_MODULE == module) {
+                    try {
+                        int numericalID = Integer.parseInt(folder.getID());
+                        if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == numericalID || FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == numericalID || 
+                            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == numericalID) {
+                            return false;
+                        }   
+                    } catch (NumberFormatException e) {
+                        // no numerical identifier
+                    }
+                }
+            }
+        }
+        return true;
     }
 
 }

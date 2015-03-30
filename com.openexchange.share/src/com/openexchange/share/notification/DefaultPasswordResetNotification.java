@@ -62,8 +62,6 @@ public class DefaultPasswordResetNotification<T> extends AbstractNotification<T>
 
     private String username;
 
-    private String password;
-
     /**
      * Initializes a new {@link DefaultPasswordResetNotification}.
      */
@@ -76,17 +74,8 @@ public class DefaultPasswordResetNotification<T> extends AbstractNotification<T>
         return username;
     }
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
 }

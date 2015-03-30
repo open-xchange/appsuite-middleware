@@ -61,6 +61,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionRequest;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
@@ -86,6 +87,8 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link HttpClients} - Utility class for HTTP client.
+ * <p>
+ * See <a href="http://svn.apache.org/repos/asf/httpcomponents/httpclient/branches/4.0.x/httpclient/src/examples/org/apache/http/examples/client/">here</a> for several examples.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
@@ -125,9 +128,10 @@ public final class HttpClients {
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
         schemeRegistry.register(new Scheme("https", 443, EasySSLSocketFactory.getInstance()));
 
-        final ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, MAX_CONNECTIONS_PER_ROUTE, MAX_TOTAL_CONNECTIONS);
+        ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, MAX_CONNECTIONS_PER_ROUTE, MAX_TOTAL_CONNECTIONS);
+        ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, KEEP_ALIVE_DURATION_SECS));
 
-        final HttpParams httpParams = new BasicHttpParams();
+        HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
         HttpConnectionParams.setSoTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
         HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
@@ -200,52 +204,87 @@ public final class HttpClients {
         HttpConnectionParams.setConnectionTimeout(reqParams, timeoutMillis);
     }
 
+    /**
+     * Shuts-down given <code>HttpClient</code> instance
+     *
+     * @param httpclient The <code>HttpClient</code> instance to shut-down
+     */
+    public static void shutDown(HttpClient httpclient) {
+        if (null != httpclient) {
+            // When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+            httpclient.getConnectionManager().shutdown();
+        }
+    }
+
     /*------------------------------------------------------ CLASSES ------------------------------------------------------*/
 
     private static class ClientConnectionManager extends PoolingClientConnectionManager {
 
-        public ClientConnectionManager(final SchemeRegistry registry, final int maxPerRoute, final int maxTotal) {
+        private volatile IdleConnectionCloser idleConnectionCloser;
+
+        ClientConnectionManager(SchemeRegistry registry, int maxPerRoute, int maxTotal) {
             super(registry);
             setMaxTotal(maxTotal);
             setDefaultMaxPerRoute(maxPerRoute);
         }
 
+        /**
+         * Sets the associated {@link IdleConnectionCloser} instance
+         *
+         * @param idleConnectionCloser The instance to set
+         */
+        void setIdleConnectionCloser(IdleConnectionCloser idleConnectionCloser) {
+            this.idleConnectionCloser = idleConnectionCloser;
+        }
+
         @Override
-        public ClientConnectionRequest requestConnection(final HttpRoute route, final Object state) {
-            IdleConnectionCloser.ensureRunning(this, KEEP_ALIVE_DURATION_SECS, KEEP_ALIVE_MONITOR_INTERVAL_SECS);
+        public ClientConnectionRequest requestConnection(HttpRoute route, Object state) {
+            IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
+            if (null != idleConnectionClose) {
+                idleConnectionClose.ensureRunning(KEEP_ALIVE_MONITOR_INTERVAL_SECS);
+            }
             return super.requestConnection(route, state);
+        }
+
+        @Override
+        public void shutdown() {
+            IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
+            if (null != idleConnectionClose) {
+                idleConnectionClose.stop();
+                this.idleConnectionCloser = null;
+            }
+            super.shutdown();
         }
     }
 
     private static class IdleConnectionCloser implements Runnable {
 
         private final ClientConnectionManager manager;
-
         private final int idleTimeoutSeconds;
+        private volatile ScheduledTimerTask timerTask;
 
-        private volatile static ScheduledTimerTask timerTask;
-
-        public IdleConnectionCloser(final ClientConnectionManager manager, final int idleTimeoutSeconds) {
+        IdleConnectionCloser(ClientConnectionManager manager, int idleTimeoutSeconds) {
             super();
             this.manager = manager;
             this.idleTimeoutSeconds = idleTimeoutSeconds;
         }
 
-        public static void ensureRunning(final ClientConnectionManager manager, final int idleTimeoutSeconds, final int checkIntervalSeconds) {
+        void ensureRunning(int checkIntervalSeconds) {
             ScheduledTimerTask tmp = timerTask;
             if (null == tmp) {
                 synchronized (IdleConnectionCloser.class) {
                     tmp = timerTask;
                     if (null == tmp) {
-                        final IdleConnectionCloser task = new IdleConnectionCloser(manager, idleTimeoutSeconds);
-                        tmp = ServerServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(task, checkIntervalSeconds, checkIntervalSeconds, TimeUnit.SECONDS);
+                        tmp = ServerServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(this, checkIntervalSeconds, checkIntervalSeconds, TimeUnit.SECONDS);
                         timerTask = tmp;
                     }
                 }
             }
         }
 
-        private static void stop() {
+        void stop() {
             ScheduledTimerTask tmp = timerTask;
             if (null != tmp) {
                 synchronized (IdleConnectionCloser.class) {
@@ -280,7 +319,7 @@ public final class HttpClients {
         }
 
         @Override
-        public long getKeepAliveDuration(final HttpResponse response, final HttpContext context) {
+        public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
             // Keep-alive for the shorter of 20 seconds or what the server specifies.
             long timeout = KEEP_ALIVE_DURATION_SECS * 1000;
 
@@ -319,7 +358,7 @@ public final class HttpClients {
          * <http://www.apache.org/>.
          */
 
-        public GzipDecompressingEntity(final HttpEntity entity) {
+        public GzipDecompressingEntity(HttpEntity entity) {
             super(entity);
         }
 

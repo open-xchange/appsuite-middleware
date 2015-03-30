@@ -67,11 +67,4 @@ public interface PasswordResetNotification<T> extends ShareNotification<T> {
      */
     String getUsername();
 
-    /**
-     * Gets the new password about that the recipient shall be notified.
-     *
-     * @return The password
-     */
-    String getPassword();
-
 }

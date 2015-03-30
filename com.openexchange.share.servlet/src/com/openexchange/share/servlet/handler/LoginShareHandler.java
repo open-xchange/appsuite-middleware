@@ -102,7 +102,7 @@ public class LoginShareHandler extends AbstractShareHandler {
             if (!share.getGuest().isPasswordSet()) {
                 message = urlEncode(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, share.getGuest().getLocale()), replacement));
                 messageType = "WARN";
-                action = "setPassword";
+                action = "askPassword";
             } else {
                 User user = ShareServiceLookup.getService(UserService.class).getUser(target.getOwnedBy(), share.getGuest().getContextID());
                 message = urlEncode(String.format(translate(ShareServletStrings.NEW_SHARE, share.getGuest().getLocale()), user.getDisplayName(), replacement));

@@ -50,7 +50,9 @@
 package com.openexchange.admin.console.user;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -75,8 +77,10 @@ import com.openexchange.passwordmechs.PasswordMech;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GenerateMasterPasswordCLT {
-    
-    private enum Parameter {adminuser, adminpass, encryption, mpasswdfile}
+
+    private enum Parameter {
+        adminuser, adminpass, encryption, mpasswdfile
+    }
 
     private static final Options options = new Options();
     static {
@@ -111,7 +115,8 @@ public class GenerateMasterPasswordCLT {
         StringBuilder builder = new StringBuilder();
         Map<Parameter, String> parameters = new HashMap<Parameter, String>();
         initParameters(parameters);
-
+        boolean printUsage = false;
+        String exceptionMessage = new String();
         try {
             CommandLine cl = parser.parse(options, args);
             if (cl.hasOption("h")) {
@@ -138,19 +143,24 @@ public class GenerateMasterPasswordCLT {
             if (cl.hasOption("f")) {
                 parameters.put(Parameter.mpasswdfile, cl.getOptionValue("f"));
             }
-            invoke(parameters);
+
             builder.setLength(0);
+
+            invoke(parameters);
             builder.append("Saved password for user '").append(parameters.get(Parameter.adminuser)).append("' and encryption '").append(parameters.get(Parameter.encryption)).append("' in '").append(parameters.get(Parameter.mpasswdfile)).append("'.");
             System.out.println(builder.toString());
+            System.exit(0);
         } catch (ParseException | NoSuchAlgorithmException | IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            System.out.println();
-            printUsage(-1);
+            exceptionMessage = e.getMessage();
+            printUsage = true;
         } catch (IOException e) {
-            builder.setLength(0);
-            builder.append("Unable to save password for user '").append(parameters.get(Parameter.adminuser)).append("' and encryption '").append(parameters.get(Parameter.encryption)).append("' in '").append(parameters.get(Parameter.mpasswdfile)).append("'.");
-            System.out.println(builder.toString());
-            System.out.println(e.getMessage());
+            exceptionMessage = e.getMessage();
+        }
+        builder.append("Unable to save password for user '").append(parameters.get(Parameter.adminuser)).append("' and encryption '").append(parameters.get(Parameter.encryption)).append("' in '").append(parameters.get(Parameter.mpasswdfile)).append("'.");
+        builder.append("\n").append(exceptionMessage);
+        System.err.println(builder.toString());
+        if (printUsage) {
+            printUsage(-1);
         }
     }
 
@@ -158,23 +168,53 @@ public class GenerateMasterPasswordCLT {
      * Invoke
      * 
      * @param parameters
+     * @throws IOException
      * @throws FileNotFoundException
      */
-    private static void invoke(Map<Parameter, String> parameters) throws FileNotFoundException {
+    private static void invoke(Map<Parameter, String> parameters) throws IOException {
         StringBuilder builder = new StringBuilder();
-        builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass));
-        PrintWriter writer = new PrintWriter(parameters.get(Parameter.mpasswdfile));
-        writer.println(builder.toString());
-        writer.close();
+        String mpasswdFilename = parameters.get(Parameter.mpasswdfile);
+        File file = new File(mpasswdFilename);
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            boolean updated = false;
+            while ((line = br.readLine()) != null) {
+                if (!line.startsWith("#") && !Strings.isEmpty(line)) {
+                    builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass)).append("\n");
+                    updated = true;
+                } else {
+                    builder.append(line).append("\n");
+                }
+            }
+
+            if (!updated) {
+                builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass)).append("\n");
+            }
+
+            PrintWriter writer = new PrintWriter(file);
+            writer.println(builder.toString());
+            writer.close();
+        } catch (FileNotFoundException e) {
+            throw e;
+        }
     }
 
+    /**
+     * Encrypt the specified password
+     * 
+     * @param encryption The encryption algorithm
+     * @param password The plain-text password to encrypt
+     * @return The encrypted password
+     * @throws UnsupportedEncodingException If the encoding is not supported
+     * @throws NoSuchAlgorithmException If the specified encryption algorithm is not found.
+     */
     private static String encryptPassword(final String encryption, final String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         PasswordMech pm = PasswordMech.getPasswordMechFor(encryption);
         return pm.encode(password);
     }
 
     /**
-     * Initialize defaults
+     * Initialise defaults
      * 
      * @param parameters
      */

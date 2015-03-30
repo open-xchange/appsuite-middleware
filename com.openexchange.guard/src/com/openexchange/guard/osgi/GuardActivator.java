@@ -97,7 +97,12 @@ public class GuardActivator extends HousekeepingActivator {
                     logger.info("No Guard end-point defined via property {}", propName);
                     return;
                 }
-                logger.info("Starting bundle {}", context.getBundle().getSymbolicName());
+                // Ensure ending slash '/' character
+                endPoint = endPoint.trim();
+                if (!endPoint.endsWith("/")) {
+                    endPoint = new StringBuilder(endPoint).append('/').toString();
+                }
+                logger.info("Starting bundle {} using end point \"{}\"", context.getBundle().getSymbolicName(), endPoint);
                 AbstractGuardAccess.setGuardApi(new GuardApi(endPoint, service));
             }
             Services.setServiceLookup(this);
@@ -118,7 +123,10 @@ public class GuardActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        AbstractGuardAccess.setGuardApi(null);
+        GuardApi guardApi = AbstractGuardAccess.unsetGuardApi();
+        if (null != guardApi) {
+            guardApi.shutDown();
+        }
         Services.setServiceLookup(null);
         super.stopBundle();
     }

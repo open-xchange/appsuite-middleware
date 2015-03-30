@@ -149,6 +149,10 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
         }
         User user = userService.getUser(share.getGuest().getGuestID(), context);
 
+        if (!share.getGuest().isPasswordSet()) {
+            return user;
+        }
+
         // Authenticate the user
         if (!userService.authenticate(user, loginInfo.getPassword())) {
             GuestService guestService = ServerServiceRegistry.getInstance().getService(GuestService.class);
