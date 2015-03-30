@@ -66,6 +66,7 @@ import com.openexchange.push.PushUtility;
 import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.credstorage.Credentials;
+import com.openexchange.push.credstorage.DefaultCredentials;
 import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -125,26 +126,47 @@ public final class PushManagerRegistry implements PushListenerService {
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
     }
 
-    @Override
-    public boolean registerPermanentListenerFor(int userId, int contextId, String clientId) throws OXException {
-        if (!PushUtility.allowedClient(clientId)) {
-            /*
-             * No permanent push listener for the client.
-             */
-            return false;
-        }
-        return PushDbUtils.insertPushRegistration(userId, contextId, clientId);
+    private CredentialStorage optCredentialStorage() throws OXException {
+        CredentialStorageProvider storageProvider = Services.optService(CredentialStorageProvider.class);
+        return null == storageProvider ? null : storageProvider.getCredentialStorage();
+    }
+
+    private Credentials optCredentials(int userId, int contextId) throws OXException {
+        CredentialStorage storage = optCredentialStorage();
+        return storage.getCredentials(userId, contextId);
     }
 
     @Override
-    public boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws OXException {
+    public boolean registerPermanentListenerFor(Session session, String clientId) throws OXException {
         if (!PushUtility.allowedClient(clientId)) {
             /*
              * No permanent push listener for the client.
              */
             return false;
         }
-        return PushDbUtils.deletePushRegistration(userId, contextId, clientId);
+
+        CredentialStorage storage = optCredentialStorage();
+        if (null != storage) {
+            DefaultCredentials credentials = new DefaultCredentials();
+            credentials.setContextId(session.getContextId());
+            credentials.setUserId(session.getUserId());
+            credentials.setLogin(session.getLoginName());
+            credentials.setPassword(session.getPassword());
+            storage.storeCredentials(credentials);
+        }
+
+        return PushDbUtils.insertPushRegistration(session.getUserId(), session.getContextId(), clientId);
+    }
+
+    @Override
+    public boolean unregisterPermanentListenerFor(Session session, String clientId) throws OXException {
+        if (!PushUtility.allowedClient(clientId)) {
+            /*
+             * No permanent push listener for the client.
+             */
+            return false;
+        }
+        return PushDbUtils.deletePushRegistration(session.getUserId(), session.getContextId(), clientId);
     }
 
     @Override
@@ -159,7 +181,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
         // Get credentials
         {
-            Credentials credentials = optCredentials(pushUser);
+            Credentials credentials = optCredentials(pushUser.getUserId(), pushUser.getContextId());
             if (null != credentials) {
                 session.setPassword(credentials.getPassword());
                 session.setLoginName(credentials.getLogin());
@@ -200,20 +222,6 @@ public final class PushManagerRegistry implements PushListenerService {
         }
 
         return session;
-    }
-
-    private Credentials optCredentials(PushUser pushUser) throws OXException {
-        CredentialStorageProvider storageProvider = Services.optService(CredentialStorageProvider.class);
-        if (null == storageProvider) {
-            return null;
-        }
-
-        CredentialStorage storage = storageProvider.getCredentialStorage();
-        if (null == storage) {
-            return null;
-        }
-
-        return storage.getCredentials(pushUser.getUserId(), pushUser.getContextId());
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------

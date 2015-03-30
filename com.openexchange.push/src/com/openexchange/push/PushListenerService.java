@@ -102,23 +102,21 @@ public interface PushListenerService {
     /**
      * Registers a permanent listener for specified user.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session
      * @param clientId The client identifier
      * @return <code>true</code> if a permanent listener is successfully registered; otherwise <code>false</code> if there is already such a listener
      * @throws OXException If operation fails
      */
-    boolean registerPermanentListenerFor(int userId, int contextId, String clientId) throws OXException;
+    boolean registerPermanentListenerFor(Session session, String clientId) throws OXException;
 
     /**
      * Unregisters a permanent listener for specified user.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session
      * @param clientId The client identifier
      * @return <code>true</code> if a permanent listener is successfully unregistered; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
-    boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws OXException;
+    boolean unregisterPermanentListenerFor(Session session, String clientId) throws OXException;
 
 }
