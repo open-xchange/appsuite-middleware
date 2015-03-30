@@ -136,6 +136,31 @@ public final class PushManagerRegistry implements PushListenerService {
         return storage.getCredentials(userId, contextId);
     }
 
+    /**
+     * Starts the permanent listeners for given push users.
+     *
+     * @param pushUsers The push users
+     */
+    public void startPermanentListenersFor(List<PushUser> pushUsers) {
+        for (PushUser pushUser : pushUsers) {
+            for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+                try {
+                    PushManagerService pushManager = pushManagersIterator.next();
+                    // Initialize a new push listener for session
+                    Session ses = generateSessionFor(new PushUser(pushUser.getUserId(), pushUser.getContextId()));
+                    PushListener pl = pushManager.startListener(ses);
+                    if (null != pl) {
+                        LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
+                    }
+                } catch (OXException e) {
+                    LOG.error("Push error while starting permanent push listener.", e);
+                } catch (RuntimeException e) {
+                    LOG.error("Runtime error while starting permanent push listener.", e);
+                }
+            }
+        }
+    }
+
     @Override
     public boolean registerPermanentListenerFor(Session session, String clientId) throws OXException {
         if (!PushUtility.allowedClient(clientId)) {
@@ -170,12 +195,12 @@ public final class PushManagerRegistry implements PushListenerService {
                     }
                     PushListener pl = pushManager.startListener(ses);
                     if (null != pl) {
-                        LOG.debug("Started push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                        LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
                     }
                 } catch (OXException e) {
-                    LOG.error("Push error while starting push listener.", e);
+                    LOG.error("Push error while starting permanent push listener.", e);
                 } catch (RuntimeException e) {
-                    LOG.error("Runtime error while starting push listener.", e);
+                    LOG.error("Runtime error while starting permanent push listener.", e);
                 }
             }
         }
