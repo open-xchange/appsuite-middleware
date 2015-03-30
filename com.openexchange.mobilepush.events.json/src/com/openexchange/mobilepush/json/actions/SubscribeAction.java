@@ -110,7 +110,7 @@ public class SubscribeAction extends AbstractMobilePushAction {
 
         ServerSession session = req.getSession();
         mnss.createSubscription(session, token, serviceId, provider);
-        pls.registerPermanentListenerFor(session.getUserId(), session.getContextId(), CLIENT_ID);
+        pls.registerPermanentListenerFor(session, CLIENT_ID);
 
         /*
          * return empty json object to indicate success
