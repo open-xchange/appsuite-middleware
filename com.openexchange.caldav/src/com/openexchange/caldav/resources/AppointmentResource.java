@@ -358,9 +358,12 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             CalendarDataObject appointment = parent.load(object, true);
             CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.getChangeExceptions(object.getObjectID()) : null;
             /*
-             * transform change- to delete-exceptions where user is removed from participants if needed (bug #26293)
+             * load change exceptions, transforming them to delete-exceptions where user is removed from participants if needed (bug #26293)
              */
             if (null != changeExceptions && 0 < changeExceptions.length) {
+                for (int i = 0; i < changeExceptions.length; i++) {
+                    changeExceptions[i] = parent.load(changeExceptions[i], true);
+                }
                 changeExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, appointment, changeExceptions);
             }
             /*
@@ -372,8 +375,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             if (null != changeExceptions && 0 < changeExceptions.length) {
                 for (Appointment changeException : changeExceptions) {
-                    icalEmitter.writeAppointment(session, parent.load(changeException, true),
-                        factory.getContext(), conversionErrors, conversionWarnings);
+                    icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
                 }
             }
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();

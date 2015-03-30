@@ -1,3 +1,15 @@
+open-xchange-audit (7.6.1-25) stable; urgency=medium
+
+  * Build for patch 2015-03-30 (2459)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Mar 2015 13:57:24 +0100
+
+open-xchange-audit (7.6.1-24) stable; urgency=medium
+
+  * Build for patch 2015-03-20
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 23 Mar 2015 14:18:01 +0100
+
 open-xchange-audit (7.6.1-23) stable; urgency=medium
 
   * Build for patch 2015-03-18

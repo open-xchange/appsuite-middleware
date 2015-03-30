@@ -1,3 +1,15 @@
+open-xchange-system (7.6.1-25) stable; urgency=medium
+
+  * Build for patch 2015-03-30 (2459)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 26 Mar 2015 13:57:07 +0100
+
+open-xchange-system (7.6.1-24) stable; urgency=medium
+
+  * Build for patch 2015-03-20
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 23 Mar 2015 14:17:45 +0100
+
 open-xchange-system (7.6.1-23) stable; urgency=medium
 
   * Build for patch 2015-03-18
