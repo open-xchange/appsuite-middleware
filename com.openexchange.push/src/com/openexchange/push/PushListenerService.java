@@ -80,15 +80,7 @@ public interface PushListenerService {
      */
     boolean stopListenerFor(Session session) throws OXException;
 
-    /**
-     * Checks cluster-wide if the user has already a registered listener
-     *
-     * @param userIds - The user identifiers
-     * @param contextId - The context id
-     * @return An array of <code>boolean</code>s which indicates if the user has an activated push listener. The order of the booleans is arranged to the input of usersIds
-     * @throws OXException If operation fails
-     */
-    boolean[] hasListenerFor(int[] userIds, int contextId) throws OXException;
+    // -----------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Gets the users with permanent listeners
