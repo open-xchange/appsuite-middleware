@@ -82,6 +82,18 @@ open-xchange-freebusy (7.6.2-0) unstable; urgency=medium
 
  -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Wed, 17 Sep 2014 12:36:11 +0200
 
+open-xchange-freebusy (7.6.1-25) stable; urgency=medium
+
+  * Build for patch 2015-03-30 (2459)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Thu, 26 Mar 2015 13:57:44 +0100
+
+open-xchange-freebusy (7.6.1-24) stable; urgency=medium
+
+  * Build for patch 2015-03-20
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 23 Mar 2015 14:18:17 +0100
+
 open-xchange-freebusy (7.6.1-23) stable; urgency=medium
 
   * Build for patch 2015-03-18
