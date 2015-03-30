@@ -68,6 +68,7 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.imapidle.ImapIdleConfiguration;
 import com.openexchange.push.imapidle.ImapIdleDeleteListener;
@@ -215,8 +216,8 @@ public class ImapIdleActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, SessiondService.class, ThreadPoolService.class,
-            ContextService.class, UserService.class };
+        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, SessiondService.class,
+            ThreadPoolService.class, ContextService.class, UserService.class, PushListenerService.class };
     }
 
     @Override
