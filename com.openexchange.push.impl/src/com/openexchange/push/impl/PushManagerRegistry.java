@@ -55,6 +55,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.MailConfig.PasswordSource;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
@@ -149,7 +152,35 @@ public final class PushManagerRegistry implements PushListenerService {
     public Session generateSessionFor(PushUser pushUser) throws OXException {
         GeneratedSession session = new GeneratedSession(pushUser.getUserId(), pushUser.getContextId());
 
-        // TODO: Try to determine associated password
+        // Password
+        {
+            PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource();
+            switch (passwordSource) {
+                case GLOBAL: {
+                    // Just for convenience
+                    String masterPassword = MailProperties.getInstance().getMasterPassword();
+                    if (null == masterPassword) {
+                        throw PushExceptionCodes.MISSING_MASTER_PASSWORD.create();
+                    }
+                    session.setPassword(masterPassword);
+                    break;
+                }
+                case SESSION:
+                    // Fall-through
+                default:
+
+                    break;
+            }
+        }
+
+        // Login
+        {
+            String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
+            if (null != proxyDelimiter && null == session.getLoginName()) {
+                // Login cannot be determined
+                throw PushExceptionCodes.MISSING_LOGIN_STRING.create();
+            }
+        }
 
         return session;
     }

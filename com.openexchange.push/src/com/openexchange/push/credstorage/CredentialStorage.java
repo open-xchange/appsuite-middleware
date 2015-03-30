@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,44 @@
  *
  */
 
+package com.openexchange.push.credstorage;
 
-package com.openexchange.hazelcast.configuration;
-
-import com.hazelcast.config.Config;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link HazelcastConfigurationService} - Provides the Hazelcast configuration.
+ * {@link CredentialStorage} - The credential storage.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
  */
-@SingletonService
-public interface HazelcastConfigurationService  {
+public interface CredentialStorage {
 
     /**
-     * Gets a value indicating whether Hazelcast services are enabled or not.
+     * Gets the credentials for specified user.
      *
-     * @return <code>true</code> if Hazelcast is enabled, <code>false</code>, otherwise
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The credentials or <code>null</code> if there are no credentials for the given user
+     * @throws OXException If returning credentials fails
      */
-    boolean isEnabled() throws OXException;
+    Credentials getCredentials(int userId, int contextId) throws OXException;
 
     /**
-     * Gets the Hazelcast configuration.
+     * Stores the given credentials
      *
-     * @return The configuration
+     * @param credentials The credentials
+     * @throws OXException If store operation fails
      */
-    Config getConfig() throws OXException;
+    void storeCredentials(Credentials credentials) throws OXException;
 
     /**
-     * Gets the actual name of a distributed map based on the supplied prefix. <p/>
+     * Deletes the credentials for specified user.
      *
-     * To support some kind of versioning, map names may be defined with an index suffix in configuration files, such as
-     * <code>mymap-5</code>. This method browses the known map configurations for the full name of the map as registered in hazelcast
-     * based on the supplied prefix, which would be <code>mymap-</code> in the above example.
-     *
-     * @param namePrefix The name prefix, e.g. <code>mymap-</code>
-     * @return The full name of the map, e.g. <code>mymap-5</code>
-     * @throws OXException If no matching map configuration was found
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The deleted credentials or <code>null</code> if there are no credentials for the given user
+     * @throws OXException If delete operation fails
      */
-    String discoverMapName(String namePrefix) throws OXException;
+    Credentials deleteCredentials(int userId, int contextId) throws OXException;
 
 }
