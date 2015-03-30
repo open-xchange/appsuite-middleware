@@ -51,21 +51,32 @@ package com.openexchange.push.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.event.EventFactoryService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.impl.PushEventHandler;
 import com.openexchange.push.impl.PushManagerRegistry;
+import com.openexchange.push.impl.credstorage.inmemory.HazelcastCredentialStorage;
+import com.openexchange.push.impl.credstorage.inmemory.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
@@ -77,7 +88,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushImplActivator extends HousekeepingActivator {
+public final class PushImplActivator extends HousekeepingActivator implements HazelcastInstanceNotActiveExceptionHandler {
 
     /**
      * Initializes a new {@link PushImplActivator}.
@@ -87,17 +98,36 @@ public final class PushImplActivator extends HousekeepingActivator {
     }
 
     @Override
+    public void propagateNotActive(HazelcastInstanceNotActiveException notActiveException) {
+        BundleContext context = this.context;
+        if (null != context) {
+            context.registerService(HazelcastInstanceNotActiveException.class, notActiveException, null);
+        }
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { HazelcastConfigurationService.class };
     }
 
     @Override
     public void startBundle() throws Exception {
-        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushImplActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushImplActivator.class);
         try {
             log.info("starting bundle: com.openexchange.push.impl");
 
             Services.setServiceLookup(this);
+            final BundleContext context = this.context;
 
             // Initialize and open service tracker for push manager services
             PushManagerRegistry.init(this);
@@ -111,16 +141,65 @@ public final class PushImplActivator extends HousekeepingActivator {
             trackService(EventAdmin.class);
             trackService(DatabaseService.class);
 
+            final HazelcastCredentialStorage hzCredStorage = new HazelcastCredentialStorage(this, this);
+            // Check Hazelcast stuff
+            {
+                final HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
+                if (hazelcastConfig.isEnabled()) {
+                    // Track HazelcastInstance service
+                    ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> customizer = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+
+                        @Override
+                        public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
+                            HazelcastInstance hazelcastInstance = context.getService(reference);
+                            try {
+                                String mapName = hazelcastConfig.discoverMapName("credentials");
+                                if (null == mapName) {
+                                    context.ungetService(reference);
+                                    return null;
+                                }
+                                addService(HazelcastInstance.class, hazelcastInstance);
+                                hzCredStorage.setHzMapName(mapName);
+                                hzCredStorage.changeBackingMapToHz();
+                                return hazelcastInstance;
+                            } catch (OXException e) {
+                                log.warn("Couldn't initialize remote binary sources map.", e);
+                            } catch (RuntimeException e) {
+                                log.warn("Couldn't initialize remote binary sources map.", e);
+                            }
+                            context.ungetService(reference);
+                            return null;
+                        }
+
+                        @Override
+                        public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                            // Ignore
+                        }
+
+                        @Override
+                        public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+                            removeService(HazelcastInstance.class);
+                            hzCredStorage.changeBackingMapToLocalMap();
+                            context.ungetService(reference);
+                        }
+                    };
+                    track(HazelcastInstance.class, customizer);
+                }
+            }
+
             openTrackers();
 
             registerService(CreateTableService.class, new CreatePushTable(), null);
             registerService(DeleteListener.class, new PushDeleteListener(), null);
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PushCreateTableTask()));
 
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
+            registerService(CredentialStorage.class, hzCredStorage);
             registerService(PushListenerService.class, PushManagerRegistry.getInstance());
 
             // Register event handler to detect removed sessions
-            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, new PushEventHandler(), serviceProperties);
         } catch (Exception e) {

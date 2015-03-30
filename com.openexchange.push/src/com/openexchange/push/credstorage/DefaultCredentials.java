@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,82 @@
  *
  */
 
-
-package com.openexchange.hazelcast.configuration;
-
-import com.hazelcast.config.Config;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+package com.openexchange.push.credstorage;
 
 /**
- * {@link HazelcastConfigurationService} - Provides the Hazelcast configuration.
+ * {@link DefaultCredentials} - The default credentials implementation.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
  */
-@SingletonService
-public interface HazelcastConfigurationService  {
+public class DefaultCredentials implements Credentials {
+
+    private int contextId;
+    private int userId;
+    private String password;
+    private String login;
 
     /**
-     * Gets a value indicating whether Hazelcast services are enabled or not.
-     *
-     * @return <code>true</code> if Hazelcast is enabled, <code>false</code>, otherwise
+     * Initializes a new {@link DefaultCredentials}.
      */
-    boolean isEnabled() throws OXException;
+    public DefaultCredentials() {
+        super();
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getLogin() {
+        return login;
+    }
 
     /**
-     * Gets the Hazelcast configuration.
+     * Sets the context identifier
      *
-     * @return The configuration
+     * @param contextId The context identifier to set
      */
-    Config getConfig() throws OXException;
+    public void setContextId(int contextId) {
+        this.contextId = contextId;
+    }
 
     /**
-     * Gets the actual name of a distributed map based on the supplied prefix. <p/>
+     * Sets the user identifier
      *
-     * To support some kind of versioning, map names may be defined with an index suffix in configuration files, such as
-     * <code>mymap-5</code>. This method browses the known map configurations for the full name of the map as registered in hazelcast
-     * based on the supplied prefix, which would be <code>mymap-</code> in the above example.
-     *
-     * @param namePrefix The name prefix, e.g. <code>mymap-</code>
-     * @return The full name of the map, e.g. <code>mymap-5</code>
-     * @throws OXException If no matching map configuration was found
+     * @param userId The user identifier to set
      */
-    String discoverMapName(String namePrefix) throws OXException;
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * Sets the password
+     *
+     * @param password The password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * Sets the login
+     *
+     * @param login The login to set
+     */
+    public void setLogin(String login) {
+        this.login = login;
+    }
 
 }

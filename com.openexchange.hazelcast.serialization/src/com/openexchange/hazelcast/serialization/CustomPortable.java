@@ -111,6 +111,10 @@ public interface CustomPortable extends Portable {
      * <li><code>  17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
      * <li><code>  18</code>: com.openexchange.sessiond.portable.PortableTokenSessionControl</li>
      * <li><code>  19</code>: com.openexchange.sessiond.serialization.PortableContextSessionsCleaner</li>
+     *
+     *
+     * <li><code>  101</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials</li>
+     * <li><code>  102</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUser</li>
      * </ul>
      *
      * @return The class ID

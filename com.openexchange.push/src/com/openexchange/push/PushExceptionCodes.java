@@ -77,7 +77,15 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An SQL error occurred: %1$s
      */
-    SQL_ERROR("An SQL error occurred: %1$s", Category.CATEGORY_ERROR, 4, null)
+    SQL_ERROR("An SQL error occurred: %1$s", Category.CATEGORY_ERROR, 4, null),
+    /**
+     * Missing master password for mail access.
+     */
+    MISSING_MASTER_PASSWORD("Missing master password for mail access.", Category.CATEGORY_CONFIGURATION, 5, null),
+    /**
+     * Missing login string for mail access.
+     */
+    MISSING_LOGIN_STRING("Missing login string for mail access.", Category.CATEGORY_CONFIGURATION, 6, null),
 
     ;
 
