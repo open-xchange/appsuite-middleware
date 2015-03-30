@@ -73,6 +73,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.session.ServerSession;
@@ -84,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFolderAwareFolderAccess {
 
-    private static final String INFOSTORE_FOLDER_ID = "9";
+    private static final String INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
     private static final String TREE_ID = "1";
 
     private final ServerSession session;
@@ -303,6 +304,11 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
         }
     }
 
+    /**
+     * Gets the folder service, throwing an appropriate exception in case the service is absent.
+     * 
+     * @return The folder service
+     */
     private FolderService getFolderService() throws OXException {
         FolderService folderService = Services.getService(FolderService.class);
         if (null == folderService) {
@@ -311,6 +317,11 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
         return folderService;
     }
 
+    /**
+     * Creates and initializes a folder service decorator ready to use with calls to the underlying folder service.
+     * 
+     * @return A new folder service decorator
+     */
     private FolderServiceDecorator initDecorator() {
         FolderServiceDecorator decorator = new FolderServiceDecorator();
         Object connection = session.getParameter(Connection.class.getName());
