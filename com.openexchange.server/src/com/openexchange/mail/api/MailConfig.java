@@ -317,8 +317,9 @@ public abstract class MailConfig {
      * @param mailAccount The mail account used to determine the login
      * @param userLoginInfo The login information of the user
      * @return The mail login of specified user
+     * @throws OXException If login cannot be determined
      */
-    public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) {
+    public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) throws OXException {
         return saneLogin(getMailLogin0(mailAccount, userLoginInfo));
     }
 
@@ -328,25 +329,31 @@ public abstract class MailConfig {
      * @param mailAccount The mail account used to determine the login
      * @param userLoginInfo The login information of the user
      * @return The mail login of specified user
+     * @throws OXException If login cannot be determined
      */
-    private static final String getMailLogin0(final MailAccount mailAccount, final String userLoginInfo) {
+    private static final String getMailLogin0(final MailAccount mailAccount, final String userLoginInfo) throws OXException {
         if (!mailAccount.isDefaultAccount()) {
             return mailAccount.getLogin();
         }
-        final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
+
+        // For primary mail account
+        String login;
+        LoginSource loginSource = MailProperties.getInstance().getLoginSource();
         if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
-            return mailAccount.getLogin();
-        }
-        if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
+            login = mailAccount.getLogin();
+        } else if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
+            String primaryAddress = mailAccount.getPrimaryAddress();
             try {
-                return QuotedInternetAddress.toACE(mailAccount.getPrimaryAddress());
-            } catch (final AddressException e) {
-                final String primaryAddress = mailAccount.getPrimaryAddress();
-                org.slf4j.LoggerFactory.getLogger(MailConfig.class).warn(
-                    "Login source primary email address \"" + primaryAddress + "\" could not be converted to ASCII. Using unicode representation.",
-                    e);
-                return primaryAddress;
+                login = QuotedInternetAddress.toACE(primaryAddress);
+            } catch (AddressException e) {
+                org.slf4j.LoggerFactory.getLogger(MailConfig.class).warn("Login source primary email address \"{}\" could not be converted to ASCII. Using unicode representation.", primaryAddress, e);
+                login = primaryAddress;
             }
+        } else {
+            login = userLoginInfo;
+        }
+        if (null == login) {
+            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Login not set. Either an invalid session or property \"com.openexchange.mail.loginSource\" is set incorrectly.");
         }
         return userLoginInfo;
     }
