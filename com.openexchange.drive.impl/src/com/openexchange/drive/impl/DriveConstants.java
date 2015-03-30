@@ -127,7 +127,7 @@ public class DriveConstants {
     /**
      * The minimum expected API version the client has to support that is used if no other one is specified via configuration.
      */
-    public static int DEFAULT_MIN_API_VERSION = 1;
+    public static final int DEFAULT_MIN_API_VERSION = 1;
 
     /**
      * The API version the backend supports currently.
@@ -136,7 +136,7 @@ public class DriveConstants {
      * 3: .drive-meta
      * 4: subfolders action, sharing
      */
-    public static int SUPPORTED_API_VERSION = 4;
+    public static final int SUPPORTED_API_VERSION = 4;
 
     /**
      * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd HH:mm:ss.SSS" as pattern.

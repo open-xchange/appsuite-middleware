@@ -88,6 +88,7 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String INVALID_PATTERN_MSG = "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again.";
     public static final String LEVEL_CONFLICTING_FILENAME_MSG = "The file name \"%1$s\" is conflicting with an equally named directory at \"%2$s\".";
     public static final String LEVEL_CONFLICTING_PATH_MSG = "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\".";
+    public static final String NOT_SYNCHRONIZABLE_DIRECTORY_MSG = "The directory \"%1$s\" is not synchronizable. Please select another directory.";
 
     /**
      * Prevent instantiation.
