@@ -69,6 +69,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
@@ -77,6 +78,8 @@ import com.openexchange.push.impl.PushEventHandler;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.credstorage.inmemory.HazelcastCredentialStorage;
 import com.openexchange.push.impl.credstorage.inmemory.HazelcastInstanceNotActiveExceptionHandler;
+import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentialsFactory;
+import com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUserFactory;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
@@ -188,6 +191,9 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
             }
 
             openTrackers();
+
+            registerService(CustomPortableFactory.class, new PortablePushUserFactory());
+            registerService(CustomPortableFactory.class, new PortableCredentialsFactory());
 
             registerService(CreateTableService.class, new CreatePushTable(), null);
             registerService(DeleteListener.class, new PushDeleteListener(), null);
