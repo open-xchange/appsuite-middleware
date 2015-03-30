@@ -49,93 +49,24 @@
 
 package com.openexchange.push.credstorage;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
- * {@link DefaultCredentials} - The default credentials implementation.
+ * {@link CredentialStorageProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class DefaultCredentials implements Credentials {
-
-    private int contextId;
-    private int userId;
-    private String password;
-    private String login;
+@SingletonService
+public interface CredentialStorageProvider {
 
     /**
-     * Initializes a new {@link DefaultCredentials}.
-     */
-    public DefaultCredentials() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link DefaultCredentials}.
+     * Gets the currently active credentials storage.
      *
-     * @param credentials
+     * @return The credentials storage or <code>null</code>
+     * @throws OXException If returning credentials storage fails
      */
-    public DefaultCredentials(Credentials credentials) {
-        super();
-        contextId = credentials.getContextId();
-        userId = credentials.getUserId();
-        password = credentials.getPassword();
-        login = credentials.getLogin();
-    }
-
-    @Override
-    public int getContextId() {
-        return contextId;
-    }
-
-    @Override
-    public int getUserId() {
-        return userId;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getLogin() {
-        return login;
-    }
-
-    /**
-     * Sets the context identifier
-     *
-     * @param contextId The context identifier to set
-     */
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
-    }
-
-    /**
-     * Sets the user identifier
-     *
-     * @param userId The user identifier to set
-     */
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * Sets the password
-     *
-     * @param password The password to set
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    /**
-     * Sets the login
-     *
-     * @param login The login to set
-     */
-    public void setLogin(String login) {
-        this.login = login;
-    }
+    CredentialStorage getCredentialStorage() throws OXException;
 
 }

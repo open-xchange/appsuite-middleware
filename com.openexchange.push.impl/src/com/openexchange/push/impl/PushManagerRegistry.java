@@ -63,6 +63,10 @@ import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
+import com.openexchange.push.credstorage.CredentialStorage;
+import com.openexchange.push.credstorage.CredentialStorageProvider;
+import com.openexchange.push.credstorage.Credentials;
+import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -150,7 +154,17 @@ public final class PushManagerRegistry implements PushListenerService {
 
     @Override
     public Session generateSessionFor(PushUser pushUser) throws OXException {
+        // Generate session instance
         GeneratedSession session = new GeneratedSession(pushUser.getUserId(), pushUser.getContextId());
+
+        // Get credentials
+        {
+            Credentials credentials = optCredentials(pushUser);
+            if (null != credentials) {
+                session.setPassword(credentials.getPassword());
+                session.setLoginName(credentials.getLogin());
+            }
+        }
 
         // Password
         {
@@ -167,9 +181,12 @@ public final class PushManagerRegistry implements PushListenerService {
                 }
                 case SESSION:
                     // Fall-through
-                default:
-
+                default: {
+                    if (null == session.getPassword()) {
+                        throw PushExceptionCodes.MISSING_PASSWORD.create();
+                    }
                     break;
+                }
             }
         }
 
@@ -183,6 +200,20 @@ public final class PushManagerRegistry implements PushListenerService {
         }
 
         return session;
+    }
+
+    private Credentials optCredentials(PushUser pushUser) throws OXException {
+        CredentialStorageProvider storageProvider = Services.optService(CredentialStorageProvider.class);
+        if (null == storageProvider) {
+            return null;
+        }
+
+        CredentialStorage storage = storageProvider.getCredentialStorage();
+        if (null == storage) {
+            return null;
+        }
+
+        return storage.getCredentials(pushUser.getUserId(), pushUser.getContextId());
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------

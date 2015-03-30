@@ -67,6 +67,7 @@ public final class GeneratedSession implements Session, Serializable {
 
     private String password;
     private String client;
+    private String loginName;
     private final int userId;
     private final int contextId;
     private final ConcurrentMap<String, Object> parameters;
@@ -93,9 +94,18 @@ public final class GeneratedSession implements Session, Serializable {
         // Nothing to do
     }
 
+    /**
+     * Sets the login name
+     *
+     * @param loginName The login name to set
+     */
+    public void setLoginName(String loginName) {
+        this.loginName = loginName;
+    }
+
     @Override
     public String getLoginName() {
-        return null;
+        return loginName;
     }
 
     @Override

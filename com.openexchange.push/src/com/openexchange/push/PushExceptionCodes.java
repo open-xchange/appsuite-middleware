@@ -83,9 +83,13 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
      */
     MISSING_MASTER_PASSWORD("Missing master password for mail access.", Category.CATEGORY_CONFIGURATION, 5, null),
     /**
+     * Missing password for mail access.
+     */
+    MISSING_PASSWORD("Missing password for mail access.", Category.CATEGORY_CONFIGURATION, 6, null),
+    /**
      * Missing login string for mail access.
      */
-    MISSING_LOGIN_STRING("Missing login string for mail access.", Category.CATEGORY_CONFIGURATION, 6, null),
+    MISSING_LOGIN_STRING("Missing login string for mail access.", Category.CATEGORY_CONFIGURATION, 7, null),
 
     ;
 
