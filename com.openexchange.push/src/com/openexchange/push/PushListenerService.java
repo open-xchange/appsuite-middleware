@@ -91,6 +91,15 @@ public interface PushListenerService {
     List<PushUser> getUsersWithPermanentListeners() throws OXException;
 
     /**
+     * Generates a session for specified push user according to configuration settings/possibilities.
+     *
+     * @param pushUser The push user
+     * @return The generated session
+     * @throws OXException If no session can be generated for specified push user
+     */
+    Session generateSessionFor(PushUser pushUser) throws OXException;
+
+    /**
      * Registers a permanent listener for specified user.
      *
      * @param userId The user identifier

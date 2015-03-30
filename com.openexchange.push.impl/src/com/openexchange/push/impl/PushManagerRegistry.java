@@ -146,6 +146,17 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     @Override
+    public Session generateSessionFor(PushUser pushUser) throws OXException {
+        GeneratedSession session = new GeneratedSession(pushUser.getUserId(), pushUser.getContextId());
+
+        // TODO: Try to determine associated password
+
+        return session;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
+    @Override
     public PushListener startListenerFor(Session session) {
         /*
          * Check session's client identifier
