@@ -63,6 +63,7 @@ import com.openexchange.push.PushUser;
 import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.credstorage.Credentials;
 import com.openexchange.push.credstorage.DefaultCredentials;
+import com.openexchange.push.impl.credstorage.Obfuscator;
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials;
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUser;
 import com.openexchange.server.ServiceLookup;
@@ -82,6 +83,7 @@ public class HazelcastCredentialStorage implements CredentialStorage {
     private final ConcurrentMap<PushUser, Credentials> sources;
     private final HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler;
     private final ServiceLookup services;
+    private final Obfuscator obfuscator;
 
     private volatile String hzMapName;
     private volatile boolean useHzMap = false;
@@ -89,8 +91,9 @@ public class HazelcastCredentialStorage implements CredentialStorage {
     /**
      * Initializes a new {@link HazelcastCredentialStorage}.
      */
-    public HazelcastCredentialStorage(HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler, ServiceLookup services) {
+    public HazelcastCredentialStorage(Obfuscator obfuscator, HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler, ServiceLookup services) {
         super();
+        this.obfuscator = obfuscator;
         this.services = services;
         this.notActiveExceptionHandler = notActiveExceptionHandler;
         sources = new ConcurrentHashMap<PushUser, Credentials>(256);
@@ -220,17 +223,17 @@ public class HazelcastCredentialStorage implements CredentialStorage {
 
     @Override
     public Credentials getCredentials(int userId, int contextId) throws OXException {
-        return peekCredentials(new PushUser(userId, contextId));
+        return obfuscator.unobfuscateCredentials(peekCredentials(new PushUser(userId, contextId)));
     }
 
     @Override
     public void storeCredentials(Credentials credentials) throws OXException {
-        putCredentials(new PushUser(credentials.getUserId(), credentials.getContextId()), credentials);
+        putCredentials(new PushUser(credentials.getUserId(), credentials.getContextId()), obfuscator.obfuscateCredentials(credentials));
     }
 
     @Override
     public Credentials deleteCredentials(int userId, int contextId) throws OXException {
-        return pollCredentials(new PushUser(userId, contextId));
+        return obfuscator.unobfuscateCredentials(pollCredentials(new PushUser(userId, contextId)));
     }
 
     // ---------------------------------------------------------------------------------------------------
