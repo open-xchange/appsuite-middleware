@@ -338,19 +338,23 @@ public abstract class MailConfig {
 
         // For primary mail account
         String login;
-        LoginSource loginSource = MailProperties.getInstance().getLoginSource();
-        if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
-            login = mailAccount.getLogin();
-        } else if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
-            String primaryAddress = mailAccount.getPrimaryAddress();
-            try {
-                login = QuotedInternetAddress.toACE(primaryAddress);
-            } catch (AddressException e) {
-                org.slf4j.LoggerFactory.getLogger(MailConfig.class).warn("Login source primary email address \"{}\" could not be converted to ASCII. Using unicode representation.", primaryAddress, e);
-                login = primaryAddress;
-            }
-        } else {
-            login = userLoginInfo;
+        switch (MailProperties.getInstance().getLoginSource()) {
+            case USER_IMAPLOGIN:
+                login = mailAccount.getLogin();
+                break;
+            case PRIMARY_EMAIL: {
+                    String primaryAddress = mailAccount.getPrimaryAddress();
+                    try {
+                        login = QuotedInternetAddress.toACE(primaryAddress);
+                    } catch (AddressException e) {
+                        org.slf4j.LoggerFactory.getLogger(MailConfig.class).warn("Login source primary email address \"{}\" could not be converted to ASCII. Using unicode representation.", primaryAddress, e);
+                        login = primaryAddress;
+                    }
+                    break;
+                }
+            default:
+                login = userLoginInfo;
+                break;
         }
         if (null == login) {
             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Login not set. Either an invalid session or property \"com.openexchange.mail.loginSource\" is set incorrectly.");
