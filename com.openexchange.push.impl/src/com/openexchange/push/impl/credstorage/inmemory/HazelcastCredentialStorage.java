@@ -273,7 +273,7 @@ public class HazelcastCredentialStorage implements CredentialStorage {
                 sources.clear();
             }
             useHzMap = true;
-            LOG.info("Binary sources backing map changed to hazelcast");
+            LOG.info("Remote credentials backing map changed to hazelcast");
         } finally {
             blocker.unblock();
         }
