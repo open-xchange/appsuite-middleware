@@ -64,10 +64,11 @@ import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.log.LogProperties;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.json.osgi.Services;
-import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -163,6 +164,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
+            LogProperties.putSessionProperties(session);
             response.setLocale(session);
             final String secret = SessionUtility.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
@@ -229,6 +231,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
+            LogProperties.putSessionProperties(session);
             response.setLocale(session);
             final String secret = SessionUtility.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
