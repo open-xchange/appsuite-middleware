@@ -158,6 +158,7 @@ public class PushDbUtils {
         for (Integer contextId : contextIds) {
             addPushRegistrationsFromAssociatedSchema(contextId.intValue(), users, service);
         }
+        Collections.sort(users);
         return users;
     }
 
