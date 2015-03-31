@@ -74,9 +74,10 @@ public interface PushManagerExtendedService extends PushManagerService {
      * Stops the permanent listener for specified session.
      *
      * @param pushUser The associated push user
+     * @param tryToReconnect <code>true</code> to signal that a reconnect attempt should be performed; otherwise <code>false</code>
      * @return <code>true</code> if permanent listener has been successfully stopped; otherwise <code>false</code>
      * @throws OXException If permanent listener cannot be stopped due to an error
      */
-    boolean stopPermanentListener(PushUser pushUser) throws OXException;
+    boolean stopPermanentListener(PushUser pushUser, boolean tryToReconnect) throws OXException;
 
 }

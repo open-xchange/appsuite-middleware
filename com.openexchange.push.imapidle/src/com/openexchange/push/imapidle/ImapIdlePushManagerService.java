@@ -193,12 +193,12 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     }
 
     @Override
-    public boolean stopPermanentListener(PushUser pushUser) throws OXException {
+    public boolean stopPermanentListener(PushUser pushUser, boolean tryToReconnect) throws OXException {
         if (null == pushUser) {
             return false;
         }
 
-        StopResult stopResult = stopListener(true, true, pushUser.getUserId(), pushUser.getContextId());
+        StopResult stopResult = stopListener(tryToReconnect, true, pushUser.getUserId(), pushUser.getContextId());
         switch (stopResult) {
         case RECONNECTED:
             LOGGER.info("Reconnected IMAP-IDLE listener for user {} in context {} using another session", I(pushUser.getUserId()), I(pushUser.getContextId()));
