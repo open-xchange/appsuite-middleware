@@ -413,9 +413,9 @@ public final class PushManagerRegistry implements PushListenerService {
                         LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
                     }
                 } catch (OXException e) {
-                    LOG.error("Error while starting permanent push listener.", e);
+                    LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                 } catch (RuntimeException e) {
-                    LOG.error("Runtime error while starting permanent push listener.", e);
+                    LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                 }
             }
         }
