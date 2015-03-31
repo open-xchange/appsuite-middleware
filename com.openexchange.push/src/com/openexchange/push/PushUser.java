@@ -55,7 +55,7 @@ package com.openexchange.push;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class PushUser {
+public class PushUser implements Comparable<PushUser> {
 
     private final int userId;
     private final int contextId;
@@ -76,6 +76,17 @@ public class PushUser {
         int result = prime * 1 + contextId;
         result = prime * result + userId;
         hash = result;
+    }
+
+    @Override
+    public int compareTo(PushUser other) {
+        int thisInt = this.contextId;
+        int otherInt = other.contextId;
+        if (thisInt == otherInt) {
+            thisInt = this.userId;
+            otherInt = other.userId;
+        }
+        return (thisInt < otherInt) ? -1 : (thisInt == otherInt ? 0 : 1);
     }
 
     /**
@@ -117,6 +128,11 @@ public class PushUser {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder(32).append("PushUser [userId=").append(userId).append(", contextId=").append(contextId).append(']').toString();
     }
 
 }
