@@ -109,6 +109,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
 
     private volatile Future<Object> udpThread;
     private volatile MailNotifyPushListenerRegistry registry;
+    private volatile MailNotifyPushUdpSocketListener udpSocketListener;
 
     /**
      * Initializes a new {@link MailNotifyActivator}.
@@ -128,16 +129,17 @@ public final class MailNotifyActivator extends HousekeepingActivator {
         try {
             Services.set(this);
 
-            final Config config = readConfiguration();
-            /*
-             * Register push manager
-             */
-            final MailNotifyPushListenerRegistry registry = new MailNotifyPushListenerRegistry(config.useOXLogin, config.useEmailAddress);
+            Config config = readConfiguration();
+
+            // Register push manager
+            MailNotifyPushListenerRegistry registry = new MailNotifyPushListenerRegistry(config.useOXLogin, config.useEmailAddress);
             this.registry = registry;
-            final MailNotifyPushManagerService pushManagerService = new MailNotifyPushManagerService(registry);
-            registerService(PushManagerService.class, pushManagerService, null);
+
+            registerService(PushManagerService.class, new MailNotifyPushManagerService(registry), null);
+
             registerService(MailAccountDeleteListener.class, new MailNotifyPushMailAccountDeleteListener(registry), null);
             registerService(DeleteListener.class, new MailNotifyPushDeleteListener(registry), null);
+
             startUdpListener(registry, config);
         } catch (final Exception e) {
             LOG.error("", e);
@@ -243,11 +245,19 @@ public final class MailNotifyActivator extends HousekeepingActivator {
 
     private void startUdpListener(final MailNotifyPushListenerRegistry registry, final Config config) throws OXException, IOException {
         final ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
-        udpThread = threadPoolService.submit(ThreadPools.task(new MailNotifyPushUdpSocketListener(registry, config.udpListenHost, config.udpListenPort, config.imapLoginDelimiter, config.multicast)));
+        MailNotifyPushUdpSocketListener udpSocketListener = new MailNotifyPushUdpSocketListener(registry, config.udpListenHost, config.udpListenPort, config.imapLoginDelimiter, config.multicast);
+        this.udpSocketListener = udpSocketListener;
+        udpThread = threadPoolService.submit(ThreadPools.task(udpSocketListener));
     }
 
     private void stopUdpListener() {
-        final Future<Object> udpThread = this.udpThread;
+        MailNotifyPushUdpSocketListener udpSocketListener = this.udpSocketListener;
+        if (null != udpSocketListener) {
+            udpSocketListener.close();
+            this.udpSocketListener = null;
+        }
+
+        Future<Object> udpThread = this.udpThread;
         if (null != udpThread) {
             udpThread.cancel(true);
             this.udpThread = null;

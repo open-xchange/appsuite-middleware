@@ -50,10 +50,12 @@
 package com.openexchange.push.mail.notify;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -69,50 +71,70 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
 
     private static final int MAX_UDP_PACKET_SIZE = 4+64+1;
 
-    private static DatagramSocket datagramSocket = null;
+    // --------------------------------------------------------------------------------------------------------------------------------
 
+    private final DatagramSocket datagramSocket;
     private final String imapLoginDelimiter;
-
     private final MailNotifyPushListenerRegistry registry;
 
-    public MailNotifyPushUdpSocketListener(MailNotifyPushListenerRegistry registry, final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws OXException, IOException {
+    /**
+     * Initializes a new {@link MailNotifyPushUdpSocketListener}.
+     */
+    public MailNotifyPushUdpSocketListener(MailNotifyPushListenerRegistry registry, String udpListenHost, int udpListenPort, String imapLoginDelimiter, boolean multicast) throws OXException, IOException {
         super();
-        this.registry = registry;
-        final InetAddress senderAddress = InetAddress.getByName(udpListenHost);
-
-        this.imapLoginDelimiter = imapLoginDelimiter;
-        if (senderAddress != null) {
-            if (multicast) {
-                datagramSocket = new MulticastSocket(udpListenPort);
-                ((MulticastSocket)datagramSocket).joinGroup(senderAddress);
-            } else {
-                datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
-            }
-        } else {
+        InetAddress senderAddress = InetAddress.getByName(udpListenHost);
+        if (senderAddress == null) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Can't get internet addres to given hostname " + udpListenHost);
         }
+
+        this.registry = registry;
+        this.imapLoginDelimiter = imapLoginDelimiter;
+        if (multicast) {
+            datagramSocket = new MulticastSocket(udpListenPort);
+            ((MulticastSocket)datagramSocket).joinGroup(senderAddress);
+        } else {
+            datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
+        }
+    }
+
+    /**
+     * Closes the listener.
+     */
+    public void close() {
+        datagramSocket.close();
+    }
+
+    @Override
+    public void run() {
+        start();
     }
 
     private void start() {
         while (true) {
-            final DatagramPacket datagramPacket = new DatagramPacket(new byte[MAX_UDP_PACKET_SIZE], MAX_UDP_PACKET_SIZE);
+            DatagramPacket datagramPacket = new DatagramPacket(new byte[MAX_UDP_PACKET_SIZE], MAX_UDP_PACKET_SIZE);
             try {
                 datagramSocket.receive(datagramPacket);
 
-                if (datagramPacket.getLength() > 0) {
-                    // Packet received
-                    final String mailboxName = getMailboxName(datagramPacket);
-                    registry.scheduleEvent(mailboxName);
-                } else {
+                // Check packet length
+                if (datagramPacket.getLength() <= 0) {
                     LOG.warn("recieved empty udp package: {}", datagramSocket);
+                    return;
                 }
-            } catch (final IOException e) {
+
+                // Packet received
+                final String mailboxName = getMailboxNameFromPacket(datagramPacket);
+                registry.scheduleEvent(mailboxName);
+            } catch (SocketException e) {
+                LOG.info("UDP socket closed");
+            } catch (InterruptedIOException e) {
+                LOG.error("Receiving of UDP packet interrupted", e);
+            } catch (IOException e) {
                 LOG.error("Receiving of UDP packet failed", e);
             }
         }
     }
 
-    private String getMailboxName(final DatagramPacket datagramPacket) {
+    private String getMailboxNameFromPacket(DatagramPacket datagramPacket) {
         /* TODO: this currently works with cyrus notify must be configurable somehow later
          *
          * Format:
@@ -127,25 +149,16 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
          */
 
         String packetDataString = new String(datagramPacket.getData());
-        // user name at position 3, see above
+        // User name at position 3, see above
         packetDataString = packetDataString.split("\0")[3];
         if (null != imapLoginDelimiter) {
-        	final int idx;
-        	idx = packetDataString.indexOf(imapLoginDelimiter);
+        	int idx = packetDataString.indexOf(imapLoginDelimiter);
         	if (idx != -1) {
         		packetDataString = packetDataString.substring(0, idx);
         	}
         }
         LOG.debug("Username={}", packetDataString);
-        if (null != packetDataString && packetDataString.length() > 0) {
-            return packetDataString;
-        } else {
-            return null;
-        }
+        return null != packetDataString && packetDataString.length() > 0 ? packetDataString : null;
     }
 
-    @Override
-    public void run() {
-        start();
-    }
 }

@@ -68,7 +68,7 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.ReadOnlyIterator;
 
 /**
- * {@link MailNotifyPushListenerRegistry} - The registry for {@link PushListener}s.
+ * {@link MailNotifyPushListenerRegistry} - The registry for {@code MailNotifyPushListener}s.
  *
  */
 public final class MailNotifyPushListenerRegistry {
@@ -84,7 +84,7 @@ public final class MailNotifyPushListenerRegistry {
     /**
      * Initializes a new {@link MailNotifyPushListenerRegistry}.
      */
-    public MailNotifyPushListenerRegistry(final boolean useOXLogin, final boolean useEmailAddress) {
+    public MailNotifyPushListenerRegistry(boolean useOXLogin, boolean useEmailAddress) {
         super();
         mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>();
         this.useOXLogin = useOXLogin;
