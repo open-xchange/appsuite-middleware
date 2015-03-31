@@ -112,7 +112,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
             {
                 List<TableObject> tables = getTables(connection);
                 findReferences(tables, connection);
-                retainRelevantTables(tables);
+                //retainRelevantTables(tables);
                 tableObjects = sortTables(tables);
             }
             purgeData(contextGroupId, tableObjects, connection);
@@ -156,10 +156,12 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
                     tableColumnObject.setName(columnName);
                     tableColumnObject.setType(rsColumns.getInt("DATA_TYPE"));
                     tableColumnObject.setColumnSize(rsColumns.getInt("COLUMN_SIZE"));
-
                     tableObject.addColumn(tableColumnObject);
+                    
+                    if (columnName.equals("gid")) {
+                        tableObjects.add(tableObject);
+                    }
                 }
-                tableObjects.add(tableObject);
                 LOG.debug("Table {} has following columns: {}", tableObject.getColumns());
                 rsColumns.close();
             }
@@ -207,7 +209,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
     }
 
     /**
-     * that have a 'gid' column, which denotes that are used as global tables
+     * Retains all tables that have a 'gid' column or have cross references to other global db tables.
      * 
      * @param tableObjects
      */
