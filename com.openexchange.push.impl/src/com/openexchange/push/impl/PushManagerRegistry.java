@@ -135,7 +135,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
     private Credentials optCredentials(int userId, int contextId) throws OXException {
         CredentialStorage storage = optCredentialStorage();
-        return storage.getCredentials(userId, contextId);
+        return null == storage ? null : storage.getCredentials(userId, contextId);
     }
 
     /**
