@@ -58,16 +58,13 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
-import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.session.reservation.impl.portable.PortableReservation;
-import com.openexchange.sessiond.AddSessionParameter;
 
 /**
  * {@link SessionReservationServiceImpl}

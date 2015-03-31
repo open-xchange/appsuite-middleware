@@ -54,7 +54,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.session.reservation.Reservation;
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.session.reservation.Reservation;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class PortableReservation implements CustomPortable {
+public class PortableReservation extends AbstractCustomPortable {
 
     /** The unique portable class ID of the {@link PortableSession} */
     public static final int CLASS_ID = 19;
@@ -100,11 +100,6 @@ public class PortableReservation implements CustomPortable {
         timeout = reservation.getTimeoutMillis();
         creationStamp = reservation.getCreationStamp();
         state = reservation.getState();
-    }
-
-    @Override
-    public int getFactoryId() {
-        return FACTORY_ID;
     }
 
     @Override
