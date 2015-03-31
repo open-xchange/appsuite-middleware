@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
