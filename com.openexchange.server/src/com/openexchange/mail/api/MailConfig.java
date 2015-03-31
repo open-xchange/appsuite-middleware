@@ -355,7 +355,7 @@ public abstract class MailConfig {
         if (null == login) {
             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Login not set. Either an invalid session or property \"com.openexchange.mail.loginSource\" is set incorrectly.");
         }
-        return userLoginInfo;
+        return login;
     }
 
     /**
