@@ -50,11 +50,9 @@
 package com.openexchange.ajax.drive.action;
 
 import java.io.IOException;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.tools.JSONCoercion;
 
 /**
  * {@link UpdateLinkRequest}

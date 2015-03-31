@@ -72,6 +72,9 @@ import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
+import com.openexchange.drive.DriveShare;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.FileVersion;
@@ -110,6 +113,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
@@ -530,29 +534,34 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<ShareTarget> targets) throws OXException {
+    public Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
         DriveStorage storage = new SyncSession(session).getStorage();
         Map<String, String> folderIds = new HashMap<String, String>();
-        for (ShareTarget target : targets) {
-            String path = target.getFolder();
-            if (target.getItem() != null && !Strings.isEmpty(target.getItem())) {
-                String name = target.getItem();
+        List<ShareTarget> shareTargets = new ArrayList<ShareTarget>();
+        for (DriveShareTarget target : targets) {
+            String path = target.getPath();
+            ShareTarget shareTarget = new ShareTarget();
+            shareTarget.setModule(FolderObject.INFOSTORE);
+            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
+                String name = target.getName();
                 File file = storage.getFileByName(path, name);
                 if (file == null) {
                     throw DriveExceptionCodes.FILE_NOT_FOUND.create(name, path);
                 }
-                target.setFolder(file.getFolderId());
-                target.setItem(file.getId());
+                shareTarget.setFolder(file.getFolderId());
+                shareTarget.setItem(file.getId());
             } else {
                 if (!folderIds.containsKey(path)) {
                     String folderID = storage.getFolderID(path);
                     folderIds.put(path, folderID);
                 }
-                target.setFolder(folderIds.get(path));
+                shareTarget.setFolder(folderIds.get(path));
             }
+            shareTargets.add(shareTarget);
+            
         }
 
-        CreatePerformer cp = new CreatePerformer(recipients, targets, session.getServerSession(), DriveServiceLookup.get());
+        CreatePerformer cp = new CreatePerformer(recipients, shareTargets, session.getServerSession(), DriveServiceLookup.get());
         return cp.perform();
     }
 
@@ -577,22 +586,22 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public List<ShareInfo> getAllLinks(DriveSession session) throws OXException {
+    public List<DriveShareInfo> getAllLinks(DriveSession session) throws OXException {
         DriveStorage storage = new SyncSession(session).getStorage();
         ShareService shareService = DriveServiceLookup.getService(ShareService.class);
 
         // Get all Shares for infostore
         List<ShareInfo> allShares = shareService.getAllShares(session.getServerSession(), "infostore");
+        List<DriveShareInfo> retval = new ArrayList<DriveShareInfo>();
 
         Map<String, String> fileId2FileName = new HashMap<String, String>();
-        Map<String, String> folderId2FolderName = new HashMap<String, String>();
+        Map<String, String> folderId2Directory = new HashMap<String, String>();
         for (Iterator<ShareInfo> shareInfoIterator = allShares.iterator(); shareInfoIterator.hasNext();) {
             ShareInfo shareInfo = shareInfoIterator.next();
             ShareTarget shareTarget = shareInfo.getShare().getTarget();
-            DriveShareTarget driveShareTarget = new DriveShareTarget(shareTarget);
-            System.out.println(shareTarget);
+            DriveShareTarget driveShareTarget = new DriveShareTarget();
 
-            // Replace fileId by fileName
+            // Set drive fileName
             if (shareTarget.getItem() != null && !Strings.isEmpty(shareTarget.getItem())) {
                 String fileId = new FileID(shareTarget.getItem()).getFileId();
                 if (!fileId2FileName.containsKey(fileId)) {
@@ -603,30 +612,33 @@ public class DriveServiceImpl implements DriveService {
                         LOG.warn("A Share (" + shareTarget + ") is pointing to a file which seems not to exist.");
                     }
                 }
-                driveShareTarget.setItem(fileId2FileName.get(fileId));
+                driveShareTarget.setName(fileId2FileName.get(fileId));
             }
 
-            // Replace folderId by folderName
+            // Set drive path
             String folderId = shareTarget.getFolder();
-            if (!folderId2FolderName.containsKey(folderId)) {
+            if (!folderId2Directory.containsKey(folderId)) {
                 try {
-                    folderId2FolderName.put(folderId, storage.getPath(folderId));
+                    folderId2Directory.put(folderId, storage.getPath(folderId));
                 } catch (OXException e) {
                     LOG.warn("A Share (" + shareTarget + ") is pointing to a folder which seems not to exist.");
                 }
             }
-            String folderName = folderId2FolderName.get(folderId);
+            String folderName = folderId2Directory.get(folderId);
             if (folderName == null) {
                 shareInfoIterator.remove();
                 continue;
             }
             
-            driveShareTarget.setFolder(folderName);
+            driveShareTarget.setPath(folderName);
             
-            shareInfo.getShare().setTarget(driveShareTarget);
+            DriveShareInfo driveShareInfo = new DriveShareInfo(shareInfo);
+            DriveShare driveShare = new DriveShare(shareInfo.getShare());
+            driveShare.setTarget(driveShareTarget);
+            driveShareInfo.setDriveShare(driveShare);
         }
 
-        return allShares;
+        return retval;
     }
 
 }

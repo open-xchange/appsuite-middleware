@@ -60,13 +60,13 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -125,10 +125,13 @@ public class AllTest extends AbstractDriveShareTest {
     }
 
     public void testAll() throws Exception {
-        List<ShareTarget> targets = new ArrayList<ShareTarget>();
-        ShareTarget fileTarget = new ShareTarget(FolderObject.INFOSTORE, "/" + folder2.getFolderName(), file.getFileName());
+        List<DriveShareTarget> targets = new ArrayList<DriveShareTarget>();
+        DriveShareTarget fileTarget = new DriveShareTarget();
+        fileTarget.setPath(folder2.getFolderName());
+        fileTarget.setName(file.getFileName());
         targets.add(fileTarget);
-        ShareTarget folderTarget = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName());
+        DriveShareTarget folderTarget = new DriveShareTarget();
+        folderTarget.setPath(folder.getFolderName());
         targets.add(folderTarget);
 
         List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();

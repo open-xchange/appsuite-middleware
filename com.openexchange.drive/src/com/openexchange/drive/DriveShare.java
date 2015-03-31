@@ -47,66 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.drive.action;
+package com.openexchange.drive;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.share.Share;
 
 /**
- * {@link GetLinkRequest}
+ * {@link DriveShare}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class GetLinkRequest extends AbstractDriveRequest<GetLinkResponse> {
+public class DriveShare {
 
-    private boolean failOnError;
-    private List<DriveShareTarget> targets;
-    private Integer bits;
-    private String password;
+    private DriveShareTarget target;
 
-    public GetLinkRequest(Integer root, List<DriveShareTarget> targets) {
-        this(root, targets, null, null, true);
+    private Share delegate;
+
+    public DriveShare(Share share) {
+        this.delegate = share;
     }
 
-    public GetLinkRequest(Integer root, List<DriveShareTarget> targets, Integer bits, String password, boolean failOnError) {
-        super(root);
-        this.targets = targets;
-        this.bits = bits;
-        this.password = password;
-        this.failOnError = failOnError;
+    public int getGuest() {
+        return delegate.getGuest();
     }
 
-    @Override
-    public Method getMethod() {
-        return Method.PUT;
+    public DriveShareTarget getTarget() {
+        return target;
     }
 
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "getLink"),
-            new Parameter("root", root)
-        };
-    }
-
-    @Override
-    public GetLinkParser getParser() {
-        return new GetLinkParser(failOnError);
-    }
-
-    @Override
-    public JSONObject getBody() throws IOException, JSONException {
-        JSONObject retval = new JSONObject();
-        retval.putOpt("bits", bits.intValue());
-        retval.putOpt("password", password);
-        retval.put("targets", ShareWriter.writeDriveTargets(targets));
-        return retval;
+    public void setTarget(DriveShareTarget target) {
+        this.target = target;
     }
 
 }

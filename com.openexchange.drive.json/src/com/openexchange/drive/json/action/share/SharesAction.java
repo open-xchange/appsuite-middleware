@@ -49,68 +49,35 @@
 
 package com.openexchange.drive.json.action.share;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveService;
-import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.json.DriveShareInfoResultConverter;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.json.actions.ShareJSONParser;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link InviteAction}
+ * {@link SharesAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class InviteAction extends AbstractDriveShareAction {
+public class SharesAction extends AbstractDriveShareAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        try {
-            JSONObject data = (JSONObject) requestData.requireData();
-            List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
-            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(data.getJSONObject("targets"));
-            /*
-             * create the shares
-             */
-            DriveService driveService = Services.getService(DriveService.class, true);
-            Map<ShareRecipient, List<ShareInfo>> createdShares = driveService.createShare(session, recipients, targets);
-            /*
-             * construct & return appropriate json result
-             */
-            AJAXRequestResult result = new AJAXRequestResult();
-            JSONArray jTokens = new JSONArray(recipients.size());
-            for (ShareRecipient recipient : recipients) {
-                List<ShareInfo> shares = createdShares.get(recipient);
-                if (null == shares || 0 == shares.size()) {
-                    // internal recipient
-                    jTokens.put(JSONObject.NULL);
-                } else {
-                    // external recipient
-                    if (1 == shares.size()) {
-                        jTokens.put(shares.get(0).getToken());
-                    } else {
-                        jTokens.put(shares.get(0).getGuest().getBaseToken());
-                    }
-                }
-            }
-            result.setResultObject(jTokens, "json");
-            result.setTimestamp(new Date());
-            return result;
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        DriveService driveService = Services.getService(DriveService.class, true);
+        List<DriveShareInfo> shares = driveService.getAllLinks(session);
+
+        if (null == shares || 0 == shares.size()) {
+            return new AJAXRequestResult(new JSONArray());
         }
+
+        return new AJAXRequestResult(shares, DriveShareInfoResultConverter.INPUT_FORMAT);
     }
 
 }

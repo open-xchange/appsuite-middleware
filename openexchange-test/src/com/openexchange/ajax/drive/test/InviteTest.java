@@ -60,14 +60,13 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -123,33 +122,38 @@ public class InviteTest extends AbstractDriveShareTest {
     }
 
     public void testInviteFileInternal() throws Exception {
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName(), file.getFileName());
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath(folder.getFolderName());
+        target.setName(file.getFileName());
         InternalRecipient recipient = new InternalRecipient();
         recipient.setEntity(client2.getValues().getUserId());
         recipient.setBits(FOLDER_READ_PERMISSION);
-        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<ShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
+        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
         client.execute(inviteRequest);
 
         checkFilePermission(client2.getValues().getUserId(), ObjectPermission.READ, itm.getAction(file.getId()));
     }
 
     public void testInviteFolderInternal() throws Exception {
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName());
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath(folder.getFolderName());
         InternalRecipient recipient = new InternalRecipient();
         recipient.setEntity(client2.getValues().getUserId());
         recipient.setBits(FOLDER_READ_PERMISSION);
-        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<ShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
+        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
         client.execute(inviteRequest);
 
         checkFolderPermission(client2.getValues().getUserId(), FOLDER_READ_PERMISSION, ftm2.getFolderFromServer(folder.getObjectID()));
     }
 
     public void testInviteFileExternal() throws Exception {
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName(), file.getFileName());
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath(folder.getFolderName());
+        target.setName(file.getFileName());
         AnonymousRecipient recipient = new AnonymousRecipient();
         recipient.setBits(FOLDER_READ_PERMISSION);
         recipient.setPassword(PASSWORD);
-        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<ShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
+        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
         client.execute(inviteRequest);
 
         List<ParsedShare> allShares = client.execute(new AllRequest(rootFolder.getObjectID())).getParsedShares();
@@ -168,12 +172,13 @@ public class InviteTest extends AbstractDriveShareTest {
     }
 
     public void testInviteFolderExternal() throws Exception {
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName());
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath(folder.getFolderName());
         AnonymousRecipient recipient = new AnonymousRecipient();
         recipient.setBits(FOLDER_READ_PERMISSION);
         recipient.setPassword(PASSWORD);
         recipient.setBits(FOLDER_READ_PERMISSION);
-        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<ShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
+        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
         client.execute(inviteRequest);
 
         List<ParsedShare> allShares = client.execute(new AllRequest(rootFolder.getObjectID())).getParsedShares();
@@ -185,8 +190,6 @@ public class InviteTest extends AbstractDriveShareTest {
             }
         }
         assertNotNull("Missing share.", share);
-        
-        System.out.println(share.getShareURL());
 
         GuestClient guestClient = new GuestClient(share.getShareURL(), null, recipient.getPassword());
         FolderTestManager ftmGuest = new FolderTestManager(guestClient);

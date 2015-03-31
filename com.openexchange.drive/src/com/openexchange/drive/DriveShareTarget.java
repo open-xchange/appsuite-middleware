@@ -47,12 +47,8 @@
  *
  */
 
-package com.openexchange.drive.impl.internal;
+package com.openexchange.drive;
 
-import java.util.Date;
-import java.util.Map;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.share.ShareTarget;
 
 /**
  * {@link DriveShareTarget}
@@ -60,55 +56,35 @@ import com.openexchange.share.ShareTarget;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class DriveShareTarget extends ShareTarget {
+public class DriveShareTarget {
 
-    private static final long serialVersionUID = -2374348001683276913L;
+    private String name;
 
-    private String item;
+    private String path;
 
-    private String folder;
+    private String checksum;
 
-    public DriveShareTarget(ShareTarget shareTarget) {
-        super(shareTarget);
+    public String getChecksum() {
+        return checksum;
     }
 
-    @Override
-    public void setItem(String item) {
-        this.item = item;
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
     }
 
-    @Override
-    public String getItem() {
-        return item;
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public void setFolder(String folder) {
-        this.folder = folder;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @Override
-    public String getFolder() {
-        return folder;
-    }
-
-    @Override
-    public int getModule() {
-        return FolderObject.INFOSTORE;
-    }
-
-    @Override
-    public Map<String, Object> getMeta() {
-        return null;
-    }
-
-    @Override
-    public Date getExpiryDate() {
-        return null;
-    }
-
-    @Override
     public String getPath() {
-        return super.getPath();
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

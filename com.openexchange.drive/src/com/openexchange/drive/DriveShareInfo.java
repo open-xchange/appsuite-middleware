@@ -47,45 +47,46 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.drive;
 
-import java.util.Date;
-import java.util.List;
-import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 
 /**
- * {@link AllAction}
+ * {@link DriveShareInfo}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class AllAction extends AbstractDriveShareAction {
+public class DriveShareInfo {
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        DriveService driveService = Services.getService(DriveService.class, true);
-        List<ShareInfo> shares = driveService.getAllLinks(session);
+    private DriveShare driveShare;
 
-        if (null == shares || 0 == shares.size()) {
-            return new AJAXRequestResult(new JSONArray());
-        }
+    private ShareInfo delegate;
 
-        Date lastModified = null;
-        for (ShareInfo shareInfo : shares) {
-            Date shareLastModified = shareInfo.getShare().getModified();
-            if (lastModified == null || shareLastModified != null && shareLastModified.after(lastModified)) {
-                lastModified = shareLastModified;
-            }
-        }
+    public DriveShareInfo(ShareInfo shareInfo) {
+        this.delegate = shareInfo;
+    }
 
-        return new AJAXRequestResult(shares, lastModified, "shareinfo");
+    public DriveShare getDriveShare() {
+        return driveShare;
+    }
+
+    public void setDriveShare(DriveShare driveShare) {
+        this.driveShare = driveShare;
+    }
+
+    public String getToken() throws OXException {
+        return delegate.getToken();
+    }
+
+    public String getShareURL(String protocol, String fallbackHostname) throws OXException {
+        return delegate.getShareURL(protocol, fallbackHostname);
+    }
+
+    public GuestInfo getGuest() {
+        return delegate.getGuest();
     }
 
 }

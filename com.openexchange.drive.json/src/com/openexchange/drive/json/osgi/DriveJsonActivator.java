@@ -51,12 +51,14 @@ package com.openexchange.drive.json.osgi;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.json.DriveShareInfoResultConverter;
 import com.openexchange.drive.json.LongPollingListenerFactory;
 import com.openexchange.drive.json.action.DriveActionFactory;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
@@ -130,6 +132,8 @@ public class DriveJsonActivator extends AJAXModuleActivator {
             LOG.info("Registering blocking long polling listener factory...");
             registerService(LongPollingListenerFactory.class, new BlockingListenerFactory());
         }
+        
+        registerService(ResultConverter.class, new DriveShareInfoResultConverter());
     }
 
     @Override

@@ -64,13 +64,13 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.test.TestInit;
 
 /**
@@ -113,16 +113,21 @@ public class GetLinkTest extends AbstractDriveShareTest {
     }
 
     public void testGetFileLink() throws Exception {
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName(), file.getFileName());
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath("/" + folder.getFolderName());
+        target.setName(file.getFileName());
+        target.setChecksum("123");
         performTest(target);
     }
     
     public void testGetFolderLink() throws Exception {
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName());
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath("/" + folder.getFolderName());
+        target.setChecksum("123");
         performTest(target);
     }
 
-    private void performTest(ShareTarget target) throws OXException, IOException, JSONException, Exception {
+    private void performTest(DriveShareTarget target) throws OXException, IOException, JSONException, Exception {
         int bits = createAnonymousGuestPermission().getPermissionBits();
         String password = UUIDs.getUnformattedString(UUID.randomUUID());
         GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, true);
