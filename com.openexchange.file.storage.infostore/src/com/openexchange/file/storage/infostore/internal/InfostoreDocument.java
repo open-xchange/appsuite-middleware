@@ -47,72 +47,48 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.internal;
 
+import java.io.InputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.Document;
+import com.openexchange.file.storage.infostore.InfostoreFile;
+import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.results.Delta;
-import com.openexchange.tools.iterator.SearchIterator;
-
 
 /**
- * {@link InfostoreDeltaWrapper}
+ * {@link InfostoreDocument}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InfostoreDeltaWrapper implements Delta<File>{
+public class InfostoreDocument extends Document {
 
-    private Delta<DocumentMetadata> delegate = null;
+    private final DocumentAndMetadata documentAndMetadata;
 
-    public InfostoreDeltaWrapper(Delta<DocumentMetadata> delegate) {
-        this.delegate = delegate;
-    }
-
-
-    @Override
-    public SearchIterator<File> getDeleted() {
-        SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
-        if(deleted == null) {
-            return null;
+    /**
+     * Initializes a new {@link InfostoreDocument}.
+     *
+     * @param documentAndMetadata The underlying document and metadata
+     */
+    public InfostoreDocument(DocumentAndMetadata documentAndMetadata) throws OXException {
+        super();
+        this.documentAndMetadata = documentAndMetadata;
+        setEtag(documentAndMetadata.getETag());
+        DocumentMetadata metadata = documentAndMetadata.getMetadata();
+        if (null != metadata) {
+            setFile(new InfostoreFile(metadata));
+            setMimeType(metadata.getFileMIMEType());
+            setName(metadata.getFileName());
+            setSize(metadata.getFileSize());
+            if (null != metadata.getLastModified()) {
+                setLastModified(metadata.getLastModified().getTime());
+            }
         }
-        return new InfostoreSearchIterator(deleted);
     }
 
-
     @Override
-    public SearchIterator<File> getModified() {
-        SearchIterator<DocumentMetadata> modified = delegate.getModified();
-        if(modified == null) {
-            return null;
-        }
-        return new InfostoreSearchIterator(modified);
-    }
-
-
-    @Override
-    public SearchIterator<File> getNew() {
-        SearchIterator<DocumentMetadata> new1 = delegate.getNew();
-        if(new1 == null) {
-            return null;
-        }
-        return new InfostoreSearchIterator(new1);
-    }
-
-
-    @Override
-    public SearchIterator<File> results() throws OXException {
-        SearchIterator<DocumentMetadata> results = delegate.results();
-        if(results == null) {
-            return null;
-        }
-        return new InfostoreSearchIterator(results);
-    }
-
-
-    @Override
-    public long sequenceNumber() throws OXException {
-        return delegate.sequenceNumber();
+    public InputStream getData() throws OXException {
+        return documentAndMetadata.getData();
     }
 
 }

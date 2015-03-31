@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.internal;
 
 import java.util.Collections;
 import java.util.Set;

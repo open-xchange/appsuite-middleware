@@ -47,91 +47,73 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageFolderAccess;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.infostore.InfostoreSearchIterator;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.results.Delta;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
- * {@link InfostoreAccountAccess}
+ * {@link InfostoreDeltaWrapper}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAccountAccess implements FileStorageAccountAccess {
+public class InfostoreDeltaWrapper implements Delta<File>{
 
-    private final ServerSession session;
-    private final InfostoreFileStorageService service;
-    private InfostoreFolderAccess folders;
-    private InfostoreAdapterFileAccess files;
+    private Delta<DocumentMetadata> delegate = null;
 
-    public InfostoreAccountAccess(final Session session, final InfostoreFileStorageService service) throws OXException {
-        this.session = ServerSessionAdapter.valueOf(session);
-        this.service = service;
+    public InfostoreDeltaWrapper(Delta<DocumentMetadata> delegate) {
+        this.delegate = delegate;
     }
 
-    @Override
-    public String getAccountId() {
-        return InfostoreDefaultAccountManager.DEFAULT_ID;
-    }
 
     @Override
-    public FileStorageFileAccess getFileAccess() throws OXException {
-        if(files != null) {
-            return files;
+    public SearchIterator<File> getDeleted() {
+        SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
+        if(deleted == null) {
+            return null;
         }
-        return files = new InfostoreAdapterFileAccess(session, service.getInfostore(), service.getSearch(), this);
+        return new InfostoreSearchIterator(deleted);
     }
 
+
     @Override
-    public FileStorageFolderAccess getFolderAccess() throws OXException {
-        if(folders != null) {
-            return folders;
+    public SearchIterator<File> getModified() {
+        SearchIterator<DocumentMetadata> modified = delegate.getModified();
+        if(modified == null) {
+            return null;
         }
-        return folders = new InfostoreFolderAccess(session, service.getInfostore());
+        return new InfostoreSearchIterator(modified);
     }
 
-    @Override
-    public FileStorageFolder getRootFolder() throws OXException {
-        // Nothing to do
-        return null;
-    }
 
     @Override
-    public boolean cacheable() {
-        return false;
+    public SearchIterator<File> getNew() {
+        SearchIterator<DocumentMetadata> new1 = delegate.getNew();
+        if(new1 == null) {
+            return null;
+        }
+        return new InfostoreSearchIterator(new1);
     }
 
-    @Override
-    public void close() {
-        // Nope
-    }
 
     @Override
-    public void connect() throws OXException {
-        // Bypassed...
+    public SearchIterator<File> results() throws OXException {
+        SearchIterator<DocumentMetadata> results = delegate.results();
+        if(results == null) {
+            return null;
+        }
+        return new InfostoreSearchIterator(results);
     }
 
-    @Override
-    public boolean isConnected() {
-        return true;
-    }
 
     @Override
-    public boolean ping() throws OXException {
-        return true;
-    }
-
-    @Override
-    public FileStorageService getService() {
-        return service;
+    public long sequenceNumber() throws OXException {
+        return delegate.sequenceNumber();
     }
 
 }

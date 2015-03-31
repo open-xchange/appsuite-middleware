@@ -47,47 +47,53 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.internal;
 
-import java.io.InputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
-import com.openexchange.groupware.infostore.DocumentAndMetadata;
-import com.openexchange.groupware.infostore.DocumentMetadata;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+
 
 /**
- * {@link InfostoreDocument}
+ * Encapsulates common methods needed by classes that delegate calls to {@link InfostoreFacade}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class InfostoreDocument extends Document {
+public abstract class InfostoreAccess {
 
-    private final DocumentAndMetadata documentAndMetadata;
-
-    /**
-     * Initializes a new {@link InfostoreDocument}.
-     *
-     * @param documentAndMetadata The underlying document and metadata
-     */
-    public InfostoreDocument(DocumentAndMetadata documentAndMetadata) throws OXException {
-        super();
-        this.documentAndMetadata = documentAndMetadata;
-        setEtag(documentAndMetadata.getETag());
-        DocumentMetadata metadata = documentAndMetadata.getMetadata();
-        if (null != metadata) {
-            setFile(new InfostoreFile(metadata));
-            setMimeType(metadata.getFileMIMEType());
-            setName(metadata.getFileName());
-            setSize(metadata.getFileSize());
-            if (null != metadata.getLastModified()) {
-                setLastModified(metadata.getLastModified().getTime());
-            }
-        }
+    protected static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
+    protected static final Set<Long> VIRTUAL_FOLDERS;
+    static {
+        final Set<Long> set = new HashSet<Long>(4);
+        set.add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+        set.add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+        set.add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
+        VIRTUAL_FOLDERS = Collections.unmodifiableSet(set);
     }
 
-    @Override
-    public InputStream getData() throws OXException {
-        return documentAndMetadata.getData();
+    protected final InfostoreFacade infostore;
+
+    protected InfostoreAccess(InfostoreFacade infostore) {
+        super();
+        this.infostore = infostore;
+    }
+
+    protected InfostoreFacade getInfostore(final String folderId) {
+        if (folderId != null && VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
+            return VIRTUAL_INFOSTORE;
+        }
+        return infostore;
+    }
+
+    protected static int ID(final String id) {
+        return Integer.parseInt(id);
+    }
+
+    protected static long FOLDERID(final String folderId) {
+        return Long.parseLong(folderId);
     }
 
 }

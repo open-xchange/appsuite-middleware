@@ -47,54 +47,41 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.internal;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.infostore.InfostoreSearchIterator;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
- * Encapsulates common methods needed by classes that delegate calls to {@link InfostoreFacade}.
+ * {@link InfostoreTimedResult}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class InfostoreAccess {
+public class InfostoreTimedResult implements TimedResult<File> {
 
-    protected static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
-    protected static final Set<Long> VIRTUAL_FOLDERS;
-    static {
-        final Set<Long> set = new HashSet<Long>(4);
-        set.add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
-        set.add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
-        set.add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
-        VIRTUAL_FOLDERS = Collections.unmodifiableSet(set);
+    private final TimedResult<DocumentMetadata> documents;
+
+    public InfostoreTimedResult(TimedResult<DocumentMetadata> documents) {
+        this.documents = documents;
     }
 
-    protected final InfostoreFacade infostore;
-
-    protected InfostoreAccess(InfostoreFacade infostore) {
-        super();
-        this.infostore = infostore;
-    }
-
-    protected InfostoreFacade getInfostore(final String folderId) {
-        if (folderId != null && VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
-            return VIRTUAL_INFOSTORE;
+    @Override
+    public SearchIterator<File> results() throws OXException {
+        SearchIterator<DocumentMetadata> results = documents.results();
+        if(results == null) {
+            return null;
         }
-        return infostore;
+        return new InfostoreSearchIterator(results);
     }
 
-    protected static int ID(final String id) {
-        return Integer.parseInt(id);
-    }
-
-    protected static long FOLDERID(final String folderId) {
-        return Long.parseLong(folderId);
+    @Override
+    public long sequenceNumber() throws OXException {
+        return documents.sequenceNumber();
     }
 
 }

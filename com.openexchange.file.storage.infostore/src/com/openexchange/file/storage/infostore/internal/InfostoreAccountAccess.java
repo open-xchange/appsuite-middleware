@@ -47,40 +47,91 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link InfostoreTimedResult}
+ * {@link InfostoreAccountAccess}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreTimedResult implements TimedResult<File> {
+public class InfostoreAccountAccess implements FileStorageAccountAccess {
 
-    private final TimedResult<DocumentMetadata> documents;
+    private final ServerSession session;
+    private final InfostoreFileStorageService service;
+    private InfostoreFolderAccess folders;
+    private InfostoreAdapterFileAccess files;
 
-    public InfostoreTimedResult(TimedResult<DocumentMetadata> documents) {
-        this.documents = documents;
+    public InfostoreAccountAccess(final Session session, final InfostoreFileStorageService service) throws OXException {
+        this.session = ServerSessionAdapter.valueOf(session);
+        this.service = service;
     }
 
     @Override
-    public SearchIterator<File> results() throws OXException {
-        SearchIterator<DocumentMetadata> results = documents.results();
-        if(results == null) {
-            return null;
+    public String getAccountId() {
+        return InfostoreDefaultAccountManager.DEFAULT_ID;
+    }
+
+    @Override
+    public FileStorageFileAccess getFileAccess() throws OXException {
+        if(files != null) {
+            return files;
         }
-        return new InfostoreSearchIterator(results);
+        return files = new InfostoreAdapterFileAccess(session, service.getInfostore(), service.getSearch(), this);
     }
 
     @Override
-    public long sequenceNumber() throws OXException {
-        return documents.sequenceNumber();
+    public FileStorageFolderAccess getFolderAccess() throws OXException {
+        if(folders != null) {
+            return folders;
+        }
+        return folders = new InfostoreFolderAccess(session, service.getInfostore());
+    }
+
+    @Override
+    public FileStorageFolder getRootFolder() throws OXException {
+        // Nothing to do
+        return null;
+    }
+
+    @Override
+    public boolean cacheable() {
+        return false;
+    }
+
+    @Override
+    public void close() {
+        // Nope
+    }
+
+    @Override
+    public void connect() throws OXException {
+        // Bypassed...
+    }
+
+    @Override
+    public boolean isConnected() {
+        return true;
+    }
+
+    @Override
+    public boolean ping() throws OXException {
+        return true;
+    }
+
+    @Override
+    public FileStorageService getService() {
+        return service;
     }
 
 }
