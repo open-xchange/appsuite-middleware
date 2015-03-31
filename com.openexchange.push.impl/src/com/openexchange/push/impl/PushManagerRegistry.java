@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
@@ -113,6 +114,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
     private final ConcurrentMap<Class<? extends PushManagerService>, PushManagerService> map;
     private final ServiceLookup services;
+    private final List<PushUser> initialPushUsers;
 
     /**
      * Initializes a new {@link PushManagerRegistry}.
@@ -122,6 +124,7 @@ public final class PushManagerRegistry implements PushListenerService {
     private PushManagerRegistry(ServiceLookup services) {
         super();
         this.services = services;
+        initialPushUsers = new CopyOnWriteArrayList<PushUser>();
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
     }
 
@@ -141,6 +144,12 @@ public final class PushManagerRegistry implements PushListenerService {
      * @param pushUsers The push users
      */
     public void startPermanentListenersFor(List<PushUser> pushUsers) {
+        if (null == pushUsers || pushUsers.isEmpty()) {
+            return;
+        }
+
+        initialPushUsers.addAll(pushUsers);
+
         for (PushUser pushUser : pushUsers) {
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                 try {
@@ -364,7 +373,25 @@ public final class PushManagerRegistry implements PushListenerService {
      */
     public boolean addPushManager(final PushManagerService pushManager) {
         Class<? extends PushManagerService> clazz = pushManager.getClass();
-        return null == map.putIfAbsent(clazz, pushManager);
+        boolean added = (null == map.putIfAbsent(clazz, pushManager));
+
+        if (added && (pushManager instanceof PushManagerExtendedService)) {
+            PushManagerExtendedService extendedService = (PushManagerExtendedService) pushManager;
+            for (PushUser pushUser : initialPushUsers) {
+                try {
+                    PushListener pl = extendedService.startPermanentListener(pushUser);
+                    if (null != pl) {
+                        LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
+                    }
+                } catch (OXException e) {
+                    LOG.error("Error while starting permanent push listener.", e);
+                } catch (RuntimeException e) {
+                    LOG.error("Runtime error while starting permanent push listener.", e);
+                }
+            }
+        }
+
+        return added;
     }
 
     /**
