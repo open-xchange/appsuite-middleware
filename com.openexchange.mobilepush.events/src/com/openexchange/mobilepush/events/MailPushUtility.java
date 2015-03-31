@@ -69,6 +69,8 @@ public class MailPushUtility {
 
     public static final String KEY_CID = "cid";
 
+    public static final String KEY_MESSAGE = "message";
+
     private static final String DEFAULT_CHARACTER_ENCODING = "UTF-8";
 
     /**
@@ -211,5 +213,17 @@ public class MailPushUtility {
             }
         }
         return "";
+    }
+
+    public static boolean isRefreshEvent(Map<String, Object> messageData) {
+        if (messageData.containsKey(KEY_MESSAGE)) {
+            if (messageData.get(KEY_MESSAGE) instanceof String) {
+                String refresh = (String) messageData.get(KEY_MESSAGE);
+                if("refresh".equals(refresh)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

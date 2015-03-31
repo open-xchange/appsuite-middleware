@@ -58,14 +58,16 @@ import javapns.communication.exceptions.KeystoreException;
 import javapns.devices.Device;
 import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
 import javapns.json.JSONException;
+import javapns.notification.NewsstandNotificationPayload;
+import javapns.notification.Payload;
 import javapns.notification.PayloadPerDevice;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
 import com.openexchange.exception.OXException;
+import com.openexchange.mobilepush.events.MailPushUtility;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
-import com.openexchange.mobilepush.events.MailPushUtility;
 import com.openexchange.mobilepush.events.apn.APNAccess;
 import com.openexchange.mobilepush.events.apn.osgi.Services;
 import com.openexchange.mobilepush.events.storage.ContextUsers;
@@ -216,9 +218,9 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(tokens.size());
         for (String token : tokens) {
             try {
-                //TODO: notify silently
-                PushNotificationPayload payload = new PushNotificationPayload();
-                payload.addAlert("LOGIN");
+                Payload payload = NewsstandNotificationPayload.contentAvailable();
+                payload.addCustomDictionary("message", "You've received a new login");
+                payload.addCustomDictionary("SYNC_EVENT", "LOGIN");
                 payloads.add(new PayloadPerDevice(payload, token));
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);
@@ -234,14 +236,23 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
             try {
-                PushNotificationPayload payload = constructPayload(event);
-                //Check payload length
-                int payloadLength = MailPushUtility.getPayloadLength(payload.toString());
-                if (payloadLength > MAX_PAYLOAD_SIZE) {
-                    int bytesToCut = payloadLength - MAX_PAYLOAD_SIZE;
-                    MailPushUtility.cutMessage(event.getMessageData(), bytesToCut);
+                Payload payload = null;
+
+                if(false == MailPushUtility.isRefreshEvent(event.getMessageData())) {
                     payload = constructPayload(event);
+                    int payloadLength = MailPushUtility.getPayloadLength(payload.toString());
+                    // Check payload length
+                    if (payloadLength > MAX_PAYLOAD_SIZE) {
+                        int bytesToCut = payloadLength - MAX_PAYLOAD_SIZE;
+                        MailPushUtility.cutMessage(event.getMessageData(), bytesToCut);
+                        payload = constructPayload(event);
+                    }
+                } else {
+                    payload = NewsstandNotificationPayload.contentAvailable();
+                    payload.addCustomDictionary("message", "refresh");
+                    payload.addCustomDictionary("SYNC_EVENT", "MAIL");
                 }
+
                 payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);
@@ -268,7 +279,11 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         sb.append(subject);
 
         payload.addAlert(sb.toString());
-        payload.addBadge(unread);
+
+        if(unread > -1) {
+            payload.addBadge(unread);
+        }
+
         payload.addCustomDictionary("cid", path);
         return payload;
     }
