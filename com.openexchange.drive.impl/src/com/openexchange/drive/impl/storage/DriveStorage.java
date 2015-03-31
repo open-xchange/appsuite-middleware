@@ -680,7 +680,16 @@ public class DriveStorage {
         }
     }
 
+    /**
+     * Gets the directory path for the supplied folder identifier, relative to the root synchronization folder.
+     * 
+     * @param folderID The folder identifier to get the path for
+     * @return The path
+     */
     public String getPath(String folderID) throws OXException {
+        if (rootFolderID.toUniqueID().equals(folderID)) {
+            return ROOT_PATH;
+        }
         String path = knownFolders.getPath(folderID);
         if (null == path) {
             path = resolveToRoot(folderID);
