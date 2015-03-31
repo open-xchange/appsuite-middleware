@@ -53,7 +53,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
-import com.openexchange.file.storage.infostore.Services;
 import com.openexchange.file.storage.infostore.internal.TrashCleanupHandler;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
