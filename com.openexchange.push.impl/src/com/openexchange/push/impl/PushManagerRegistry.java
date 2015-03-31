@@ -49,9 +49,12 @@
 
 package com.openexchange.push.impl;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
@@ -118,7 +121,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
     private final ConcurrentMap<Class<? extends PushManagerService>, PushManagerService> map;
     private final ServiceLookup services;
-    private final ConcurrentMap<PushUser, Object> initialPushUsers;
+    private final Set<PushUser> initialPushUsers;
 
     /**
      * Initializes a new {@link PushManagerRegistry}.
@@ -128,7 +131,7 @@ public final class PushManagerRegistry implements PushListenerService {
     private PushManagerRegistry(ServiceLookup services) {
         super();
         this.services = services;
-        initialPushUsers = new ConcurrentHashMap<PushUser, Object>(256);
+        initialPushUsers = new HashSet<PushUser>(256);
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
     }
 
@@ -152,14 +155,23 @@ public final class PushManagerRegistry implements PushListenerService {
             return;
         }
 
-        List<PushUser> toStart = new LinkedList<PushUser>();
-        List<PushUser> toStop = new LinkedList<PushUser>();
-        for (PushUser pushUser : pushUsers) {
-            if (null == initialPushUsers.putIfAbsent(pushUser, PRESENCE)) {
-                toStart.add(pushUser);
-            } else {
-                toStop.add(pushUser);
+        Collection<PushUser> toStart;
+        Collection<PushUser> toStop;
+        synchronized (this) {
+            {
+                Set<PushUser> current = new HashSet<PushUser>(initialPushUsers);
+                current.removeAll(pushUsers);
+                toStop = current;
             }
+
+            toStart = new LinkedList<PushUser>();
+            for (PushUser pushUser : pushUsers) {
+                if (initialPushUsers.add(pushUser)) {
+                    toStart.add(pushUser);
+                }
+            }
+
+            initialPushUsers.removeAll(toStop);
         }
 
         for (PushUser pushUser : toStart) {
@@ -433,17 +445,19 @@ public final class PushManagerRegistry implements PushListenerService {
         boolean added = (null == map.putIfAbsent(clazz, pushManager));
 
         if (added && (pushManager instanceof PushManagerExtendedService)) {
-            PushManagerExtendedService extendedService = (PushManagerExtendedService) pushManager;
-            for (PushUser pushUser : initialPushUsers.keySet()) {
-                try {
-                    PushListener pl = extendedService.startPermanentListener(pushUser);
-                    if (null != pl) {
-                        LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
+            synchronized (this) {
+                PushManagerExtendedService extendedService = (PushManagerExtendedService) pushManager;
+                for (PushUser pushUser : initialPushUsers) {
+                    try {
+                        PushListener pl = extendedService.startPermanentListener(pushUser);
+                        if (null != pl) {
+                            LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
+                        }
+                    } catch (OXException e) {
+                        LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
+                    } catch (RuntimeException e) {
+                        LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                     }
-                } catch (OXException e) {
-                    LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
-                } catch (RuntimeException e) {
-                    LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                 }
             }
         }
