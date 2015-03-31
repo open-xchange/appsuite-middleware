@@ -156,7 +156,7 @@ public class PushDbUtils {
 
             do {
                 int currentContextId = rs.getInt(1);
-                int currentUserId = rs.getInt(1);
+                int currentUserId = rs.getInt(2);
                 users.add(new PushUser(currentUserId, currentContextId));
             } while (rs.next());
         } catch (SQLException e) {
