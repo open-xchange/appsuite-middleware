@@ -58,6 +58,10 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/bundles/*
 
 %changelog
+* Thu Mar 26 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-03-30 (2459)
+* Mon Mar 23 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-03-20
 * Tue Mar 17 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-03-18
 * Fri Mar 13 2015 Carsten Hoeger <choeger@open-xchange.com>

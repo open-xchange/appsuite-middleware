@@ -86,20 +86,10 @@ public interface FileStorageFolder extends FileStorageConstants {
     public static final String CAPABILITY_SORT = "sort";
 
     /**
-     * The capability identifier for subscription support.
-     */
-    public static final String CAPABILITY_SUBSCRIPTION = "subscription";
-
-    /**
-     * The capability identifier for publication support.
-     */
-    public static final String CAPABILITY_PUBLICATION = "publication";
-
-    /**
      * All known capabilities in a set.
      */
     public static final Set<String> ALL_CAPABILITIES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
-        CAPABILITY_PERMISSIONS, CAPABILITY_PUBLICATION, CAPABILITY_QUOTA, CAPABILITY_SORT, CAPABILITY_SUBSCRIPTION }
+        CAPABILITY_PERMISSIONS, CAPABILITY_QUOTA, CAPABILITY_SORT }
     )));
 
     /**

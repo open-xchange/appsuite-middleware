@@ -228,21 +228,21 @@ public class InfostoreRequestTest extends FileTest {
         assertEquals(-1l, diff);
     }
 
-    public void testStartAndEnd() {
+    public void testStartAndEnd() throws OXException {
         request().param("start", "10").param("end", "20");
         assertEquals(10, request.getStart());
         assertEquals(20, request.getEnd());
 
     }
 
-    public void testLimit() {
+    public void testLimit() throws OXException {
         request().param("limit", "12");
 
         assertEquals(0, request.getStart());
         assertEquals(11, request.getEnd());
     }
 
-    public void testStartAndEndUnset() {
+    public void testStartAndEndUnset() throws OXException {
         request();
         assertEquals(FileStorageFileAccess.NOT_SET, request.getStart());
         assertEquals(FileStorageFileAccess.NOT_SET, request.getEnd());

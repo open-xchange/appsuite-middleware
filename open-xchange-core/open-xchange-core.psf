@@ -5,9 +5,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.ctc.wstx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.android.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.common"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.magicwerk.brownies.collections"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.fasterxml.jackson.core.jackson-core"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.annotation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching.events"/>
@@ -177,6 +176,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.ho.jyaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.javasimon"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.magicwerk.brownies.collections"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.xmlpull"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,oxscripts"/>
 </provider>
