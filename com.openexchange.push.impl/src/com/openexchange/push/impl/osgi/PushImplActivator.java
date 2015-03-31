@@ -186,17 +186,17 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
 
                         @Override
                         public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-                            HazelcastInstance hazelcastInstance = context.getService(reference);
+                            HazelcastInstance hzInstance = context.getService(reference);
                             try {
                                 String mapName = hazelcastConfig.discoverMapName("credentials");
                                 if (null == mapName) {
                                     context.ungetService(reference);
                                     return null;
                                 }
-                                addService(HazelcastInstance.class, hazelcastInstance);
+                                addService(HazelcastInstance.class, hzInstance);
                                 hzCredStorage.setHzMapName(mapName);
                                 hzCredStorage.changeBackingMapToHz();
-                                return hazelcastInstance;
+                                return hzInstance;
                             } catch (OXException e) {
                                 log.warn("Couldn't initialize remote credentials map.", e);
                             } catch (RuntimeException e) {
@@ -231,15 +231,15 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
 
                     @Override
                     public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-                        HazelcastInstance hazelcastInstance = context.getService(reference);
+                        HazelcastInstance hzInstance = context.getService(reference);
 
                         try {
                             PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
                             List<PushUser> allPushUsers = pushManagerRegistry.getUsersWithPermanentListeners();
                             if (false == allPushUsers.isEmpty()) {
                                 // Determine cluster members
-                                Member localMember = hazelcastInstance.getCluster().getLocalMember();
-                                Set<Member> allMembers = hazelcastInstance.getCluster().getMembers();
+                                Member localMember = hzInstance.getCluster().getLocalMember();
+                                Set<Member> allMembers = hzInstance.getCluster().getMembers();
                                 Set<Member> otherMembers = new HashSet<Member>(allMembers);
                                 if (!otherMembers.remove(localMember)) {
                                     log.warn("Couldn't remove local member from cluster members.");
@@ -279,7 +279,7 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
                                 }
                             }
 
-                            return hazelcastInstance;
+                            return hzInstance;
                         } catch (Exception e) {
                             log.warn("Failed to distribute permanent listeners among cluster nodes", e);
                         }
