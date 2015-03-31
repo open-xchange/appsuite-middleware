@@ -7,6 +7,5 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush.events.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush.events.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush.events.storage"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush.events.watchdog"/>
 </provider>
 </psf>
