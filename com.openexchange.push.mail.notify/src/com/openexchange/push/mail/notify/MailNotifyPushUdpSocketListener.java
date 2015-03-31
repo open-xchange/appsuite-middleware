@@ -56,6 +56,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.util.concurrent.Future;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -76,6 +77,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
     private final DatagramSocket datagramSocket;
     private final String imapLoginDelimiter;
     private final MailNotifyPushListenerRegistry registry;
+    private volatile Future<Object> udpThread;
 
     /**
      * Initializes a new {@link MailNotifyPushUdpSocketListener}.
@@ -98,10 +100,25 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
     }
 
     /**
-     * Closes the listener.
+     * Sets the associated thread
+     *
+     * @param udpThread The thread
+     */
+    public void setUdpThread(Future<Object> udpThread) {
+        this.udpThread = udpThread;
+    }
+
+    /**
+     * Closes this UDP listener.
      */
     public void close() {
         datagramSocket.close();
+
+        Future<Object> udpThread = this.udpThread;
+        if (null != udpThread) {
+            udpThread.cancel(true);
+            this.udpThread = null;
+        }
     }
 
     @Override
