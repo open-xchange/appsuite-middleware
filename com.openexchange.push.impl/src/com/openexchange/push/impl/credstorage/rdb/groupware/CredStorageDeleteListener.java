@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.impl.groupware;
+package com.openexchange.push.impl.credstorage.rdb.groupware;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,16 +59,16 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link PushDeleteListener}
+ * {@link CredStorageDeleteListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushDeleteListener implements DeleteListener {
+public final class CredStorageDeleteListener implements DeleteListener {
 
     /**
-     * Initializes a new {@link PushDeleteListener}.
+     * Initializes a new {@link CredStorageDeleteListener}.
      */
-    public PushDeleteListener() {
+    public CredStorageDeleteListener() {
         super();
     }
 
@@ -85,7 +85,7 @@ public final class PushDeleteListener implements DeleteListener {
                 /*
                  * Delete account data
                  */
-                stmt = writeCon.prepareStatement("DELETE FROM registeredPush WHERE cid = ? AND user = ?");
+                stmt = writeCon.prepareStatement("DELETE FROM credentials WHERE cid = ? AND user = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
@@ -106,7 +106,7 @@ public final class PushDeleteListener implements DeleteListener {
                 /*
                  * Delete account data
                  */
-                stmt = writeCon.prepareStatement("DELETE FROM registeredPush WHERE cid = ?");
+                stmt = writeCon.prepareStatement("DELETE FROM credentials WHERE cid = ?");
                 stmt.setInt(1, contextId);
                 stmt.executeUpdate();
             } catch (SQLException e) {
