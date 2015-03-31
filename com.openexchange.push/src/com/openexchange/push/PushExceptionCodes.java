@@ -90,7 +90,10 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
      * Missing login string for mail access.
      */
     MISSING_LOGIN_STRING("Missing login string for mail access.", Category.CATEGORY_CONFIGURATION, 7, null),
-
+    /**
+     * Push user %1$s in context %2$s has no push registration.
+     */
+    NO_PUSH_REGISTRATION("Push user %1$s in context %2$s has no push registration.", Category.CATEGORY_PERMISSION_DENIED, 8, null),
     ;
 
     /** The exception code prefix */

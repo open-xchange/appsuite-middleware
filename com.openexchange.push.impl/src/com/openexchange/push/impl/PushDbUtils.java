@@ -84,6 +84,43 @@ public class PushDbUtils {
     // ----------------------------------------------------------------------------------------------------------------------------
 
     /**
+     * Has push registration
+     *
+     * @param pushUser The push user to check
+     * @return <code>true</code> if a push registration is available; otherwise <code>false</code>
+     * @throws OXException If push registrations cannot be returned
+     */
+    public static boolean hasPushRegistration(PushUser pushUser) throws OXException {
+        DatabaseService service = Services.requireService(DatabaseService.class);
+        int contextId = pushUser.getContextId();
+        Connection con = service.getReadOnly(contextId);
+        try {
+            return hasPushRegistration(pushUser, con);
+        } finally {
+            service.backReadOnly(contextId, con);
+        }
+    }
+
+    private static boolean hasPushRegistration(PushUser pushUser, Connection con) throws OXException {
+        int contextId = pushUser.getContextId();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? AND user=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, pushUser.getUserId());
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
      * Gets the available push registrations
      *
      * @return The push registrations
