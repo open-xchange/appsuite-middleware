@@ -102,13 +102,15 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
         file.setTitle("GetLinkTest_" + now);
         file.setFileName(file.getTitle());
         file.setDescription(file.getTitle());
+        file.setFileMD5Sum(getChecksum(new File(TestInit.getTestProperty("ajaxPropertiesFile"))));
         itm.newAction(file, new File(TestInit.getTestProperty("ajaxPropertiesFile")));
     }
 
     public void testDelete() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
-        target.setPath(folder.getFolderName());
+        target.setPath("/" + folder.getFolderName());
         target.setName(file.getFileName());
+        target.setChecksum(file.getFileMD5Sum());
         int bits = createAnonymousGuestPermission().getPermissionBits();
         String password = UUIDs.getUnformattedString(UUID.randomUUID());
         GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, true);

@@ -49,46 +49,33 @@
 
 package com.openexchange.ajax.drive.action;
 
-import java.io.IOException;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link AllRequest}
+ * {@link SharesParser}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class AllRequest extends AbstractDriveRequest<AllResponse> {
+public class SharesParser extends AbstractAJAXParser<SharesResponse> {
 
-    private boolean failOnError;
-
-    public AllRequest(Integer root) {
-        super(root);
-        failOnError = true;
+    protected SharesParser(boolean failOnError) {
+        super(failOnError);
     }
 
     @Override
-    public Method getMethod() {
-        return Method.GET;
-    }
+    protected SharesResponse createResponse(Response response) throws JSONException {
+        SharesResponse retval = new SharesResponse(response);
 
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "all"),
-            new Parameter("root", root)
-        };
-    }
+        List<ParsedDriveShareInfo> parsedShares = DriveShareParser.parseDriveShareInfos((JSONArray) response.getData());
 
-    @Override
-    public AllParser getParser() {
-        return new AllParser(failOnError);
-    }
+        retval.setShares(parsedShares);
 
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+        return retval;
     }
 
 }

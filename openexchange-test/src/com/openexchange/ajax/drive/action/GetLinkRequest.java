@@ -54,7 +54,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.share.actions.ShareWriter;
 import com.openexchange.drive.DriveShareTarget;
 
 /**
@@ -105,7 +104,7 @@ public class GetLinkRequest extends AbstractDriveRequest<GetLinkResponse> {
         JSONObject retval = new JSONObject();
         retval.putOpt("bits", bits.intValue());
         retval.putOpt("password", password);
-        retval.put("targets", ShareWriter.writeDriveTargets(targets));
+        DriveShareWriter.writeDriveTargets(targets, retval);
         return retval;
     }
 

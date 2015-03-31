@@ -128,23 +128,6 @@ public class ShareWriter {
         return jTargets;
     }
 
-    public static JSONObject writeDriveTargets(List<DriveShareTarget> targets) throws JSONException {
-        JSONArray jsonFileTargets = new JSONArray();
-        JSONArray jsonDirectoryTargets = new JSONArray();
-        for (DriveShareTarget target : targets) {
-            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
-                jsonFileTargets.put(ShareWriter.writeDriveTarget(target));
-            } else {
-                jsonDirectoryTargets.put(ShareWriter.writeDriveTarget(target));
-            }
-        }
-
-        JSONObject retval = new JSONObject();
-        retval.put("directoryVersions", jsonDirectoryTargets);
-        retval.put("fileVersions", jsonFileTargets);
-        return retval;
-    }
-
     public static JSONObject writeTarget(ShareTarget target) throws JSONException {
         JSONObject jTarget = new JSONObject(6);
         jTarget.put("module", Module.getModuleString(target.getModule(), -1));

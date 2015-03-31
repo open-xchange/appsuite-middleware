@@ -49,39 +49,34 @@
 
 package com.openexchange.ajax.drive.action;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import org.json.JSONObject;
+import com.openexchange.ajax.share.actions.ShareWriter;
+import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.java.Strings;
 
 /**
- * {@link AllParser}
+ * {@link DriveShareWriter}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class AllParser extends AbstractAJAXParser<AllResponse> {
+public class DriveShareWriter {
 
-    protected AllParser(boolean failOnError) {
-        super(failOnError);
-    }
-
-    @Override
-    protected AllResponse createResponse(Response response) throws JSONException {
-        AllResponse retval = new AllResponse(response);
-
-        JSONArray jsonArray = (JSONArray) response.getData();
-        List<ParsedShare> parsedShares = new ArrayList<ParsedShare>(jsonArray.length());
-        for (int i = 0; i < jsonArray.length(); i++) {
-            parsedShares.add(new ParsedShare(jsonArray.getJSONObject(i)));
+    public static void writeDriveTargets(List<DriveShareTarget> targets, JSONObject json) throws JSONException {
+        JSONArray jsonFileTargets = new JSONArray();
+        JSONArray jsonDirectoryTargets = new JSONArray();
+        for (DriveShareTarget target : targets) {
+            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
+                jsonFileTargets.put(ShareWriter.writeDriveTarget(target));
+            } else {
+                jsonDirectoryTargets.put(ShareWriter.writeDriveTarget(target));
+            }
         }
 
-        retval.setParsedShares(parsedShares);
-
-        return retval;
+        json.put("directoryVersions", jsonDirectoryTargets);
+        json.put("fileVersions", jsonFileTargets);
     }
-
 }

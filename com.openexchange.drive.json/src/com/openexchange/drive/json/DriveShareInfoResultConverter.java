@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -154,7 +155,14 @@ public class DriveShareInfoResultConverter implements ResultConverter {
             /*
              * share targets & recipient
              */
-            json.put("target", serializeShareTarget(share.getDriveShare().getTarget(), timeZone));
+
+            DriveShareTarget target = share.getDriveShare().getTarget();
+            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
+                json.put("fileVersion", serializeShareTarget(share.getDriveShare().getTarget(), timeZone));
+            } else {
+                json.put("directoryVersion", serializeShareTarget(share.getDriveShare().getTarget(), timeZone));
+            }
+
             json.put("recipient", serializeShareRecipient(share, timeZone));
             return json;
         } catch (JSONException e) {

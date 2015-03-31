@@ -79,10 +79,6 @@ public class DriveShareJSONParser {
      * @return The share targets
      */
     public static List<DriveShareTarget> parseTargets(JSONObject jsonTargets) throws OXException, JSONException {
-        if (jsonTargets == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("targets");
-        }
-
         List<DriveShareTarget> targets = new ArrayList<DriveShareTarget>();
 
         if (jsonTargets.has(DIRECTORY_VERSIONS) && jsonTargets.getJSONArray(DIRECTORY_VERSIONS).length() != 0) {

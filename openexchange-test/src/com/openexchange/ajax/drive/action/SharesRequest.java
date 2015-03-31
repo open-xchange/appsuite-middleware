@@ -49,33 +49,46 @@
 
 package com.openexchange.ajax.drive.action;
 
-import java.util.List;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.share.actions.ParsedShare;
-
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 
 /**
- * {@link AllResponse}
+ * {@link SharesRequest}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class AllResponse extends AbstractAJAXResponse {
+public class SharesRequest extends AbstractDriveRequest<SharesResponse> {
 
-    private List<ParsedShare> parsedShares;
+    private boolean failOnError;
 
-
-    protected AllResponse(Response response) {
-        super(response);
+    public SharesRequest(Integer root) {
+        super(root);
+        failOnError = true;
     }
-    
-    public void setParsedShares(List<ParsedShare> parsedShares) {
-        this.parsedShares = parsedShares;
+
+    @Override
+    public Method getMethod() {
+        return Method.GET;
     }
-    
-    public List<ParsedShare> getParsedShares() {
-        return parsedShares;
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, "shares"),
+            new Parameter("root", root)
+        };
+    }
+
+    @Override
+    public SharesParser getParser() {
+        return new SharesParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

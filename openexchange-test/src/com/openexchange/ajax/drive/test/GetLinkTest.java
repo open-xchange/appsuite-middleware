@@ -64,7 +64,9 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -84,6 +86,7 @@ public class GetLinkTest extends AbstractDriveShareTest {
     private InfostoreTestManager itm;
     private FolderObject rootFolder, folder;
     private DefaultFile file;
+    private FolderObject folder2;
 
     /**
      * Initializes a new {@link GetLinkTest}.
@@ -102,29 +105,58 @@ public class GetLinkTest extends AbstractDriveShareTest {
         UserValues values = client.getValues();
         rootFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
         folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), rootFolder.getObjectID());
+        folder2 = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), rootFolder.getObjectID());
 
         long now = System.currentTimeMillis();
         file = new DefaultFile();
-        file.setFolderId(String.valueOf(folder.getObjectID()));
+        file.setFolderId(String.valueOf(folder2.getObjectID()));
         file.setTitle("GetLinkTest_" + now);
         file.setFileName(file.getTitle());
         file.setDescription(file.getTitle());
+        file.setFileMD5Sum(getChecksum(new File(TestInit.getTestProperty("ajaxPropertiesFile"))));
         itm.newAction(file, new File(TestInit.getTestProperty("ajaxPropertiesFile")));
     }
 
     public void testGetFileLink() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder.getFolderName());
+        target.setPath("/" + folder2.getFolderName());
         target.setName(file.getFileName());
-        target.setChecksum("123");
+        target.setChecksum(file.getFileMD5Sum());
         performTest(target);
     }
     
     public void testGetFolderLink() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
         target.setPath("/" + folder.getFolderName());
-        target.setChecksum("123");
+        target.setChecksum(DriveConstants.EMPTY_MD5);
         performTest(target);
+    }
+    
+    public void testBadFileChecksum() throws Exception {
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath("/" + folder2.getFolderName());
+        target.setName(file.getFileName());
+        target.setChecksum("bad");
+
+        int bits = createAnonymousGuestPermission().getPermissionBits();
+        String password = UUIDs.getUnformattedString(UUID.randomUUID());
+        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, false);
+        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        assertTrue("Expected error.", getLinkResponse.hasError());
+        assertTrue("Wrong exception", DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(getLinkResponse.getException()));
+    }
+    
+    public void testBadDirectoryChecksum() throws Exception {
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath("/" + folder.getFolderName());
+        target.setChecksum("bad");
+
+        int bits = createAnonymousGuestPermission().getPermissionBits();
+        String password = UUIDs.getUnformattedString(UUID.randomUUID());
+        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, false);
+        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        assertTrue("Expected error.", getLinkResponse.hasError());
+        assertTrue("Wrong exception", DriveExceptionCodes.DIRECTORYVERSION_NOT_FOUND.equals(getLinkResponse.getException()));
     }
 
     private void performTest(DriveShareTarget target) throws OXException, IOException, JSONException, Exception {

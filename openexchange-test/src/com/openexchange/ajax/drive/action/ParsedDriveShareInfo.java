@@ -49,65 +49,35 @@
 
 package com.openexchange.ajax.drive.action;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * {@link InviteRequest}
+ * {@link ParsedDriveShareInfo}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
+public class ParsedDriveShareInfo extends DriveShareInfo {
 
-    private List<DriveShareTarget> targets;
-    private List<ShareRecipient> recipients;
-    private String message;
-    private boolean failOnError;
+    private ShareRecipient recipient;
 
-    public InviteRequest(Integer root, List<DriveShareTarget> targets, List<ShareRecipient> recipients) {
-        this(root, targets, recipients, null, true);
+    /**
+     * Initializes a new {@link ParsedDriveShareInfo}.
+     * 
+     * @param shareInfo
+     */
+    public ParsedDriveShareInfo(ShareInfo shareInfo) {
+        super(shareInfo);
     }
 
-    public InviteRequest(Integer root, List<DriveShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
-        super(root);
-        this.targets = targets;
-        this.recipients = recipients;
-        this.message = message;
-        this.failOnError = failOnError;
+    public ShareRecipient getRecipient() {
+        return recipient;
     }
 
-    @Override
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "invite"),
-            new Parameter("root", root)
-        };
-    }
-
-    @Override
-    public InviteParser getParser() {
-        return new InviteParser(failOnError);
-    }
-
-    @Override
-    public JSONObject getBody() throws IOException, JSONException {
-        JSONObject retval = new JSONObject();
-        DriveShareWriter.writeDriveTargets(targets, retval);
-        retval.put("recipients", ShareWriter.writeRecipients(recipients));
-        retval.putOpt("message", message);
-        return retval;
+    public void setRecipient(ShareRecipient recipient) {
+        this.recipient = recipient;
     }
 
 }
