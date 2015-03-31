@@ -172,10 +172,10 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
             if (credStoreEnabled) {
                 String key = configService.getProperty("com.openexchange.push.credstorage.passcrypt");
                 if (Strings.isEmpty(key)) {
-                    throw new BundleException("Missing value for \"com.openexchange.push.credstorage.passcrypt\" property.");
+                    throw new BundleException("Property \"com.openexchange.push.credstorage.enabled\" set to \"true\", but missing value for \"com.openexchange.push.credstorage.passcrypt\" property.");
                 }
 
-                Obfuscator obfuscator = new Obfuscator(key);
+                Obfuscator obfuscator = new Obfuscator(key.trim());
 
                 hzCredStorage = new HazelcastCredentialStorage(obfuscator, this, this);
                 rdbCredStorage = configService.getBoolProperty("com.openexchange.push.credstorage.rdb", false) ? new RdbCredentialStorage(obfuscator) : null;
@@ -324,13 +324,13 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
             if (null != hzCredStorage) {
                 Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
                 serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-                registerService(CredentialStorage.class, hzCredStorage);
+                registerService(CredentialStorage.class, hzCredStorage, serviceProperties);
             }
             if (null != rdbCredStorage) {
                 // Higher ranked
                 Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
                 serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-                registerService(CredentialStorage.class, rdbCredStorage);
+                registerService(CredentialStorage.class, rdbCredStorage, serviceProperties);
             }
 
             registerService(PushListenerService.class, PushManagerRegistry.getInstance());
