@@ -60,14 +60,13 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
+import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.credstorage.Credentials;
-import com.openexchange.push.credstorage.DefaultCredentials;
-import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -127,7 +126,7 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     private CredentialStorage optCredentialStorage() throws OXException {
-        CredentialStorageProvider storageProvider = Services.optService(CredentialStorageProvider.class);
+        CredentialStorageProvider storageProvider = services.getOptionalService(CredentialStorageProvider.class);
         return null == storageProvider ? null : storageProvider.getCredentialStorage();
     }
 
@@ -146,11 +145,11 @@ public final class PushManagerRegistry implements PushListenerService {
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                 try {
                     PushManagerService pushManager = pushManagersIterator.next();
-                    // Initialize a new push listener for session
-                    Session ses = generateSessionFor(new PushUser(pushUser.getUserId(), pushUser.getContextId()));
-                    PushListener pl = pushManager.startListener(ses);
-                    if (null != pl) {
-                        LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
+                    if (pushManager instanceof PushManagerExtendedService) {
+                        PushListener pl = ((PushManagerExtendedService) pushManager).startPermanentListener(pushUser);
+                        if (null != pl) {
+                            LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
+                        }
                     }
                 } catch (OXException e) {
                     LOG.error("Error while starting permanent push listener.", e);
@@ -170,32 +169,18 @@ public final class PushManagerRegistry implements PushListenerService {
             return false;
         }
 
-        CredentialStorage storage = optCredentialStorage();
-        if (null != storage) {
-            DefaultCredentials credentials = new DefaultCredentials();
-            credentials.setContextId(session.getContextId());
-            credentials.setUserId(session.getUserId());
-            credentials.setLogin(session.getLoginName());
-            credentials.setPassword(session.getPassword());
-            storage.storeCredentials(credentials);
-        }
-
         boolean inserted = PushDbUtils.insertPushRegistration(session.getUserId(), session.getContextId(), clientId);
 
         if (inserted) {
+            PushUser pushUser = new PushUser(session.getUserId(), session.getContextId());
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                 try {
                     PushManagerService pushManager = pushManagersIterator.next();
-                    // Initialize a new push listener for session
-                    Session ses;
-                    try {
-                        ses = generateSessionFor(new PushUser(session.getUserId(), session.getContextId()));
-                    } catch (Exception e) {
-                        ses = session;
-                    }
-                    PushListener pl = pushManager.startListener(ses);
-                    if (null != pl) {
-                        LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                    if (pushManager instanceof PushManagerExtendedService) {
+                        PushListener pl = ((PushManagerExtendedService) pushManager).startPermanentListener(pushUser);
+                        if (null != pl) {
+                            LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                        }
                     }
                 } catch (OXException e) {
                     LOG.error("Error while starting permanent push listener.", e);
@@ -219,13 +204,16 @@ public final class PushManagerRegistry implements PushListenerService {
         boolean deleted = PushDbUtils.deletePushRegistration(session.getUserId(), session.getContextId(), clientId);
 
         if (deleted) {
+            PushUser pushUser = new PushUser(session.getUserId(), session.getContextId());
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                 try {
                     PushManagerService pushManager = pushManagersIterator.next();
-                    // Stop listener for session
-                    boolean stopped = pushManager.stopListener(session);
-                    if (stopped) {
-                        LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                    if (pushManager instanceof PushManagerExtendedService) {
+                        // Stop listener for session
+                        boolean stopped = ((PushManagerExtendedService) pushManager).stopPermanentListener(pushUser);
+                        if (stopped) {
+                            LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                        }
                     }
                 } catch (OXException e) {
                     LOG.error("Error while stopping push listener.", e);
@@ -244,7 +232,17 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     @Override
+    public boolean hasRegistration(PushUser pushUser) throws OXException {
+        return PushDbUtils.hasPushRegistration(pushUser);
+    }
+
+    @Override
     public Session generateSessionFor(PushUser pushUser) throws OXException {
+        // Check push user
+        if (false == PushDbUtils.hasPushRegistration(pushUser)) {
+            throw PushExceptionCodes.NO_PUSH_REGISTRATION.create(pushUser.getUserId(), pushUser.getContextId());
+        }
+
         // Generate session instance
         GeneratedSession session = new GeneratedSession(pushUser.getUserId(), pushUser.getContextId());
 
@@ -355,6 +353,8 @@ public final class PushManagerRegistry implements PushListenerService {
         }
         return false;
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Adds specified push manager service.

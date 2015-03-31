@@ -91,6 +91,15 @@ public interface PushListenerService {
     List<PushUser> getUsersWithPermanentListeners() throws OXException;
 
     /**
+     * Has push registration
+     *
+     * @param pushUser The push user to check
+     * @return <code>true</code> if a push registration is available; otherwise <code>false</code>
+     * @throws OXException If push registrations cannot be returned
+     */
+    boolean hasRegistration(PushUser pushUser) throws OXException;
+
+    /**
      * Generates a session for specified push user according to configuration settings/possibilities.
      *
      * @param pushUser The push user
