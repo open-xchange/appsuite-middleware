@@ -394,22 +394,6 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         }
     }
 
-    @Override
-    public boolean[] hasListenerFor(int contextId, int[] userIds) {
-        boolean[] hasListener = new boolean[userIds.length];
-        int index = 0;
-        for(int userId : userIds) {
-            SimpleKey sk = SimpleKey.valueOf(userId, contextId);
-            ImapIdlePushListener listener = listeners.get(sk);
-            if(listener == null) {
-                hasListener[index++] = false;
-            } else {
-                hasListener[index++] = true;
-            }
-        }
-        return hasListener;
-    }
-
     // -------------------------------------------------------------------------------------------------------------------------------
 
     private static class InjectedImapIdlePushListener {
