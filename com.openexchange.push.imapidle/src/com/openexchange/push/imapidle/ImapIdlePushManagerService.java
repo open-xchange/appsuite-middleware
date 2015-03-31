@@ -173,12 +173,12 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
                     listener.start();
                     unlock = false;
-                    LOGGER.info("Started IMAP-IDLE listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
+                    LOGGER.info("Started permanent IMAP-IDLE listener for user {} in context {}", I(userId), I(contextId));
                     return listener;
                 }
 
                 // Already running for session user
-                LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
+                LOGGER.info("Did not start permanent IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
             } finally {
                 if (unlock) {
                     releaseLock(session);
