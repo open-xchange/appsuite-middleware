@@ -95,6 +95,9 @@ import com.openexchange.push.impl.credstorage.inmemory.HazelcastInstanceNotActiv
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentialsFactory;
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUserFactory;
 import com.openexchange.push.impl.credstorage.rdb.RdbCredentialStorage;
+import com.openexchange.push.impl.credstorage.rdb.groupware.CreateCredStorageTable;
+import com.openexchange.push.impl.credstorage.rdb.groupware.CredStorageCreateTableTask;
+import com.openexchange.push.impl.credstorage.rdb.groupware.CredStorageDeleteListener;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
@@ -312,6 +315,9 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
             registerService(CreateTableService.class, new CreatePushTable(), null);
             registerService(DeleteListener.class, new PushDeleteListener(), null);
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PushCreateTableTask()));
+            registerService(CreateTableService.class, new CreateCredStorageTable(), null);
+            registerService(DeleteListener.class, new CredStorageDeleteListener(), null);
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CredStorageCreateTableTask()));
 
             registerService(CredentialStorageProvider.class, storageProvider);
             addService(CredentialStorageProvider.class, storageProvider);

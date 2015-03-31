@@ -47,75 +47,53 @@
  *
  */
 
-package com.openexchange.push.impl.groupware;
+package com.openexchange.push.impl.credstorage.rdb.groupware;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.push.impl.osgi.Services;
 
 /**
- * {@link PushDeleteListener}
+ * {@link CredStorageCreateTableTask} - Inserts necessary tables.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushDeleteListener implements DeleteListener {
+public class CredStorageCreateTableTask extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link PushDeleteListener}.
-     */
-    public PushDeleteListener() {
+    public CredStorageCreateTableTask() {
         super();
     }
 
     @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER == event.getType()) {
-            /*
-             * Writable connection
-             */
-            int contextId = event.getContext().getContextId();
-            PreparedStatement stmt = null;
-            try {
-                int userId = event.getId();
-                /*
-                 * Delete account data
-                 */
-                stmt = writeCon.prepareStatement("DELETE FROM registeredPush WHERE cid = ? AND user = ?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (Exception e) {
-                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
+    public String[] getDependencies() {
+        return new String[] {};
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        DatabaseService dbService = Services.requireService(DatabaseService.class);
+        int contextId = params.getContextId();
+        Connection writeCon = dbService.getForUpdateTask(contextId);
+        PreparedStatement stmt = null;
+        try {
+            if (tableExists(writeCon, "credentials")) {
+                return;
             }
-        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
-            /*
-             * Writable connection
-             */
-            int contextId = event.getContext().getContextId();
-            PreparedStatement stmt = null;
-            try {
-                /*
-                 * Delete account data
-                 */
-                stmt = writeCon.prepareStatement("DELETE FROM registeredPush WHERE cid = ?");
-                stmt.setInt(1, contextId);
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (Exception e) {
-                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
+            stmt = writeCon.prepareStatement(CreateCredStorageTable.getCreateTableStatement());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 
